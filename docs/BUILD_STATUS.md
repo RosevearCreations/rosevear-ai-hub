@@ -4,17 +4,18 @@ This file records completed and active builds. The roadmap remains authoritative
 
 | Build | Name | Status | Promotion |
 |---|---|---|---|
-| 001 | Repository and Documentation Foundation | COMPLETE | main |
-| 002 | FastAPI Backend Skeleton | IN PROGRESS | dev |
+| 001 | Repository and Documentation Foundation | COMPLETE | main via PR #1 |
+| 002 | FastAPI Backend Skeleton | COMPLETE | PR #2 to main |
 
 ## Build 001 evidence
 
 - Canonical source-of-truth documentation committed.
-- `dev` and `main` were synchronized after PR #1.
 - Foundation workflow completed successfully.
+- PR #1 merged to main.
+- `dev` synchronized with `main` after promotion.
 - Production commit after promotion: `d03032d23f78de1c3387004bdf1e02d9d8320d21`.
 
-## Build 002 acceptance checklist
+## Build 002 acceptance
 
 - [x] Python project packaging
 - [x] FastAPI application factory
@@ -25,6 +26,18 @@ This file records completed and active builds. The roadmap remains authoritative
 - [x] pytest coverage for system endpoints/configuration
 - [x] Ruff lint and format configuration
 - [x] CI backend job
-- [ ] CI passes on Build 002 PR
-- [ ] promoted to `main`
-- [ ] `dev` synchronized with promoted `main`
+- [x] latest dev push CI passed
+- [x] PR #2 CI passed before final documentation close
+- [x] ready for promotion to `main`
+
+## Build 002 delivered files
+
+- `pyproject.toml`
+- `server/src/rosevear_ai_hub/__init__.py`
+- `server/src/rosevear_ai_hub/config.py`
+- `server/src/rosevear_ai_hub/logging.py`
+- `server/src/rosevear_ai_hub/main.py`
+- `server/src/rosevear_ai_hub/schemas.py`
+- `server/tests/test_config.py`
+- `server/tests/test_system_endpoints.py`
+- backend CI additions in `.github/workflows/foundation.yml`
