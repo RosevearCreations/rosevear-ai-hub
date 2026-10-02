@@ -1,0 +1,49 @@
+"""FastAPI application entry point."""
+
+import logging
+
+from fastapi import FastAPI
+
+from rosevear_ai_hub import __version__
+from rosevear_ai_hub.config import get_settings
+from rosevear_ai_hub.logging import configure_logging
+from rosevear_ai_hub.schemas import HealthResponse, VersionResponse
+
+
+def create_app() -> FastAPI:
+    """Create and configure the FastAPI application."""
+
+    settings = get_settings()
+    configure_logging(settings.log_level)
+
+    application = FastAPI(
+        title=settings.app_name,
+        version=__version__,
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json",
+    )
+
+    logger = logging.getLogger(__name__)
+    logger.info("application configured")
+
+    @application.get("/health", response_model=HealthResponse, tags=["system"])
+    def health() -> HealthResponse:
+        return HealthResponse(
+            status="ok",
+            service=settings.app_name,
+            environment=settings.app_env,
+        )
+
+    @application.get("/version", response_model=VersionResponse, tags=["system"])
+    def version() -> VersionResponse:
+        return VersionResponse(
+            service=settings.app_name,
+            version=__version__,
+            environment=settings.app_env,
+        )
+
+    return application
+
+
+app = create_app()
