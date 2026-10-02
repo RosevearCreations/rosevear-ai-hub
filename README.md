@@ -68,6 +68,6 @@ Major architecture changes require an ADR under `docs/adr/`.
 ## Current milestone
 
 - **Build 001 — Repository and Documentation Foundation:** COMPLETE
-- **Build 002 — FastAPI Backend Skeleton:** IN PROGRESS
+- **Build 002 — FastAPI Backend Skeleton:** COMPLETE
 
 The first functional MVP boundary is **Build 025**.
