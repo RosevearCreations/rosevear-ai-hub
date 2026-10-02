@@ -1,6 +1,6 @@
 # Rosevear AI Hub
 
-**Status:** Foundation / Source of Truth  
+**Status:** Active development  
 **Established:** 2026-10-02  
 **Repository:** RosevearCreations/rosevear-ai-hub
 
@@ -50,12 +50,13 @@ Start here:
 1. [Source of Truth](docs/SOURCE_OF_TRUTH.md)
 2. [Architecture](docs/ARCHITECTURE.md)
 3. [Build Roadmap](docs/BUILD_ROADMAP.md)
-4. [Security Model](docs/SECURITY_MODEL.md)
-5. [Data Model](docs/DATA_MODEL.md)
-6. [Integrations](docs/INTEGRATIONS.md)
-7. [Testing and Release](docs/TESTING_AND_RELEASE.md)
-8. [Operations](docs/OPERATIONS.md)
-9. [Open Decisions](docs/DECISIONS_TO_MAKE.md)
+4. [Build Status](docs/BUILD_STATUS.md)
+5. [Security Model](docs/SECURITY_MODEL.md)
+6. [Data Model](docs/DATA_MODEL.md)
+7. [Integrations](docs/INTEGRATIONS.md)
+8. [Testing and Release](docs/TESTING_AND_RELEASE.md)
+9. [Operations](docs/OPERATIONS.md)
+10. [Open Decisions](docs/DECISIONS_TO_MAKE.md)
 
 ## Branch policy
 
@@ -66,13 +67,7 @@ Major architecture changes require an ADR under `docs/adr/`.
 
 ## Current milestone
 
-**Build 001 — Repository and Documentation Foundation**
+- **Build 001 — Repository and Documentation Foundation:** COMPLETE
+- **Build 002 — FastAPI Backend Skeleton:** IN PROGRESS
 
-The first functional MVP boundary is **Build 025**. At that point the Hub should be able to:
-- run locally
-- chat with Ollama
-- search private documents with citations
-- manage users/roles
-- control explicitly approved Home Assistant entities
-- audit state-changing actions
-- connect to MQTT
+The first functional MVP boundary is **Build 025**.
