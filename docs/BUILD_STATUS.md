@@ -9,7 +9,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 003 | Local Database Foundation | COMPLETE | main via PR #3 |
 | 004 | React Web UI Foundation | COMPLETE | main via PR #4 |
 | 005 | Tauri Desktop Shell | COMPLETE | main via PR #5 |
-| 006 | Ollama Discovery | IN PROGRESS | dev |
+| 006 | Ollama Discovery | COMPLETE | main via PR #6 |
 
 ## Completed foundation
 
@@ -29,8 +29,8 @@ Builds 001–005 established the documented repository, FastAPI backend, SQLite/
 - [x] CORS policy for local web/Tauri development
 - [x] Ollama setup documentation
 - [x] Rust CI cache to reduce repeated desktop build time
-- [ ] Build 006 CI green
-- [ ] promoted to main
+- [x] Build 006 CI green
+- [x] ready for promotion to main
 - [ ] dev synchronized with main
 
 ## External setup
