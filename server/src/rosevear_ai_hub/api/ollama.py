@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -31,6 +31,9 @@ def get_ollama_client() -> OllamaClient:
         timeout_seconds=settings.ollama_timeout_seconds,
         generation_timeout_seconds=settings.ollama_generation_timeout_seconds,
     )
+
+
+OllamaClientDependency = Annotated[OllamaClient, Depends(get_ollama_client)]
 
 
 def _model_response(item: dict[str, Any]) -> OllamaModelResponse:
@@ -69,7 +72,7 @@ def _model_response(item: dict[str, Any]) -> OllamaModelResponse:
 
 @router.get("/status", response_model=OllamaStatusResponse)
 async def ollama_status(
-    client: OllamaClient = Depends(get_ollama_client),
+    client: OllamaClientDependency,
 ) -> OllamaStatusResponse:
     try:
         version = await client.version()
