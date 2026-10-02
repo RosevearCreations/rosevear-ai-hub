@@ -8,7 +8,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 002 | FastAPI Backend Skeleton | COMPLETE | main via PR #2 |
 | 003 | Local Database Foundation | COMPLETE | main via PR #3 |
 | 004 | React Web UI Foundation | COMPLETE | main via PR #4 |
-| 005 | Tauri Desktop Shell | IN PROGRESS | dev |
+| 005 | Tauri Desktop Shell | COMPLETE | main via PR #5 |
 
 ## Completed foundation
 
@@ -34,8 +34,8 @@ React/TypeScript/Vite UI, responsive navigation, accessibility baseline, API cli
 - [x] development launcher
 - [x] Windows CI compile/build job
 - [x] Windows executable artifact configuration
-- [ ] Build 005 CI green
-- [ ] promoted to main
+- [x] Build 005 CI green
+- [x] ready for promotion to main
 - [ ] dev synchronized with main
 
 ## External setup
