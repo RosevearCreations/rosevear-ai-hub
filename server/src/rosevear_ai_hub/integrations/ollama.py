@@ -91,13 +91,9 @@ class OllamaClient:
                 response = await client.request(method, path, json=json)
                 response.raise_for_status()
         except httpx.RequestError as exc:
-            raise OllamaUnavailableError(
-                f"Unable to reach Ollama at {self.base_url}."
-            ) from exc
+            raise OllamaUnavailableError(f"Unable to reach Ollama at {self.base_url}.") from exc
         except httpx.HTTPStatusError as exc:
-            raise OllamaRequestError(
-                f"Ollama returned HTTP {exc.response.status_code}."
-            ) from exc
+            raise OllamaRequestError(f"Ollama returned HTTP {exc.response.status_code}.") from exc
 
         try:
             payload = response.json()
