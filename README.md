@@ -71,8 +71,10 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 002 — FastAPI Backend Skeleton**
 - **Build 003 — Local Database Foundation**
 
+- **Build 004 — React Web UI Foundation**
+
 ## Next build
 
-**Build 004 — React Web UI Foundation**
+**Build 005 — Tauri Desktop Shell**
 
 The first functional MVP boundary is **Build 025**.

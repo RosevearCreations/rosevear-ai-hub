@@ -7,42 +7,33 @@ This file records completed and active builds. The roadmap remains authoritative
 | 001 | Repository and Documentation Foundation | COMPLETE | main via PR #1 |
 | 002 | FastAPI Backend Skeleton | COMPLETE | main via PR #2 |
 | 003 | Local Database Foundation | COMPLETE | main via PR #3 |
+| 004 | React Web UI Foundation | COMPLETE | main via PR #4 |
 
-## Build 001 evidence
+## Completed foundation
 
-- Canonical source-of-truth documentation committed.
-- Foundation workflow completed successfully.
-- PR #1 merged to main.
-- `dev` synchronized with `main` after promotion.
-- Production commit after promotion: `d03032d23f78de1c3387004bdf1e02d9d8320d21`.
+### Build 001
+Repository structure, canonical documentation, architecture, security model, roadmap, ADR process, and CI foundation.
 
-## Build 002 evidence
+### Build 002
+FastAPI backend skeleton, configuration, structured logging, health/version endpoints, pytest, and Ruff.
 
-- Python project packaging established.
-- FastAPI application factory delivered.
-- `/health` and `/version` delivered.
-- Environment configuration and structured JSON logging delivered.
-- Pytest + Ruff checks passed.
-- PR #2 merged to main.
-- Production commit after promotion: `067cd8e48ea0fabeb50ed6a0061c80bc367f7d2d`.
+### Build 003
+SQLAlchemy + SQLite database foundation, Alembic migrations, users, settings, audit events, conversation metadata, and reversible migration tests.
 
-## Build 003 acceptance
+## Build 004 acceptance checklist
 
-- [x] SQLAlchemy database foundation
-- [x] SQLite foreign-key enforcement
-- [x] Alembic migration framework
-- [x] initial reversible schema migration
-- [x] users table
-- [x] application settings table
-- [x] audit events table
-- [x] conversation metadata table
-- [x] migration tests
-- [x] ORM persistence tests
-- [x] latest dev CI passed before PR close
-- [x] PR #3 created for promotion to `main`
+- [x] React + TypeScript + Vite application
+- [x] responsive navigation shell
+- [x] accessibility baseline
+- [x] backend API client
+- [x] backend system-health display
+- [x] error boundary
+- [x] component test foundation
+- [x] CI type-check/test/build job
+- [x] Build 004 CI green
+- [x] ready for promotion to main
+- [ ] dev synchronized with main
 
-## Build 003 notes
+## External setup
 
-- Authentication behavior remains intentionally deferred to Build 016.
-- Alembic migrations, not application startup, are authoritative for schema changes.
-- No external service or additional application is required for this build.
+No external application or service setup is required through Build 004.
