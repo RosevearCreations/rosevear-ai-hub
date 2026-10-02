@@ -5,7 +5,8 @@ This file records completed and active builds. The roadmap remains authoritative
 | Build | Name | Status | Promotion |
 |---|---|---|---|
 | 001 | Repository and Documentation Foundation | COMPLETE | main via PR #1 |
-| 002 | FastAPI Backend Skeleton | COMPLETE | PR #2 to main |
+| 002 | FastAPI Backend Skeleton | COMPLETE | main via PR #2 |
+| 003 | Local Database Foundation | IN PROGRESS | dev |
 
 ## Build 001 evidence
 
@@ -15,29 +16,28 @@ This file records completed and active builds. The roadmap remains authoritative
 - `dev` synchronized with `main` after promotion.
 - Production commit after promotion: `d03032d23f78de1c3387004bdf1e02d9d8320d21`.
 
-## Build 002 acceptance
+## Build 002 evidence
 
-- [x] Python project packaging
-- [x] FastAPI application factory
-- [x] `/health`
-- [x] `/version`
-- [x] environment-based configuration
-- [x] structured JSON logging
-- [x] pytest coverage for system endpoints/configuration
-- [x] Ruff lint and format configuration
-- [x] CI backend job
-- [x] latest dev push CI passed
-- [x] PR #2 CI passed before final documentation close
-- [x] ready for promotion to `main`
+- Python project packaging established.
+- FastAPI application factory delivered.
+- `/health` and `/version` delivered.
+- Environment configuration and structured JSON logging delivered.
+- Pytest + Ruff checks passed.
+- PR #2 merged to main.
+- Production commit after promotion: `067cd8e48ea0fabeb50ed6a0061c80bc367f7d2d`.
 
-## Build 002 delivered files
+## Build 003 acceptance checklist
 
-- `pyproject.toml`
-- `server/src/rosevear_ai_hub/__init__.py`
-- `server/src/rosevear_ai_hub/config.py`
-- `server/src/rosevear_ai_hub/logging.py`
-- `server/src/rosevear_ai_hub/main.py`
-- `server/src/rosevear_ai_hub/schemas.py`
-- `server/tests/test_config.py`
-- `server/tests/test_system_endpoints.py`
-- backend CI additions in `.github/workflows/foundation.yml`
+- [x] SQLAlchemy database foundation
+- [x] SQLite foreign-key enforcement
+- [x] Alembic migration framework
+- [x] initial schema migration
+- [x] users table
+- [x] application settings table
+- [x] audit events table
+- [x] conversation metadata table
+- [x] migration tests
+- [x] ORM persistence tests
+- [ ] CI passes on Build 003 PR
+- [ ] promoted to `main`
+- [ ] `dev` synchronized with promoted `main`
