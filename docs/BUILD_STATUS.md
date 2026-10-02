@@ -8,6 +8,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 002 | FastAPI Backend Skeleton | COMPLETE | main via PR #2 |
 | 003 | Local Database Foundation | COMPLETE | main via PR #3 |
 | 004 | React Web UI Foundation | COMPLETE | main via PR #4 |
+| 005 | Tauri Desktop Shell | IN PROGRESS | dev |
 
 ## Completed foundation
 
@@ -20,20 +21,25 @@ FastAPI backend skeleton, configuration, structured logging, health/version endp
 ### Build 003
 SQLAlchemy + SQLite database foundation, Alembic migrations, users, settings, audit events, conversation metadata, and reversible migration tests.
 
-## Build 004 acceptance checklist
+### Build 004
+React/TypeScript/Vite UI, responsive navigation, accessibility baseline, API client, backend health display, error boundary, tests, and production web build.
 
-- [x] React + TypeScript + Vite application
-- [x] responsive navigation shell
-- [x] accessibility baseline
-- [x] backend API client
-- [x] backend system-health display
-- [x] error boundary
-- [x] component test foundation
-- [x] CI type-check/test/build job
-- [x] Build 004 CI green
-- [x] ready for promotion to main
+## Build 005 acceptance checklist
+
+- [x] Tauri 2 project shell
+- [x] shared React frontend strategy
+- [x] restrictive desktop capability
+- [x] Content Security Policy
+- [x] localhost FastAPI connection strategy
+- [x] development launcher
+- [x] Windows CI compile/build job
+- [x] Windows executable artifact configuration
+- [ ] Build 005 CI green
+- [ ] promoted to main
 - [ ] dev synchronized with main
 
 ## External setup
 
-No external application or service setup is required through Build 004.
+No household-side setup is required to author Build 005. GitHub Actions performs the Windows/Rust validation.
+
+The first external runtime setup is expected at Build 006, when Ollama must be installed on the Windows machine or another LAN host that will provide local AI.
