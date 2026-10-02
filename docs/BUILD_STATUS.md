@@ -7,7 +7,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 001 | Repository and Documentation Foundation | COMPLETE | main via PR #1 |
 | 002 | FastAPI Backend Skeleton | COMPLETE | main via PR #2 |
 | 003 | Local Database Foundation | COMPLETE | main via PR #3 |
-| 004 | React Web UI Foundation | IN PROGRESS | dev |
+| 004 | React Web UI Foundation | COMPLETE | main via PR #4 |
 
 ## Completed foundation
 
@@ -30,8 +30,8 @@ SQLAlchemy + SQLite database foundation, Alembic migrations, users, settings, au
 - [x] error boundary
 - [x] component test foundation
 - [x] CI type-check/test/build job
-- [ ] Build 004 CI green
-- [ ] promoted to main
+- [x] Build 004 CI green
+- [x] ready for promotion to main
 - [ ] dev synchronized with main
 
 ## External setup
