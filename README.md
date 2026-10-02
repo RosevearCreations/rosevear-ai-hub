@@ -73,8 +73,10 @@ Major architecture changes require an ADR under `docs/adr/`.
 
 - **Build 004 — React Web UI Foundation**
 
+- **Build 005 — Tauri Desktop Shell**
+
 ## Next build
 
-**Build 005 — Tauri Desktop Shell**
+**Build 006 — Ollama Discovery**
 
 The first functional MVP boundary is **Build 025**.
