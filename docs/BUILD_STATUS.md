@@ -9,37 +9,32 @@ This file records completed and active builds. The roadmap remains authoritative
 | 003 | Local Database Foundation | COMPLETE | main via PR #3 |
 | 004 | React Web UI Foundation | COMPLETE | main via PR #4 |
 | 005 | Tauri Desktop Shell | COMPLETE | main via PR #5 |
+| 006 | Ollama Discovery | IN PROGRESS | dev |
 
 ## Completed foundation
 
-### Build 001
-Repository structure, canonical documentation, architecture, security model, roadmap, ADR process, and CI foundation.
+Builds 001–005 established the documented repository, FastAPI backend, SQLite/Alembic database, React web UI, and Tauri Windows shell.
 
-### Build 002
-FastAPI backend skeleton, configuration, structured logging, health/version endpoints, pytest, and Ruff.
+## Build 006 acceptance checklist
 
-### Build 003
-SQLAlchemy + SQLite database foundation, Alembic migrations, users, settings, audit events, conversation metadata, and reversible migration tests.
-
-### Build 004
-React/TypeScript/Vite UI, responsive navigation, accessibility baseline, API client, backend health display, error boundary, tests, and production web build.
-
-## Build 005 acceptance checklist
-
-- [x] Tauri 2 project shell
-- [x] shared React frontend strategy
-- [x] restrictive desktop capability
-- [x] Content Security Policy
-- [x] localhost FastAPI connection strategy
-- [x] development launcher
-- [x] Windows CI compile/build job
-- [x] Windows executable artifact configuration
-- [x] Build 005 CI green
-- [x] ready for promotion to main
+- [x] Ollama base URL and timeout configuration
+- [x] local Ollama version discovery
+- [x] installed-model enumeration
+- [x] safe offline/unavailable state
+- [x] model smoke-test endpoint
+- [x] backend status/models/test API
+- [x] UI Ollama status display
+- [x] backend integration tests with mock transport
+- [x] web component coverage
+- [x] CORS policy for local web/Tauri development
+- [x] Ollama setup documentation
+- [x] Rust CI cache to reduce repeated desktop build time
+- [ ] Build 006 CI green
+- [ ] promoted to main
 - [ ] dev synchronized with main
 
 ## External setup
 
-No household-side setup is required to author Build 005. GitHub Actions performs the Windows/Rust validation.
+Build 006 is the first point where a household runtime is useful.
 
-The first external runtime setup is expected at Build 006, when Ollama must be installed on the Windows machine or another LAN host that will provide local AI.
+To test against the real Windows machine, install Ollama from the official Windows distribution. A model download is not required merely to confirm that Ollama is online; model selection can wait until we inventory the machine's RAM, GPU, VRAM, and disk space.
