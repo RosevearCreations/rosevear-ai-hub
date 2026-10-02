@@ -1,2 +1,78 @@
-# rosevear-ai-hub
-Private local-first AI, home automation, knowledge, camera and business integration hub
+# Rosevear AI Hub
+
+**Status:** Foundation / Source of Truth  
+**Established:** 2026-10-02  
+**Repository:** RosevearCreations/rosevear-ai-hub
+
+Rosevear AI Hub is a private, local-first AI control and knowledge layer for our home, workshop, cameras, documents, automations, and business systems.
+
+It is intentionally **not just another chatbot**. The Hub is designed to let us:
+- use local AI through Ollama
+- optionally use cloud AI through replaceable provider adapters
+- search our own documents with citations
+- control approved Home Assistant devices
+- integrate MQTT sensors and automations
+- view compatible cameras through ONVIF/RTSP/go2rtc/Frigate
+- connect to Devil n Dove, Rosie Dazzlers, and YW without duplicating their data
+- keep high-risk physical-world actions behind strict permissions and confirmation
+
+## Core principles
+
+1. Local-first whenever practical.
+2. Cloud optional, never mandatory.
+3. Provider-neutral architecture.
+4. Home Assistant is the primary IoT abstraction layer.
+5. Deterministic automation executes rules; AI may help author them.
+6. State-changing actions are permissioned and audited.
+7. No direct public-internet exposure.
+8. Business systems remain their own sources of truth.
+9. Safety-critical equipment is never autonomously controlled by an LLM.
+10. Documentation is part of the product.
+
+## Planned stack
+
+- **Desktop:** React + Tauri
+- **Web/PWA:** React
+- **API:** Python + FastAPI
+- **Database:** SQLite initially; PostgreSQL + pgvector later if justified
+- **Local AI:** Ollama
+- **Speech-to-text:** faster-whisper
+- **Text-to-speech:** Piper or compatible local TTS
+- **IoT:** Home Assistant + MQTT
+- **Cameras:** ONVIF / RTSP / go2rtc; Frigate optional
+- **Remote access:** Tailscale or equivalent private VPN
+- **Tool protocol:** MCP-compatible adapters where useful
+
+## Canonical documentation
+
+Start here:
+
+1. [Source of Truth](docs/SOURCE_OF_TRUTH.md)
+2. [Architecture](docs/ARCHITECTURE.md)
+3. [Build Roadmap](docs/BUILD_ROADMAP.md)
+4. [Security Model](docs/SECURITY_MODEL.md)
+5. [Data Model](docs/DATA_MODEL.md)
+6. [Integrations](docs/INTEGRATIONS.md)
+7. [Testing and Release](docs/TESTING_AND_RELEASE.md)
+8. [Operations](docs/OPERATIONS.md)
+9. [Open Decisions](docs/DECISIONS_TO_MAKE.md)
+
+## Branch policy
+
+- `dev` — active integration branch
+- `main` — stable, reviewed home-production branch
+
+Major architecture changes require an ADR under `docs/adr/`.
+
+## Current milestone
+
+**Build 001 — Repository and Documentation Foundation**
+
+The first functional MVP boundary is **Build 025**. At that point the Hub should be able to:
+- run locally
+- chat with Ollama
+- search private documents with citations
+- manage users/roles
+- control explicitly approved Home Assistant entities
+- audit state-changing actions
+- connect to MQTT
