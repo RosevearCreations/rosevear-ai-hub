@@ -97,7 +97,7 @@ async def ollama_status(
 
 @router.get("/models", response_model=OllamaModelsResponse)
 async def ollama_models(
-    client: OllamaClient = Depends(get_ollama_client),
+    client: OllamaClientDependency,
 ) -> OllamaModelsResponse:
     try:
         items = await client.models()
@@ -116,7 +116,7 @@ async def ollama_models(
 @router.post("/test", response_model=OllamaTestResponse)
 async def ollama_test(
     request: OllamaTestRequest,
-    client: OllamaClient = Depends(get_ollama_client),
+    client: OllamaClientDependency,
 ) -> OllamaTestResponse:
     try:
         payload = await client.test_model(request.model)
