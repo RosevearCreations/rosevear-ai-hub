@@ -1,0 +1,26 @@
+name: Foundation Check
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  docs-foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify canonical documentation exists
+        shell: bash
+        run: |
+          test -f README.md
+          test -f docs/SOURCE_OF_TRUTH.md
+          test -f docs/ARCHITECTURE.md
+          test -f docs/BUILD_ROADMAP.md
+          test -f docs/SECURITY_MODEL.md
+          test -f docs/DATA_MODEL.md
+          test -f docs/INTEGRATIONS.md
+          test -f docs/TESTING_AND_RELEASE.md
+          test -f docs/OPERATIONS.md
+          test -f docs/DECISIONS_TO_MAKE.md
