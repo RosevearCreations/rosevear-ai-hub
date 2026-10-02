@@ -1,14 +1,18 @@
 {
   "name": "rosevear-ai-hub",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "workspaces": [
-    "apps/web"
+    "apps/web",
+    "apps/desktop"
   ],
   "scripts": {
     "web:dev": "npm --workspace apps/web run dev",
     "web:build": "npm --workspace apps/web run build",
     "web:test": "npm --workspace apps/web run test",
-    "web:typecheck": "npm --workspace apps/web run typecheck"
+    "web:typecheck": "npm --workspace apps/web run typecheck",
+    "desktop:dev": "npm --workspace apps/desktop run dev",
+    "desktop:check": "npm --workspace apps/desktop run check",
+    "desktop:build": "npm run web:build && npm --workspace apps/desktop run build"
   }
 }

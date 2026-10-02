@@ -1,0 +1,16 @@
+[package]
+name = "rosevear-ai-hub"
+version = "0.0.5"
+description = "Rosevear AI Hub desktop shell"
+authors = ["RosevearCreations"]
+edition = "2021"
+
+[lib]
+name = "rosevear_ai_hub_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
