@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+
+# Tauri / Rust
+target/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Runtime data
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+data/backups/
+data/models/
+data/knowledge/
+
+# Logs
+*.log
+logs/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
