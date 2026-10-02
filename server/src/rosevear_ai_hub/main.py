@@ -3,8 +3,10 @@
 import logging
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from rosevear_ai_hub import __version__
+from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.logging import configure_logging
 from rosevear_ai_hub.schemas import HealthResponse, VersionResponse
@@ -22,6 +24,14 @@ def create_app() -> FastAPI:
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
+    )
+
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_allowed_origins,
+        allow_credentials=False,
+        allow_methods=["GET", "POST"],
+        allow_headers=["Accept", "Content-Type"],
     )
 
     logger = logging.getLogger(__name__)
@@ -43,6 +53,7 @@ def create_app() -> FastAPI:
             environment=settings.app_env,
         )
 
+    application.include_router(ollama_router)
     return application
 
 

@@ -205,6 +205,21 @@ h1 {
   padding: 0.65rem 0.9rem;
 }
 
+.runtime-status {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0 0 1rem;
+  color: #404040;
+}
+
+.runtime-status strong {
+  color: #171717;
+}
+
+.runtime-status small {
+  color: #525252;
+}
+
 .fatal-error {
   max-width: 760px;
   margin: 4rem auto;
