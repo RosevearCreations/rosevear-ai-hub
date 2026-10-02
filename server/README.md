@@ -20,6 +20,30 @@ pip install -e ".[dev]"
 
 Copy `.env.example` to `.env` if custom local settings are needed.
 
+## Database
+
+SQLite is the initial local database. Alembic migrations are authoritative; application startup must not silently create or mutate the schema.
+
+Apply all migrations from the repository root:
+
+```powershell
+alembic upgrade head
+```
+
+Show the current migration:
+
+```powershell
+alembic current
+```
+
+Downgrade one revision during development only:
+
+```powershell
+alembic downgrade -1
+```
+
+The default database is `./data/rosevear_ai_hub.db`. Override it with `DATABASE_URL`.
+
 ## Run
 
 ```powershell
