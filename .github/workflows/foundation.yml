@@ -1,4 +1,4 @@
-name: Foundation and Backend Checks
+name: Foundation, Backend and Web Checks
 
 on:
   push:
@@ -42,3 +42,24 @@ jobs:
         run: ruff format --check server/src server/tests
       - name: Test
         run: pytest
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/web/package.json
+      - name: Install web dependencies
+        run: npm install
+      - name: Type check
+        run: npm run typecheck
+      - name: Test
+        run: npm run test
+      - name: Production build
+        run: npm run build
