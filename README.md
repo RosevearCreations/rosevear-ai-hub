@@ -65,9 +65,14 @@ Start here:
 
 Major architecture changes require an ADR under `docs/adr/`.
 
-## Current milestone
+## Completed builds
 
-- **Build 001 — Repository and Documentation Foundation:** COMPLETE
-- **Build 002 — FastAPI Backend Skeleton:** COMPLETE
+- **Build 001 — Repository and Documentation Foundation**
+- **Build 002 — FastAPI Backend Skeleton**
+- **Build 003 — Local Database Foundation**
+
+## Next build
+
+**Build 004 — React Web UI Foundation**
 
 The first functional MVP boundary is **Build 025**.
