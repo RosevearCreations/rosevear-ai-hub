@@ -23,6 +23,7 @@ Initial persistence target: SQLite.
 - user_id
 - title
 - profile_id
+- provider
 - model
 - created_at
 - updated_at
@@ -32,6 +33,7 @@ Initial persistence target: SQLite.
 - conversation_id
 - role
 - content
+- provider
 - model
 - status
 - created_at
@@ -146,3 +148,8 @@ Build 008 seeds five built-in local-only profiles:
 
 ## design rule
 Business-domain entities are not copied into the Hub as authoritative records. Store references/cache metadata only when necessary.
+
+
+## provider routing note
+
+Build 009 persists the stable provider key on conversations and assistant messages. User-authored messages keep provider null. Existing conversations migrate to `ollama`.
