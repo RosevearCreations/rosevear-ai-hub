@@ -31,8 +31,6 @@ def _profile_response(profile: ModelProfile) -> ModelProfileResponse:
 @router.get("", response_model=list[ModelProfileResponse])
 def list_profiles(session: SessionDependency) -> list[ModelProfileResponse]:
     profiles = session.scalars(
-        select(ModelProfile)
-        .where(ModelProfile.enabled.is_(True))
-        .order_by(ModelProfile.id.asc())
+        select(ModelProfile).where(ModelProfile.enabled.is_(True)).order_by(ModelProfile.id.asc())
     ).all()
     return [_profile_response(profile) for profile in profiles]
