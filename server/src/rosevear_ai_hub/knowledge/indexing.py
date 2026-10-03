@@ -9,9 +9,9 @@ from datetime import UTC, datetime
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
-from rosevear_ai_hub.models import KnowledgeChunk, KnowledgeDocument
 from rosevear_ai_hub.knowledge.chunking import TextChunk, chunk_text
 from rosevear_ai_hub.knowledge.vector_store import VectorStore
+from rosevear_ai_hub.models import KnowledgeChunk, KnowledgeDocument
 
 EmbeddingFunction = Callable[[str, list[str]], Awaitable[list[list[float]]]]
 
