@@ -60,15 +60,29 @@ class OllamaTestResponse(BaseModel):
     eval_count: int | None = None
 
 
+class ModelProfileResponse(BaseModel):
+    id: int
+    slug: str
+    name: str
+    system_prompt: str
+    preferred_provider: str
+    preferred_model: str | None
+    privacy_policy: str
+    enabled: bool
+    built_in: bool
+
+
 class ConversationCreateRequest(BaseModel):
     title: str = Field(default="New conversation", min_length=1, max_length=255)
     model: str | None = Field(default=None, max_length=255)
+    profile_id: int | None = Field(default=None, ge=1)
 
 
 class ConversationResponse(BaseModel):
     id: int
     title: str
     model: str | None
+    profile_id: int | None
     created_at: datetime
     updated_at: datetime
 
@@ -86,6 +100,7 @@ class ChatMessageResponse(BaseModel):
 class ChatStreamRequest(BaseModel):
     model: str = Field(min_length=1, max_length=255)
     prompt: str = Field(min_length=1, max_length=20000)
+    profile_id: int | None = Field(default=None, ge=1)
 
 
 class CancelGenerationResponse(BaseModel):

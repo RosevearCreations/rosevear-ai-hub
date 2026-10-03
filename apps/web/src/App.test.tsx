@@ -44,6 +44,25 @@ describe("App", () => {
           };
         }
 
+        if (url.endsWith("/api/v1/models/profiles")) {
+          return {
+            ok: true,
+            json: async () => [
+              {
+                id: 1,
+                slug: "general",
+                name: "General",
+                system_prompt: "General prompt",
+                preferred_provider: "ollama",
+                preferred_model: null,
+                privacy_policy: "local_only",
+                enabled: true,
+                built_in: true,
+              },
+            ],
+          };
+        }
+
         if (url.endsWith("/api/v1/chat/conversations")) {
           return {
             ok: true,
@@ -60,7 +79,7 @@ describe("App", () => {
     vi.unstubAllGlobals();
   });
 
-  test("renders health and opens the streaming chat surface", async () => {
+  test("renders health and opens the model-profile chat surface", async () => {
     render(<App />);
 
     expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
@@ -80,6 +99,7 @@ describe("App", () => {
       expect(
         screen.getByText("Ollama is ready, but no model is installed."),
       ).toBeInTheDocument();
+      expect(screen.getByText("General · local_only")).toBeInTheDocument();
     });
   });
 });

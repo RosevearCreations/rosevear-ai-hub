@@ -1,6 +1,6 @@
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
 
 
 def migration_config(database_path, monkeypatch) -> Config:
@@ -26,9 +26,16 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "audit_events",
         "chat_messages",
         "conversations",
+        "model_profiles",
         "users",
     }.issubset(tables)
     assert "model" in {column["name"] for column in inspector.get_columns("conversations")}
+
+    with test_engine.connect() as connection:
+        profile_names = (
+            connection.execute(text("SELECT name FROM model_profiles ORDER BY id")).scalars().all()
+        )
+    assert profile_names == ["General", "Coding", "Home", "Workshop", "Business"]
 
 
 def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
@@ -44,4 +51,5 @@ def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
     assert "users" not in tables
     assert "conversations" not in tables
     assert "chat_messages" not in tables
+    assert "model_profiles" not in tables
     assert "audit_events" not in tables

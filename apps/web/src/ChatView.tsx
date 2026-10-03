@@ -5,10 +5,12 @@ import {
   createConversation,
   getConversationMessages,
   getConversations,
+  getModelProfiles,
   getOllamaModels,
   streamChat,
   type ChatMessage,
   type Conversation,
+  type ModelProfile,
   type OllamaModel,
 } from "./api";
 
@@ -16,10 +18,12 @@ type ChatStatus = "idle" | "streaming" | "cancelled" | "error";
 
 export function ChatView() {
   const [models, setModels] = useState<OllamaModel[]>([]);
+  const [profiles, setProfiles] = useState<ModelProfile[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
   const [selectedModel, setSelectedModel] = useState("");
+  const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [prompt, setPrompt] = useState("");
   const [status, setStatus] = useState<ChatStatus>("idle");
   const [error, setError] = useState("");
@@ -31,17 +35,31 @@ export function ChatView() {
 
     Promise.all([
       getOllamaModels(controller.signal),
+      getModelProfiles(controller.signal),
       getConversations(controller.signal),
     ])
-      .then(([modelResponse, conversationResponse]) => {
+      .then(([modelResponse, profileResponse, conversationResponse]) => {
         setModels(modelResponse.models);
+        setProfiles(profileResponse);
         setConversations(conversationResponse);
-        setSelectedModel(modelResponse.models[0]?.name ?? "");
+
+        const firstProfile = profileResponse[0] ?? null;
+        setSelectedProfileId(firstProfile?.id ?? null);
+
+        const preferredModel =
+          firstProfile?.preferred_model &&
+          modelResponse.models.some((model) => model.name === firstProfile.preferred_model)
+            ? firstProfile.preferred_model
+            : null;
+        setSelectedModel(preferredModel ?? modelResponse.models[0]?.name ?? "");
 
         if (conversationResponse[0]) {
-          setSelectedConversationId(conversationResponse[0].id);
-          if (conversationResponse[0].model) {
-            setSelectedModel(conversationResponse[0].model);
+          const conversation = conversationResponse[0];
+          setSelectedConversationId(conversation.id);
+          setSelectedProfileId(conversation.profile_id ?? firstProfile?.id ?? null);
+
+          if (conversation.model) {
+            setSelectedModel(conversation.model);
           }
         }
       })
@@ -78,6 +96,11 @@ export function ChatView() {
     [conversations, selectedConversationId],
   );
 
+  const activeProfile = useMemo(
+    () => profiles.find((profile) => profile.id === selectedProfileId) ?? null,
+    [profiles, selectedProfileId],
+  );
+
   async function refreshConversations() {
     const items = await getConversations();
     setConversations(items);
@@ -85,11 +108,26 @@ export function ChatView() {
   }
 
   async function newConversation() {
-    const conversation = await createConversation("New conversation", selectedModel || null);
+    const conversation = await createConversation(
+      "New conversation",
+      selectedModel || null,
+      selectedProfileId,
+    );
     setConversations((current) => [conversation, ...current]);
     setSelectedConversationId(conversation.id);
     setMessages([]);
     setError("");
+  }
+
+  function chooseProfile(profileId: number | null) {
+    setSelectedProfileId(profileId);
+    const profile = profiles.find((item) => item.id === profileId);
+    if (
+      profile?.preferred_model &&
+      models.some((model) => model.name === profile.preferred_model)
+    ) {
+      setSelectedModel(profile.preferred_model);
+    }
   }
 
   async function sendMessage() {
@@ -107,6 +145,7 @@ export function ChatView() {
       const conversation = await createConversation(
         cleanPrompt.slice(0, 80),
         selectedModel,
+        selectedProfileId,
       );
       conversationId = conversation.id;
       setConversations((current) => [conversation, ...current]);
@@ -140,29 +179,35 @@ export function ChatView() {
     let streamFailed = false;
 
     try {
-      await streamChat(conversationId, selectedModel, cleanPrompt, {
-        signal: controller.signal,
-        onGeneration: (generationId) => {
-          generationIdRef.current = generationId;
+      await streamChat(
+        conversationId,
+        selectedModel,
+        cleanPrompt,
+        selectedProfileId,
+        {
+          signal: controller.signal,
+          onGeneration: (generationId) => {
+            generationIdRef.current = generationId;
+          },
+          onEvent: (event) => {
+            if (event.type === "token") {
+              setMessages((current) =>
+                current.map((message) =>
+                  message.id === optimisticAssistant.id
+                    ? { ...message, content: message.content + event.content }
+                    : message,
+                ),
+              );
+            } else if (event.type === "cancelled") {
+              setStatus("cancelled");
+            } else if (event.type === "error") {
+              streamFailed = true;
+              setError(event.message);
+              setStatus("error");
+            }
+          },
         },
-        onEvent: (event) => {
-          if (event.type === "token") {
-            setMessages((current) =>
-              current.map((message) =>
-                message.id === optimisticAssistant.id
-                  ? { ...message, content: message.content + event.content }
-                  : message,
-              ),
-            );
-          } else if (event.type === "cancelled") {
-            setStatus("cancelled");
-          } else if (event.type === "error") {
-            streamFailed = true;
-            setError(event.message);
-            setStatus("error");
-          }
-        },
-      });
+      );
 
       if (!streamFailed) {
         setStatus("idle");
@@ -212,6 +257,7 @@ export function ChatView() {
               }
               onClick={() => {
                 setSelectedConversationId(conversation.id);
+                setSelectedProfileId(conversation.profile_id);
                 if (conversation.model) {
                   setSelectedModel(conversation.model);
                 }
@@ -227,33 +273,58 @@ export function ChatView() {
       <section className="chat-panel" aria-label="Local AI chat">
         <header className="chat-header">
           <div>
-            <p className="eyebrow">Build 007</p>
+            <p className="eyebrow">Build 008</p>
             <h1>{activeConversation?.title ?? "Chat"}</h1>
+            <small className="profile-summary">
+              {activeProfile
+                ? `${activeProfile.name} · ${activeProfile.privacy_policy}`
+                : "No profile selected"}
+            </small>
           </div>
 
-          <label className="model-picker">
-            <span>Model</span>
-            <select
-              value={selectedModel}
-              onChange={(event) => setSelectedModel(event.target.value)}
-              disabled={status === "streaming"}
-            >
-              <option value="">Select a local model</option>
-              {models.map((model) => (
-                <option key={model.name} value={model.name}>
-                  {model.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="chat-controls">
+            <label className="model-picker">
+              <span>Profile</span>
+              <select
+                value={selectedProfileId ?? ""}
+                onChange={(event) =>
+                  chooseProfile(event.target.value ? Number(event.target.value) : null)
+                }
+                disabled={status === "streaming"}
+              >
+                <option value="">No profile</option>
+                {profiles.map((profile) => (
+                  <option key={profile.id} value={profile.id}>
+                    {profile.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="model-picker">
+              <span>Model</span>
+              <select
+                value={selectedModel}
+                onChange={(event) => setSelectedModel(event.target.value)}
+                disabled={status === "streaming"}
+              >
+                <option value="">Select a local model</option>
+                {models.map((model) => (
+                  <option key={model.name} value={model.name}>
+                    {model.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </header>
 
         {models.length === 0 ? (
           <div className="empty-state" role="status">
             <h2>Ollama is ready, but no model is installed.</h2>
             <p>
-              Chat will activate as soon as a suitable local model is downloaded through
-              Ollama.
+              Profiles are available now. Chat will activate as soon as a suitable local
+              model is downloaded through Ollama.
             </p>
           </div>
         ) : null}
@@ -263,10 +334,7 @@ export function ChatView() {
             <p className="empty-copy">Start a local conversation when a model is selected.</p>
           ) : (
             messages.map((message) => (
-              <article
-                key={message.id}
-                className={`message message-${message.role}`}
-              >
+              <article key={message.id} className={`message message-${message.role}`}>
                 <strong>{message.role === "assistant" ? "Hub" : "We"}</strong>
                 <p>{message.content || (message.status === "streaming" ? "…" : "")}</p>
               </article>

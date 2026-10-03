@@ -274,11 +274,24 @@ h1 {
   min-width: 0;
 }
 
+.chat-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 0.75rem;
+  min-width: min(560px, 100%);
+}
+
 .model-picker {
   display: grid;
   gap: 0.35rem;
-  min-width: min(320px, 100%);
+  min-width: 0;
   font-weight: 600;
+}
+
+.profile-summary {
+  display: block;
+  margin-top: 0.4rem;
+  color: #525252;
 }
 
 .model-picker select,
@@ -422,8 +435,13 @@ h1 {
   }
 
   .health-card,
-  .model-picker {
+  .model-picker,
+  .chat-controls {
     width: 100%;
+  }
+
+  .chat-controls {
+    grid-template-columns: 1fr;
   }
 
   .message {

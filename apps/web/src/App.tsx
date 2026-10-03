@@ -119,7 +119,7 @@ function HomeView({
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 007</p>
+          <p className="eyebrow">Build 008</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -133,6 +133,7 @@ function HomeView({
         <article className="panel">
           <h2>Local AI</h2>
           <OllamaHealth ollama={ollama} />
+          <p>General, Coding, Home, Workshop, and Business profiles are available.</p>
           <button type="button" onClick={onOpenChat}>
             Open chat
           </button>

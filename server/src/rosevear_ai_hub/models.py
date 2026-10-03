@@ -47,6 +47,22 @@ class AppSetting(TimestampMixin, Base):
     value_json: Mapped[Any] = mapped_column(JSON, nullable=False)
 
 
+class ModelProfile(TimestampMixin, Base):
+    """Named local-AI behavior profile."""
+
+    __tablename__ = "model_profiles"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    slug: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    system_prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    preferred_provider: Mapped[str] = mapped_column(String(64), nullable=False, default="ollama")
+    preferred_model: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    privacy_policy: Mapped[str] = mapped_column(String(64), nullable=False, default="local_only")
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    built_in: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+
 class Conversation(TimestampMixin, Base):
     """Persisted local chat conversation."""
 
@@ -59,7 +75,11 @@ class Conversation(TimestampMixin, Base):
         index=True,
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
-    profile_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    profile_id: Mapped[int | None] = mapped_column(
+        ForeignKey("model_profiles.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     model: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
 

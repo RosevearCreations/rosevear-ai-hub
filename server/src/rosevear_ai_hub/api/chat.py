@@ -25,7 +25,7 @@ from rosevear_ai_hub.integrations.ollama import (
     OllamaRequestError,
     OllamaUnavailableError,
 )
-from rosevear_ai_hub.models import ChatMessage, Conversation
+from rosevear_ai_hub.models import ChatMessage, Conversation, ModelProfile
 from rosevear_ai_hub.schemas import (
     CancelGenerationResponse,
     ChatMessageResponse,
@@ -45,6 +45,7 @@ def _conversation_response(conversation: Conversation) -> ConversationResponse:
         id=conversation.id,
         title=conversation.title,
         model=conversation.model,
+        profile_id=conversation.profile_id,
         created_at=conversation.created_at,
         updated_at=conversation.updated_at,
     )
@@ -59,6 +60,18 @@ def _message_response(message: ChatMessage) -> ChatMessageResponse:
         model=message.model,
         status=message.status,
         created_at=message.created_at,
+    )
+
+
+def _get_enabled_profile(session: Session, profile_id: int | None) -> ModelProfile | None:
+    if profile_id is None:
+        return None
+
+    return session.scalar(
+        select(ModelProfile).where(
+            ModelProfile.id == profile_id,
+            ModelProfile.enabled.is_(True),
+        )
     )
 
 
@@ -85,11 +98,19 @@ def create_conversation(
     request: ConversationCreateRequest,
     session: SessionDependency,
 ) -> ConversationResponse:
+    profile = _get_enabled_profile(session, request.profile_id)
+    if request.profile_id is not None and profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model profile not found.",
+        )
+
     user = get_or_create_local_user(session)
     conversation = Conversation(
         user_id=user.id,
         title=request.title.strip(),
         model=request.model,
+        profile_id=profile.id if profile is not None else None,
     )
     session.add(conversation)
     session.commit()
@@ -129,7 +150,18 @@ async def stream_chat(
     if conversation is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found.")
 
+    selected_profile_id = (
+        request.profile_id if request.profile_id is not None else conversation.profile_id
+    )
+    profile = _get_enabled_profile(session, selected_profile_id)
+    if selected_profile_id is not None and profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model profile not found.",
+        )
+
     conversation.model = request.model
+    conversation.profile_id = profile.id if profile is not None else None
     conversation.updated_at = datetime.now(UTC)
 
     user_message = ChatMessage(
@@ -147,11 +179,16 @@ async def stream_chat(
         .where(ChatMessage.conversation_id == conversation.id)
         .order_by(ChatMessage.id.asc())
     ).all()
-    ollama_messages = [
+
+    ollama_messages: list[dict[str, str]] = []
+    if profile is not None:
+        ollama_messages.append({"role": "system", "content": profile.system_prompt})
+
+    ollama_messages.extend(
         {"role": item.role, "content": item.content}
         for item in history
         if item.role in {"user", "assistant", "system"} and item.status == "complete"
-    ]
+    )
 
     generation_id = generation_registry.start()
     bind = session.get_bind()
