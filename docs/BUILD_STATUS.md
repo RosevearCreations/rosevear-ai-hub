@@ -13,7 +13,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 007 | Streaming Chat | COMPLETE | main via PR #7 |
 | 008 | Model Profiles | COMPLETE | main via PR #8 |
 | 009 | Provider Abstraction | COMPLETE | main via PR #9 |
-| 010 | Chat Reliability | IN PROGRESS | dev |
+| 010 | Chat Reliability | READY FOR PROMOTION | dev CI green |
 
 ## Completed foundation
 
@@ -41,7 +41,7 @@ Builds 001–009 establish the documented repository, FastAPI backend, SQLite/Al
 - [x] retry/offline/recovery tests
 - [x] no schema migration required
 - [x] rollback and security documentation
-- [ ] Build 010 CI green
+- [x] Build 010 CI green
 - [ ] promoted to main
 - [ ] post-merge main CI green
 - [ ] dev synchronized with main
