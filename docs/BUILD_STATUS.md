@@ -14,44 +14,48 @@ This file records completed and active builds. The roadmap remains authoritative
 | 008 | Model Profiles | COMPLETE | main via PR #8 |
 | 009 | Provider Abstraction | COMPLETE | main via PR #9 |
 | 010 | Chat Reliability | COMPLETE | main via PR #10 |
-| 011 | File Ingestion | READY FOR PROMOTION | dev CI green |
+| 011 | File Ingestion | COMPLETE | main via PR #12 |
+| 012 | Chunking and Embeddings | IN PROGRESS | dev |
 
 ## Completed foundation
 
-Builds 001–010 establish the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, Ollama discovery, persistent token-streaming local chat, model profiles, provider-neutral routing, and bounded chat recovery.
+Builds 001–011 establish the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, local Ollama chat, provider-neutral routing, reliable generation recovery, and safe local file ingestion.
 
-## Build 011 acceptance checklist
+## Build 012 acceptance checklist
 
-- [x] PDF ingestion
-- [x] UTF-8 TXT ingestion
-- [x] Markdown ingestion
-- [x] DOCX ingestion
-- [x] safe filename normalization
-- [x] MIME/extension validation
-- [x] configurable upload-size limit
-- [x] DOCX expanded-size guard
-- [x] PDF encrypted/invalid-file rejection
-- [x] SHA-256 content hashing
-- [x] duplicate-content detection
-- [x] content-addressed local original storage
-- [x] extracted text persistence
-- [x] document metadata persistence
-- [x] seeded local-only Inbox collection
-- [x] document list/detail API
-- [x] local Knowledge ingestion UI
-- [x] duplicate user feedback
-- [x] ingestion/unit/API/migration/UI tests
-- [x] rollback/security documentation
-- [x] no external service required
-- [x] Build 011 CI green
+- [x] configurable deterministic chunking
+- [x] configurable overlap
+- [x] stable character offsets for future citations
+- [x] local Ollama embedding adapter
+- [x] configurable embedding model
+- [x] configurable embedding batch size
+- [x] vector-storage abstraction
+- [x] portable SQLite/SQLAlchemy JSON-vector backend
+- [x] document chunk persistence
+- [x] embedding metadata and vector persistence
+- [x] per-chunk embedding references
+- [x] idempotent document re-index foundation
+- [x] no-text document handling
+- [x] document indexing API
+- [x] chunk inspection API
+- [x] local indexing UI and re-index control
+- [x] chunking/indexing/Ollama/API/migration tests
+- [x] rollback/security/runtime documentation
+- [ ] Build 012 CI green
 - [ ] promoted to main
 - [ ] post-merge main CI green
 - [ ] dev synchronized with main
 
 ## External setup
 
-None is required for Build 011.
+No new application, hosted database, or cloud service is required.
 
-Original source files are stored under the local knowledge directory, which defaults to `./data/knowledge`. The directory is gitignored.
+For **live embeddings**, Ollama needs the configured embedding model. The default is:
 
-Ollama remains separate from file ingestion. A local model is not required until later retrieval/answering builds.
+`nomic-embed-text`
+
+On the Windows Ollama PC, the model can be installed from PowerShell with:
+
+`ollama pull nomic-embed-text`
+
+Repository CI uses a fake embedding provider, so development and promotion do not depend on the model download.
