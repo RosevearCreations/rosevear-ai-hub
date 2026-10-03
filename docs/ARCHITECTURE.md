@@ -17,9 +17,11 @@ Desktop / Browser / Phone
 AI Router      Knowledge   Tool Bus   Automation Engine
   |                |          |           |
   v                v          v           v
-Ollama/Cloud   SQLite/Vec   Integrations  Event Store
-                           /   |    \
-                         HA   MQTT  Cameras
+Providers       SQLite/Vec  Integrations  Event Store
+  |                         /   |    \
+  v                       HA   MQTT  Cameras
+Ollama
+(optional cloud later)
                                   |
                            Business adapters
 ```
@@ -55,14 +57,25 @@ Responsibilities:
 
 ## AI router
 
-Provider-neutral interface with:
+Build 009 establishes a provider-neutral interface with:
 - provider capability metadata
-- model discovery
-- privacy routing
+- normalized health and errors
+- provider registry
+- model discovery contract
+- streaming chat contract
+- privacy metadata
+- optional-cloud adapter contract
+
+Current provider:
+- Ollama — local-only
+
+Planned later behavior:
 - local-first preference
 - timeout/retry/fallback
 - tool-call normalization
 - cost metadata for optional paid providers
+
+Cloud providers remain optional and are not configured by Build 009.
 
 ## Knowledge service
 
