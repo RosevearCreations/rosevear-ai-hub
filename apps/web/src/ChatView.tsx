@@ -31,6 +31,8 @@ export function ChatView() {
   const [prompt, setPrompt] = useState("");
   const [status, setStatus] = useState<ChatStatus>("idle");
   const [error, setError] = useState("");
+  const [modelLoadError, setModelLoadError] = useState("");
+  const [retryNotice, setRetryNotice] = useState("");
   const generationIdRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -38,18 +40,17 @@ export function ChatView() {
     const controller = new AbortController();
 
     Promise.all([
-      getOllamaModels(controller.signal),
       getProviders(controller.signal),
       getModelProfiles(controller.signal),
       getConversations(controller.signal),
     ])
-      .then(([modelResponse, providerResponse, profileResponse, conversationResponse]) => {
-        setModels(modelResponse.models);
+      .then(([providerResponse, profileResponse, conversationResponse]) => {
         setProviders(providerResponse);
         setProfiles(profileResponse);
         setConversations(conversationResponse);
 
-        const firstProvider = providerResponse.find((provider) => provider.available) ??
+        const firstProvider =
+          providerResponse.find((provider) => provider.available) ??
           providerResponse[0] ??
           null;
         const firstProfile = profileResponse[0] ?? null;
@@ -57,19 +58,11 @@ export function ChatView() {
         setSelectedProvider(firstProfile?.preferred_provider ?? firstProvider?.key ?? "ollama");
         setSelectedProfileId(firstProfile?.id ?? null);
 
-        const preferredModel =
-          firstProfile?.preferred_model &&
-          modelResponse.models.some((model) => model.name === firstProfile.preferred_model)
-            ? firstProfile.preferred_model
-            : null;
-        setSelectedModel(preferredModel ?? modelResponse.models[0]?.name ?? "");
-
         if (conversationResponse[0]) {
           const conversation = conversationResponse[0];
           setSelectedConversationId(conversation.id);
           setSelectedProvider(conversation.provider);
           setSelectedProfileId(conversation.profile_id ?? firstProfile?.id ?? null);
-
           if (conversation.model) {
             setSelectedModel(conversation.model);
           }
@@ -80,6 +73,22 @@ export function ChatView() {
           return;
         }
         setError(caught instanceof Error ? caught.message : "Unable to load chat.");
+      });
+
+    getOllamaModels(controller.signal)
+      .then((response) => {
+        setModels(response.models);
+        setModelLoadError("");
+        setSelectedModel((current) => current || response.models[0]?.name || "");
+      })
+      .catch((caught: unknown) => {
+        if (caught instanceof DOMException && caught.name === "AbortError") {
+          return;
+        }
+        setModels([]);
+        setModelLoadError(
+          caught instanceof Error ? caught.message : "Unable to load local models.",
+        );
       });
 
     return () => controller.abort();
@@ -124,6 +133,32 @@ export function ChatView() {
     return items;
   }
 
+  async function refreshProviderAndModels() {
+    setRetryNotice("Checking provider…");
+    const [providerResult, modelResult] = await Promise.allSettled([
+      getProviders(),
+      getOllamaModels(),
+    ]);
+
+    if (providerResult.status === "fulfilled") {
+      setProviders(providerResult.value);
+    }
+
+    if (modelResult.status === "fulfilled") {
+      setModels(modelResult.value.models);
+      setModelLoadError("");
+      setSelectedModel((current) => current || modelResult.value.models[0]?.name || "");
+    } else {
+      setModelLoadError(
+        modelResult.reason instanceof Error
+          ? modelResult.reason.message
+          : "Unable to load local models.",
+      );
+    }
+
+    setRetryNotice("");
+  }
+
   async function newConversation() {
     const conversation = await createConversation(
       "New conversation",
@@ -163,6 +198,7 @@ export function ChatView() {
     }
 
     setError("");
+    setRetryNotice("");
     setStatus("streaming");
     setPrompt("");
 
@@ -221,6 +257,7 @@ export function ChatView() {
           },
           onEvent: (event) => {
             if (event.type === "token") {
+              setRetryNotice("");
               setMessages((current) =>
                 current.map((message) =>
                   message.id === optimisticAssistant.id
@@ -228,10 +265,16 @@ export function ChatView() {
                     : message,
                 ),
               );
+            } else if (event.type === "retrying") {
+              setRetryNotice(
+                `${event.provider} did not respond. Retrying ${event.attempt}/${event.max_attempts}…`,
+              );
             } else if (event.type === "cancelled") {
+              setRetryNotice("");
               setStatus("cancelled");
             } else if (event.type === "error") {
               streamFailed = true;
+              setRetryNotice("");
               setError(event.message);
               setStatus("error");
             }
@@ -246,6 +289,10 @@ export function ChatView() {
       const persisted = await getConversationMessages(conversationId);
       setMessages(persisted);
       await refreshConversations();
+
+      if (streamFailed) {
+        await refreshProviderAndModels();
+      }
     } catch (caught: unknown) {
       if (caught instanceof DOMException && caught.name === "AbortError") {
         setStatus("cancelled");
@@ -265,6 +312,7 @@ export function ChatView() {
       await cancelGeneration(generationId).catch(() => undefined);
     }
     abortRef.current?.abort();
+    setRetryNotice("");
     setStatus("cancelled");
   }
 
@@ -306,7 +354,7 @@ export function ChatView() {
       <section className="chat-panel" aria-label="Local AI chat">
         <header className="chat-header">
           <div>
-            <p className="eyebrow">Build 009</p>
+            <p className="eyebrow">Build 010</p>
             <h1>{activeConversation?.title ?? "Chat"}</h1>
             <small className="profile-summary">
               {activeProfile
@@ -375,12 +423,32 @@ export function ChatView() {
           </div>
         </header>
 
-        {models.length === 0 ? (
+        {activeProvider?.available === false ? (
+          <div className="empty-state provider-offline" role="status">
+            <h2>{activeProvider.display_name} is offline.</h2>
+            <p>
+              Conversation history remains available. New generations are paused until the
+              provider responds again.
+            </p>
+            <p>{activeProvider.last_error ?? activeProvider.message}</p>
+            <button type="button" onClick={() => void refreshProviderAndModels()}>
+              Check again
+            </button>
+          </div>
+        ) : modelLoadError ? (
+          <div className="empty-state" role="status">
+            <h2>Could not read local models.</h2>
+            <p>{modelLoadError}</p>
+            <button type="button" onClick={() => void refreshProviderAndModels()}>
+              Try again
+            </button>
+          </div>
+        ) : models.length === 0 ? (
           <div className="empty-state" role="status">
             <h2>Ollama is ready, but no model is installed.</h2>
             <p>
-              Provider routing and profiles are ready. Chat will activate as soon as a suitable
-              local model is downloaded through Ollama.
+              Reliability and recovery controls are ready. Chat will activate as soon as a
+              suitable local model is downloaded through Ollama.
             </p>
           </div>
         ) : null}
@@ -390,18 +458,29 @@ export function ChatView() {
             <p className="empty-copy">Start a conversation when a provider and model are selected.</p>
           ) : (
             messages.map((message) => (
-              <article key={message.id} className={`message message-${message.role}`}>
+              <article
+                key={message.id}
+                className={`message message-${message.role} message-status-${message.status}`}
+              >
                 <strong>
                   {message.role === "assistant"
                     ? `Hub${message.provider ? ` · ${message.provider}` : ""}`
                     : "We"}
                 </strong>
                 <p>{message.content || (message.status === "streaming" ? "…" : "")}</p>
+                {message.role === "assistant" && message.status !== "complete" ? (
+                  <small className="message-status">{message.status}</small>
+                ) : null}
               </article>
             ))
           )}
         </div>
 
+        {retryNotice ? (
+          <p className="chat-notice" role="status">
+            {retryNotice}
+          </p>
+        ) : null}
         {error ? (
           <p className="chat-error" role="alert">
             {error}
@@ -409,7 +488,7 @@ export function ChatView() {
         ) : null}
         {status === "cancelled" ? (
           <p className="chat-notice" role="status">
-            Generation stopped.
+            Generation stopped. Any partial response was kept.
           </p>
         ) : null}
 
