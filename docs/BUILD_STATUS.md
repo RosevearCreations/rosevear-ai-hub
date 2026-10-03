@@ -10,13 +10,13 @@ This file records completed and active builds. The roadmap remains authoritative
 | 004 | React Web UI Foundation | COMPLETE | main via PR #4 |
 | 005 | Tauri Desktop Shell | COMPLETE | main via PR #5 |
 | 006 | Ollama Discovery | COMPLETE | main via PR #6 |
-| 007 | Streaming Chat | IN PROGRESS | dev |
+| 007 | Streaming Chat | COMPLETE | main via PR #7 |
 
 ## Completed foundation
 
-Builds 001–006 established the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, and local Ollama discovery.
+Builds 001–007 established the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, Ollama discovery, and persistent token-streaming local chat.
 
-## Build 007 acceptance checklist
+## Build 007 acceptance
 
 - [x] conversation creation and listing
 - [x] model selection per conversation
@@ -31,12 +31,13 @@ Builds 001–006 established the documented repository, FastAPI backend, SQLite/
 - [x] backend integration tests
 - [x] web coverage for empty-model chat state
 - [x] security/rollback/runtime documentation
-- [ ] Build 007 CI green
-- [ ] promoted to main
-- [ ] dev synchronized with main
+- [x] Build 007 dev CI green
+- [x] ready for promotion to main
 
 ## External setup
 
-Ollama 0.35.1 is installed and reachable on the target Windows PC, but no model is installed yet.
+Ollama 0.35.1 is installed and reachable on the target Windows PC.
 
-Build 007 can be fully implemented and CI-tested without a downloaded model. Live chat validation will require one suitable model. Model choice should account for the target PC's 16 GB RAM and available GPU/VRAM.
+The target PC has an Intel Core i7-8700 (6 cores / 12 logical processors) and about 16 GB of usable RAM. No local model is installed yet. Live chat validation requires one model, but repository development can continue independently.
+
+All household runtime commands are documented for PowerShell; Bash is not required.
