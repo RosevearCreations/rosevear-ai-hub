@@ -104,6 +104,28 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
         };
       }
 
+      if (url.endsWith("/api/v1/knowledge/collections")) {
+        return {
+          ok: true,
+          json: async () => [
+            {
+              id: 1,
+              name: "Inbox",
+              description: "Default local knowledge intake collection.",
+              local_only: true,
+              created_at: "2026-10-03T00:00:00Z",
+            },
+          ],
+        };
+      }
+
+      if (url.endsWith("/api/v1/knowledge/documents")) {
+        return {
+          ok: true,
+          json: async () => [],
+        };
+      }
+
       return { ok: false, status: 404 };
     }),
   );
@@ -137,6 +159,18 @@ describe("App", () => {
         screen.getByText("Ollama is ready, but no model is installed."),
       ).toBeInTheDocument();
       expect(screen.getByText(/General · local_only · Ollama online/)).toBeInTheDocument();
+    });
+  });
+
+  test("opens the local knowledge ingestion surface", async () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Knowledge" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Knowledge" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Ingest a file" })).toBeInTheDocument();
+      expect(screen.getByText(/PDF, TXT, Markdown, and DOCX/)).toBeInTheDocument();
+      expect(screen.getByText("No documents yet")).toBeInTheDocument();
     });
   });
 
