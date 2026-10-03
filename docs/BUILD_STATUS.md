@@ -15,11 +15,11 @@ This file records completed and active builds. The roadmap remains authoritative
 | 009 | Provider Abstraction | COMPLETE | main via PR #9 |
 | 010 | Chat Reliability | COMPLETE | main via PR #10 |
 | 011 | File Ingestion | COMPLETE | main via PR #12 |
-| 012 | Chunking and Embeddings | IN PROGRESS | dev |
+| 012 | Chunking and Embeddings | COMPLETE | main via PR #13 |
 
 ## Completed foundation
 
-Builds 001–011 establish the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, local Ollama chat, provider-neutral routing, reliable generation recovery, and safe local file ingestion.
+Builds 001–012 establish the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, local Ollama chat, provider-neutral routing, reliable generation recovery, and safe local file ingestion.
 
 ## Build 012 acceptance checklist
 
@@ -41,10 +41,10 @@ Builds 001–011 establish the documented repository, FastAPI backend, SQLite/Al
 - [x] local indexing UI and re-index control
 - [x] chunking/indexing/Ollama/API/migration tests
 - [x] rollback/security/runtime documentation
-- [ ] Build 012 CI green
-- [ ] promoted to main
-- [ ] post-merge main CI green
-- [ ] dev synchronized with main
+- [x] Build 012 CI green
+- [x] promoted to main
+- [x] post-merge main CI green
+- [x] dev synchronized with main
 
 ## External setup
 
