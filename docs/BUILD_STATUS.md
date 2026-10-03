@@ -13,11 +13,11 @@ This file records completed and active builds. The roadmap remains authoritative
 | 007 | Streaming Chat | COMPLETE | main via PR #7 |
 | 008 | Model Profiles | COMPLETE | main via PR #8 |
 | 009 | Provider Abstraction | COMPLETE | main via PR #9 |
-| 010 | Chat Reliability | READY FOR PROMOTION | dev CI green |
+| 010 | Chat Reliability | COMPLETE | main via PR #10 |
 
 ## Completed foundation
 
-Builds 001–009 establish the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, Ollama discovery, persistent token-streaming local chat, model profiles, and provider-neutral AI routing.
+Builds 001–010 establish the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, Ollama discovery, persistent token-streaming local chat, model profiles, and provider-neutral AI routing, bounded retry/offline handling, graceful degradation, and interrupted-generation recovery.
 
 ## Build 010 acceptance checklist
 
@@ -42,9 +42,9 @@ Builds 001–009 establish the documented repository, FastAPI backend, SQLite/Al
 - [x] no schema migration required
 - [x] rollback and security documentation
 - [x] Build 010 CI green
-- [ ] promoted to main
-- [ ] post-merge main CI green
-- [ ] dev synchronized with main
+- [x] promoted to main
+- [x] post-merge main CI green
+- [x] dev synchronized with main
 
 ## External setup
 

@@ -76,6 +76,7 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 007 — Streaming Chat**
 - **Build 008 — Model Profiles**
 - **Build 009 — Provider Abstraction**
+- **Build 011 — File Ingestion**
 
 ## Next build
 
