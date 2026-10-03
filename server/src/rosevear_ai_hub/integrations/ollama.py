@@ -69,6 +69,32 @@ class OllamaClient:
             timeout_seconds=self.generation_timeout_seconds,
         )
 
+    async def embed(self, model: str, inputs: list[str]) -> list[list[float]]:
+        """Return local Ollama embeddings for one batch of text inputs."""
+
+        if not inputs:
+            return []
+
+        payload = await self._post_json(
+            "/api/embed",
+            {"model": model, "input": inputs},
+            timeout_seconds=self.generation_timeout_seconds,
+        )
+        embeddings = payload.get("embeddings")
+        if not isinstance(embeddings, list) or len(embeddings) != len(inputs):
+            raise OllamaRequestError("Ollama embedding response was incomplete.")
+
+        normalized: list[list[float]] = []
+        for vector in embeddings:
+            if not isinstance(vector, list) or not vector:
+                raise OllamaRequestError("Ollama returned an invalid embedding vector.")
+            try:
+                normalized.append([float(value) for value in vector])
+            except (TypeError, ValueError) as exc:
+                raise OllamaRequestError("Ollama returned a non-numeric embedding vector.") from exc
+
+        return normalized
+
     async def stream_chat(
         self,
         model: str,
