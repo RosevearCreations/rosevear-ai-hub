@@ -145,9 +145,7 @@ class KnowledgeIndexingService:
         chunks: list[TextChunk],
     ) -> None:
         self.vector_store.delete_for_document(session, document.id)
-        session.execute(
-            delete(KnowledgeChunk).where(KnowledgeChunk.document_id == document.id)
-        )
+        session.execute(delete(KnowledgeChunk).where(KnowledgeChunk.document_id == document.id))
 
         for chunk in chunks:
             session.add(
