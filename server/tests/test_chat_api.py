@@ -233,9 +233,7 @@ def test_offline_failure_is_persisted_and_provider_enters_cooldown(tmp_path) -> 
     assert '"type":"error"' in body
     assert registry.runtime_state("fake-local").temporarily_offline is True
 
-    messages = client.get(
-        f"/api/v1/chat/conversations/{conversation_id}/messages"
-    ).json()
+    messages = client.get(f"/api/v1/chat/conversations/{conversation_id}/messages").json()
     assert messages[-1]["role"] == "assistant"
     assert messages[-1]["status"] == "error"
 
