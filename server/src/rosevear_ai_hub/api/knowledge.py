@@ -147,9 +147,7 @@ async def ingest_document(
         await file.close()
 
     duplicate = session.scalar(
-        select(KnowledgeDocument).where(
-            KnowledgeDocument.content_hash == prepared.content_hash
-        )
+        select(KnowledgeDocument).where(KnowledgeDocument.content_hash == prepared.content_hash)
     )
     if duplicate is not None:
         response.status_code = status.HTTP_200_OK
