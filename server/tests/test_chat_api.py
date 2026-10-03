@@ -56,9 +56,7 @@ def test_conversation_stream_and_message_persistence(tmp_path) -> None:
     assert '"type":"token","content":"back"' in body
     assert '"type":"done"' in body
 
-    messages_response = client.get(
-        f"/api/v1/chat/conversations/{conversation_id}/messages"
-    )
+    messages_response = client.get(f"/api/v1/chat/conversations/{conversation_id}/messages")
     assert messages_response.status_code == 200
     messages = messages_response.json()
     assert [item["role"] for item in messages] == ["user", "assistant"]
