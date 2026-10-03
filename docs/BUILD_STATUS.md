@@ -14,7 +14,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 008 | Model Profiles | COMPLETE | main via PR #8 |
 | 009 | Provider Abstraction | COMPLETE | main via PR #9 |
 | 010 | Chat Reliability | COMPLETE | main via PR #10 |
-| 011 | File Ingestion | IN PROGRESS | dev |
+| 011 | File Ingestion | READY FOR PROMOTION | dev CI green |
 
 ## Completed foundation
 
@@ -43,7 +43,7 @@ Builds 001–010 establish the documented repository, FastAPI backend, SQLite/Al
 - [x] ingestion/unit/API/migration/UI tests
 - [x] rollback/security documentation
 - [x] no external service required
-- [ ] Build 011 CI green
+- [x] Build 011 CI green
 - [ ] promoted to main
 - [ ] post-merge main CI green
 - [ ] dev synchronized with main
