@@ -11,7 +11,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 005 | Tauri Desktop Shell | COMPLETE | main via PR #5 |
 | 006 | Ollama Discovery | COMPLETE | main via PR #6 |
 | 007 | Streaming Chat | COMPLETE | main via PR #7 |
-| 008 | Model Profiles | IN PROGRESS | dev |
+| 008 | Model Profiles | COMPLETE | main via PR #8 |
 
 ## Completed foundation
 
@@ -34,8 +34,8 @@ Builds 001–007 established the documented repository, FastAPI backend, SQLite/
 - [x] disabled profiles excluded from selection API
 - [x] migration/profile/chat tests
 - [x] data-model and rollback documentation
-- [ ] Build 008 CI green
-- [ ] promoted to main
+- [x] Build 008 CI green
+- [x] ready for promotion to main
 - [ ] dev synchronized with main
 
 ## External setup
