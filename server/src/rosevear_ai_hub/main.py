@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from rosevear_ai_hub import __version__
+from rosevear_ai_hub.api.chat import router as chat_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.logging import configure_logging
@@ -32,6 +33,7 @@ def create_app() -> FastAPI:
         allow_credentials=False,
         allow_methods=["GET", "POST"],
         allow_headers=["Accept", "Content-Type"],
+        expose_headers=["X-Generation-ID"],
     )
 
     logger = logging.getLogger(__name__)
@@ -54,6 +56,7 @@ def create_app() -> FastAPI:
         )
 
     application.include_router(ollama_router)
+    application.include_router(chat_router)
     return application
 
 

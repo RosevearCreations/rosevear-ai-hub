@@ -2,7 +2,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.database import build_engine
-from rosevear_ai_hub.models import AppSetting, AuditEvent, Base, Conversation, User
+from rosevear_ai_hub.models import (
+    AppSetting,
+    AuditEvent,
+    Base,
+    ChatMessage,
+    Conversation,
+    User,
+)
 
 
 def test_initial_models_persist(tmp_path) -> None:
@@ -21,7 +28,21 @@ def test_initial_models_persist(tmp_path) -> None:
         session.flush()
 
         session.add(AppSetting(key="ui.theme", value_json={"mode": "system"}))
-        session.add(Conversation(user_id=user.id, title="Foundation conversation"))
+        conversation = Conversation(
+            user_id=user.id,
+            title="Foundation conversation",
+            model="test-model:latest",
+        )
+        session.add(conversation)
+        session.flush()
+        session.add(
+            ChatMessage(
+                conversation_id=conversation.id,
+                role="user",
+                content="Hello",
+                status="complete",
+            )
+        )
         session.add(
             AuditEvent(
                 actor_user_id=user.id,
@@ -38,4 +59,5 @@ def test_initial_models_persist(tmp_path) -> None:
         assert session.scalar(select(User).where(User.username == "owner")) is not None
         assert session.scalar(select(AppSetting).where(AppSetting.key == "ui.theme")) is not None
         assert session.scalar(select(Conversation)) is not None
+        assert session.scalar(select(ChatMessage)) is not None
         assert session.scalar(select(AuditEvent)) is not None

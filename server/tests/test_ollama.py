@@ -38,11 +38,21 @@ def mock_transport(request: httpx.Request) -> httpx.Response:
                 "eval_count": 1,
             },
         )
+    if request.url.path == "/api/chat":
+        return httpx.Response(
+            200,
+            content=(
+                b'{"message":{"role":"assistant","content":"Hello "},"done":false}\n'
+                b'{"message":{"role":"assistant","content":"there"},"done":false}\n'
+                b'{"message":{"role":"assistant","content":""},"done":true}\n'
+            ),
+            headers={"content-type": "application/x-ndjson"},
+        )
     return httpx.Response(404)
 
 
 @pytest.mark.asyncio
-async def test_ollama_client_discovers_models_and_tests_generation() -> None:
+async def test_ollama_client_discovers_models_tests_and_streams() -> None:
     client = OllamaClient(
         "http://ollama.test",
         transport=httpx.MockTransport(mock_transport),
@@ -54,6 +64,15 @@ async def test_ollama_client_discovers_models_and_tests_generation() -> None:
 
     result = await client.test_model("test-model:latest")
     assert result["response"] == "OK"
+
+    chunks = [
+        chunk
+        async for chunk in client.stream_chat(
+            "test-model:latest",
+            [{"role": "user", "content": "Hello"}],
+        )
+    ]
+    assert chunks == ["Hello ", "there"]
 
 
 @pytest.mark.asyncio
