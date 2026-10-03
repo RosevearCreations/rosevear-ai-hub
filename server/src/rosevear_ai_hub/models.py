@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from rosevear_ai_hub.database import Base
@@ -150,6 +150,60 @@ class KnowledgeDocument(Base):
         index=True,
     )
     indexed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class KnowledgeChunk(Base):
+    """Deterministic text chunk produced from one ingested document."""
+
+    __tablename__ = "document_chunks"
+    __table_args__ = (
+        UniqueConstraint(
+            "document_id",
+            "ordinal",
+            name="uq_document_chunks_document_ordinal",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    document_id: Mapped[int] = mapped_column(
+        ForeignKey("documents.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    ordinal: Mapped[int] = mapped_column(Integer, nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    start_char: Mapped[int] = mapped_column(Integer, nullable=False)
+    end_char: Mapped[int] = mapped_column(Integer, nullable=False)
+    citation_metadata: Mapped[Any] = mapped_column(JSON, nullable=False)
+    embedding_reference: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.current_timestamp(),
+        nullable=False,
+    )
+
+
+class ChunkEmbedding(Base):
+    """Portable JSON vector record behind the vector-store abstraction."""
+
+    __tablename__ = "chunk_embeddings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    chunk_id: Mapped[int] = mapped_column(
+        ForeignKey("document_chunks.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+    provider: Mapped[str] = mapped_column(String(64), nullable=False)
+    model: Mapped[str] = mapped_column(String(255), nullable=False)
+    dimensions: Mapped[int] = mapped_column(Integer, nullable=False)
+    vector_json: Mapped[Any] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.current_timestamp(),
+        nullable=False,
+    )
 
 
 class AuditEvent(Base):
