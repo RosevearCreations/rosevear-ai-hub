@@ -136,7 +136,11 @@ class KnowledgeIngestionService:
 
         return target.relative_to(self.storage_root).as_posix()
 
-    def _extract(self, extension: str, data: bytes) -> tuple[str, dict[str, int | str | bool | None]]:
+    def _extract(
+        self,
+        extension: str,
+        data: bytes,
+    ) -> tuple[str, dict[str, int | str | bool | None]]:
         if extension in {".txt", ".md"}:
             try:
                 text = data.decode("utf-8-sig")
