@@ -23,26 +23,38 @@ Initial persistence target: SQLite.
 - user_id
 - title
 - profile_id
+- model
 - created_at
 - updated_at
 
-## messages
+## chat_messages
 - id
 - conversation_id
 - role
 - content
-- model_provider
-- model_name
+- model
+- status
 - created_at
 
 ## model_profiles
 - id
+- slug
 - name
 - system_prompt
 - preferred_provider
 - preferred_model
 - privacy_policy
 - enabled
+- built_in
+- created_at
+- updated_at
+
+Build 008 seeds five built-in local-only profiles:
+- General
+- Coding
+- Home
+- Workshop
+- Business
 
 ## knowledge_collections
 - id
