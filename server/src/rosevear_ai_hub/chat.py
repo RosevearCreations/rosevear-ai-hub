@@ -98,10 +98,7 @@ class GenerationRegistry:
         return state.cancelled if state is not None else False
 
     def has_active_conversation(self, conversation_id: int) -> bool:
-        return any(
-            state.conversation_id == conversation_id
-            for state in self._states.values()
-        )
+        return any(state.conversation_id == conversation_id for state in self._states.values())
 
     def finish(self, generation_id: str) -> None:
         self._states.pop(generation_id, None)
