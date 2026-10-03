@@ -69,9 +69,13 @@ class ProviderStatusResponse(BaseModel):
     supports_tools: bool
     enabled: bool
     available: bool
+    degraded: bool
     message: str
     version: str | None = None
     model_count: int | None = None
+    consecutive_failures: int = 0
+    retry_after_seconds: float = 0
+    last_error: str | None = None
 
 
 class ModelProfileResponse(BaseModel):

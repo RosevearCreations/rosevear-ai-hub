@@ -16,6 +16,10 @@ class ProviderUnavailableError(ProviderError):
     """Raised when a configured provider cannot be reached."""
 
 
+class ProviderTimeoutError(ProviderUnavailableError):
+    """Raised when a provider times out before completing a request."""
+
+
 class ProviderRequestError(ProviderError):
     """Raised when a provider rejects or cannot complete a safe request."""
 

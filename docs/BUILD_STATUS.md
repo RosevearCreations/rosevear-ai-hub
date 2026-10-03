@@ -13,40 +13,43 @@ This file records completed and active builds. The roadmap remains authoritative
 | 007 | Streaming Chat | COMPLETE | main via PR #7 |
 | 008 | Model Profiles | COMPLETE | main via PR #8 |
 | 009 | Provider Abstraction | COMPLETE | main via PR #9 |
+| 010 | Chat Reliability | READY FOR PROMOTION | dev CI green |
 
 ## Completed foundation
 
 Builds 001–009 establish the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, Ollama discovery, persistent token-streaming local chat, model profiles, and provider-neutral AI routing.
 
-## Build 009 acceptance checklist
+## Build 010 acceptance checklist
 
-- [x] provider-neutral AI interface
-- [x] normalized provider descriptor and health metadata
-- [x] normalized provider error classes
-- [x] Ollama implementation behind the provider interface
-- [x] optional-cloud adapter contract without enabling a cloud provider
-- [x] provider registry
-- [x] provider status API
-- [x] provider routing persisted on conversations
-- [x] provider metadata persisted on assistant messages
-- [x] chat generation routed through provider registry
-- [x] profile preferred-provider routing
-- [x] unknown/disabled provider rejection
-- [x] provider selector and provider state in chat UI
-- [x] migration for provider routing metadata
-- [x] provider, chat, migration, and UI tests
-- [x] no cloud credentials or hosted AI service required
-- [x] Build 009 dev CI green
-- [x] ready for promotion to main
+- [x] normalized provider timeout error
+- [x] bounded generation retry policy
+- [x] retry only before the first token
+- [x] retry progress stream event
+- [x] process-level provider offline/cooldown state
+- [x] provider status remains available while inference is offline
+- [x] provider degraded-state metadata
+- [x] user message persisted before generation
+- [x] assistant placeholder persisted before generation
+- [x] successful response persistence
+- [x] provider-error persistence
+- [x] cancelled-response persistence
+- [x] abandoned generation recovery to interrupted
+- [x] partial content preserved where available
+- [x] conversation history remains available while provider is offline
+- [x] model-list failure no longer blocks history UI
+- [x] provider refresh/recovery UI
+- [x] retry/offline/recovery tests
+- [x] no schema migration required
+- [x] rollback and security documentation
+- [x] Build 010 CI green
+- [ ] promoted to main
 - [ ] post-merge main CI green
 - [ ] dev synchronized with main
 
 ## External setup
 
-Ollama 0.35.1 is installed and reachable on the target Windows PC.
+Ollama 0.35.1 remains the only active provider.
 
-The target PC has an Intel Core i7-8700 (6 cores / 12 logical processors) and about 16 GB of usable RAM. The Task Manager screenshot confirms Intel UHD Graphics is present; another GPU entry is also visible but its model/VRAM has not yet been captured.
-
-Build 009 requires no new application, hosted database, cloud AI account, or secret. Ollama remains the only registered provider and remains local-only.
+Build 010 requires no new application, hosted database, cloud account, or secret. Reliability policy is configured through optional environment variables with safe defaults.
 
 A local model is still needed only for live response acceptance, not for repository CI. All household runtime commands are documented for PowerShell; Bash is not required.

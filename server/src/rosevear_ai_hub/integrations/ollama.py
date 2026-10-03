@@ -8,11 +8,19 @@ from typing import Any
 
 import httpx
 
-from rosevear_ai_hub.providers.base import ProviderRequestError, ProviderUnavailableError
+from rosevear_ai_hub.providers.base import (
+    ProviderRequestError,
+    ProviderTimeoutError,
+    ProviderUnavailableError,
+)
 
 
 class OllamaUnavailableError(ProviderUnavailableError):
     """Raised when the configured Ollama server cannot be reached."""
+
+
+class OllamaTimeoutError(ProviderTimeoutError):
+    """Raised when Ollama does not respond within the configured timeout."""
 
 
 class OllamaRequestError(ProviderRequestError):
@@ -111,6 +119,10 @@ class OllamaClient:
 
                         if payload.get("done") is True:
                             break
+        except httpx.TimeoutException as exc:
+            raise OllamaTimeoutError(
+                f"Ollama timed out after {self.generation_timeout_seconds:g} seconds."
+            ) from exc
         except httpx.RequestError as exc:
             raise OllamaUnavailableError(f"Unable to reach Ollama at {self.base_url}.") from exc
         except httpx.HTTPStatusError as exc:
@@ -149,6 +161,10 @@ class OllamaClient:
             ) as client:
                 response = await client.request(method, path, json=json)
                 response.raise_for_status()
+        except httpx.TimeoutException as exc:
+            raise OllamaTimeoutError(
+                f"Ollama timed out after {timeout_seconds:g} seconds."
+            ) from exc
         except httpx.RequestError as exc:
             raise OllamaUnavailableError(f"Unable to reach Ollama at {self.base_url}.") from exc
         except httpx.HTTPStatusError as exc:

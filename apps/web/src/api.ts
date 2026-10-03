@@ -41,9 +41,13 @@ export interface ProviderStatus {
   supports_tools: boolean;
   enabled: boolean;
   available: boolean;
+  degraded: boolean;
   message: string;
   version: string | null;
   model_count: number | null;
+  consecutive_failures: number;
+  retry_after_seconds: number;
+  last_error: string | null;
 }
 
 export interface ModelProfile {
@@ -80,11 +84,29 @@ export interface ChatMessage {
 }
 
 export type ChatStreamEvent =
-  | { type: "generation"; generation_id: string; provider: string }
+  | {
+      type: "generation";
+      generation_id: string;
+      provider: string;
+      assistant_message_id: number;
+    }
   | { type: "token"; content: string }
+  | {
+      type: "retrying";
+      provider: string;
+      attempt: number;
+      max_attempts: number;
+      message: string;
+    }
   | { type: "done"; message_id: number }
   | { type: "cancelled" }
-  | { type: "error"; message: string };
+  | {
+      type: "error";
+      message: string;
+      provider: string;
+      retryable: boolean;
+      retry_after_seconds: number;
+    };
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8765";
 

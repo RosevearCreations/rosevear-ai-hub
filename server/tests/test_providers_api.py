@@ -42,6 +42,11 @@ class HealthyProvider(AIProvider):
         yield "ok"
 
 
+class OfflineProvider(HealthyProvider):
+    async def health(self) -> ProviderHealth:
+        return ProviderHealth(available=False, message="Provider offline.")
+
+
 def test_provider_status_endpoint_returns_routing_metadata() -> None:
     application = create_app()
     application.dependency_overrides[get_provider_registry] = lambda: ProviderRegistry(
@@ -61,8 +66,28 @@ def test_provider_status_endpoint_returns_routing_metadata() -> None:
             "supports_tools": False,
             "enabled": True,
             "available": True,
+            "degraded": False,
             "message": "Ready.",
             "version": "1.2.3",
             "model_count": 2,
+            "consecutive_failures": 0,
+            "retry_after_seconds": 0,
+            "last_error": None,
         }
     ]
+
+
+def test_provider_status_reports_offline_state_without_failing_endpoint() -> None:
+    registry = ProviderRegistry([OfflineProvider()], offline_cooldown_seconds=30)
+    application = create_app()
+    application.dependency_overrides[get_provider_registry] = lambda: registry
+    client = TestClient(application)
+
+    response = client.get("/api/v1/models/providers")
+    assert response.status_code == 200
+    item = response.json()[0]
+    assert item["available"] is False
+    assert item["degraded"] is True
+    assert item["consecutive_failures"] == 1
+    assert item["last_error"] == "Provider offline."
+    assert item["retry_after_seconds"] > 0

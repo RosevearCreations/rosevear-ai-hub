@@ -1,7 +1,8 @@
-"""Conversation persistence and provider-neutral streaming chat API."""
+"""Reliable provider-neutral streaming chat API."""
 
 from __future__ import annotations
 
+import asyncio
 import json
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime
@@ -17,6 +18,7 @@ from rosevear_ai_hub.chat import (
     generation_registry,
     get_local_conversation,
     get_or_create_local_user,
+    recover_incomplete_messages,
 )
 from rosevear_ai_hub.database import get_session
 from rosevear_ai_hub.models import ChatMessage, Conversation, ModelProfile
@@ -83,6 +85,22 @@ def _require_provider(registry: ProviderRegistry, key: str):
         ) from exc
 
 
+def _persist_assistant_state(
+    bind: Engine,
+    message_id: int,
+    *,
+    content: str,
+    message_status: str,
+) -> None:
+    with Session(bind=bind, expire_on_commit=False) as stream_session:
+        assistant_message = stream_session.get(ChatMessage, message_id)
+        if assistant_message is None:
+            return
+        assistant_message.content = content
+        assistant_message.status = message_status
+        stream_session.commit()
+
+
 @router.get("/conversations", response_model=list[ConversationResponse])
 def list_conversations(session: SessionDependency) -> list[ConversationResponse]:
     user = get_or_create_local_user(session)
@@ -143,7 +161,12 @@ def list_messages(
     if conversation is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found.")
 
-    session.commit()
+    recovered = recover_incomplete_messages(session, conversation.id)
+    if recovered:
+        session.commit()
+    else:
+        session.commit()
+
     messages = session.scalars(
         select(ChatMessage)
         .where(ChatMessage.conversation_id == conversation.id)
@@ -181,6 +204,15 @@ async def stream_chat(
     )
     provider = _require_provider(registry, provider_key)
 
+    bind = session.get_bind()
+    if not isinstance(bind, Engine):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database engine unavailable.",
+        )
+
+    recover_incomplete_messages(session, conversation.id)
+
     conversation.provider = provider_key
     conversation.model = request.model
     conversation.profile_id = profile.id if profile is not None else None
@@ -194,8 +226,17 @@ async def stream_chat(
         model=None,
         status="complete",
     )
-    session.add(user_message)
+    assistant_message = ChatMessage(
+        conversation_id=conversation.id,
+        role="assistant",
+        content="",
+        provider=provider_key,
+        model=request.model,
+        status="pending",
+    )
+    session.add_all([user_message, assistant_message])
     session.commit()
+    session.refresh(assistant_message)
 
     history = session.scalars(
         select(ChatMessage)
@@ -213,17 +254,12 @@ async def stream_chat(
         if item.role in {"user", "assistant", "system"} and item.status == "complete"
     )
 
-    generation_id = generation_registry.start()
-    bind = session.get_bind()
-    if not isinstance(bind, Engine):
-        generation_registry.finish(generation_id)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Database engine unavailable.",
-        )
+    generation_id = generation_registry.start(conversation.id, assistant_message.id)
 
     async def generate() -> AsyncIterator[str]:
         chunks: list[str] = []
+        finalized = False
+
         try:
             yield (
                 json.dumps(
@@ -231,61 +267,182 @@ async def stream_chat(
                         "type": "generation",
                         "generation_id": generation_id,
                         "provider": provider_key,
+                        "assistant_message_id": assistant_message.id,
                     },
                     separators=(",", ":"),
                 )
                 + "\n"
             )
 
-            async for token in provider.stream_chat(request.model, provider_messages):
-                if generation_registry.is_cancelled(generation_id):
-                    yield json.dumps({"type": "cancelled"}, separators=(",", ":")) + "\n"
-                    return
-
-                chunks.append(token)
+            runtime = registry.runtime_state(provider_key)
+            if runtime.temporarily_offline:
+                message = runtime.last_error or f"{provider_key} is temporarily offline."
+                _persist_assistant_state(
+                    bind,
+                    assistant_message.id,
+                    content="",
+                    message_status="error",
+                )
+                finalized = True
                 yield (
                     json.dumps(
-                        {"type": "token", "content": token},
+                        {
+                            "type": "error",
+                            "message": message,
+                            "provider": provider_key,
+                            "retryable": True,
+                            "retry_after_seconds": runtime.retry_after_seconds,
+                        },
                         separators=(",", ":"),
                     )
                     + "\n"
                 )
-
-            if generation_registry.is_cancelled(generation_id):
-                yield json.dumps({"type": "cancelled"}, separators=(",", ":")) + "\n"
                 return
 
-            assistant_text = "".join(chunks)
-            with Session(bind=bind, expire_on_commit=False) as stream_session:
-                assistant_message = ChatMessage(
-                    conversation_id=conversation_id,
-                    role="assistant",
-                    content=assistant_text,
-                    provider=provider_key,
-                    model=request.model,
-                    status="complete",
-                )
-                stream_session.add(assistant_message)
-                stream_session.commit()
-                stream_session.refresh(assistant_message)
-                message_id = assistant_message.id
+            max_attempts = registry.generation_attempts
 
-            yield (
-                json.dumps(
-                    {"type": "done", "message_id": message_id},
-                    separators=(",", ":"),
-                )
-                + "\n"
-            )
-        except (ProviderUnavailableError, ProviderRequestError) as exc:
-            yield (
-                json.dumps(
-                    {"type": "error", "message": str(exc)},
-                    separators=(",", ":"),
-                )
-                + "\n"
-            )
+            for attempt in range(1, max_attempts + 1):
+                produced_token = False
+                try:
+                    if generation_registry.is_cancelled(generation_id):
+                        _persist_assistant_state(
+                            bind,
+                            assistant_message.id,
+                            content="".join(chunks),
+                            message_status="cancelled",
+                        )
+                        finalized = True
+                        yield (
+                            json.dumps(
+                                {"type": "cancelled"},
+                                separators=(",", ":"),
+                            )
+                            + "\n"
+                        )
+                        return
+
+                    async for token in provider.stream_chat(request.model, provider_messages):
+                        produced_token = True
+
+                        if generation_registry.is_cancelled(generation_id):
+                            _persist_assistant_state(
+                                bind,
+                                assistant_message.id,
+                                content="".join(chunks),
+                                message_status="cancelled",
+                            )
+                            finalized = True
+                            yield (
+                                json.dumps(
+                                    {"type": "cancelled"},
+                                    separators=(",", ":"),
+                                )
+                                + "\n"
+                            )
+                            return
+
+                        chunks.append(token)
+                        yield (
+                            json.dumps(
+                                {"type": "token", "content": token},
+                                separators=(",", ":"),
+                            )
+                            + "\n"
+                        )
+
+                    registry.mark_success(provider_key)
+                    _persist_assistant_state(
+                        bind,
+                        assistant_message.id,
+                        content="".join(chunks),
+                        message_status="complete",
+                    )
+                    finalized = True
+                    yield (
+                        json.dumps(
+                            {"type": "done", "message_id": assistant_message.id},
+                            separators=(",", ":"),
+                        )
+                        + "\n"
+                    )
+                    return
+                except ProviderUnavailableError as exc:
+                    can_retry = not produced_token and attempt < max_attempts
+                    if can_retry:
+                        yield (
+                            json.dumps(
+                                {
+                                    "type": "retrying",
+                                    "provider": provider_key,
+                                    "attempt": attempt + 1,
+                                    "max_attempts": max_attempts,
+                                    "message": str(exc),
+                                },
+                                separators=(",", ":"),
+                            )
+                            + "\n"
+                        )
+                        if registry.retry_delay_seconds:
+                            await asyncio.sleep(registry.retry_delay_seconds * attempt)
+                        continue
+
+                    registry.mark_unavailable(provider_key, str(exc))
+                    _persist_assistant_state(
+                        bind,
+                        assistant_message.id,
+                        content="".join(chunks),
+                        message_status="error",
+                    )
+                    finalized = True
+                    runtime = registry.runtime_state(provider_key)
+                    yield (
+                        json.dumps(
+                            {
+                                "type": "error",
+                                "message": str(exc),
+                                "provider": provider_key,
+                                "retryable": not produced_token,
+                                "retry_after_seconds": runtime.retry_after_seconds,
+                            },
+                            separators=(",", ":"),
+                        )
+                        + "\n"
+                    )
+                    return
+                except ProviderRequestError as exc:
+                    _persist_assistant_state(
+                        bind,
+                        assistant_message.id,
+                        content="".join(chunks),
+                        message_status="error",
+                    )
+                    finalized = True
+                    yield (
+                        json.dumps(
+                            {
+                                "type": "error",
+                                "message": str(exc),
+                                "provider": provider_key,
+                                "retryable": False,
+                                "retry_after_seconds": 0,
+                            },
+                            separators=(",", ":"),
+                        )
+                        + "\n"
+                    )
+                    return
         finally:
+            if not finalized:
+                _persist_assistant_state(
+                    bind,
+                    assistant_message.id,
+                    content="".join(chunks),
+                    message_status=(
+                        "cancelled"
+                        if generation_registry.is_cancelled(generation_id)
+                        else "interrupted"
+                    ),
+                )
             generation_registry.finish(generation_id)
 
     return StreamingResponse(

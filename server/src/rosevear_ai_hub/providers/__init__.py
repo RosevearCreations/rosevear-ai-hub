@@ -6,6 +6,7 @@ from rosevear_ai_hub.providers.base import (
     ProviderError,
     ProviderHealth,
     ProviderRequestError,
+    ProviderTimeoutError,
     ProviderUnavailableError,
 )
 
@@ -15,5 +16,6 @@ __all__ = [
     "ProviderError",
     "ProviderHealth",
     "ProviderRequestError",
+    "ProviderTimeoutError",
     "ProviderUnavailableError",
 ]
