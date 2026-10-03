@@ -6,6 +6,7 @@ import {
   type HealthResponse,
   type OllamaStatusResponse,
 } from "./api";
+import { ChatView } from "./ChatView";
 
 type HealthState =
   | { kind: "loading" }
@@ -18,10 +19,12 @@ type OllamaState =
   | { kind: "offline"; message: string };
 
 const sections = ["Home", "Chat", "Knowledge", "Devices", "System"] as const;
+type Section = (typeof sections)[number];
 
 export function App() {
   const [health, setHealth] = useState<HealthState>({ kind: "loading" });
   const [ollama, setOllama] = useState<OllamaState>({ kind: "loading" });
+  const [section, setSection] = useState<Section>("Home");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -76,14 +79,15 @@ export function App() {
 
         <nav aria-label="Primary navigation">
           <ul>
-            {sections.map((section, index) => (
-              <li key={section}>
+            {sections.map((item) => (
+              <li key={item}>
                 <button
-                  className={index === 0 ? "nav-item active" : "nav-item"}
+                  className={item === section ? "nav-item active" : "nav-item"}
                   type="button"
-                  aria-current={index === 0 ? "page" : undefined}
+                  aria-current={item === section ? "page" : undefined}
+                  onClick={() => setSection(item)}
                 >
-                  {section}
+                  {item}
                 </button>
               </li>
             ))}
@@ -92,44 +96,64 @@ export function App() {
       </aside>
 
       <main id="main-content" className="content" tabIndex={-1}>
-        <header className="page-header">
-          <div>
-            <p className="eyebrow">Build 006</p>
-            <h1>Home</h1>
-            <p className="lede">
-              One private interface for AI, household systems, workshop knowledge,
-              cameras, and business integrations.
-            </p>
-          </div>
-          <SystemHealth health={health} />
-        </header>
-
-        <section className="dashboard-grid" aria-label="Hub overview">
-          <article className="panel">
-            <h2>Local AI</h2>
-            <OllamaHealth ollama={ollama} />
-            <button type="button" disabled>
-              Start chat
-            </button>
-          </article>
-
-          <article className="panel">
-            <h2>Knowledge</h2>
-            <p>Private document indexing and cited answers arrive in Builds 011–015.</p>
-          </article>
-
-          <article className="panel">
-            <h2>Home &amp; Workshop</h2>
-            <p>Home Assistant and MQTT controls arrive in Builds 021–025.</p>
-          </article>
-
-          <article className="panel">
-            <h2>Cameras</h2>
-            <p>ONVIF, RTSP, and optional Frigate support arrive in Builds 031–035.</p>
-          </article>
-        </section>
+        {section === "Chat" ? (
+          <ChatView />
+        ) : (
+          <HomeView health={health} ollama={ollama} onOpenChat={() => setSection("Chat")} />
+        )}
       </main>
     </div>
+  );
+}
+
+function HomeView({
+  health,
+  ollama,
+  onOpenChat,
+}: {
+  health: HealthState;
+  ollama: OllamaState;
+  onOpenChat: () => void;
+}) {
+  return (
+    <>
+      <header className="page-header">
+        <div>
+          <p className="eyebrow">Build 007</p>
+          <h1>Home</h1>
+          <p className="lede">
+            One private interface for AI, household systems, workshop knowledge,
+            cameras, and business integrations.
+          </p>
+        </div>
+        <SystemHealth health={health} />
+      </header>
+
+      <section className="dashboard-grid" aria-label="Hub overview">
+        <article className="panel">
+          <h2>Local AI</h2>
+          <OllamaHealth ollama={ollama} />
+          <button type="button" onClick={onOpenChat}>
+            Open chat
+          </button>
+        </article>
+
+        <article className="panel">
+          <h2>Knowledge</h2>
+          <p>Private document indexing and cited answers arrive in Builds 011–015.</p>
+        </article>
+
+        <article className="panel">
+          <h2>Home &amp; Workshop</h2>
+          <p>Home Assistant and MQTT controls arrive in Builds 021–025.</p>
+        </article>
+
+        <article className="panel">
+          <h2>Cameras</h2>
+          <p>ONVIF, RTSP, and optional Frigate support arrive in Builds 031–035.</p>
+        </article>
+      </section>
+    </>
   );
 }
 
@@ -158,7 +182,7 @@ function OllamaHealth({ ollama }: { ollama: OllamaState }) {
       {ollama.data.model_count === 0 ? (
         <small>Runtime is ready; no local models are installed yet.</small>
       ) : (
-        <small>Model discovery is ready for chat setup.</small>
+        <small>Local streaming chat is available.</small>
       )}
     </div>
   );
