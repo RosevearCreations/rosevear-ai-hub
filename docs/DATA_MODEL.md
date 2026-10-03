@@ -65,6 +65,8 @@ Build 008 seeds five built-in local-only profiles:
 - local_only
 - created_at
 
+Build 011 seeds a local-only `Inbox` collection. Collection administration arrives in Build 015.
+
 ## documents
 - id
 - collection_id
@@ -72,9 +74,16 @@ Build 008 seeds five built-in local-only profiles:
 - content_hash
 - mime_type
 - source_path
+- size_bytes
+- extracted_text
+- metadata_json
 - status
 - created_at
 - indexed_at
+
+Build 011 stores originals using a SHA-256 content-addressed path under the local knowledge storage directory. `content_hash` is unique and is the duplicate-detection key. `source_path` is relative to the configured knowledge root rather than an absolute host path.
+
+`metadata_json` stores format-specific ingestion metadata such as page count, extracted character count, DOCX paragraph/table counts, and whether PDF text was available.
 
 ## chunks
 - id
@@ -83,6 +92,8 @@ Build 008 seeds five built-in local-only profiles:
 - text
 - citation_metadata
 - embedding_reference
+
+Build 012 creates and populates chunks/embeddings.
 
 ## integrations
 - id
@@ -147,8 +158,8 @@ Build 008 seeds five built-in local-only profiles:
 - last_health_at
 
 ## design rule
-Business-domain entities are not copied into the Hub as authoritative records. Store references/cache metadata only when necessary.
 
+Business-domain entities are not copied into the Hub as authoritative records. Store references/cache metadata only when necessary.
 
 ## provider routing note
 
