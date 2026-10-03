@@ -18,6 +18,15 @@ async def list_providers(registry: ProviderRegistryDependency) -> list[ProviderS
     for provider in registry.list():
         descriptor = provider.descriptor
         health = await provider.health()
+
+        if health.available:
+            registry.mark_success(descriptor.key)
+        else:
+            registry.mark_unavailable(descriptor.key, health.message)
+
+        runtime = registry.runtime_state(descriptor.key)
+        available = health.available and not runtime.temporarily_offline
+
         responses.append(
             ProviderStatusResponse(
                 key=descriptor.key,
@@ -27,10 +36,14 @@ async def list_providers(registry: ProviderRegistryDependency) -> list[ProviderS
                 supports_streaming=descriptor.supports_streaming,
                 supports_tools=descriptor.supports_tools,
                 enabled=descriptor.enabled,
-                available=health.available,
+                available=available,
+                degraded=not available or runtime.consecutive_failures > 0,
                 message=health.message,
                 version=health.version,
                 model_count=health.model_count,
+                consecutive_failures=runtime.consecutive_failures,
+                retry_after_seconds=runtime.retry_after_seconds,
+                last_error=runtime.last_error,
             )
         )
 

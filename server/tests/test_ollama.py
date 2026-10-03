@@ -1,7 +1,11 @@
 import httpx
 import pytest
 
-from rosevear_ai_hub.integrations.ollama import OllamaClient, OllamaUnavailableError
+from rosevear_ai_hub.integrations.ollama import (
+    OllamaClient,
+    OllamaTimeoutError,
+    OllamaUnavailableError,
+)
 
 
 def mock_transport(request: httpx.Request) -> httpx.Response:
@@ -86,4 +90,19 @@ async def test_ollama_client_reports_connection_failure() -> None:
     )
 
     with pytest.raises(OllamaUnavailableError, match="Unable to reach Ollama"):
+        await client.version()
+
+
+@pytest.mark.asyncio
+async def test_ollama_client_reports_timeout_separately() -> None:
+    def timeout_transport(request: httpx.Request) -> httpx.Response:
+        raise httpx.ReadTimeout("slow", request=request)
+
+    client = OllamaClient(
+        "http://ollama.test",
+        timeout_seconds=1,
+        transport=httpx.MockTransport(timeout_transport),
+    )
+
+    with pytest.raises(OllamaTimeoutError, match="timed out after 1 seconds"):
         await client.version()

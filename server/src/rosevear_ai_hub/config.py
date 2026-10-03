@@ -39,6 +39,24 @@ class Settings(BaseSettings):
         gt=0,
         alias="OLLAMA_GENERATION_TIMEOUT_SECONDS",
     )
+    provider_generation_attempts: int = Field(
+        default=2,
+        ge=1,
+        le=5,
+        alias="PROVIDER_GENERATION_ATTEMPTS",
+    )
+    provider_retry_delay_seconds: float = Field(
+        default=0.35,
+        ge=0,
+        le=10,
+        alias="PROVIDER_RETRY_DELAY_SECONDS",
+    )
+    provider_offline_cooldown_seconds: float = Field(
+        default=5.0,
+        ge=0,
+        le=300,
+        alias="PROVIDER_OFFLINE_COOLDOWN_SECONDS",
+    )
     cors_allowed_origins: list[str] = Field(
         default_factory=lambda: [
             "http://127.0.0.1:5173",

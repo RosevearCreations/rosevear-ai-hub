@@ -59,3 +59,27 @@ def test_registry_rejects_unknown_or_disabled_provider() -> None:
 
     with pytest.raises(ProviderRequestError, match="Unknown or disabled"):
         registry.get("disabled")
+
+
+def test_registry_tracks_temporary_offline_state_and_recovers() -> None:
+    now = [100.0]
+    registry = ProviderRegistry(
+        [StubProvider("alpha")],
+        offline_cooldown_seconds=5,
+        time_source=lambda: now[0],
+    )
+
+    registry.mark_unavailable("alpha", "offline")
+    state = registry.runtime_state("alpha")
+    assert state.temporarily_offline is True
+    assert state.consecutive_failures == 1
+    assert state.last_error == "offline"
+    assert state.retry_after_seconds == 5
+
+    now[0] = 106.0
+    assert registry.runtime_state("alpha").temporarily_offline is False
+
+    registry.mark_success("alpha")
+    recovered = registry.runtime_state("alpha")
+    assert recovered.consecutive_failures == 0
+    assert recovered.last_error is None
