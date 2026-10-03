@@ -156,3 +156,23 @@ class KnowledgeDocumentResponse(BaseModel):
 class KnowledgeUploadResponse(BaseModel):
     document: KnowledgeDocumentResponse
     duplicate: bool
+
+
+class KnowledgeChunkResponse(BaseModel):
+    id: int
+    document_id: int
+    ordinal: int
+    text: str
+    start_char: int
+    end_char: int
+    citation_metadata: dict[str, int | str]
+    embedding_reference: str | None
+
+
+class KnowledgeIndexResponse(BaseModel):
+    document_id: int
+    status: str
+    chunk_count: int
+    embedding_provider: str
+    embedding_model: str
+    dimensions: int | None
