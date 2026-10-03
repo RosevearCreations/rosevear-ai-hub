@@ -7,6 +7,7 @@ import {
   type OllamaStatusResponse,
 } from "./api";
 import { ChatView } from "./ChatView";
+import { KnowledgeView } from "./KnowledgeView";
 
 type HealthState =
   | { kind: "loading" }
@@ -98,8 +99,15 @@ export function App() {
       <main id="main-content" className="content" tabIndex={-1}>
         {section === "Chat" ? (
           <ChatView />
+        ) : section === "Knowledge" ? (
+          <KnowledgeView />
         ) : (
-          <HomeView health={health} ollama={ollama} onOpenChat={() => setSection("Chat")} />
+          <HomeView
+            health={health}
+            ollama={ollama}
+            onOpenChat={() => setSection("Chat")}
+            onOpenKnowledge={() => setSection("Knowledge")}
+          />
         )}
       </main>
     </div>
@@ -110,16 +118,18 @@ function HomeView({
   health,
   ollama,
   onOpenChat,
+  onOpenKnowledge,
 }: {
   health: HealthState;
   ollama: OllamaState;
   onOpenChat: () => void;
+  onOpenKnowledge: () => void;
 }) {
   return (
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 008</p>
+          <p className="eyebrow">Build 011</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -141,7 +151,10 @@ function HomeView({
 
         <article className="panel">
           <h2>Knowledge</h2>
-          <p>Private document indexing and cited answers arrive in Builds 011–015.</p>
+          <p>PDF, TXT, Markdown, and DOCX local ingestion is now available.</p>
+          <button type="button" onClick={onOpenKnowledge}>
+            Open knowledge
+          </button>
         </article>
 
         <article className="panel">
