@@ -260,9 +260,7 @@ def test_abandoned_pending_message_recovers_as_interrupted(tmp_path) -> None:
         )
         session.commit()
 
-    messages = client.get(
-        f"/api/v1/chat/conversations/{conversation_id}/messages"
-    ).json()
+    messages = client.get(f"/api/v1/chat/conversations/{conversation_id}/messages").json()
     assert messages[-1]["content"] == "partial"
     assert messages[-1]["status"] == "interrupted"
 
