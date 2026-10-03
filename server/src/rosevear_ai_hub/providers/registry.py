@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from functools import lru_cache
 from time import monotonic
-from typing import Callable
 
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.integrations.ollama import OllamaClient
