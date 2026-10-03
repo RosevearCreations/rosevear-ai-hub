@@ -51,10 +51,7 @@ class ProviderRegistry:
         self.retry_delay_seconds = max(0.0, retry_delay_seconds)
         self.offline_cooldown_seconds = max(0.0, offline_cooldown_seconds)
         self._time_source = time_source
-        self._runtime = {
-            key: _MutableProviderRuntimeState()
-            for key in self._providers
-        }
+        self._runtime = {key: _MutableProviderRuntimeState() for key in self._providers}
 
     def list(self) -> list[AIProvider]:
         return sorted(self._providers.values(), key=lambda item: item.descriptor.key)
