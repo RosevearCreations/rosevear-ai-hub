@@ -301,6 +301,15 @@ export interface KnowledgeUploadResponse {
   duplicate: boolean;
 }
 
+export interface KnowledgeIndexResponse {
+  document_id: number;
+  status: string;
+  chunk_count: number;
+  embedding_provider: string;
+  embedding_model: string;
+  dimensions: number | null;
+}
+
 export function getKnowledgeCollections(
   signal?: AbortSignal,
 ): Promise<KnowledgeCollection[]> {
@@ -347,3 +356,34 @@ export async function uploadKnowledgeDocument(
   return (await response.json()) as KnowledgeUploadResponse;
 }
 
+
+export async function indexKnowledgeDocument(
+  documentId: number,
+  signal?: AbortSignal,
+): Promise<KnowledgeIndexResponse> {
+  const response = await fetch(
+    API_BASE_URL + `/api/v1/knowledge/documents/${documentId}/index`,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+      signal,
+    },
+  );
+
+  if (!response.ok) {
+    let detail = "Indexing failed with status " + response.status;
+    try {
+      const payload = (await response.json()) as { detail?: string };
+      if (payload.detail) {
+        detail = payload.detail;
+      }
+    } catch {
+      // Keep the HTTP status fallback when the server did not return JSON.
+    }
+    throw new Error(detail);
+  }
+
+  return (await response.json()) as KnowledgeIndexResponse;
+}
