@@ -1,5 +1,6 @@
-"""Public API response schemas."""
+"""Public API request and response schemas."""
 
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -57,3 +58,36 @@ class OllamaTestResponse(BaseModel):
     response: str
     total_duration_ns: int | None = None
     eval_count: int | None = None
+
+
+class ConversationCreateRequest(BaseModel):
+    title: str = Field(default="New conversation", min_length=1, max_length=255)
+    model: str | None = Field(default=None, max_length=255)
+
+
+class ConversationResponse(BaseModel):
+    id: int
+    title: str
+    model: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ChatMessageResponse(BaseModel):
+    id: int
+    conversation_id: int
+    role: Literal["user", "assistant", "system"]
+    content: str
+    model: str | None
+    status: str
+    created_at: datetime
+
+
+class ChatStreamRequest(BaseModel):
+    model: str = Field(min_length=1, max_length=255)
+    prompt: str = Field(min_length=1, max_length=20000)
+
+
+class CancelGenerationResponse(BaseModel):
+    generation_id: str
+    cancelled: bool

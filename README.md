@@ -76,9 +76,10 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 005 — Tauri Desktop Shell**
 
 - **Build 006 — Ollama Discovery**
+- **Build 007 — Streaming Chat**
 
 ## Next build
 
-**Build 007 — Streaming Chat**
+**Build 008 — Model Profiles**
 
 The first functional MVP boundary is **Build 025**.
