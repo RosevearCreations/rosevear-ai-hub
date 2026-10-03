@@ -75,9 +75,10 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 006 — Ollama Discovery**
 - **Build 007 — Streaming Chat**
 - **Build 008 — Model Profiles**
+- **Build 009 — Provider Abstraction**
 
-## Current build
+## Next build
 
-**Build 009 — Provider Abstraction**
+**Build 010 — Chat Reliability**
 
 The first functional MVP boundary is **Build 025**.

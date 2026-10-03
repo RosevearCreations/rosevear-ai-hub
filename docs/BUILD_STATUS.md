@@ -12,11 +12,11 @@ This file records completed and active builds. The roadmap remains authoritative
 | 006 | Ollama Discovery | COMPLETE | main via PR #6 |
 | 007 | Streaming Chat | COMPLETE | main via PR #7 |
 | 008 | Model Profiles | COMPLETE | main via PR #8 |
-| 009 | Provider Abstraction | IN PROGRESS | dev |
+| 009 | Provider Abstraction | COMPLETE | main via PR #9 |
 
 ## Completed foundation
 
-Builds 001–008 established the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, Ollama discovery, persistent token-streaming local chat, and built-in model profiles.
+Builds 001–009 establish the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, Ollama discovery, persistent token-streaming local chat, model profiles, and provider-neutral AI routing.
 
 ## Build 009 acceptance checklist
 
@@ -36,8 +36,9 @@ Builds 001–008 established the documented repository, FastAPI backend, SQLite/
 - [x] migration for provider routing metadata
 - [x] provider, chat, migration, and UI tests
 - [x] no cloud credentials or hosted AI service required
-- [ ] Build 009 CI green
-- [ ] promoted to main
+- [x] Build 009 dev CI green
+- [x] ready for promotion to main
+- [ ] post-merge main CI green
 - [ ] dev synchronized with main
 
 ## External setup
