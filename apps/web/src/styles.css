@@ -478,3 +478,134 @@ h1 {
     animation-iteration-count: 1 !important;
   }
 }
+
+
+.knowledge-view {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.knowledge-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+  gap: 1rem;
+}
+
+.knowledge-upload {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.knowledge-upload label {
+  display: grid;
+  gap: 0.4rem;
+  font-weight: 700;
+}
+
+.knowledge-upload input,
+.knowledge-upload select {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #a3a3a3;
+  border-radius: 0.6rem;
+  background: white;
+  color: #171717;
+}
+
+.knowledge-upload small {
+  color: #525252;
+}
+
+.knowledge-notice {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid #a3a3a3;
+  border-radius: 0.65rem;
+  background: white;
+}
+
+.knowledge-library {
+  display: grid;
+  gap: 1rem;
+}
+
+.knowledge-library-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.knowledge-library-header h2,
+.knowledge-library-header p {
+  margin: 0;
+}
+
+.knowledge-library-header p {
+  margin-top: 0.35rem;
+  color: #525252;
+}
+
+.knowledge-document-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.knowledge-document {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.25fr) minmax(360px, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 0.8rem;
+  background: white;
+}
+
+.knowledge-document strong,
+.knowledge-document small {
+  display: block;
+}
+
+.knowledge-document small {
+  margin-top: 0.25rem;
+  color: #525252;
+}
+
+.knowledge-document dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.knowledge-document dl div {
+  min-width: 0;
+}
+
+.knowledge-document dt {
+  color: #737373;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.knowledge-document dd {
+  margin: 0.2rem 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1000px) {
+  .knowledge-grid,
+  .knowledge-document {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .knowledge-document dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

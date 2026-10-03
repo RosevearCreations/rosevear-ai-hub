@@ -32,7 +32,26 @@ The Hub handles private data and can affect physical devices. Assume:
 - never redisplay full saved secrets
 - support rotation
 
+## Knowledge-file ingestion
+
+Uploaded knowledge files are untrusted input.
+
+Build 011 therefore:
+- accepts only PDF, TXT, Markdown, and DOCX
+- normalizes filenames and never trusts client paths
+- limits upload size before full processing
+- validates PDF/DOCX structure
+- rejects encrypted PDFs
+- limits expanded DOCX archive size
+- never executes macros or embedded programs
+- stores originals under content-addressed local paths
+- exposes relative storage paths rather than absolute host paths
+- uses SHA-256 duplicate detection
+
+A successful parse means only that the file could be read. It does **not** make the document trustworthy.
+
 ## Prompt injection
+
 Retrieved content is untrusted data.
 
 Content found in a document, camera metadata, webpage, or business record must never be allowed to:
@@ -43,6 +62,7 @@ Content found in a document, camera metadata, webpage, or business record must n
 - bypass confirmation
 
 ## High-risk physical actions
+
 The AI must not autonomously:
 - unlock exterior doors
 - disarm security
@@ -54,6 +74,7 @@ The AI must not autonomously:
 Future support for such equipment requires dedicated non-AI interlocks.
 
 ## Audit
+
 All state-changing tool actions record:
 - actor
 - requested action

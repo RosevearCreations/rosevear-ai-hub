@@ -272,3 +272,78 @@ export function cancelGeneration(
     signal,
   );
 }
+
+export interface KnowledgeCollection {
+  id: number;
+  name: string;
+  description: string | null;
+  local_only: boolean;
+  created_at: string;
+}
+
+export interface KnowledgeDocument {
+  id: number;
+  collection_id: number;
+  filename: string;
+  content_hash: string;
+  mime_type: string;
+  source_path: string;
+  size_bytes: number;
+  status: string;
+  extracted_characters: number;
+  page_count: number | null;
+  created_at: string;
+  indexed_at: string | null;
+}
+
+export interface KnowledgeUploadResponse {
+  document: KnowledgeDocument;
+  duplicate: boolean;
+}
+
+export function getKnowledgeCollections(
+  signal?: AbortSignal,
+): Promise<KnowledgeCollection[]> {
+  return getJson<KnowledgeCollection[]>("/api/v1/knowledge/collections", signal);
+}
+
+export function getKnowledgeDocuments(
+  signal?: AbortSignal,
+): Promise<KnowledgeDocument[]> {
+  return getJson<KnowledgeDocument[]>("/api/v1/knowledge/documents", signal);
+}
+
+export async function uploadKnowledgeDocument(
+  file: File,
+  collectionId: number,
+  signal?: AbortSignal,
+): Promise<KnowledgeUploadResponse> {
+  const body = new FormData();
+  body.append("file", file);
+  body.append("collection_id", String(collectionId));
+
+  const response = await fetch(API_BASE_URL + "/api/v1/knowledge/documents", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+    body,
+    signal,
+  });
+
+  if (!response.ok) {
+    let detail = "Upload failed with status " + response.status;
+    try {
+      const payload = (await response.json()) as { detail?: string };
+      if (payload.detail) {
+        detail = payload.detail;
+      }
+    } catch {
+      // Keep the HTTP status fallback when the server did not return JSON.
+    }
+    throw new Error(detail);
+  }
+
+  return (await response.json()) as KnowledgeUploadResponse;
+}
+

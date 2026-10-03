@@ -128,3 +128,31 @@ class ChatStreamRequest(BaseModel):
 class CancelGenerationResponse(BaseModel):
     generation_id: str
     cancelled: bool
+
+
+class KnowledgeCollectionResponse(BaseModel):
+    id: int
+    name: str
+    description: str | None
+    local_only: bool
+    created_at: datetime
+
+
+class KnowledgeDocumentResponse(BaseModel):
+    id: int
+    collection_id: int
+    filename: str
+    content_hash: str
+    mime_type: str
+    source_path: str
+    size_bytes: int
+    status: str
+    extracted_characters: int
+    page_count: int | None
+    created_at: datetime
+    indexed_at: datetime | None
+
+
+class KnowledgeUploadResponse(BaseModel):
+    document: KnowledgeDocumentResponse
+    duplicate: bool

@@ -108,6 +108,50 @@ class ChatMessage(Base):
     )
 
 
+class KnowledgeCollection(Base):
+    """Local knowledge collection; administration UI arrives in Build 015."""
+
+    __tablename__ = "knowledge_collections"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    local_only: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.current_timestamp(),
+        nullable=False,
+    )
+
+
+class KnowledgeDocument(Base):
+    """Original ingested document plus extracted text and source metadata."""
+
+    __tablename__ = "documents"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    collection_id: Mapped[int] = mapped_column(
+        ForeignKey("knowledge_collections.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    content_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    mime_type: Mapped[str] = mapped_column(String(128), nullable=False)
+    source_path: Mapped[str] = mapped_column(String(512), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    extracted_text: Mapped[str] = mapped_column(Text, nullable=False)
+    metadata_json: Mapped[Any] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="ingested")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.current_timestamp(),
+        nullable=False,
+        index=True,
+    )
+    indexed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class AuditEvent(Base):
     """Immutable audit record for significant application actions."""
 

@@ -1,6 +1,7 @@
 """Application configuration loaded from environment variables."""
 
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -24,6 +25,20 @@ class Settings(BaseSettings):
     database_url: str = Field(
         default="sqlite:///./data/rosevear_ai_hub.db",
         alias="DATABASE_URL",
+    )
+    knowledge_storage_dir: Path = Field(
+        default=Path("./data/knowledge"),
+        alias="KNOWLEDGE_STORAGE_DIR",
+    )
+    knowledge_max_upload_bytes: int = Field(
+        default=25 * 1024 * 1024,
+        gt=0,
+        alias="KNOWLEDGE_MAX_UPLOAD_BYTES",
+    )
+    knowledge_max_expanded_docx_bytes: int = Field(
+        default=100 * 1024 * 1024,
+        gt=0,
+        alias="KNOWLEDGE_MAX_EXPANDED_DOCX_BYTES",
     )
     ollama_base_url: str = Field(
         default="http://127.0.0.1:11434",

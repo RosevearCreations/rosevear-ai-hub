@@ -78,7 +78,7 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 009 — Provider Abstraction**
 - **Build 010 — Chat Reliability**
 
-## Next build
+## Current build
 
 **Build 011 — File Ingestion**
 
