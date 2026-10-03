@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -123,6 +123,7 @@ def get_document(document_id: int, session: SessionDependency) -> KnowledgeDocum
 async def ingest_document(
     session: SessionDependency,
     ingestion: IngestionDependency,
+    response: Response,
     file: Annotated[UploadFile, File(...)],
     collection_id: Annotated[int, Form(ge=1)] = 1,
 ) -> KnowledgeUploadResponse:
@@ -151,6 +152,7 @@ async def ingest_document(
         )
     )
     if duplicate is not None:
+        response.status_code = status.HTTP_200_OK
         return KnowledgeUploadResponse(
             document=_document_response(duplicate),
             duplicate=True,

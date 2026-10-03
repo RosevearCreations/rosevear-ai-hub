@@ -26,20 +26,37 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "audit_events",
         "chat_messages",
         "conversations",
+        "documents",
+        "knowledge_collections",
         "model_profiles",
         "users",
     }.issubset(tables)
 
     conversation_columns = {column["name"] for column in inspector.get_columns("conversations")}
     message_columns = {column["name"] for column in inspector.get_columns("chat_messages")}
+    document_columns = {column["name"] for column in inspector.get_columns("documents")}
     assert {"model", "provider"}.issubset(conversation_columns)
     assert {"model", "provider"}.issubset(message_columns)
+    assert {
+        "collection_id",
+        "content_hash",
+        "source_path",
+        "extracted_text",
+        "metadata_json",
+        "status",
+    }.issubset(document_columns)
 
     with test_engine.connect() as connection:
         profile_names = (
             connection.execute(text("SELECT name FROM model_profiles ORDER BY id")).scalars().all()
         )
+        collection_names = (
+            connection.execute(text("SELECT name FROM knowledge_collections ORDER BY id"))
+            .scalars()
+            .all()
+        )
     assert profile_names == ["General", "Coding", "Home", "Workshop", "Business"]
+    assert collection_names == ["Inbox"]
 
 
 def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
@@ -56,4 +73,6 @@ def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
     assert "conversations" not in tables
     assert "chat_messages" not in tables
     assert "model_profiles" not in tables
+    assert "documents" not in tables
+    assert "knowledge_collections" not in tables
     assert "audit_events" not in tables
