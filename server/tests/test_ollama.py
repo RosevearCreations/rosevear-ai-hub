@@ -42,6 +42,14 @@ def mock_transport(request: httpx.Request) -> httpx.Response:
                 "eval_count": 1,
             },
         )
+    if request.url.path == "/api/embed":
+        return httpx.Response(
+            200,
+            json={
+                "model": "test-embed",
+                "embeddings": [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]],
+            },
+        )
     if request.url.path == "/api/chat":
         return httpx.Response(
             200,
@@ -68,6 +76,9 @@ async def test_ollama_client_discovers_models_tests_and_streams() -> None:
 
     result = await client.test_model("test-model:latest")
     assert result["response"] == "OK"
+
+    embeddings = await client.embed("test-embed", ["alpha", "beta"])
+    assert embeddings == [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
 
     chunks = [
         chunk
