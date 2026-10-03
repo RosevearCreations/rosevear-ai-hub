@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from rosevear_ai_hub import __version__
 from rosevear_ai_hub.api.chat import router as chat_router
+from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
 from rosevear_ai_hub.api.providers import router as providers_router
@@ -61,6 +62,7 @@ def create_app() -> FastAPI:
     application.include_router(providers_router)
     application.include_router(profiles_router)
     application.include_router(chat_router)
+    application.include_router(knowledge_router)
     return application
 
 
