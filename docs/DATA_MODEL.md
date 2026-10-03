@@ -85,15 +85,29 @@ Build 011 stores originals using a SHA-256 content-addressed path under the loca
 
 `metadata_json` stores format-specific ingestion metadata such as page count, extracted character count, DOCX paragraph/table counts, and whether PDF text was available.
 
-## chunks
+## document_chunks
 - id
 - document_id
 - ordinal
 - text
+- start_char
+- end_char
 - citation_metadata
 - embedding_reference
+- created_at
 
-Build 012 creates and populates chunks/embeddings.
+Build 012 chunks extracted document text deterministically using configurable character windows and overlap. Character offsets are retained for later citation work.
+
+## chunk_embeddings
+- id
+- chunk_id
+- provider
+- model
+- dimensions
+- vector_json
+- created_at
+
+Build 012 stores embeddings behind a vector-store abstraction. The initial SQLite deployment uses JSON vectors through SQLAlchemy and stores a stable embedding reference on each chunk. This can later be replaced by pgvector or another vector backend without changing the document/chunk API.
 
 ## integrations
 - id

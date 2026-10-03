@@ -3,9 +3,11 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   getKnowledgeCollections,
   getKnowledgeDocuments,
+  indexKnowledgeDocument,
   uploadKnowledgeDocument,
   type KnowledgeCollection,
   type KnowledgeDocument,
+  type KnowledgeIndexResponse,
 } from "./api";
 
 const SUPPORTED_FILE_TYPES = ".pdf,.txt,.md,.docx";
@@ -17,6 +19,10 @@ export function KnowledgeView() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [indexingId, setIndexingId] = useState<number | null>(null);
+  const [indexResults, setIndexResults] = useState<Map<number, KnowledgeIndexResponse>>(
+    new Map(),
+  );
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
@@ -49,6 +55,11 @@ export function KnowledgeView() {
     () => new Map(collections.map((collection) => [collection.id, collection])),
     [collections],
   );
+
+  async function refreshDocuments() {
+    const refreshed = await getKnowledgeDocuments();
+    setDocuments(refreshed);
+  }
 
   async function submitUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -86,21 +97,60 @@ export function KnowledgeView() {
     }
   }
 
+  async function indexDocument(document: KnowledgeDocument) {
+    if (indexingId !== null) {
+      return;
+    }
+
+    setIndexingId(document.id);
+    setError("");
+    setNotice("");
+
+    try {
+      const result = await indexKnowledgeDocument(document.id);
+      setIndexResults((current) => {
+        const next = new Map(current);
+        next.set(document.id, result);
+        return next;
+      });
+      await refreshDocuments();
+
+      if (result.status === "no_text") {
+        setNotice(
+          `${document.filename} has no extractable text, so no embeddings were created.`,
+        );
+      } else {
+        setNotice(
+          `${document.filename} indexed into ${result.chunk_count} chunk${result.chunk_count === 1 ? "" : "s"} using ${result.embedding_model}.`,
+        );
+      }
+    } catch (caught: unknown) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Local document indexing failed.",
+      );
+      await refreshDocuments().catch(() => undefined);
+    } finally {
+      setIndexingId(null);
+    }
+  }
+
   return (
-    <section className="knowledge-view" aria-label="Knowledge ingestion">
+    <section className="knowledge-view" aria-label="Knowledge ingestion and indexing">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 011</p>
+          <p className="eyebrow">Build 012</p>
           <h1>Knowledge</h1>
           <p className="lede">
-            Add private local documents now. Chunking, embeddings, retrieval, and cited answers
-            arrive in Builds 012–014.
+            Add private local documents, split them into configurable chunks, and create
+            local embeddings through Ollama.
           </p>
         </div>
         <div className="health-card" role="status">
           <span className="status-dot online" aria-hidden="true" />
           <span>
-            Local-only intake
+            Local knowledge
             <small>{documents.length} document{documents.length === 1 ? "" : "s"}</small>
           </span>
         </div>
@@ -110,8 +160,8 @@ export function KnowledgeView() {
         <form className="panel knowledge-upload" onSubmit={(event) => void submitUpload(event)}>
           <h2>Ingest a file</h2>
           <p>
-            Supported: PDF, TXT, Markdown, and DOCX. Originals are stored locally and duplicate
-            content is detected by SHA-256 hash.
+            Supported: PDF, TXT, Markdown, and DOCX. Originals remain local and duplicate
+            content is detected by SHA-256.
           </p>
 
           <label>
@@ -153,14 +203,14 @@ export function KnowledgeView() {
         </form>
 
         <article className="panel">
-          <h2>What happens now</h2>
+          <h2>Local indexing</h2>
           <p>
-            The Hub validates the type, extracts readable text, records metadata, hashes the
-            original bytes, and stores one content-addressed local copy.
+            Each document can now be chunked and embedded locally. The default embedding
+            model is <strong>nomic-embed-text</strong> through Ollama.
           </p>
           <p>
-            PDF scans without embedded text can still be stored. OCR is intentionally not part of
-            this build.
+            If the embedding model is not installed yet, ingestion still works and documents
+            remain available for indexing later.
           </p>
         </article>
       </div>
@@ -179,8 +229,8 @@ export function KnowledgeView() {
       <section className="knowledge-library" aria-labelledby="knowledge-library-title">
         <div className="knowledge-library-header">
           <div>
-            <h2 id="knowledge-library-title">Ingested documents</h2>
-            <p>Original files remain local. Indexing begins in Build 012.</p>
+            <h2 id="knowledge-library-title">Local documents</h2>
+            <p>Chunking and embeddings stay on this machine.</p>
           </div>
         </div>
 
@@ -193,35 +243,60 @@ export function KnowledgeView() {
           </div>
         ) : (
           <div className="knowledge-document-list">
-            {documents.map((item) => (
-              <article className="knowledge-document" key={item.id}>
-                <div>
-                  <strong>{item.filename}</strong>
-                  <small>
-                    {collectionById.get(item.collection_id)?.name ?? "Collection"} ·{" "}
-                    {formatBytes(item.size_bytes)}
-                  </small>
-                </div>
-                <dl>
+            {documents.map((item) => {
+              const result = indexResults.get(item.id);
+              const busy = indexingId === item.id;
+
+              return (
+                <article className="knowledge-document" key={item.id}>
                   <div>
-                    <dt>Status</dt>
-                    <dd>{item.status}</dd>
+                    <strong>{item.filename}</strong>
+                    <small>
+                      {collectionById.get(item.collection_id)?.name ?? "Collection"} ·{" "}
+                      {formatBytes(item.size_bytes)}
+                    </small>
+                    {result ? (
+                      <small>
+                        {result.chunk_count} chunk{result.chunk_count === 1 ? "" : "s"} ·{" "}
+                        {result.embedding_model}
+                        {result.dimensions ? ` · ${result.dimensions} dimensions` : ""}
+                      </small>
+                    ) : null}
                   </div>
-                  <div>
-                    <dt>Text</dt>
-                    <dd>{item.extracted_characters.toLocaleString()} chars</dd>
+                  <dl>
+                    <div>
+                      <dt>Status</dt>
+                      <dd>{item.status}</dd>
+                    </div>
+                    <div>
+                      <dt>Text</dt>
+                      <dd>{item.extracted_characters.toLocaleString()} chars</dd>
+                    </div>
+                    <div>
+                      <dt>Pages</dt>
+                      <dd>{item.page_count ?? "—"}</dd>
+                    </div>
+                    <div>
+                      <dt>Hash</dt>
+                      <dd title={item.content_hash}>{item.content_hash.slice(0, 12)}…</dd>
+                    </div>
+                  </dl>
+                  <div className="knowledge-document-actions">
+                    <button
+                      type="button"
+                      onClick={() => void indexDocument(item)}
+                      disabled={indexingId !== null}
+                    >
+                      {busy
+                        ? "Indexing…"
+                        : item.status === "indexed"
+                          ? "Re-index locally"
+                          : "Index locally"}
+                    </button>
                   </div>
-                  <div>
-                    <dt>Pages</dt>
-                    <dd>{item.page_count ?? "—"}</dd>
-                  </div>
-                  <div>
-                    <dt>Hash</dt>
-                    <dd title={item.content_hash}>{item.content_hash.slice(0, 12)}…</dd>
-                  </div>
-                </dl>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         )}
       </section>

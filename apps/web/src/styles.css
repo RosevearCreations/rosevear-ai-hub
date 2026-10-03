@@ -553,7 +553,7 @@ h1 {
 
 .knowledge-document {
   display: grid;
-  grid-template-columns: minmax(180px, 1.25fr) minmax(360px, 1fr);
+  grid-template-columns: minmax(180px, 1.1fr) minmax(360px, 1fr) auto;
   gap: 1rem;
   align-items: center;
   padding: 1rem;
@@ -594,6 +594,16 @@ h1 {
   margin: 0.2rem 0 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.knowledge-document-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.knowledge-document-actions button {
+  padding: 0.6rem 0.8rem;
   white-space: nowrap;
 }
 

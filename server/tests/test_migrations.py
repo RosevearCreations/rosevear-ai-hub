@@ -26,6 +26,8 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "audit_events",
         "chat_messages",
         "conversations",
+        "chunk_embeddings",
+        "document_chunks",
         "documents",
         "knowledge_collections",
         "model_profiles",
@@ -35,6 +37,8 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
     conversation_columns = {column["name"] for column in inspector.get_columns("conversations")}
     message_columns = {column["name"] for column in inspector.get_columns("chat_messages")}
     document_columns = {column["name"] for column in inspector.get_columns("documents")}
+    chunk_columns = {column["name"] for column in inspector.get_columns("document_chunks")}
+    embedding_columns = {column["name"] for column in inspector.get_columns("chunk_embeddings")}
     assert {"model", "provider"}.issubset(conversation_columns)
     assert {"model", "provider"}.issubset(message_columns)
     assert {
@@ -45,6 +49,22 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "metadata_json",
         "status",
     }.issubset(document_columns)
+    assert {
+        "document_id",
+        "ordinal",
+        "text",
+        "start_char",
+        "end_char",
+        "citation_metadata",
+        "embedding_reference",
+    }.issubset(chunk_columns)
+    assert {
+        "chunk_id",
+        "provider",
+        "model",
+        "dimensions",
+        "vector_json",
+    }.issubset(embedding_columns)
 
     with test_engine.connect() as connection:
         profile_names = (
@@ -73,6 +93,8 @@ def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
     assert "conversations" not in tables
     assert "chat_messages" not in tables
     assert "model_profiles" not in tables
+    assert "chunk_embeddings" not in tables
+    assert "document_chunks" not in tables
     assert "documents" not in tables
     assert "knowledge_collections" not in tables
     assert "audit_events" not in tables
