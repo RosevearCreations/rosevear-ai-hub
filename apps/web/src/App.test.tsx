@@ -44,6 +44,27 @@ describe("App", () => {
           };
         }
 
+        if (url.endsWith("/api/v1/models/providers")) {
+          return {
+            ok: true,
+            json: async () => [
+              {
+                key: "ollama",
+                display_name: "Ollama",
+                provider_type: "local",
+                privacy_policy: "local_only",
+                supports_streaming: true,
+                supports_tools: false,
+                enabled: true,
+                available: true,
+                message: "Ollama is available.",
+                version: "0.35.1",
+                model_count: 0,
+              },
+            ],
+          };
+        }
+
         if (url.endsWith("/api/v1/models/profiles")) {
           return {
             ok: true,
@@ -99,7 +120,7 @@ describe("App", () => {
       expect(
         screen.getByText("Ollama is ready, but no model is installed."),
       ).toBeInTheDocument();
-      expect(screen.getByText("General · local_only")).toBeInTheDocument();
+      expect(screen.getByText(/General · local_only · Ollama online/)).toBeInTheDocument();
     });
   });
 });
