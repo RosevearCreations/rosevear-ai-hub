@@ -165,10 +165,13 @@ async def stream_chat(
     async def generate() -> AsyncIterator[str]:
         chunks: list[str] = []
         try:
-            yield json.dumps(
-                {"type": "generation", "generation_id": generation_id},
-                separators=(",", ":"),
-            ) + "\n"
+            yield (
+                json.dumps(
+                    {"type": "generation", "generation_id": generation_id},
+                    separators=(",", ":"),
+                )
+                + "\n"
+            )
 
             async for token in client.stream_chat(request.model, ollama_messages):
                 if generation_registry.is_cancelled(generation_id):
@@ -176,10 +179,13 @@ async def stream_chat(
                     return
 
                 chunks.append(token)
-                yield json.dumps(
-                    {"type": "token", "content": token},
-                    separators=(",", ":"),
-                ) + "\n"
+                yield (
+                    json.dumps(
+                        {"type": "token", "content": token},
+                        separators=(",", ":"),
+                    )
+                    + "\n"
+                )
 
             if generation_registry.is_cancelled(generation_id):
                 yield json.dumps({"type": "cancelled"}, separators=(",", ":")) + "\n"
@@ -199,15 +205,21 @@ async def stream_chat(
                 stream_session.refresh(assistant_message)
                 message_id = assistant_message.id
 
-            yield json.dumps(
-                {"type": "done", "message_id": message_id},
-                separators=(",", ":"),
-            ) + "\n"
+            yield (
+                json.dumps(
+                    {"type": "done", "message_id": message_id},
+                    separators=(",", ":"),
+                )
+                + "\n"
+            )
         except (OllamaUnavailableError, OllamaRequestError) as exc:
-            yield json.dumps(
-                {"type": "error", "message": str(exc)},
-                separators=(",", ":"),
-            ) + "\n"
+            yield (
+                json.dumps(
+                    {"type": "error", "message": str(exc)},
+                    separators=(",", ":"),
+                )
+                + "\n"
+            )
         finally:
             generation_registry.finish(generation_id)
 
