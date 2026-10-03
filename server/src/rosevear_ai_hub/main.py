@@ -9,6 +9,7 @@ from rosevear_ai_hub import __version__
 from rosevear_ai_hub.api.chat import router as chat_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
+from rosevear_ai_hub.api.providers import router as providers_router
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.logging import configure_logging
 from rosevear_ai_hub.schemas import HealthResponse, VersionResponse
@@ -57,6 +58,7 @@ def create_app() -> FastAPI:
         )
 
     application.include_router(ollama_router)
+    application.include_router(providers_router)
     application.include_router(profiles_router)
     application.include_router(chat_router)
     return application

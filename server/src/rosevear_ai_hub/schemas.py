@@ -60,6 +60,20 @@ class OllamaTestResponse(BaseModel):
     eval_count: int | None = None
 
 
+class ProviderStatusResponse(BaseModel):
+    key: str
+    display_name: str
+    provider_type: Literal["local", "cloud"]
+    privacy_policy: str
+    supports_streaming: bool
+    supports_tools: bool
+    enabled: bool
+    available: bool
+    message: str
+    version: str | None = None
+    model_count: int | None = None
+
+
 class ModelProfileResponse(BaseModel):
     id: int
     slug: str
@@ -74,6 +88,7 @@ class ModelProfileResponse(BaseModel):
 
 class ConversationCreateRequest(BaseModel):
     title: str = Field(default="New conversation", min_length=1, max_length=255)
+    provider: str | None = Field(default=None, min_length=1, max_length=64)
     model: str | None = Field(default=None, max_length=255)
     profile_id: int | None = Field(default=None, ge=1)
 
@@ -81,6 +96,7 @@ class ConversationCreateRequest(BaseModel):
 class ConversationResponse(BaseModel):
     id: int
     title: str
+    provider: str
     model: str | None
     profile_id: int | None
     created_at: datetime
@@ -92,12 +108,14 @@ class ChatMessageResponse(BaseModel):
     conversation_id: int
     role: Literal["user", "assistant", "system"]
     content: str
+    provider: str | None
     model: str | None
     status: str
     created_at: datetime
 
 
 class ChatStreamRequest(BaseModel):
+    provider: str | None = Field(default=None, min_length=1, max_length=64)
     model: str = Field(min_length=1, max_length=255)
     prompt: str = Field(min_length=1, max_length=20000)
     profile_id: int | None = Field(default=None, ge=1)
