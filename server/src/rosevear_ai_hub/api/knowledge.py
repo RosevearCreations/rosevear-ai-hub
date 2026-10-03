@@ -47,9 +47,7 @@ def get_knowledge_ingestion_service() -> KnowledgeIngestionService:
 def get_knowledge_indexing_service() -> KnowledgeIndexingService:
     settings = get_settings()
     if settings.knowledge_embedding_provider != "ollama":
-        raise RuntimeError(
-            "Build 012 currently supports the Ollama embedding provider only."
-        )
+        raise RuntimeError("Build 012 currently supports the Ollama embedding provider only.")
 
     client = OllamaClient(
         settings.ollama_base_url,
@@ -99,9 +97,7 @@ def _document_response(document: KnowledgeDocument) -> KnowledgeDocumentResponse
 def _chunk_response(chunk: KnowledgeChunk) -> KnowledgeChunkResponse:
     metadata = chunk.citation_metadata if isinstance(chunk.citation_metadata, dict) else {}
     normalized_metadata = {
-        str(key): value
-        for key, value in metadata.items()
-        if isinstance(value, (int, str))
+        str(key): value for key, value in metadata.items() if isinstance(value, (int, str))
     }
     return KnowledgeChunkResponse(
         id=chunk.id,
