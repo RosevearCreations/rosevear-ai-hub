@@ -29,7 +29,11 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "model_profiles",
         "users",
     }.issubset(tables)
-    assert "model" in {column["name"] for column in inspector.get_columns("conversations")}
+
+    conversation_columns = {column["name"] for column in inspector.get_columns("conversations")}
+    message_columns = {column["name"] for column in inspector.get_columns("chat_messages")}
+    assert {"model", "provider"}.issubset(conversation_columns)
+    assert {"model", "provider"}.issubset(message_columns)
 
     with test_engine.connect() as connection:
         profile_names = (
