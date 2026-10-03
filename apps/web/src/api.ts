@@ -32,10 +32,23 @@ export interface OllamaModelsResponse {
   models: OllamaModel[];
 }
 
+export interface ModelProfile {
+  id: number;
+  slug: string;
+  name: string;
+  system_prompt: string;
+  preferred_provider: string;
+  preferred_model: string | null;
+  privacy_policy: string;
+  enabled: boolean;
+  built_in: boolean;
+}
+
 export interface Conversation {
   id: number;
   title: string;
   model: string | null;
+  profile_id: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -109,6 +122,10 @@ export function getOllamaModels(signal?: AbortSignal): Promise<OllamaModelsRespo
   return getJson<OllamaModelsResponse>("/api/v1/models/ollama/models", signal);
 }
 
+export function getModelProfiles(signal?: AbortSignal): Promise<ModelProfile[]> {
+  return getJson<ModelProfile[]>("/api/v1/models/profiles", signal);
+}
+
 export function getConversations(signal?: AbortSignal): Promise<Conversation[]> {
   return getJson<Conversation[]>("/api/v1/chat/conversations", signal);
 }
@@ -116,9 +133,14 @@ export function getConversations(signal?: AbortSignal): Promise<Conversation[]> 
 export function createConversation(
   title: string,
   model: string | null,
+  profileId: number | null,
   signal?: AbortSignal,
 ): Promise<Conversation> {
-  return postJson<Conversation>("/api/v1/chat/conversations", { title, model }, signal);
+  return postJson<Conversation>(
+    "/api/v1/chat/conversations",
+    { title, model, profile_id: profileId },
+    signal,
+  );
 }
 
 export function getConversationMessages(
@@ -135,6 +157,7 @@ export async function streamChat(
   conversationId: number,
   model: string,
   prompt: string,
+  profileId: number | null,
   options: {
     signal?: AbortSignal;
     onGeneration?: (generationId: string) => void;
@@ -149,7 +172,7 @@ export async function streamChat(
         Accept: "application/x-ndjson",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ model, prompt }),
+      body: JSON.stringify({ model, prompt, profile_id: profileId }),
       signal: options.signal,
     },
   );
