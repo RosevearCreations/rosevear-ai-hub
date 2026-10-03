@@ -32,6 +32,20 @@ export interface OllamaModelsResponse {
   models: OllamaModel[];
 }
 
+export interface ProviderStatus {
+  key: string;
+  display_name: string;
+  provider_type: "local" | "cloud";
+  privacy_policy: string;
+  supports_streaming: boolean;
+  supports_tools: boolean;
+  enabled: boolean;
+  available: boolean;
+  message: string;
+  version: string | null;
+  model_count: number | null;
+}
+
 export interface ModelProfile {
   id: number;
   slug: string;
@@ -47,6 +61,7 @@ export interface ModelProfile {
 export interface Conversation {
   id: number;
   title: string;
+  provider: string;
   model: string | null;
   profile_id: number | null;
   created_at: string;
@@ -58,13 +73,14 @@ export interface ChatMessage {
   conversation_id: number;
   role: "user" | "assistant" | "system";
   content: string;
+  provider: string | null;
   model: string | null;
   status: string;
   created_at: string;
 }
 
 export type ChatStreamEvent =
-  | { type: "generation"; generation_id: string }
+  | { type: "generation"; generation_id: string; provider: string }
   | { type: "token"; content: string }
   | { type: "done"; message_id: number }
   | { type: "cancelled" }
@@ -122,6 +138,10 @@ export function getOllamaModels(signal?: AbortSignal): Promise<OllamaModelsRespo
   return getJson<OllamaModelsResponse>("/api/v1/models/ollama/models", signal);
 }
 
+export function getProviders(signal?: AbortSignal): Promise<ProviderStatus[]> {
+  return getJson<ProviderStatus[]>("/api/v1/models/providers", signal);
+}
+
 export function getModelProfiles(signal?: AbortSignal): Promise<ModelProfile[]> {
   return getJson<ModelProfile[]>("/api/v1/models/profiles", signal);
 }
@@ -132,13 +152,14 @@ export function getConversations(signal?: AbortSignal): Promise<Conversation[]> 
 
 export function createConversation(
   title: string,
+  provider: string,
   model: string | null,
   profileId: number | null,
   signal?: AbortSignal,
 ): Promise<Conversation> {
   return postJson<Conversation>(
     "/api/v1/chat/conversations",
-    { title, model, profile_id: profileId },
+    { title, provider, model, profile_id: profileId },
     signal,
   );
 }
@@ -155,12 +176,13 @@ export function getConversationMessages(
 
 export async function streamChat(
   conversationId: number,
+  provider: string,
   model: string,
   prompt: string,
   profileId: number | null,
   options: {
     signal?: AbortSignal;
-    onGeneration?: (generationId: string) => void;
+    onGeneration?: (generationId: string, provider: string) => void;
     onEvent: (event: ChatStreamEvent) => void;
   },
 ): Promise<void> {
@@ -172,7 +194,7 @@ export async function streamChat(
         Accept: "application/x-ndjson",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ model, prompt, profile_id: profileId }),
+      body: JSON.stringify({ provider, model, prompt, profile_id: profileId }),
       signal: options.signal,
     },
   );
@@ -183,7 +205,7 @@ export async function streamChat(
 
   const generationId = response.headers.get("X-Generation-ID");
   if (generationId) {
-    options.onGeneration?.(generationId);
+    options.onGeneration?.(generationId, provider);
   }
 
   if (!response.body) {

@@ -80,6 +80,7 @@ class Conversation(TimestampMixin, Base):
         nullable=True,
         index=True,
     )
+    provider: Mapped[str] = mapped_column(String(64), nullable=False, default="ollama")
     model: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
 
@@ -96,6 +97,7 @@ class ChatMessage(Base):
     )
     role: Mapped[str] = mapped_column(String(32), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str | None] = mapped_column(String(64), nullable=True)
     model: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="complete")
     created_at: Mapped[datetime] = mapped_column(

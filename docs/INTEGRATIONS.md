@@ -14,12 +14,18 @@ Why: prevents permanent custom integrations for every Meross, Govee, Gosund, sen
 
 ## Ollama
 **Priority:** Highest  
-**Role:** Local inference and embeddings.
+**Role:** Local inference and embeddings.  
+**Provider key:** `ollama`  
+**Privacy:** Local-only.
+
+Build 009 wraps Ollama in the provider-neutral AI interface.
 
 ## Optional cloud AI
 **Priority:** Optional  
 **Role:** More capable models for selected tasks when explicitly enabled.  
 **Rule:** Cloud usage must be visible/configurable.
+
+Build 009 defines the adapter contract only. No cloud adapter is registered, no credentials are required, and no chat data is sent to an external AI provider.
 
 ## ONVIF
 **Priority:** Medium  

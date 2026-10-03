@@ -7,21 +7,25 @@ import {
   getConversations,
   getModelProfiles,
   getOllamaModels,
+  getProviders,
   streamChat,
   type ChatMessage,
   type Conversation,
   type ModelProfile,
   type OllamaModel,
+  type ProviderStatus,
 } from "./api";
 
 type ChatStatus = "idle" | "streaming" | "cancelled" | "error";
 
 export function ChatView() {
   const [models, setModels] = useState<OllamaModel[]>([]);
+  const [providers, setProviders] = useState<ProviderStatus[]>([]);
   const [profiles, setProfiles] = useState<ModelProfile[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState("ollama");
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [prompt, setPrompt] = useState("");
@@ -35,15 +39,22 @@ export function ChatView() {
 
     Promise.all([
       getOllamaModels(controller.signal),
+      getProviders(controller.signal),
       getModelProfiles(controller.signal),
       getConversations(controller.signal),
     ])
-      .then(([modelResponse, profileResponse, conversationResponse]) => {
+      .then(([modelResponse, providerResponse, profileResponse, conversationResponse]) => {
         setModels(modelResponse.models);
+        setProviders(providerResponse);
         setProfiles(profileResponse);
         setConversations(conversationResponse);
 
+        const firstProvider = providerResponse.find((provider) => provider.available) ??
+          providerResponse[0] ??
+          null;
         const firstProfile = profileResponse[0] ?? null;
+
+        setSelectedProvider(firstProfile?.preferred_provider ?? firstProvider?.key ?? "ollama");
         setSelectedProfileId(firstProfile?.id ?? null);
 
         const preferredModel =
@@ -56,6 +67,7 @@ export function ChatView() {
         if (conversationResponse[0]) {
           const conversation = conversationResponse[0];
           setSelectedConversationId(conversation.id);
+          setSelectedProvider(conversation.provider);
           setSelectedProfileId(conversation.profile_id ?? firstProfile?.id ?? null);
 
           if (conversation.model) {
@@ -101,6 +113,11 @@ export function ChatView() {
     [profiles, selectedProfileId],
   );
 
+  const activeProvider = useMemo(
+    () => providers.find((provider) => provider.key === selectedProvider) ?? null,
+    [providers, selectedProvider],
+  );
+
   async function refreshConversations() {
     const items = await getConversations();
     setConversations(items);
@@ -110,6 +127,7 @@ export function ChatView() {
   async function newConversation() {
     const conversation = await createConversation(
       "New conversation",
+      selectedProvider,
       selectedModel || null,
       selectedProfileId,
     );
@@ -122,6 +140,9 @@ export function ChatView() {
   function chooseProfile(profileId: number | null) {
     setSelectedProfileId(profileId);
     const profile = profiles.find((item) => item.id === profileId);
+    if (profile?.preferred_provider) {
+      setSelectedProvider(profile.preferred_provider);
+    }
     if (
       profile?.preferred_model &&
       models.some((model) => model.name === profile.preferred_model)
@@ -132,7 +153,12 @@ export function ChatView() {
 
   async function sendMessage() {
     const cleanPrompt = prompt.trim();
-    if (!cleanPrompt || !selectedModel || status === "streaming") {
+    if (
+      !cleanPrompt ||
+      !selectedProvider ||
+      !selectedModel ||
+      status === "streaming"
+    ) {
       return;
     }
 
@@ -144,6 +170,7 @@ export function ChatView() {
     if (conversationId === null) {
       const conversation = await createConversation(
         cleanPrompt.slice(0, 80),
+        selectedProvider,
         selectedModel,
         selectedProfileId,
       );
@@ -157,6 +184,7 @@ export function ChatView() {
       conversation_id: conversationId,
       role: "user",
       content: cleanPrompt,
+      provider: null,
       model: null,
       status: "complete",
       created_at: new Date().toISOString(),
@@ -166,6 +194,7 @@ export function ChatView() {
       conversation_id: conversationId,
       role: "assistant",
       content: "",
+      provider: selectedProvider,
       model: selectedModel,
       status: "streaming",
       created_at: new Date().toISOString(),
@@ -181,6 +210,7 @@ export function ChatView() {
     try {
       await streamChat(
         conversationId,
+        selectedProvider,
         selectedModel,
         cleanPrompt,
         selectedProfileId,
@@ -257,6 +287,7 @@ export function ChatView() {
               }
               onClick={() => {
                 setSelectedConversationId(conversation.id);
+                setSelectedProvider(conversation.provider);
                 setSelectedProfileId(conversation.profile_id);
                 if (conversation.model) {
                   setSelectedModel(conversation.model);
@@ -264,7 +295,9 @@ export function ChatView() {
               }}
             >
               <strong>{conversation.title}</strong>
-              <small>{conversation.model ?? "No model selected"}</small>
+              <small>
+                {conversation.provider} · {conversation.model ?? "No model selected"}
+              </small>
             </button>
           ))}
         </div>
@@ -273,12 +306,15 @@ export function ChatView() {
       <section className="chat-panel" aria-label="Local AI chat">
         <header className="chat-header">
           <div>
-            <p className="eyebrow">Build 008</p>
+            <p className="eyebrow">Build 009</p>
             <h1>{activeConversation?.title ?? "Chat"}</h1>
             <small className="profile-summary">
               {activeProfile
                 ? `${activeProfile.name} · ${activeProfile.privacy_policy}`
                 : "No profile selected"}
+              {activeProvider
+                ? ` · ${activeProvider.display_name} ${activeProvider.available ? "online" : "offline"}`
+                : ""}
             </small>
           </div>
 
@@ -296,6 +332,26 @@ export function ChatView() {
                 {profiles.map((profile) => (
                   <option key={profile.id} value={profile.id}>
                     {profile.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="model-picker">
+              <span>Provider</span>
+              <select
+                value={selectedProvider}
+                onChange={(event) => setSelectedProvider(event.target.value)}
+                disabled={status === "streaming"}
+              >
+                {providers.map((provider) => (
+                  <option
+                    key={provider.key}
+                    value={provider.key}
+                    disabled={!provider.available}
+                  >
+                    {provider.display_name}
+                    {provider.available ? "" : " (offline)"}
                   </option>
                 ))}
               </select>
@@ -323,19 +379,23 @@ export function ChatView() {
           <div className="empty-state" role="status">
             <h2>Ollama is ready, but no model is installed.</h2>
             <p>
-              Profiles are available now. Chat will activate as soon as a suitable local
-              model is downloaded through Ollama.
+              Provider routing and profiles are ready. Chat will activate as soon as a suitable
+              local model is downloaded through Ollama.
             </p>
           </div>
         ) : null}
 
         <div className="message-list" aria-live="polite">
           {messages.length === 0 ? (
-            <p className="empty-copy">Start a local conversation when a model is selected.</p>
+            <p className="empty-copy">Start a conversation when a provider and model are selected.</p>
           ) : (
             messages.map((message) => (
               <article key={message.id} className={`message message-${message.role}`}>
-                <strong>{message.role === "assistant" ? "Hub" : "We"}</strong>
+                <strong>
+                  {message.role === "assistant"
+                    ? `Hub${message.provider ? ` · ${message.provider}` : ""}`
+                    : "We"}
+                </strong>
                 <p>{message.content || (message.status === "streaming" ? "…" : "")}</p>
               </article>
             ))
@@ -361,7 +421,11 @@ export function ChatView() {
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
             placeholder="Ask the local AI…"
-            disabled={status === "streaming" || models.length === 0}
+            disabled={
+              status === "streaming" ||
+              models.length === 0 ||
+              activeProvider?.available === false
+            }
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
@@ -379,7 +443,12 @@ export function ChatView() {
                 type="button"
                 className="primary-button"
                 onClick={() => void sendMessage()}
-                disabled={!prompt.trim() || !selectedModel}
+                disabled={
+                  !prompt.trim() ||
+                  !selectedProvider ||
+                  !selectedModel ||
+                  activeProvider?.available === false
+                }
               >
                 Send
               </button>

@@ -1,4 +1,4 @@
-"""Conversation persistence and streaming local chat API."""
+"""Conversation persistence and provider-neutral streaming chat API."""
 
 from __future__ import annotations
 
@@ -13,19 +13,15 @@ from sqlalchemy import select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from rosevear_ai_hub.api.ollama import get_ollama_client
 from rosevear_ai_hub.chat import (
     generation_registry,
     get_local_conversation,
     get_or_create_local_user,
 )
 from rosevear_ai_hub.database import get_session
-from rosevear_ai_hub.integrations.ollama import (
-    OllamaClient,
-    OllamaRequestError,
-    OllamaUnavailableError,
-)
 from rosevear_ai_hub.models import ChatMessage, Conversation, ModelProfile
+from rosevear_ai_hub.providers.base import ProviderRequestError, ProviderUnavailableError
+from rosevear_ai_hub.providers.registry import ProviderRegistry, get_provider_registry
 from rosevear_ai_hub.schemas import (
     CancelGenerationResponse,
     ChatMessageResponse,
@@ -37,13 +33,14 @@ from rosevear_ai_hub.schemas import (
 router = APIRouter(prefix="/api/v1/chat", tags=["chat"])
 
 SessionDependency = Annotated[Session, Depends(get_session)]
-OllamaClientDependency = Annotated[OllamaClient, Depends(get_ollama_client)]
+ProviderRegistryDependency = Annotated[ProviderRegistry, Depends(get_provider_registry)]
 
 
 def _conversation_response(conversation: Conversation) -> ConversationResponse:
     return ConversationResponse(
         id=conversation.id,
         title=conversation.title,
+        provider=conversation.provider,
         model=conversation.model,
         profile_id=conversation.profile_id,
         created_at=conversation.created_at,
@@ -57,6 +54,7 @@ def _message_response(message: ChatMessage) -> ChatMessageResponse:
         conversation_id=message.conversation_id,
         role=cast("str", message.role),
         content=message.content,
+        provider=message.provider,
         model=message.model,
         status=message.status,
         created_at=message.created_at,
@@ -73,6 +71,16 @@ def _get_enabled_profile(session: Session, profile_id: int | None) -> ModelProfi
             ModelProfile.enabled.is_(True),
         )
     )
+
+
+def _require_provider(registry: ProviderRegistry, key: str):
+    try:
+        return registry.get(key)
+    except ProviderRequestError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
 
 
 @router.get("/conversations", response_model=list[ConversationResponse])
@@ -97,6 +105,7 @@ def list_conversations(session: SessionDependency) -> list[ConversationResponse]
 def create_conversation(
     request: ConversationCreateRequest,
     session: SessionDependency,
+    registry: ProviderRegistryDependency,
 ) -> ConversationResponse:
     profile = _get_enabled_profile(session, request.profile_id)
     if request.profile_id is not None and profile is None:
@@ -105,10 +114,14 @@ def create_conversation(
             detail="Model profile not found.",
         )
 
+    provider_key = request.provider or (profile.preferred_provider if profile else None) or "ollama"
+    _require_provider(registry, provider_key)
+
     user = get_or_create_local_user(session)
     conversation = Conversation(
         user_id=user.id,
         title=request.title.strip(),
+        provider=provider_key,
         model=request.model,
         profile_id=profile.id if profile is not None else None,
     )
@@ -144,7 +157,7 @@ async def stream_chat(
     conversation_id: int,
     request: ChatStreamRequest,
     session: SessionDependency,
-    client: OllamaClientDependency,
+    registry: ProviderRegistryDependency,
 ) -> StreamingResponse:
     conversation = get_local_conversation(session, conversation_id)
     if conversation is None:
@@ -160,6 +173,15 @@ async def stream_chat(
             detail="Model profile not found.",
         )
 
+    provider_key = (
+        request.provider
+        or (profile.preferred_provider if profile is not None else None)
+        or conversation.provider
+        or "ollama"
+    )
+    provider = _require_provider(registry, provider_key)
+
+    conversation.provider = provider_key
     conversation.model = request.model
     conversation.profile_id = profile.id if profile is not None else None
     conversation.updated_at = datetime.now(UTC)
@@ -168,6 +190,7 @@ async def stream_chat(
         conversation_id=conversation.id,
         role="user",
         content=request.prompt.strip(),
+        provider=None,
         model=None,
         status="complete",
     )
@@ -180,11 +203,11 @@ async def stream_chat(
         .order_by(ChatMessage.id.asc())
     ).all()
 
-    ollama_messages: list[dict[str, str]] = []
+    provider_messages: list[dict[str, str]] = []
     if profile is not None:
-        ollama_messages.append({"role": "system", "content": profile.system_prompt})
+        provider_messages.append({"role": "system", "content": profile.system_prompt})
 
-    ollama_messages.extend(
+    provider_messages.extend(
         {"role": item.role, "content": item.content}
         for item in history
         if item.role in {"user", "assistant", "system"} and item.status == "complete"
@@ -204,13 +227,17 @@ async def stream_chat(
         try:
             yield (
                 json.dumps(
-                    {"type": "generation", "generation_id": generation_id},
+                    {
+                        "type": "generation",
+                        "generation_id": generation_id,
+                        "provider": provider_key,
+                    },
                     separators=(",", ":"),
                 )
                 + "\n"
             )
 
-            async for token in client.stream_chat(request.model, ollama_messages):
+            async for token in provider.stream_chat(request.model, provider_messages):
                 if generation_registry.is_cancelled(generation_id):
                     yield json.dumps({"type": "cancelled"}, separators=(",", ":")) + "\n"
                     return
@@ -234,6 +261,7 @@ async def stream_chat(
                     conversation_id=conversation_id,
                     role="assistant",
                     content=assistant_text,
+                    provider=provider_key,
                     model=request.model,
                     status="complete",
                 )
@@ -249,7 +277,7 @@ async def stream_chat(
                 )
                 + "\n"
             )
-        except (OllamaUnavailableError, OllamaRequestError) as exc:
+        except (ProviderUnavailableError, ProviderRequestError) as exc:
             yield (
                 json.dumps(
                     {"type": "error", "message": str(exc)},

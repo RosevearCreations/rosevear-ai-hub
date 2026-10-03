@@ -12,30 +12,33 @@ This file records completed and active builds. The roadmap remains authoritative
 | 006 | Ollama Discovery | COMPLETE | main via PR #6 |
 | 007 | Streaming Chat | COMPLETE | main via PR #7 |
 | 008 | Model Profiles | COMPLETE | main via PR #8 |
+| 009 | Provider Abstraction | COMPLETE | main via PR #9 |
 
 ## Completed foundation
 
-Builds 001–007 established the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, Ollama discovery, and persistent token-streaming local chat.
+Builds 001–009 establish the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, Ollama discovery, persistent token-streaming local chat, model profiles, and provider-neutral AI routing.
 
-## Build 008 acceptance checklist
+## Build 009 acceptance checklist
 
-- [x] model_profiles persistence schema
-- [x] migration seeds General profile
-- [x] migration seeds Coding profile
-- [x] migration seeds Home profile
-- [x] migration seeds Workshop profile
-- [x] migration seeds Business profile
-- [x] local-only privacy policy metadata
-- [x] profile listing API
-- [x] conversation profile persistence
-- [x] profile-specific system instruction injection
-- [x] profile selector in chat UI
-- [x] preferred-model hook when a profile has one
-- [x] disabled profiles excluded from selection API
-- [x] migration/profile/chat tests
-- [x] data-model and rollback documentation
-- [x] Build 008 CI green
+- [x] provider-neutral AI interface
+- [x] normalized provider descriptor and health metadata
+- [x] normalized provider error classes
+- [x] Ollama implementation behind the provider interface
+- [x] optional-cloud adapter contract without enabling a cloud provider
+- [x] provider registry
+- [x] provider status API
+- [x] provider routing persisted on conversations
+- [x] provider metadata persisted on assistant messages
+- [x] chat generation routed through provider registry
+- [x] profile preferred-provider routing
+- [x] unknown/disabled provider rejection
+- [x] provider selector and provider state in chat UI
+- [x] migration for provider routing metadata
+- [x] provider, chat, migration, and UI tests
+- [x] no cloud credentials or hosted AI service required
+- [x] Build 009 dev CI green
 - [x] ready for promotion to main
+- [ ] post-merge main CI green
 - [ ] dev synchronized with main
 
 ## External setup
@@ -44,6 +47,6 @@ Ollama 0.35.1 is installed and reachable on the target Windows PC.
 
 The target PC has an Intel Core i7-8700 (6 cores / 12 logical processors) and about 16 GB of usable RAM. The Task Manager screenshot confirms Intel UHD Graphics is present; another GPU entry is also visible but its model/VRAM has not yet been captured.
 
-No additional application or service is required for Build 008. A local model is still needed only for live chat acceptance, not for repository CI.
+Build 009 requires no new application, hosted database, cloud AI account, or secret. Ollama remains the only registered provider and remains local-only.
 
-All household runtime commands are documented for PowerShell; Bash is not required.
+A local model is still needed only for live response acceptance, not for repository CI. All household runtime commands are documented for PowerShell; Bash is not required.
