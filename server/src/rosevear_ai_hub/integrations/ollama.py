@@ -8,17 +8,19 @@ from typing import Any
 
 import httpx
 
+from rosevear_ai_hub.providers.base import ProviderRequestError, ProviderUnavailableError
 
-class OllamaUnavailableError(RuntimeError):
+
+class OllamaUnavailableError(ProviderUnavailableError):
     """Raised when the configured Ollama server cannot be reached."""
 
 
-class OllamaRequestError(RuntimeError):
+class OllamaRequestError(ProviderRequestError):
     """Raised when Ollama responds but the request cannot be completed safely."""
 
 
 class OllamaClient:
-    """Small provider adapter for Ollama discovery, testing, and streaming chat."""
+    """Low-level Ollama HTTP adapter used by the Ollama provider."""
 
     def __init__(
         self,
