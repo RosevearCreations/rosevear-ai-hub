@@ -15,10 +15,7 @@ from rosevear_ai_hub.models import (
 
 async def fake_embed(model: str, inputs: list[str]) -> list[list[float]]:
     assert model == "test-embed"
-    return [
-        [float(len(text)), float(index + 1), 1.0]
-        for index, text in enumerate(inputs)
-    ]
+    return [[float(len(text)), float(index + 1), 1.0] for index, text in enumerate(inputs)]
 
 
 def seed_document(session: Session, text: str) -> KnowledgeDocument:
