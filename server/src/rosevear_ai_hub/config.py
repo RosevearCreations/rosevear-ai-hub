@@ -40,6 +40,32 @@ class Settings(BaseSettings):
         gt=0,
         alias="KNOWLEDGE_MAX_EXPANDED_DOCX_BYTES",
     )
+    knowledge_chunk_characters: int = Field(
+        default=1200,
+        ge=100,
+        le=10000,
+        alias="KNOWLEDGE_CHUNK_CHARACTERS",
+    )
+    knowledge_chunk_overlap_characters: int = Field(
+        default=200,
+        ge=0,
+        le=5000,
+        alias="KNOWLEDGE_CHUNK_OVERLAP_CHARACTERS",
+    )
+    knowledge_embedding_provider: str = Field(
+        default="ollama",
+        alias="KNOWLEDGE_EMBEDDING_PROVIDER",
+    )
+    knowledge_embedding_model: str = Field(
+        default="nomic-embed-text",
+        alias="KNOWLEDGE_EMBEDDING_MODEL",
+    )
+    knowledge_embedding_batch_size: int = Field(
+        default=16,
+        ge=1,
+        le=128,
+        alias="KNOWLEDGE_EMBEDDING_BATCH_SIZE",
+    )
     ollama_base_url: str = Field(
         default="http://127.0.0.1:11434",
         alias="OLLAMA_BASE_URL",
