@@ -1,7 +1,9 @@
-"""Minimal Ollama API adapter used for local-model discovery."""
+"""Ollama API adapter for local-model discovery and chat."""
 
 from __future__ import annotations
 
+import json
+from collections.abc import AsyncIterator
 from typing import Any
 
 import httpx
@@ -16,7 +18,7 @@ class OllamaRequestError(RuntimeError):
 
 
 class OllamaClient:
-    """Small provider adapter for Ollama discovery and smoke testing."""
+    """Small provider adapter for Ollama discovery, testing, and streaming chat."""
 
     def __init__(
         self,
@@ -56,6 +58,61 @@ class OllamaClient:
             request_body,
             timeout_seconds=self.generation_timeout_seconds,
         )
+
+    async def stream_chat(
+        self,
+        model: str,
+        messages: list[dict[str, str]],
+    ) -> AsyncIterator[str]:
+        """Yield assistant text chunks from Ollama's NDJSON chat stream."""
+
+        request_body = {
+            "model": model,
+            "messages": messages,
+            "stream": True,
+        }
+
+        try:
+            async with httpx.AsyncClient(
+                base_url=self.base_url,
+                timeout=self.generation_timeout_seconds,
+                transport=self.transport,
+            ) as client:
+                async with client.stream("POST", "/api/chat", json=request_body) as response:
+                    response.raise_for_status()
+
+                    async for line in response.aiter_lines():
+                        if not line:
+                            continue
+
+                        try:
+                            payload = json.loads(line)
+                        except json.JSONDecodeError as exc:
+                            raise OllamaRequestError(
+                                "Ollama returned invalid streaming JSON."
+                            ) from exc
+
+                        if not isinstance(payload, dict):
+                            raise OllamaRequestError(
+                                "Ollama returned an unexpected streaming response."
+                            )
+
+                        error = payload.get("error")
+                        if isinstance(error, str) and error:
+                            raise OllamaRequestError(error)
+
+                        message = payload.get("message")
+                        if isinstance(message, dict):
+                            content = message.get("content")
+                            if isinstance(content, str) and content:
+                                yield content
+
+                        if payload.get("done") is True:
+                            break
+        except httpx.RequestError as exc:
+            raise OllamaUnavailableError(f"Unable to reach Ollama at {self.base_url}.") from exc
+        except httpx.HTTPStatusError as exc:
+            raise OllamaRequestError(f"Ollama returned HTTP {exc.response.status_code}.") from exc
 
     async def _get_json(self, path: str) -> dict[str, Any]:
         return await self._request_json("GET", path, timeout_seconds=self.timeout_seconds)

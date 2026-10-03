@@ -1,9 +1,9 @@
-"""Initial persistent data model for Rosevear AI Hub."""
+"""Persistent data model for Rosevear AI Hub."""
 
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from rosevear_ai_hub.database import Base
@@ -48,7 +48,7 @@ class AppSetting(TimestampMixin, Base):
 
 
 class Conversation(TimestampMixin, Base):
-    """Conversation metadata; message persistence arrives with chat functionality."""
+    """Persisted local chat conversation."""
 
     __tablename__ = "conversations"
 
@@ -60,6 +60,30 @@ class Conversation(TimestampMixin, Base):
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     profile_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    model: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+
+class ChatMessage(Base):
+    """One persisted message in a conversation."""
+
+    __tablename__ = "chat_messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    conversation_id: Mapped[int] = mapped_column(
+        ForeignKey("conversations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    role: Mapped[str] = mapped_column(String(32), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    model: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="complete")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.current_timestamp(),
+        nullable=False,
+        index=True,
+    )
 
 
 class AuditEvent(Base):
