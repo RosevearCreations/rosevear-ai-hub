@@ -64,7 +64,7 @@ class KnowledgeIngestionService:
         content_type: str | None,
         data: bytes,
     ) -> PreparedDocument:
-        safe_filename = Path(filename).name.strip()
+        safe_filename = Path(filename.replace("\\", "/")).name.strip()
         if not safe_filename or safe_filename in {".", ".."}:
             raise KnowledgeIngestionError("A valid filename is required.", status_code=400)
 
@@ -92,6 +92,8 @@ class KnowledgeIngestionService:
             expected_mime,
             mimetypes.guess_type(safe_filename)[0] or expected_mime,
         }
+        if extension == ".md":
+            allowed_content_types.add("text/plain")
         if normalized_content_type not in allowed_content_types:
             raise KnowledgeIngestionError(
                 f"Content type does not match the {extension} file extension.",
