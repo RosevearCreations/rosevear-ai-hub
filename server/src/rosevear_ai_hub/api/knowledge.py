@@ -1,4 +1,4 @@
-"""Local knowledge file-ingestion API."""
+"""Local knowledge ingestion and indexing API."""
 
 from __future__ import annotations
 
@@ -10,14 +10,24 @@ from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.database import get_session
+from rosevear_ai_hub.integrations.ollama import OllamaClient
+from rosevear_ai_hub.knowledge.chunking import ChunkingError
+from rosevear_ai_hub.knowledge.indexing import (
+    KnowledgeIndexingError,
+    KnowledgeIndexingService,
+)
 from rosevear_ai_hub.knowledge.ingestion import (
     KnowledgeIngestionError,
     KnowledgeIngestionService,
 )
-from rosevear_ai_hub.models import KnowledgeCollection, KnowledgeDocument
+from rosevear_ai_hub.knowledge.vector_store import SQLAlchemyVectorStore
+from rosevear_ai_hub.models import KnowledgeChunk, KnowledgeCollection, KnowledgeDocument
+from rosevear_ai_hub.providers.base import ProviderError
 from rosevear_ai_hub.schemas import (
+    KnowledgeChunkResponse,
     KnowledgeCollectionResponse,
     KnowledgeDocumentResponse,
+    KnowledgeIndexResponse,
     KnowledgeUploadResponse,
 )
 
@@ -34,9 +44,36 @@ def get_knowledge_ingestion_service() -> KnowledgeIngestionService:
     )
 
 
+def get_knowledge_indexing_service() -> KnowledgeIndexingService:
+    settings = get_settings()
+    if settings.knowledge_embedding_provider != "ollama":
+        raise RuntimeError(
+            "Build 012 currently supports the Ollama embedding provider only."
+        )
+
+    client = OllamaClient(
+        settings.ollama_base_url,
+        timeout_seconds=settings.ollama_timeout_seconds,
+        generation_timeout_seconds=settings.ollama_generation_timeout_seconds,
+    )
+    return KnowledgeIndexingService(
+        embed=client.embed,
+        vector_store=SQLAlchemyVectorStore(),
+        embedding_provider="ollama",
+        embedding_model=settings.knowledge_embedding_model,
+        chunk_characters=settings.knowledge_chunk_characters,
+        chunk_overlap_characters=settings.knowledge_chunk_overlap_characters,
+        embedding_batch_size=settings.knowledge_embedding_batch_size,
+    )
+
+
 IngestionDependency = Annotated[
     KnowledgeIngestionService,
     Depends(get_knowledge_ingestion_service),
+]
+IndexingDependency = Annotated[
+    KnowledgeIndexingService,
+    Depends(get_knowledge_indexing_service),
 ]
 
 
@@ -56,6 +93,25 @@ def _document_response(document: KnowledgeDocument) -> KnowledgeDocumentResponse
         page_count=page_count if isinstance(page_count, int) else None,
         created_at=document.created_at,
         indexed_at=document.indexed_at,
+    )
+
+
+def _chunk_response(chunk: KnowledgeChunk) -> KnowledgeChunkResponse:
+    metadata = chunk.citation_metadata if isinstance(chunk.citation_metadata, dict) else {}
+    normalized_metadata = {
+        str(key): value
+        for key, value in metadata.items()
+        if isinstance(value, (int, str))
+    }
+    return KnowledgeChunkResponse(
+        id=chunk.id,
+        document_id=chunk.document_id,
+        ordinal=chunk.ordinal,
+        text=chunk.text,
+        start_char=chunk.start_char,
+        end_char=chunk.end_char,
+        citation_metadata=normalized_metadata,
+        embedding_reference=chunk.embedding_reference,
     )
 
 
@@ -113,6 +169,57 @@ def get_document(document_id: int, session: SessionDependency) -> KnowledgeDocum
     if document is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
     return _document_response(document)
+
+
+@router.get(
+    "/documents/{document_id}/chunks",
+    response_model=list[KnowledgeChunkResponse],
+)
+def list_document_chunks(
+    document_id: int,
+    session: SessionDependency,
+) -> list[KnowledgeChunkResponse]:
+    document = session.get(KnowledgeDocument, document_id)
+    if document is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+
+    chunks = session.scalars(
+        select(KnowledgeChunk)
+        .where(KnowledgeChunk.document_id == document_id)
+        .order_by(KnowledgeChunk.ordinal.asc())
+    ).all()
+    return [_chunk_response(chunk) for chunk in chunks]
+
+
+@router.post(
+    "/documents/{document_id}/index",
+    response_model=KnowledgeIndexResponse,
+)
+async def index_document(
+    document_id: int,
+    session: SessionDependency,
+    indexing: IndexingDependency,
+) -> KnowledgeIndexResponse:
+    document = session.get(KnowledgeDocument, document_id)
+    if document is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+
+    try:
+        result = await indexing.index_document(session, document)
+    except (ProviderError, KnowledgeIndexingError, ChunkingError, ValueError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
+
+    return KnowledgeIndexResponse(
+        document_id=result.document_id,
+        status=result.status,
+        chunk_count=result.chunk_count,
+        embedding_provider=result.embedding_provider,
+        embedding_model=result.embedding_model,
+        dimensions=result.dimensions,
+    )
 
 
 @router.post(
