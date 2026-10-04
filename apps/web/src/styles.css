@@ -703,3 +703,66 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+
+.knowledge-result-meta a,
+.grounded-citations a {
+  display: inline-block;
+  margin-top: 0.35rem;
+}
+
+.grounded-answer {
+  display: grid;
+  gap: 1rem;
+}
+
+.grounded-answer h2,
+.grounded-answer p {
+  margin: 0;
+}
+
+.grounded-answer p {
+  margin-top: 0.35rem;
+  line-height: 1.55;
+}
+
+.grounded-answer-controls {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.grounded-answer-controls label {
+  display: grid;
+  gap: 0.4rem;
+  font-weight: 700;
+}
+
+.grounded-answer-controls select {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #a3a3a3;
+  border-radius: 0.6rem;
+  background: white;
+  color: #171717;
+}
+
+.grounded-answer-result {
+  padding: 1rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 0.8rem;
+  background: #fafafa;
+}
+
+.grounded-citations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+@media (max-width: 760px) {
+  .grounded-answer-controls {
+    grid-template-columns: 1fr;
+  }
+}

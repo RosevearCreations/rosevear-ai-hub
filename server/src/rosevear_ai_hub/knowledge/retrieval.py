@@ -1,4 +1,4 @@
-"""Local semantic retrieval with keyword fallback and source filters."""
+"""Local semantic retrieval with keyword fallback and citation-ready evidence."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from rosevear_ai_hub.knowledge.citations import citation_label
 from rosevear_ai_hub.models import (
     ChunkEmbedding,
     KnowledgeChunk,
@@ -48,6 +49,10 @@ class RetrievalHit:
     text: str
     start_char: int
     end_char: int
+    page: int | None
+    section: str | None
+    location_label: str | None
+    evidence_path: str
     score: float
     method: str
 
@@ -140,11 +145,7 @@ class KnowledgeRetrievalService:
             )
 
         if mode == "semantic":
-            return RetrievalResult(
-                query=clean_query,
-                method="semantic",
-                hits=[],
-            )
+            return RetrievalResult(query=clean_query, method="semantic", hits=[])
 
         return RetrievalResult(
             query=clean_query,
@@ -287,6 +288,9 @@ class KnowledgeRetrievalService:
         score: float,
         method: str,
     ) -> RetrievalHit:
+        metadata = chunk.citation_metadata if isinstance(chunk.citation_metadata, dict) else {}
+        page = metadata.get("page")
+        section = metadata.get("section")
         return RetrievalHit(
             chunk_id=chunk.id,
             document_id=document.id,
@@ -297,6 +301,10 @@ class KnowledgeRetrievalService:
             text=chunk.text,
             start_char=chunk.start_char,
             end_char=chunk.end_char,
+            page=page if isinstance(page, int) else None,
+            section=section if isinstance(section, str) else None,
+            location_label=citation_label(metadata),
+            evidence_path=f"/api/v1/knowledge/evidence/{chunk.id}",
             score=score,
             method=method,
         )

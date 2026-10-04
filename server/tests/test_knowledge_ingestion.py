@@ -30,6 +30,7 @@ def test_text_ingestion_hashes_extracts_and_sanitizes_filename(tmp_path) -> None
     assert prepared.extracted_text == "# Workshop\nLocal notes."
     assert len(prepared.content_hash) == 64
     assert prepared.metadata["character_count"] == len(prepared.extracted_text)
+    assert prepared.metadata["citation_spans"][0]["section"] == "Workshop"
 
 
 def test_docx_ingestion_extracts_paragraphs_and_tables(tmp_path) -> None:
@@ -68,6 +69,7 @@ def test_pdf_ingestion_accepts_valid_pdf_and_counts_pages(tmp_path) -> None:
     assert prepared.mime_type == "application/pdf"
     assert prepared.metadata["page_count"] == 1
     assert prepared.metadata["text_extracted"] is False
+    assert prepared.metadata["citation_spans"][0]["page"] == 1
 
 
 def test_unsupported_and_oversized_files_are_rejected(tmp_path) -> None:

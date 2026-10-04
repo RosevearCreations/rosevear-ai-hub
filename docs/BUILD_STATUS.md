@@ -17,46 +17,35 @@ This file records completed and active builds. The roadmap remains authoritative
 | 011 | File Ingestion | COMPLETE | main via PR #12 |
 | 012 | Chunking and Embeddings | COMPLETE | main via PR #13 |
 | 013 | Retrieval | COMPLETE | main via PR #15 |
+| 014 | Citations | COMPLETE | main via PR #17 |
 
-## Completed foundation
+## Build 014 acceptance checklist
 
-Builds 001–012 establish the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, local Ollama chat, provider-neutral routing, reliable generation recovery, and local knowledge ingestion/indexing.
-
-## Build 013 acceptance checklist
-
-- [x] semantic retrieval over stored local vectors
-- [x] cosine similarity ranking
-- [x] compatible embedding provider/model filtering
-- [x] keyword fallback
-- [x] explicit keyword-only mode
-- [x] explicit semantic-only mode
-- [x] collection filters
-- [x] source-document filters
-- [x] bounded top-k results
-- [x] source, collection, chunk, offset, score metadata
-- [x] retrieval API
-- [x] Knowledge search UI
-- [x] visible semantic-fallback explanation
-- [x] retrieval service tests
-- [x] retrieval API tests
-- [x] web retrieval-surface coverage
+- [x] source name on retrieval evidence
+- [x] PDF page metadata where extraction provides page boundaries
+- [x] Markdown section metadata where headings exist
+- [x] stable evidence endpoint and links
+- [x] citation-ready search response
+- [x] evidence-only grounded-answer prompt
+- [x] citation ID validation
+- [x] unknown citation rejection
+- [x] uncited answer rejection
+- [x] insufficient-evidence response path
+- [x] local-only collection protection against future cloud providers
+- [x] evidence links in Knowledge UI
+- [x] grounded-answer UI
+- [x] citation/grounding tests
 - [x] no schema migration required
 - [x] rollback/security/runtime documentation
-- [x] Build 013 CI green
-- [x] promoted to main
-- [x] post-merge main CI green
-- [x] dev synchronized with main
+- [x] Build 014 CI green
+- [x] ready for promotion to main
+- [ ] post-merge main CI green
+- [ ] dev synchronized with main
 
 ## External setup
 
 No new application, hosted database, cloud account, or secret is required.
 
-Live semantic retrieval uses the same configured Ollama embedding model as Build 012. The default is:
+Citation search works immediately with indexed documents. Grounded answer generation additionally requires an installed local Ollama chat model.
 
-`nomic-embed-text`
-
-If it is not installed on the Windows Ollama PC, it can be installed from PowerShell with:
-
-`ollama pull nomic-embed-text`
-
-Keyword retrieval does not require Ollama and is available as the local fallback.
+Existing documents remain valid. Re-ingesting/re-indexing a PDF or Markdown source is required only if we want the new page/section citation metadata applied to an older ingestion.

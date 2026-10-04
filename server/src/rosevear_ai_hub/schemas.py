@@ -196,6 +196,10 @@ class KnowledgeSearchHitResponse(BaseModel):
     text: str
     start_char: int
     end_char: int
+    page: int | None
+    section: str | None
+    location_label: str | None
+    evidence_path: str
     score: float
     method: Literal["semantic", "keyword"]
 
@@ -205,3 +209,47 @@ class KnowledgeSearchResponse(BaseModel):
     method: Literal["semantic", "keyword"]
     fallback_reason: str | None
     hits: list[KnowledgeSearchHitResponse]
+
+
+class KnowledgeEvidenceResponse(BaseModel):
+    chunk_id: int
+    document_id: int
+    collection_id: int
+    source_name: str
+    collection_name: str
+    ordinal: int
+    text: str
+    start_char: int
+    end_char: int
+    page: int | None
+    section: str | None
+    location_label: str | None
+    evidence_path: str
+
+
+class KnowledgeAnswerRequest(KnowledgeSearchRequest):
+    provider: str = Field(default="ollama", min_length=1, max_length=64)
+    model: str = Field(min_length=1, max_length=255)
+
+
+class KnowledgeCitationResponse(BaseModel):
+    citation_id: str
+    chunk_id: int
+    document_id: int
+    source_name: str
+    collection_name: str
+    page: int | None
+    section: str | None
+    location_label: str | None
+    evidence_path: str
+
+
+class KnowledgeAnswerResponse(BaseModel):
+    query: str
+    answer: str
+    grounding_status: Literal["grounded", "insufficient_evidence", "rejected"]
+    provider: str
+    model: str
+    retrieval_method: Literal["semantic", "keyword"]
+    fallback_reason: str | None
+    citations: list[KnowledgeCitationResponse]
