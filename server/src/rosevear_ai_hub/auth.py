@@ -12,6 +12,7 @@ from argon2.exceptions import VerificationError
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import func, select, update
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.config import get_settings
@@ -174,9 +175,15 @@ def _resolve_user(db: Session, token: str | None) -> User | None:
 def _user_count(db: Session) -> int:
     """Count configured accounts, excluding the temporary pre-auth chat owner."""
 
-    return int(
-        db.scalar(select(func.count(User.id)).where(User.username != PRE_AUTH_USERNAME)) or 0
-    )
+    try:
+        return int(
+            db.scalar(select(func.count(User.id)).where(User.username != PRE_AUTH_USERNAME)) or 0
+        )
+    except OperationalError:
+        # A brand-new process can answer health/provider checks before migrations run.
+        # Treat that state as pre-bootstrap rather than turning unrelated reads into 500s.
+        db.rollback()
+        return 0
 
 
 def require_authenticated(
