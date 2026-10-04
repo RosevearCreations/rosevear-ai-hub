@@ -18,27 +18,33 @@ This file records completed and active builds. The roadmap remains authoritative
 | 012 | Chunking and Embeddings | COMPLETE | main via PR #13 |
 | 013 | Retrieval | COMPLETE | main via PR #15 |
 | 014 | Citations | COMPLETE | main via PR #17 |
+| 015 | Knowledge Administration | IN PROGRESS | dev |
 
-## Build 014 acceptance checklist
+## Build 015 acceptance checklist
 
-- [x] source name on retrieval evidence
-- [x] PDF page metadata where extraction provides page boundaries
-- [x] Markdown section metadata where headings exist
-- [x] stable evidence endpoint and links
-- [x] citation-ready search response
-- [x] evidence-only grounded-answer prompt
-- [x] citation ID validation
-- [x] unknown citation rejection
-- [x] uncited answer rejection
-- [x] insufficient-evidence response path
-- [x] local-only collection protection against future cloud providers
-- [x] evidence links in Knowledge UI
-- [x] grounded-answer UI
-- [x] citation/grounding tests
+- [x] administration status endpoint
+- [x] collection creation
+- [x] collection description and local-only metadata
+- [x] collection local-only toggle
+- [x] safe collection deletion
+- [x] default Inbox protection
+- [x] occupied collection deletion protection
+- [x] document move between collections
+- [x] document deletion
+- [x] chunk and embedding cleanup on document deletion
+- [x] stored-original cleanup on document deletion
+- [x] existing local re-index operation surfaced as administration action
+- [x] index/document/collection status dashboard
+- [x] destructive-action confirmation in UI
+- [x] collection administration UI
+- [x] document administration UI
+- [x] PATCH/DELETE CORS support for local web client
+- [x] backend administration tests
+- [x] web administration coverage
+- [x] no new hosted service or secret required
 - [x] no schema migration required
-- [x] rollback/security/runtime documentation
-- [x] Build 014 CI green
-- [x] ready for promotion to main
+- [ ] Build 015 CI green
+- [ ] promoted to main
 - [ ] post-merge main CI green
 - [ ] dev synchronized with main
 
@@ -46,6 +52,6 @@ This file records completed and active builds. The roadmap remains authoritative
 
 No new application, hosted database, cloud account, or secret is required.
 
-Citation search works immediately with indexed documents. Grounded answer generation additionally requires an installed local Ollama chat model.
+Build 015 uses the existing local SQLite knowledge metadata and original-file storage. Re-indexing still requires the local Ollama embedding model configured for knowledge indexing.
 
-Existing documents remain valid. Re-ingesting/re-indexing a PDF or Markdown source is required only if we want the new page/section citation metadata applied to an older ingestion.
+All destructive administration actions remain local and require explicit user interaction in the UI.

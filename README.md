@@ -81,9 +81,10 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 012 — Chunking and Embeddings**
 - **Build 013 — Retrieval**
 - **Build 014 — Citations**
+- **Build 015 — Knowledge Administration**
 
 ## Next build
 
-**Build 015 — Knowledge Administration**
+**Build 016 — User Accounts**
 
 The first functional MVP boundary is **Build 025**.
