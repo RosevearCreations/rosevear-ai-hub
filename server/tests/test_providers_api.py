@@ -3,6 +3,7 @@ from typing import Any
 
 from fastapi.testclient import TestClient
 
+from rosevear_ai_hub.auth import require_authenticated
 from rosevear_ai_hub.main import create_app
 from rosevear_ai_hub.providers.base import AIProvider, ProviderDescriptor, ProviderHealth
 from rosevear_ai_hub.providers.registry import ProviderRegistry, get_provider_registry
@@ -49,6 +50,7 @@ class OfflineProvider(HealthyProvider):
 
 def test_provider_status_endpoint_returns_routing_metadata() -> None:
     application = create_app()
+    application.dependency_overrides[require_authenticated] = lambda: None
     application.dependency_overrides[get_provider_registry] = lambda: ProviderRegistry(
         [HealthyProvider()]
     )
@@ -80,6 +82,7 @@ def test_provider_status_endpoint_returns_routing_metadata() -> None:
 def test_provider_status_reports_offline_state_without_failing_endpoint() -> None:
     registry = ProviderRegistry([OfflineProvider()], offline_cooldown_seconds=30)
     application = create_app()
+    application.dependency_overrides[require_authenticated] = lambda: None
     application.dependency_overrides[get_provider_registry] = lambda: registry
     client = TestClient(application)
 
