@@ -217,6 +217,9 @@ describe("App", () => {
 
   test("opens the local knowledge ingestion surface", async () => {
     render(<App />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Knowledge" })).toBeInTheDocument();
+    });
     fireEvent.click(screen.getByRole("button", { name: "Knowledge" }));
 
     await waitFor(() => {
@@ -237,6 +240,9 @@ describe("App", () => {
     installFetchMock({ providerAvailable: false, modelFailure: true });
 
     render(<App />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Chat" })).toBeInTheDocument();
+    });
     fireEvent.click(screen.getByRole("button", { name: "Chat" }));
 
     await waitFor(() => {
