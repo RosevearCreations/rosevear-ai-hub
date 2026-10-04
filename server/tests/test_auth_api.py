@@ -179,3 +179,37 @@ def test_administrator_cannot_create_or_manage_privileged_accounts(tmp_path) -> 
         },
     )
     assert forbidden.status_code == 403
+
+
+def test_read_only_account_cannot_change_application_state(tmp_path) -> None:
+    client, _ = build_client(tmp_path)
+    client.post(
+        "/api/v1/auth/bootstrap",
+        json={"username": "owner", "password": "owner-password-123"},
+    )
+    created = client.post(
+        "/api/v1/auth/users",
+        json={
+            "username": "viewer",
+            "password": "viewer-password-123",
+            "role": "read_only",
+        },
+    )
+    assert created.status_code == 201
+
+    client.post("/api/v1/auth/logout")
+    assert (
+        client.post(
+            "/api/v1/auth/login",
+            json={"username": "viewer", "password": "viewer-password-123"},
+        ).status_code
+        == 200
+    )
+
+    assert client.get("/api/v1/models/profiles").status_code == 200
+    blocked = client.post(
+        "/api/v1/chat/conversations",
+        json={"title": "Blocked write", "provider": "ollama"},
+    )
+    assert blocked.status_code == 403
+    assert "Read-only" in blocked.json()["detail"]
