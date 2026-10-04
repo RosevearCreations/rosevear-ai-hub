@@ -176,3 +176,32 @@ class KnowledgeIndexResponse(BaseModel):
     embedding_provider: str
     embedding_model: str
     dimensions: int | None
+
+
+class KnowledgeSearchRequest(BaseModel):
+    query: str = Field(min_length=1, max_length=2000)
+    top_k: int = Field(default=8, ge=1, le=50)
+    mode: Literal["auto", "semantic", "keyword"] = "auto"
+    collection_ids: list[int] = Field(default_factory=list, max_length=100)
+    document_ids: list[int] = Field(default_factory=list, max_length=100)
+
+
+class KnowledgeSearchHitResponse(BaseModel):
+    chunk_id: int
+    document_id: int
+    collection_id: int
+    filename: str
+    collection_name: str
+    ordinal: int
+    text: str
+    start_char: int
+    end_char: int
+    score: float
+    method: Literal["semantic", "keyword"]
+
+
+class KnowledgeSearchResponse(BaseModel):
+    query: str
+    method: Literal["semantic", "keyword"]
+    fallback_reason: str | None
+    hits: list[KnowledgeSearchHitResponse]
