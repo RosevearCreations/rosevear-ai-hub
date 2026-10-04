@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from rosevear_ai_hub import __version__
 from rosevear_ai_hub.api.chat import router as chat_router
 from rosevear_ai_hub.api.knowledge import router as knowledge_router
+from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
 from rosevear_ai_hub.api.providers import router as providers_router
@@ -34,7 +35,7 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_allowed_origins,
         allow_credentials=False,
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "PATCH", "DELETE"],
         allow_headers=["Accept", "Content-Type"],
         expose_headers=["X-Generation-ID"],
     )
@@ -63,6 +64,7 @@ def create_app() -> FastAPI:
     application.include_router(profiles_router)
     application.include_router(chat_router)
     application.include_router(knowledge_router)
+    application.include_router(knowledge_admin_router)
     return application
 
 
