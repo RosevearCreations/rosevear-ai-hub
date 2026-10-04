@@ -16,7 +16,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 010 | Chat Reliability | COMPLETE | main via PR #10 |
 | 011 | File Ingestion | COMPLETE | main via PR #12 |
 | 012 | Chunking and Embeddings | COMPLETE | main via PR #13 |
-| 013 | Retrieval | READY FOR PROMOTION | dev CI green |
+| 013 | Retrieval | COMPLETE | main via PR #15 |
 
 ## Completed foundation
 
@@ -43,9 +43,9 @@ Builds 001–012 establish the documented repository, FastAPI backend, SQLite/Al
 - [x] no schema migration required
 - [x] rollback/security/runtime documentation
 - [x] Build 013 CI green
-- [ ] promoted to main
-- [ ] post-merge main CI green
-- [ ] dev synchronized with main
+- [x] promoted to main
+- [x] post-merge main CI green
+- [x] dev synchronized with main
 
 ## External setup
 
