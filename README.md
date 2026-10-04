@@ -79,9 +79,10 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 010 — Chat Reliability**
 - **Build 011 — File Ingestion**
 - **Build 012 — Chunking and Embeddings**
+- **Build 013 — Retrieval**
 
 ## Next build
 
-**Build 013 — Retrieval**
+**Build 014 — Citations**
 
 The first functional MVP boundary is **Build 025**.

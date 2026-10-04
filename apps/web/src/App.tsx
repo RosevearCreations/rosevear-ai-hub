@@ -129,7 +129,7 @@ function HomeView({
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 012</p>
+          <p className="eyebrow">Build 013</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -151,7 +151,7 @@ function HomeView({
 
         <article className="panel">
           <h2>Knowledge</h2>
-          <p>Local ingestion, chunking, and Ollama embeddings are now available.</p>
+          <p>Local ingestion, embeddings, semantic retrieval, and keyword fallback are now available.</p>
           <button type="button" onClick={onOpenKnowledge}>
             Open knowledge
           </button>

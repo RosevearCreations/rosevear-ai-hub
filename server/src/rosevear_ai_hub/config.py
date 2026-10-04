@@ -66,6 +66,12 @@ class Settings(BaseSettings):
         le=128,
         alias="KNOWLEDGE_EMBEDDING_BATCH_SIZE",
     )
+    knowledge_search_top_k: int = Field(
+        default=8,
+        ge=1,
+        le=50,
+        alias="KNOWLEDGE_SEARCH_TOP_K",
+    )
     ollama_base_url: str = Field(
         default="http://127.0.0.1:11434",
         alias="OLLAMA_BASE_URL",

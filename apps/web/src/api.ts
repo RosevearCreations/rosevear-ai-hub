@@ -387,3 +387,50 @@ export async function indexKnowledgeDocument(
 
   return (await response.json()) as KnowledgeIndexResponse;
 }
+
+
+export type KnowledgeSearchMode = "auto" | "semantic" | "keyword";
+
+export interface KnowledgeSearchHit {
+  chunk_id: number;
+  document_id: number;
+  collection_id: number;
+  filename: string;
+  collection_name: string;
+  ordinal: number;
+  text: string;
+  start_char: number;
+  end_char: number;
+  score: number;
+  method: "semantic" | "keyword";
+}
+
+export interface KnowledgeSearchResponse {
+  query: string;
+  method: "semantic" | "keyword";
+  fallback_reason: string | null;
+  hits: KnowledgeSearchHit[];
+}
+
+export function searchKnowledge(
+  query: string,
+  options?: {
+    topK?: number;
+    mode?: KnowledgeSearchMode;
+    collectionIds?: number[];
+    documentIds?: number[];
+    signal?: AbortSignal;
+  },
+): Promise<KnowledgeSearchResponse> {
+  return postJson<KnowledgeSearchResponse>(
+    "/api/v1/knowledge/search",
+    {
+      query,
+      top_k: options?.topK ?? 8,
+      mode: options?.mode ?? "auto",
+      collection_ids: options?.collectionIds ?? [],
+      document_ids: options?.documentIds ?? [],
+    },
+    options?.signal,
+  );
+}

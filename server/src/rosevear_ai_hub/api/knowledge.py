@@ -20,6 +20,11 @@ from rosevear_ai_hub.knowledge.ingestion import (
     KnowledgeIngestionError,
     KnowledgeIngestionService,
 )
+from rosevear_ai_hub.knowledge.retrieval import (
+    KnowledgeRetrievalError,
+    KnowledgeRetrievalService,
+    RetrievalFilters,
+)
 from rosevear_ai_hub.knowledge.vector_store import SQLAlchemyVectorStore
 from rosevear_ai_hub.models import KnowledgeChunk, KnowledgeCollection, KnowledgeDocument
 from rosevear_ai_hub.providers.base import ProviderError
@@ -28,6 +33,9 @@ from rosevear_ai_hub.schemas import (
     KnowledgeCollectionResponse,
     KnowledgeDocumentResponse,
     KnowledgeIndexResponse,
+    KnowledgeSearchHitResponse,
+    KnowledgeSearchRequest,
+    KnowledgeSearchResponse,
     KnowledgeUploadResponse,
 )
 
@@ -47,7 +55,7 @@ def get_knowledge_ingestion_service() -> KnowledgeIngestionService:
 def get_knowledge_indexing_service() -> KnowledgeIndexingService:
     settings = get_settings()
     if settings.knowledge_embedding_provider != "ollama":
-        raise RuntimeError("Build 012 currently supports the Ollama embedding provider only.")
+        raise RuntimeError("Local knowledge currently supports the Ollama embedding provider only.")
 
     client = OllamaClient(
         settings.ollama_base_url,
@@ -65,6 +73,24 @@ def get_knowledge_indexing_service() -> KnowledgeIndexingService:
     )
 
 
+def get_knowledge_retrieval_service() -> KnowledgeRetrievalService:
+    settings = get_settings()
+    if settings.knowledge_embedding_provider != "ollama":
+        raise RuntimeError("Local knowledge currently supports the Ollama embedding provider only.")
+
+    client = OllamaClient(
+        settings.ollama_base_url,
+        timeout_seconds=settings.ollama_timeout_seconds,
+        generation_timeout_seconds=settings.ollama_generation_timeout_seconds,
+    )
+    return KnowledgeRetrievalService(
+        embed=client.embed,
+        embedding_provider="ollama",
+        embedding_model=settings.knowledge_embedding_model,
+        default_top_k=settings.knowledge_search_top_k,
+    )
+
+
 IngestionDependency = Annotated[
     KnowledgeIngestionService,
     Depends(get_knowledge_ingestion_service),
@@ -72,6 +98,10 @@ IngestionDependency = Annotated[
 IndexingDependency = Annotated[
     KnowledgeIndexingService,
     Depends(get_knowledge_indexing_service),
+]
+RetrievalDependency = Annotated[
+    KnowledgeRetrievalService,
+    Depends(get_knowledge_retrieval_service),
 ]
 
 
@@ -215,6 +245,54 @@ async def index_document(
         embedding_provider=result.embedding_provider,
         embedding_model=result.embedding_model,
         dimensions=result.dimensions,
+    )
+
+
+@router.post("/search", response_model=KnowledgeSearchResponse)
+async def search_knowledge(
+    request: KnowledgeSearchRequest,
+    session: SessionDependency,
+    retrieval: RetrievalDependency,
+) -> KnowledgeSearchResponse:
+    filters = RetrievalFilters(
+        collection_ids=tuple(request.collection_ids),
+        document_ids=tuple(request.document_ids),
+    )
+
+    try:
+        result = await retrieval.search(
+            session,
+            request.query,
+            top_k=request.top_k,
+            filters=filters,
+            mode=request.mode,
+        )
+    except KnowledgeRetrievalError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
+
+    return KnowledgeSearchResponse(
+        query=result.query,
+        method=result.method,
+        fallback_reason=result.fallback_reason,
+        hits=[
+            KnowledgeSearchHitResponse(
+                chunk_id=hit.chunk_id,
+                document_id=hit.document_id,
+                collection_id=hit.collection_id,
+                filename=hit.filename,
+                collection_name=hit.collection_name,
+                ordinal=hit.ordinal,
+                text=hit.text,
+                start_char=hit.start_char,
+                end_char=hit.end_char,
+                score=hit.score,
+                method=hit.method,
+            )
+            for hit in result.hits
+        ],
     )
 
 
