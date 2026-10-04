@@ -14,9 +14,12 @@ Initial persistence target: SQLite.
 ## sessions
 - id
 - user_id
+- token_hash
 - created_at
 - expires_at
 - revoked_at
+
+Build 016 stores only a SHA-256 hash of each opaque session token. Raw session tokens are never persisted. Sessions are revoked on logout and expire according to the configured local session lifetime.
 
 ## conversations
 - id
