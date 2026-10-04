@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
 
 import {
+  getAuthStatus,
   getHealth,
   getOllamaStatus,
+  logout,
+  type AuthStatus,
+  type AuthUser,
   type HealthResponse,
   type OllamaStatusResponse,
 } from "./api";
+import { AuthView } from "./AuthView";
 import { ChatView } from "./ChatView";
 import { KnowledgeView } from "./KnowledgeView";
+import { UsersView } from "./UsersView";
 
 type HealthState =
   | { kind: "loading" }
@@ -19,47 +25,128 @@ type OllamaState =
   | { kind: "online"; data: OllamaStatusResponse }
   | { kind: "offline"; message: string };
 
-const sections = ["Home", "Chat", "Knowledge", "Devices", "System"] as const;
-type Section = (typeof sections)[number];
+type AuthState =
+  | { kind: "loading" }
+  | { kind: "error"; message: string }
+  | { kind: "ready"; status: AuthStatus };
+
+const baseSections = ["Home", "Chat", "Knowledge", "Devices", "System"] as const;
+type Section = (typeof baseSections)[number] | "Users";
 
 export function App() {
+  const [auth, setAuth] = useState<AuthState>({ kind: "loading" });
   const [health, setHealth] = useState<HealthState>({ kind: "loading" });
   const [ollama, setOllama] = useState<OllamaState>({ kind: "loading" });
   const [section, setSection] = useState<Section>("Home");
 
   useEffect(() => {
     const controller = new AbortController();
+    getAuthStatus(controller.signal)
+      .then((status) => setAuth({ kind: "ready", status }))
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setAuth({
+          kind: "error",
+          message: error instanceof Error ? error.message : "Backend unavailable",
+        });
+      });
+    return () => controller.abort();
+  }, []);
+
+  const authenticatedUser =
+    auth.kind === "ready" && auth.status.authenticated ? auth.status.user : null;
+
+  useEffect(() => {
+    if (!authenticatedUser) return;
+
+    const controller = new AbortController();
 
     getHealth(controller.signal)
       .then((data) => setHealth({ kind: "online", data }))
       .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-
-        const message = error instanceof Error ? error.message : "Backend unavailable";
-        setHealth({ kind: "offline", message });
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setHealth({
+          kind: "offline",
+          message: error instanceof Error ? error.message : "Backend unavailable",
+        });
       });
 
     getOllamaStatus(controller.signal)
       .then((data) => {
-        if (data.available) {
-          setOllama({ kind: "online", data });
-        } else {
-          setOllama({ kind: "offline", message: data.message });
-        }
+        setOllama(
+          data.available
+            ? { kind: "online", data }
+            : { kind: "offline", message: data.message },
+        );
       })
       .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-
-        const message = error instanceof Error ? error.message : "Ollama unavailable";
-        setOllama({ kind: "offline", message });
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setOllama({
+          kind: "offline",
+          message: error instanceof Error ? error.message : "Ollama unavailable",
+        });
       });
 
     return () => controller.abort();
-  }, []);
+  }, [authenticatedUser]);
+
+  if (auth.kind === "loading") {
+    return (
+      <main className="auth-shell">
+        <section className="auth-card" role="status">
+          <p className="eyebrow">Rosevear AI Hub</p>
+          <h1>Checking local account…</h1>
+        </section>
+      </main>
+    );
+  }
+
+  if (auth.kind === "error") {
+    return (
+      <main className="auth-shell">
+        <section className="auth-card">
+          <p className="eyebrow">Rosevear AI Hub</p>
+          <h1>Backend unavailable</h1>
+          <p className="auth-error">{auth.message}</p>
+          <button className="primary-button" type="button" onClick={() => window.location.reload()}>
+            Try again
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  if (!auth.status.authenticated || !auth.status.user) {
+    return (
+      <AuthView
+        status={auth.status}
+        onAuthenticated={(user) =>
+          setAuth({
+            kind: "ready",
+            status: { bootstrap_required: false, authenticated: true, user },
+          })
+        }
+      />
+    );
+  }
+
+  const user = auth.status.user;
+  const canManageUsers = user.role === "owner" || user.role === "administrator";
+  const sections: Section[] = canManageUsers ? [...baseSections, "Users"] : [...baseSections];
+
+  async function signOut() {
+    try {
+      await logout();
+    } finally {
+      setSection("Home");
+      setHealth({ kind: "loading" });
+      setOllama({ kind: "loading" });
+      setAuth({
+        kind: "ready",
+        status: { bootstrap_required: false, authenticated: false, user: null },
+      });
+    }
+  }
 
   return (
     <div className="app-shell">
@@ -94,6 +181,14 @@ export function App() {
             ))}
           </ul>
         </nav>
+
+        <div className="account-card">
+          <strong>{user.username}</strong>
+          <small>{roleLabel(user)}</small>
+          <button type="button" onClick={() => void signOut()}>
+            Sign out
+          </button>
+        </div>
       </aside>
 
       <main id="main-content" className="content" tabIndex={-1}>
@@ -101,6 +196,8 @@ export function App() {
           <ChatView />
         ) : section === "Knowledge" ? (
           <KnowledgeView />
+        ) : section === "Users" ? (
+          <UsersView currentUser={user} />
         ) : (
           <HomeView
             health={health}
@@ -112,6 +209,13 @@ export function App() {
       </main>
     </div>
   );
+}
+
+function roleLabel(user: AuthUser): string {
+  if (user.role === "owner") return "Owner";
+  if (user.role === "administrator") return "Administrator";
+  if (user.role === "household_user") return "Household user";
+  return "Read only";
 }
 
 function HomeView({
@@ -129,7 +233,7 @@ function HomeView({
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 015</p>
+          <p className="eyebrow">Build 016</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -151,20 +255,20 @@ function HomeView({
 
         <article className="panel">
           <h2>Knowledge</h2>
-          <p>Local ingestion, citations, collection administration, re-indexing, and deletion are available.</p>
+          <p>Private ingestion, citations, collection administration, re-indexing, and deletion are available.</p>
           <button type="button" onClick={onOpenKnowledge}>
             Open knowledge
           </button>
         </article>
 
         <article className="panel">
-          <h2>Home &amp; Workshop</h2>
-          <p>Home Assistant and MQTT controls arrive in Builds 021–025.</p>
+          <h2>Local accounts</h2>
+          <p>Authentication, sessions, roles, and owner/admin user management are active.</p>
         </article>
 
         <article className="panel">
-          <h2>Cameras</h2>
-          <p>ONVIF, RTSP, and optional Frigate support arrive in Builds 031–035.</p>
+          <h2>Home &amp; Workshop</h2>
+          <p>Home Assistant and MQTT controls arrive in Builds 021–025.</p>
         </article>
       </section>
     </>
