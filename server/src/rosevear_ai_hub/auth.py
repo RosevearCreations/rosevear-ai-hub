@@ -11,15 +11,16 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, Field, field_validator
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.database import get_session
-from rosevear_ai_hub.models import AuditEvent, HubSession, User
+from rosevear_ai_hub.models import AuditEvent, Conversation, HubSession, User
 
 SESSION_COOKIE_NAME = "rosevear_ai_hub_session"
 ROLES = ("owner", "administrator", "household_user", "read_only")
+PRE_AUTH_USERNAME = "__local_pre_auth__"
 PasswordRole = Literal["owner", "administrator", "household_user", "read_only"]
 _password_hasher = PasswordHasher(time_cost=3, memory_cost=65536, parallelism=2)
 
@@ -171,7 +172,11 @@ def _resolve_user(db: Session, token: str | None) -> User | None:
 
 
 def _user_count(db: Session) -> int:
-    return int(db.scalar(select(func.count(User.id))) or 0)
+    """Count configured accounts, excluding the temporary pre-auth chat owner."""
+
+    return int(
+        db.scalar(select(func.count(User.id)).where(User.username != PRE_AUTH_USERNAME)) or 0
+    )
 
 
 def require_authenticated(
@@ -234,6 +239,10 @@ def bootstrap_owner(
     if _user_count(db) != 0:
         raise HTTPException(status_code=409, detail="Owner bootstrap has already been completed.")
 
+    if payload.username == PRE_AUTH_USERNAME:
+        raise HTTPException(status_code=400, detail="That username is reserved.")
+
+    legacy_user = db.scalar(select(User).where(User.username == PRE_AUTH_USERNAME))
     owner = User(
         username=payload.username,
         password_hash=hash_password(payload.password),
@@ -242,6 +251,15 @@ def bootstrap_owner(
     )
     db.add(owner)
     db.flush()
+
+    if legacy_user is not None:
+        db.execute(
+            update(Conversation)
+            .where(Conversation.user_id == legacy_user.id)
+            .values(user_id=owner.id)
+        )
+        db.delete(legacy_user)
+
     _record_auth_event(
         db,
         actor_user_id=owner.id,
@@ -323,6 +341,8 @@ def create_user(
 ) -> UserResponse:
     if actor.role != "owner" and payload.role in {"owner", "administrator"}:
         raise HTTPException(status_code=403, detail="Only an owner can create privileged accounts.")
+    if payload.username == PRE_AUTH_USERNAME:
+        raise HTTPException(status_code=400, detail="That username is reserved.")
     if db.scalar(select(User).where(User.username == payload.username)) is not None:
         raise HTTPException(status_code=409, detail="Username already exists.")
 
