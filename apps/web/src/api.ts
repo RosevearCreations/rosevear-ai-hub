@@ -310,6 +310,7 @@ export async function streamChat(
     API_BASE_URL + `/api/v1/chat/conversations/${conversationId}/stream`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
         Accept: "application/x-ndjson",
         "Content-Type": "application/json",
@@ -464,6 +465,7 @@ export async function indexKnowledgeDocument(
     API_BASE_URL + `/api/v1/knowledge/documents/${documentId}/index`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
         Accept: "application/json",
       },
@@ -620,6 +622,7 @@ async function knowledgeMutation<T>(
 ): Promise<T> {
   const response = await fetch(API_BASE_URL + path, {
     method,
+    credentials: "include",
     headers: body === undefined
       ? { Accept: "application/json" }
       : { Accept: "application/json", "Content-Type": "application/json" },
