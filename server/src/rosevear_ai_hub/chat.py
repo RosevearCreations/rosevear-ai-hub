@@ -14,7 +14,7 @@ LOCAL_PRE_AUTH_USERNAME = "__local_pre_auth__"
 
 
 def get_or_create_local_user(session: Session) -> User:
-    """Return the temporary single local user used before Build 016 authentication."""
+    """Return the temporary local owner used only before authentication bootstrap."""
 
     user = session.scalar(select(User).where(User.username == LOCAL_PRE_AUTH_USERNAME))
     if user is not None:
@@ -31,10 +31,13 @@ def get_or_create_local_user(session: Session) -> User:
     return user
 
 
-def get_local_conversation(session: Session, conversation_id: int) -> Conversation | None:
-    """Resolve a conversation owned by the pre-auth local user."""
+def get_user_conversation(
+    session: Session,
+    conversation_id: int,
+    user: User,
+) -> Conversation | None:
+    """Resolve a conversation only when it belongs to the supplied user."""
 
-    user = get_or_create_local_user(session)
     return session.scalar(
         select(Conversation).where(
             Conversation.id == conversation_id,
