@@ -16,8 +16,8 @@ from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.chat import (
     generation_registry,
-    get_user_conversation,
     get_or_create_local_user,
+    get_user_conversation,
     recover_incomplete_messages,
 )
 from rosevear_ai_hub.database import get_session
