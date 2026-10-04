@@ -76,7 +76,6 @@ def validate_grounded_answer(
             ordered_unique.append(value)
 
     citations = [
-        GroundedCitation(citation_id=f"K{value}", hit=hits[value - 1])
-        for value in ordered_unique
+        GroundedCitation(citation_id=f"K{value}", hit=hits[value - 1]) for value in ordered_unique
     ]
     return "grounded", citations
