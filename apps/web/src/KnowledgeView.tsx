@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import {
+  answerKnowledge,
   getKnowledgeCollections,
   getKnowledgeDocuments,
+  getOllamaModels,
   indexKnowledgeDocument,
+  knowledgeEvidenceUrl,
   searchKnowledge,
   uploadKnowledgeDocument,
+  type KnowledgeAnswerResponse,
   type KnowledgeCollection,
   type KnowledgeDocument,
   type KnowledgeIndexResponse,
+  type OllamaModel,
   type KnowledgeSearchMode,
   type KnowledgeSearchResponse,
 } from "./api";
@@ -32,6 +37,10 @@ export function KnowledgeView() {
   const [searchDocumentId, setSearchDocumentId] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchResult, setSearchResult] = useState<KnowledgeSearchResponse | null>(null);
+  const [models, setModels] = useState<OllamaModel[]>([]);
+  const [answerModel, setAnswerModel] = useState("");
+  const [answering, setAnswering] = useState(false);
+  const [answerResult, setAnswerResult] = useState<KnowledgeAnswerResponse | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
@@ -56,6 +65,16 @@ export function KnowledgeView() {
         );
       })
       .finally(() => setLoading(false));
+
+    getOllamaModels(controller.signal)
+      .then((response) => {
+        setModels(response.models);
+        setAnswerModel(response.models[0]?.name ?? "");
+      })
+      .catch(() => {
+        setModels([]);
+        setAnswerModel("");
+      });
 
     return () => controller.abort();
   }, []);
@@ -163,6 +182,7 @@ export function KnowledgeView() {
     setSearching(true);
     setError("");
     setNotice("");
+    setAnswerResult(null);
 
     try {
       const result = await searchKnowledge(query, {
@@ -181,15 +201,42 @@ export function KnowledgeView() {
     }
   }
 
+  async function submitGroundedAnswer() {
+    const query = searchQuery.trim();
+    if (!query || !answerModel || answering) {
+      return;
+    }
+
+    setAnswering(true);
+    setError("");
+    setNotice("");
+
+    try {
+      const result = await answerKnowledge(query, "ollama", answerModel, {
+        mode: searchMode,
+        collectionIds: searchCollectionId ? [Number(searchCollectionId)] : [],
+        documentIds: searchDocumentId ? [Number(searchDocumentId)] : [],
+      });
+      setAnswerResult(result);
+    } catch (caught: unknown) {
+      setAnswerResult(null);
+      setError(
+        caught instanceof Error ? caught.message : "Grounded local answer failed.",
+      );
+    } finally {
+      setAnswering(false);
+    }
+  }
+
   return (
     <section className="knowledge-view" aria-label="Knowledge ingestion, indexing, and retrieval">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 013</p>
+          <p className="eyebrow">Build 014</p>
           <h1>Knowledge</h1>
           <p className="lede">
-            Add private local documents, create local embeddings, and search indexed
-            knowledge with semantic ranking plus keyword fallback.
+            Add private local documents, search indexed knowledge, and verify answers
+            against citation-linked local evidence.
           </p>
         </div>
         <div className="health-card" role="status">
@@ -311,15 +358,94 @@ export function KnowledgeView() {
                   <div className="knowledge-result-meta">
                     <strong>{hit.filename}</strong>
                     <small>
-                      {hit.collection_name} · chunk {hit.ordinal + 1} · {hit.method} · score{" "}
+                      {hit.collection_name}
+                      {hit.location_label ? ` · ${hit.location_label}` : ""}
+                      {" · "}chunk {hit.ordinal + 1} · {hit.method} · score{" "}
                       {hit.score.toFixed(3)}
                     </small>
+                    <a
+                      href={knowledgeEvidenceUrl(hit.evidence_path)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      View evidence
+                    </a>
                   </div>
                   <p>{hit.text}</p>
                 </article>
               ))}
             </div>
           )}
+        </section>
+      ) : null}
+
+      {searchResult ? (
+        <section className="panel grounded-answer" aria-labelledby="grounded-answer-title">
+          <div>
+            <h2 id="grounded-answer-title">Grounded answer</h2>
+            <p>
+              Uses only retrieved local evidence. Unsupported answers are rejected instead
+              of being shown as factual.
+            </p>
+          </div>
+
+          <div className="grounded-answer-controls">
+            <label>
+              <span>Local chat model</span>
+              <select
+                value={answerModel}
+                onChange={(event) => setAnswerModel(event.target.value)}
+                disabled={answering || models.length === 0}
+              >
+                {models.length === 0 ? (
+                  <option value="">No local chat model installed</option>
+                ) : (
+                  models.map((model) => (
+                    <option key={model.name} value={model.name}>
+                      {model.name}
+                    </option>
+                  ))
+                )}
+              </select>
+            </label>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => void submitGroundedAnswer()}
+              disabled={!answerModel || answering || !searchQuery.trim()}
+            >
+              {answering ? "Checking evidence…" : "Ask with citations"}
+            </button>
+          </div>
+
+          {models.length === 0 ? (
+            <small>
+              Search citations work now. A local Ollama chat model is required only to
+              generate a grounded answer.
+            </small>
+          ) : null}
+
+          {answerResult ? (
+            <div className="grounded-answer-result" role="status">
+              <strong>{answerResult.grounding_status.replaceAll("_", " ")}</strong>
+              <p>{answerResult.answer}</p>
+              {answerResult.citations.length > 0 ? (
+                <div className="grounded-citations">
+                  {answerResult.citations.map((citation) => (
+                    <a
+                      key={citation.citation_id}
+                      href={knowledgeEvidenceUrl(citation.evidence_path)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      [{citation.citation_id}] {citation.source_name}
+                      {citation.location_label ? ` · ${citation.location_label}` : ""}
+                    </a>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </section>
       ) : null}
 
