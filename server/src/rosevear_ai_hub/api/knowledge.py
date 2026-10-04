@@ -440,9 +440,7 @@ async def answer_knowledge(
     except GroundingError:
         return KnowledgeAnswerResponse(
             query=result.query,
-            answer=(
-                "I could not produce an answer that met the local evidence-citation policy."
-            ),
+            answer=("I could not produce an answer that met the local evidence-citation policy."),
             grounding_status="rejected",
             provider=request.provider,
             model=request.model,
