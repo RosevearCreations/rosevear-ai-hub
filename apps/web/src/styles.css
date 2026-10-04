@@ -766,3 +766,121 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Build 015 — knowledge administration */
+.knowledge-admin {
+  display: grid;
+  gap: 1rem;
+}
+
+.knowledge-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.knowledge-status dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.knowledge-status dl div {
+  padding: 0.65rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 0.6rem;
+}
+
+.knowledge-status dt {
+  color: #737373;
+  font-size: 0.8rem;
+}
+
+.knowledge-status dd {
+  margin: 0.2rem 0 0;
+  font-weight: 700;
+}
+
+.knowledge-collection-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.knowledge-collection-form label,
+.knowledge-document-actions label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.knowledge-collection-form input,
+.knowledge-collection-form textarea,
+.knowledge-document-actions select {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid #a3a3a3;
+  border-radius: 0.6rem;
+  background: white;
+  color: #171717;
+}
+
+.knowledge-checkbox {
+  display: flex !important;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.knowledge-checkbox input {
+  width: auto;
+}
+
+.knowledge-collection-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.knowledge-collection-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 0.75rem;
+  background: white;
+}
+
+.knowledge-collection-card strong,
+.knowledge-collection-card small {
+  display: block;
+}
+
+.knowledge-collection-card small {
+  margin-top: 0.25rem;
+  color: #525252;
+}
+
+.knowledge-document-actions {
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.knowledge-document-actions label {
+  min-width: 160px;
+}
+
+@media (max-width: 900px) {
+  .knowledge-admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .knowledge-status dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .knowledge-collection-card {
+    grid-template-columns: 1fr;
+  }
+}
