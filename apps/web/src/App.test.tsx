@@ -168,6 +168,7 @@ describe("App", () => {
 
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Knowledge" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Search local knowledge" })).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "Ingest a file" })).toBeInTheDocument();
       expect(screen.getByText(/PDF, TXT, Markdown, and DOCX/)).toBeInTheDocument();
       expect(screen.getByText("No documents yet")).toBeInTheDocument();
