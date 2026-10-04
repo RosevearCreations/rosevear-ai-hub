@@ -374,9 +374,7 @@ def create_user(
 
 def _enabled_owner_count(db: Session) -> int:
     return int(
-        db.scalar(
-            select(func.count(User.id)).where(User.role == "owner", User.enabled.is_(True))
-        )
+        db.scalar(select(func.count(User.id)).where(User.role == "owner", User.enabled.is_(True)))
         or 0
     )
 
