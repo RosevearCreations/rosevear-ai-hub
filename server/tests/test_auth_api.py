@@ -87,7 +87,11 @@ def test_bootstrap_adopts_pre_auth_conversations(tmp_path) -> None:
         )
         session.add(legacy)
         session.flush()
-        conversation = Conversation(user_id=legacy.id, title="Earlier local chat", provider="ollama")
+        conversation = Conversation(
+            user_id=legacy.id,
+            title="Earlier local chat",
+            provider="ollama",
+        )
         session.add(conversation)
         session.commit()
         conversation_id = conversation.id
