@@ -6,13 +6,14 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from rosevear_ai_hub import __version__
-from rosevear_ai_hub.auth import require_authenticated, router as auth_router
 from rosevear_ai_hub.api.chat import router as chat_router
 from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
 from rosevear_ai_hub.api.providers import router as providers_router
+from rosevear_ai_hub.auth import require_authenticated
+from rosevear_ai_hub.auth import router as auth_router
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.logging import configure_logging
 from rosevear_ai_hub.schemas import HealthResponse, VersionResponse
