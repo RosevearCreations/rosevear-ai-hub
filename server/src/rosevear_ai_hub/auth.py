@@ -195,6 +195,11 @@ def require_authenticated(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required.",
         )
+    if user.role == "read_only" and request.method not in {"GET", "HEAD", "OPTIONS"}:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Read-only accounts cannot change Hub state.",
+        )
     request.state.user = user
     return user
 
