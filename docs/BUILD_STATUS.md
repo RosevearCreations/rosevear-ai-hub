@@ -17,7 +17,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 011 | File Ingestion | COMPLETE | main via PR #12 |
 | 012 | Chunking and Embeddings | COMPLETE | main via PR #13 |
 | 013 | Retrieval | COMPLETE | main via PR #15 |
-| 014 | Citations | IN PROGRESS | dev |
+| 014 | Citations | COMPLETE | main via PR #17 |
 
 ## Build 014 acceptance checklist
 
@@ -37,8 +37,8 @@ This file records completed and active builds. The roadmap remains authoritative
 - [x] citation/grounding tests
 - [x] no schema migration required
 - [x] rollback/security/runtime documentation
-- [ ] Build 014 CI green
-- [ ] promoted to main
+- [x] Build 014 CI green
+- [x] ready for promotion to main
 - [ ] post-merge main CI green
 - [ ] dev synchronized with main
 
