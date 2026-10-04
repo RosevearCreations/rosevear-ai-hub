@@ -16,46 +16,47 @@ This file records completed and active builds. The roadmap remains authoritative
 | 010 | Chat Reliability | COMPLETE | main via PR #10 |
 | 011 | File Ingestion | COMPLETE | main via PR #12 |
 | 012 | Chunking and Embeddings | COMPLETE | main via PR #13 |
+| 013 | Retrieval | IN PROGRESS | dev |
 
 ## Completed foundation
 
-Builds 001–012 establish the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, local Ollama chat, provider-neutral routing, reliable generation recovery, and safe local file ingestion.
+Builds 001–012 establish the documented repository, FastAPI backend, SQLite/Alembic database, React/Tauri interface, local Ollama chat, provider-neutral routing, reliable generation recovery, and local knowledge ingestion/indexing.
 
-## Build 012 acceptance checklist
+## Build 013 acceptance checklist
 
-- [x] configurable deterministic chunking
-- [x] configurable overlap
-- [x] stable character offsets for future citations
-- [x] local Ollama embedding adapter
-- [x] configurable embedding model
-- [x] configurable embedding batch size
-- [x] vector-storage abstraction
-- [x] portable SQLite/SQLAlchemy JSON-vector backend
-- [x] document chunk persistence
-- [x] embedding metadata and vector persistence
-- [x] per-chunk embedding references
-- [x] idempotent document re-index foundation
-- [x] no-text document handling
-- [x] document indexing API
-- [x] chunk inspection API
-- [x] local indexing UI and re-index control
-- [x] chunking/indexing/Ollama/API/migration tests
+- [x] semantic retrieval over stored local vectors
+- [x] cosine similarity ranking
+- [x] compatible embedding provider/model filtering
+- [x] keyword fallback
+- [x] explicit keyword-only mode
+- [x] explicit semantic-only mode
+- [x] collection filters
+- [x] source-document filters
+- [x] bounded top-k results
+- [x] source, collection, chunk, offset, score metadata
+- [x] retrieval API
+- [x] Knowledge search UI
+- [x] visible semantic-fallback explanation
+- [x] retrieval service tests
+- [x] retrieval API tests
+- [x] web retrieval-surface coverage
+- [x] no schema migration required
 - [x] rollback/security/runtime documentation
-- [x] Build 012 CI green
-- [x] promoted to main
-- [x] post-merge main CI green
-- [x] dev synchronized with main
+- [ ] Build 013 CI green
+- [ ] promoted to main
+- [ ] post-merge main CI green
+- [ ] dev synchronized with main
 
 ## External setup
 
-No new application, hosted database, or cloud service is required.
+No new application, hosted database, cloud account, or secret is required.
 
-For **live embeddings**, Ollama needs the configured embedding model. The default is:
+Live semantic retrieval uses the same configured Ollama embedding model as Build 012. The default is:
 
 `nomic-embed-text`
 
-On the Windows Ollama PC, the model can be installed from PowerShell with:
+If it is not installed on the Windows Ollama PC, it can be installed from PowerShell with:
 
 `ollama pull nomic-embed-text`
 
-Repository CI uses a fake embedding provider, so development and promotion do not depend on the model download.
+Keyword retrieval does not require Ollama and is available as the local fallback.
