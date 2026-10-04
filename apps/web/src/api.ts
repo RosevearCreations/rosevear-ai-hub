@@ -1,3 +1,19 @@
+export type AuthRole = "owner" | "administrator" | "household_user" | "read_only";
+
+export interface AuthUser {
+  id: number;
+  username: string;
+  role: AuthRole;
+  enabled: boolean;
+  created_at: string;
+}
+
+export interface AuthStatus {
+  bootstrap_required: boolean;
+  authenticated: boolean;
+  user: AuthUser | null;
+}
+
 export interface HealthResponse {
   status: "ok";
   service: string;
@@ -113,6 +129,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8765
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(API_BASE_URL + path, {
     method: "GET",
+    credentials: "include",
     headers: {
       Accept: "application/json",
     },
@@ -133,6 +150,7 @@ async function postJson<T>(
 ): Promise<T> {
   const response = await fetch(API_BASE_URL + path, {
     method: "POST",
+    credentials: "include",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -146,6 +164,86 @@ async function postJson<T>(
   }
 
   return (await response.json()) as T;
+}
+
+async function authJson<T>(
+  method: "GET" | "POST" | "PATCH",
+  path: string,
+  body?: unknown,
+  signal?: AbortSignal,
+): Promise<T> {
+  const response = await fetch(API_BASE_URL + path, {
+    method,
+    credentials: "include",
+    headers: body === undefined
+      ? { Accept: "application/json" }
+      : { Accept: "application/json", "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+    signal,
+  });
+
+  if (!response.ok) {
+    let detail = "Request failed with status " + response.status;
+    try {
+      const payload = (await response.json()) as { detail?: string };
+      if (payload.detail) detail = payload.detail;
+    } catch {
+      // Keep the status fallback.
+    }
+    throw new Error(detail);
+  }
+
+  return (await response.json()) as T;
+}
+
+export function getAuthStatus(signal?: AbortSignal): Promise<AuthStatus> {
+  return authJson<AuthStatus>("GET", "/api/v1/auth/status", undefined, signal);
+}
+
+export function bootstrapOwner(
+  username: string,
+  password: string,
+  signal?: AbortSignal,
+): Promise<AuthUser> {
+  return authJson<AuthUser>("POST", "/api/v1/auth/bootstrap", { username, password }, signal);
+}
+
+export function login(
+  username: string,
+  password: string,
+  signal?: AbortSignal,
+): Promise<AuthUser> {
+  return authJson<AuthUser>("POST", "/api/v1/auth/login", { username, password }, signal);
+}
+
+export function logout(signal?: AbortSignal): Promise<{ ok: boolean; message: string }> {
+  return authJson("POST", "/api/v1/auth/logout", {}, signal);
+}
+
+export function getUsers(signal?: AbortSignal): Promise<AuthUser[]> {
+  return authJson<AuthUser[]>("GET", "/api/v1/auth/users", undefined, signal);
+}
+
+export function createUser(
+  username: string,
+  password: string,
+  role: AuthRole,
+  signal?: AbortSignal,
+): Promise<AuthUser> {
+  return authJson<AuthUser>(
+    "POST",
+    "/api/v1/auth/users",
+    { username, password, role },
+    signal,
+  );
+}
+
+export function updateUser(
+  userId: number,
+  changes: { role?: AuthRole; enabled?: boolean; new_password?: string },
+  signal?: AbortSignal,
+): Promise<AuthUser> {
+  return authJson<AuthUser>("PATCH", "/api/v1/auth/users/" + userId, changes, signal);
 }
 
 export function getHealth(signal?: AbortSignal): Promise<HealthResponse> {
@@ -333,6 +431,7 @@ export async function uploadKnowledgeDocument(
 
   const response = await fetch(API_BASE_URL + "/api/v1/knowledge/documents", {
     method: "POST",
+    credentials: "include",
     headers: {
       Accept: "application/json",
     },
