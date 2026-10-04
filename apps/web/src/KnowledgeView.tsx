@@ -4,10 +4,13 @@ import {
   getKnowledgeCollections,
   getKnowledgeDocuments,
   indexKnowledgeDocument,
+  searchKnowledge,
   uploadKnowledgeDocument,
   type KnowledgeCollection,
   type KnowledgeDocument,
   type KnowledgeIndexResponse,
+  type KnowledgeSearchMode,
+  type KnowledgeSearchResponse,
 } from "./api";
 
 const SUPPORTED_FILE_TYPES = ".pdf,.txt,.md,.docx";
@@ -23,6 +26,12 @@ export function KnowledgeView() {
   const [indexResults, setIndexResults] = useState<Map<number, KnowledgeIndexResponse>>(
     new Map(),
   );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchMode, setSearchMode] = useState<KnowledgeSearchMode>("auto");
+  const [searchCollectionId, setSearchCollectionId] = useState("");
+  const [searchDocumentId, setSearchDocumentId] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [searchResult, setSearchResult] = useState<KnowledgeSearchResponse | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
@@ -55,6 +64,14 @@ export function KnowledgeView() {
     () => new Map(collections.map((collection) => [collection.id, collection])),
     [collections],
   );
+
+  const filteredSourceDocuments = useMemo(() => {
+    if (!searchCollectionId) {
+      return documents;
+    }
+    const selected = Number(searchCollectionId);
+    return documents.filter((document) => document.collection_id === selected);
+  }, [documents, searchCollectionId]);
 
   async function refreshDocuments() {
     const refreshed = await getKnowledgeDocuments();
@@ -136,15 +153,43 @@ export function KnowledgeView() {
     }
   }
 
+  async function submitSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    if (!query || searching) {
+      return;
+    }
+
+    setSearching(true);
+    setError("");
+    setNotice("");
+
+    try {
+      const result = await searchKnowledge(query, {
+        mode: searchMode,
+        collectionIds: searchCollectionId ? [Number(searchCollectionId)] : [],
+        documentIds: searchDocumentId ? [Number(searchDocumentId)] : [],
+      });
+      setSearchResult(result);
+    } catch (caught: unknown) {
+      setSearchResult(null);
+      setError(
+        caught instanceof Error ? caught.message : "Local knowledge search failed.",
+      );
+    } finally {
+      setSearching(false);
+    }
+  }
+
   return (
-    <section className="knowledge-view" aria-label="Knowledge ingestion and indexing">
+    <section className="knowledge-view" aria-label="Knowledge ingestion, indexing, and retrieval">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 012</p>
+          <p className="eyebrow">Build 013</p>
           <h1>Knowledge</h1>
           <p className="lede">
-            Add private local documents, split them into configurable chunks, and create
-            local embeddings through Ollama.
+            Add private local documents, create local embeddings, and search indexed
+            knowledge with semantic ranking plus keyword fallback.
           </p>
         </div>
         <div className="health-card" role="status">
@@ -155,6 +200,128 @@ export function KnowledgeView() {
           </span>
         </div>
       </header>
+
+      <form className="panel knowledge-search" onSubmit={(event) => void submitSearch(event)}>
+        <div>
+          <h2>Search local knowledge</h2>
+          <p>
+            Auto mode uses local semantic search first and falls back to keyword matching
+            if embeddings are unavailable.
+          </p>
+        </div>
+
+        <label className="knowledge-search-query">
+          <span>Search</span>
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="What do our local documents say about…"
+            disabled={searching}
+          />
+        </label>
+
+        <div className="knowledge-search-filters">
+          <label>
+            <span>Mode</span>
+            <select
+              value={searchMode}
+              onChange={(event) => setSearchMode(event.target.value as KnowledgeSearchMode)}
+              disabled={searching}
+            >
+              <option value="auto">Auto</option>
+              <option value="semantic">Semantic only</option>
+              <option value="keyword">Keyword only</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Collection</span>
+            <select
+              value={searchCollectionId}
+              onChange={(event) => {
+                setSearchCollectionId(event.target.value);
+                setSearchDocumentId("");
+              }}
+              disabled={searching}
+            >
+              <option value="">All collections</option>
+              {collections.map((collection) => (
+                <option key={collection.id} value={collection.id}>
+                  {collection.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            <span>Source</span>
+            <select
+              value={searchDocumentId}
+              onChange={(event) => setSearchDocumentId(event.target.value)}
+              disabled={searching}
+            >
+              <option value="">All documents</option>
+              {filteredSourceDocuments.map((document) => (
+                <option key={document.id} value={document.id}>
+                  {document.filename}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <button
+            type="submit"
+            className="primary-button"
+            disabled={!searchQuery.trim() || searching}
+          >
+            {searching ? "Searching…" : "Search"}
+          </button>
+        </div>
+      </form>
+
+      {searchResult ? (
+        <section className="knowledge-results" aria-labelledby="knowledge-results-title">
+          <div className="knowledge-library-header">
+            <div>
+              <h2 id="knowledge-results-title">Search results</h2>
+              <p>
+                {searchResult.hits.length} result
+                {searchResult.hits.length === 1 ? "" : "s"} · {searchResult.method}
+              </p>
+            </div>
+          </div>
+
+          {searchResult.fallback_reason ? (
+            <p className="knowledge-notice" role="status">
+              Semantic search was unavailable, so keyword fallback was used:{" "}
+              {searchResult.fallback_reason}
+            </p>
+          ) : null}
+
+          {searchResult.hits.length === 0 ? (
+            <div className="empty-state">
+              <h2>No matching indexed chunks</h2>
+              <p>Try broader wording, another source, or keyword mode.</p>
+            </div>
+          ) : (
+            <div className="knowledge-result-list">
+              {searchResult.hits.map((hit) => (
+                <article className="knowledge-result" key={hit.chunk_id}>
+                  <div className="knowledge-result-meta">
+                    <strong>{hit.filename}</strong>
+                    <small>
+                      {hit.collection_name} · chunk {hit.ordinal + 1} · {hit.method} · score{" "}
+                      {hit.score.toFixed(3)}
+                    </small>
+                  </div>
+                  <p>{hit.text}</p>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      ) : null}
 
       <div className="knowledge-grid">
         <form className="panel knowledge-upload" onSubmit={(event) => void submitUpload(event)}>
@@ -205,12 +372,11 @@ export function KnowledgeView() {
         <article className="panel">
           <h2>Local indexing</h2>
           <p>
-            Each document can now be chunked and embedded locally. The default embedding
+            Each document can be chunked and embedded locally. The default embedding
             model is <strong>nomic-embed-text</strong> through Ollama.
           </p>
           <p>
-            If the embedding model is not installed yet, ingestion still works and documents
-            remain available for indexing later.
+            Search filters can limit retrieval to one collection or one source document.
           </p>
         </article>
       </div>
@@ -230,7 +396,7 @@ export function KnowledgeView() {
         <div className="knowledge-library-header">
           <div>
             <h2 id="knowledge-library-title">Local documents</h2>
-            <p>Chunking and embeddings stay on this machine.</p>
+            <p>Chunking, embeddings, and retrieval stay on this machine.</p>
           </div>
         </div>
 
