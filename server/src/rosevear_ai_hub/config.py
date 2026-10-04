@@ -26,6 +26,16 @@ class Settings(BaseSettings):
         default="sqlite:///./data/rosevear_ai_hub.db",
         alias="DATABASE_URL",
     )
+    auth_session_hours: int = Field(
+        default=168,
+        ge=1,
+        le=24 * 365,
+        alias="AUTH_SESSION_HOURS",
+    )
+    auth_cookie_secure: bool = Field(
+        default=False,
+        alias="AUTH_COOKIE_SECURE",
+    )
     knowledge_storage_dir: Path = Field(
         default=Path("./data/knowledge"),
         alias="KNOWLEDGE_STORAGE_DIR",
