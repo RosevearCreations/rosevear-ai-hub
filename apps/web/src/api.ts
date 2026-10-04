@@ -493,3 +493,121 @@ export function answerKnowledge(
     options?.signal,
   );
 }
+
+
+export interface KnowledgeAdminStatus {
+  collection_count: number;
+  local_only_collection_count: number;
+  document_count: number;
+  indexed_document_count: number;
+  needs_indexing_count: number;
+  chunk_count: number;
+  embedding_count: number;
+  total_source_bytes: number;
+  documents_by_status: Record<string, number>;
+}
+
+export function getKnowledgeAdminStatus(
+  signal?: AbortSignal,
+): Promise<KnowledgeAdminStatus> {
+  return getJson<KnowledgeAdminStatus>("/api/v1/knowledge/admin/status", signal);
+}
+
+async function knowledgeMutation<T>(
+  method: "POST" | "PATCH" | "DELETE",
+  path: string,
+  body?: unknown,
+  signal?: AbortSignal,
+): Promise<T> {
+  const response = await fetch(API_BASE_URL + path, {
+    method,
+    headers: body === undefined
+      ? { Accept: "application/json" }
+      : { Accept: "application/json", "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+    signal,
+  });
+
+  if (!response.ok) {
+    let detail = `Request failed with status ${response.status}`;
+    try {
+      const payload = (await response.json()) as { detail?: string };
+      if (payload.detail) {
+        detail = payload.detail;
+      }
+    } catch {
+      // Keep the HTTP status fallback.
+    }
+    throw new Error(detail);
+  }
+
+  return (await response.json()) as T;
+}
+
+export function createKnowledgeCollection(
+  name: string,
+  description: string,
+  localOnly: boolean,
+  signal?: AbortSignal,
+): Promise<KnowledgeCollection> {
+  return knowledgeMutation<KnowledgeCollection>(
+    "POST",
+    "/api/v1/knowledge/collections",
+    { name, description: description || null, local_only: localOnly },
+    signal,
+  );
+}
+
+export function updateKnowledgeCollection(
+  collectionId: number,
+  changes: {
+    name?: string;
+    description?: string | null;
+    local_only?: boolean;
+  },
+  signal?: AbortSignal,
+): Promise<KnowledgeCollection> {
+  return knowledgeMutation<KnowledgeCollection>(
+    "PATCH",
+    `/api/v1/knowledge/collections/${collectionId}`,
+    changes,
+    signal,
+  );
+}
+
+export function deleteKnowledgeCollection(
+  collectionId: number,
+  signal?: AbortSignal,
+): Promise<{ deleted: boolean; source_deleted: boolean }> {
+  return knowledgeMutation(
+    "DELETE",
+    `/api/v1/knowledge/collections/${collectionId}`,
+    undefined,
+    signal,
+  );
+}
+
+export function moveKnowledgeDocument(
+  documentId: number,
+  collectionId: number,
+  signal?: AbortSignal,
+): Promise<KnowledgeDocument> {
+  return knowledgeMutation<KnowledgeDocument>(
+    "PATCH",
+    `/api/v1/knowledge/documents/${documentId}/collection`,
+    { collection_id: collectionId },
+    signal,
+  );
+}
+
+export function deleteKnowledgeDocument(
+  documentId: number,
+  signal?: AbortSignal,
+): Promise<{ deleted: boolean; source_deleted: boolean }> {
+  return knowledgeMutation(
+    "DELETE",
+    `/api/v1/knowledge/documents/${documentId}`,
+    undefined,
+    signal,
+  );
+}

@@ -2,13 +2,20 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import {
   answerKnowledge,
+  createKnowledgeCollection,
+  deleteKnowledgeCollection,
+  deleteKnowledgeDocument,
+  getKnowledgeAdminStatus,
   getKnowledgeCollections,
   getKnowledgeDocuments,
   getOllamaModels,
   indexKnowledgeDocument,
   knowledgeEvidenceUrl,
+  moveKnowledgeDocument,
   searchKnowledge,
+  updateKnowledgeCollection,
   uploadKnowledgeDocument,
+  type KnowledgeAdminStatus,
   type KnowledgeAnswerResponse,
   type KnowledgeCollection,
   type KnowledgeDocument,
@@ -23,7 +30,14 @@ const SUPPORTED_FILE_TYPES = ".pdf,.txt,.md,.docx";
 export function KnowledgeView() {
   const [collections, setCollections] = useState<KnowledgeCollection[]>([]);
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
+  const [adminStatus, setAdminStatus] = useState<KnowledgeAdminStatus | null>(null);
   const [collectionId, setCollectionId] = useState<number>(1);
+  const [newCollectionName, setNewCollectionName] = useState("");
+  const [newCollectionDescription, setNewCollectionDescription] = useState("");
+  const [newCollectionLocalOnly, setNewCollectionLocalOnly] = useState(true);
+  const [creatingCollection, setCreatingCollection] = useState(false);
+  const [collectionBusyId, setCollectionBusyId] = useState<number | null>(null);
+  const [documentAdminId, setDocumentAdminId] = useState<number | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -50,10 +64,12 @@ export function KnowledgeView() {
     Promise.all([
       getKnowledgeCollections(controller.signal),
       getKnowledgeDocuments(controller.signal),
+      getKnowledgeAdminStatus(controller.signal),
     ])
-      .then(([collectionResponse, documentResponse]) => {
+      .then(([collectionResponse, documentResponse, statusResponse]) => {
         setCollections(collectionResponse);
         setDocuments(documentResponse);
+        setAdminStatus(statusResponse);
         setCollectionId(collectionResponse[0]?.id ?? 1);
       })
       .catch((caught: unknown) => {
@@ -93,8 +109,160 @@ export function KnowledgeView() {
   }, [documents, searchCollectionId]);
 
   async function refreshDocuments() {
-    const refreshed = await getKnowledgeDocuments();
+    const [refreshed, statusResponse] = await Promise.all([
+      getKnowledgeDocuments(),
+      getKnowledgeAdminStatus(),
+    ]);
     setDocuments(refreshed);
+    setAdminStatus(statusResponse);
+  }
+
+  async function refreshCollections() {
+    const [refreshed, statusResponse] = await Promise.all([
+      getKnowledgeCollections(),
+      getKnowledgeAdminStatus(),
+    ]);
+    setCollections(refreshed);
+    setAdminStatus(statusResponse);
+    if (!refreshed.some((item) => item.id === collectionId)) {
+      setCollectionId(refreshed[0]?.id ?? 1);
+    }
+  }
+
+  async function submitCollection(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const name = newCollectionName.trim();
+    if (!name || creatingCollection) {
+      return;
+    }
+
+    setCreatingCollection(true);
+    setError("");
+    setNotice("");
+
+    try {
+      const created = await createKnowledgeCollection(
+        name,
+        newCollectionDescription.trim(),
+        newCollectionLocalOnly,
+      );
+      await refreshCollections();
+      setCollectionId(created.id);
+      setNewCollectionName("");
+      setNewCollectionDescription("");
+      setNewCollectionLocalOnly(true);
+      setNotice(`${created.name} collection created.`);
+    } catch (caught: unknown) {
+      setError(caught instanceof Error ? caught.message : "Collection creation failed.");
+    } finally {
+      setCreatingCollection(false);
+    }
+  }
+
+  async function toggleCollectionLocalOnly(collection: KnowledgeCollection) {
+    if (collectionBusyId !== null) {
+      return;
+    }
+
+    setCollectionBusyId(collection.id);
+    setError("");
+    try {
+      const updated = await updateKnowledgeCollection(collection.id, {
+        local_only: !collection.local_only,
+      });
+      setCollections((current) =>
+        current.map((item) => (item.id === updated.id ? updated : item)),
+      );
+      setNotice(
+        `${updated.name} is now ${updated.local_only ? "local only" : "eligible for future non-local providers"}.`,
+      );
+      setAdminStatus(await getKnowledgeAdminStatus());
+    } catch (caught: unknown) {
+      setError(caught instanceof Error ? caught.message : "Collection update failed.");
+    } finally {
+      setCollectionBusyId(null);
+    }
+  }
+
+  async function removeCollection(collection: KnowledgeCollection) {
+    if (collectionBusyId !== null) {
+      return;
+    }
+    if (!window.confirm(`Delete the empty collection "${collection.name}"?`)) {
+      return;
+    }
+
+    setCollectionBusyId(collection.id);
+    setError("");
+    try {
+      await deleteKnowledgeCollection(collection.id);
+      await refreshCollections();
+      setNotice(`${collection.name} collection deleted.`);
+      if (searchCollectionId === String(collection.id)) {
+        setSearchCollectionId("");
+        setSearchDocumentId("");
+      }
+    } catch (caught: unknown) {
+      setError(caught instanceof Error ? caught.message : "Collection deletion failed.");
+    } finally {
+      setCollectionBusyId(null);
+    }
+  }
+
+  async function moveDocument(document: KnowledgeDocument, targetCollectionId: number) {
+    if (documentAdminId !== null || targetCollectionId === document.collection_id) {
+      return;
+    }
+
+    setDocumentAdminId(document.id);
+    setError("");
+    try {
+      const updated = await moveKnowledgeDocument(document.id, targetCollectionId);
+      setDocuments((current) =>
+        current.map((item) => (item.id === updated.id ? updated : item)),
+      );
+      setNotice(
+        `${updated.filename} moved to ${collectionById.get(targetCollectionId)?.name ?? "collection"}.`,
+      );
+    } catch (caught: unknown) {
+      setError(caught instanceof Error ? caught.message : "Document move failed.");
+    } finally {
+      setDocumentAdminId(null);
+    }
+  }
+
+  async function removeDocument(document: KnowledgeDocument) {
+    if (documentAdminId !== null) {
+      return;
+    }
+    if (
+      !window.confirm(
+        `Delete "${document.filename}" and its local chunks/embeddings? This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    setDocumentAdminId(document.id);
+    setError("");
+    try {
+      const result = await deleteKnowledgeDocument(document.id);
+      await refreshDocuments();
+      setSearchResult(null);
+      setAnswerResult(null);
+      if (searchDocumentId === String(document.id)) {
+        setSearchDocumentId("");
+      }
+      setNotice(
+        result.source_deleted
+          ? `${document.filename} and its stored original were deleted.`
+          : `${document.filename} was deleted from the knowledge index. The original file could not be removed automatically.`,
+      );
+    } catch (caught: unknown) {
+      setError(caught instanceof Error ? caught.message : "Document deletion failed.");
+    } finally {
+      setDocumentAdminId(null);
+    }
   }
 
   async function submitUpload(event: FormEvent<HTMLFormElement>) {
@@ -232,18 +400,20 @@ export function KnowledgeView() {
     <section className="knowledge-view" aria-label="Knowledge ingestion, indexing, and retrieval">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 014</p>
+          <p className="eyebrow">Build 015</p>
           <h1>Knowledge</h1>
           <p className="lede">
-            Add private local documents, search indexed knowledge, and verify answers
-            against citation-linked local evidence.
+            Administer private collections and documents, re-index local knowledge, and
+            verify answers against citation-linked local evidence.
           </p>
         </div>
         <div className="health-card" role="status">
           <span className="status-dot online" aria-hidden="true" />
           <span>
             Local knowledge
-            <small>{documents.length} document{documents.length === 1 ? "" : "s"}</small>
+            <small>
+              {adminStatus?.indexed_document_count ?? 0}/{adminStatus?.document_count ?? documents.length} indexed
+            </small>
           </span>
         </div>
       </header>
@@ -449,6 +619,112 @@ export function KnowledgeView() {
         </section>
       ) : null}
 
+
+      <section className="knowledge-admin" aria-labelledby="knowledge-admin-title">
+        <div className="knowledge-library-header">
+          <div>
+            <h2 id="knowledge-admin-title">Knowledge administration</h2>
+            <p>Create collections, enforce local-only privacy, and monitor index health.</p>
+          </div>
+        </div>
+
+        <div className="knowledge-admin-grid">
+          <article className="panel knowledge-status">
+            <h2>Index status</h2>
+            <dl>
+              <div><dt>Collections</dt><dd>{adminStatus?.collection_count ?? collections.length}</dd></div>
+              <div><dt>Documents</dt><dd>{adminStatus?.document_count ?? documents.length}</dd></div>
+              <div><dt>Indexed</dt><dd>{adminStatus?.indexed_document_count ?? 0}</dd></div>
+              <div><dt>Needs indexing</dt><dd>{adminStatus?.needs_indexing_count ?? 0}</dd></div>
+              <div><dt>Chunks</dt><dd>{adminStatus?.chunk_count ?? 0}</dd></div>
+              <div><dt>Embeddings</dt><dd>{adminStatus?.embedding_count ?? 0}</dd></div>
+              <div><dt>Stored sources</dt><dd>{formatBytes(adminStatus?.total_source_bytes ?? 0)}</dd></div>
+              <div><dt>Local-only</dt><dd>{adminStatus?.local_only_collection_count ?? 0}</dd></div>
+            </dl>
+          </article>
+
+          <form className="panel knowledge-collection-form" onSubmit={(event) => void submitCollection(event)}>
+            <h2>Create collection</h2>
+            <label>
+              <span>Name</span>
+              <input
+                value={newCollectionName}
+                onChange={(event) => setNewCollectionName(event.target.value)}
+                maxLength={128}
+                required
+              />
+            </label>
+            <label>
+              <span>Description</span>
+              <textarea
+                value={newCollectionDescription}
+                onChange={(event) => setNewCollectionDescription(event.target.value)}
+                rows={3}
+                maxLength={2000}
+              />
+            </label>
+            <label className="knowledge-checkbox">
+              <input
+                type="checkbox"
+                checked={newCollectionLocalOnly}
+                onChange={(event) => setNewCollectionLocalOnly(event.target.checked)}
+              />
+              <span>Keep this collection local only</span>
+            </label>
+            <button
+              type="submit"
+              className="primary-button"
+              disabled={creatingCollection || !newCollectionName.trim()}
+            >
+              {creatingCollection ? "Creating…" : "Create collection"}
+            </button>
+          </form>
+        </div>
+
+        <div className="knowledge-collection-list">
+          {collections.map((collection) => {
+            const documentCount = documents.filter(
+              (document) => document.collection_id === collection.id,
+            ).length;
+            const busy = collectionBusyId === collection.id;
+            return (
+              <article className="knowledge-collection-card" key={collection.id}>
+                <div>
+                  <strong>{collection.name}</strong>
+                  <small>
+                    {documentCount} document{documentCount === 1 ? "" : "s"}
+                    {collection.description ? ` · ${collection.description}` : ""}
+                  </small>
+                </div>
+                <label className="knowledge-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={collection.local_only}
+                    onChange={() => void toggleCollectionLocalOnly(collection)}
+                    disabled={busy}
+                  />
+                  <span>Local only</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => void removeCollection(collection)}
+                  disabled={busy || collection.name === "Inbox" || documentCount > 0}
+                  title={
+                    collection.name === "Inbox"
+                      ? "The default Inbox cannot be deleted."
+                      : documentCount > 0
+                        ? "Move or delete the collection documents first."
+                        : "Delete this empty collection."
+                  }
+                >
+                  {busy ? "Working…" : "Delete"}
+                </button>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
       <div className="knowledge-grid">
         <form className="panel knowledge-upload" onSubmit={(event) => void submitUpload(event)}>
           <h2>Ingest a file</h2>
@@ -574,16 +850,37 @@ export function KnowledgeView() {
                     </div>
                   </dl>
                   <div className="knowledge-document-actions">
+                    <label>
+                      <span>Collection</span>
+                      <select
+                        value={item.collection_id}
+                        onChange={(event) => void moveDocument(item, Number(event.target.value))}
+                        disabled={documentAdminId !== null}
+                      >
+                        {collections.map((collection) => (
+                          <option key={collection.id} value={collection.id}>
+                            {collection.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                     <button
                       type="button"
                       onClick={() => void indexDocument(item)}
-                      disabled={indexingId !== null}
+                      disabled={indexingId !== null || documentAdminId !== null}
                     >
                       {busy
                         ? "Indexing…"
                         : item.status === "indexed"
                           ? "Re-index locally"
                           : "Index locally"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void removeDocument(item)}
+                      disabled={documentAdminId !== null || indexingId !== null}
+                    >
+                      {documentAdminId === item.id ? "Deleting…" : "Delete"}
                     </button>
                   </div>
                 </article>

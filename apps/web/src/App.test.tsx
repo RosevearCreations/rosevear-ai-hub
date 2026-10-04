@@ -126,6 +126,23 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
         };
       }
 
+      if (url.endsWith("/api/v1/knowledge/admin/status")) {
+        return {
+          ok: true,
+          json: async () => ({
+            collection_count: 1,
+            local_only_collection_count: 1,
+            document_count: 0,
+            indexed_document_count: 0,
+            needs_indexing_count: 0,
+            chunk_count: 0,
+            embedding_count: 0,
+            total_source_bytes: 0,
+            documents_by_status: {},
+          }),
+        };
+      }
+
       return { ok: false, status: 404 };
     }),
   );
@@ -169,6 +186,10 @@ describe("App", () => {
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Knowledge" })).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "Search local knowledge" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Knowledge administration" }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Create collection" })).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "Ingest a file" })).toBeInTheDocument();
       expect(screen.getByText(/PDF, TXT, Markdown, and DOCX/)).toBeInTheDocument();
       expect(screen.getByText("No documents yet")).toBeInTheDocument();
