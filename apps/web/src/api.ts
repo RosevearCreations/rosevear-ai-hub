@@ -401,6 +401,10 @@ export interface KnowledgeSearchHit {
   text: string;
   start_char: number;
   end_char: number;
+  page: number | null;
+  section: string | null;
+  location_label: string | null;
+  evidence_path: string;
   score: number;
   method: "semantic" | "keyword";
 }
@@ -426,6 +430,61 @@ export function searchKnowledge(
     "/api/v1/knowledge/search",
     {
       query,
+      top_k: options?.topK ?? 8,
+      mode: options?.mode ?? "auto",
+      collection_ids: options?.collectionIds ?? [],
+      document_ids: options?.documentIds ?? [],
+    },
+    options?.signal,
+  );
+}
+
+
+export interface KnowledgeCitation {
+  citation_id: string;
+  chunk_id: number;
+  document_id: number;
+  source_name: string;
+  collection_name: string;
+  page: number | null;
+  section: string | null;
+  location_label: string | null;
+  evidence_path: string;
+}
+
+export interface KnowledgeAnswerResponse {
+  query: string;
+  answer: string;
+  grounding_status: "grounded" | "insufficient_evidence" | "rejected";
+  provider: string;
+  model: string;
+  retrieval_method: "semantic" | "keyword";
+  fallback_reason: string | null;
+  citations: KnowledgeCitation[];
+}
+
+export function knowledgeEvidenceUrl(evidencePath: string): string {
+  return API_BASE_URL + evidencePath;
+}
+
+export function answerKnowledge(
+  query: string,
+  provider: string,
+  model: string,
+  options?: {
+    topK?: number;
+    mode?: KnowledgeSearchMode;
+    collectionIds?: number[];
+    documentIds?: number[];
+    signal?: AbortSignal;
+  },
+): Promise<KnowledgeAnswerResponse> {
+  return postJson<KnowledgeAnswerResponse>(
+    "/api/v1/knowledge/answer",
+    {
+      query,
+      provider,
+      model,
       top_k: options?.topK ?? 8,
       mode: options?.mode ?? "auto",
       collection_ids: options?.collectionIds ?? [],
