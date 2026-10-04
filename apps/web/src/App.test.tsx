@@ -34,6 +34,38 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
     vi.fn().mockImplementation(async (input: RequestInfo | URL) => {
       const url = String(input);
 
+      if (url.endsWith("/api/v1/auth/status")) {
+        return {
+          ok: true,
+          json: async () => ({
+            bootstrap_required: false,
+            authenticated: true,
+            user: {
+              id: 1,
+              username: "owner",
+              role: "owner",
+              enabled: true,
+              created_at: "2026-10-04T00:00:00Z",
+            },
+          }),
+        };
+      }
+
+      if (url.endsWith("/api/v1/auth/users")) {
+        return {
+          ok: true,
+          json: async () => [
+            {
+              id: 1,
+              username: "owner",
+              role: "owner",
+              enabled: true,
+              created_at: "2026-10-04T00:00:00Z",
+            },
+          ],
+        };
+      }
+
       if (url.endsWith("/health")) {
         return {
           ok: true,
@@ -161,8 +193,12 @@ describe("App", () => {
   test("renders health and opens the reliable chat surface", async () => {
     render(<App />);
 
-    expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Home" })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Home" })).toBeInTheDocument();
+      expect(screen.getByText("owner")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Users" })).toBeInTheDocument();
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Backend online")).toBeInTheDocument();
