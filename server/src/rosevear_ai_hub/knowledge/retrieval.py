@@ -273,9 +273,7 @@ class KnowledgeRetrievalService:
     @staticmethod
     def _apply_filters(statement, filters: RetrievalFilters):
         if filters.collection_ids:
-            statement = statement.where(
-                KnowledgeDocument.collection_id.in_(filters.collection_ids)
-            )
+            statement = statement.where(KnowledgeDocument.collection_id.in_(filters.collection_ids))
         if filters.document_ids:
             statement = statement.where(KnowledgeDocument.id.in_(filters.document_ids))
         return statement
