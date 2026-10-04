@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 
 from rosevear_ai_hub.api.ollama import get_ollama_client
+from rosevear_ai_hub.auth import require_authenticated
 from rosevear_ai_hub.integrations.ollama import OllamaUnavailableError
 from rosevear_ai_hub.main import create_app
 
@@ -43,6 +44,7 @@ class OfflineOllamaClient(FakeOllamaClient):
 
 def test_ollama_status_models_and_smoke_test() -> None:
     application = create_app()
+    application.dependency_overrides[require_authenticated] = lambda: None
     application.dependency_overrides[get_ollama_client] = FakeOllamaClient
     client = TestClient(application)
 
@@ -65,6 +67,7 @@ def test_ollama_status_models_and_smoke_test() -> None:
 
 def test_ollama_status_is_safe_when_runtime_is_offline() -> None:
     application = create_app()
+    application.dependency_overrides[require_authenticated] = lambda: None
     application.dependency_overrides[get_ollama_client] = OfflineOllamaClient
     client = TestClient(application)
 
