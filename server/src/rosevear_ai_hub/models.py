@@ -36,7 +36,7 @@ class TimestampMixin:
 
 
 class User(TimestampMixin, Base):
-    """Local Hub user record; authentication behavior arrives in Build 016."""
+    """Local Hub account protected by Build 016 authentication."""
 
     __tablename__ = "users"
 
@@ -45,6 +45,31 @@ class User(TimestampMixin, Base):
     password_hash: Mapped[str] = mapped_column(String(512), nullable=False)
     role: Mapped[str] = mapped_column(String(64), nullable=False, default="household_user")
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+
+class HubSession(Base):
+    """Opaque local authentication session. Raw bearer tokens are never persisted."""
+
+    __tablename__ = "sessions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.current_timestamp(),
+        nullable=False,
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        index=True,
+    )
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class AppSetting(TimestampMixin, Base):
