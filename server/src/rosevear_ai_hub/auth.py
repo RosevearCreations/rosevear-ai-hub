@@ -397,7 +397,10 @@ def update_user(
 
     if actor.role != "owner":
         if user.role in {"owner", "administrator"} or desired_role in {"owner", "administrator"}:
-            raise HTTPException(status_code=403, detail="Only an owner can manage privileged accounts.")
+            raise HTTPException(
+                status_code=403,
+                detail="Only an owner can manage privileged accounts.",
+            )
 
     removing_last_owner = (
         user.role == "owner"
