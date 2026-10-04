@@ -19,10 +19,16 @@ The Hub handles private data and can affect physical devices. Assume:
 - do not expose Ollama or MQTT anonymously
 
 ## Authentication
-- strong password hashing
-- session expiration
+- local passwords are hashed with Argon2
+- raw session tokens are never persisted; only SHA-256 token hashes are stored
+- session cookies are HTTP-only and SameSite=Strict
+- session expiration and explicit logout revocation are enforced
+- the one-time owner bootstrap is available only while no configured account exists
+- at least one enabled owner must remain
+- administrators cannot manage privileged owner/administrator accounts
+- application APIs require a valid server-side session after bootstrap
 - admin-only integration configuration
-- server-side authorization on every write
+- server-side authorization on every protected route
 - optional MFA later
 
 ## Secrets
