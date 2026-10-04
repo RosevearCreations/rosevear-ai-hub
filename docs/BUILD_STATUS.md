@@ -19,7 +19,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 013 | Retrieval | COMPLETE | main via PR #15 |
 | 014 | Citations | COMPLETE | main via PR #17 |
 | 015 | Knowledge Administration | COMPLETE | main |
-| 016 | Authentication | READY FOR CI | dev |
+| 016 | Authentication | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -44,10 +44,10 @@ This file records completed and active builds. The roadmap remains authoritative
 - [x] web authenticated-shell coverage
 - [x] security/data-model/environment documentation
 - [x] no external identity provider or hosted service required
-- [ ] dev CI green
-- [ ] promoted to main
-- [ ] main CI green
-- [ ] dev synchronized with main
+- [x] dev CI green
+- [x] promoted to main
+- [x] main CI green
+- [x] dev synchronized with main
 
 ## Operator setup
 
