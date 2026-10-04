@@ -104,9 +104,7 @@ def test_bootstrap_adopts_pre_auth_conversations(tmp_path) -> None:
     assert response.status_code == 201
 
     with session_maker() as session:
-        assert session.scalar(
-            select(User).where(User.username == "__local_pre_auth__")
-        ) is None
+        assert session.scalar(select(User).where(User.username == "__local_pre_auth__")) is None
         owner = session.scalar(select(User).where(User.username == "ree"))
         adopted = session.get(Conversation, conversation_id)
         assert owner is not None
