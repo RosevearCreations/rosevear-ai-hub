@@ -18,7 +18,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 012 | Chunking and Embeddings | COMPLETE | main via PR #13 |
 | 013 | Retrieval | COMPLETE | main via PR #15 |
 | 014 | Citations | COMPLETE | main via PR #17 |
-| 015 | Knowledge Administration | IN PROGRESS | dev |
+| 015 | Knowledge Administration | COMPLETE | main |
 
 ## Build 015 acceptance checklist
 
@@ -43,10 +43,10 @@ This file records completed and active builds. The roadmap remains authoritative
 - [x] web administration coverage
 - [x] no new hosted service or secret required
 - [x] no schema migration required
-- [ ] Build 015 CI green
-- [ ] promoted to main
-- [ ] post-merge main CI green
-- [ ] dev synchronized with main
+- [x] Build 015 CI green
+- [x] promoted to main
+- [x] post-promotion main CI green
+- [x] dev synchronized with main
 
 ## External setup
 
@@ -55,3 +55,7 @@ No new application, hosted database, cloud account, or secret is required.
 Build 015 uses the existing local SQLite knowledge metadata and original-file storage. Re-indexing still requires the local Ollama embedding model configured for knowledge indexing.
 
 All destructive administration actions remain local and require explicit user interaction in the UI.
+
+## Next build
+
+**Build 016 — Authentication**
