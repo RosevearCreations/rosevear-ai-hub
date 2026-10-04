@@ -179,10 +179,13 @@ def _user_count(db: Session) -> int:
         return int(
             db.scalar(select(func.count(User.id)).where(User.username != PRE_AUTH_USERNAME)) or 0
         )
-    except OperationalError:
+    except OperationalError as exc:
         # A brand-new process can answer health/provider checks before migrations run.
-        # Treat that state as pre-bootstrap rather than turning unrelated reads into 500s.
+        # Only the missing users-table case is treated as pre-bootstrap; other
+        # database failures must remain fail-closed.
         db.rollback()
+        if "no such table: users" not in str(exc).lower():
+            raise
         return 0
 
 
