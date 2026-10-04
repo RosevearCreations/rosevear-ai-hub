@@ -8,7 +8,7 @@ from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from typing import Annotated, cast
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.engine import Engine
@@ -16,12 +16,12 @@ from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.chat import (
     generation_registry,
-    get_local_conversation,
+    get_user_conversation,
     get_or_create_local_user,
     recover_incomplete_messages,
 )
 from rosevear_ai_hub.database import get_session
-from rosevear_ai_hub.models import ChatMessage, Conversation, ModelProfile
+from rosevear_ai_hub.models import ChatMessage, Conversation, ModelProfile, User
 from rosevear_ai_hub.providers.base import ProviderRequestError, ProviderUnavailableError
 from rosevear_ai_hub.providers.registry import ProviderRegistry, get_provider_registry
 from rosevear_ai_hub.schemas import (
@@ -36,6 +36,11 @@ router = APIRouter(prefix="/api/v1/chat", tags=["chat"])
 
 SessionDependency = Annotated[Session, Depends(get_session)]
 ProviderRegistryDependency = Annotated[ProviderRegistry, Depends(get_provider_registry)]
+
+
+def _effective_user(request: Request, session: Session) -> User:
+    authenticated = getattr(request.state, "user", None)
+    return authenticated if isinstance(authenticated, User) else get_or_create_local_user(session)
 
 
 def _conversation_response(conversation: Conversation) -> ConversationResponse:
@@ -102,8 +107,8 @@ def _persist_assistant_state(
 
 
 @router.get("/conversations", response_model=list[ConversationResponse])
-def list_conversations(session: SessionDependency) -> list[ConversationResponse]:
-    user = get_or_create_local_user(session)
+def list_conversations(request: Request, session: SessionDependency) -> list[ConversationResponse]:
+    user = _effective_user(request, session)
     session.commit()
 
     conversations = session.scalars(
@@ -121,26 +126,27 @@ def list_conversations(session: SessionDependency) -> list[ConversationResponse]
     status_code=status.HTTP_201_CREATED,
 )
 def create_conversation(
-    request: ConversationCreateRequest,
+    payload: ConversationCreateRequest,
+    request: Request,
     session: SessionDependency,
     registry: ProviderRegistryDependency,
 ) -> ConversationResponse:
-    profile = _get_enabled_profile(session, request.profile_id)
-    if request.profile_id is not None and profile is None:
+    profile = _get_enabled_profile(session, payload.profile_id)
+    if payload.profile_id is not None and profile is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Model profile not found.",
         )
 
-    provider_key = request.provider or (profile.preferred_provider if profile else None) or "ollama"
+    provider_key = payload.provider or (profile.preferred_provider if profile else None) or "ollama"
     _require_provider(registry, provider_key)
 
-    user = get_or_create_local_user(session)
+    user = _effective_user(request, session)
     conversation = Conversation(
         user_id=user.id,
-        title=request.title.strip(),
+        title=payload.title.strip(),
         provider=provider_key,
-        model=request.model,
+        model=payload.model,
         profile_id=profile.id if profile is not None else None,
     )
     session.add(conversation)
@@ -155,9 +161,11 @@ def create_conversation(
 )
 def list_messages(
     conversation_id: int,
+    request: Request,
     session: SessionDependency,
 ) -> list[ChatMessageResponse]:
-    conversation = get_local_conversation(session, conversation_id)
+    user = _effective_user(request, session)
+    conversation = get_user_conversation(session, conversation_id, user)
     if conversation is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found.")
 
@@ -178,16 +186,18 @@ def list_messages(
 @router.post("/conversations/{conversation_id}/stream")
 async def stream_chat(
     conversation_id: int,
-    request: ChatStreamRequest,
+    payload: ChatStreamRequest,
+    request: Request,
     session: SessionDependency,
     registry: ProviderRegistryDependency,
 ) -> StreamingResponse:
-    conversation = get_local_conversation(session, conversation_id)
+    user = _effective_user(request, session)
+    conversation = get_user_conversation(session, conversation_id, user)
     if conversation is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found.")
 
     selected_profile_id = (
-        request.profile_id if request.profile_id is not None else conversation.profile_id
+        payload.profile_id if payload.profile_id is not None else conversation.profile_id
     )
     profile = _get_enabled_profile(session, selected_profile_id)
     if selected_profile_id is not None and profile is None:
@@ -197,7 +207,7 @@ async def stream_chat(
         )
 
     provider_key = (
-        request.provider
+        payload.provider
         or (profile.preferred_provider if profile is not None else None)
         or conversation.provider
         or "ollama"
@@ -214,14 +224,14 @@ async def stream_chat(
     recover_incomplete_messages(session, conversation.id)
 
     conversation.provider = provider_key
-    conversation.model = request.model
+    conversation.model = payload.model
     conversation.profile_id = profile.id if profile is not None else None
     conversation.updated_at = datetime.now(UTC)
 
     user_message = ChatMessage(
         conversation_id=conversation.id,
         role="user",
-        content=request.prompt.strip(),
+        content=payload.prompt.strip(),
         provider=None,
         model=None,
         status="complete",
@@ -231,7 +241,7 @@ async def stream_chat(
         role="assistant",
         content="",
         provider=provider_key,
-        model=request.model,
+        model=payload.model,
         status="pending",
     )
     session.add_all([user_message, assistant_message])
@@ -321,7 +331,7 @@ async def stream_chat(
                         )
                         return
 
-                    async for token in provider.stream_chat(request.model, provider_messages):
+                    async for token in provider.stream_chat(payload.model, provider_messages):
                         produced_token = True
 
                         if generation_registry.is_cancelled(generation_id):
