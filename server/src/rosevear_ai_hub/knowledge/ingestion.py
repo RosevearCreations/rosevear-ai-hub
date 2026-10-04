@@ -9,9 +9,15 @@ import zipfile
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
+from typing import Any
 
 from docx import Document as DocxDocument
 from pypdf import PdfReader
+
+from rosevear_ai_hub.knowledge.citations import (
+    markdown_citation_spans,
+    page_citation_spans,
+)
 
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".md", ".docx"}
 MIME_BY_EXTENSION = {
@@ -40,7 +46,7 @@ class PreparedDocument:
     content_hash: str
     size_bytes: int
     extracted_text: str
-    metadata: dict[str, int | str | bool | None]
+    metadata: dict[str, Any]
 
 
 class KnowledgeIngestionService:
@@ -140,7 +146,7 @@ class KnowledgeIngestionService:
         self,
         extension: str,
         data: bytes,
-    ) -> tuple[str, dict[str, int | str | bool | None]]:
+    ) -> tuple[str, dict[str, Any]]:
         if extension in {".txt", ".md"}:
             try:
                 text = data.decode("utf-8-sig")
@@ -148,11 +154,15 @@ class KnowledgeIngestionService:
                 raise KnowledgeIngestionError(
                     "Text and Markdown files must use UTF-8 encoding."
                 ) from exc
-            return text, {
+
+            metadata: dict[str, Any] = {
                 "format": extension.lstrip("."),
                 "page_count": None,
                 "character_count": len(text),
             }
+            if extension == ".md":
+                metadata["citation_spans"] = markdown_citation_spans(text)
+            return text, metadata
 
         if extension == ".pdf":
             if not data.startswith(b"%PDF-"):
@@ -170,12 +180,13 @@ class KnowledgeIngestionService:
             except Exception as exc:
                 raise KnowledgeIngestionError("The PDF could not be parsed safely.") from exc
 
-            text = "\n\n".join(page_text)
+            text, citation_spans = page_citation_spans(page_text)
             return text, {
                 "format": "pdf",
                 "page_count": len(reader.pages),
                 "character_count": len(text),
                 "text_extracted": bool(text.strip()),
+                "citation_spans": citation_spans,
             }
 
         if extension == ".docx":

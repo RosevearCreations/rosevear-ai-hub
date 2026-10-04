@@ -10,6 +10,7 @@ from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.knowledge.chunking import TextChunk, chunk_text
+from rosevear_ai_hub.knowledge.citations import citation_metadata_for_range
 from rosevear_ai_hub.knowledge.vector_store import VectorStore
 from rosevear_ai_hub.models import KnowledgeChunk, KnowledgeDocument
 
@@ -155,7 +156,12 @@ class KnowledgeIndexingService:
                     text=chunk.text,
                     start_char=chunk.start_char,
                     end_char=chunk.end_char,
-                    citation_metadata=chunk.citation_metadata,
+                    citation_metadata=citation_metadata_for_range(
+                        document.metadata_json,
+                        ordinal=chunk.ordinal,
+                        start_char=chunk.start_char,
+                        end_char=chunk.end_char,
+                    ),
                     embedding_reference=None,
                 )
             )
