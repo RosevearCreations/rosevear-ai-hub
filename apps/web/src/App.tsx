@@ -13,6 +13,7 @@ import {
 import { AuthView } from "./AuthView";
 import { ChatView } from "./ChatView";
 import { KnowledgeView } from "./KnowledgeView";
+import { ToolsView } from "./ToolsView";
 import { UsersView } from "./UsersView";
 
 type HealthState =
@@ -31,7 +32,7 @@ type AuthState =
   | { kind: "ready"; status: AuthStatus };
 
 const baseSections = ["Home", "Chat", "Knowledge", "Devices", "System"] as const;
-type Section = (typeof baseSections)[number] | "Users";
+type Section = (typeof baseSections)[number] | "Users" | "Tools";
 
 export function App() {
   const [auth, setAuth] = useState<AuthState>({ kind: "loading" });
@@ -131,8 +132,10 @@ export function App() {
   }
 
   const user = auth.status.user;
-  const canManageUsers = user.role === "owner" || user.role === "administrator";
-  const sections: Section[] = canManageUsers ? [...baseSections, "Users"] : [...baseSections];
+  const canAdminister = user.role === "owner" || user.role === "administrator";
+  const sections: Section[] = canAdminister
+    ? [...baseSections, "Tools", "Users"]
+    : [...baseSections];
 
   async function signOut() {
     try {
@@ -196,6 +199,8 @@ export function App() {
           <ChatView />
         ) : section === "Knowledge" ? (
           <KnowledgeView />
+        ) : section === "Tools" ? (
+          <ToolsView />
         ) : section === "Users" ? (
           <UsersView currentUser={user} />
         ) : (
@@ -233,7 +238,7 @@ function HomeView({
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 016</p>
+          <p className="eyebrow">Build 017</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -259,6 +264,11 @@ function HomeView({
           <button type="button" onClick={onOpenKnowledge}>
             Open knowledge
           </button>
+        </article>
+
+        <article className="panel">
+          <h2>Tool registry</h2>
+          <p>Normalized tool contracts, capabilities, risk levels, and enable state are active.</p>
         </article>
 
         <article className="panel">
