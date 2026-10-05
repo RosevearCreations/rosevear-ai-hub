@@ -713,3 +713,54 @@ export function deleteKnowledgeDocument(
     signal,
   );
 }
+
+
+export interface ToolDescriptor {
+  id: number;
+  tool_key: string;
+  display_name: string;
+  description: string;
+  integration_key: string | null;
+  integration_name: string | null;
+  capabilities: string[];
+  risk_level: number;
+  risk_label: string;
+  confirmation_policy: string;
+  input_schema: Record<string, unknown>;
+  output_schema: Record<string, unknown>;
+  enabled: boolean;
+  built_in: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ToolRegistrySummary {
+  tool_count: number;
+  enabled_count: number;
+  disabled_count: number;
+  counts_by_risk: Record<string, number>;
+  capabilities: string[];
+}
+
+export function getTools(signal?: AbortSignal): Promise<ToolDescriptor[]> {
+  return getJson<ToolDescriptor[]>("/api/v1/tools", signal);
+}
+
+export function getToolRegistrySummary(
+  signal?: AbortSignal,
+): Promise<ToolRegistrySummary> {
+  return getJson<ToolRegistrySummary>("/api/v1/tools/summary", signal);
+}
+
+export function updateTool(
+  toolKey: string,
+  enabled: boolean,
+  signal?: AbortSignal,
+): Promise<ToolDescriptor> {
+  return authJson<ToolDescriptor>(
+    "PATCH",
+    "/api/v1/tools/" + encodeURIComponent(toolKey),
+    { enabled },
+    signal,
+  );
+}
