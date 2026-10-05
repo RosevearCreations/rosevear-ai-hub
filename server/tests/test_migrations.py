@@ -31,7 +31,9 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "documents",
         "knowledge_collections",
         "model_profiles",
+        "integrations",
         "sessions",
+        "tools",
         "users",
     }.issubset(tables)
 
@@ -41,6 +43,8 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
     chunk_columns = {column["name"] for column in inspector.get_columns("document_chunks")}
     embedding_columns = {column["name"] for column in inspector.get_columns("chunk_embeddings")}
     session_columns = {column["name"] for column in inspector.get_columns("sessions")}
+    integration_columns = {column["name"] for column in inspector.get_columns("integrations")}
+    tool_columns = {column["name"] for column in inspector.get_columns("tools")}
     assert {"model", "provider"}.issubset(conversation_columns)
     assert {"model", "provider"}.issubset(message_columns)
     assert {
@@ -74,6 +78,27 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "expires_at",
         "revoked_at",
     }.issubset(session_columns)
+    assert {
+        "integration_key",
+        "type",
+        "name",
+        "enabled",
+        "configuration_reference",
+        "last_health_status",
+        "last_health_at",
+    }.issubset(integration_columns)
+    assert {
+        "integration_id",
+        "tool_key",
+        "display_name",
+        "description",
+        "capabilities_json",
+        "risk_level",
+        "input_schema_json",
+        "output_schema_json",
+        "enabled",
+        "built_in",
+    }.issubset(tool_columns)
 
     with test_engine.connect() as connection:
         profile_names = (
@@ -98,6 +123,8 @@ def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
     test_engine = create_engine(f"sqlite:///{database_path}")
     tables = set(inspect(test_engine).get_table_names())
 
+    assert "tools" not in tables
+    assert "integrations" not in tables
     assert "sessions" not in tables
     assert "users" not in tables
     assert "conversations" not in tables
