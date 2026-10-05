@@ -264,3 +264,40 @@ class AuditEvent(Base):
         nullable=False,
         index=True,
     )
+
+
+class Integration(TimestampMixin, Base):
+    """Persisted integration metadata used by tool and connector registries."""
+
+    __tablename__ = "integrations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    integration_key: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    type: Mapped[str] = mapped_column(String(64), nullable=False)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    configuration_reference: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    last_health_status: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    last_health_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ToolRecord(TimestampMixin, Base):
+    """Normalized persisted tool contract and administrative enable state."""
+
+    __tablename__ = "tools"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    integration_id: Mapped[int | None] = mapped_column(
+        ForeignKey("integrations.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    tool_key: Mapped[str] = mapped_column(String(160), unique=True, nullable=False)
+    display_name: Mapped[str] = mapped_column(String(160), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    capabilities_json: Mapped[Any] = mapped_column(JSON, nullable=False)
+    risk_level: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    input_schema_json: Mapped[Any] = mapped_column(JSON, nullable=False)
+    output_schema_json: Mapped[Any] = mapped_column(JSON, nullable=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    built_in: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
