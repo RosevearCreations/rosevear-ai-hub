@@ -51,9 +51,7 @@ def test_registry_exposes_normalized_builtin_contracts(tmp_path) -> None:
     assert search["output_schema"]["type"] == "object"
     assert search["output_schema"]["additionalProperties"] is False
 
-    delete = next(
-        item for item in tools if item["tool_key"] == "knowledge.document.delete"
-    )
+    delete = next(item for item in tools if item["tool_key"] == "knowledge.document.delete")
     assert delete["risk_level"] == 2
     assert delete["risk_label"] == "confirmation_required"
     assert delete["confirmation_policy"] == "required"
@@ -96,9 +94,7 @@ def test_owner_toggle_persists_and_writes_audit_event(tmp_path) -> None:
     assert refreshed.json()["enabled"] is False
 
     with session_maker() as session:
-        record = session.scalar(
-            select(ToolRecord).where(ToolRecord.tool_key == "knowledge.search")
-        )
+        record = session.scalar(select(ToolRecord).where(ToolRecord.tool_key == "knowledge.search"))
         event = session.scalar(
             select(AuditEvent).where(AuditEvent.event_type == "tool.registry.updated")
         )
