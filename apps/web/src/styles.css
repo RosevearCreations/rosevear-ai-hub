@@ -1013,3 +1013,137 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Build 017 — normalized tool registry */
+.tools-view {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.tool-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.tool-summary div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.9rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 0.75rem;
+  background: white;
+}
+
+.tool-summary span,
+.tool-meta dt {
+  color: #737373;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tool-summary strong {
+  font-size: 1.35rem;
+}
+
+.tool-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.tool-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.1rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 0.85rem;
+  background: white;
+}
+
+.tool-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.tool-card-header strong,
+.tool-card-header code {
+  display: block;
+}
+
+.tool-card-header code {
+  margin-top: 0.3rem;
+  color: #525252;
+}
+
+.tool-card p {
+  margin: 0;
+  color: #525252;
+  line-height: 1.55;
+}
+
+.tool-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.tool-meta dd {
+  margin: 0.25rem 0 0;
+}
+
+.tool-capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tool-capabilities span {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 999px;
+  background: #fafafa;
+  font-size: 0.85rem;
+}
+
+.tool-card details {
+  border-top: 1px solid #e5e5e5;
+  padding-top: 0.75rem;
+}
+
+.tool-card summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.tool-schema-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.tool-schema-grid pre {
+  overflow-x: auto;
+  padding: 0.75rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.65rem;
+  background: #fafafa;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 900px) {
+  .tool-summary,
+  .tool-meta,
+  .tool-schema-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-card-header {
+    flex-direction: column;
+  }
+}
