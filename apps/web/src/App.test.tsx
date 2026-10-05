@@ -51,6 +51,95 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
         };
       }
 
+      if (url.endsWith("/api/v1/tools/summary")) {
+        return {
+          ok: true,
+          json: async () => ({
+            tool_count: 3,
+            enabled_count: 2,
+            disabled_count: 1,
+            counts_by_risk: {
+              read: 2,
+              low_risk_action: 0,
+              confirmation_required: 1,
+              prohibited_autonomous: 0,
+            },
+            capabilities: [
+              "ai.generate",
+              "knowledge.answer",
+              "knowledge.delete",
+              "knowledge.read",
+              "knowledge.search",
+              "knowledge.write",
+            ],
+          }),
+        };
+      }
+
+      if (url.endsWith("/api/v1/tools")) {
+        return {
+          ok: true,
+          json: async () => [
+            {
+              id: 1,
+              tool_key: "knowledge.search",
+              display_name: "Search local knowledge",
+              description: "Search indexed local knowledge and return grounded evidence chunks.",
+              integration_key: "core.knowledge",
+              integration_name: "Knowledge",
+              capabilities: ["knowledge.read", "knowledge.search"],
+              risk_level: 0,
+              risk_label: "read",
+              confirmation_policy: "none",
+              input_schema: {
+                type: "object",
+                properties: { query: { type: "string" } },
+                required: ["query"],
+                additionalProperties: false,
+              },
+              output_schema: {
+                type: "object",
+                properties: { hits: { type: "array" } },
+                required: ["hits"],
+                additionalProperties: false,
+              },
+              enabled: true,
+              built_in: true,
+              created_at: "2026-10-05T00:00:00Z",
+              updated_at: "2026-10-05T00:00:00Z",
+            },
+            {
+              id: 2,
+              tool_key: "knowledge.document.delete",
+              display_name: "Delete knowledge document",
+              description: "Delete a knowledge document after confirmation.",
+              integration_key: "core.knowledge",
+              integration_name: "Knowledge",
+              capabilities: ["knowledge.delete", "knowledge.write"],
+              risk_level: 2,
+              risk_label: "confirmation_required",
+              confirmation_policy: "required",
+              input_schema: {
+                type: "object",
+                properties: { document_id: { type: "integer" } },
+                required: ["document_id"],
+                additionalProperties: false,
+              },
+              output_schema: {
+                type: "object",
+                properties: { deleted: { type: "boolean" } },
+                required: ["deleted"],
+                additionalProperties: false,
+              },
+              enabled: false,
+              built_in: true,
+              created_at: "2026-10-05T00:00:00Z",
+              updated_at: "2026-10-05T00:00:00Z",
+            },
+          ],
+        };
+      }
+
       if (url.endsWith("/api/v1/auth/users")) {
         return {
           ok: true,
@@ -197,6 +286,7 @@ describe("App", () => {
       expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "Home" })).toBeInTheDocument();
       expect(screen.getByText("owner")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Tools" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Users" })).toBeInTheDocument();
     });
 
@@ -212,6 +302,24 @@ describe("App", () => {
         screen.getByText("Ollama is ready, but no model is installed."),
       ).toBeInTheDocument();
       expect(screen.getByText(/General · local_only · Ollama online/)).toBeInTheDocument();
+    });
+  });
+
+  test("opens the normalized tool registry", async () => {
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Tools" })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Tools" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Tool registry" })).toBeInTheDocument();
+      expect(screen.getByText("Search local knowledge")).toBeInTheDocument();
+      expect(screen.getByText("Level 0 — Read")).toBeInTheDocument();
+      expect(screen.getByText("Level 2 — Confirmation required")).toBeInTheDocument();
+      expect(screen.getByText("knowledge.read")).toBeInTheDocument();
+      expect(screen.getByText("knowledge.delete")).toBeInTheDocument();
     });
   });
 
