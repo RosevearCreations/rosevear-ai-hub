@@ -8,6 +8,8 @@ from rosevear_ai_hub.models import (
     Base,
     ChatMessage,
     Conversation,
+    Integration,
+    ToolRecord,
     User,
 )
 
@@ -28,6 +30,38 @@ def test_initial_models_persist(tmp_path) -> None:
         session.flush()
 
         session.add(AppSetting(key="ui.theme", value_json={"mode": "system"}))
+        integration = Integration(
+            integration_key="core.test",
+            type="core",
+            name="Test",
+            enabled=True,
+        )
+        session.add(integration)
+        session.flush()
+        session.add(
+            ToolRecord(
+                integration_id=integration.id,
+                tool_key="test.read",
+                display_name="Test read",
+                description="Test registry persistence.",
+                capabilities_json=["test.read"],
+                risk_level=0,
+                input_schema_json={
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": False,
+                },
+                output_schema_json={
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": False,
+                },
+                enabled=True,
+                built_in=True,
+            )
+        )
         conversation = Conversation(
             user_id=user.id,
             title="Foundation conversation",
@@ -61,3 +95,5 @@ def test_initial_models_persist(tmp_path) -> None:
         assert session.scalar(select(Conversation)) is not None
         assert session.scalar(select(ChatMessage)) is not None
         assert session.scalar(select(AuditEvent)) is not None
+        assert session.scalar(select(Integration)) is not None
+        assert session.scalar(select(ToolRecord)) is not None
