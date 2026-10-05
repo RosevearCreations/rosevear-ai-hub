@@ -12,6 +12,7 @@ from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
 from rosevear_ai_hub.api.providers import router as providers_router
+from rosevear_ai_hub.api.tools import router as tools_router
 from rosevear_ai_hub.auth import require_authenticated
 from rosevear_ai_hub.auth import router as auth_router
 from rosevear_ai_hub.config import get_settings
@@ -66,6 +67,7 @@ def create_app() -> FastAPI:
     application.include_router(ollama_router, dependencies=protected)
     application.include_router(providers_router, dependencies=protected)
     application.include_router(profiles_router, dependencies=protected)
+    application.include_router(tools_router, dependencies=protected)
     application.include_router(chat_router, dependencies=protected)
     application.include_router(knowledge_router, dependencies=protected)
     application.include_router(knowledge_admin_router, dependencies=protected)
