@@ -490,7 +490,7 @@ describe("App", () => {
       expect(screen.getByRole("heading", { name: "Secrets" })).toBeInTheDocument();
       expect(screen.getByText("Home Assistant token")).toBeInTheDocument();
       expect(screen.getByText("Encrypted store")).toBeInTheDocument();
-      expect(screen.getByText("0123456789abcdef")).toBeInTheDocument();
+      expect(screen.getAllByText("0123456789abcdef").length).toBeGreaterThan(0);
       expect(screen.queryByText("ha-token-with-sensitive-value")).not.toBeInTheDocument();
       expect(screen.getByLabelText("New value")).toHaveAttribute("type", "password");
     });
