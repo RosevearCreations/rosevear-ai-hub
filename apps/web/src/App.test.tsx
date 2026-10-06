@@ -492,7 +492,10 @@ describe("App", () => {
       expect(screen.getByText("Encrypted store")).toBeInTheDocument();
       expect(screen.getAllByText("0123456789abcdef").length).toBeGreaterThan(0);
       expect(screen.queryByText("ha-token-with-sensitive-value")).not.toBeInTheDocument();
-      expect(screen.getByLabelText("New value")).toHaveAttribute("type", "password");
+      expect(screen.getAllByLabelText("New value")).toHaveLength(2);
+      for (const input of screen.getAllByLabelText("New value")) {
+        expect(input).toHaveAttribute("type", "password");
+      }
     });
   });
 
