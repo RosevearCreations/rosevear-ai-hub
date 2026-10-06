@@ -128,19 +128,18 @@ def list_audit_events(
         )
 
     base = select(AuditEvent).where(*filters)
-    total = int(
-        db.scalar(select(func.count()).select_from(base.subquery())) or 0
-    )
+    total = int(db.scalar(select(func.count()).select_from(base.subquery())) or 0)
     events = db.scalars(
         base.order_by(AuditEvent.created_at.desc(), AuditEvent.id.desc())
         .limit(limit)
         .offset(offset)
     ).all()
     actor_ids = {event.actor_user_id for event in events if event.actor_user_id is not None}
-    actors = {
-        user.id: user
-        for user in db.scalars(select(User).where(User.id.in_(actor_ids))).all()
-    } if actor_ids else {}
+    actors = (
+        {user.id: user for user in db.scalars(select(User).where(User.id.in_(actor_ids))).all()}
+        if actor_ids
+        else {}
+    )
 
     return AuditEventListResponse(
         events=[_response(event, actors.get(event.actor_user_id)) for event in events],
@@ -157,15 +156,11 @@ def audit_summary(
 ) -> AuditSummaryResponse:
     total = int(db.scalar(select(func.count(AuditEvent.id))) or 0)
     success = int(
-        db.scalar(
-            select(func.count(AuditEvent.id)).where(AuditEvent.result_status == "success")
-        )
+        db.scalar(select(func.count(AuditEvent.id)).where(AuditEvent.result_status == "success"))
         or 0
     )
     failure = int(
-        db.scalar(
-            select(func.count(AuditEvent.id)).where(AuditEvent.result_status == "failure")
-        )
+        db.scalar(select(func.count(AuditEvent.id)).where(AuditEvent.result_status == "failure"))
         or 0
     )
     unknown = total - success - failure
@@ -178,10 +173,7 @@ def audit_summary(
         or 0
     )
     tool_events = int(
-        db.scalar(
-            select(func.count(AuditEvent.id)).where(AuditEvent.tool_key.is_not(None))
-        )
-        or 0
+        db.scalar(select(func.count(AuditEvent.id)).where(AuditEvent.tool_key.is_not(None))) or 0
     )
     newest = db.scalar(select(func.max(AuditEvent.created_at)))
     oldest = db.scalar(select(func.min(AuditEvent.created_at)))
