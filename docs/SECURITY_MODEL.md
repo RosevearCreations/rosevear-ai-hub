@@ -67,6 +67,22 @@ Content found in a document, camera metadata, webpage, or business record must n
 - override system policy
 - bypass confirmation
 
+## Tool registry
+
+Build 017 establishes the permission boundary before tool execution exists:
+- every registered tool declares a stable key, capabilities, normalized input/output schemas, and risk level
+- risk levels map directly to the canonical Level 0–3 policy
+- Level 2 tools carry a mandatory-confirmation policy for the Build 018 execution layer
+- Level 3 tools cannot be enabled for autonomous execution
+- only Owner/Administrator accounts may change tool enable state
+- Household and Read-only users may inspect registry metadata but cannot administer it
+- registry enable/disable changes are audit-recorded
+- the registry itself cannot execute tools
+
+Tool arguments supplied by an LLM remain untrusted input. Future execution code must validate
+arguments against the registered schema, authorization, risk policy, and confirmation evidence
+before calling an implementation.
+
 ## High-risk physical actions
 
 The AI must not autonomously:
