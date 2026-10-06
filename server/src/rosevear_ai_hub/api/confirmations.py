@@ -144,9 +144,7 @@ def approve_confirmation(
     db: Annotated[Session, Depends(get_session)],
 ) -> ConfirmationResponse:
     request = _load_visible_request(db, request_id, actor)
-    return response_for(
-        decide_confirmation(db, request=request, actor=actor, decision=APPROVED)
-    )
+    return response_for(decide_confirmation(db, request=request, actor=actor, decision=APPROVED))
 
 
 @router.post("/{request_id}/reject", response_model=ConfirmationResponse)
@@ -156,6 +154,4 @@ def reject_confirmation(
     db: Annotated[Session, Depends(get_session)],
 ) -> ConfirmationResponse:
     request = _load_visible_request(db, request_id, actor)
-    return response_for(
-        decide_confirmation(db, request=request, actor=actor, decision=REJECTED)
-    )
+    return response_for(decide_confirmation(db, request=request, actor=actor, decision=REJECTED))
