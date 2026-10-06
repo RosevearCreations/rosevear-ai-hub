@@ -10,9 +10,10 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.auth import require_roles
 from rosevear_ai_hub.database import get_session
-from rosevear_ai_hub.models import AuditEvent, Integration, ToolRecord, User
+from rosevear_ai_hub.models import Integration, ToolRecord, User
 from rosevear_ai_hub.tool_registry import (
     ToolRiskLevel,
     confirmation_policy,
@@ -165,16 +166,17 @@ def update_tool(
     changed = tool.enabled != payload.enabled
     tool.enabled = payload.enabled
     if changed:
-        db.add(
-            AuditEvent(
-                actor_user_id=actor.id,
-                event_type="tool.registry.updated",
-                object_type="tool",
-                object_id=tool.tool_key,
-                action="enable" if tool.enabled else "disable",
-                sanitized_arguments={"enabled": tool.enabled},
-                result={"ok": True, "risk_level": tool.risk_level},
-            )
+        record_audit_event(
+            db,
+            actor_user_id=actor.id,
+            event_type="tool.registry.updated",
+            object_type="tool",
+            object_id=tool.tool_key,
+            action="enable" if tool.enabled else "disable",
+            arguments={"enabled": tool.enabled},
+            result={"ok": True},
+            tool_key=tool.tool_key,
+            risk_level=tool.risk_level,
         )
     db.commit()
     db.refresh(tool)
