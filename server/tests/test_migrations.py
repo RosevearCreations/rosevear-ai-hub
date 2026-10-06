@@ -49,6 +49,7 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
     confirmation_columns = {
         column["name"] for column in inspector.get_columns("confirmation_requests")
     }
+    audit_columns = {column["name"] for column in inspector.get_columns("audit_events")}
     assert {"model", "provider"}.issubset(conversation_columns)
     assert {"model", "provider"}.issubset(message_columns)
     assert {
@@ -117,6 +118,20 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "decided_at",
         "consumed_at",
     }.issubset(confirmation_columns)
+    assert {
+        "actor_user_id",
+        "event_type",
+        "object_type",
+        "object_id",
+        "action",
+        "tool_key",
+        "risk_level",
+        "confirmation_id",
+        "sanitized_arguments",
+        "result",
+        "result_status",
+        "created_at",
+    }.issubset(audit_columns)
 
     with test_engine.connect() as connection:
         profile_names = (
@@ -154,3 +169,47 @@ def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
     assert "documents" not in tables
     assert "knowledge_collections" not in tables
     assert "audit_events" not in tables
+
+
+def test_audit_migration_backfills_filter_columns(tmp_path, monkeypatch) -> None:
+    database_path = tmp_path / "audit-backfill.db"
+    config = migration_config(database_path, monkeypatch)
+    command.upgrade(config, "0009")
+
+    test_engine = create_engine(f"sqlite:///{database_path}")
+    with test_engine.begin() as connection:
+        user_id = connection.execute(
+            text(
+                "INSERT INTO users (username, password_hash, role, enabled) "
+                "VALUES ('owner', 'hash', 'owner', 1) RETURNING id"
+            )
+        ).scalar_one()
+        connection.execute(
+            text(
+                "INSERT INTO audit_events "
+                "(actor_user_id, event_type, object_type, object_id, action, "
+                "sanitized_arguments, result) "
+                "VALUES (:actor_user_id, 'confirmation.requested', 'confirmation', "
+                "'confirmation-1', 'request', :arguments, :result)"
+            ),
+            {
+                "actor_user_id": user_id,
+                "arguments": '{"tool_key":"knowledge.document.delete","arguments_hash":"abc"}',
+                "result": '{"ok":true,"risk_level":2}',
+            },
+        )
+
+    command.upgrade(config, "head")
+
+    with test_engine.connect() as connection:
+        row = connection.execute(
+            text(
+                "SELECT tool_key, risk_level, confirmation_id, result_status "
+                "FROM audit_events WHERE event_type = 'confirmation.requested'"
+            )
+        ).one()
+
+    assert row.tool_key == "knowledge.document.delete"
+    assert row.risk_level == 2
+    assert row.confirmation_id == "confirmation-1"
+    assert row.result_status == "success"
