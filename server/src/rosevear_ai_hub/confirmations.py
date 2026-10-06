@@ -212,6 +212,8 @@ def decide_confirmation(
     if expire_if_needed(session, request):
         session.commit()
         raise HTTPException(status_code=410, detail="Confirmation request has expired.")
+    if request.status == EXPIRED:
+        raise HTTPException(status_code=410, detail="Confirmation request has expired.")
     if request.status != PENDING:
         raise HTTPException(
             status_code=409,
@@ -264,6 +266,8 @@ def consume_confirmation(
 
     if expire_if_needed(session, request):
         session.commit()
+        raise HTTPException(status_code=410, detail="Confirmation request has expired.")
+    if request.status == EXPIRED:
         raise HTTPException(status_code=410, detail="Confirmation request has expired.")
 
     normalized, arguments_hash = canonical_arguments(arguments)
