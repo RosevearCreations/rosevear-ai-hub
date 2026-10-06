@@ -51,6 +51,68 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
         };
       }
 
+      if (url.endsWith("/api/v1/confirmations/confirmation-1/approve")) {
+        return {
+          ok: true,
+          json: async () => ({
+            id: "confirmation-1",
+            requested_by_user_id: 1,
+            decided_by_user_id: 1,
+            tool_key: "knowledge.document.delete",
+            risk_level: 2,
+            arguments: { document_id: 42 },
+            arguments_hash: "a".repeat(64),
+            preview: {
+              tool_key: "knowledge.document.delete",
+              tool_name: "Delete knowledge document",
+              description: "Delete an ingested source document.",
+              risk_level: 2,
+              risk_label: "confirmation_required",
+              summary: "Delete knowledge document: document_id=42",
+              arguments: { document_id: 42 },
+            },
+            status: "approved",
+            expires_at: "2026-10-06T01:00:00Z",
+            decided_at: "2026-10-06T00:30:00Z",
+            consumed_at: null,
+            created_at: "2026-10-06T00:25:00Z",
+            updated_at: "2026-10-06T00:30:00Z",
+          }),
+        };
+      }
+
+      if (url.includes("/api/v1/confirmations?status=")) {
+        return {
+          ok: true,
+          json: async () => [
+            {
+              id: "confirmation-1",
+              requested_by_user_id: 1,
+              decided_by_user_id: null,
+              tool_key: "knowledge.document.delete",
+              risk_level: 2,
+              arguments: { document_id: 42 },
+              arguments_hash: "a".repeat(64),
+              preview: {
+                tool_key: "knowledge.document.delete",
+                tool_name: "Delete knowledge document",
+                description: "Delete an ingested source document.",
+                risk_level: 2,
+                risk_label: "confirmation_required",
+                summary: "Delete knowledge document: document_id=42",
+                arguments: { document_id: 42 },
+              },
+              status: "pending",
+              expires_at: "2026-10-06T01:00:00Z",
+              decided_at: null,
+              consumed_at: null,
+              created_at: "2026-10-06T00:25:00Z",
+              updated_at: "2026-10-06T00:25:00Z",
+            },
+          ],
+        };
+      }
+
       if (url.endsWith("/api/v1/tools/summary")) {
         return {
           ok: true,
@@ -286,6 +348,7 @@ describe("App", () => {
       expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "Home" })).toBeInTheDocument();
       expect(screen.getByText("owner")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Confirmations" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Tools" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Users" })).toBeInTheDocument();
     });
@@ -302,6 +365,30 @@ describe("App", () => {
         screen.getByText("Ollama is ready, but no model is installed."),
       ).toBeInTheDocument();
       expect(screen.getByText(/General · local_only · Ollama online/)).toBeInTheDocument();
+    });
+  });
+
+  test("opens the exact-action confirmation queue and records approval", async () => {
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Confirmations" })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Confirmations" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Confirmations" })).toBeInTheDocument();
+      expect(screen.getByText("Exact intended action")).toBeInTheDocument();
+      expect(
+        screen.getByText("Delete knowledge document: document_id=42"),
+      ).toBeInTheDocument();
+      expect(screen.getByText(/Level 2/)).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Delete knowledge document approved.")).toBeInTheDocument();
     });
   });
 
