@@ -16,8 +16,8 @@ from rosevear_ai_hub.database import get_session
 from rosevear_ai_hub.models import SecretValue, User
 from rosevear_ai_hub.secrets import (
     SECRET_DEFINITIONS,
-    delete_stored_secret,
     current_key,
+    delete_stored_secret,
     encryption_available,
     environment_secret,
     key_fingerprint,
