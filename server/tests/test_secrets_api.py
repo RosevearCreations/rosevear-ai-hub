@@ -113,8 +113,7 @@ def test_environment_secret_takes_precedence_without_redisplay(tmp_path, monkeyp
     status = client.get("/api/v1/secrets")
     assert status.status_code == 200
     item = next(
-        value for value in status.json()["secrets"]
-        if value["secret_key"] == "home_assistant.token"
+        value for value in status.json()["secrets"] if value["secret_key"] == "home_assistant.token"
     )
     assert item["configured"] is True
     assert item["effective_source"] == "environment"
