@@ -40,6 +40,9 @@ def test_sanitizer_redacts_sensitive_values_and_bounds_payloads() -> None:
             "safe": "visible",
         },
         "header": "Bearer should-not-persist",
+        "token": "plain-token",
+        "home_assistant_token": "ha-token",
+        "token_count": 12,
         "long": "x" * 1200,
     }
 
@@ -51,6 +54,9 @@ def test_sanitizer_redacts_sensitive_values_and_bounds_payloads() -> None:
     assert sanitized["nested"]["authorization"] == REDACTED
     assert sanitized["nested"]["safe"] == "visible"
     assert sanitized["header"] == REDACTED
+    assert sanitized["token"] == REDACTED
+    assert sanitized["home_assistant_token"] == REDACTED
+    assert sanitized["token_count"] == 12
     assert sanitized["long"].endswith("…")
     assert len(sanitized["long"]) == 1025
 
