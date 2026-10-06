@@ -42,27 +42,27 @@ def test_initial_models_persist(tmp_path) -> None:
         session.add(integration)
         session.flush()
         tool = ToolRecord(
-                integration_id=integration.id,
-                tool_key="test.read",
-                display_name="Test read",
-                description="Test registry persistence.",
-                capabilities_json=["test.read"],
-                risk_level=0,
-                input_schema_json={
-                    "type": "object",
-                    "properties": {},
-                    "required": [],
-                    "additionalProperties": False,
-                },
-                output_schema_json={
-                    "type": "object",
-                    "properties": {},
-                    "required": [],
-                    "additionalProperties": False,
-                },
-                enabled=True,
-                built_in=True,
-            )
+            integration_id=integration.id,
+            tool_key="test.read",
+            display_name="Test read",
+            description="Test registry persistence.",
+            capabilities_json=["test.read"],
+            risk_level=2,
+            input_schema_json={
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": False,
+            },
+            output_schema_json={
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": False,
+            },
+            enabled=True,
+            built_in=True,
+        )
         session.add(tool)
         session.flush()
         session.add(
