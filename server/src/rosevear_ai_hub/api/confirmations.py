@@ -107,10 +107,14 @@ def list_confirmations(
         Depends(require_roles("owner", "administrator", "household_user", "read_only")),
     ],
     db: Annotated[Session, Depends(get_session)],
-    request_status: Literal["pending", "approved", "rejected", "expired", "consumed", "all"] = Query(
-        default="pending",
-        alias="status",
-    ),
+    request_status: Literal[
+        "pending",
+        "approved",
+        "rejected",
+        "expired",
+        "consumed",
+        "all",
+    ] = Query(default="pending", alias="status"),
 ) -> list[ConfirmationResponse]:
     expire_stale_confirmations(db)
     query = select(ConfirmationRequest).order_by(ConfirmationRequest.created_at.desc())
