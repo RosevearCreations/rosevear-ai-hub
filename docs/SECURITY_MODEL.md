@@ -83,6 +83,24 @@ Tool arguments supplied by an LLM remain untrusted input. Future execution code 
 arguments against the registered schema, authorization, risk policy, and confirmation evidence
 before calling an implementation.
 
+## Confirmation workflow
+
+Build 018 enforces Level 2 confirmation on the server:
+- registered input schemas validate untrusted tool arguments before a request is created
+- the server builds the exact action preview from the registered tool plus canonical arguments
+- canonical arguments are SHA-256 fingerprinted and must match again at consumption
+- only Owner/Administrator accounts may approve or reject Level 2 requests
+- confirmations expire; the default lifetime is five minutes
+- expired decisions/consumption return HTTP 410
+- successful approvals are consumed atomically and cannot be replayed
+- the approval and protected database mutation share one transaction
+- Level 3 tools cannot enter the confirmation workflow
+- disabled tools cannot create confirmation requests
+- no reusable approval token or secret is exposed to the browser
+
+Knowledge-document deletion is the first enforced Level 2 consumer. Direct deletion without an
+approved matching confirmation returns HTTP 428.
+
 ## High-risk physical actions
 
 The AI must not autonomously:

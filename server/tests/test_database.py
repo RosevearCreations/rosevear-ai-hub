@@ -1,3 +1,5 @@
+from datetime import UTC, datetime, timedelta
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -7,6 +9,7 @@ from rosevear_ai_hub.models import (
     AuditEvent,
     Base,
     ChatMessage,
+    ConfirmationRequest,
     Conversation,
     Integration,
     ToolRecord,
@@ -38,28 +41,43 @@ def test_initial_models_persist(tmp_path) -> None:
         )
         session.add(integration)
         session.flush()
+        tool = ToolRecord(
+            integration_id=integration.id,
+            tool_key="test.read",
+            display_name="Test read",
+            description="Test registry persistence.",
+            capabilities_json=["test.read"],
+            risk_level=2,
+            input_schema_json={
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": False,
+            },
+            output_schema_json={
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": False,
+            },
+            enabled=True,
+            built_in=True,
+        )
+        session.add(tool)
+        session.flush()
         session.add(
-            ToolRecord(
-                integration_id=integration.id,
-                tool_key="test.read",
-                display_name="Test read",
-                description="Test registry persistence.",
-                capabilities_json=["test.read"],
-                risk_level=0,
-                input_schema_json={
-                    "type": "object",
-                    "properties": {},
-                    "required": [],
-                    "additionalProperties": False,
-                },
-                output_schema_json={
-                    "type": "object",
-                    "properties": {},
-                    "required": [],
-                    "additionalProperties": False,
-                },
-                enabled=True,
-                built_in=True,
+            ConfirmationRequest(
+                id="00000000-0000-0000-0000-000000000001",
+                requested_by_user_id=user.id,
+                decided_by_user_id=None,
+                tool_id=tool.id,
+                tool_key=tool.tool_key,
+                risk_level=2,
+                arguments_json={"item_id": 1},
+                arguments_hash="a" * 64,
+                preview_json={"summary": "Test confirmation"},
+                status="pending",
+                expires_at=datetime.now(UTC) + timedelta(minutes=5),
             )
         )
         conversation = Conversation(
@@ -97,3 +115,4 @@ def test_initial_models_persist(tmp_path) -> None:
         assert session.scalar(select(AuditEvent)) is not None
         assert session.scalar(select(Integration)) is not None
         assert session.scalar(select(ToolRecord)) is not None
+        assert session.scalar(select(ConfirmationRequest)) is not None

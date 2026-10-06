@@ -12,6 +12,7 @@ import {
 } from "./api";
 import { AuthView } from "./AuthView";
 import { ChatView } from "./ChatView";
+import { ConfirmationsView } from "./ConfirmationsView";
 import { KnowledgeView } from "./KnowledgeView";
 import { ToolsView } from "./ToolsView";
 import { UsersView } from "./UsersView";
@@ -32,7 +33,7 @@ type AuthState =
   | { kind: "ready"; status: AuthStatus };
 
 const baseSections = ["Home", "Chat", "Knowledge", "Devices", "System"] as const;
-type Section = (typeof baseSections)[number] | "Users" | "Tools";
+type Section = (typeof baseSections)[number] | "Users" | "Tools" | "Confirmations";
 
 export function App() {
   const [auth, setAuth] = useState<AuthState>({ kind: "loading" });
@@ -134,7 +135,7 @@ export function App() {
   const user = auth.status.user;
   const canAdminister = user.role === "owner" || user.role === "administrator";
   const sections: Section[] = canAdminister
-    ? [...baseSections, "Tools", "Users"]
+    ? [...baseSections, "Confirmations", "Tools", "Users"]
     : [...baseSections];
 
   async function signOut() {
@@ -198,7 +199,9 @@ export function App() {
         {section === "Chat" ? (
           <ChatView />
         ) : section === "Knowledge" ? (
-          <KnowledgeView />
+          <KnowledgeView currentUser={user} />
+        ) : section === "Confirmations" ? (
+          <ConfirmationsView />
         ) : section === "Tools" ? (
           <ToolsView />
         ) : section === "Users" ? (
@@ -238,7 +241,7 @@ function HomeView({
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 017</p>
+          <p className="eyebrow">Build 018</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -264,6 +267,11 @@ function HomeView({
           <button type="button" onClick={onOpenKnowledge}>
             Open knowledge
           </button>
+        </article>
+
+        <article className="panel">
+          <h2>Confirmations</h2>
+          <p>Exact action previews, approve/reject decisions, expiry, and replay prevention are active.</p>
         </article>
 
         <article className="panel">

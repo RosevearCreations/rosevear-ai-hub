@@ -25,6 +25,7 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "app_settings",
         "audit_events",
         "chat_messages",
+        "confirmation_requests",
         "conversations",
         "chunk_embeddings",
         "document_chunks",
@@ -45,6 +46,9 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
     session_columns = {column["name"] for column in inspector.get_columns("sessions")}
     integration_columns = {column["name"] for column in inspector.get_columns("integrations")}
     tool_columns = {column["name"] for column in inspector.get_columns("tools")}
+    confirmation_columns = {
+        column["name"] for column in inspector.get_columns("confirmation_requests")
+    }
     assert {"model", "provider"}.issubset(conversation_columns)
     assert {"model", "provider"}.issubset(message_columns)
     assert {
@@ -99,6 +103,20 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "enabled",
         "built_in",
     }.issubset(tool_columns)
+    assert {
+        "requested_by_user_id",
+        "decided_by_user_id",
+        "tool_id",
+        "tool_key",
+        "risk_level",
+        "arguments_json",
+        "arguments_hash",
+        "preview_json",
+        "status",
+        "expires_at",
+        "decided_at",
+        "consumed_at",
+    }.issubset(confirmation_columns)
 
     with test_engine.connect() as connection:
         profile_names = (
@@ -123,6 +141,7 @@ def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
     test_engine = create_engine(f"sqlite:///{database_path}")
     tables = set(inspect(test_engine).get_table_names())
 
+    assert "confirmation_requests" not in tables
     assert "tools" not in tables
     assert "integrations" not in tables
     assert "sessions" not in tables

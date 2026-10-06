@@ -6,13 +6,15 @@ from collections import Counter
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.api.knowledge import get_knowledge_ingestion_service
+from rosevear_ai_hub.auth import require_roles
+from rosevear_ai_hub.confirmations import consume_confirmation
 from rosevear_ai_hub.database import get_session
 from rosevear_ai_hub.knowledge.ingestion import KnowledgeIngestionService
 from rosevear_ai_hub.models import (
@@ -20,6 +22,7 @@ from rosevear_ai_hub.models import (
     KnowledgeChunk,
     KnowledgeCollection,
     KnowledgeDocument,
+    User,
 )
 from rosevear_ai_hub.schemas import KnowledgeCollectionResponse, KnowledgeDocumentResponse
 
@@ -253,12 +256,28 @@ def move_document(
 )
 def delete_document(
     document_id: int,
+    actor: Annotated[User, Depends(require_roles("owner", "administrator"))],
     session: SessionDependency,
     ingestion: IngestionDependency,
+    confirmation_id: str | None = Query(default=None),
 ) -> KnowledgeDeleteResponse:
+    if confirmation_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_428_PRECONDITION_REQUIRED,
+            detail="An approved confirmation is required to delete a knowledge document.",
+        )
+
     document = session.get(KnowledgeDocument, document_id)
     if document is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+
+    consume_confirmation(
+        session,
+        confirmation_id=confirmation_id,
+        actor=actor,
+        tool_key="knowledge.document.delete",
+        arguments={"document_id": document_id},
+    )
 
     source_path = document.source_path
     chunk_ids = select(KnowledgeChunk.id).where(KnowledgeChunk.document_id == document_id)

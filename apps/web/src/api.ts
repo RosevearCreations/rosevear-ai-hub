@@ -704,11 +704,12 @@ export function moveKnowledgeDocument(
 
 export function deleteKnowledgeDocument(
   documentId: number,
+  confirmationId: string,
   signal?: AbortSignal,
 ): Promise<{ deleted: boolean; source_deleted: boolean }> {
   return knowledgeMutation(
     "DELETE",
-    `/api/v1/knowledge/documents/${documentId}`,
+    `/api/v1/knowledge/documents/${documentId}?confirmation_id=${encodeURIComponent(confirmationId)}`,
     undefined,
     signal,
   );
@@ -761,6 +762,83 @@ export function updateTool(
     "PATCH",
     "/api/v1/tools/" + encodeURIComponent(toolKey),
     { enabled },
+    signal,
+  );
+}
+
+
+export interface ConfirmationPreview {
+  tool_key: string;
+  tool_name: string;
+  description: string;
+  risk_level: number;
+  risk_label: string;
+  summary: string;
+  arguments: Record<string, unknown>;
+}
+
+export interface ConfirmationRequest {
+  id: string;
+  requested_by_user_id: number;
+  decided_by_user_id: number | null;
+  tool_key: string;
+  risk_level: number;
+  arguments: Record<string, unknown>;
+  arguments_hash: string;
+  preview: ConfirmationPreview;
+  status: "pending" | "approved" | "rejected" | "expired" | "consumed";
+  expires_at: string;
+  decided_at: string | null;
+  consumed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export function createConfirmation(
+  toolKey: string,
+  argumentsValue: Record<string, unknown>,
+  signal?: AbortSignal,
+): Promise<ConfirmationRequest> {
+  return authJson<ConfirmationRequest>(
+    "POST",
+    "/api/v1/confirmations",
+    { tool_key: toolKey, arguments: argumentsValue },
+    signal,
+  );
+}
+
+export function getConfirmations(
+  statusValue: ConfirmationRequest["status"] | "all" = "pending",
+  signal?: AbortSignal,
+): Promise<ConfirmationRequest[]> {
+  return authJson<ConfirmationRequest[]>(
+    "GET",
+    "/api/v1/confirmations?status=" + encodeURIComponent(statusValue),
+    undefined,
+    signal,
+  );
+}
+
+export function approveConfirmation(
+  confirmationId: string,
+  signal?: AbortSignal,
+): Promise<ConfirmationRequest> {
+  return authJson<ConfirmationRequest>(
+    "POST",
+    "/api/v1/confirmations/" + encodeURIComponent(confirmationId) + "/approve",
+    {},
+    signal,
+  );
+}
+
+export function rejectConfirmation(
+  confirmationId: string,
+  signal?: AbortSignal,
+): Promise<ConfirmationRequest> {
+  return authJson<ConfirmationRequest>(
+    "POST",
+    "/api/v1/confirmations/" + encodeURIComponent(confirmationId) + "/reject",
+    {},
     signal,
   );
 }

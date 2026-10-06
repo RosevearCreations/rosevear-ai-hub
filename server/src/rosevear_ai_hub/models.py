@@ -301,3 +301,38 @@ class ToolRecord(TimestampMixin, Base):
     output_schema_json: Mapped[Any] = mapped_column(JSON, nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     built_in: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class ConfirmationRequest(TimestampMixin, Base):
+    """One exact-action confirmation with a single-use approval lifecycle."""
+
+    __tablename__ = "confirmation_requests"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    requested_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    decided_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    tool_id: Mapped[int] = mapped_column(
+        ForeignKey("tools.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    tool_key: Mapped[str] = mapped_column(String(160), nullable=False, index=True)
+    risk_level: Mapped[int] = mapped_column(Integer, nullable=False)
+    arguments_json: Mapped[Any] = mapped_column(JSON, nullable=False)
+    arguments_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    preview_json: Mapped[Any] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, index=True, default="pending")
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        index=True,
+    )
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

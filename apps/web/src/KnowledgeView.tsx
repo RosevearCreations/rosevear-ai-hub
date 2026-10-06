@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import {
   answerKnowledge,
+  approveConfirmation,
+  createConfirmation,
   createKnowledgeCollection,
   deleteKnowledgeCollection,
   deleteKnowledgeDocument,
@@ -12,9 +14,11 @@ import {
   indexKnowledgeDocument,
   knowledgeEvidenceUrl,
   moveKnowledgeDocument,
+  rejectConfirmation,
   searchKnowledge,
   updateKnowledgeCollection,
   uploadKnowledgeDocument,
+  type AuthUser,
   type KnowledgeAdminStatus,
   type KnowledgeAnswerResponse,
   type KnowledgeCollection,
@@ -27,7 +31,7 @@ import {
 
 const SUPPORTED_FILE_TYPES = ".pdf,.txt,.md,.docx";
 
-export function KnowledgeView() {
+export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
   const [collections, setCollections] = useState<KnowledgeCollection[]>([]);
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
   const [adminStatus, setAdminStatus] = useState<KnowledgeAdminStatus | null>(null);
@@ -94,6 +98,9 @@ export function KnowledgeView() {
 
     return () => controller.abort();
   }, []);
+
+  const canDeleteDocuments =
+    currentUser.role === "owner" || currentUser.role === "administrator";
 
   const collectionById = useMemo(
     () => new Map(collections.map((collection) => [collection.id, collection])),
@@ -232,21 +239,42 @@ export function KnowledgeView() {
   }
 
   async function removeDocument(document: KnowledgeDocument) {
-    if (documentAdminId !== null) {
-      return;
-    }
-    if (
-      !window.confirm(
-        `Delete "${document.filename}" and its local chunks/embeddings? This cannot be undone.`,
-      )
-    ) {
+    if (documentAdminId !== null || !canDeleteDocuments) {
       return;
     }
 
     setDocumentAdminId(document.id);
     setError("");
+    setNotice("");
     try {
-      const result = await deleteKnowledgeDocument(document.id);
+      const confirmation = await createConfirmation(
+        "knowledge.document.delete",
+        { document_id: document.id },
+      );
+      const exactArguments = JSON.stringify(confirmation.arguments, null, 2);
+      const accepted = window.confirm(
+        [
+          "Confirmation required",
+          "",
+          confirmation.preview.summary,
+          "",
+          "Exact arguments:",
+          exactArguments,
+          "",
+          "Expires: " + new Date(confirmation.expires_at).toLocaleString(),
+          "",
+          "Approve this exact action?",
+        ].join("\n"),
+      );
+
+      if (!accepted) {
+        await rejectConfirmation(confirmation.id);
+        setNotice(`Deletion of ${document.filename} was rejected.`);
+        return;
+      }
+
+      const approved = await approveConfirmation(confirmation.id);
+      const result = await deleteKnowledgeDocument(document.id, approved.id);
       await refreshDocuments();
       setSearchResult(null);
       setAnswerResult(null);
@@ -255,11 +283,16 @@ export function KnowledgeView() {
       }
       setNotice(
         result.source_deleted
-          ? `${document.filename} and its stored original were deleted.`
-          : `${document.filename} was deleted from the knowledge index. The original file could not be removed automatically.`,
+          ? `${document.filename} and its stored original were deleted after confirmation.`
+          : `${document.filename} was deleted from the knowledge index after confirmation. The original file could not be removed automatically.`,
       );
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Document deletion failed.");
+      const message = caught instanceof Error ? caught.message : "Document deletion failed.";
+      setError(
+        message === "Tool is disabled."
+          ? "Document deletion is disabled. Enable knowledge.document.delete in Tools first."
+          : message,
+      );
     } finally {
       setDocumentAdminId(null);
     }
@@ -875,13 +908,17 @@ export function KnowledgeView() {
                           ? "Re-index locally"
                           : "Index locally"}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => void removeDocument(item)}
-                      disabled={documentAdminId !== null || indexingId !== null}
-                    >
-                      {documentAdminId === item.id ? "Deleting…" : "Delete"}
-                    </button>
+                    {canDeleteDocuments ? (
+                      <button
+                        type="button"
+                        onClick={() => void removeDocument(item)}
+                        disabled={documentAdminId !== null || indexingId !== null}
+                      >
+                        {documentAdminId === item.id ? "Confirming…" : "Delete"}
+                      </button>
+                    ) : (
+                      <small>Owner/Administrator approval is required to delete.</small>
+                    )}
                   </div>
                 </article>
               );

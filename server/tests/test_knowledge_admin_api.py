@@ -55,7 +55,35 @@ def build_client(tmp_path):
     application = create_app()
     application.dependency_overrides[get_session] = override_session
     application.dependency_overrides[get_knowledge_ingestion_service] = lambda: ingestion
-    return TestClient(application), session_maker, storage_root
+    client = TestClient(application)
+    bootstrap = client.post(
+        "/api/v1/auth/bootstrap",
+        json={"username": "owner", "password": "owner-password-123"},
+    )
+    assert bootstrap.status_code == 201
+    enabled = client.patch(
+        "/api/v1/tools/knowledge.document.delete",
+        json={"enabled": True},
+    )
+    assert enabled.status_code == 200
+    return client, session_maker, storage_root
+
+
+def approve_delete_confirmation(client: TestClient, document_id: int) -> str:
+    prepared = client.post(
+        "/api/v1/confirmations",
+        json={
+            "tool_key": "knowledge.document.delete",
+            "arguments": {"document_id": document_id},
+        },
+    )
+    assert prepared.status_code == 201
+    confirmation_id = prepared.json()["id"]
+
+    approved = client.post(f"/api/v1/confirmations/{confirmation_id}/approve")
+    assert approved.status_code == 200
+    assert approved.json()["status"] == "approved"
+    return confirmation_id
 
 
 def seed_document(session_maker, storage_root: Path) -> int:
@@ -161,7 +189,13 @@ def test_document_move_delete_and_source_cleanup(tmp_path) -> None:
     assert status["chunk_count"] == 1
     assert status["embedding_count"] == 1
 
-    deleted = client.delete(f"/api/v1/knowledge/documents/{document_id}")
+    missing_confirmation = client.delete(f"/api/v1/knowledge/documents/{document_id}")
+    assert missing_confirmation.status_code == 428
+
+    confirmation_id = approve_delete_confirmation(client, document_id)
+    deleted = client.delete(
+        f"/api/v1/knowledge/documents/{document_id}?confirmation_id={confirmation_id}"
+    )
     assert deleted.status_code == 200
     assert deleted.json() == {"deleted": True, "source_deleted": True}
     assert not (storage_root / "originals" / "test.txt").exists()
@@ -179,7 +213,8 @@ def test_collection_delete_requires_empty_non_default_collection(tmp_path) -> No
     occupied = client.delete("/api/v1/knowledge/collections/1")
     assert occupied.status_code == 409
 
-    client.delete(f"/api/v1/knowledge/documents/{document_id}")
+    confirmation_id = approve_delete_confirmation(client, document_id)
+    client.delete(f"/api/v1/knowledge/documents/{document_id}?confirmation_id={confirmation_id}")
 
     default_collection = client.delete("/api/v1/knowledge/collections/1")
     assert default_collection.status_code == 409
