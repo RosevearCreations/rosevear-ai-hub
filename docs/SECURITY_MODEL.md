@@ -163,3 +163,16 @@ backup/retention operations are explicitly defined.
 - encrypted off-machine copy
 - regular restore test
 - knowledge source documents backed up separately where appropriate
+
+
+## Home Assistant connection
+
+Build 021 keeps Home Assistant access read-only and server-side:
+- the long-lived token is resolved through Build 020 and is never returned to the browser
+- Authorization headers are constructed only inside the backend adapter
+- token values are excluded from connector error messages
+- the configured URL must use HTTP or HTTPS and contain a valid host
+- missing configuration and network outages degrade to status information rather than disabling the Hub
+- the entity inventory exposes a bounded normalized subset instead of forwarding arbitrary Home Assistant attributes
+- no Home Assistant service-call endpoint or device-control tool exists in Build 021
+- the Hub and Home Assistant must remain on trusted local/private networking; no public port forwarding is introduced

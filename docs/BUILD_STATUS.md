@@ -24,6 +24,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 018 | Confirmation Workflow | COMPLETE | main |
 | 019 | Audit Log | COMPLETE | main |
 | 020 | Secret Management | COMPLETE | main |
+| 021 | Home Assistant Connection | READY FOR CI | dev |
 
 ## Build 016 acceptance checklist
 
@@ -251,6 +252,42 @@ logs, tickets, and chat. Environment-backed secrets continue to work without it.
 
 Detailed Windows PowerShell generation and rotation steps are documented in `docs/OPERATIONS.md`.
 
+## Build 021 acceptance checklist
+
+- [x] Home Assistant base URL environment configuration
+- [x] Build 020 Home Assistant token resolution reused
+- [x] Bearer token remains server-side only
+- [x] URL normalized and restricted to http/https
+- [x] configurable connection timeout
+- [x] authenticated Home Assistant health endpoint
+- [x] safe not-configured status
+- [x] safe offline status
+- [x] rejected-token status without token disclosure
+- [x] read-only Home Assistant entity inventory
+- [x] entity inventory excludes arbitrary full attributes
+- [x] entity identity, domain, state, friendly name and basic metadata
+- [x] authenticated Devices UI
+- [x] explicit read-only/no-control boundary
+- [x] backend adapter tests with mock transport
+- [x] backend API configured/offline/unconfigured coverage
+- [x] web Home Assistant health/inventory coverage
+- [x] no database migration required
+- [x] security/integration/operations/build documentation
+- [x] no cloud service, OAuth registration, or paid dependency required
+- [ ] final Build 021 dev CI green
+- [ ] promoted to main
+- [ ] final Build 021 main CI green
+- [ ] dev synchronized with main
+
+## Operator setup
+
+Build 021 can be installed and tested without a live Home Assistant instance because automated tests
+use local mock transports.
+
+To connect the real home instance, configure `HOME_ASSISTANT_URL` on the Hub machine and provide a
+Home Assistant long-lived access token either as `HOME_ASSISTANT_TOKEN` or through the Owner/Admin
+**Secrets** screen. Never paste the token into GitHub, logs, tickets, or chat.
+
 ## Next build
 
-**Build 021 — Home Assistant Connection**
+**Build 022 — Entity Browser**

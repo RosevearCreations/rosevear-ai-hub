@@ -253,3 +253,29 @@ class KnowledgeAnswerResponse(BaseModel):
     retrieval_method: Literal["semantic", "keyword"]
     fallback_reason: str | None
     citations: list[KnowledgeCitationResponse]
+
+
+class HomeAssistantStatusResponse(BaseModel):
+    configured: bool
+    available: bool
+    base_url: str | None
+    url_configured: bool
+    token_configured: bool
+    message: str
+
+
+class HomeAssistantEntityResponse(BaseModel):
+    entity_id: str
+    domain: str
+    state: str
+    friendly_name: str | None = None
+    icon: str | None = None
+    unit_of_measurement: str | None = None
+    device_class: str | None = None
+    last_changed: str | None = None
+    last_updated: str | None = None
+
+
+class HomeAssistantEntitiesResponse(BaseModel):
+    count: int
+    entities: list[HomeAssistantEntityResponse]

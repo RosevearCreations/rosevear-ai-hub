@@ -1585,3 +1585,77 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Build 021 — Home Assistant connection */
+.home-assistant-view {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.ha-meta,
+.ha-entity-card dl {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.ha-meta div,
+.ha-entity-card dl div {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.45fr) minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.ha-meta dt,
+.ha-entity-card dt {
+  color: #525252;
+  font-size: 0.85rem;
+}
+
+.ha-meta dd,
+.ha-entity-card dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.ha-inventory {
+  min-height: 0;
+}
+
+.ha-section-heading {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ha-section-heading > strong {
+  min-width: 2.5rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 999px;
+  text-align: center;
+}
+
+.ha-entity-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.ha-entity-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.75rem;
+  background: #fafafa;
+}
+
+.ha-entity-card code {
+  display: block;
+  margin-top: 0.25rem;
+  overflow-wrap: anywhere;
+}

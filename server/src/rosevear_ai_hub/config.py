@@ -50,9 +50,19 @@ class Settings(BaseSettings):
         default=None,
         alias="SECRET_ENCRYPTION_PREVIOUS_KEY",
     )
+    home_assistant_url: str = Field(
+        default="",
+        alias="HOME_ASSISTANT_URL",
+    )
     home_assistant_token: SecretStr | None = Field(
         default=None,
         alias="HOME_ASSISTANT_TOKEN",
+    )
+    home_assistant_timeout_seconds: float = Field(
+        default=5.0,
+        gt=0,
+        le=60,
+        alias="HOME_ASSISTANT_TIMEOUT_SECONDS",
     )
     mqtt_password: SecretStr | None = Field(
         default=None,
