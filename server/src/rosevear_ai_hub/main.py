@@ -9,8 +9,8 @@ from rosevear_ai_hub import __version__
 from rosevear_ai_hub.api.audit import router as audit_router
 from rosevear_ai_hub.api.chat import router as chat_router
 from rosevear_ai_hub.api.confirmations import router as confirmations_router
-from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.home_assistant import router as home_assistant_router
+from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
