@@ -14,8 +14,9 @@ from jsonschema.exceptions import SchemaError
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
+from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.config import get_settings
-from rosevear_ai_hub.models import AuditEvent, ConfirmationRequest, ToolRecord, User
+from rosevear_ai_hub.models import ConfirmationRequest, ToolRecord, User
 from rosevear_ai_hub.tool_registry import ToolRiskLevel, risk_label, sync_builtin_tools
 
 PENDING = "pending"
@@ -110,19 +111,18 @@ def expire_if_needed(session: Session, request: ConfirmationRequest) -> bool:
         return False
 
     request.status = EXPIRED
-    session.add(
-        AuditEvent(
-            actor_user_id=None,
-            event_type="confirmation.expired",
-            object_type="confirmation",
-            object_id=request.id,
-            action="expire",
-            sanitized_arguments={
-                "tool_key": request.tool_key,
-                "arguments_hash": request.arguments_hash,
-            },
-            result={"ok": True},
-        )
+    record_audit_event(
+        session,
+        actor_user_id=None,
+        event_type="confirmation.expired",
+        object_type="confirmation",
+        object_id=request.id,
+        action="expire",
+        arguments={"arguments_hash": request.arguments_hash},
+        result={"ok": True},
+        tool_key=request.tool_key,
+        risk_level=request.risk_level,
+        confirmation_id=request.id,
     )
     session.flush()
     return True
@@ -181,19 +181,18 @@ def prepare_confirmation(
         expires_at=now + timedelta(seconds=ttl),
     )
     session.add(request)
-    session.add(
-        AuditEvent(
-            actor_user_id=actor.id,
-            event_type="confirmation.requested",
-            object_type="confirmation",
-            object_id=request.id,
-            action="request",
-            sanitized_arguments={
-                "tool_key": request.tool_key,
-                "arguments_hash": request.arguments_hash,
-            },
-            result={"ok": True, "expires_at": request.expires_at.isoformat()},
-        )
+    record_audit_event(
+        session,
+        actor_user_id=actor.id,
+        event_type="confirmation.requested",
+        object_type="confirmation",
+        object_id=request.id,
+        action="request",
+        arguments={"arguments_hash": request.arguments_hash},
+        result={"ok": True, "expires_at": request.expires_at.isoformat()},
+        tool_key=request.tool_key,
+        risk_level=request.risk_level,
+        confirmation_id=request.id,
     )
     session.commit()
     session.refresh(request)
@@ -226,19 +225,18 @@ def decide_confirmation(
     request.status = decision
     request.decided_by_user_id = actor.id
     request.decided_at = now
-    session.add(
-        AuditEvent(
-            actor_user_id=actor.id,
-            event_type=f"confirmation.{decision}",
-            object_type="confirmation",
-            object_id=request.id,
-            action=decision,
-            sanitized_arguments={
-                "tool_key": request.tool_key,
-                "arguments_hash": request.arguments_hash,
-            },
-            result={"ok": True},
-        )
+    record_audit_event(
+        session,
+        actor_user_id=actor.id,
+        event_type=f"confirmation.{decision}",
+        object_type="confirmation",
+        object_id=request.id,
+        action=decision,
+        arguments={"arguments_hash": request.arguments_hash},
+        result={"ok": True},
+        tool_key=request.tool_key,
+        risk_level=request.risk_level,
+        confirmation_id=request.id,
     )
     session.commit()
     session.refresh(request)
@@ -307,19 +305,18 @@ def consume_confirmation(
             detail="Confirmation has already been consumed.",
         )
 
-    session.add(
-        AuditEvent(
-            actor_user_id=actor.id,
-            event_type="confirmation.consumed",
-            object_type="confirmation",
-            object_id=request.id,
-            action="consume",
-            sanitized_arguments={
-                "tool_key": request.tool_key,
-                "arguments_hash": request.arguments_hash,
-            },
-            result={"ok": True},
-        )
+    record_audit_event(
+        session,
+        actor_user_id=actor.id,
+        event_type="confirmation.consumed",
+        object_type="confirmation",
+        object_id=request.id,
+        action="consume",
+        arguments={"arguments_hash": request.arguments_hash},
+        result={"ok": True},
+        tool_key=request.tool_key,
+        risk_level=request.risk_level,
+        confirmation_id=request.id,
     )
     session.flush()
     session.expire(request)
