@@ -38,6 +38,26 @@ The Hub handles private data and can affect physical devices. Assume:
 - never redisplay full saved secrets
 - support rotation
 
+## Secret management
+
+Build 020 makes secret handling a dedicated security boundary:
+- environment-backed secrets remain outside SQLite
+- environment values take precedence over encrypted stored copies
+- persisted secret values use AES-GCM authenticated encryption
+- the 256-bit master key is supplied separately through `SECRET_ENCRYPTION_KEY`
+- the master key is never persisted in the Hub database
+- ciphertext uses a fresh random nonce and binds the stable secret key as authenticated data
+- Owner/Administrator accounts may administer secrets; lower roles cannot
+- saved secret plaintext is never returned through the API or UI
+- configuration objects use secret-aware Pydantic fields so values are redacted from representations
+- secret administration audit records contain identity/operation metadata, not submitted plaintext
+- `SECRET_ENCRYPTION_PREVIOUS_KEY` is accepted only as a temporary rotation aid
+- master-key rotation rewraps stored ciphertext under the new current key before the previous key is removed
+
+Encrypted-at-rest storage protects database copies, but it does not protect against a fully
+compromised process that already has access to the live master key. Host account security,
+filesystem permissions, process isolation, and backups remain part of the trust boundary.
+
 ## Knowledge-file ingestion
 
 Uploaded knowledge files are untrusted input.

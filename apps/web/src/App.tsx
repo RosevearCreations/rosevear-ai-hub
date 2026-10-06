@@ -15,6 +15,7 @@ import { AuthView } from "./AuthView";
 import { ChatView } from "./ChatView";
 import { ConfirmationsView } from "./ConfirmationsView";
 import { KnowledgeView } from "./KnowledgeView";
+import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
 import { UsersView } from "./UsersView";
 
@@ -34,7 +35,7 @@ type AuthState =
   | { kind: "ready"; status: AuthStatus };
 
 const baseSections = ["Home", "Chat", "Knowledge", "Devices", "System"] as const;
-type Section = (typeof baseSections)[number] | "Users" | "Tools" | "Confirmations" | "Audit";
+type Section = (typeof baseSections)[number] | "Users" | "Tools" | "Confirmations" | "Audit" | "Secrets";
 
 export function App() {
   const [auth, setAuth] = useState<AuthState>({ kind: "loading" });
@@ -136,7 +137,7 @@ export function App() {
   const user = auth.status.user;
   const canAdminister = user.role === "owner" || user.role === "administrator";
   const sections: Section[] = canAdminister
-    ? [...baseSections, "Confirmations", "Audit", "Tools", "Users"]
+    ? [...baseSections, "Confirmations", "Audit", "Secrets", "Tools", "Users"]
     : [...baseSections];
 
   async function signOut() {
@@ -205,6 +206,8 @@ export function App() {
           <ConfirmationsView />
         ) : section === "Audit" ? (
           <AuditView />
+        ) : section === "Secrets" ? (
+          <SecretsView />
         ) : section === "Tools" ? (
           <ToolsView />
         ) : section === "Users" ? (
@@ -244,7 +247,7 @@ function HomeView({
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 019</p>
+          <p className="eyebrow">Build 020</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -270,6 +273,11 @@ function HomeView({
           <button type="button" onClick={onOpenKnowledge}>
             Open knowledge
           </button>
+        </article>
+
+        <article className="panel">
+          <h2>Secret management</h2>
+          <p>Environment-backed and encrypted-at-rest secret storage with rotation safeguards is active.</p>
         </article>
 
         <article className="panel">

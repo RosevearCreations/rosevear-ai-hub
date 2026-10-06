@@ -23,6 +23,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 017 | Tool Registry | COMPLETE | main |
 | 018 | Confirmation Workflow | COMPLETE | main |
 | 019 | Audit Log | COMPLETE | main |
+| 020 | Secret Management | READY FOR CI | dev |
 
 ## Build 016 acceptance checklist
 
@@ -200,6 +201,56 @@ Audit data remains local in the Hub database. Build 019 does not automatically p
 the documented 180-day retention target remains an operational target until backup/retention
 automation is introduced deliberately.
 
+## Build 020 acceptance checklist
+
+- [x] environment-backed secret definitions
+- [x] environment source takes precedence over encrypted store
+- [x] AES-GCM authenticated encryption for persisted secrets
+- [x] separate 256-bit environment-provided master key
+- [x] master key never persisted in SQLite
+- [x] fresh random nonce per encryption
+- [x] stable secret key bound as authenticated associated data
+- [x] explicit versioned ciphertext format
+- [x] non-secret master-key fingerprint metadata
+- [x] optional previous-master-key support during rotation
+- [x] per-secret create/rotate/delete
+- [x] master-key rewrap
+- [x] Home Assistant token secret definition
+- [x] MQTT password secret definition
+- [x] environment-backed secrets remain outside SQLite
+- [x] saved plaintext never returned by API
+- [x] saved plaintext never redisplayed by UI
+- [x] password-type write-only secret inputs
+- [x] Owner/Administrator secret administration
+- [x] Household/Read-only secret administration denied
+- [x] secret create/rotate/delete/rewrap audit evidence
+- [x] submitted secret values excluded from audit payloads
+- [x] Pydantic SecretStr configuration redaction
+- [x] plaintext absent from persisted ciphertext column
+- [x] encrypted storage remains locked without master key
+- [x] environment-only secret use remains available without master key
+- [x] reversible secret_values migration
+- [x] migration upgrade/downgrade coverage
+- [x] encryption/persistence/API/role/rotation tests
+- [x] authenticated web secret-management coverage
+- [x] Windows/Tauri packaging passed on implementation tree
+- [x] security/data-model/environment/operations documentation
+- [x] no cloud service, OAuth registration, or paid dependency required
+- [ ] final Build 020 dev CI green
+- [ ] promoted to main
+- [ ] final Build 020 main CI green
+- [ ] dev synchronized with main
+
+## Operator setup
+
+No manual setup is required to keep the Hub running after Build 020.
+
+If encrypted SQLite secret storage will be used, generate a local 32-byte URL-safe base64 master
+key and configure it as `SECRET_ENCRYPTION_KEY` on the Hub machine. Keep that key outside GitHub,
+logs, tickets, and chat. Environment-backed secrets continue to work without it.
+
+Detailed Windows PowerShell generation and rotation steps are documented in `docs/OPERATIONS.md`.
+
 ## Next build
 
-**Build 020 — Secret Management**
+**Build 021 — Home Assistant Connection**

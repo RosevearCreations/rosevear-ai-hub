@@ -86,9 +86,10 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 017 — Tool Registry**
 - **Build 018 — Confirmation Workflow**
 - **Build 019 — Audit Log**
+- **Build 020 — Secret Management**
 
 ## Next build
 
-**Build 020 — Secret Management**
+**Build 021 — Home Assistant Connection**
 
 The first functional MVP boundary is **Build 025**.

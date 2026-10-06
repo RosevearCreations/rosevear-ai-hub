@@ -210,6 +210,20 @@ be filtered efficiently without parsing JSON payloads. Existing Build 016–018 
 backfilled when those values can be derived. New state-changing paths use the central audit writer,
 which sanitizes and bounds arguments/results before persistence.
 
+## secret_values
+- id
+- secret_key
+- ciphertext
+- key_fingerprint
+- rotated_at
+- created_at
+- updated_at
+
+Build 020 stores only authenticated ciphertext for persisted credentials. The database does not
+contain the encryption master key or plaintext values. `key_fingerprint` is a non-secret SHA-256
+fingerprint prefix used to identify which configured master key wrapped a row. Environment-backed
+secrets are not copied into this table and take precedence when both sources are configured.
+
 ## camera_registry
 - id
 - name

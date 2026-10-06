@@ -167,7 +167,7 @@ async function postJson<T>(
 }
 
 async function authJson<T>(
-  method: "GET" | "POST" | "PATCH",
+  method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE",
   path: string,
   body?: unknown,
   signal?: AbortSignal,
@@ -927,6 +927,69 @@ export function getAuditEvents(
     "GET",
     "/api/v1/audit/events?" + params.toString(),
     undefined,
+    signal,
+  );
+}
+
+
+export interface SecretMetadata {
+  secret_key: string;
+  display_name: string;
+  description: string;
+  environment_variable: string;
+  configured: boolean;
+  effective_source: "environment" | "encrypted_store" | null;
+  environment_configured: boolean;
+  encrypted_store_configured: boolean;
+  key_fingerprint: string | null;
+  rotated_at: string | null;
+  updated_at: string | null;
+}
+
+export interface SecretStatus {
+  encryption_available: boolean;
+  current_key_fingerprint: string | null;
+  previous_key_available: boolean;
+  stored_secret_count: number;
+  secrets: SecretMetadata[];
+}
+
+export function getSecretStatus(signal?: AbortSignal): Promise<SecretStatus> {
+  return authJson<SecretStatus>("GET", "/api/v1/secrets", undefined, signal);
+}
+
+export function saveSecret(
+  secretKey: string,
+  value: string,
+  signal?: AbortSignal,
+): Promise<SecretMetadata> {
+  return authJson<SecretMetadata>(
+    "PUT",
+    "/api/v1/secrets/" + encodeURIComponent(secretKey),
+    { value },
+    signal,
+  );
+}
+
+export function deleteStoredSecret(
+  secretKey: string,
+  signal?: AbortSignal,
+): Promise<{ deleted: boolean }> {
+  return authJson<{ deleted: boolean }>(
+    "DELETE",
+    "/api/v1/secrets/" + encodeURIComponent(secretKey),
+    undefined,
+    signal,
+  );
+}
+
+export function rewrapSecrets(
+  signal?: AbortSignal,
+): Promise<{ rewrapped: number; current_key_fingerprint: string }> {
+  return authJson(
+    "POST",
+    "/api/v1/secrets/rewrap",
+    {},
     signal,
   );
 }

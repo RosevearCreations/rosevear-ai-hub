@@ -12,6 +12,7 @@ from rosevear_ai_hub.models import (
     ConfirmationRequest,
     Conversation,
     Integration,
+    SecretValue,
     ToolRecord,
     User,
 )
@@ -33,6 +34,14 @@ def test_initial_models_persist(tmp_path) -> None:
         session.flush()
 
         session.add(AppSetting(key="ui.theme", value_json={"mode": "system"}))
+        session.add(
+            SecretValue(
+                secret_key="home_assistant.token",
+                ciphertext="v1:test:test",
+                key_fingerprint="0123456789abcdef",
+                rotated_at=datetime.now(UTC),
+            )
+        )
         integration = Integration(
             integration_key="core.test",
             type="core",
@@ -118,5 +127,6 @@ def test_initial_models_persist(tmp_path) -> None:
         assert session.scalar(select(ChatMessage)) is not None
         assert session.scalar(select(AuditEvent)) is not None
         assert session.scalar(select(Integration)) is not None
+        assert session.scalar(select(SecretValue)) is not None
         assert session.scalar(select(ToolRecord)) is not None
         assert session.scalar(select(ConfirmationRequest)) is not None

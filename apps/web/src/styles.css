@@ -1484,3 +1484,104 @@ h1 {
     align-items: flex-start;
   }
 }
+
+
+/* Build 020 — secret management */
+.secrets-view {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.secret-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.secret-summary div,
+.secret-card {
+  padding: 1rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 0.8rem;
+  background: white;
+}
+
+.secret-summary div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.secret-summary span,
+.secret-meta dt {
+  color: #737373;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.secret-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.secret-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.secret-card strong,
+.secret-card code {
+  display: block;
+}
+
+.secret-card p {
+  margin: 0.5rem 0 0;
+  color: #525252;
+}
+
+.secret-meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.secret-meta dd {
+  margin: 0.25rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.secret-write {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.secret-write label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 700;
+}
+
+.secret-write input {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #a3a3a3;
+  border-radius: 0.6rem;
+  background: white;
+  color: #171717;
+}
+
+.secret-rotation {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  .secret-summary,
+  .secret-meta,
+  .secret-write {
+    grid-template-columns: 1fr;
+  }
+}
