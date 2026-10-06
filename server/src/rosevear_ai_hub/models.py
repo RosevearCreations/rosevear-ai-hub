@@ -340,3 +340,15 @@ class ConfirmationRequest(TimestampMixin, Base):
     )
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class SecretValue(TimestampMixin, Base):
+    """Encrypted-at-rest secret value; plaintext is never persisted."""
+
+    __tablename__ = "secret_values"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    secret_key: Mapped[str] = mapped_column(String(160), unique=True, nullable=False)
+    ciphertext: Mapped[str] = mapped_column(Text, nullable=False)
+    key_fingerprint: Mapped[str] = mapped_column(String(16), nullable=False)
+    rotated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
