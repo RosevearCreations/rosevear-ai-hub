@@ -13,7 +13,6 @@ from sqlalchemy.orm import Session
 from rosevear_ai_hub.auth import require_roles
 from rosevear_ai_hub.confirmations import (
     APPROVED,
-    PENDING,
     REJECTED,
     decide_confirmation,
     expire_if_needed,
