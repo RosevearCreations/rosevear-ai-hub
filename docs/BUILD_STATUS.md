@@ -20,7 +20,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 014 | Citations | COMPLETE | main via PR #17 |
 | 015 | Knowledge Administration | COMPLETE | main |
 | 016 | Authentication | COMPLETE | main |
-| 017 | Tool Registry | READY FOR CI | dev |
+| 017 | Tool Registry | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -82,10 +82,10 @@ No GitHub secret, OAuth application, cloud account, or paid service is required.
 - [x] authenticated web registry coverage
 - [x] no tool execution introduced
 - [x] no external service or secret required
-- [ ] final Build 017 dev CI green
-- [ ] promoted to main
-- [ ] final Build 017 main CI green
-- [ ] dev synchronized with main
+- [x] final Build 017 dev CI green
+- [x] promoted to main
+- [x] final Build 017 main CI green
+- [x] dev synchronized with main
 
 ## External setup
 
