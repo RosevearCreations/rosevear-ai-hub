@@ -14,6 +14,7 @@ import { AuditView } from "./AuditView";
 import { AuthView } from "./AuthView";
 import { ChatView } from "./ChatView";
 import { ConfirmationsView } from "./ConfirmationsView";
+import { HomeAssistantView } from "./HomeAssistantView";
 import { KnowledgeView } from "./KnowledgeView";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
@@ -202,6 +203,8 @@ export function App() {
           <ChatView />
         ) : section === "Knowledge" ? (
           <KnowledgeView currentUser={user} />
+        ) : section === "Devices" ? (
+          <HomeAssistantView />
         ) : section === "Confirmations" ? (
           <ConfirmationsView />
         ) : section === "Audit" ? (
@@ -218,6 +221,7 @@ export function App() {
             ollama={ollama}
             onOpenChat={() => setSection("Chat")}
             onOpenKnowledge={() => setSection("Knowledge")}
+            onOpenDevices={() => setSection("Devices")}
           />
         )}
       </main>
@@ -237,17 +241,19 @@ function HomeView({
   ollama,
   onOpenChat,
   onOpenKnowledge,
+  onOpenDevices,
 }: {
   health: HealthState;
   ollama: OllamaState;
   onOpenChat: () => void;
   onOpenKnowledge: () => void;
+  onOpenDevices: () => void;
 }) {
   return (
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 020</p>
+          <p className="eyebrow">Build 021</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -301,8 +307,11 @@ function HomeView({
         </article>
 
         <article className="panel">
-          <h2>Home &amp; Workshop</h2>
-          <p>Home Assistant and MQTT controls arrive in Builds 021–025.</p>
+          <h2>Home Assistant</h2>
+          <p>Read-only connectivity, health checks, and entity inventory are available.</p>
+          <button type="button" onClick={onOpenDevices}>
+            Open devices
+          </button>
         </article>
       </section>
     </>

@@ -993,3 +993,42 @@ export function rewrapSecrets(
     signal,
   );
 }
+
+
+export interface HomeAssistantStatus {
+  configured: boolean;
+  available: boolean;
+  base_url: string | null;
+  url_configured: boolean;
+  token_configured: boolean;
+  message: string;
+}
+
+export interface HomeAssistantEntity {
+  entity_id: string;
+  domain: string;
+  state: string;
+  friendly_name: string | null;
+  icon: string | null;
+  unit_of_measurement: string | null;
+  device_class: string | null;
+  last_changed: string | null;
+  last_updated: string | null;
+}
+
+export interface HomeAssistantEntitiesResponse {
+  count: number;
+  entities: HomeAssistantEntity[];
+}
+
+export function getHomeAssistantStatus(
+  signal?: AbortSignal,
+): Promise<HomeAssistantStatus> {
+  return getJson<HomeAssistantStatus>("/api/v1/home-assistant/status", signal);
+}
+
+export function getHomeAssistantEntities(
+  signal?: AbortSignal,
+): Promise<HomeAssistantEntitiesResponse> {
+  return getJson<HomeAssistantEntitiesResponse>("/api/v1/home-assistant/entities", signal);
+}

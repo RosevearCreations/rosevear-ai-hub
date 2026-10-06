@@ -147,6 +147,14 @@ Example:
 }
 ```
 
+## Home Assistant adapter
+
+Build 021 implements the first IoT adapter against Home Assistant's authenticated REST API. The
+FastAPI backend owns URL/token resolution, network calls, normalized errors, health, and a basic
+read-only entity inventory. The browser receives normalized status/entity fields only.
+
+No service calls are implemented in Build 021. Safe controls remain a later tool/permission layer.
+
 ## Integration contract
 
 Each adapter exposes:

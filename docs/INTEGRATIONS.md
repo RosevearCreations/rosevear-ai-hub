@@ -7,6 +7,15 @@
 
 Why: prevents permanent custom integrations for every Meross, Govee, Gosund, sensor, switch, light, and future device brand.
 
+Build 021 establishes the first real connector boundary:
+- `HOME_ASSISTANT_URL` supplies the non-secret base URL
+- the token is resolved through Build 020 secret management
+- the server sends `Authorization: Bearer ...` directly to Home Assistant
+- `GET /api/` is used for health
+- `GET /api/states` supplies the basic read-only entity inventory
+- the browser never receives the token
+- device-service writes are intentionally absent until Build 023
+
 ## MQTT
 **Priority:** High  
 **Role:** Local event/device messaging  

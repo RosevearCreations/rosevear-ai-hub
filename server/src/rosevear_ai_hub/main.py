@@ -10,6 +10,7 @@ from rosevear_ai_hub.api.audit import router as audit_router
 from rosevear_ai_hub.api.chat import router as chat_router
 from rosevear_ai_hub.api.confirmations import router as confirmations_router
 from rosevear_ai_hub.api.knowledge import router as knowledge_router
+from rosevear_ai_hub.api.home_assistant import router as home_assistant_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
@@ -71,6 +72,7 @@ def create_app() -> FastAPI:
     application.include_router(ollama_router, dependencies=protected)
     application.include_router(providers_router, dependencies=protected)
     application.include_router(profiles_router, dependencies=protected)
+    application.include_router(home_assistant_router, dependencies=protected)
     application.include_router(secrets_router, dependencies=protected)
     application.include_router(tools_router, dependencies=protected)
     application.include_router(chat_router, dependencies=protected)

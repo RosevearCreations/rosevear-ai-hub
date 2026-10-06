@@ -88,3 +88,30 @@ The previous encrypted value is overwritten and is not recoverable from the Hub.
 
 Never remove the old key before a successful rewrap. Keep master keys out of database backups; a
 backup of encrypted rows is unusable without the corresponding key.
+
+
+## Build 021 Home Assistant operations
+
+### Configure the connection
+
+1. Determine the Home Assistant base URL reachable from the Hub machine, for example
+   `http://homeassistant.local:8123` or the trusted LAN address.
+2. Set that value as `HOME_ASSISTANT_URL` in the Hub's local runtime environment.
+3. In Home Assistant, create a long-lived access token for the Hub.
+4. Store the token either as `HOME_ASSISTANT_TOKEN` or, when Build 020 encrypted storage is
+   configured, sign in as Owner/Administrator and save it under **Secrets → Home Assistant token**.
+5. Restart the Hub after changing environment variables.
+6. Open **Devices** and choose **Refresh**.
+7. Confirm **Home Assistant online** and review the read-only entity count.
+
+The token is write-only from the Hub UI and must never be pasted into GitHub, logs, tickets, or chat.
+
+### Troubleshooting
+
+- **Not configured:** confirm both URL and token are present.
+- **Rejected token:** replace/rotate the Home Assistant token; do not log the token while testing.
+- **Unavailable:** confirm the Hub machine can reach the configured URL and Home Assistant is running.
+- **Timeout:** verify LAN routing/firewall and increase `HOME_ASSISTANT_TIMEOUT_SECONDS` only when
+  the local connection is legitimately slow.
+
+Build 021 does not call Home Assistant services and cannot change device state.
