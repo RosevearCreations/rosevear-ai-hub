@@ -21,6 +21,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 015 | Knowledge Administration | COMPLETE | main |
 | 016 | Authentication | COMPLETE | main |
 | 017 | Tool Registry | COMPLETE | main |
+| 018 | Confirmation Workflow | READY FOR CI | dev |
 
 ## Build 016 acceptance checklist
 
@@ -95,6 +96,54 @@ required for Build 017.
 The registry is local metadata and administration only. Tool execution remains unavailable until
 the confirmation workflow is introduced.
 
+## Build 018 acceptance checklist
+
+- [x] persistent confirmation requests
+- [x] server-generated exact action previews
+- [x] JSON Schema validation of untrusted arguments
+- [x] canonical JSON argument normalization
+- [x] SHA-256 exact-action argument fingerprint
+- [x] Level 2-only confirmation request policy
+- [x] disabled-tool request rejection
+- [x] Level 3 workflow prohibition
+- [x] Owner/Administrator approve/reject decisions
+- [x] Household User request support without approval permission
+- [x] Read-only mutation protection retained
+- [x] configurable confirmation expiry
+- [x] HTTP 410 expired-decision/consumption semantics
+- [x] exact tool-key matching at consumption
+- [x] exact argument matching at consumption
+- [x] requester/approver identity binding
+- [x] atomic single-use consumption
+- [x] replay prevention
+- [x] request/approve/reject/expire/consume audit evidence
+- [x] Owner/Administrator confirmation queue UI
+- [x] exact argument display in confirmation UI
+- [x] confirmed knowledge-document deletion
+- [x] direct knowledge deletion blocked without confirmation
+- [x] destructive delete restricted to Owner/Administrator
+- [x] confirmation consume and knowledge deletion share one transaction
+- [x] reversible confirmation_requests migration
+- [x] migration upgrade/downgrade coverage
+- [x] persistence coverage
+- [x] backend confirmation policy coverage
+- [x] web confirmation workflow coverage
+- [x] Windows/Tauri packaging passed on implementation tree
+- [x] security/data-model/environment documentation
+- [x] no external service, secret, or paid dependency required
+- [ ] final Build 018 dev CI green
+- [ ] promoted to main
+- [ ] final Build 018 main CI green
+- [ ] dev synchronized with main
+
+## External setup
+
+No external application, API key, OAuth registration, hosted database, secret, or paid service is
+required for Build 018.
+
+The confirmation workflow is local Hub state. The default five-minute expiry may be adjusted with
+`CONFIRMATION_TTL_SECONDS` if needed.
+
 ## Next build
 
-**Build 018 — Confirmation Workflow**
+**Build 019 — Audit Log**
