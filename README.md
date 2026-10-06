@@ -85,10 +85,10 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 016 — Authentication**
 - **Build 017 — Tool Registry**
 - **Build 018 — Confirmation Workflow**
-- **Build 020 — Secret Management**
+- **Build 019 — Audit Log**
 
 ## Next build
 
-**Build 019 — Audit Log**
+**Build 020 — Secret Management**
 
 The first functional MVP boundary is **Build 025**.
