@@ -69,10 +69,7 @@ def sanitize_audit_value(value: Any, *, key: str | None = None, depth: int = 0) 
         return sanitized
     if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
         items = list(value[:MAX_COLLECTION_ITEMS])
-        sanitized_items = [
-            sanitize_audit_value(item, depth=depth + 1)
-            for item in items
-        ]
+        sanitized_items = [sanitize_audit_value(item, depth=depth + 1) for item in items]
         if len(value) > MAX_COLLECTION_ITEMS:
             sanitized_items.append(TRUNCATED)
         return sanitized_items
@@ -109,9 +106,7 @@ def record_audit_event(
 ) -> AuditEvent:
     """Stage one immutable sanitized audit event in the caller's transaction."""
 
-    sanitized_arguments = (
-        None if arguments is None else sanitize_audit_value(arguments)
-    )
+    sanitized_arguments = None if arguments is None else sanitize_audit_value(arguments)
     sanitized_result = None if result is None else sanitize_audit_value(result)
 
     event = AuditEvent(
