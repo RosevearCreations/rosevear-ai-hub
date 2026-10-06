@@ -17,10 +17,10 @@ from rosevear_ai_hub.models import SecretValue, User
 from rosevear_ai_hub.secrets import (
     SECRET_DEFINITIONS,
     delete_stored_secret,
+    current_key,
     encryption_available,
     environment_secret,
     key_fingerprint,
-    current_key,
     previous_key,
     rewrap_all_secrets,
     secret_definition,
