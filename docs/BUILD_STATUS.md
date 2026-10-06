@@ -20,6 +20,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 014 | Citations | COMPLETE | main via PR #17 |
 | 015 | Knowledge Administration | COMPLETE | main |
 | 016 | Authentication | COMPLETE | main |
+| 017 | Tool Registry | READY FOR CI | dev |
 
 ## Build 016 acceptance checklist
 
@@ -55,6 +56,45 @@ After this build reaches the local Hub, open the Hub once and create the first o
 
 No GitHub secret, OAuth application, cloud account, or paid service is required.
 
+## Build 017 acceptance checklist
+
+- [x] stable dotted tool keys
+- [x] normalized input schemas
+- [x] normalized output schemas
+- [x] explicit capabilities
+- [x] canonical Level 0–3 risk classes
+- [x] confirmation policy derived from risk
+- [x] integration ownership metadata
+- [x] persistent enable/disable state
+- [x] code-owned metadata synchronization preserves operator enable state
+- [x] authenticated registry list/detail/summary API
+- [x] owner/administrator enable/disable API
+- [x] household-user inspection without administration
+- [x] read-only mutation protection retained
+- [x] Level 3 autonomous enable prohibition
+- [x] enable/disable audit evidence
+- [x] owner/administrator Tool Registry UI
+- [x] risk, capability, integration, and schema visibility in UI
+- [x] reversible integrations/tools migration
+- [x] database persistence coverage
+- [x] migration upgrade/downgrade coverage
+- [x] backend registry policy coverage
+- [x] authenticated web registry coverage
+- [x] no tool execution introduced
+- [x] no external service or secret required
+- [ ] final Build 017 dev CI green
+- [ ] promoted to main
+- [ ] final Build 017 main CI green
+- [ ] dev synchronized with main
+
+## External setup
+
+No external application, API key, OAuth registration, hosted database, secret, or paid service is
+required for Build 017.
+
+The registry is local metadata and administration only. Tool execution remains unavailable until
+the confirmation workflow is introduced.
+
 ## Next build
 
-**Build 017 — Tool Registry**
+**Build 018 — Confirmation Workflow**
