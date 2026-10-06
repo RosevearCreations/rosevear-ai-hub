@@ -34,6 +34,7 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "model_profiles",
         "integrations",
         "sessions",
+        "secret_values",
         "tools",
         "users",
     }.issubset(tables)
@@ -50,6 +51,7 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         column["name"] for column in inspector.get_columns("confirmation_requests")
     }
     audit_columns = {column["name"] for column in inspector.get_columns("audit_events")}
+    secret_columns = {column["name"] for column in inspector.get_columns("secret_values")}
     assert {"model", "provider"}.issubset(conversation_columns)
     assert {"model", "provider"}.issubset(message_columns)
     assert {
@@ -132,6 +134,14 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "result_status",
         "created_at",
     }.issubset(audit_columns)
+    assert {
+        "secret_key",
+        "ciphertext",
+        "key_fingerprint",
+        "rotated_at",
+        "created_at",
+        "updated_at",
+    }.issubset(secret_columns)
 
     with test_engine.connect() as connection:
         profile_names = (
@@ -156,6 +166,7 @@ def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
     test_engine = create_engine(f"sqlite:///{database_path}")
     tables = set(inspect(test_engine).get_table_names())
 
+    assert "secret_values" not in tables
     assert "confirmation_requests" not in tables
     assert "tools" not in tables
     assert "integrations" not in tables
