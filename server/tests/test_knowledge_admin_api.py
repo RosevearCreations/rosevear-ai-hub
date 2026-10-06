@@ -214,9 +214,7 @@ def test_collection_delete_requires_empty_non_default_collection(tmp_path) -> No
     assert occupied.status_code == 409
 
     confirmation_id = approve_delete_confirmation(client, document_id)
-    client.delete(
-        f"/api/v1/knowledge/documents/{document_id}?confirmation_id={confirmation_id}"
-    )
+    client.delete(f"/api/v1/knowledge/documents/{document_id}?confirmation_id={confirmation_id}")
 
     default_collection = client.delete("/api/v1/knowledge/collections/1")
     assert default_collection.status_code == 409
