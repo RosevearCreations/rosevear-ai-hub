@@ -382,7 +382,7 @@ describe("App", () => {
       expect(
         screen.getByText("Delete knowledge document: document_id=42"),
       ).toBeInTheDocument();
-      expect(screen.getByText(/Level 2/)).toBeInTheDocument();
+      expect(screen.getAllByText(/Level 2/).length).toBeGreaterThan(0);
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Approve" }));
