@@ -34,6 +34,8 @@ _SENSITIVE_KEY_PARTS = (
 
 def _is_sensitive_key(key: str) -> bool:
     normalized = key.lower().replace("-", "_").replace(" ", "_")
+    if normalized == "token" or normalized.endswith("_token"):
+        return True
     return any(part in normalized for part in _SENSITIVE_KEY_PARTS)
 
 
