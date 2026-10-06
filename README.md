@@ -85,6 +85,7 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 016 — Authentication**
 - **Build 017 — Tool Registry**
 - **Build 018 — Confirmation Workflow**
+- **Build 020 — Secret Management**
 
 ## Next build
 
