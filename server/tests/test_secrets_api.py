@@ -16,7 +16,13 @@ def new_key() -> str:
     return base64.urlsafe_b64encode(os.urandom(32)).decode("ascii").rstrip("=")
 
 
-def build_client(tmp_path, monkeypatch, *, current_key: str | None = None, previous_key: str | None = None):
+def build_client(
+    tmp_path,
+    monkeypatch,
+    *,
+    current_key: str | None = None,
+    previous_key: str | None = None,
+):
     if current_key is None:
         monkeypatch.delenv("SECRET_ENCRYPTION_KEY", raising=False)
     else:
