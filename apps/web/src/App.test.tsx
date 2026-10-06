@@ -202,6 +202,46 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
         };
       }
 
+      if (url.endsWith("/api/v1/secrets")) {
+        return {
+          ok: true,
+          json: async () => ({
+            encryption_available: true,
+            current_key_fingerprint: "0123456789abcdef",
+            previous_key_available: false,
+            stored_secret_count: 1,
+            secrets: [
+              {
+                secret_key: "home_assistant.token",
+                display_name: "Home Assistant token",
+                description: "Long-lived token used by the Home Assistant connector in Build 021.",
+                environment_variable: "HOME_ASSISTANT_TOKEN",
+                configured: true,
+                effective_source: "encrypted_store",
+                environment_configured: false,
+                encrypted_store_configured: true,
+                key_fingerprint: "0123456789abcdef",
+                rotated_at: "2026-10-06T10:00:00Z",
+                updated_at: "2026-10-06T10:00:00Z",
+              },
+              {
+                secret_key: "mqtt.password",
+                display_name: "MQTT password",
+                description: "Password used by the MQTT connector beginning in Build 025.",
+                environment_variable: "MQTT_PASSWORD",
+                configured: false,
+                effective_source: null,
+                environment_configured: false,
+                encrypted_store_configured: false,
+                key_fingerprint: null,
+                rotated_at: null,
+                updated_at: null,
+              },
+            ],
+          }),
+        };
+      }
+
       if (url.endsWith("/api/v1/audit/summary")) {
         return {
           ok: true,
@@ -394,6 +434,7 @@ describe("App", () => {
       expect(screen.getByText("owner")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Confirmations" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Audit" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Secrets" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Tools" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Users" })).toBeInTheDocument();
     });
@@ -434,6 +475,24 @@ describe("App", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Delete knowledge document approved.")).toBeInTheDocument();
+    });
+  });
+
+  test("opens secret management without redisplaying saved plaintext", async () => {
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Secrets" })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Secrets" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Secrets" })).toBeInTheDocument();
+      expect(screen.getByText("Home Assistant token")).toBeInTheDocument();
+      expect(screen.getByText("Encrypted store")).toBeInTheDocument();
+      expect(screen.getByText("0123456789abcdef")).toBeInTheDocument();
+      expect(screen.queryByText("ha-token-with-sensitive-value")).not.toBeInTheDocument();
+      expect(screen.getByLabelText("New value")).toHaveAttribute("type", "password");
     });
   });
 
