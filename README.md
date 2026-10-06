@@ -83,6 +83,7 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 014 — Citations**
 - **Build 015 — Knowledge Administration**
 - **Build 016 — Authentication**
+- **Build 018 — Confirmation Workflow**
 
 ## Next build
 
