@@ -842,3 +842,91 @@ export function rejectConfirmation(
     signal,
   );
 }
+
+
+export interface AuditActor {
+  id: number;
+  username: string;
+  role: string;
+}
+
+export interface AuditEvent {
+  id: number;
+  actor: AuditActor | null;
+  event_type: string;
+  object_type: string;
+  object_id: string | null;
+  action: string;
+  tool_key: string | null;
+  risk_level: number | null;
+  confirmation_id: string | null;
+  sanitized_arguments: unknown;
+  result: unknown;
+  result_status: string;
+  created_at: string;
+}
+
+export interface AuditEventListResponse {
+  events: AuditEvent[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface AuditSummary {
+  total_events: number;
+  success_count: number;
+  failure_count: number;
+  unknown_count: number;
+  actor_count: number;
+  tool_event_count: number;
+  newest_event_at: string | null;
+  oldest_event_at: string | null;
+}
+
+export interface AuditFilters {
+  actorUserId?: number;
+  eventType?: string;
+  objectType?: string;
+  action?: string;
+  toolKey?: string;
+  resultStatus?: string;
+  confirmationId?: string;
+  search?: string;
+  createdFrom?: string;
+  createdTo?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export function getAuditSummary(signal?: AbortSignal): Promise<AuditSummary> {
+  return authJson<AuditSummary>("GET", "/api/v1/audit/summary", undefined, signal);
+}
+
+export function getAuditEvents(
+  filters: AuditFilters = {},
+  signal?: AbortSignal,
+): Promise<AuditEventListResponse> {
+  const params = new URLSearchParams();
+  if (filters.actorUserId !== undefined) {
+    params.set("actor_user_id", String(filters.actorUserId));
+  }
+  if (filters.eventType) params.set("event_type", filters.eventType);
+  if (filters.objectType) params.set("object_type", filters.objectType);
+  if (filters.action) params.set("action", filters.action);
+  if (filters.toolKey) params.set("tool_key", filters.toolKey);
+  if (filters.resultStatus) params.set("result_status", filters.resultStatus);
+  if (filters.confirmationId) params.set("confirmation_id", filters.confirmationId);
+  if (filters.search) params.set("search", filters.search);
+  if (filters.createdFrom) params.set("created_from", filters.createdFrom);
+  if (filters.createdTo) params.set("created_to", filters.createdTo);
+  params.set("limit", String(filters.limit ?? 50));
+  params.set("offset", String(filters.offset ?? 0));
+
+  return authJson<AuditEventListResponse>(
+    "GET",
+    "/api/v1/audit/events?" + params.toString(),
+    undefined,
+    signal,
+  );
+}
