@@ -86,6 +86,7 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 017 — Tool Registry**
 - **Build 018 — Confirmation Workflow**
 - **Build 019 — Audit Log**
+- **Build 021 — Home Assistant Connection**
 
 ## Next build
 
