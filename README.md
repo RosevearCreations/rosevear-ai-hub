@@ -83,10 +83,10 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 014 — Citations**
 - **Build 015 — Knowledge Administration**
 - **Build 016 — Authentication**
-- **Build 018 — Confirmation Workflow**
+- **Build 017 — Tool Registry**
 
 ## Next build
 
-**Build 017 — Tool Registry**
+**Build 018 — Confirmation Workflow**
 
 The first functional MVP boundary is **Build 025**.
