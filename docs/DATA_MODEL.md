@@ -150,13 +150,28 @@ contracts are stored as JSON-compatible object schemas with undeclared top-level
 rejected. Code-owned metadata may be synchronized while the operator-controlled enabled state is
 preserved.
 
-## confirmations
+## confirmation_requests
 - id
-- user_id
-- requested_action_hash
+- requested_by_user_id
+- decided_by_user_id
+- tool_id
+- tool_key
+- risk_level
+- arguments_json
+- arguments_hash
+- preview_json
+- status
 - expires_at
-- approved_at
-- rejected_at
+- decided_at
+- consumed_at
+- created_at
+- updated_at
+
+Build 018 persists exact-action confirmation requests. The server validates arguments against the
+registered tool schema, stores canonical arguments plus a SHA-256 fingerprint, generates the
+preview server-side, and tracks the lifecycle through pending, approved, rejected, expired, and
+consumed states. A successful action atomically changes an approved request to consumed in the same
+transaction as the protected database mutation, preventing replay.
 
 ## automations
 - id
