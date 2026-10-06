@@ -21,7 +21,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 015 | Knowledge Administration | COMPLETE | main |
 | 016 | Authentication | COMPLETE | main |
 | 017 | Tool Registry | COMPLETE | main |
-| 018 | Confirmation Workflow | READY FOR CI | dev |
+| 018 | Confirmation Workflow | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -131,10 +131,10 @@ the confirmation workflow is introduced.
 - [x] Windows/Tauri packaging passed on implementation tree
 - [x] security/data-model/environment documentation
 - [x] no external service, secret, or paid dependency required
-- [ ] final Build 018 dev CI green
-- [ ] promoted to main
-- [ ] final Build 018 main CI green
-- [ ] dev synchronized with main
+- [x] final Build 018 dev CI green
+- [x] promoted to main
+- [x] final Build 018 main CI green
+- [x] dev synchronized with main
 
 ## External setup
 
