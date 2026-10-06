@@ -114,19 +114,41 @@ Build 012 stores embeddings behind a vector-store abstraction. The initial SQLit
 
 ## integrations
 - id
+- integration_key
 - type
 - name
 - enabled
 - configuration_reference
 - last_health_status
 - last_health_at
+- created_at
+- updated_at
+
+Build 017 introduces integration metadata as the stable ownership layer for registered tools. Core
+registries use stable keys such as `core.knowledge`; later Home Assistant, MQTT, camera, and
+business connectors can reuse the same ownership model without making the Hub their system of
+record.
 
 ## tools
 - id
 - integration_id
 - tool_key
+- display_name
+- description
+- capabilities_json
 - risk_level
+- input_schema_json
+- output_schema_json
 - enabled
+- built_in
+- created_at
+- updated_at
+
+Build 017 makes the tool registry contract explicit. `tool_key` is a stable dotted identifier.
+Capabilities are normalized strings, risk levels use the canonical 0–3 policy, and input/output
+contracts are stored as JSON-compatible object schemas with undeclared top-level properties
+rejected. Code-owned metadata may be synchronized while the operator-controlled enabled state is
+preserved.
 
 ## confirmations
 - id
