@@ -84,6 +84,7 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 015 — Knowledge Administration**
 - **Build 016 — Authentication**
 - **Build 017 — Tool Registry**
+- **Build 019 — Audit Log**
 
 ## Next build
 
