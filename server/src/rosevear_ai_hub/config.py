@@ -36,6 +36,12 @@ class Settings(BaseSettings):
         default=False,
         alias="AUTH_COOKIE_SECURE",
     )
+    confirmation_ttl_seconds: int = Field(
+        default=300,
+        ge=30,
+        le=3600,
+        alias="CONFIRMATION_TTL_SECONDS",
+    )
     knowledge_storage_dir: Path = Field(
         default=Path("./data/knowledge"),
         alias="KNOWLEDGE_STORAGE_DIR",
