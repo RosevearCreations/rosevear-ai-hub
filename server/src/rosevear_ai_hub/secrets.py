@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import hashlib
 import os
 from dataclasses import dataclass
@@ -60,7 +61,7 @@ def _decode_key(encoded: str | None, *, label: str) -> bytes | None:
     padding = "=" * (-len(encoded) % 4)
     try:
         raw = base64.urlsafe_b64decode(encoded + padding)
-    except ValueError as exc:
+    except (ValueError, binascii.Error) as exc:
         raise RuntimeError(f"{label} must be URL-safe base64.") from exc
     if len(raw) != 32:
         raise RuntimeError(f"{label} must decode to exactly 32 bytes.")
@@ -73,7 +74,11 @@ def key_fingerprint(raw_key: bytes) -> str:
 
 def current_key(settings: Settings | None = None) -> bytes | None:
     settings = settings or get_settings()
-    encoded = settings.secret_encryption_key.get_secret_value() if settings.secret_encryption_key else None
+    encoded = (
+        settings.secret_encryption_key.get_secret_value()
+        if settings.secret_encryption_key
+        else None
+    )
     return _decode_key(encoded, label="SECRET_ENCRYPTION_KEY")
 
 
@@ -168,9 +173,9 @@ def store_secret(
             status_code=503,
             detail="Encrypted secret storage is locked. Configure SECRET_ENCRYPTION_KEY first.",
         )
-    normalized = value.strip()
-    if not normalized:
+    if not value:
         raise HTTPException(status_code=422, detail="Secret value cannot be empty.")
+    normalized = value
 
     record = session.scalar(select(SecretValue).where(SecretValue.secret_key == secret_key))
     now = datetime.now(UTC)
