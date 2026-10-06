@@ -3,7 +3,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -41,6 +41,22 @@ class Settings(BaseSettings):
         ge=30,
         le=3600,
         alias="CONFIRMATION_TTL_SECONDS",
+    )
+    secret_encryption_key: SecretStr | None = Field(
+        default=None,
+        alias="SECRET_ENCRYPTION_KEY",
+    )
+    secret_encryption_previous_key: SecretStr | None = Field(
+        default=None,
+        alias="SECRET_ENCRYPTION_PREVIOUS_KEY",
+    )
+    home_assistant_token: SecretStr | None = Field(
+        default=None,
+        alias="HOME_ASSISTANT_TOKEN",
+    )
+    mqtt_password: SecretStr | None = Field(
+        default=None,
+        alias="MQTT_PASSWORD",
     )
     knowledge_storage_dir: Path = Field(
         default=Path("./data/knowledge"),
