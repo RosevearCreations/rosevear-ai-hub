@@ -256,8 +256,12 @@ class AuditEvent(Base):
     object_type: Mapped[str] = mapped_column(String(128), nullable=False)
     object_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     action: Mapped[str] = mapped_column(String(128), nullable=False)
+    tool_key: Mapped[str | None] = mapped_column(String(160), nullable=True, index=True)
+    risk_level: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    confirmation_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     sanitized_arguments: Mapped[Any | None] = mapped_column(JSON, nullable=True)
     result: Mapped[Any | None] = mapped_column(JSON, nullable=True)
+    result_status: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.current_timestamp(),
