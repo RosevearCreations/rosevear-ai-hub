@@ -130,9 +130,7 @@ def expire_if_needed(session: Session, request: ConfirmationRequest) -> bool:
 
 def expire_stale_confirmations(session: Session) -> int:
     requests = session.scalars(
-        select(ConfirmationRequest).where(
-            ConfirmationRequest.status.in_([PENDING, APPROVED])
-        )
+        select(ConfirmationRequest).where(ConfirmationRequest.status.in_([PENDING, APPROVED]))
     ).all()
     expired = sum(1 for item in requests if expire_if_needed(session, item))
     if expired:
