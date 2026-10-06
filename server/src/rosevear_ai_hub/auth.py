@@ -15,9 +15,10 @@ from sqlalchemy import func, select, update
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
+from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.database import get_session
-from rosevear_ai_hub.models import AuditEvent, Conversation, HubSession, User
+from rosevear_ai_hub.models import Conversation, HubSession, User
 
 SESSION_COOKIE_NAME = "rosevear_ai_hub_session"
 ROLES = ("owner", "administrator", "household_user", "read_only")
@@ -106,16 +107,14 @@ def _record_auth_event(
     object_id: str | None,
     result: dict[str, object],
 ) -> None:
-    db.add(
-        AuditEvent(
-            actor_user_id=actor_user_id,
-            event_type=event_type,
-            object_type="authentication",
-            object_id=object_id,
-            action=action,
-            sanitized_arguments=None,
-            result=result,
-        )
+    record_audit_event(
+        db,
+        actor_user_id=actor_user_id,
+        event_type=event_type,
+        object_type="authentication",
+        object_id=object_id,
+        action=action,
+        result=result,
     )
 
 
