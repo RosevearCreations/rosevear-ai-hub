@@ -22,7 +22,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 016 | Authentication | COMPLETE | main |
 | 017 | Tool Registry | COMPLETE | main |
 | 018 | Confirmation Workflow | COMPLETE | main |
-| 019 | Audit Log | READY FOR CI | dev |
+| 019 | Audit Log | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -186,10 +186,10 @@ The confirmation workflow is local Hub state. The default five-minute expiry may
 - [x] Windows/Tauri packaging passed on implementation tree
 - [x] security/data-model/build documentation
 - [x] no external logging service, secret, or paid dependency required
-- [ ] final Build 019 dev CI green
-- [ ] promoted to main
-- [ ] final Build 019 main CI green
-- [ ] dev synchronized with main
+- [x] final Build 019 dev CI green
+- [x] promoted to main
+- [x] final Build 019 main CI green
+- [x] dev synchronized with main
 
 ## External setup
 
