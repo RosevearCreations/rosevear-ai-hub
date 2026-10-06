@@ -22,6 +22,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 016 | Authentication | COMPLETE | main |
 | 017 | Tool Registry | COMPLETE | main |
 | 018 | Confirmation Workflow | COMPLETE | main |
+| 019 | Audit Log | READY FOR CI | dev |
 
 ## Build 016 acceptance checklist
 
@@ -144,6 +145,61 @@ required for Build 018.
 The confirmation workflow is local Hub state. The default five-minute expiry may be adjusted with
 `CONFIRMATION_TTL_SECONDS` if needed.
 
+## Build 019 acceptance checklist
+
+- [x] centralized persistent audit recorder
+- [x] centralized recursive audit sanitization
+- [x] actor identity on human-initiated events
+- [x] first-class tool key metadata
+- [x] first-class risk-level metadata
+- [x] first-class confirmation evidence
+- [x] normalized result status
+- [x] immutable timestamped audit records
+- [x] existing Build 016–018 audit metadata backfill
+- [x] Owner/Administrator audit API
+- [x] Household/Read-only audit access denied
+- [x] actor filter
+- [x] event-type filter
+- [x] object/action filters
+- [x] tool-key filter
+- [x] result-status filter
+- [x] confirmation-ID filter
+- [x] date-range filters
+- [x] free-text identity search
+- [x] bounded limit/offset pagination
+- [x] audit summary metrics
+- [x] Owner/Administrator Audit Log UI
+- [x] expandable sanitized arguments/results
+- [x] authentication events use central audit writer
+- [x] tool-registry changes use central audit writer
+- [x] confirmation lifecycle uses central audit writer
+- [x] confirmed knowledge-document deletion audit evidence
+- [x] password/secret/API-key redaction
+- [x] generic token and *_token redaction
+- [x] authorization/cookie/credential/private-key redaction
+- [x] Bearer/Basic value redaction
+- [x] bounded string/depth/collection payloads
+- [x] reversible audit schema migration
+- [x] historical audit backfill coverage
+- [x] backend audit policy/filter/sanitization tests
+- [x] authenticated web audit coverage
+- [x] Windows/Tauri packaging passed on implementation tree
+- [x] security/data-model/build documentation
+- [x] no external logging service, secret, or paid dependency required
+- [ ] final Build 019 dev CI green
+- [ ] promoted to main
+- [ ] final Build 019 main CI green
+- [ ] dev synchronized with main
+
+## External setup
+
+No external logging service, API key, OAuth application, cloud account, secret, hosted database, or
+paid subscription is required for Build 019.
+
+Audit data remains local in the Hub database. Build 019 does not automatically prune audit rows;
+the documented 180-day retention target remains an operational target until backup/retention
+automation is introduced deliberately.
+
 ## Next build
 
-**Build 019 — Audit Log**
+**Build 020 — Secret Management**
