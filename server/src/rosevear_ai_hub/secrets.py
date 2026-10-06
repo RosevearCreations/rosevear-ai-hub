@@ -96,7 +96,10 @@ def encryption_available(settings: Settings | None = None) -> bool:
     return current_key(settings) is not None
 
 
-def environment_secret(definition: SecretDefinition, settings: Settings | None = None) -> str | None:
+def environment_secret(
+    definition: SecretDefinition,
+    settings: Settings | None = None,
+) -> str | None:
     settings = settings or get_settings()
     configured = {
         "HOME_ASSISTANT_TOKEN": settings.home_assistant_token,
@@ -148,7 +151,11 @@ def _decrypt_record(record: SecretValue, settings: Settings | None = None) -> st
     raise RuntimeError("No configured encryption key can decrypt this stored secret.")
 
 
-def resolve_secret(session: Session, secret_key: str, settings: Settings | None = None) -> str | None:
+def resolve_secret(
+    session: Session,
+    secret_key: str,
+    settings: Settings | None = None,
+) -> str | None:
     definition = secret_definition(secret_key)
     env_value = environment_secret(definition, settings)
     if env_value:
@@ -165,7 +172,7 @@ def store_secret(
     value: str,
     settings: Settings | None = None,
 ) -> SecretValue:
-    definition = secret_definition(secret_key)
+    secret_definition(secret_key)
     settings = settings or get_settings()
     raw_key = current_key(settings)
     if raw_key is None:
