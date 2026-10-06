@@ -197,9 +197,18 @@ transaction as the protected database mutation, preventing replay.
 - object_type
 - object_id
 - action
+- tool_key
+- risk_level
+- confirmation_id
 - sanitized_arguments
 - result
+- result_status
 - created_at
+
+Build 019 adds first-class tool, risk, confirmation, and result-status fields so audit records can
+be filtered efficiently without parsing JSON payloads. Existing Build 016–018 audit rows are
+backfilled when those values can be derived. New state-changing paths use the central audit writer,
+which sanitizes and bounds arguments/results before persistence.
 
 ## camera_registry
 - id

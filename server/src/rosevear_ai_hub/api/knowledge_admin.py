@@ -13,6 +13,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.api.knowledge import get_knowledge_ingestion_service
+from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.auth import require_roles
 from rosevear_ai_hub.confirmations import consume_confirmation
 from rosevear_ai_hub.database import get_session
@@ -284,6 +285,19 @@ def delete_document(
     session.execute(delete(ChunkEmbedding).where(ChunkEmbedding.chunk_id.in_(chunk_ids)))
     session.execute(delete(KnowledgeChunk).where(KnowledgeChunk.document_id == document_id))
     session.delete(document)
+    record_audit_event(
+        session,
+        actor_user_id=actor.id,
+        event_type="tool.execution.completed",
+        object_type="knowledge_document",
+        object_id=str(document_id),
+        action="delete",
+        arguments={"document_id": document_id},
+        result={"ok": True, "deleted": True},
+        tool_key="knowledge.document.delete",
+        risk_level=2,
+        confirmation_id=confirmation_id,
+    )
     session.commit()
 
     source_deleted = _delete_source_file(ingestion.storage_root, source_path)

@@ -102,8 +102,12 @@ def test_initial_models_persist(tmp_path) -> None:
                 object_type="database",
                 object_id="local",
                 action="write",
+                tool_key="test.read",
+                risk_level=2,
+                confirmation_id="00000000-0000-0000-0000-000000000001",
                 sanitized_arguments={"secret": "[REDACTED]"},
                 result={"ok": True},
+                result_status="success",
             )
         )
         session.commit()

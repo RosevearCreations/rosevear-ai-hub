@@ -202,6 +202,50 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
         };
       }
 
+      if (url.endsWith("/api/v1/audit/summary")) {
+        return {
+          ok: true,
+          json: async () => ({
+            total_events: 8,
+            success_count: 7,
+            failure_count: 1,
+            unknown_count: 0,
+            actor_count: 1,
+            tool_event_count: 4,
+            newest_event_at: "2026-10-06T10:00:00Z",
+            oldest_event_at: "2026-10-06T09:00:00Z",
+          }),
+        };
+      }
+
+      if (url.includes("/api/v1/audit/events?")) {
+        return {
+          ok: true,
+          json: async () => ({
+            events: [
+              {
+                id: 8,
+                actor: { id: 1, username: "owner", role: "owner" },
+                event_type: "tool.execution.completed",
+                object_type: "knowledge_document",
+                object_id: "42",
+                action: "delete",
+                tool_key: "knowledge.document.delete",
+                risk_level: 2,
+                confirmation_id: "confirmation-42",
+                sanitized_arguments: { document_id: 42, password: "[REDACTED]" },
+                result: { ok: true, deleted: true },
+                result_status: "success",
+                created_at: "2026-10-06T10:00:00Z",
+              },
+            ],
+            total: 1,
+            limit: 25,
+            offset: 0,
+          }),
+        };
+      }
+
       if (url.endsWith("/api/v1/auth/users")) {
         return {
           ok: true,
@@ -349,6 +393,7 @@ describe("App", () => {
       expect(screen.getByRole("heading", { name: "Home" })).toBeInTheDocument();
       expect(screen.getByText("owner")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Confirmations" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Audit" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Tools" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Users" })).toBeInTheDocument();
     });
@@ -389,6 +434,28 @@ describe("App", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Delete knowledge document approved.")).toBeInTheDocument();
+    });
+  });
+
+  test("opens the searchable audit log with sanitized details", async () => {
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Audit" })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Audit" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Audit log" })).toBeInTheDocument();
+      expect(screen.getByText("tool.execution.completed")).toBeInTheDocument();
+      expect(screen.getByText("knowledge.document.delete")).toBeInTheDocument();
+      expect(screen.getByText("owner (#1)")).toBeInTheDocument();
+      expect(screen.getByText("Showing 1–1 of 1")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("Sanitized arguments"));
+    await waitFor(() => {
+      expect(screen.getByText(/\[REDACTED\]/)).toBeInTheDocument();
     });
   });
 

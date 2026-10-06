@@ -115,16 +115,28 @@ Future support for such equipment requires dedicated non-AI interlocks.
 
 ## Audit
 
-All state-changing tool actions record:
-- actor
-- requested action
-- risk level
-- confirmation evidence
+Build 019 centralizes persistent audit recording for current state-changing Hub paths.
+
+Audit records include:
+- actor, when a human actor exists
+- event and requested action
+- object identity
+- tool key, when applicable
+- risk level, when applicable
+- confirmation evidence, when applicable
 - sanitized inputs
-- result
+- sanitized result and filterable result status
 - timestamp
 
-Initial retention target: 180 days, configurable.
+Only Owner/Administrator accounts may inspect the Audit Log.
+
+The audit sanitizer redacts common password, secret, API-key, token, authorization, cookie,
+credential, and private-key fields before persistence. Bearer/Basic authorization-looking string
+values are also redacted, and oversized/deep payloads are bounded.
+
+Audit records are append-only through the application API. Build 019 does not silently delete
+records. The operational retention target remains 180 days; automated pruning is deferred until
+backup/retention operations are explicitly defined.
 
 ## Backups
 - daily DB backup

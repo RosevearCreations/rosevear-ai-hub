@@ -10,6 +10,7 @@ import {
   type HealthResponse,
   type OllamaStatusResponse,
 } from "./api";
+import { AuditView } from "./AuditView";
 import { AuthView } from "./AuthView";
 import { ChatView } from "./ChatView";
 import { ConfirmationsView } from "./ConfirmationsView";
@@ -33,7 +34,7 @@ type AuthState =
   | { kind: "ready"; status: AuthStatus };
 
 const baseSections = ["Home", "Chat", "Knowledge", "Devices", "System"] as const;
-type Section = (typeof baseSections)[number] | "Users" | "Tools" | "Confirmations";
+type Section = (typeof baseSections)[number] | "Users" | "Tools" | "Confirmations" | "Audit";
 
 export function App() {
   const [auth, setAuth] = useState<AuthState>({ kind: "loading" });
@@ -135,7 +136,7 @@ export function App() {
   const user = auth.status.user;
   const canAdminister = user.role === "owner" || user.role === "administrator";
   const sections: Section[] = canAdminister
-    ? [...baseSections, "Confirmations", "Tools", "Users"]
+    ? [...baseSections, "Confirmations", "Audit", "Tools", "Users"]
     : [...baseSections];
 
   async function signOut() {
@@ -202,6 +203,8 @@ export function App() {
           <KnowledgeView currentUser={user} />
         ) : section === "Confirmations" ? (
           <ConfirmationsView />
+        ) : section === "Audit" ? (
+          <AuditView />
         ) : section === "Tools" ? (
           <ToolsView />
         ) : section === "Users" ? (
@@ -241,7 +244,7 @@ function HomeView({
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 018</p>
+          <p className="eyebrow">Build 019</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -267,6 +270,11 @@ function HomeView({
           <button type="button" onClick={onOpenKnowledge}>
             Open knowledge
           </button>
+        </article>
+
+        <article className="panel">
+          <h2>Audit log</h2>
+          <p>Actor, tool, sanitized inputs, results, confirmation evidence, timestamps, and filters are active.</p>
         </article>
 
         <article className="panel">
