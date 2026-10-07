@@ -25,7 +25,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 019 | Audit Log | COMPLETE | main |
 | 020 | Secret Management | COMPLETE | main |
 | 021 | Home Assistant Connection | COMPLETE | main |
-| 022 | Entity Browser | READY FOR CI | dev |
+| 022 | Entity Browser | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -312,10 +312,10 @@ Home Assistant long-lived access token either as `HOME_ASSISTANT_TOKEN` or throu
 - [x] no database migration required
 - [x] security/integration/operations/build documentation
 - [x] no new credential, cloud service, OAuth registration, or paid dependency
-- [ ] final Build 022 dev CI green
-- [ ] promoted to main
-- [ ] final Build 022 main CI green
-- [ ] dev synchronized with main
+- [x] final Build 022 dev CI green
+- [x] promoted to main
+- [x] final Build 022 main CI green
+- [x] dev synchronized with main
 
 ## Operator setup
 
