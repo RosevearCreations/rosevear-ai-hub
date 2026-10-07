@@ -188,9 +188,7 @@ class HomeAssistantClient:
                         raise HomeAssistantRequestError(
                             "Home Assistant registry response was incomplete."
                         )
-                    results[command_type] = [
-                        item for item in payload if isinstance(item, dict)
-                    ]
+                    results[command_type] = [item for item in payload if isinstance(item, dict)]
                 return results
         except HomeAssistantError:
             raise
