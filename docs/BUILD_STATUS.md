@@ -24,7 +24,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 018 | Confirmation Workflow | COMPLETE | main |
 | 019 | Audit Log | COMPLETE | main |
 | 020 | Secret Management | COMPLETE | main |
-| 021 | Home Assistant Connection | READY FOR CI | dev |
+| 021 | Home Assistant Connection | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -274,10 +274,10 @@ Detailed Windows PowerShell generation and rotation steps are documented in `doc
 - [x] no database migration required
 - [x] security/integration/operations/build documentation
 - [x] no cloud service, OAuth registration, or paid dependency required
-- [ ] final Build 021 dev CI green
-- [ ] promoted to main
-- [ ] final Build 021 main CI green
-- [ ] dev synchronized with main
+- [x] final Build 021 dev CI green
+- [x] promoted to main
+- [x] final Build 021 main CI green
+- [x] dev synchronized with main
 
 ## Operator setup
 
