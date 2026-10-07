@@ -128,9 +128,7 @@ def test_entity_browser_resolves_area_device_domain_state_and_safe_attributes() 
     assert payload["devices"][0]["name"] == "Workshop thermostat"
 
     temperature = next(
-        item
-        for item in payload["entities"]
-        if item["entity_id"] == "sensor.workshop_temperature"
+        item for item in payload["entities"] if item["entity_id"] == "sensor.workshop_temperature"
     )
     assert temperature["area_name"] == "Workshop"
     assert temperature["device_name"] == "Workshop thermostat"
