@@ -47,21 +47,21 @@ describe("HomeAssistantView", () => {
     render(<HomeAssistantView />);
     await waitFor(() => {
       expect(screen.getByText("Home Assistant online")).toBeInTheDocument();
-      expect(screen.getByText("Workshop temperature")).toBeInTheDocument();
-      expect(screen.getByText("Living room lamp")).toBeInTheDocument();
+      expect(screen.getByText("sensor.workshop_temperature")).toBeInTheDocument();
+      expect(screen.getByText("light.living_room")).toBeInTheDocument();
     });
     expect(screen.getByText("21.5 °C")).toBeInTheDocument();
     expect(screen.getByText("Attributes (1)")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Area"), { target: { value: "workshop" } });
-    expect(screen.getByText("Workshop temperature")).toBeInTheDocument();
-    expect(screen.queryByText("Living room lamp")).not.toBeInTheDocument();
+    expect(screen.getByText("sensor.workshop_temperature")).toBeInTheDocument();
+    expect(screen.queryByText("light.living_room")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
-    expect(screen.getByText("Living room lamp")).toBeInTheDocument();
+    expect(screen.getByText("light.living_room")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Search"), { target: { value: "thermostat" } });
-    expect(screen.getByText("Workshop temperature")).toBeInTheDocument();
-    expect(screen.queryByText("Living room lamp")).not.toBeInTheDocument();
+    expect(screen.getByText("sensor.workshop_temperature")).toBeInTheDocument();
+    expect(screen.queryByText("light.living_room")).not.toBeInTheDocument();
   });
 });
