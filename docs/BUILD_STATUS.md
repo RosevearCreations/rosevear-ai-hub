@@ -26,7 +26,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 020 | Secret Management | COMPLETE | main |
 | 021 | Home Assistant Connection | COMPLETE | main |
 | 022 | Entity Browser | COMPLETE | main |
-| 023 | Safe Device Controls | READY FOR CI | dev |
+| 023 | Safe Device Controls | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -350,10 +350,10 @@ No additional credential is required beyond Build 021. The existing Home Assista
 - [x] no database migration required
 - [x] security/integration/data-model/operations/build documentation
 - [x] no new credential, cloud service, OAuth registration, or paid dependency
-- [ ] final Build 023 dev CI green
-- [ ] promoted to main
-- [ ] final Build 023 main CI green
-- [ ] dev synchronized with main
+- [x] final Build 023 dev CI green
+- [x] promoted to main
+- [x] final Build 023 main CI green
+- [x] dev synchronized with main
 
 ## Operator setup
 
