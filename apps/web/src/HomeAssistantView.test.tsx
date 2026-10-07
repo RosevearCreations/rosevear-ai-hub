@@ -121,7 +121,7 @@ describe("HomeAssistantView", () => {
     await waitFor(() => {
       expect(screen.getByText("Home Assistant online")).toBeInTheDocument();
       expect(screen.getByText("sensor.workshop_temperature")).toBeInTheDocument();
-      expect(screen.getByText("light.living_room")).toBeInTheDocument();
+      expect(screen.getAllByText("light.living_room").length).toBeGreaterThan(0);
     });
 
     expect(screen.getByRole("heading", { name: "Safe-control allow list" })).toBeInTheDocument();
@@ -135,10 +135,10 @@ describe("HomeAssistantView", () => {
 
     fireEvent.change(screen.getByLabelText("Area"), { target: { value: "workshop" } });
     expect(screen.getByText("sensor.workshop_temperature")).toBeInTheDocument();
-    expect(screen.queryByText("light.living_room")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Turn on" })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
-    expect(screen.getByText("light.living_room")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Turn on" })).toBeInTheDocument();
 
     const movieCheckbox = screen.getByRole("checkbox", { name: /Movie night/ });
     fireEvent.click(movieCheckbox);
