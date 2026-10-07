@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rosevear-ai-hub"
-version = "0.0.21"
+version = "0.0.22"
 description = "Private local-first AI, home automation, knowledge, camera and business integration hub"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -21,6 +21,7 @@ dependencies = [
   "python-multipart>=0.0.12,<1.0",
   "sqlalchemy>=2.0,<3.0",
   "uvicorn[standard]>=0.32,<1.0",
+  "websockets>=14,<16",
 ]
 
 [project.optional-dependencies]

@@ -115,3 +115,19 @@ The token is write-only from the Hub UI and must never be pasted into GitHub, lo
   the local connection is legitimately slow.
 
 Build 021 does not call Home Assistant services and cannot change device state.
+
+
+## Build 022 entity browser operations
+
+No new Home Assistant credential is required. After updating the Hub:
+1. keep the Build 021 URL and token configured
+2. restart the backend if dependencies or environment changed
+3. open Devices / Entity Browser
+4. confirm area, device, domain, and entity counts load
+5. use filters to verify a known entity resolves to its expected area/device
+
+The browser uses Home Assistant's WebSocket registry API in addition to REST state. If status is online but the browser returns unavailable, verify /api/websocket is reachable through the same trusted Home Assistant base URL.
+
+### CORS PUT regression
+
+Build 022 permanently includes PUT in the FastAPI CORS allow-method list. This is required because the Secrets screen saves/rotates credentials with PUT. The endpoint's Owner/Administrator authorization remains unchanged.

@@ -176,3 +176,15 @@ Build 021 keeps Home Assistant access read-only and server-side:
 - the entity inventory exposes a bounded normalized subset instead of forwarding arbitrary Home Assistant attributes
 - no Home Assistant service-call endpoint or device-control tool exists in Build 021
 - the Hub and Home Assistant must remain on trusted local/private networking; no public port forwarding is introduced
+
+
+## Home Assistant entity browser
+
+Build 022 expands read access without expanding write authority:
+- registry discovery uses authenticated Home Assistant WebSocket commands only for area, device, and entity lists
+- live state remains read through the REST API
+- no Home Assistant service call or state-changing WebSocket command is exposed
+- entity attributes are bounded before response serialization
+- secret-like attribute keys are redacted before data leaves the backend
+- entity area assignment prefers the entity registry and falls back to the owning device area
+- Build 020 secret writes remain Owner/Administrator-only; the CORS PUT fix changes browser transport permission only, not application authorization

@@ -1,7 +1,7 @@
 """Public API request and response schemas."""
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -279,3 +279,56 @@ class HomeAssistantEntityResponse(BaseModel):
 class HomeAssistantEntitiesResponse(BaseModel):
     count: int
     entities: list[HomeAssistantEntityResponse]
+
+
+class HomeAssistantAreaResponse(BaseModel):
+    area_id: str
+    name: str
+    aliases: list[str] = Field(default_factory=list)
+    floor_id: str | None = None
+    icon: str | None = None
+
+
+class HomeAssistantDeviceResponse(BaseModel):
+    device_id: str
+    name: str
+    area_id: str | None = None
+    manufacturer: str | None = None
+    model: str | None = None
+    sw_version: str | None = None
+    hw_version: str | None = None
+    parent_device_id: str | None = None
+
+
+class HomeAssistantDomainSummaryResponse(BaseModel):
+    domain: str
+    count: int
+
+
+class HomeAssistantBrowserEntityResponse(BaseModel):
+    entity_id: str
+    domain: str
+    state: str
+    friendly_name: str | None = None
+    area_id: str | None = None
+    area_name: str | None = None
+    device_id: str | None = None
+    device_name: str | None = None
+    platform: str | None = None
+    icon: str | None = None
+    unit_of_measurement: str | None = None
+    device_class: str | None = None
+    last_changed: str | None = None
+    last_updated: str | None = None
+    attributes: dict[str, Any] = Field(default_factory=dict)
+
+
+class HomeAssistantBrowserResponse(BaseModel):
+    area_count: int
+    device_count: int
+    domain_count: int
+    entity_count: int
+    areas: list[HomeAssistantAreaResponse]
+    devices: list[HomeAssistantDeviceResponse]
+    domains: list[HomeAssistantDomainSummaryResponse]
+    entities: list[HomeAssistantBrowserEntityResponse]

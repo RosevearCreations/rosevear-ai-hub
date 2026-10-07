@@ -25,6 +25,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 019 | Audit Log | COMPLETE | main |
 | 020 | Secret Management | COMPLETE | main |
 | 021 | Home Assistant Connection | COMPLETE | main |
+| 022 | Entity Browser | READY FOR CI | dev |
 
 ## Build 016 acceptance checklist
 
@@ -288,6 +289,38 @@ To connect the real home instance, configure `HOME_ASSISTANT_URL` on the Hub mac
 Home Assistant long-lived access token either as `HOME_ASSISTANT_TOKEN` or through the Owner/Admin
 **Secrets** screen. Never paste the token into GitHub, logs, tickets, or chat.
 
+## Build 022 acceptance checklist
+
+- [x] authenticated WebSocket registry discovery
+- [x] area registry normalization
+- [x] device registry normalization
+- [x] entity registry normalization
+- [x] live REST state joined to registry metadata
+- [x] entity area assignment with device-area fallback
+- [x] domain summary counts
+- [x] area/domain/device/state/search browser filters
+- [x] bounded attribute exposure
+- [x] secret-like attribute value redaction
+- [x] child-device fields tolerated
+- [x] Build 021 status/minimal entity endpoints retained
+- [x] no Home Assistant service calls introduced
+- [x] CORS PUT regression fixed for secret save/rotation
+- [x] CORS preflight regression coverage
+- [x] backend WebSocket adapter coverage
+- [x] backend entity-browser API coverage
+- [x] web entity-browser/filter coverage
+- [x] no database migration required
+- [x] security/integration/operations/build documentation
+- [x] no new credential, cloud service, OAuth registration, or paid dependency
+- [ ] final Build 022 dev CI green
+- [ ] promoted to main
+- [ ] final Build 022 main CI green
+- [ ] dev synchronized with main
+
+## Operator setup
+
+No additional credential is required beyond Build 021. The existing Home Assistant URL and long-lived token are reused.
+
 ## Next build
 
-**Build 022 — Entity Browser**
+**Build 023 — Safe Device Controls**
