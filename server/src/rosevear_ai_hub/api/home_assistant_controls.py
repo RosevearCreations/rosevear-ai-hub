@@ -262,9 +262,7 @@ async def update_control_policy(
 
     allowed = set(requested)
     candidates = [
-        candidate
-        for item in states
-        if (candidate := _candidate(item, allowed)) is not None
+        candidate for item in states if (candidate := _candidate(item, allowed)) is not None
     ]
     candidates.sort(key=lambda item: (item.domain, item.friendly_name or item.entity_id))
     return HomeAssistantControlPolicyResponse(
