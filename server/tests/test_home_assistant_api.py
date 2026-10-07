@@ -1,6 +1,9 @@
 from fastapi.testclient import TestClient
 
-from rosevear_ai_hub.api.home_assistant import HomeAssistantRuntime, get_home_assistant_runtime
+from rosevear_ai_hub.api.home_assistant import (
+    HomeAssistantRuntime,
+    get_home_assistant_runtime,
+)
 from rosevear_ai_hub.auth import require_authenticated
 from rosevear_ai_hub.integrations.home_assistant import HomeAssistantUnavailableError
 from rosevear_ai_hub.main import create_app
@@ -28,23 +31,54 @@ class FakeHomeAssistantClient:
                 "last_changed": "2026-10-06T20:00:00+00:00",
                 "last_updated": "2026-10-06T20:00:00+00:00",
             },
-            {"entity_id": "light.workshop", "state": "off", "attributes": {"friendly_name": "Workshop light", "icon": "mdi:lightbulb"}},
+            {
+                "entity_id": "light.workshop",
+                "state": "off",
+                "attributes": {
+                    "friendly_name": "Workshop light",
+                    "icon": "mdi:lightbulb",
+                },
+            },
         ]
 
     async def registry_snapshot(self):
         return {
-            "areas": [{"area_id": "workshop", "name": "Workshop", "aliases": ["Shop"]}],
-            "devices": [{"id": "device-thermostat", "name": "Workshop thermostat", "area_id": "workshop", "manufacturer": "Example", "model": "T1"}],
+            "areas": [
+                {
+                    "area_id": "workshop",
+                    "name": "Workshop",
+                    "aliases": ["Shop"],
+                }
+            ],
+            "devices": [
+                {
+                    "id": "device-thermostat",
+                    "name": "Workshop thermostat",
+                    "area_id": "workshop",
+                    "manufacturer": "Example",
+                    "model": "T1",
+                }
+            ],
             "entities": [
-                {"entity_id": "sensor.workshop_temperature", "device_id": "device-thermostat", "platform": "demo"},
-                {"entity_id": "light.workshop", "area_id": "workshop", "platform": "demo"},
+                {
+                    "entity_id": "sensor.workshop_temperature",
+                    "device_id": "device-thermostat",
+                    "platform": "demo",
+                },
+                {
+                    "entity_id": "light.workshop",
+                    "area_id": "workshop",
+                    "platform": "demo",
+                },
             ],
         }
 
 
 class OfflineHomeAssistantClient(FakeHomeAssistantClient):
     async def health(self) -> str:
-        raise HomeAssistantUnavailableError("Unable to reach Home Assistant at http://homeassistant.test.")
+        raise HomeAssistantUnavailableError(
+            "Unable to reach Home Assistant at http://homeassistant.test."
+        )
 
 
 def build_client(runtime: HomeAssistantRuntime) -> TestClient:
@@ -55,7 +89,12 @@ def build_client(runtime: HomeAssistantRuntime) -> TestClient:
 
 
 def configured_runtime() -> HomeAssistantRuntime:
-    return HomeAssistantRuntime(client=FakeHomeAssistantClient(), base_url="http://homeassistant.test", url_configured=True, token_configured=True)
+    return HomeAssistantRuntime(
+        client=FakeHomeAssistantClient(),
+        base_url="http://homeassistant.test",
+        url_configured=True,
+        token_configured=True,
+    )
 
 
 def test_home_assistant_status_and_entity_inventory() -> None:
@@ -68,7 +107,10 @@ def test_home_assistant_status_and_entity_inventory() -> None:
     assert entities_response.status_code == 200
     payload = entities_response.json()
     assert payload["count"] == 2
-    assert [item["entity_id"] for item in payload["entities"]] == ["light.workshop", "sensor.workshop_temperature"]
+    assert [item["entity_id"] for item in payload["entities"]] == [
+        "light.workshop",
+        "sensor.workshop_temperature",
+    ]
     assert payload["entities"][1]["unit_of_measurement"] == "°C"
     assert "never-expose-this" not in entities_response.text
 
@@ -85,7 +127,11 @@ def test_entity_browser_resolves_area_device_domain_state_and_safe_attributes() 
     assert payload["areas"][0]["name"] == "Workshop"
     assert payload["devices"][0]["name"] == "Workshop thermostat"
 
-    temperature = next(item for item in payload["entities"] if item["entity_id"] == "sensor.workshop_temperature")
+    temperature = next(
+        item
+        for item in payload["entities"]
+        if item["entity_id"] == "sensor.workshop_temperature"
+    )
     assert temperature["area_name"] == "Workshop"
     assert temperature["device_name"] == "Workshop thermostat"
     assert temperature["platform"] == "demo"
@@ -97,7 +143,14 @@ def test_entity_browser_resolves_area_device_domain_state_and_safe_attributes() 
 
 
 def test_home_assistant_status_degrades_safely_when_not_configured() -> None:
-    client = build_client(HomeAssistantRuntime(client=None, base_url=None, url_configured=False, token_configured=False))
+    client = build_client(
+        HomeAssistantRuntime(
+            client=None,
+            base_url=None,
+            url_configured=False,
+            token_configured=False,
+        )
+    )
     status_response = client.get("/api/v1/home-assistant/status")
     assert status_response.status_code == 200
     assert status_response.json()["configured"] is False
@@ -106,7 +159,14 @@ def test_home_assistant_status_degrades_safely_when_not_configured() -> None:
 
 
 def test_home_assistant_status_degrades_safely_when_offline() -> None:
-    client = build_client(HomeAssistantRuntime(client=OfflineHomeAssistantClient(), base_url="http://homeassistant.test", url_configured=True, token_configured=True))
+    client = build_client(
+        HomeAssistantRuntime(
+            client=OfflineHomeAssistantClient(),
+            base_url="http://homeassistant.test",
+            url_configured=True,
+            token_configured=True,
+        )
+    )
     response = client.get("/api/v1/home-assistant/status")
     assert response.status_code == 200
     assert response.json()["available"] is False
