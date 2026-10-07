@@ -133,8 +133,12 @@ def _entity_response(item: dict[str, Any]) -> HomeAssistantEntityResponse | None
         icon=_optional_string(safe_attributes, "icon"),
         unit_of_measurement=_optional_string(safe_attributes, "unit_of_measurement"),
         device_class=_optional_string(safe_attributes, "device_class"),
-        last_changed=item.get("last_changed") if isinstance(item.get("last_changed"), str) else None,
-        last_updated=item.get("last_updated") if isinstance(item.get("last_updated"), str) else None,
+        last_changed=(
+            item.get("last_changed") if isinstance(item.get("last_changed"), str) else None
+        ),
+        last_updated=(
+            item.get("last_updated") if isinstance(item.get("last_updated"), str) else None
+        ),
     )
 
 
