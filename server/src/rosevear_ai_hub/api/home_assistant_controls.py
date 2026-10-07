@@ -211,9 +211,7 @@ async def get_control_policy(
     states = await _states_or_503(runtime)
     allowed = set(_load_allowlist(db))
     candidates = [
-        candidate
-        for item in states
-        if (candidate := _candidate(item, allowed)) is not None
+        candidate for item in states if (candidate := _candidate(item, allowed)) is not None
     ]
     candidates.sort(key=lambda item: (item.domain, item.friendly_name or item.entity_id))
     return HomeAssistantControlPolicyResponse(
@@ -237,9 +235,7 @@ async def update_control_policy(
 
     states = await _states_or_503(runtime)
     state_by_id = {
-        item["entity_id"]: item
-        for item in states
-        if isinstance(item.get("entity_id"), str)
+        item["entity_id"]: item for item in states if isinstance(item.get("entity_id"), str)
     }
     requested = sorted(set(payload.allowed_entity_ids))
     for entity_id in requested:
