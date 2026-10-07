@@ -322,9 +322,7 @@ async def home_assistant_browser(
     area_names = {area.area_id: area.name for area in areas}
 
     devices = [
-        device
-        for item in registry["devices"]
-        if (device := _device_response(item)) is not None
+        device for item in registry["devices"] if (device := _device_response(item)) is not None
     ]
     devices.sort(key=lambda item: (item.name.lower(), item.device_id))
     devices_by_id = {device.device_id: device for device in devices}
