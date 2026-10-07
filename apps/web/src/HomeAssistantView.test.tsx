@@ -51,7 +51,7 @@ describe("HomeAssistantView", () => {
       expect(screen.getByText("light.living_room")).toBeInTheDocument();
     });
     expect(screen.getByText("21.5 °C")).toBeInTheDocument();
-    expect(screen.getByText("Attributes (1)")).toBeInTheDocument();
+    expect(screen.getAllByText("Attributes (1)")).toHaveLength(2);
 
     fireEvent.change(screen.getByLabelText("Area"), { target: { value: "workshop" } });
     expect(screen.getByText("sensor.workshop_temperature")).toBeInTheDocument();
