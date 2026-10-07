@@ -88,6 +88,7 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 019 — Audit Log**
 - **Build 020 — Secret Management**
 - **Build 021 — Home Assistant Connection**
+- **Build 023 — Safe Device Controls**
 
 ## Next build
 

@@ -155,6 +155,8 @@ read-only entity inventory. The browser receives normalized status/entity fields
 
 No service calls are implemented in Build 021. Safe controls remain a later tool/permission layer.
 
+Build 022 adds Home Assistant WebSocket registry discovery for areas, devices, and entities. The backend joins registry metadata to REST state and emits a normalized read-only browser model. WebSocket commands remain discovery-only; service calls are still absent.
+
 ## Integration contract
 
 Each adapter exposes:

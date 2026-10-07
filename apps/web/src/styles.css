@@ -1659,3 +1659,68 @@ h1 {
   margin-top: 0.25rem;
   overflow-wrap: anywhere;
 }
+
+
+/* Build 022 — Home Assistant entity browser */
+.ha-browser-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.ha-browser-summary div {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 0.75rem;
+  background: white;
+}
+.ha-browser-summary span {
+  color: #737373;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ha-browser-summary strong { font-size: 1.35rem; }
+.ha-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(140px, 1fr)) auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+.ha-filters label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 700;
+}
+.ha-filters input,
+.ha-filters select {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid #a3a3a3;
+  border-radius: 0.6rem;
+  background: white;
+  color: #171717;
+}
+.ha-entity-card details {
+  border-top: 1px solid #e5e5e5;
+  padding-top: 0.75rem;
+}
+.ha-entity-card summary { cursor: pointer; font-weight: 700; }
+.ha-entity-card pre {
+  overflow: auto;
+  max-height: 280px;
+  margin: 0.75rem 0 0;
+  padding: 0.75rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.65rem;
+  background: white;
+  font-size: 0.78rem;
+}
+@media (max-width: 1100px) {
+  .ha-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .ha-browser-summary,
+  .ha-filters { grid-template-columns: 1fr; }
+}

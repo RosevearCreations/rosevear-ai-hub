@@ -1021,6 +1021,59 @@ export interface HomeAssistantEntitiesResponse {
   entities: HomeAssistantEntity[];
 }
 
+export interface HomeAssistantArea {
+  area_id: string;
+  name: string;
+  aliases: string[];
+  floor_id: string | null;
+  icon: string | null;
+}
+
+export interface HomeAssistantDevice {
+  device_id: string;
+  name: string;
+  area_id: string | null;
+  manufacturer: string | null;
+  model: string | null;
+  sw_version: string | null;
+  hw_version: string | null;
+  parent_device_id: string | null;
+}
+
+export interface HomeAssistantDomainSummary {
+  domain: string;
+  count: number;
+}
+
+export interface HomeAssistantBrowserEntity {
+  entity_id: string;
+  domain: string;
+  state: string;
+  friendly_name: string | null;
+  area_id: string | null;
+  area_name: string | null;
+  device_id: string | null;
+  device_name: string | null;
+  platform: string | null;
+  icon: string | null;
+  unit_of_measurement: string | null;
+  device_class: string | null;
+  last_changed: string | null;
+  last_updated: string | null;
+  attributes: Record<string, unknown>;
+}
+
+export interface HomeAssistantBrowserResponse {
+  area_count: number;
+  device_count: number;
+  domain_count: number;
+  entity_count: number;
+  areas: HomeAssistantArea[];
+  devices: HomeAssistantDevice[];
+  domains: HomeAssistantDomainSummary[];
+  entities: HomeAssistantBrowserEntity[];
+}
+
 export function getHomeAssistantStatus(
   signal?: AbortSignal,
 ): Promise<HomeAssistantStatus> {
@@ -1031,4 +1084,10 @@ export function getHomeAssistantEntities(
   signal?: AbortSignal,
 ): Promise<HomeAssistantEntitiesResponse> {
   return getJson<HomeAssistantEntitiesResponse>("/api/v1/home-assistant/entities", signal);
+}
+
+export function getHomeAssistantBrowser(
+  signal?: AbortSignal,
+): Promise<HomeAssistantBrowserResponse> {
+  return getJson<HomeAssistantBrowserResponse>("/api/v1/home-assistant/browser", signal);
 }

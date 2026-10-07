@@ -16,6 +16,8 @@ Build 021 establishes the first real connector boundary:
 - the browser never receives the token
 - device-service writes are intentionally absent until Build 023
 
+Build 022 adds the authenticated Home Assistant WebSocket API for read-only area, device, and entity registry discovery. Live state still comes from REST. The Hub joins those sources into a normalized entity browser and redacts secret-like attribute values before they reach the UI.
+
 ## MQTT
 **Priority:** High  
 **Role:** Local event/device messaging  
