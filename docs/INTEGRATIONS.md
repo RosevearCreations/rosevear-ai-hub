@@ -76,3 +76,14 @@ Read-only first. Avoid duplication of booking/customer/operations data.
 
 ## YW
 Read-only first. Avoid duplication of job/crew/operations data.
+
+
+## Build 023 safe Home Assistant writes
+
+The Home Assistant adapter now exposes only three bounded write families to the Hub:
+- light on/off
+- switch on/off
+- scene activation
+
+There is no generic domain/service execution method in the application API. The caller must pass
+through the Build 023 entity allow list, tool-registry risk contract, role checks, and audit layer.

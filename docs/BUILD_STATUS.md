@@ -26,6 +26,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 020 | Secret Management | COMPLETE | main |
 | 021 | Home Assistant Connection | COMPLETE | main |
 | 022 | Entity Browser | COMPLETE | main |
+| 023 | Safe Device Controls | READY FOR CI | dev |
 
 ## Build 016 acceptance checklist
 
@@ -321,6 +322,45 @@ Home Assistant long-lived access token either as `HOME_ASSISTANT_TOKEN` or throu
 
 No additional credential is required beyond Build 021. The existing Home Assistant URL and long-lived token are reused.
 
+## Build 023 acceptance checklist
+
+- [x] bounded Home Assistant light on/off adapter
+- [x] bounded Home Assistant switch on/off adapter
+- [x] bounded Home Assistant scene activation adapter
+- [x] no arbitrary Home Assistant service-call API
+- [x] Level-1 tool contract for lights
+- [x] Level-1 tool contract for switches
+- [x] Level-1 tool contract for non-safety scenes
+- [x] exact-entity safe-control allow list
+- [x] Owner/Administrator-only allow-list administration
+- [x] Household User execution of allow-listed Level-1 controls
+- [x] Read-only execution denied
+- [x] explicit low-risk acknowledgement on allow-list changes
+- [x] allow-list mutation not exposed as an AI tool
+- [x] hazardous/safety-looking target deny checks
+- [x] action/domain validation
+- [x] tool enable-state gate
+- [x] registered input-schema validation before execution
+- [x] Home Assistant outage blocks writes
+- [x] successful execution audit evidence
+- [x] failed execution audit evidence
+- [x] allow-list policy audit evidence
+- [x] Devices UI allow-list administration
+- [x] Devices UI allow-listed action buttons
+- [x] no database migration required
+- [x] security/integration/data-model/operations/build documentation
+- [x] no new credential, cloud service, OAuth registration, or paid dependency
+- [ ] final Build 023 dev CI green
+- [ ] promoted to main
+- [ ] final Build 023 main CI green
+- [ ] dev synchronized with main
+
+## Operator setup
+
+No new credential is required beyond Build 021. The existing Home Assistant URL and long-lived token
+are reused. An Owner/Administrator must manually review and save the low-risk entity allow list
+before any device write can occur.
+
 ## Next build
 
-**Build 023 — Safe Device Controls**
+**Build 024 — Natural-Language Home Tools**

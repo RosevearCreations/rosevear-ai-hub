@@ -204,7 +204,7 @@ export function App() {
         ) : section === "Knowledge" ? (
           <KnowledgeView currentUser={user} />
         ) : section === "Devices" ? (
-          <HomeAssistantView />
+          <HomeAssistantView currentUser={user} />
         ) : section === "Confirmations" ? (
           <ConfirmationsView />
         ) : section === "Audit" ? (
@@ -253,7 +253,7 @@ function HomeView({
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 022</p>
+          <p className="eyebrow">Build 023</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -308,7 +308,7 @@ function HomeView({
 
         <article className="panel">
           <h2>Home Assistant</h2>
-          <p>Read-only area, device, domain, state, and attribute browsing is available.</p>
+          <p>Allow-listed low-risk lights, switches, and scenes can now be controlled with audit evidence.</p>
           <button type="button" onClick={onOpenDevices}>
             Open devices
           </button>

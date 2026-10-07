@@ -1,4 +1,4 @@
-"""Home Assistant REST/WebSocket adapter for read-only discovery."""
+"""Home Assistant REST/WebSocket adapter for discovery and bounded safe controls."""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ WebSocketConnect = Callable[..., Any]
 
 
 class HomeAssistantClient:
-    """Authenticated read-only Home Assistant client."""
+    """Authenticated client with read APIs plus explicitly bounded safe controls."""
 
     def __init__(
         self,
@@ -97,6 +97,17 @@ class HomeAssistantClient:
             raise HomeAssistantRequestError("Home Assistant entity inventory was incomplete.")
         return [item for item in payload if isinstance(item, dict)]
 
+    async def set_light(self, entity_id: str, *, enabled: bool) -> list[dict[str, Any]]:
+        service = "turn_on" if enabled else "turn_off"
+        return await self._safe_service("/api/services/light/" + service, entity_id)
+
+    async def set_switch(self, entity_id: str, *, enabled: bool) -> list[dict[str, Any]]:
+        service = "turn_on" if enabled else "turn_off"
+        return await self._safe_service("/api/services/switch/" + service, entity_id)
+
+    async def activate_scene(self, entity_id: str) -> list[dict[str, Any]]:
+        return await self._safe_service("/api/services/scene/turn_on", entity_id)
+
     async def registry_snapshot(self) -> dict[str, list[dict[str, Any]]]:
         command_types = (
             "config/area_registry/list",
@@ -110,7 +121,23 @@ class HomeAssistantClient:
             "entities": results[command_types[2]],
         }
 
-    async def _request_json(self, method: str, path: str) -> Any:
+    async def _safe_service(self, path: str, entity_id: str) -> list[dict[str, Any]]:
+        payload = await self._request_json(
+            "POST",
+            path,
+            json_body={"entity_id": entity_id},
+        )
+        if not isinstance(payload, list):
+            raise HomeAssistantRequestError("Home Assistant service response was incomplete.")
+        return [item for item in payload if isinstance(item, dict)]
+
+    async def _request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        json_body: dict[str, Any] | None = None,
+    ) -> Any:
         headers = {"Authorization": f"Bearer {self._token}", "Accept": "application/json"}
         try:
             async with httpx.AsyncClient(
@@ -119,7 +146,7 @@ class HomeAssistantClient:
                 transport=self.transport,
                 headers=headers,
             ) as client:
-                response = await client.request(method, path)
+                response = await client.request(method, path, json=json_body)
                 if response.status_code in {401, 403}:
                     raise HomeAssistantAuthenticationError(
                         "Home Assistant rejected the configured access token."
