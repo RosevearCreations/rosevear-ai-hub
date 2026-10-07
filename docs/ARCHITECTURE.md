@@ -208,3 +208,20 @@ Recommended eventual pattern:
 ## Network rule
 
 Do **not** directly expose FastAPI, Ollama, MQTT, Home Assistant admin services, or camera services to the public internet.
+
+
+## Build 023 control path
+
+Safe Home Assistant writes follow a deterministic server-owned path:
+
+authenticated user
+-> exact entity allow list
+-> supported domain/action check
+-> hazardous target deny check
+-> enabled Level-1 tool contract
+-> JSON-schema argument validation
+-> bounded Home Assistant adapter method
+-> immutable audit record
+
+The allow-list administration path is Owner/Administrator-only and is intentionally not registered
+as an AI-executable tool.

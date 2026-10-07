@@ -241,3 +241,10 @@ Business-domain entities are not copied into the Hub as authoritative records. S
 ## provider routing note
 
 Build 009 persists the stable provider key on conversations and assistant messages. User-authored messages keep provider null. Existing conversations migrate to `ollama`.
+
+
+## Build 023 safe-control policy
+
+No new table is required. The exact Home Assistant entity allow list is stored in the existing
+app_settings table under key home_assistant.safe_control_allowlist as a JSON array of entity IDs.
+The Hub does not duplicate Home Assistant entity state into a new authority.

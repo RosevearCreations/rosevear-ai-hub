@@ -1091,3 +1091,68 @@ export function getHomeAssistantBrowser(
 ): Promise<HomeAssistantBrowserResponse> {
   return getJson<HomeAssistantBrowserResponse>("/api/v1/home-assistant/browser", signal);
 }
+
+
+export interface HomeAssistantControlCandidate {
+  entity_id: string;
+  domain: "light" | "switch" | "scene";
+  friendly_name: string | null;
+  state: string;
+  allowed: boolean;
+  blocked_reason: string | null;
+}
+
+export interface HomeAssistantControlPolicy {
+  allowed_entity_ids: string[];
+  candidates: HomeAssistantControlCandidate[];
+}
+
+export type HomeAssistantControlAction = "on" | "off" | "activate";
+
+export interface HomeAssistantControlResponse {
+  accepted: boolean;
+  entity_id: string;
+  domain: string;
+  action: string;
+  tool_key: string;
+  state: string | null;
+}
+
+export function getHomeAssistantControlPolicy(
+  signal?: AbortSignal,
+): Promise<HomeAssistantControlPolicy> {
+  return authJson<HomeAssistantControlPolicy>(
+    "GET",
+    "/api/v1/home-assistant/control-policy",
+    undefined,
+    signal,
+  );
+}
+
+export function saveHomeAssistantControlPolicy(
+  allowedEntityIds: string[],
+  signal?: AbortSignal,
+): Promise<HomeAssistantControlPolicy> {
+  return authJson<HomeAssistantControlPolicy>(
+    "PUT",
+    "/api/v1/home-assistant/control-policy",
+    {
+      allowed_entity_ids: allowedEntityIds,
+      acknowledge_low_risk_only: true,
+    },
+    signal,
+  );
+}
+
+export function controlHomeAssistantEntity(
+  entityId: string,
+  action: HomeAssistantControlAction,
+  signal?: AbortSignal,
+): Promise<HomeAssistantControlResponse> {
+  return authJson<HomeAssistantControlResponse>(
+    "POST",
+    "/api/v1/home-assistant/control",
+    { entity_id: entityId, action },
+    signal,
+  );
+}

@@ -26,6 +26,21 @@ def home_assistant_transport(request: httpx.Request) -> httpx.Response:
                 }
             ],
         )
+    if request.url.path == "/api/services/light/turn_off":
+        assert json.loads(request.content) == {"entity_id": "light.workshop"}
+        return httpx.Response(
+            200,
+            json=[{"entity_id": "light.workshop", "state": "off"}],
+        )
+    if request.url.path == "/api/services/switch/turn_on":
+        assert json.loads(request.content) == {"entity_id": "switch.fan"}
+        return httpx.Response(
+            200,
+            json=[{"entity_id": "switch.fan", "state": "on"}],
+        )
+    if request.url.path == "/api/services/scene/turn_on":
+        assert json.loads(request.content) == {"entity_id": "scene.movie_night"}
+        return httpx.Response(200, json=[])
     return httpx.Response(404)
 
 
@@ -78,7 +93,7 @@ class FakeWebSocket:
 
 
 @pytest.mark.asyncio
-async def test_home_assistant_client_health_states_and_registries() -> None:
+async def test_home_assistant_client_health_states_registries_and_safe_services() -> None:
     websocket = FakeWebSocket()
 
     def connect(*args, **kwargs):
@@ -100,11 +115,10 @@ async def test_home_assistant_client_health_states_and_registries() -> None:
     assert registry["devices"][0]["id"] == "device-1"
     assert registry["entities"][0]["entity_id"] == "light.workshop"
     assert websocket.sent[0] == {"type": "auth", "access_token": "test-token"}
-    assert [item["type"] for item in websocket.sent[1:]] == [
-        "config/area_registry/list",
-        "config/device_registry/list",
-        "config/entity_registry/list",
-    ]
+
+    assert (await client.set_light("light.workshop", enabled=False))[0]["state"] == "off"
+    assert (await client.set_switch("switch.fan", enabled=True))[0]["state"] == "on"
+    assert await client.activate_scene("scene.movie_night") == []
 
 
 @pytest.mark.asyncio

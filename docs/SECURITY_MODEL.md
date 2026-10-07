@@ -188,3 +188,24 @@ Build 022 expands read access without expanding write authority:
 - secret-like attribute keys are redacted before data leaves the backend
 - entity area assignment prefers the entity registry and falls back to the owning device area
 - Build 020 secret writes remain Owner/Administrator-only; the CORS PUT fix changes browser transport permission only, not application authorization
+
+
+## Home Assistant safe device controls
+
+Build 023 introduces bounded Level-1 Home Assistant writes:
+- only light, switch, and scene domains are eligible
+- exact entity IDs must be placed on an Owner/Administrator-managed allow list
+- allow-list mutation is an administrative path, not an AI tool
+- allow-list changes are audited at Level 3 because they alter which future writes may be delegated
+- light and switch actions are limited to on/off
+- scene actions are limited to activation and must be manually classified as non-safety
+- hazardous/safety-looking targets are rejected even if persisted policy data is stale
+- Household Users may use allow-listed Level-1 controls
+- Read-only users cannot execute writes
+- Home Assistant outages block writes
+- arbitrary Home Assistant service calls are not exposed
+- each attempted execution passes the registered tool schema and enable-state gate
+- successful and failed executions are audit-recorded
+
+Build 023 does not relax the canonical Level-3 prohibitions for locks, alarm/security changes,
+life-safety devices, hazardous workshop equipment, purchases, or security bypasses.

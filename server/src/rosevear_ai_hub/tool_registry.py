@@ -170,6 +170,94 @@ BUILTIN_TOOL_DEFINITIONS: tuple[ToolDefinition, ...] = (
         ),
         default_enabled=False,
     ),
+    ToolDefinition(
+        tool_key="home_assistant.light.set",
+        display_name="Set Home Assistant light",
+        description=(
+            "Turn one explicitly allow-listed, non-safety Home Assistant light on or off."
+        ),
+        integration_key="home_assistant",
+        integration_name="Home Assistant",
+        capabilities=("home.read", "home.light.control"),
+        risk_level=ToolRiskLevel.LOW_RISK_ACTION,
+        input_schema=object_schema(
+            {
+                "entity_id": {
+                    "type": "string",
+                    "pattern": "^light\\.[a-z0-9_]+$",
+                },
+                "state": {"type": "string", "enum": ["on", "off"]},
+            },
+            required=("entity_id", "state"),
+        ),
+        output_schema=object_schema(
+            {
+                "accepted": {"type": "boolean"},
+                "entity_id": {"type": "string"},
+                "state": {"type": ["string", "null"]},
+            },
+            required=("accepted", "entity_id"),
+        ),
+        default_enabled=True,
+    ),
+    ToolDefinition(
+        tool_key="home_assistant.switch.set",
+        display_name="Set Home Assistant switch",
+        description=(
+            "Turn one explicitly allow-listed, non-safety Home Assistant switch on or off."
+        ),
+        integration_key="home_assistant",
+        integration_name="Home Assistant",
+        capabilities=("home.read", "home.switch.control"),
+        risk_level=ToolRiskLevel.LOW_RISK_ACTION,
+        input_schema=object_schema(
+            {
+                "entity_id": {
+                    "type": "string",
+                    "pattern": "^switch\\.[a-z0-9_]+$",
+                },
+                "state": {"type": "string", "enum": ["on", "off"]},
+            },
+            required=("entity_id", "state"),
+        ),
+        output_schema=object_schema(
+            {
+                "accepted": {"type": "boolean"},
+                "entity_id": {"type": "string"},
+                "state": {"type": ["string", "null"]},
+            },
+            required=("accepted", "entity_id"),
+        ),
+        default_enabled=True,
+    ),
+    ToolDefinition(
+        tool_key="home_assistant.scene.activate",
+        display_name="Activate Home Assistant scene",
+        description=(
+            "Activate one explicitly allow-listed scene classified by an Owner/Admin as non-safety."
+        ),
+        integration_key="home_assistant",
+        integration_name="Home Assistant",
+        capabilities=("home.read", "home.scene.activate"),
+        risk_level=ToolRiskLevel.LOW_RISK_ACTION,
+        input_schema=object_schema(
+            {
+                "entity_id": {
+                    "type": "string",
+                    "pattern": "^scene\\.[a-z0-9_]+$",
+                },
+            },
+            required=("entity_id",),
+        ),
+        output_schema=object_schema(
+            {
+                "accepted": {"type": "boolean"},
+                "entity_id": {"type": "string"},
+            },
+            required=("accepted", "entity_id"),
+        ),
+        default_enabled=True,
+    ),
 )
 
 

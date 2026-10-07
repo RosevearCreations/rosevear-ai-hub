@@ -131,3 +131,25 @@ The browser uses Home Assistant's WebSocket registry API in addition to REST sta
 ### CORS PUT regression
 
 Build 022 permanently includes PUT in the FastAPI CORS allow-method list. This is required because the Secrets screen saves/rotates credentials with PUT. The endpoint's Owner/Administrator authorization remains unchanged.
+
+
+## Build 023 safe-control operations
+
+Build 023 reuses the existing Home Assistant URL and encrypted token. No additional secret is needed.
+
+To enable one low-risk entity:
+1. sign in as Owner or Administrator
+2. open Devices
+3. review Safe-control allow list
+4. select only an ordinary light, benign switch, or non-safety scene
+5. save the allow list
+6. use the action buttons on the entity card
+7. verify the resulting tool.execution.completed entry in Audit
+
+If Home Assistant is unavailable, writes are blocked rather than queued.
+
+If an entity is safety-sensitive, hazardous, or no longer intended for delegation, remove it from
+the allow list immediately. Tool Registry can also disable the light, switch, or scene control tool
+globally.
+
+No port forwarding, public exposure, or additional cloud service is required.
