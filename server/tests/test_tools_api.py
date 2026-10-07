@@ -36,6 +36,9 @@ def test_registry_exposes_normalized_builtin_contracts(tmp_path) -> None:
     assert [item["tool_key"] for item in tools] == [
         "knowledge.answer",
         "knowledge.search",
+        "home_assistant.light.set",
+        "home_assistant.scene.activate",
+        "home_assistant.switch.set",
         "knowledge.document.delete",
     ]
 
@@ -51,6 +54,13 @@ def test_registry_exposes_normalized_builtin_contracts(tmp_path) -> None:
     assert search["output_schema"]["type"] == "object"
     assert search["output_schema"]["additionalProperties"] is False
 
+    light = next(item for item in tools if item["tool_key"] == "home_assistant.light.set")
+    assert light["risk_level"] == 1
+    assert light["risk_label"] == "low_risk_action"
+    assert light["confirmation_policy"] == "configurable"
+    assert light["enabled"] is True
+    assert light["input_schema"]["required"] == ["entity_id", "state"]
+
     delete = next(item for item in tools if item["tool_key"] == "knowledge.document.delete")
     assert delete["risk_level"] == 2
     assert delete["risk_label"] == "confirmation_required"
@@ -64,13 +74,18 @@ def test_registry_summary_reports_capabilities_and_risk_counts(tmp_path) -> None
     response = client.get("/api/v1/tools/summary")
     assert response.status_code == 200
     payload = response.json()
-    assert payload["tool_count"] == 3
-    assert payload["enabled_count"] == 2
+    assert payload["tool_count"] == 6
+    assert payload["enabled_count"] == 5
     assert payload["disabled_count"] == 1
     assert payload["counts_by_risk"]["read"] == 2
+    assert payload["counts_by_risk"]["low_risk_action"] == 3
     assert payload["counts_by_risk"]["confirmation_required"] == 1
     assert payload["capabilities"] == [
         "ai.generate",
+        "home.light.control",
+        "home.read",
+        "home.scene.activate",
+        "home.switch.control",
         "knowledge.answer",
         "knowledge.delete",
         "knowledge.read",
