@@ -1222,3 +1222,114 @@ export function publishMQTT(
     signal,
   );
 }
+
+
+export interface AutomationRule {
+  id: number;
+  name: string;
+  enabled: boolean;
+  definition: Record<string, unknown>;
+  created_by: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AutomationRuntime {
+  running: boolean;
+  queue_depth: number;
+  queue_capacity: number;
+  processed_events: number;
+  dropped_events: number;
+  failed_events: number;
+  home_assistant_configured: boolean;
+  mqtt_configured: boolean;
+  mqtt_rule_subscriptions: string[];
+  last_error: string | null;
+}
+
+export interface AutomationDraft {
+  valid: boolean;
+  name: string;
+  definition: Record<string, unknown>;
+  explanation: string;
+  assumptions: string[];
+  warnings: string[];
+  referenced_tools: string[];
+  provider: string;
+  model: string;
+  recommended_enabled: boolean;
+}
+
+export interface AutomationChangePayload {
+  operation: "create" | "update" | "delete";
+  automation_id?: number | null;
+  name?: string | null;
+  enabled?: boolean | null;
+  definition?: Record<string, unknown> | null;
+}
+
+export interface AutomationConfirmation {
+  confirmation_id: string;
+  status: string;
+  arguments_hash: string;
+  preview: ConfirmationPreview;
+  expires_at: string;
+}
+
+export interface AutomationChangeResult {
+  operation: "create" | "update" | "delete";
+  automation: AutomationRule | null;
+  deleted: boolean;
+}
+
+export function getAutomations(signal?: AbortSignal): Promise<AutomationRule[]> {
+  return authJson<AutomationRule[]>("GET", "/api/v1/automations", undefined, signal);
+}
+
+export function getAutomationRuntime(signal?: AbortSignal): Promise<AutomationRuntime> {
+  return authJson<AutomationRuntime>(
+    "GET",
+    "/api/v1/automations/runtime",
+    undefined,
+    signal,
+  );
+}
+
+export function draftAutomation(
+  prompt: string,
+  provider: string,
+  model: string,
+  signal?: AbortSignal,
+): Promise<AutomationDraft> {
+  return authJson<AutomationDraft>(
+    "POST",
+    "/api/v1/automations/author/draft",
+    { prompt, provider, model },
+    signal,
+  );
+}
+
+export function confirmAutomationChange(
+  payload: AutomationChangePayload,
+  signal?: AbortSignal,
+): Promise<AutomationConfirmation> {
+  return authJson<AutomationConfirmation>(
+    "POST",
+    "/api/v1/automations/confirm",
+    payload,
+    signal,
+  );
+}
+
+export function applyAutomationChange(
+  payload: AutomationChangePayload,
+  confirmationId: string,
+  signal?: AbortSignal,
+): Promise<AutomationChangeResult> {
+  return authJson<AutomationChangeResult>(
+    "POST",
+    "/api/v1/automations/apply?confirmation_id=" + encodeURIComponent(confirmationId),
+    payload,
+    signal,
+  );
+}

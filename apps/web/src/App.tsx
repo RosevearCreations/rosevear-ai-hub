@@ -10,6 +10,7 @@ import {
   type HealthResponse,
   type OllamaStatusResponse,
 } from "./api";
+import { AutomationView } from "./AutomationView";
 import { AuditView } from "./AuditView";
 import { AuthView } from "./AuthView";
 import { ChatView } from "./ChatView";
@@ -37,7 +38,14 @@ type AuthState =
   | { kind: "ready"; status: AuthStatus };
 
 const baseSections = ["Home", "Chat", "Knowledge", "Devices", "MQTT", "System"] as const;
-type Section = (typeof baseSections)[number] | "Users" | "Tools" | "Confirmations" | "Audit" | "Secrets";
+type Section =
+  | (typeof baseSections)[number]
+  | "Automations"
+  | "Users"
+  | "Tools"
+  | "Confirmations"
+  | "Audit"
+  | "Secrets";
 
 export function App() {
   const [auth, setAuth] = useState<AuthState>({ kind: "loading" });
@@ -139,7 +147,7 @@ export function App() {
   const user = auth.status.user;
   const canAdminister = user.role === "owner" || user.role === "administrator";
   const sections: Section[] = canAdminister
-    ? [...baseSections, "Confirmations", "Audit", "Secrets", "Tools", "Users"]
+    ? [...baseSections, "Automations", "Confirmations", "Audit", "Secrets", "Tools", "Users"]
     : [...baseSections];
 
   async function signOut() {
@@ -208,6 +216,8 @@ export function App() {
           <HomeAssistantView currentUser={user} />
         ) : section === "MQTT" ? (
           <MQTTView currentUser={user} />
+        ) : section === "Automations" ? (
+          <AutomationView />
         ) : section === "Confirmations" ? (
           <ConfirmationsView />
         ) : section === "Audit" ? (
@@ -259,7 +269,7 @@ function HomeView({
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 025</p>
+          <p className="eyebrow">Build 028</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -318,6 +328,11 @@ function HomeView({
           <button type="button" onClick={onOpenDevices}>
             Open devices
           </button>
+        </article>
+
+        <article className="panel">
+          <h2>Automations</h2>
+          <p>AI-assisted drafting now feeds deterministic Rule Schema validation and exact human approval.</p>
         </article>
 
         <article className="panel">
