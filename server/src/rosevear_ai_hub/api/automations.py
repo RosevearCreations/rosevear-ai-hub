@@ -103,8 +103,6 @@ class AutomationRuntimeResponse(BaseModel):
     recovered_interrupted_runs: int = 0
 
 
-
-
 RunStatus = Literal["running", "success", "failed", "skipped", "interrupted"]
 
 
@@ -212,8 +210,6 @@ def _response(record: Automation) -> AutomationRuleResponse:
         created_at=record.created_at,
         updated_at=record.updated_at,
     )
-
-
 
 
 def _run_response(run: AutomationRun, automation_name: str) -> AutomationRunResponse:
@@ -339,8 +335,6 @@ def automation_runtime_status(request: Request) -> AutomationRuntimeResponse:
             last_error="Event Engine runtime has not started.",
         )
     return AutomationRuntimeResponse(**runtime.snapshot())
-
-
 
 
 @router.get("/history/summary", response_model=AutomationHistorySummaryResponse)
