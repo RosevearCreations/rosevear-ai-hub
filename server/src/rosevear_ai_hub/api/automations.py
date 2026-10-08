@@ -7,7 +7,7 @@ from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -17,6 +17,11 @@ from rosevear_ai_hub.api.home_assistant import (
 )
 from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.auth import require_roles
+from rosevear_ai_hub.automation_history import (
+    AUTOMATION_FAILURE_STATUSES,
+    AUTOMATION_RUN_STATUSES,
+    public_run_summary,
+)
 from rosevear_ai_hub.automation_authoring import (
     MAX_AUTHORING_PROMPT_CHARACTERS,
     build_authoring_context,
@@ -38,7 +43,7 @@ from rosevear_ai_hub.automations import (
 )
 from rosevear_ai_hub.confirmations import consume_confirmation, prepare_confirmation
 from rosevear_ai_hub.database import get_session
-from rosevear_ai_hub.models import Automation, User
+from rosevear_ai_hub.models import Automation, AutomationRun, User
 from rosevear_ai_hub.providers.base import ProviderRequestError, ProviderUnavailableError
 from rosevear_ai_hub.providers.registry import ProviderRegistry, get_provider_registry
 
@@ -95,6 +100,44 @@ class AutomationRuntimeResponse(BaseModel):
     mqtt_configured: bool
     mqtt_rule_subscriptions: list[str]
     last_error: str | None = None
+    recovered_interrupted_runs: int = 0
+
+
+
+
+RunStatus = Literal["running", "success", "failed", "skipped", "interrupted"]
+
+
+class AutomationRunResponse(BaseModel):
+    id: int
+    automation_id: int
+    automation_name: str
+    started_at: datetime
+    completed_at: datetime | None
+    status: RunStatus
+    result_summary: dict[str, Any]
+    duration_ms: int | None
+
+
+class AutomationHistoryResponse(BaseModel):
+    runs: list[AutomationRunResponse]
+    total: int
+    limit: int
+    offset: int
+
+
+class AutomationHistorySummaryResponse(BaseModel):
+    total_runs: int
+    success_count: int
+    failed_count: int
+    interrupted_count: int
+    skipped_count: int
+    running_count: int
+    failure_count: int
+    automations_with_failures: int
+    newest_run_at: datetime | None
+    latest_failure_at: datetime | None
+    automatic_retry_enabled: bool = False
 
 
 class AutomationAuthoringRequest(BaseModel):
@@ -168,6 +211,27 @@ def _response(record: Automation) -> AutomationRuleResponse:
         created_by=record.created_by,
         created_at=record.created_at,
         updated_at=record.updated_at,
+    )
+
+
+
+
+def _run_response(run: AutomationRun, automation_name: str) -> AutomationRunResponse:
+    duration_ms = None
+    if run.completed_at is not None:
+        try:
+            duration_ms = max(0, int((run.completed_at - run.started_at).total_seconds() * 1000))
+        except TypeError:
+            duration_ms = None
+    return AutomationRunResponse(
+        id=run.id,
+        automation_id=run.automation_id,
+        automation_name=automation_name,
+        started_at=run.started_at,
+        completed_at=run.completed_at,
+        status=run.status,
+        result_summary=public_run_summary(run.result_summary),
+        duration_ms=duration_ms,
     )
 
 
@@ -275,6 +339,79 @@ def automation_runtime_status(request: Request) -> AutomationRuntimeResponse:
             last_error="Event Engine runtime has not started.",
         )
     return AutomationRuntimeResponse(**runtime.snapshot())
+
+
+
+
+@router.get("/history/summary", response_model=AutomationHistorySummaryResponse)
+def automation_history_summary(db: SessionDependency) -> AutomationHistorySummaryResponse:
+    counts = {key: 0 for key in AUTOMATION_RUN_STATUSES}
+    for run_status, count in db.execute(
+        select(AutomationRun.status, func.count(AutomationRun.id)).group_by(AutomationRun.status)
+    ).all():
+        if run_status in counts:
+            counts[run_status] = int(count)
+
+    newest_run_at = db.scalar(select(func.max(AutomationRun.started_at)))
+    latest_failure_at = db.scalar(
+        select(func.max(AutomationRun.started_at)).where(
+            AutomationRun.status.in_(AUTOMATION_FAILURE_STATUSES)
+        )
+    )
+    automations_with_failures = db.scalar(
+        select(func.count(func.distinct(AutomationRun.automation_id))).where(
+            AutomationRun.status.in_(AUTOMATION_FAILURE_STATUSES)
+        )
+    )
+    return AutomationHistorySummaryResponse(
+        total_runs=sum(counts.values()),
+        success_count=counts["success"],
+        failed_count=counts["failed"],
+        interrupted_count=counts["interrupted"],
+        skipped_count=counts["skipped"],
+        running_count=counts["running"],
+        failure_count=counts["failed"] + counts["interrupted"],
+        automations_with_failures=int(automations_with_failures or 0),
+        newest_run_at=newest_run_at,
+        latest_failure_at=latest_failure_at,
+        automatic_retry_enabled=False,
+    )
+
+
+@router.get("/history", response_model=AutomationHistoryResponse)
+def automation_history(
+    db: SessionDependency,
+    automation_id: int | None = Query(default=None, ge=1),
+    run_status: RunStatus | None = Query(default=None, alias="status"),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+) -> AutomationHistoryResponse:
+    conditions = []
+    if automation_id is not None:
+        conditions.append(AutomationRun.automation_id == automation_id)
+    if run_status is not None:
+        conditions.append(AutomationRun.status == run_status)
+
+    total_query = select(func.count(AutomationRun.id))
+    rows_query = (
+        select(AutomationRun, Automation.name)
+        .join(Automation, AutomationRun.automation_id == Automation.id)
+        .order_by(AutomationRun.started_at.desc(), AutomationRun.id.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    if conditions:
+        total_query = total_query.where(*conditions)
+        rows_query = rows_query.where(*conditions)
+
+    total = int(db.scalar(total_query) or 0)
+    rows = db.execute(rows_query).all()
+    return AutomationHistoryResponse(
+        runs=[_run_response(run, name) for run, name in rows],
+        total=total,
+        limit=limit,
+        offset=offset,
+    )
 
 
 @router.post("/validate", response_model=RuleValidationResponse)

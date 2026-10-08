@@ -1,9 +1,10 @@
-"""Deterministic Build 027 automation Event Engine."""
+"""Deterministic automation Event Engine with Build 029 failure containment."""
 
 from __future__ import annotations
 
 import hashlib
 import json
+import logging
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -49,6 +50,8 @@ _HAZARD_MARKERS = (
     "heater",
     "heating",
 )
+logger = logging.getLogger(__name__)
+
 _TOOL_DOMAINS = {
     "home_assistant.light.set": "light",
     "home_assistant.switch.set": "switch",
@@ -334,7 +337,7 @@ class AutomationEventEngine:
             select(AutomationRun)
             .where(
                 AutomationRun.automation_id == automation_id,
-                AutomationRun.status.in_(["success", "failed"]),
+                AutomationRun.status.in_(["success", "failed", "interrupted"]),
             )
             .order_by(AutomationRun.started_at.desc(), AutomationRun.id.desc())
             .limit(1)
@@ -402,30 +405,47 @@ class AutomationEventEngine:
         db.refresh(run)
 
         completed = 0
+        run_id = run.id
+        automation_id = automation.id
+        automation_name = automation.name
         try:
             for action in rule.actions:
                 await self._execute_action(db, action, states)
                 completed += 1
         except AutomationExecutionError as exc:
-            run.status = "failed"
-            run.completed_at = _utc_now()
-            run.result_summary = {
-                "event": event_summary,
-                "deduplication_token": deduplication_token,
-                "actions_completed": completed,
-                "error": str(exc)[:500],
-            }
-            record_audit_event(
+            self._record_failed_run(
                 db,
-                actor_user_id=None,
-                event_type="automation.run.failed",
-                object_type="automation",
-                object_id=str(automation.id),
-                action="execute",
-                arguments={"name": automation.name},
-                result={"ok": False, "run_id": run.id, "error": str(exc)[:500]},
+                run,
+                automation_id=automation_id,
+                automation_name=automation_name,
+                event_summary=event_summary,
+                deduplication_token=deduplication_token,
+                actions_completed=completed,
+                failure_kind="execution_error",
+                error_message=str(exc)[:500],
             )
-            db.commit()
+            return
+        except Exception:
+            logger.exception(
+                "Unexpected automation action failure for automation %s run %s",
+                automation_id,
+                run_id,
+            )
+            db.rollback()
+            recovered_run = db.get(AutomationRun, run_id)
+            if recovered_run is None:
+                raise
+            self._record_failed_run(
+                db,
+                recovered_run,
+                automation_id=automation_id,
+                automation_name=automation_name,
+                event_summary=event_summary,
+                deduplication_token=deduplication_token,
+                actions_completed=completed,
+                failure_kind="unexpected_error",
+                error_message="Unexpected Event Engine action failure.",
+            )
             return
 
         run.status = "success"
@@ -444,6 +464,52 @@ class AutomationEventEngine:
             action="execute",
             arguments={"name": automation.name},
             result={"ok": True, "run_id": run.id, "actions_completed": completed},
+        )
+        db.commit()
+
+    def _record_failed_run(
+        self,
+        db: Session,
+        run: AutomationRun,
+        *,
+        automation_id: int,
+        automation_name: str,
+        event_summary: dict[str, Any],
+        deduplication_token: str | None,
+        actions_completed: int,
+        failure_kind: str,
+        error_message: str,
+    ) -> None:
+        run.status = "failed"
+        run.completed_at = _utc_now()
+        run.result_summary = {
+            "event": event_summary,
+            "deduplication_token": deduplication_token,
+            "actions_completed": actions_completed,
+            "failure_kind": failure_kind,
+            "error": error_message,
+            "automatic_retry": False,
+            "retry_guidance": (
+                "Review the failure and allow a new source event to trigger the rule after "
+                "the underlying issue is corrected."
+            ),
+            "partial_execution_possible": actions_completed > 0,
+        }
+        record_audit_event(
+            db,
+            actor_user_id=None,
+            event_type="automation.run.failed",
+            object_type="automation",
+            object_id=str(automation_id),
+            action="execute",
+            arguments={"name": automation_name},
+            result={
+                "ok": False,
+                "run_id": run.id,
+                "error": error_message,
+                "failure_kind": failure_kind,
+                "automatic_retry": False,
+            },
         )
         db.commit()
 

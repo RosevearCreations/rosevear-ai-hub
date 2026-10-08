@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from rosevear_ai_hub.api.home_assistant import get_home_assistant_runtime
 from rosevear_ai_hub.api.mqtt import get_mqtt_runtime
+from rosevear_ai_hub.automation_history import recover_interrupted_automation_runs
 from rosevear_ai_hub.automations import MQTTMessageTrigger, normalize_rule_definition
 from rosevear_ai_hub.database import SessionLocal
 from rosevear_ai_hub.event_engine import AutomationEventEngine, MQTTEvent, StateEvent
@@ -48,6 +49,7 @@ class AutomationEventRuntime:
         self._failed_events = 0
         self._mqtt_rule_subscriptions: set[str] = set()
         self._last_error: str | None = None
+        self._recovered_interrupted_runs = 0
 
     async def start(self) -> None:
         if self._running:
@@ -55,6 +57,13 @@ class AutomationEventRuntime:
         self._running = True
         self._stopping.clear()
         self._loop = asyncio.get_running_loop()
+
+        try:
+            with self._session_factory() as db:
+                self._recovered_interrupted_runs = recover_interrupted_automation_runs(db)
+        except Exception as exc:
+            self._last_error = f"Automation run recovery failed: {exc}"
+            logger.exception("Automation run recovery failed")
 
         try:
             with self._session_factory() as db:
@@ -113,6 +122,7 @@ class AutomationEventRuntime:
             "mqtt_configured": self._mqtt_client is not None,
             "mqtt_rule_subscriptions": sorted(self._mqtt_rule_subscriptions),
             "last_error": self._last_error,
+            "recovered_interrupted_runs": self._recovered_interrupted_runs,
         }
 
     def _on_mqtt_message(self, record: MQTTMessageRecord) -> None:
