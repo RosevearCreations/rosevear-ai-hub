@@ -33,7 +33,7 @@ class StateChangeTrigger(StrictRuleModel):
     to_state: str | None = Field(default=None, max_length=255)
 
     @model_validator(mode="after")
-    def require_state_edge(self) -> "StateChangeTrigger":
+    def require_state_edge(self) -> StateChangeTrigger:
         if self.from_state is None and self.to_state is None:
             raise ValueError("state_change requires from_state or to_state.")
         return self
@@ -46,7 +46,7 @@ class StateThresholdTrigger(StrictRuleModel):
     below: float | None = None
 
     @model_validator(mode="after")
-    def require_threshold(self) -> "StateThresholdTrigger":
+    def require_threshold(self) -> StateThresholdTrigger:
         if self.above is None and self.below is None:
             raise ValueError("state_threshold requires above or below.")
         if self.above is not None and self.below is not None and self.above >= self.below:
@@ -88,7 +88,7 @@ class NumericThresholdCondition(StrictRuleModel):
     below: float | None = None
 
     @model_validator(mode="after")
-    def require_threshold(self) -> "NumericThresholdCondition":
+    def require_threshold(self) -> NumericThresholdCondition:
         if self.above is None and self.below is None:
             raise ValueError("numeric_threshold requires above or below.")
         if self.above is not None and self.below is not None and self.above >= self.below:

@@ -73,7 +73,7 @@ class AutomationChangeRequest(BaseModel):
     definition: RuleDefinition | None = None
 
     @model_validator(mode="after")
-    def validate_shape(self) -> "AutomationChangeRequest":
+    def validate_shape(self) -> AutomationChangeRequest:
         if self.operation == "create":
             if self.automation_id is not None:
                 raise ValueError("create must not include automation_id.")
@@ -230,7 +230,11 @@ def get_automation(automation_id: int, db: SessionDependency) -> AutomationRuleR
     return _response(_load_record(db, automation_id))
 
 
-@router.post("/confirm", response_model=AutomationConfirmationResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/confirm",
+    response_model=AutomationConfirmationResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def confirm_automation_change(
     payload: AutomationChangeRequest,
     actor: Annotated[User, Depends(require_roles("owner", "administrator"))],
