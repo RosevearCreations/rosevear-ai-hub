@@ -225,3 +225,20 @@ authenticated user
 
 The allow-list administration path is Owner/Administrator-only and is intentionally not registered
 as an AI-executable tool.
+
+
+## Build 024 home-language orchestration
+
+Home-profile chat now branches before model generation:
+
+chat prompt
+-> bounded imperative parser
+-> exact Home Assistant entity resolver
+-> Build 023 safe-control policy
+-> bounded tool execution
+-> audit evidence
+-> deterministic chat result
+
+If the prompt is not a recognized home-control command, the normal provider-neutral streaming chat
+path continues unchanged. The architecture intentionally avoids LLM-selected device IDs or generic
+Home Assistant service calls.

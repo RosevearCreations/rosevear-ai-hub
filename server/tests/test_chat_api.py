@@ -5,9 +5,11 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
+from rosevear_ai_hub.api.home_assistant import get_home_assistant_runtime
+from rosevear_ai_hub.api.home_assistant_controls import HomeAssistantRuntime
 from rosevear_ai_hub.database import build_engine, get_session
 from rosevear_ai_hub.main import create_app
-from rosevear_ai_hub.models import Base, ChatMessage, ModelProfile
+from rosevear_ai_hub.models import AppSetting, AuditEvent, Base, ChatMessage, ModelProfile
 from rosevear_ai_hub.providers.base import (
     AIProvider,
     ProviderDescriptor,
@@ -83,6 +85,57 @@ class OfflineProvider(FakeStreamingProvider):
         yield ""
 
 
+class HomeCommandProvider(FakeStreamingProvider):
+    def __init__(self) -> None:
+        self.calls = 0
+
+    async def stream_chat(
+        self,
+        model: str,
+        messages: list[dict[str, str]],
+    ) -> AsyncIterator[str]:
+        self.calls += 1
+        raise AssertionError("Deterministic home commands must not be sent to the AI provider.")
+        yield ""
+
+
+class FakeHomeAssistantClient:
+    base_url = "http://homeassistant.test"
+
+    def __init__(self, *, duplicate: bool = False) -> None:
+        self.duplicate = duplicate
+        self.actions: list[tuple[str, str, bool]] = []
+
+    async def states(self):
+        items = [
+            {
+                "entity_id": "light.living_room_lamp",
+                "state": "off",
+                "attributes": {"friendly_name": "Living room lamp"},
+            }
+        ]
+        if self.duplicate:
+            items.append(
+                {
+                    "entity_id": "switch.living_room_lamp",
+                    "state": "off",
+                    "attributes": {"friendly_name": "Living room lamp"},
+                }
+            )
+        return items
+
+    async def set_light(self, entity_id: str, *, enabled: bool):
+        self.actions.append(("light", entity_id, enabled))
+        return [{"entity_id": entity_id, "state": "on" if enabled else "off"}]
+
+    async def set_switch(self, entity_id: str, *, enabled: bool):
+        self.actions.append(("switch", entity_id, enabled))
+        return [{"entity_id": entity_id, "state": "on" if enabled else "off"}]
+
+    async def activate_scene(self, entity_id: str):
+        return []
+
+
 def _test_session_maker(tmp_path, filename: str):
     engine = build_engine(f"sqlite:///{tmp_path / filename}")
     Base.metadata.create_all(engine)
@@ -116,7 +169,12 @@ def _seed_profile(session_maker, provider_key: str = "fake-local") -> None:
         session.commit()
 
 
-def _build_client(session_maker, registry: ProviderRegistry) -> TestClient:
+def _build_client(
+    session_maker,
+    registry: ProviderRegistry,
+    *,
+    home_runtime: HomeAssistantRuntime | None = None,
+) -> TestClient:
     def override_session():
         with session_maker() as session:
             yield session
@@ -124,6 +182,8 @@ def _build_client(session_maker, registry: ProviderRegistry) -> TestClient:
     application = create_app()
     application.dependency_overrides[get_session] = override_session
     application.dependency_overrides[get_provider_registry] = lambda: registry
+    if home_runtime is not None:
+        application.dependency_overrides[get_home_assistant_runtime] = lambda: home_runtime
     return TestClient(application)
 
 
@@ -293,3 +353,145 @@ def test_unknown_provider_is_rejected(tmp_path) -> None:
         json={"title": "Bad provider", "provider": "not-real"},
     )
     assert response.status_code == 404
+
+
+def _seed_home_profile_and_allowlist(session_maker) -> None:
+    with session_maker() as session:
+        session.add(
+            ModelProfile(
+                id=3,
+                slug="home",
+                name="Home",
+                system_prompt="Prioritize household safety.",
+                preferred_provider="fake-local",
+                preferred_model=None,
+                privacy_policy="local_only",
+                enabled=True,
+                built_in=True,
+            )
+        )
+        session.add(
+            AppSetting(
+                key="home_assistant.safe_control_allowlist",
+                value_json=["light.living_room_lamp"],
+            )
+        )
+        session.commit()
+
+
+def test_home_profile_executes_exact_allowlisted_natural_language_without_llm(tmp_path) -> None:
+    _, test_session_maker = _test_session_maker(tmp_path, "home-command.db")
+    _seed_home_profile_and_allowlist(test_session_maker)
+    provider = HomeCommandProvider()
+    home_client = FakeHomeAssistantClient()
+    client = _build_client(
+        test_session_maker,
+        _fake_registry(provider),
+        home_runtime=HomeAssistantRuntime(
+            client=home_client,
+            base_url=home_client.base_url,
+            url_configured=True,
+            token_configured=True,
+        ),
+    )
+
+    conversation_id = client.post(
+        "/api/v1/chat/conversations",
+        json={
+            "title": "Home command",
+            "provider": "fake-local",
+            "model": "tiny:latest",
+            "profile_id": 3,
+        },
+    ).json()["id"]
+
+    with client.stream(
+        "POST",
+        f"/api/v1/chat/conversations/{conversation_id}/stream",
+        json={
+            "provider": "fake-local",
+            "model": "tiny:latest",
+            "prompt": "turn on the living room lamp",
+            "profile_id": 3,
+        },
+    ) as response:
+        assert response.status_code == 200
+        assert response.headers["x-execution-path"] == "deterministic-home-tool"
+        body = "".join(response.iter_text())
+
+    assert "Turned on Living room lamp." in body
+    assert "recorded in Audit" in body
+    assert provider.calls == 0
+    assert home_client.actions == [
+        ("light", "light.living_room_lamp", True),
+    ]
+
+    messages = client.get(f"/api/v1/chat/conversations/{conversation_id}/messages").json()
+    assert messages[-1]["role"] == "assistant"
+    assert messages[-1]["status"] == "complete"
+    assert "Turned on Living room lamp." in messages[-1]["content"]
+
+    with test_session_maker() as session:
+        event = session.scalar(
+            select(AuditEvent)
+            .where(AuditEvent.event_type == "tool.execution.completed")
+            .order_by(AuditEvent.id.desc())
+        )
+        assert event is not None
+        assert event.tool_key == "home_assistant.light.set"
+        assert event.object_id == "light.living_room_lamp"
+
+
+def test_home_profile_ambiguous_name_requires_restatement_and_never_executes(tmp_path) -> None:
+    _, test_session_maker = _test_session_maker(tmp_path, "home-ambiguous.db")
+    _seed_home_profile_and_allowlist(test_session_maker)
+    with test_session_maker() as session:
+        setting = session.scalar(
+            select(AppSetting).where(AppSetting.key == "home_assistant.safe_control_allowlist")
+        )
+        assert setting is not None
+        setting.value_json = [
+            "light.living_room_lamp",
+            "switch.living_room_lamp",
+        ]
+        session.commit()
+
+    provider = HomeCommandProvider()
+    home_client = FakeHomeAssistantClient(duplicate=True)
+    client = _build_client(
+        test_session_maker,
+        _fake_registry(provider),
+        home_runtime=HomeAssistantRuntime(
+            client=home_client,
+            base_url=home_client.base_url,
+            url_configured=True,
+            token_configured=True,
+        ),
+    )
+
+    conversation_id = client.post(
+        "/api/v1/chat/conversations",
+        json={
+            "title": "Ambiguous home command",
+            "provider": "fake-local",
+            "model": "tiny:latest",
+            "profile_id": 3,
+        },
+    ).json()["id"]
+
+    with client.stream(
+        "POST",
+        f"/api/v1/chat/conversations/{conversation_id}/stream",
+        json={
+            "provider": "fake-local",
+            "model": "tiny:latest",
+            "prompt": "turn on living room lamp",
+            "profile_id": 3,
+        },
+    ) as response:
+        body = "".join(response.iter_text())
+
+    assert "matches more than one Home Assistant entity" in body
+    assert "exact entity name" in body
+    assert provider.calls == 0
+    assert home_client.actions == []

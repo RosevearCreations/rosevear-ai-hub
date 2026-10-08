@@ -14,6 +14,11 @@ from sqlalchemy import select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
+from rosevear_ai_hub.api.home_assistant import HomeAssistantRuntime, get_home_assistant_runtime
+from rosevear_ai_hub.api.home_assistant_controls import (
+    HomeAssistantControlRequest,
+    control_entity,
+)
 from rosevear_ai_hub.chat import (
     generation_registry,
     get_or_create_local_user,
@@ -21,6 +26,12 @@ from rosevear_ai_hub.chat import (
     recover_incomplete_messages,
 )
 from rosevear_ai_hub.database import get_session
+from rosevear_ai_hub.home_language import (
+    load_safe_control_allowlist,
+    parse_home_command,
+    resolve_home_command,
+)
+from rosevear_ai_hub.integrations.home_assistant import HomeAssistantError
 from rosevear_ai_hub.models import ChatMessage, Conversation, ModelProfile, User
 from rosevear_ai_hub.providers.base import ProviderRequestError, ProviderUnavailableError
 from rosevear_ai_hub.providers.registry import ProviderRegistry, get_provider_registry
@@ -104,6 +115,124 @@ def _persist_assistant_state(
         assistant_message.content = content
         assistant_message.status = message_status
         stream_session.commit()
+
+
+async def _try_natural_language_home_command(
+    *,
+    profile: ModelProfile | None,
+    prompt: str,
+    user: User,
+    runtime: HomeAssistantRuntime,
+    session: Session,
+) -> str | None:
+    if profile is None or profile.slug != "home":
+        return None
+
+    parsed = parse_home_command(prompt)
+    if parsed is None:
+        preflight = resolve_home_command(prompt, [], set())
+        if preflight.status == "not_home_command":
+            return None
+        return preflight.message
+
+    if user.role == "read_only":
+        return "This account is read-only and cannot execute Home Assistant actions."
+
+    if runtime.client is None:
+        return (
+            "Home Assistant is not configured or its credential is unavailable, "
+            "so the command was not executed."
+        )
+
+    try:
+        states = await runtime.client.states()
+    except HomeAssistantError as exc:
+        return f"Home Assistant is unavailable, so the command was not executed: {exc}"
+
+    resolution = resolve_home_command(
+        prompt,
+        states,
+        load_safe_control_allowlist(session),
+    )
+    if resolution.status != "resolved":
+        return resolution.message
+
+    if resolution.entity_id is None or resolution.action is None:
+        return "The home command could not be validated, so nothing was executed."
+
+    try:
+        result = await control_entity(
+            HomeAssistantControlRequest(
+                entity_id=resolution.entity_id,
+                action=resolution.action,
+            ),
+            actor=user,
+            runtime=runtime,
+            db=session,
+        )
+    except HTTPException as exc:
+        return f"The home command was not executed: {exc.detail}"
+
+    friendly_name = resolution.friendly_name or result.entity_id
+    if result.action == "on":
+        summary = f"Turned on {friendly_name}."
+    elif result.action == "off":
+        summary = f"Turned off {friendly_name}."
+    else:
+        summary = f"Activated {friendly_name}."
+
+    return summary + " The exact allow-listed Level-1 action was validated and recorded in Audit."
+
+
+def _completed_chat_stream(
+    *,
+    conversation_id: int,
+    assistant_message_id: int,
+    provider_key: str,
+    content: str,
+) -> StreamingResponse:
+    generation_id = generation_registry.start(conversation_id, assistant_message_id)
+
+    async def generate() -> AsyncIterator[str]:
+        try:
+            yield (
+                json.dumps(
+                    {
+                        "type": "generation",
+                        "generation_id": generation_id,
+                        "provider": provider_key,
+                        "assistant_message_id": assistant_message_id,
+                    },
+                    separators=(",", ":"),
+                )
+                + "\n"
+            )
+            yield (
+                json.dumps(
+                    {"type": "token", "content": content},
+                    separators=(",", ":"),
+                )
+                + "\n"
+            )
+            yield (
+                json.dumps(
+                    {"type": "done", "message_id": assistant_message_id},
+                    separators=(",", ":"),
+                )
+                + "\n"
+            )
+        finally:
+            generation_registry.finish(generation_id)
+
+    return StreamingResponse(
+        generate(),
+        media_type="application/x-ndjson",
+        headers={
+            "Cache-Control": "no-store",
+            "X-Generation-ID": generation_id,
+            "X-Execution-Path": "deterministic-home-tool",
+        },
+    )
 
 
 @router.get("/conversations", response_model=list[ConversationResponse])
@@ -190,6 +319,7 @@ async def stream_chat(
     request: Request,
     session: SessionDependency,
     registry: ProviderRegistryDependency,
+    home_runtime: Annotated[HomeAssistantRuntime, Depends(get_home_assistant_runtime)],
 ) -> StreamingResponse:
     user = _effective_user(request, session)
     conversation = get_user_conversation(session, conversation_id, user)
@@ -247,6 +377,24 @@ async def stream_chat(
     session.add_all([user_message, assistant_message])
     session.commit()
     session.refresh(assistant_message)
+
+    home_reply = await _try_natural_language_home_command(
+        profile=profile,
+        prompt=payload.prompt,
+        user=user,
+        runtime=home_runtime,
+        session=session,
+    )
+    if home_reply is not None:
+        assistant_message.content = home_reply
+        assistant_message.status = "complete"
+        session.commit()
+        return _completed_chat_stream(
+            conversation_id=conversation.id,
+            assistant_message_id=assistant_message.id,
+            provider_key="home-assistant",
+            content=home_reply,
+        )
 
     history = session.scalars(
         select(ChatMessage)

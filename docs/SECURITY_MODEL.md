@@ -209,3 +209,25 @@ Build 023 introduces bounded Level-1 Home Assistant writes:
 
 Build 023 does not relax the canonical Level-3 prohibitions for locks, alarm/security changes,
 life-safety devices, hazardous workshop equipment, purchases, or security bypasses.
+
+
+## Build 024 natural-language home tools
+
+Natural-language home control is deterministic rather than model-directed:
+- only the Home profile enters the command resolver
+- only explicit single-target Level-1 light/switch/scene imperatives are recognized
+- exact friendly-name/entity resolution is required for execution
+- partial or duplicate names require clarification and do not execute
+- bulk commands do not execute
+- unsupported actions are not passed to an LLM for interpretation
+- the Build 023 exact-entity allow list remains mandatory
+- hazardous/safety-sensitive targets remain prohibited
+- read-only accounts cannot execute writes
+- Home Assistant outages block execution
+- the provider never chooses the entity, action, or service call
+- Build 023 tool schema, enable-state, role, and audit checks remain authoritative
+
+For recognized exact allow-listed Level-1 commands, the Owner/Admin allow list is the configuration
+that permits direct execution and the user's explicit imperative is the exact requested action.
+Build 018 confirmation remains mandatory for future Level-2 actions and is not bypassed by this
+resolver.
