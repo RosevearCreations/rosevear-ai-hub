@@ -255,3 +255,12 @@ Build 009 persists the stable provider key on conversations and assistant messag
 No new table is required. The exact Home Assistant entity allow list is stored in the existing
 app_settings table under key home_assistant.safe_control_allowlist as a JSON array of entity IDs.
 The Hub does not duplicate Home Assistant entity state into a new authority.
+
+
+## Build 028 authoring data handling
+
+Build 028 adds no table or column. AI-generated automation drafts are transient API responses and are
+not stored in SQLite. Only after an Owner/Administrator completes the existing exact Level-2
+confirmation flow does the rule enter the Build 026 `automations` table. Authoring audit records
+store provider/model identifiers, bounded character counts, validation outcome, referenced tool keys,
+and warning counts; they intentionally do not store the natural-language prompt or raw model output.

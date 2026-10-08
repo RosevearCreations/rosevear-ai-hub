@@ -11,8 +11,21 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from rosevear_ai_hub.api.home_assistant import (
+    HomeAssistantRuntime,
+    get_home_assistant_runtime,
+)
 from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.auth import require_roles
+from rosevear_ai_hub.automation_authoring import (
+    MAX_AUTHORING_PROMPT_CHARACTERS,
+    build_authoring_context,
+    build_authoring_messages,
+    canonical_authoring_definition,
+    collect_provider_text,
+    parse_authoring_output,
+    validate_authoring_draft,
+)
 from rosevear_ai_hub.automations import (
     MAX_ACTIONS,
     MAX_CONDITIONS,
@@ -26,9 +39,16 @@ from rosevear_ai_hub.automations import (
 from rosevear_ai_hub.confirmations import consume_confirmation, prepare_confirmation
 from rosevear_ai_hub.database import get_session
 from rosevear_ai_hub.models import Automation, User
+from rosevear_ai_hub.providers.base import ProviderRequestError, ProviderUnavailableError
+from rosevear_ai_hub.providers.registry import ProviderRegistry, get_provider_registry
 
 router = APIRouter(prefix="/api/v1/automations", tags=["automations"])
 SessionDependency = Annotated[Session, Depends(get_session)]
+ProviderRegistryDependency = Annotated[ProviderRegistry, Depends(get_provider_registry)]
+HomeAssistantRuntimeDependency = Annotated[
+    HomeAssistantRuntime,
+    Depends(get_home_assistant_runtime),
+]
 
 
 class AutomationRuleResponse(BaseModel):
@@ -75,6 +95,26 @@ class AutomationRuntimeResponse(BaseModel):
     mqtt_configured: bool
     mqtt_rule_subscriptions: list[str]
     last_error: str | None = None
+
+
+class AutomationAuthoringRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    prompt: str = Field(min_length=3, max_length=MAX_AUTHORING_PROMPT_CHARACTERS)
+    provider: str = Field(default="ollama", min_length=1, max_length=64)
+    model: str = Field(min_length=1, max_length=200)
+
+
+class AutomationAuthoringResponse(BaseModel):
+    valid: bool
+    name: str
+    definition: dict[str, Any]
+    explanation: str
+    assumptions: list[str]
+    warnings: list[str]
+    referenced_tools: list[str]
+    provider: str
+    model: str
+    recommended_enabled: bool = False
 
 
 class AutomationChangeRequest(BaseModel):
@@ -255,6 +295,112 @@ def validate_rule(payload: RuleValidationRequest, db: SessionDependency) -> Rule
 def list_automations(db: SessionDependency) -> list[AutomationRuleResponse]:
     rows = db.scalars(select(Automation).order_by(Automation.name.asc(), Automation.id.asc())).all()
     return [_response(row) for row in rows]
+
+
+@router.post("/author/draft", response_model=AutomationAuthoringResponse)
+async def author_automation_draft(
+    payload: AutomationAuthoringRequest,
+    actor: Annotated[User, Depends(require_roles("owner", "administrator"))],
+    db: SessionDependency,
+    registry: ProviderRegistryDependency,
+    home_runtime: HomeAssistantRuntimeDependency,
+) -> AutomationAuthoringResponse:
+    try:
+        context = await build_authoring_context(db, home_runtime)
+        messages = build_authoring_messages(payload.prompt, context)
+        raw = await collect_provider_text(
+            registry,
+            payload.provider,
+            payload.model,
+            messages,
+        )
+        envelope = parse_authoring_output(raw)
+        referenced, warnings = validate_authoring_draft(db, envelope, context)
+    except ProviderUnavailableError as exc:
+        record_audit_event(
+            db,
+            actor_user_id=actor.id,
+            event_type="automation.authoring.failed",
+            object_type="automation_draft",
+            object_id=None,
+            action="draft",
+            arguments={
+                "provider": payload.provider,
+                "model": payload.model,
+                "prompt_characters": len(payload.prompt),
+            },
+            result={"ok": False, "error": str(exc)},
+        )
+        db.commit()
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except ProviderRequestError as exc:
+        record_audit_event(
+            db,
+            actor_user_id=actor.id,
+            event_type="automation.authoring.failed",
+            object_type="automation_draft",
+            object_id=None,
+            action="draft",
+            arguments={
+                "provider": payload.provider,
+                "model": payload.model,
+                "prompt_characters": len(payload.prompt),
+            },
+            result={"ok": False, "error": str(exc)},
+        )
+        db.commit()
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except ValueError as exc:
+        record_audit_event(
+            db,
+            actor_user_id=actor.id,
+            event_type="automation.authoring.rejected",
+            object_type="automation_draft",
+            object_id=None,
+            action="validate",
+            arguments={
+                "provider": payload.provider,
+                "model": payload.model,
+                "prompt_characters": len(payload.prompt),
+            },
+            result={"ok": False, "error": str(exc)},
+        )
+        db.commit()
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    definition = canonical_authoring_definition(envelope)
+    record_audit_event(
+        db,
+        actor_user_id=actor.id,
+        event_type="automation.authoring.drafted",
+        object_type="automation_draft",
+        object_id=None,
+        action="draft",
+        arguments={
+            "provider": payload.provider,
+            "model": payload.model,
+            "prompt_characters": len(payload.prompt),
+        },
+        result={
+            "ok": True,
+            "schema_version": RULE_SCHEMA_VERSION,
+            "referenced_tools": referenced,
+            "warning_count": len(warnings),
+        },
+    )
+    db.commit()
+    return AutomationAuthoringResponse(
+        valid=True,
+        name=envelope.name,
+        definition=definition,
+        explanation=envelope.explanation,
+        assumptions=envelope.assumptions,
+        warnings=warnings,
+        referenced_tools=referenced,
+        provider=payload.provider,
+        model=payload.model,
+        recommended_enabled=False,
+    )
 
 
 @router.get("/{automation_id}", response_model=AutomationRuleResponse)

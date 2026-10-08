@@ -222,3 +222,32 @@ After deployment:
 Rollback is migration-safe: disable affected rules first, stop the Hub, downgrade Alembic from
 `0013` to `0012`, and deploy the prior application version. Downgrading removes only
 `automation_runs`; Build 026 automation definitions remain intact.
+
+
+## Build 028 AI-assisted rule authoring operations
+
+No new secret, account, migration, or external service is required.
+
+To author a rule:
+1. sign in as Owner or Administrator
+2. ensure at least one model is installed in the existing Ollama runtime
+3. open **Automations**
+4. describe the desired trigger, conditions, action, and cooldown in plain language
+5. choose **Draft and validate**
+6. review the explanation, assumptions, warnings, and exact Rule Schema JSON
+7. leave **Enable immediately after creation** off unless every target and condition has been
+   deliberately verified
+8. choose **Prepare exact save confirmation**
+9. review the Level-2 exact action preview
+10. choose **Approve and create this exact rule** only when the preview is correct
+
+If Home Assistant is offline, drafting can still occur, but the workbench warns that entity IDs could
+not be cross-checked. If an action target is not on the Build 023 safe-control allow list, the draft
+is not automatically made safe; the warning must be resolved or consciously reviewed before save.
+MQTT authoring likewise reports topic-policy mismatches.
+
+Provider failures, invalid JSON, invalid Rule Schema, unsupported tools, and invalid action arguments
+do not create a rule. Retry only after correcting the prompt/provider/runtime issue.
+
+Rollback requires only deploying the prior application version. Build 028 adds no database schema,
+and drafts are not persisted.

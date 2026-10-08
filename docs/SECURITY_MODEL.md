@@ -288,3 +288,29 @@ Build 027 activates deterministic execution without expanding the autonomous-wri
 - queue or integration failure does not move action selection into an AI fallback
 
 Build 028 may help author structured rules, but it does not change this execution boundary.
+
+
+## Build 028 AI-assisted automation authoring
+
+Build 028 allows an AI model to propose automation definitions but grants the model no persistence or
+execution authority:
+- only Owner/Administrator accounts can request AI rule drafts
+- authoring prompts are bounded to 4,000 characters and provider output to 32,000 characters
+- the model receives only non-secret rule/tool/entity/topic-policy context
+- Home Assistant tokens, MQTT passwords, session data, and other secrets are never included
+- entity names, states, topic strings, and user prompts are explicitly treated as untrusted data
+- provider output must parse as the strict Build 026 Rule Schema v1 envelope
+- tool keys are rechecked against the live registry and Build 027 executor allow list
+- disabled tools and Level 2/3 tools are rejected
+- every proposed action argument object is revalidated against its registered JSON schema
+- action targets outside the Build 023 safe-control allow list are surfaced as warnings
+- MQTT triggers outside the configured Build 025 topic policy are surfaced as warnings
+- no draft is inserted into the automations table
+- creation defaults to disabled in the UI
+- persistence still requires the existing exact Level-2 confirmation, an explicit approval, and the
+  Build 026 apply endpoint
+- authoring audit records contain provider/model/character counts and validation outcome, not prompt
+  plaintext or provider response plaintext
+- provider errors and malformed output fail closed without changing automation state
+
+AI remains an authoring assistant only. Build 027 deterministic execution remains authoritative.

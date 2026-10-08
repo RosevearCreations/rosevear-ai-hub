@@ -95,9 +95,15 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 026 — Rule Schema**
 - **Build 027 — Event Engine**
 
+## Current build
+
+**Build 028 — AI-Assisted Rule Authoring** is implemented on `dev` and is undergoing release
+verification.
+
 ## Next build
 
-**Build 028 — AI-Assisted Rule Authoring**
+**Build 029 — Automation History and Failure Handling**
 
-The first functional MVP boundary remains Build 025. Build 027 turns the validated Rule Schema into
-a deterministic local event engine without moving automation execution into the AI model layer.
+The first functional MVP boundary remains Build 025. Build 028 lets an Owner/Administrator describe
+a rule in plain language, but AI output is only a draft: deterministic validation and exact human
+confirmation remain mandatory before persistence.

@@ -120,7 +120,7 @@ class ToolAction(StrictRuleModel):
 
 
 class RuleDefinition(StrictRuleModel):
-    """Build 026 schema. Build 027 will execute validated instances deterministically."""
+    """Versioned rule contract executed deterministically by the Build 027 Event Engine."""
 
     schema_version: Literal[1] = RULE_SCHEMA_VERSION
     trigger: RuleTrigger
