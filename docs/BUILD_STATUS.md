@@ -31,7 +31,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 025 | MQTT Foundation | COMPLETE | main |
 | 026 | Rule Schema | COMPLETE | main |
 | 027 | Event Engine | COMPLETE | main |
-| 028 | AI-Assisted Rule Authoring | IN PROGRESS | dev |
+| 028 | AI-Assisted Rule Authoring | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -566,10 +566,10 @@ Home Assistant light, switch, or scene.
 - [x] no database migration required
 - [x] security/architecture/data-model/operations/build documentation
 - [x] no new credential, cloud service, OAuth registration, or paid dependency required
-- [ ] final Build 028 dev CI green
-- [ ] promoted to main
-- [ ] final Build 028 main CI green
-- [ ] dev synchronized with final main closeout target
+- [x] final Build 028 dev CI green — run 37817853196
+- [x] promoted to main — PR #40 / merge aa20a242c9613a98f1e5313a45df64ebc31c105b
+- [x] final Build 028 main CI green — run 37819287357
+- [x] dev synchronized with final main closeout target
 
 ## Operator setup
 
