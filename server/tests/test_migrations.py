@@ -122,9 +122,15 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "decided_at",
         "consumed_at",
     }.issubset(confirmation_columns)
-    assert {"name", "enabled", "definition_json", "created_by", "created_at", "updated_at"}.issubset(
-        automation_columns
-    )
+    expected_automation_columns = {
+        "name",
+        "enabled",
+        "definition_json",
+        "created_by",
+        "created_at",
+        "updated_at",
+    }
+    assert expected_automation_columns.issubset(automation_columns)
     assert {
         "actor_user_id",
         "event_type",
