@@ -243,7 +243,10 @@ class AutomationEventRuntime:
                     continue
                 trigger = rule.trigger
                 if isinstance(trigger, MQTTMessageTrigger):
-                    desired[trigger.topic_filter] = max(desired.get(trigger.topic_filter, 0), trigger.qos)
+                    desired[trigger.topic_filter] = max(
+                        desired.get(trigger.topic_filter, 0),
+                        trigger.qos,
+                    )
 
         existing = set(client.snapshot().get("subscriptions", []))
         for topic_filter, qos in desired.items():

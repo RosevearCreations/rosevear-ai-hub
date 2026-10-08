@@ -94,8 +94,13 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 025 — MQTT Foundation**
 - **Build 026 — Rule Schema**
 
+## Current build
+
+**Build 027 — Event Engine** is implemented on `dev` and is undergoing release verification.
+
 ## Next build
 
-**Build 027 — Event Engine**
+**Build 028 — AI-Assisted Rule Authoring**
 
-The first functional MVP boundary remains Build 025; Build 026 adds the deterministic automation rule contract without executing rules.
+The first functional MVP boundary remains Build 025. Build 027 turns the validated Rule Schema into
+a deterministic local event engine without moving automation execution into the AI model layer.

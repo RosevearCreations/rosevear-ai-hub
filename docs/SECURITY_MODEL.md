@@ -267,3 +267,24 @@ applying after the rule has been edited.
 Executable rule actions may reference only registered Level 0 or Level 1 tools. Level 2 and Level 3
 tools are rejected from automation definitions, and an enabled rule cannot reference a disabled
 tool. Build 026 performs no event subscription and no rule execution.
+
+
+## Build 027 Event Engine boundary
+
+Build 027 activates deterministic execution without expanding the autonomous-write policy:
+- Home Assistant and MQTT credentials remain inside their existing server-side adapters
+- live events enter a bounded in-process queue; overload drops are counted rather than allowing
+  unbounded memory growth
+- only enabled rules are evaluated
+- triggers and conditions are evaluated by deterministic code, never by an LLM
+- state-threshold rules fire only on a real boundary crossing
+- cooldown and deduplication checks are persisted through `automation_runs`
+- MQTT run evidence stores a SHA-256 payload fingerprint instead of the raw payload
+- every action rechecks the current registered tool, enabled state, risk level, and input schema
+- autonomous executors are limited to the Build 023 light/switch/scene Level-1 tool contracts
+- the exact Home Assistant safe-control allow list and hazardous-target denial remain authoritative
+- Level 2 and Level 3 tools remain unavailable to autonomous rules
+- failed/denied actions and final automation outcomes are audit-recorded
+- queue or integration failure does not move action selection into an AI fallback
+
+Build 028 may help author structured rules, but it does not change this execution boundary.

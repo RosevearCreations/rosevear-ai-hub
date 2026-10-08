@@ -201,3 +201,24 @@ networking and never port-forward the broker.
 Reconnect behavior uses bounded delays from `MQTT_RECONNECT_MIN_SECONDS` through
 `MQTT_RECONNECT_MAX_SECONDS`. Existing subscriptions are restored after connection recovery.
 Received messages are an in-memory diagnostic/event buffer, not durable automation history.
+
+
+## Build 027 Event Engine operations
+
+No new environment variable or credential is required.
+
+After deployment:
+1. keep the Build 021 Home Assistant URL/token configured if state events or Home Assistant actions
+   are used
+2. keep the Build 025 MQTT broker credentials and topic allow list configured if MQTT triggers are
+   used
+3. keep every automation target on the Build 023 safe-control allow list
+4. inspect `GET /api/v1/automations/runtime` while signed in to confirm the Event Engine is running,
+   source configuration state, queue depth, processed/dropped/failed event counts, and MQTT rule
+   subscriptions
+5. if a source is offline, fix that integration; the Hub continues running and does not fall back to
+   an LLM for automation decisions
+
+Rollback is migration-safe: disable affected rules first, stop the Hub, downgrade Alembic from
+`0013` to `0012`, and deploy the prior application version. Downgrading removes only
+`automation_runs`; Build 026 automation definitions remain intact.

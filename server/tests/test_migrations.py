@@ -24,6 +24,7 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "alembic_version",
         "app_settings",
         "automations",
+        "automation_runs",
         "audit_events",
         "chat_messages",
         "confirmation_requests",
@@ -52,6 +53,9 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         column["name"] for column in inspector.get_columns("confirmation_requests")
     }
     automation_columns = {column["name"] for column in inspector.get_columns("automations")}
+    automation_run_columns = {
+        column["name"] for column in inspector.get_columns("automation_runs")
+    }
     audit_columns = {column["name"] for column in inspector.get_columns("audit_events")}
     secret_columns = {column["name"] for column in inspector.get_columns("secret_values")}
     assert {"model", "provider"}.issubset(conversation_columns)
@@ -132,6 +136,13 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
     }
     assert expected_automation_columns.issubset(automation_columns)
     assert {
+        "automation_id",
+        "started_at",
+        "completed_at",
+        "status",
+        "result_summary",
+    }.issubset(automation_run_columns)
+    assert {
         "actor_user_id",
         "event_type",
         "object_type",
@@ -177,6 +188,7 @@ def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
     test_engine = create_engine(f"sqlite:///{database_path}")
     tables = set(inspect(test_engine).get_table_names())
 
+    assert "automation_runs" not in tables
     assert "automations" not in tables
     assert "secret_values" not in tables
     assert "confirmation_requests" not in tables
