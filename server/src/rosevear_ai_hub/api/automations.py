@@ -64,8 +64,6 @@ class AutomationSchemaResponse(BaseModel):
     execution_available: bool
 
 
-
-
 class AutomationRuntimeResponse(BaseModel):
     running: bool
     queue_depth: int
@@ -218,7 +216,6 @@ def automation_schema() -> AutomationSchemaResponse:
         },
         execution_available=True,
     )
-
 
 
 @router.get("/runtime", response_model=AutomationRuntimeResponse)

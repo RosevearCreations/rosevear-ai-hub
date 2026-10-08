@@ -187,9 +187,7 @@ class AutomationEventEngine:
         event_hash, event_summary = _event_fingerprint(event)
         with self._session_factory() as db:
             automations = db.scalars(
-                select(Automation)
-                .where(Automation.enabled.is_(True))
-                .order_by(Automation.id.asc())
+                select(Automation).where(Automation.enabled.is_(True)).order_by(Automation.id.asc())
             ).all()
             matched: list[tuple[Automation, RuleDefinition]] = []
             for automation in automations:
@@ -285,8 +283,7 @@ class AutomationEventEngine:
             states = {
                 item["entity_id"]: item
                 for item in current
-                if isinstance(item.get("entity_id"), str)
-                and isinstance(item.get("state"), str)
+                if isinstance(item.get("entity_id"), str) and isinstance(item.get("state"), str)
             }
 
         if isinstance(event, StateEvent) and event.new_state is not None:

@@ -233,9 +233,7 @@ class AutomationEventRuntime:
             return
         desired: dict[str, int] = {}
         with self._session_factory() as db:
-            rows = db.scalars(
-                select(Automation).where(Automation.enabled.is_(True))
-            ).all()
+            rows = db.scalars(select(Automation).where(Automation.enabled.is_(True))).all()
             for row in rows:
                 try:
                     rule = normalize_rule_definition(dict(row.definition_json or {}))

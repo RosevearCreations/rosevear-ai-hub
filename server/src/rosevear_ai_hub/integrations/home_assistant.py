@@ -121,8 +121,6 @@ class HomeAssistantClient:
             "entities": results[command_types[2]],
         }
 
-
-
     async def state_change_events(self) -> AsyncIterator[dict[str, Any]]:
         """Subscribe to Home Assistant state_changed events on one authenticated socket."""
 
@@ -184,7 +182,6 @@ class HomeAssistantClient:
             raise HomeAssistantRequestError(
                 "Home Assistant WebSocket authentication handshake was incomplete."
             )
-
 
     async def _safe_service(self, path: str, entity_id: str) -> list[dict[str, Any]]:
         payload = await self._request_json(

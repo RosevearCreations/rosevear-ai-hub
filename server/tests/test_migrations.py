@@ -53,9 +53,7 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         column["name"] for column in inspector.get_columns("confirmation_requests")
     }
     automation_columns = {column["name"] for column in inspector.get_columns("automations")}
-    automation_run_columns = {
-        column["name"] for column in inspector.get_columns("automation_runs")
-    }
+    automation_run_columns = {column["name"] for column in inspector.get_columns("automation_runs")}
     audit_columns = {column["name"] for column in inspector.get_columns("audit_events")}
     secret_columns = {column["name"] for column in inspector.get_columns("secret_values")}
     assert {"model", "provider"}.issubset(conversation_columns)
