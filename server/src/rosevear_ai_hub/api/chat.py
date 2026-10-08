@@ -181,10 +181,7 @@ async def _try_natural_language_home_command(
     else:
         summary = f"Activated {friendly_name}."
 
-    return (
-        summary
-        + " The exact allow-listed Level-1 action was validated and recorded in Audit."
-    )
+    return summary + " The exact allow-listed Level-1 action was validated and recorded in Audit."
 
 
 def _completed_chat_stream(
