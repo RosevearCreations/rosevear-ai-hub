@@ -355,7 +355,6 @@ def test_unknown_provider_is_rejected(tmp_path) -> None:
     assert response.status_code == 404
 
 
-
 def _seed_home_profile_and_allowlist(session_maker) -> None:
     with session_maker() as session:
         session.add(
@@ -427,9 +426,7 @@ def test_home_profile_executes_exact_allowlisted_natural_language_without_llm(tm
         ("light", "light.living_room_lamp", True),
     ]
 
-    messages = client.get(
-        f"/api/v1/chat/conversations/{conversation_id}/messages"
-    ).json()
+    messages = client.get(f"/api/v1/chat/conversations/{conversation_id}/messages").json()
     assert messages[-1]["role"] == "assistant"
     assert messages[-1]["status"] == "complete"
     assert "Turned on Living room lamp." in messages[-1]["content"]
@@ -450,9 +447,7 @@ def test_home_profile_ambiguous_name_requires_restatement_and_never_executes(tmp
     _seed_home_profile_and_allowlist(test_session_maker)
     with test_session_maker() as session:
         setting = session.scalar(
-            select(AppSetting).where(
-                AppSetting.key == "home_assistant.safe_control_allowlist"
-            )
+            select(AppSetting).where(AppSetting.key == "home_assistant.safe_control_allowlist")
         )
         assert setting is not None
         setting.value_json = [
