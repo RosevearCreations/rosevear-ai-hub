@@ -1900,3 +1900,156 @@ h1 {
     display: grid;
   }
 }
+
+
+/* Build 029 — automation history and failure handling */
+.automation-history {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 0.9rem;
+  background: white;
+}
+
+.automation-history-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: end;
+}
+
+.automation-history-heading h2 {
+  margin: 0.25rem 0;
+}
+
+.automation-history-heading p {
+  max-width: 760px;
+  color: #525252;
+  line-height: 1.5;
+}
+
+.automation-history-heading label {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 170px;
+  font-weight: 700;
+}
+
+.automation-history-heading select {
+  padding: 0.65rem;
+  border: 1px solid #a3a3a3;
+  border-radius: 0.6rem;
+  background: white;
+}
+
+.automation-history-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.automation-history-summary div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.8rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.65rem;
+}
+
+.automation-history-summary span,
+.automation-run-card dt {
+  color: #737373;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.automation-history-summary strong {
+  font-size: 1.3rem;
+}
+
+.automation-run-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.automation-run-card {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.75rem;
+}
+
+.automation-run-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.automation-run-header strong,
+.automation-run-header small {
+  display: block;
+}
+
+.automation-run-header small {
+  margin-top: 0.25rem;
+  color: #525252;
+}
+
+.automation-run-status {
+  height: fit-content;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #a3a3a3;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.automation-run-card dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.automation-run-card dd {
+  margin: 0.2rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.automation-run-error {
+  margin: 0;
+  font-weight: 700;
+}
+
+.automation-run-card summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .automation-history-heading {
+    display: grid;
+    align-items: start;
+  }
+
+  .automation-history-summary,
+  .automation-run-card dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .automation-history-summary,
+  .automation-run-card dl {
+    grid-template-columns: 1fr;
+  }
+
+  .automation-run-header {
+    display: grid;
+  }
+}

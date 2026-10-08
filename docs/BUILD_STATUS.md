@@ -32,6 +32,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 026 | Rule Schema | COMPLETE | main |
 | 027 | Event Engine | COMPLETE | main |
 | 028 | AI-Assisted Rule Authoring | COMPLETE | main |
+| 029 | Automation History and Failure Handling | IN PROGRESS | dev |
 
 ## Build 016 acceptance checklist
 
@@ -579,6 +580,50 @@ the Build 023 safe-control allow list, and MQTT topic policy configured when tho
 Every generated rule remains unsaved until an Owner/Administrator explicitly approves its exact
 Build 018 confirmation.
 
+## Build 029 acceptance checklist
+
+- [x] authenticated durable automation run-history API
+- [x] history filter by automation and run status
+- [x] bounded history pagination
+- [x] automation names joined to run evidence
+- [x] run duration exposed when completion time is known
+- [x] aggregate history summary counts
+- [x] distinct automation failure count
+- [x] latest run/failure timestamps
+- [x] success/failed/skipped/running/interrupted status vocabulary
+- [x] restart recovery converts orphaned running rows to interrupted
+- [x] restart recovery preserves prior bounded run evidence
+- [x] restart recovery is audit-recorded
+- [x] interrupted runs participate in cooldown protection
+- [x] unexpected action exceptions are contained to the affected run
+- [x] unexpected internal exception text is not persisted to user-facing history
+- [x] failed runs include deterministic failure kind
+- [x] failed/interrupted runs explicitly disable automatic retry
+- [x] partial/uncertain physical actions are never replayed automatically
+- [x] Event Engine continues using deterministic rule execution only
+- [x] MQTT history retains payload fingerprint rather than raw payload
+- [x] runtime reports count of restart-recovered runs
+- [x] Automations workbench execution-history summary
+- [x] run status filter in the workbench
+- [x] run source/duration/action/failure evidence display
+- [x] explicit no-auto-retry operator guidance
+- [x] backend history/recovery/failure-containment coverage
+- [x] web history/failure visibility coverage
+- [x] no database migration required
+- [x] security/architecture/data-model/operations/build documentation
+- [x] no new credential, cloud service, OAuth registration, or paid dependency required
+- [ ] final Build 029 dev CI green
+- [ ] promoted to main
+- [ ] final Build 029 main CI green
+- [ ] dev synchronized with final main closeout target
+
+## Operator setup
+
+No new credential or service is required. Open **Automations → Execution history** to inspect recent
+runs and filter by outcome. A failed or interrupted physical-world action is intentionally not
+replayed automatically; correct the underlying issue, inspect the run evidence, and allow a new
+source event to trigger the rule.
+
 ## Next build
 
-**Build 029 — Automation History and Failure Handling**
+**Build 030 — Notification Layer**

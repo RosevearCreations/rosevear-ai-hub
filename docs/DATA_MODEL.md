@@ -192,10 +192,15 @@ Build 026 makes the `automations` record real. `definition_json` contains strict
 - status
 - result_summary
 
-Build 027 creates this table. `status` records `running`, `success`, `failed`, or `skipped`.
-`result_summary` is bounded structured evidence containing source metadata, action counts, skip/failure
-reason, and an optional deduplication token. MQTT payload plaintext is not stored in run evidence;
-only its SHA-256 fingerprint is retained. Build 029 will add the richer history/failure experience.
+Build 027 creates this table. Build 029 formalizes `status` as `running`, `success`, `failed`,
+`skipped`, or `interrupted`. `result_summary` is bounded structured evidence containing source
+metadata, action counts, skip/failure reason, and an optional deduplication token. MQTT payload
+plaintext is not stored in run evidence; only its SHA-256 fingerprint is retained.
+
+Build 029 adds no schema columns. It treats `interrupted` as restart-recovery evidence for a row
+that was still `running` when the prior process stopped. Failed/interrupted summaries include
+failure classification and `automatic_retry=false`; the same table powers the bounded history and
+summary APIs.
 
 ## audit_events
 - id

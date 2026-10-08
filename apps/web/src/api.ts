@@ -1333,3 +1333,78 @@ export function applyAutomationChange(
     signal,
   );
 }
+
+
+export type AutomationRunStatus =
+  | "running"
+  | "success"
+  | "failed"
+  | "skipped"
+  | "interrupted";
+
+export interface AutomationRun {
+  id: number;
+  automation_id: number;
+  automation_name: string;
+  started_at: string;
+  completed_at: string | null;
+  status: AutomationRunStatus;
+  result_summary: Record<string, unknown>;
+  duration_ms: number | null;
+}
+
+export interface AutomationHistoryResponse {
+  runs: AutomationRun[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface AutomationHistorySummary {
+  total_runs: number;
+  success_count: number;
+  failed_count: number;
+  interrupted_count: number;
+  skipped_count: number;
+  running_count: number;
+  failure_count: number;
+  automations_with_failures: number;
+  newest_run_at: string | null;
+  latest_failure_at: string | null;
+  automatic_retry_enabled: boolean;
+}
+
+export function getAutomationHistory(
+  options: {
+    automationId?: number;
+    status?: AutomationRunStatus;
+    limit?: number;
+    offset?: number;
+    signal?: AbortSignal;
+  } = {},
+): Promise<AutomationHistoryResponse> {
+  const params = new URLSearchParams();
+  if (options.automationId !== undefined) {
+    params.set("automation_id", String(options.automationId));
+  }
+  if (options.status) params.set("status", options.status);
+  params.set("limit", String(options.limit ?? 50));
+  params.set("offset", String(options.offset ?? 0));
+  return authJson<AutomationHistoryResponse>(
+    "GET",
+    "/api/v1/automations/history?" + params.toString(),
+    undefined,
+    options.signal,
+  );
+}
+
+export function getAutomationHistorySummary(
+  signal?: AbortSignal,
+): Promise<AutomationHistorySummary> {
+  return authJson<AutomationHistorySummary>(
+    "GET",
+    "/api/v1/automations/history/summary",
+    undefined,
+    signal,
+  );
+}

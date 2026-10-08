@@ -251,3 +251,31 @@ do not create a rule. Retry only after correcting the prompt/provider/runtime is
 
 Rollback requires only deploying the prior application version. Build 028 adds no database schema,
 and drafts are not persisted.
+
+
+## Build 029 automation history and failure operations
+
+No new environment variable, credential, migration, or external service is required.
+
+Use **Automations → Execution history** to:
+1. review total success/failure/skip counts
+2. filter recent runs by success, failed, interrupted, skipped, or running
+3. inspect event source, duration, completed action count, failure kind, and bounded run evidence
+4. distinguish ordinary execution failures from restart-recovered interruptions
+
+On Hub startup, any row left in `running` state by a prior process is closed as `interrupted`.
+This is evidence recovery only: the Hub does not replay the rule.
+
+For a failed or interrupted run:
+1. inspect the run evidence and Audit trail
+2. verify Home Assistant/MQTT availability and the target's safe-control allow-list membership
+3. confirm the tool is still enabled and the target is not safety-sensitive
+4. correct the underlying issue
+5. allow a new source event to trigger the rule normally
+
+Do not manually repeat a physical action solely because the prior run says `interrupted`; the
+remote action may have completed before connectivity or process state was lost. Build 029 therefore
+has no automatic-retry button or background action replay.
+
+Rollback requires only deploying the prior application version. The `interrupted` status uses the
+existing Build 027 string column and requires no schema downgrade.

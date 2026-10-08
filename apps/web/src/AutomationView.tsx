@@ -5,6 +5,8 @@ import {
   approveConfirmation,
   confirmAutomationChange,
   draftAutomation,
+  getAutomationHistory,
+  getAutomationHistorySummary,
   getAutomationRuntime,
   getAutomations,
   getOllamaModels,
@@ -12,7 +14,10 @@ import {
   type AutomationChangePayload,
   type AutomationConfirmation,
   type AutomationDraft,
+  type AutomationHistorySummary,
   type AutomationRule,
+  type AutomationRun,
+  type AutomationRunStatus,
   type AutomationRuntime,
   type OllamaModel,
 } from "./api";
@@ -25,6 +30,10 @@ export function AutomationView() {
   const [models, setModels] = useState<OllamaModel[]>([]);
   const [automations, setAutomations] = useState<AutomationRule[]>([]);
   const [runtime, setRuntime] = useState<AutomationRuntime | null>(null);
+  const [history, setHistory] = useState<AutomationRun[]>([]);
+  const [historySummary, setHistorySummary] = useState<AutomationHistorySummary | null>(null);
+  const [historyStatus, setHistoryStatus] = useState<AutomationRunStatus | "all">("all");
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [model, setModel] = useState("");
   const [prompt, setPrompt] = useState("");
   const [draft, setDraft] = useState<AutomationDraft | null>(null);
@@ -38,14 +47,19 @@ export function AutomationView() {
     setLoadState("loading");
     setError("");
     try {
-      const [rules, modelPayload, runtimePayload] = await Promise.all([
-        getAutomations(),
-        getOllamaModels(),
-        getAutomationRuntime(),
-      ]);
+      const [rules, modelPayload, runtimePayload, historyPayload, summaryPayload] =
+        await Promise.all([
+          getAutomations(),
+          getOllamaModels(),
+          getAutomationRuntime(),
+          getAutomationHistory({ limit: 25 }),
+          getAutomationHistorySummary(),
+        ]);
       setAutomations(rules);
       setModels(modelPayload.models);
       setRuntime(runtimePayload);
+      setHistory(historyPayload.runs);
+      setHistorySummary(summaryPayload);
       setModel((current) => current || modelPayload.models[0]?.name || "");
       setLoadState("ready");
     } catch (value) {
@@ -57,6 +71,24 @@ export function AutomationView() {
   useEffect(() => {
     void refresh();
   }, []);
+
+
+  async function loadHistory(statusValue: AutomationRunStatus | "all") {
+    setHistoryLoading(true);
+    setError("");
+    try {
+      const result = await getAutomationHistory({
+        status: statusValue === "all" ? undefined : statusValue,
+        limit: 25,
+      });
+      setHistory(result.runs);
+      setHistoryStatus(statusValue);
+    } catch (value) {
+      setError(value instanceof Error ? value.message : "Unable to load automation history.");
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
 
   const canDraft = model.length > 0 && prompt.trim().length >= 3 && !busy;
   const triggerLabel = useMemo(() => {
@@ -166,11 +198,11 @@ export function AutomationView() {
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 028</p>
+          <p className="eyebrow">Build 029</p>
           <h1>Automations</h1>
           <p className="lede">
-            Describe a rule in plain language. AI may draft it, but deterministic validation and
-            your exact approval are required before it can be saved.
+            Author rules with human approval, inspect durable run history, and diagnose failures
+            without automatically replaying uncertain physical-world actions.
           </p>
         </div>
         <div className="health-card" role="status">
@@ -260,6 +292,80 @@ export function AutomationView() {
             })}
           </div>
         </article>
+      </section>
+
+
+      <section className="automation-history" aria-label="Automation execution history">
+        <div className="automation-history-heading">
+          <div>
+            <p className="eyebrow">Build 029 evidence</p>
+            <h2>Execution history</h2>
+            <p>
+              Failed and interrupted actions are never retried automatically. Correct the cause,
+              review the evidence, and allow a new source event to trigger the rule.
+            </p>
+          </div>
+          <label>
+            Status
+            <select
+              value={historyStatus}
+              disabled={historyLoading}
+              onChange={(event) =>
+                void loadHistory(event.target.value as AutomationRunStatus | "all")
+              }
+            >
+              <option value="all">All runs</option>
+              <option value="success">Success</option>
+              <option value="failed">Failed</option>
+              <option value="interrupted">Interrupted</option>
+              <option value="skipped">Skipped</option>
+              <option value="running">Running</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="automation-history-summary">
+          <div><span>Total</span><strong>{historySummary?.total_runs ?? 0}</strong></div>
+          <div><span>Success</span><strong>{historySummary?.success_count ?? 0}</strong></div>
+          <div><span>Failures</span><strong>{historySummary?.failure_count ?? 0}</strong></div>
+          <div><span>Skipped</span><strong>{historySummary?.skipped_count ?? 0}</strong></div>
+        </div>
+
+        {historyLoading ? <p>Refreshing run history…</p> : null}
+        {!historyLoading && history.length === 0 ? <p>No matching automation runs yet.</p> : null}
+
+        <div className="automation-run-list">
+          {history.map((run) => {
+            const errorValue = run.result_summary.error;
+            const failureKind = run.result_summary.failure_kind;
+            const sourceValue =
+              run.result_summary.event && typeof run.result_summary.event === "object"
+                ? (run.result_summary.event as Record<string, unknown>).source
+                : null;
+            return (
+              <article className="automation-run-card" key={run.id}>
+                <div className="automation-run-header">
+                  <div>
+                    <strong>{run.automation_name}</strong>
+                    <small>Run #{run.id} · {new Date(run.started_at).toLocaleString()}</small>
+                  </div>
+                  <span className={"automation-run-status " + run.status}>{run.status}</span>
+                </div>
+                <dl>
+                  <div><dt>Source</dt><dd>{typeof sourceValue === "string" ? sourceValue : "—"}</dd></div>
+                  <div><dt>Duration</dt><dd>{run.duration_ms === null ? "—" : run.duration_ms + " ms"}</dd></div>
+                  <div><dt>Actions</dt><dd>{String(run.result_summary.actions_completed ?? 0)}</dd></div>
+                  <div><dt>Failure kind</dt><dd>{typeof failureKind === "string" ? failureKind : "—"}</dd></div>
+                </dl>
+                {typeof errorValue === "string" ? <p className="automation-run-error">{errorValue}</p> : null}
+                <details>
+                  <summary>Run evidence</summary>
+                  <pre className="automation-code">{JSON.stringify(run.result_summary, null, 2)}</pre>
+                </details>
+              </article>
+            );
+          })}
+        </div>
       </section>
 
       {draft ? (
