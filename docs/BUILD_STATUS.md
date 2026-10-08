@@ -29,7 +29,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 023 | Safe Device Controls | COMPLETE | main |
 | 024 | Natural-Language Home Tools | COMPLETE | main |
 | 025 | MQTT Foundation | COMPLETE | main |
-| 026 | Rule Schema | ACTIVE | dev |
+| 026 | Rule Schema | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -479,10 +479,10 @@ provide the MQTT password through `MQTT_PASSWORD` or the encrypted **Secrets** s
 - [x] backend schema/policy/API coverage
 - [x] security/data-model/architecture/build documentation
 - [x] no external service, OAuth registration, secret, or paid dependency required
-- [ ] final Build 026 dev CI green
-- [ ] promoted to main
-- [ ] final Build 026 main CI green
-- [ ] dev synchronized with final main closeout target
+- [x] final Build 026 dev CI green — run 37725781902
+- [x] promoted to main — PR #36 / merge 1162fb825e79160b8f729f5a9e52d56eea2ad7c8
+- [x] final Build 026 main CI green — run 37726734512
+- [x] dev synchronized with final main closeout target
 
 ## Operator setup
 
