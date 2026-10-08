@@ -1,0 +1,332 @@
+"""Automation rule schema and persistence API for Build 026."""
+
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Annotated, Any, Literal
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
+from rosevear_ai_hub.audit import record_audit_event
+from rosevear_ai_hub.auth import require_roles
+from rosevear_ai_hub.automations import (
+    MAX_ACTIONS,
+    MAX_CONDITIONS,
+    MAX_COOLDOWN_SECONDS,
+    RULE_SCHEMA_VERSION,
+    RuleDefinition,
+    automation_record_hash,
+    canonical_rule_dict,
+    validate_rule_tool_references,
+)
+from rosevear_ai_hub.confirmations import consume_confirmation, prepare_confirmation
+from rosevear_ai_hub.database import get_session
+from rosevear_ai_hub.models import Automation, User
+
+router = APIRouter(prefix="/api/v1/automations", tags=["automations"])
+SessionDependency = Annotated[Session, Depends(get_session)]
+
+
+class AutomationRuleResponse(BaseModel):
+    id: int
+    name: str
+    enabled: bool
+    definition: dict[str, Any]
+    created_by: int | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class RuleValidationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    definition: RuleDefinition
+    enabled: bool = False
+
+
+class RuleValidationResponse(BaseModel):
+    valid: bool
+    schema_version: int
+    normalized_definition: dict[str, Any]
+    referenced_tools: list[str]
+
+
+class AutomationSchemaResponse(BaseModel):
+    schema_version: int
+    definition_schema: dict[str, Any]
+    supported_triggers: list[str]
+    supported_conditions: list[str]
+    supported_actions: list[str]
+    limits: dict[str, int]
+    execution_available: bool
+
+
+class AutomationChangeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    operation: Literal["create", "update", "delete"]
+    automation_id: int | None = Field(default=None, ge=1)
+    name: str | None = Field(default=None, min_length=1, max_length=160)
+    enabled: bool | None = None
+    definition: RuleDefinition | None = None
+
+    @model_validator(mode="after")
+    def validate_shape(self) -> AutomationChangeRequest:
+        if self.operation == "create":
+            if self.automation_id is not None:
+                raise ValueError("create must not include automation_id.")
+            if self.name is None or self.enabled is None or self.definition is None:
+                raise ValueError("create requires name, enabled, and definition.")
+        elif self.operation == "update":
+            if self.automation_id is None:
+                raise ValueError("update requires automation_id.")
+            if self.name is None or self.enabled is None or self.definition is None:
+                raise ValueError("update requires name, enabled, and definition.")
+        else:
+            if self.automation_id is None:
+                raise ValueError("delete requires automation_id.")
+            if self.name is not None or self.enabled is not None or self.definition is not None:
+                raise ValueError("delete accepts automation_id only.")
+        return self
+
+
+class AutomationConfirmationResponse(BaseModel):
+    confirmation_id: str
+    status: str
+    arguments_hash: str
+    preview: dict[str, Any]
+    expires_at: datetime
+
+
+class AutomationChangeResult(BaseModel):
+    operation: Literal["create", "update", "delete"]
+    automation: AutomationRuleResponse | None
+    deleted: bool
+
+
+def _response(record: Automation) -> AutomationRuleResponse:
+    return AutomationRuleResponse(
+        id=record.id,
+        name=record.name,
+        enabled=record.enabled,
+        definition=dict(record.definition_json or {}),
+        created_by=record.created_by,
+        created_at=record.created_at,
+        updated_at=record.updated_at,
+    )
+
+
+def _clean_name(value: str) -> str:
+    name = " ".join(value.strip().split())
+    if not name:
+        raise HTTPException(status_code=422, detail="Automation name cannot be blank.")
+    return name
+
+
+def _load_record(db: Session, automation_id: int) -> Automation:
+    record = db.get(Automation, automation_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Automation not found.")
+    return record
+
+
+def _ensure_name_available(db: Session, *, name: str, exclude_id: int | None = None) -> None:
+    row = db.scalar(select(Automation).where(Automation.name == name))
+    if row is not None and row.id != exclude_id:
+        raise HTTPException(status_code=409, detail="Automation name already exists.")
+
+
+def _change_arguments(db: Session, payload: AutomationChangeRequest) -> dict[str, Any]:
+    if payload.operation == "create":
+        assert payload.name is not None and payload.enabled is not None
+        assert payload.definition is not None
+        name = _clean_name(payload.name)
+        _ensure_name_available(db, name=name)
+        try:
+            validate_rule_tool_references(db, payload.definition, enabled=payload.enabled)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        return {
+            "operation": "create",
+            "automation_id": None,
+            "name": name,
+            "enabled": payload.enabled,
+            "definition": canonical_rule_dict(payload.definition),
+            "expected_current_hash": None,
+        }
+
+    assert payload.automation_id is not None
+    record = _load_record(db, payload.automation_id)
+    expected_hash = automation_record_hash(record)
+    if payload.operation == "delete":
+        return {
+            "operation": "delete",
+            "automation_id": record.id,
+            "name": record.name,
+            "enabled": record.enabled,
+            "definition": dict(record.definition_json or {}),
+            "expected_current_hash": expected_hash,
+        }
+
+    assert payload.name is not None and payload.enabled is not None
+    assert payload.definition is not None
+    name = _clean_name(payload.name)
+    _ensure_name_available(db, name=name, exclude_id=record.id)
+    try:
+        validate_rule_tool_references(db, payload.definition, enabled=payload.enabled)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return {
+        "operation": "update",
+        "automation_id": record.id,
+        "name": name,
+        "enabled": payload.enabled,
+        "definition": canonical_rule_dict(payload.definition),
+        "expected_current_hash": expected_hash,
+    }
+
+
+@router.get("/schema", response_model=AutomationSchemaResponse)
+def automation_schema() -> AutomationSchemaResponse:
+    return AutomationSchemaResponse(
+        schema_version=RULE_SCHEMA_VERSION,
+        definition_schema=RuleDefinition.model_json_schema(),
+        supported_triggers=["state_change", "state_threshold", "mqtt_message"],
+        supported_conditions=["state_equals", "numeric_threshold"],
+        supported_actions=["tool"],
+        limits={
+            "max_conditions": MAX_CONDITIONS,
+            "max_actions": MAX_ACTIONS,
+            "max_cooldown_seconds": MAX_COOLDOWN_SECONDS,
+        },
+        execution_available=False,
+    )
+
+
+@router.post("/validate", response_model=RuleValidationResponse)
+def validate_rule(payload: RuleValidationRequest, db: SessionDependency) -> RuleValidationResponse:
+    try:
+        referenced = validate_rule_tool_references(db, payload.definition, enabled=payload.enabled)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return RuleValidationResponse(
+        valid=True,
+        schema_version=RULE_SCHEMA_VERSION,
+        normalized_definition=canonical_rule_dict(payload.definition),
+        referenced_tools=referenced,
+    )
+
+
+@router.get("", response_model=list[AutomationRuleResponse])
+def list_automations(db: SessionDependency) -> list[AutomationRuleResponse]:
+    rows = db.scalars(select(Automation).order_by(Automation.name.asc(), Automation.id.asc())).all()
+    return [_response(row) for row in rows]
+
+
+@router.get("/{automation_id}", response_model=AutomationRuleResponse)
+def get_automation(automation_id: int, db: SessionDependency) -> AutomationRuleResponse:
+    return _response(_load_record(db, automation_id))
+
+
+@router.post(
+    "/confirm",
+    response_model=AutomationConfirmationResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def confirm_automation_change(
+    payload: AutomationChangeRequest,
+    actor: Annotated[User, Depends(require_roles("owner", "administrator"))],
+    db: SessionDependency,
+) -> AutomationConfirmationResponse:
+    request = prepare_confirmation(
+        db,
+        actor=actor,
+        tool_key="automation.rule.change",
+        arguments=_change_arguments(db, payload),
+    )
+    return AutomationConfirmationResponse(
+        confirmation_id=request.id,
+        status=request.status,
+        arguments_hash=request.arguments_hash,
+        preview=dict(request.preview_json or {}),
+        expires_at=request.expires_at,
+    )
+
+
+@router.post("/apply", response_model=AutomationChangeResult)
+def apply_automation_change(
+    payload: AutomationChangeRequest,
+    actor: Annotated[User, Depends(require_roles("owner", "administrator"))],
+    db: SessionDependency,
+    confirmation_id: str = Query(min_length=36, max_length=36),
+) -> AutomationChangeResult:
+    arguments = _change_arguments(db, payload)
+    consume_confirmation(
+        db,
+        confirmation_id=confirmation_id,
+        actor=actor,
+        tool_key="automation.rule.change",
+        arguments=arguments,
+    )
+
+    record: Automation | None
+    deleted = False
+    if payload.operation == "create":
+        record = Automation(
+            name=str(arguments["name"]),
+            enabled=bool(arguments["enabled"]),
+            definition_json=dict(arguments["definition"]),
+            created_by=actor.id,
+        )
+        db.add(record)
+        db.flush()
+    elif payload.operation == "update":
+        assert payload.automation_id is not None
+        record = _load_record(db, payload.automation_id)
+        record.name = str(arguments["name"])
+        record.enabled = bool(arguments["enabled"])
+        record.definition_json = dict(arguments["definition"])
+        db.flush()
+    else:
+        assert payload.automation_id is not None
+        record = _load_record(db, payload.automation_id)
+        db.delete(record)
+        deleted = True
+
+    object_id = str(payload.automation_id or (record.id if record is not None else ""))
+    record_audit_event(
+        db,
+        actor_user_id=actor.id,
+        event_type=f"automation.rule.{payload.operation}d",
+        object_type="automation",
+        object_id=object_id,
+        action=payload.operation,
+        arguments={
+            "name": arguments["name"],
+            "enabled": arguments["enabled"],
+            "schema_version": RULE_SCHEMA_VERSION,
+            "expected_current_hash": arguments["expected_current_hash"],
+        },
+        result={"ok": True, "deleted": deleted},
+        tool_key="automation.rule.change",
+        risk_level=2,
+        confirmation_id=confirmation_id,
+    )
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Automation name already exists.") from exc
+
+    if deleted:
+        return AutomationChangeResult(operation="delete", automation=None, deleted=True)
+
+    assert record is not None
+    db.refresh(record)
+    return AutomationChangeResult(
+        operation=payload.operation,
+        automation=_response(record),
+        deleted=False,
+    )

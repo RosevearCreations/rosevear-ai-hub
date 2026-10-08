@@ -67,6 +67,48 @@ def object_schema(
 
 BUILTIN_TOOL_DEFINITIONS: tuple[ToolDefinition, ...] = (
     ToolDefinition(
+        tool_key="automation.rule.change",
+        display_name="Change automation rule",
+        description=(
+            "Create, update, or delete one deterministic automation rule. "
+            "Every change requires the Build 018 exact confirmation workflow."
+        ),
+        integration_key="core.automation",
+        integration_name="Automations",
+        capabilities=("automation.write",),
+        risk_level=ToolRiskLevel.CONFIRMATION_REQUIRED,
+        input_schema=object_schema(
+            {
+                "operation": {"type": "string", "enum": ["create", "update", "delete"]},
+                "automation_id": {"type": ["integer", "null"], "minimum": 1},
+                "name": {"type": ["string", "null"], "minLength": 1, "maxLength": 160},
+                "enabled": {"type": ["boolean", "null"]},
+                "definition": {"type": ["object", "null"]},
+                "expected_current_hash": {
+                    "type": ["string", "null"],
+                    "pattern": "^[a-f0-9]{64}$",
+                },
+            },
+            required=(
+                "operation",
+                "automation_id",
+                "name",
+                "enabled",
+                "definition",
+                "expected_current_hash",
+            ),
+        ),
+        output_schema=object_schema(
+            {
+                "operation": {"type": "string", "enum": ["create", "update", "delete"]},
+                "automation_id": {"type": ["integer", "null"]},
+                "deleted": {"type": "boolean"},
+            },
+            required=("operation", "deleted"),
+        ),
+        default_enabled=True,
+    ),
+    ToolDefinition(
         tool_key="knowledge.search",
         display_name="Search local knowledge",
         description="Search indexed local knowledge and return grounded evidence chunks.",

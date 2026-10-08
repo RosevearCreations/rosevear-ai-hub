@@ -29,6 +29,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 023 | Safe Device Controls | COMPLETE | main |
 | 024 | Natural-Language Home Tools | COMPLETE | main |
 | 025 | MQTT Foundation | COMPLETE | main |
+| 026 | Rule Schema | ACTIVE | dev |
 
 ## Build 016 acceptance checklist
 
@@ -447,6 +448,47 @@ No live broker is required for automated verification. To use MQTT locally, conf
 authenticated broker account, set `MQTT_HOST`, `MQTT_USERNAME`, and `MQTT_ALLOWED_TOPICS`, and
 provide the MQTT password through `MQTT_PASSWORD` or the encrypted **Secrets** screen.
 
+## Build 026 acceptance checklist
+
+- [x] versioned Rule Schema v1
+- [x] strict unknown-field rejection
+- [x] state-change trigger
+- [x] state-threshold trigger
+- [x] MQTT-message trigger using Build 025 filter validation
+- [x] state-equality condition
+- [x] numeric-threshold condition
+- [x] one-or-more registered tool actions
+- [x] cooldown metadata
+- [x] deduplication metadata
+- [x] persistent automations table
+- [x] unique human-readable automation names
+- [x] authenticated schema endpoint
+- [x] authenticated rule validation endpoint
+- [x] authenticated automation list/detail endpoints
+- [x] Owner/Administrator-only rule changes
+- [x] Build 018 exact confirmation required for create/update/delete
+- [x] update/delete confirmation bound to current-record fingerprint
+- [x] Household/Read-only mutation protection retained
+- [x] Level 2 tool actions prohibited from automation rules
+- [x] Level 3 tool actions prohibited from automation rules
+- [x] enabled rules cannot reference disabled tools
+- [x] rule execution explicitly deferred to Build 027
+- [x] audit evidence for confirmed rule changes
+- [x] reversible automations migration
+- [x] migration upgrade/downgrade coverage
+- [x] backend schema/policy/API coverage
+- [x] security/data-model/architecture/build documentation
+- [x] no external service, OAuth registration, secret, or paid dependency required
+- [ ] final Build 026 dev CI green
+- [ ] promoted to main
+- [ ] final Build 026 main CI green
+- [ ] dev synchronized with final main closeout target
+
+## Operator setup
+
+No external setup is required for Build 026. Rule execution is intentionally unavailable until
+Build 027, so no live event source is required for verification.
+
 ## Next build
 
-**Build 026 — Rule Schema**
+**Build 027 — Event Engine**

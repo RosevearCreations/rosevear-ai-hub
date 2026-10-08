@@ -182,6 +182,8 @@ transaction as the protected database mutation, preventing replay.
 - created_at
 - updated_at
 
+Build 026 makes the `automations` record real. `definition_json` contains strict Rule Schema v1: one trigger, zero or more conditions, one or more Level 0/1 tool actions, cooldown metadata, and optional deduplication metadata. Rule execution and run records remain deferred to Build 027 and later builds.
+
 ## automation_runs
 - id
 - automation_id
