@@ -352,3 +352,19 @@ class SecretValue(TimestampMixin, Base):
     ciphertext: Mapped[str] = mapped_column(Text, nullable=False)
     key_fingerprint: Mapped[str] = mapped_column(String(16), nullable=False)
     rotated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Automation(TimestampMixin, Base):
+    """Persisted deterministic automation definition introduced by Build 026."""
+
+    __tablename__ = "automations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(160), unique=True, nullable=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
+    definition_json: Mapped[Any] = mapped_column(JSON, nullable=False)
+    created_by: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
