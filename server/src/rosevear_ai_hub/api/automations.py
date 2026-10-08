@@ -17,11 +17,6 @@ from rosevear_ai_hub.api.home_assistant import (
 )
 from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.auth import require_roles
-from rosevear_ai_hub.automation_history import (
-    AUTOMATION_FAILURE_STATUSES,
-    AUTOMATION_RUN_STATUSES,
-    public_run_summary,
-)
 from rosevear_ai_hub.automation_authoring import (
     MAX_AUTHORING_PROMPT_CHARACTERS,
     build_authoring_context,
@@ -30,6 +25,11 @@ from rosevear_ai_hub.automation_authoring import (
     collect_provider_text,
     parse_authoring_output,
     validate_authoring_draft,
+)
+from rosevear_ai_hub.automation_history import (
+    AUTOMATION_FAILURE_STATUSES,
+    AUTOMATION_RUN_STATUSES,
+    public_run_summary,
 )
 from rosevear_ai_hub.automations import (
     MAX_ACTIONS,
@@ -382,7 +382,7 @@ def automation_history_summary(db: SessionDependency) -> AutomationHistorySummar
 def automation_history(
     db: SessionDependency,
     automation_id: int | None = Query(default=None, ge=1),
-    run_status: RunStatus | None = Query(default=None, alias="status"),
+    run_status: Annotated[RunStatus | None, Query(alias="status")] = None,
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
 ) -> AutomationHistoryResponse:
