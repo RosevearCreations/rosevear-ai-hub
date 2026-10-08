@@ -30,7 +30,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 024 | Natural-Language Home Tools | COMPLETE | main |
 | 025 | MQTT Foundation | COMPLETE | main |
 | 026 | Rule Schema | COMPLETE | main |
-| 027 | Event Engine | IN PROGRESS | dev |
+| 027 | Event Engine | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -520,10 +520,10 @@ Build 027, so no live event source is required for verification.
 - [x] event-engine trigger/condition/deduplication/privacy tests
 - [x] security/data-model/architecture/integration/operations/build documentation
 - [x] no new credential, cloud service, OAuth registration, or paid dependency required
-- [ ] final Build 027 dev CI green
-- [ ] promoted to main
-- [ ] final Build 027 main CI green
-- [ ] dev synchronized with final main closeout target
+- [x] final Build 027 dev CI green — run 37776822135
+- [x] promoted to main — PR #38 / merge 5c601c1e10955696153dc8e8f3767946204db519
+- [x] final Build 027 main CI green — run 37778920468
+- [x] dev synchronized with final main closeout target
 
 ## Operator setup
 
