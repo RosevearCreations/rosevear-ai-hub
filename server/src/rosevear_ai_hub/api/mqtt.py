@@ -118,8 +118,16 @@ def get_mqtt_runtime(db: Annotated[Session, Depends(get_session)]) -> MQTTRuntim
         allowed_topics = _parse_allowed_topics(settings.mqtt_allowed_topics)
     except MQTTConfigurationError as exc:
         return MQTTRuntime(
-            None, host or None, settings.mqtt_port, settings.mqtt_tls, bool(username), False, (),
-            settings.mqtt_reconnect_min_seconds, settings.mqtt_reconnect_max_seconds, str(exc)
+            None,
+            host or None,
+            settings.mqtt_port,
+            settings.mqtt_tls,
+            bool(username),
+            False,
+            (),
+            settings.mqtt_reconnect_min_seconds,
+            settings.mqtt_reconnect_max_seconds,
+            str(exc),
         )
     try:
         password = resolve_secret(db, "mqtt.password", settings)
@@ -153,9 +161,16 @@ def get_mqtt_runtime(db: Annotated[Session, Depends(get_session)]) -> MQTTRuntim
         )
 
     signature = (
-        host, settings.mqtt_port, username, _password_fingerprint(password), settings.mqtt_tls,
-        settings.mqtt_client_id, settings.mqtt_keepalive_seconds,
-        settings.mqtt_reconnect_min_seconds, settings.mqtt_reconnect_max_seconds, allowed_topics,
+        host,
+        settings.mqtt_port,
+        username,
+        _password_fingerprint(password),
+        settings.mqtt_tls,
+        settings.mqtt_client_id,
+        settings.mqtt_keepalive_seconds,
+        settings.mqtt_reconnect_min_seconds,
+        settings.mqtt_reconnect_max_seconds,
+        allowed_topics,
     )
     global _runtime_client, _runtime_signature
     with _runtime_lock:
@@ -164,8 +179,12 @@ def get_mqtt_runtime(db: Annotated[Session, Depends(get_session)]) -> MQTTRuntim
                 _runtime_client.close()
             try:
                 client = MQTTClient(
-                    host, settings.mqtt_port, username=username, password=password or "",
-                    allowed_topics=allowed_topics, tls=settings.mqtt_tls,
+                    host,
+                    settings.mqtt_port,
+                    username=username,
+                    password=password or "",
+                    allowed_topics=allowed_topics,
+                    tls=settings.mqtt_tls,
                     client_id=settings.mqtt_client_id,
                     keepalive_seconds=settings.mqtt_keepalive_seconds,
                     reconnect_min_seconds=settings.mqtt_reconnect_min_seconds,
@@ -190,8 +209,15 @@ def get_mqtt_runtime(db: Annotated[Session, Depends(get_session)]) -> MQTTRuntim
         runtime_client = _runtime_client
 
     return MQTTRuntime(
-        runtime_client, host, settings.mqtt_port, settings.mqtt_tls, True, True, allowed_topics,
-        settings.mqtt_reconnect_min_seconds, settings.mqtt_reconnect_max_seconds
+        runtime_client,
+        host,
+        settings.mqtt_port,
+        settings.mqtt_tls,
+        True,
+        True,
+        allowed_topics,
+        settings.mqtt_reconnect_min_seconds,
+        settings.mqtt_reconnect_max_seconds,
     )
 
 
@@ -250,8 +276,7 @@ def mqtt_messages(
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> list[MQTTMessageResponse]:
     return [
-        MQTTMessageResponse(**item.__dict__)
-        for item in _require_client(runtime).messages(limit)
+        MQTTMessageResponse(**item.__dict__) for item in _require_client(runtime).messages(limit)
     ]
 
 
@@ -281,23 +306,36 @@ def mqtt_publish(
         raise HTTPException(status_code=403, detail="Complete owner bootstrap before MQTT writes.")
     encoded = payload.payload.encode("utf-8")
     arguments = {
-        "topic": payload.topic, "qos": payload.qos, "retain": False,
-        "payload_bytes": len(encoded), "payload_sha256": hashlib.sha256(encoded).hexdigest(),
+        "topic": payload.topic,
+        "qos": payload.qos,
+        "retain": False,
+        "payload_bytes": len(encoded),
+        "payload_sha256": hashlib.sha256(encoded).hexdigest(),
     }
     try:
         message_id = _require_client(runtime).publish(payload.topic, payload.payload, payload.qos)
     except MQTTError as exc:
         record_audit_event(
-            db, actor_user_id=actor.id, event_type="mqtt.publish.failed", object_type="mqtt_topic",
-            object_id=payload.topic, action="publish", arguments=arguments,
-            result={"ok": False, "error": str(exc)}
+            db,
+            actor_user_id=actor.id,
+            event_type="mqtt.publish.failed",
+            object_type="mqtt_topic",
+            object_id=payload.topic,
+            action="publish",
+            arguments=arguments,
+            result={"ok": False, "error": str(exc)},
         )
         db.commit()
         raise _http_error(exc) from exc
     record_audit_event(
-        db, actor_user_id=actor.id, event_type="mqtt.publish.completed", object_type="mqtt_topic",
-        object_id=payload.topic, action="publish", arguments=arguments,
-        result={"ok": True, "message_id": message_id}
+        db,
+        actor_user_id=actor.id,
+        event_type="mqtt.publish.completed",
+        object_type="mqtt_topic",
+        object_id=payload.topic,
+        action="publish",
+        arguments=arguments,
+        result={"ok": True, "message_id": message_id},
     )
     db.commit()
     return MQTTPublishResponse(
