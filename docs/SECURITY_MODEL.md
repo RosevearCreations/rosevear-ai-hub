@@ -314,3 +314,23 @@ execution authority:
 - provider errors and malformed output fail closed without changing automation state
 
 AI remains an authoring assistant only. Build 027 deterministic execution remains authoritative.
+
+
+## Build 029 automation history and failure handling
+
+Build 029 exposes only the bounded evidence already stored by the deterministic Event Engine:
+- history is authenticated and never exposes Home Assistant tokens, MQTT credentials, or session data
+- MQTT evidence continues to store only the payload SHA-256 fingerprint, never raw payload plaintext
+- history endpoints are read-only and bounded to at most 200 rows per request
+- restart recovery changes orphaned `running` rows to `interrupted` and emits audit evidence
+- recovery never replays an action
+- unexpected action exceptions are logged server-side but persisted as a generic failure message so
+  arbitrary internal exception text is not copied into user-facing history
+- failed and interrupted rows explicitly record that automatic retry is disabled
+- interrupted runs participate in cooldown checks to reduce immediate duplicate physical effects
+- Level 1 tool policy, safe-control allow list, hazardous-target denial, and Level 2/3 prohibitions
+  remain unchanged
+
+The no-auto-retry policy is intentional: after a connection loss or process restart, the Hub may not
+be able to prove whether a physical action completed. Replaying it automatically would be less safe
+than waiting for a new source event after review.

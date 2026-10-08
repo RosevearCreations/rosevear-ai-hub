@@ -51,6 +51,47 @@ describe("AutomationView", () => {
             mqtt_configured: true,
             mqtt_rule_subscriptions: [],
             last_error: null,
+            recovered_interrupted_runs: 1,
+          });
+        }
+        if (url.endsWith("/api/v1/automations/history/summary")) {
+          return response({
+            total_runs: 7,
+            success_count: 4,
+            failed_count: 1,
+            interrupted_count: 1,
+            skipped_count: 1,
+            running_count: 0,
+            failure_count: 2,
+            automations_with_failures: 1,
+            newest_run_at: "2026-10-08T20:00:00Z",
+            latest_failure_at: "2026-10-08T19:55:00Z",
+            automatic_retry_enabled: false,
+          });
+        }
+        if (url.includes("/api/v1/automations/history?")) {
+          return response({
+            runs: [
+              {
+                id: 7,
+                automation_id: 42,
+                automation_name: "Garage scene monitor",
+                started_at: "2026-10-08T19:55:00Z",
+                completed_at: "2026-10-08T19:55:01Z",
+                status: "failed",
+                result_summary: {
+                  event: { source: "home_assistant" },
+                  actions_completed: 0,
+                  failure_kind: "execution_error",
+                  error: "Entity state is unavailable.",
+                  automatic_retry: false,
+                },
+                duration_ms: 1000,
+              },
+            ],
+            total: 1,
+            limit: 25,
+            offset: 0,
           });
         }
         if (url.endsWith("/api/v1/automations/author/draft") && method === "POST") {
@@ -156,6 +197,12 @@ describe("AutomationView", () => {
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Automations" })).toBeInTheDocument();
       expect(screen.getByText("Event Engine running")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Execution history" })).toBeInTheDocument();
+      expect(screen.getByText("Garage scene monitor")).toBeInTheDocument();
+      expect(screen.getByText("Entity state is unavailable.")).toBeInTheDocument();
+      expect(
+        screen.getByText(/Failed and interrupted actions are never retried automatically/),
+      ).toBeInTheDocument();
     });
 
     fireEvent.change(screen.getByLabelText("Describe the automation"), {

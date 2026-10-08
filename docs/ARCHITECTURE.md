@@ -165,6 +165,17 @@ every action's arguments against the registered tool schema. The AI draft is not
 Owner/Administrator workbench displays the exact JSON and warnings, then reuses the Build 018 Level-2
 confirmation and Build 026 apply path for an explicit human-approved save.
 
+Build 029 makes the existing `automation_runs` evidence operational. Authenticated history endpoints
+join run evidence to automation names, support bounded status/rule filtering, and summarize success,
+failure, interruption, skip, and active counts. Runtime startup closes any orphaned `running` row as
+`interrupted`, preserving prior evidence and audit-recording the recovery. Unexpected action
+exceptions are contained to the affected run instead of escaping into the event worker.
+
+Failure handling deliberately does not replay actions. A failed or interrupted run may represent a
+partially completed physical-world change, so Build 029 records `automatic_retry=false`, applies
+cooldown protection to interrupted runs, and requires a later source event after the operator fixes
+the underlying issue.
+
 ## Home Assistant adapter
 
 Build 021 implements the first IoT adapter against Home Assistant's authenticated REST API. The
