@@ -147,6 +147,8 @@ Example:
 }
 ```
 
+Build 026 formalizes this concept as strict Rule Schema v1 and persists validated definitions in the local `automations` table. Owner/Administrator changes use the Build 018 exact confirmation workflow. Rule definitions may reference only Level 0/1 registered tools. Build 026 does not subscribe to events or execute rules; that boundary remains Build 027.
+
 ## Home Assistant adapter
 
 Build 021 implements the first IoT adapter against Home Assistant's authenticated REST API. The

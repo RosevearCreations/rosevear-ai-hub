@@ -92,9 +92,10 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 023 — Safe Device Controls**
 - **Build 024 — Natural-Language Home Tools**
 - **Build 025 — MQTT Foundation**
+- **Build 026 — Rule Schema**
 
 ## Next build
 
-**Build 026 — Rule Schema**
+**Build 027 — Event Engine**
 
-The first functional MVP boundary has now been reached through **Build 025**.
+The first functional MVP boundary remains Build 025; Build 026 adds the deterministic automation rule contract without executing rules.

@@ -251,3 +251,19 @@ Build 025 treats MQTT as a private authenticated integration boundary:
 When `MQTT_TLS=false`, broker credentials are not protected from a compromised local network path.
 Use a trusted private LAN/VLAN or enable a broker TLS listener with a certificate trusted by the Hub
 host. Never expose the MQTT listener directly to the public internet.
+
+
+## Build 026 automation rule boundary
+
+Automation definitions are untrusted structured input. Rule Schema v1 rejects unknown fields and
+bounds condition/action counts, cooldown values, entity identifiers, MQTT topic filters, and
+deduplication keys before persistence.
+
+Only Owner/Administrator accounts can request or apply rule changes. Every create, update, or delete
+is a Level 2 change and consumes one exact Build 018 confirmation. Update/delete confirmations bind a
+SHA-256 fingerprint of the current rule record to prevent a previously approved change from silently
+applying after the rule has been edited.
+
+Executable rule actions may reference only registered Level 0 or Level 1 tools. Level 2 and Level 3
+tools are rejected from automation definitions, and an enabled rule cannot reference a disabled
+tool. Build 026 performs no event subscription and no rule execution.
