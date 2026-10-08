@@ -6,7 +6,8 @@ from collections import deque
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from threading import Lock
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from paho.mqtt import client as mqtt
 
@@ -182,7 +183,9 @@ class MQTTClient:
         if qos not in {0, 1}:
             raise MQTTTopicDeniedError("Build 025 supports MQTT subscription QoS 0 or 1.")
         if not _subscription_allowed(value, self.allowed_topics):
-            raise MQTTTopicDeniedError("MQTT subscription is outside the configured topic allow list.")
+            raise MQTTTopicDeniedError(
+                "MQTT subscription is outside the configured topic allow list."
+            )
         if not self.connected:
             raise MQTTUnavailableError("MQTT broker is not connected.")
         result, _mid = self._client.subscribe(value, qos=qos)
@@ -197,7 +200,9 @@ class MQTTClient:
         if qos not in {0, 1}:
             raise MQTTTopicDeniedError("Build 025 supports MQTT publish QoS 0 or 1.")
         if not _matches_allowed_filter(value, self.allowed_topics):
-            raise MQTTTopicDeniedError("MQTT publish topic is outside the configured topic allow list.")
+            raise MQTTTopicDeniedError(
+                "MQTT publish topic is outside the configured topic allow list."
+            )
         if not self.connected:
             raise MQTTUnavailableError("MQTT broker is not connected.")
         info = self._client.publish(value, payload=payload, qos=qos, retain=False)
@@ -218,7 +223,14 @@ class MQTTClient:
                 "last_error": self._last_error,
             }
 
-    def _on_connect(self, _client: Any, _userdata: Any, _flags: Any, reason_code: Any, _properties: Any = None) -> None:
+    def _on_connect(
+        self,
+        _client: Any,
+        _userdata: Any,
+        _flags: Any,
+        reason_code: Any,
+        _properties: Any = None,
+    ) -> None:
         success = _reason_value(reason_code) == 0
         with self._lock:
             self._connected = success
@@ -228,7 +240,14 @@ class MQTTClient:
             for topic_filter, qos in subscriptions:
                 self._client.subscribe(topic_filter, qos=qos)
 
-    def _on_disconnect(self, _client: Any, _userdata: Any, _disconnect_flags: Any, reason_code: Any, _properties: Any = None) -> None:
+    def _on_disconnect(
+        self,
+        _client: Any,
+        _userdata: Any,
+        _disconnect_flags: Any,
+        reason_code: Any,
+        _properties: Any = None,
+    ) -> None:
         with self._lock:
             self._connected = False
             if self._started and _reason_value(reason_code) != 0:

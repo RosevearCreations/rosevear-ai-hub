@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from threading import Lock
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -19,7 +19,6 @@ from rosevear_ai_hub.integrations.mqtt import (
     MQTTClient,
     MQTTConfigurationError,
     MQTTError,
-    MQTTMessageRecord,
     MQTTTopicDeniedError,
     MQTTUnavailableError,
     validate_topic_filter,
@@ -141,9 +140,16 @@ def get_mqtt_runtime(db: Annotated[Session, Depends(get_session)]) -> MQTTRuntim
     if missing or secret_error:
         detail = secret_error or "Configure " + ", ".join(missing) + " to enable MQTT."
         return MQTTRuntime(
-            None, host or None, settings.mqtt_port, settings.mqtt_tls, bool(username), bool(password),
-            allowed_topics, settings.mqtt_reconnect_min_seconds, settings.mqtt_reconnect_max_seconds,
-            detail
+            None,
+            host or None,
+            settings.mqtt_port,
+            settings.mqtt_tls,
+            bool(username),
+            bool(password),
+            allowed_topics,
+            settings.mqtt_reconnect_min_seconds,
+            settings.mqtt_reconnect_max_seconds,
+            detail,
         )
 
     signature = (
@@ -168,8 +174,16 @@ def get_mqtt_runtime(db: Annotated[Session, Depends(get_session)]) -> MQTTRuntim
                 client.start()
             except MQTTError as exc:
                 return MQTTRuntime(
-                    None, host, settings.mqtt_port, settings.mqtt_tls, True, True, allowed_topics,
-                    settings.mqtt_reconnect_min_seconds, settings.mqtt_reconnect_max_seconds, str(exc)
+                    None,
+                    host,
+                    settings.mqtt_port,
+                    settings.mqtt_tls,
+                    True,
+                    True,
+                    allowed_topics,
+                    settings.mqtt_reconnect_min_seconds,
+                    settings.mqtt_reconnect_max_seconds,
+                    str(exc),
                 )
             _runtime_client = client
             _runtime_signature = signature
@@ -186,7 +200,10 @@ MQTTRuntimeDependency = Annotated[MQTTRuntime, Depends(get_mqtt_runtime)]
 
 def _require_client(runtime: MQTTRuntime) -> MQTTClient:
     if runtime.client is None:
-        raise HTTPException(status_code=503, detail=runtime.configuration_error or "MQTT is not configured.")
+        raise HTTPException(
+            status_code=503,
+            detail=runtime.configuration_error or "MQTT is not configured.",
+        )
     return runtime.client
 
 
@@ -203,23 +220,39 @@ def mqtt_status(runtime: MQTTRuntimeDependency) -> MQTTStatusResponse:
     snapshot = runtime.client.snapshot() if runtime.client is not None else {}
     available = bool(snapshot.get("connected"))
     configured = runtime.client is not None
-    message = (
-        "MQTT broker connected." if available else
-        snapshot.get("last_error") or ("MQTT connection is starting or reconnecting." if configured else runtime.configuration_error or "MQTT is not configured.")
-    )
+    if available:
+        message = "MQTT broker connected."
+    elif configured:
+        message = snapshot.get("last_error") or "MQTT connection is starting or reconnecting."
+    else:
+        message = runtime.configuration_error or "MQTT is not configured."
     return MQTTStatusResponse(
-        configured=configured, available=available, host=runtime.host, port=runtime.port, tls=runtime.tls,
-        username_configured=runtime.username_configured, password_configured=runtime.password_configured,
-        allowed_topics=list(runtime.allowed_topics), subscriptions=list(snapshot.get("subscriptions", [])),
-        reconnect_min_seconds=runtime.reconnect_min_seconds, reconnect_max_seconds=runtime.reconnect_max_seconds,
-        message_count=int(snapshot.get("message_count", 0)), last_error=snapshot.get("last_error"),
+        configured=configured,
+        available=available,
+        host=runtime.host,
+        port=runtime.port,
+        tls=runtime.tls,
+        username_configured=runtime.username_configured,
+        password_configured=runtime.password_configured,
+        allowed_topics=list(runtime.allowed_topics),
+        subscriptions=list(snapshot.get("subscriptions", [])),
+        reconnect_min_seconds=runtime.reconnect_min_seconds,
+        reconnect_max_seconds=runtime.reconnect_max_seconds,
+        message_count=int(snapshot.get("message_count", 0)),
+        last_error=snapshot.get("last_error"),
         message=str(message),
     )
 
 
 @router.get("/messages", response_model=list[MQTTMessageResponse])
-def mqtt_messages(runtime: MQTTRuntimeDependency, limit: Annotated[int, Query(ge=1, le=200)] = 50) -> list[MQTTMessageResponse]:
-    return [MQTTMessageResponse(**item.__dict__) for item in _require_client(runtime).messages(limit)]
+def mqtt_messages(
+    runtime: MQTTRuntimeDependency,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+) -> list[MQTTMessageResponse]:
+    return [
+        MQTTMessageResponse(**item.__dict__)
+        for item in _require_client(runtime).messages(limit)
+    ]
 
 
 @router.post("/subscriptions", response_model=MQTTSubscriptionResponse)
