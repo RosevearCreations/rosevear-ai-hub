@@ -93,10 +93,7 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 024 — Natural-Language Home Tools**
 - **Build 025 — MQTT Foundation**
 - **Build 026 — Rule Schema**
-
-## Current build
-
-**Build 027 — Event Engine** is implemented on `dev` and is undergoing release verification.
+- **Build 027 — Event Engine**
 
 ## Next build
 
