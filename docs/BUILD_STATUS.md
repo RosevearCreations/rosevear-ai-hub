@@ -27,7 +27,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 021 | Home Assistant Connection | COMPLETE | main |
 | 022 | Entity Browser | COMPLETE | main |
 | 023 | Safe Device Controls | COMPLETE | main |
-| 024 | Natural-Language Home Tools | READY FOR CI | dev |
+| 024 | Natural-Language Home Tools | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -393,10 +393,10 @@ before any device write can occur.
 - [x] no database migration required
 - [x] security/integration/architecture/operations/build documentation
 - [x] no new credential, cloud service, OAuth registration, or paid dependency
-- [ ] final Build 024 dev CI green
-- [ ] promoted to main
-- [ ] final Build 024 main CI green
-- [ ] dev synchronized with main
+- [x] final Build 024 dev CI green
+- [x] promoted to main
+- [x] final Build 024 main CI green
+- [x] dev synchronized with main
 
 ## Operator setup
 
