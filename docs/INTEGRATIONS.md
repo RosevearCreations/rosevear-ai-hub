@@ -23,6 +23,19 @@ Build 022 adds the authenticated Home Assistant WebSocket API for read-only area
 **Role:** Local event/device messaging  
 **Security:** Authenticated broker + topic allow lists.
 
+Build 025 implements the first MQTT connector boundary:
+- broker host/port and optional TLS are non-secret runtime configuration
+- username is configuration; password is resolved through Build 020 secret management
+- username + password are required before the connector is considered configured
+- subscriptions and publishes are rejected unless permitted by `MQTT_ALLOWED_TOPICS`
+- wildcard subscriptions must exactly match an allow-list filter
+- concrete publish topics may be authorized by an allow-listed wildcard filter
+- retained publishes are blocked
+- reconnect delay is bounded and active subscriptions restore after reconnect
+- recent received messages are held only in a bounded in-memory buffer
+- the browser never receives the MQTT password and never connects directly to the broker
+- MQTT is not registered as an AI tool in Build 025
+
 ## Ollama
 **Priority:** Highest  
 **Role:** Local inference and embeddings.  

@@ -175,3 +175,29 @@ shown on Devices. Build 024 deliberately will not guess.
 Bulk commands, hazardous targets, non-allow-listed entities, and unsupported actions do not execute.
 Recognized commands bypass Ollama generation; ordinary Home questions continue through the selected
 provider.
+
+
+## Build 025 MQTT operations
+
+Automated verification uses a fake broker client, so CI does not need a live MQTT broker.
+
+To connect the real local broker:
+1. Create a dedicated broker account for Rosevear AI Hub with only the broker permissions it needs.
+2. Set `MQTT_HOST` to the broker hostname or LAN IP and `MQTT_PORT` to its listener port.
+3. Set `MQTT_USERNAME` to the dedicated Hub broker username.
+4. Store the password as `MQTT_PASSWORD` or under **Secrets → MQTT password**.
+5. Set `MQTT_ALLOWED_TOPICS` to a comma-separated allow list, for example
+   `rosevear/sensors/#,rosevear/commands/living-room-light`.
+6. Set `MQTT_TLS=true` when the broker listener uses TLS with a certificate trusted by the Hub host.
+7. Restart the Hub after environment changes.
+8. Open **MQTT**, refresh, and verify the broker reports online.
+9. Subscribe to an allowed topic/filter and verify incoming messages appear.
+10. Publish only a harmless test message to an allowed test topic and verify the audit record.
+
+The connector fails closed when host, username, password, or topic allow list is missing. It never
+falls back to anonymous broker access. When TLS is disabled, keep MQTT strictly on trusted private
+networking and never port-forward the broker.
+
+Reconnect behavior uses bounded delays from `MQTT_RECONNECT_MIN_SECONDS` through
+`MQTT_RECONNECT_MAX_SECONDS`. Existing subscriptions are restored after connection recovery.
+Received messages are an in-memory diagnostic/event buffer, not durable automation history.

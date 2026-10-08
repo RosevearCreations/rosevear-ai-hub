@@ -28,6 +28,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 022 | Entity Browser | COMPLETE | main |
 | 023 | Safe Device Controls | COMPLETE | main |
 | 024 | Natural-Language Home Tools | COMPLETE | main |
+| 025 | MQTT Foundation | READY FOR CI | dev |
 
 ## Build 016 acceptance checklist
 
@@ -404,6 +405,48 @@ No new credential is required. Keep the Build 021 Home Assistant connection and 
 control allow list. Select the **Home** chat profile and use explicit commands naming one exact
 allow-listed entity.
 
+## Build 025 acceptance checklist
+
+- [x] broker host/port configuration
+- [x] dedicated broker username configuration
+- [x] Build 020 MQTT password resolution reused
+- [x] anonymous broker use fails closed
+- [x] optional TLS transport
+- [x] authenticated broker runtime status
+- [x] bounded MQTT topic/filter validation
+- [x] fail-closed MQTT topic allow list
+- [x] concrete subscribe beneath allowed wildcard
+- [x] wildcard subscribe requires exact allow-list entry
+- [x] publish topics cannot contain wildcards
+- [x] retained publish blocked
+- [x] bounded payload size
+- [x] QoS 0/1 publish and subscribe
+- [x] bounded in-memory received-message buffer
+- [x] bounded reconnect delay
+- [x] active subscription restoration after reconnect
+- [x] broker credentials remain server-side
+- [x] MQTT publish audit evidence excludes payload plaintext
+- [x] authenticated MQTT UI
+- [x] read-only write boundary retained
+- [x] MQTT not registered as an AI-executable tool
+- [x] no durable automation/event-history claim introduced
+- [x] adapter unit coverage with fake broker client
+- [x] API publish/subscribe/status/message coverage
+- [x] web MQTT status/publish/subscribe coverage
+- [x] no database migration required
+- [x] security/integration/architecture/operations/build documentation
+- [x] no cloud service, OAuth registration, or paid dependency required
+- [ ] final Build 025 dev CI green
+- [ ] promoted to main
+- [ ] final Build 025 main CI green
+- [ ] dev synchronized with main
+
+## Operator setup
+
+No live broker is required for automated verification. To use MQTT locally, configure a dedicated
+authenticated broker account, set `MQTT_HOST`, `MQTT_USERNAME`, and `MQTT_ALLOWED_TOPICS`, and
+provide the MQTT password through `MQTT_PASSWORD` or the encrypted **Secrets** screen.
+
 ## Next build
 
-**Build 025 — MQTT Foundation**
+**Build 026 — Rule Schema**
