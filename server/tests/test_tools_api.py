@@ -39,6 +39,7 @@ def test_registry_exposes_normalized_builtin_contracts(tmp_path) -> None:
         "home_assistant.light.set",
         "home_assistant.scene.activate",
         "home_assistant.switch.set",
+        "automation.rule.change",
         "knowledge.document.delete",
     ]
 
@@ -74,14 +75,15 @@ def test_registry_summary_reports_capabilities_and_risk_counts(tmp_path) -> None
     response = client.get("/api/v1/tools/summary")
     assert response.status_code == 200
     payload = response.json()
-    assert payload["tool_count"] == 6
-    assert payload["enabled_count"] == 5
+    assert payload["tool_count"] == 7
+    assert payload["enabled_count"] == 6
     assert payload["disabled_count"] == 1
     assert payload["counts_by_risk"]["read"] == 2
     assert payload["counts_by_risk"]["low_risk_action"] == 3
-    assert payload["counts_by_risk"]["confirmation_required"] == 1
+    assert payload["counts_by_risk"]["confirmation_required"] == 2
     assert payload["capabilities"] == [
         "ai.generate",
+        "automation.write",
         "home.light.control",
         "home.read",
         "home.scene.activate",
