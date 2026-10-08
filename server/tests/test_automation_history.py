@@ -270,7 +270,9 @@ async def test_unexpected_action_failure_is_contained_and_persisted(tmp_path) ->
 
 
 @pytest.mark.asyncio
-async def test_interrupted_run_participates_in_cooldown_to_prevent_immediate_replay(tmp_path) -> None:
+async def test_interrupted_run_participates_in_cooldown_to_prevent_immediate_replay(
+    tmp_path,
+) -> None:
     session_maker = _session_maker(tmp_path, "interrupted-cooldown.db")
     automation_id = _seed_automation(session_maker, cooldown_seconds=60)
 
