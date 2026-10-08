@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Annotated, Any, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -62,6 +62,19 @@ class AutomationSchemaResponse(BaseModel):
     supported_actions: list[str]
     limits: dict[str, int]
     execution_available: bool
+
+
+class AutomationRuntimeResponse(BaseModel):
+    running: bool
+    queue_depth: int
+    queue_capacity: int
+    processed_events: int
+    dropped_events: int
+    failed_events: int
+    home_assistant_configured: bool
+    mqtt_configured: bool
+    mqtt_rule_subscriptions: list[str]
+    last_error: str | None = None
 
 
 class AutomationChangeRequest(BaseModel):
@@ -201,8 +214,27 @@ def automation_schema() -> AutomationSchemaResponse:
             "max_actions": MAX_ACTIONS,
             "max_cooldown_seconds": MAX_COOLDOWN_SECONDS,
         },
-        execution_available=False,
+        execution_available=True,
     )
+
+
+@router.get("/runtime", response_model=AutomationRuntimeResponse)
+def automation_runtime_status(request: Request) -> AutomationRuntimeResponse:
+    runtime = getattr(request.app.state, "automation_event_runtime", None)
+    if runtime is None:
+        return AutomationRuntimeResponse(
+            running=False,
+            queue_depth=0,
+            queue_capacity=0,
+            processed_events=0,
+            dropped_events=0,
+            failed_events=0,
+            home_assistant_configured=False,
+            mqtt_configured=False,
+            mqtt_rule_subscriptions=[],
+            last_error="Event Engine runtime has not started.",
+        )
+    return AutomationRuntimeResponse(**runtime.snapshot())
 
 
 @router.post("/validate", response_model=RuleValidationResponse)

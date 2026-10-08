@@ -110,3 +110,17 @@ list, then routed through the same bounded light/switch/scene methods.
 
 The AI provider is bypassed for recognized commands. Ordinary Home-profile questions still use the
 configured provider normally.
+
+
+## Build 027 automation event sources
+
+The Event Engine reuses the existing Home Assistant and MQTT adapters rather than introducing new
+credentials or a second IoT authority.
+
+- Home Assistant uses an authenticated WebSocket `subscribe_events` request limited to
+  `state_changed` events.
+- MQTT reuses the Build 025 authenticated client and registers an in-process message listener.
+- Enabled MQTT rules are reconciled to authorized broker subscriptions while the broker is online.
+- MQTT topic policy remains governed by `MQTT_ALLOWED_TOPICS`; the Event Engine cannot widen it.
+- Home Assistant actions still pass the Build 023 tool, allow-list, domain, and hazard checks.
+- Source outages are isolated from chat/knowledge and use bounded reconnect/reconciliation loops.

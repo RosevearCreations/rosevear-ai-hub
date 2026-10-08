@@ -131,6 +131,7 @@ class MQTTClient:
         self._last_error: str | None = None
         self._subscriptions: dict[str, int] = {}
         self._messages: deque[MQTTMessageRecord] = deque(maxlen=message_buffer_size)
+        self._message_listeners: set[Callable[[MQTTMessageRecord], None]] = set()
         factory = client_factory or mqtt.Client
         self._client = factory(
             mqtt.CallbackAPIVersion.VERSION2,
@@ -210,6 +211,14 @@ class MQTTClient:
             raise MQTTUnavailableError("MQTT broker rejected the publish request.")
         return int(info.mid)
 
+    def add_message_listener(self, listener: Callable[[MQTTMessageRecord], None]) -> None:
+        with self._lock:
+            self._message_listeners.add(listener)
+
+    def remove_message_listener(self, listener: Callable[[MQTTMessageRecord], None]) -> None:
+        with self._lock:
+            self._message_listeners.discard(listener)
+
     def messages(self, limit: int = 50) -> list[MQTTMessageRecord]:
         with self._lock:
             return list(self._messages)[-limit:]
@@ -265,3 +274,9 @@ class MQTTClient:
         )
         with self._lock:
             self._messages.append(record)
+            listeners = tuple(self._message_listeners)
+        for listener in listeners:
+            try:
+                listener(record)
+            except Exception:
+                continue

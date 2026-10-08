@@ -30,6 +30,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 024 | Natural-Language Home Tools | COMPLETE | main |
 | 025 | MQTT Foundation | COMPLETE | main |
 | 026 | Rule Schema | COMPLETE | main |
+| 027 | Event Engine | IN PROGRESS | dev |
 
 ## Build 016 acceptance checklist
 
@@ -489,6 +490,48 @@ provide the MQTT password through `MQTT_PASSWORD` or the encrypted **Secrets** s
 No external setup is required for Build 026. Rule execution is intentionally unavailable until
 Build 027, so no live event source is required for verification.
 
+## Build 027 acceptance checklist
+
+- [x] deterministic event processor independent of the AI model layer
+- [x] Home Assistant state_changed WebSocket event intake
+- [x] MQTT message callback intake
+- [x] bounded 256-event runtime queue
+- [x] bounded Home Assistant listener reconnect backoff
+- [x] enabled-rule MQTT subscription reconciliation
+- [x] state-change trigger evaluation
+- [x] state-threshold crossing evaluation
+- [x] MQTT topic-filter and optional payload equality evaluation
+- [x] state-equality condition evaluation against current Home Assistant state
+- [x] numeric-threshold condition evaluation against current Home Assistant state
+- [x] persistent cooldown enforcement
+- [x] persistent event deduplication tokens
+- [x] persistent automation_runs evidence
+- [x] raw MQTT payload excluded from automation run evidence
+- [x] registered tool schema revalidation immediately before execution
+- [x] enabled-tool gate rechecked immediately before execution
+- [x] autonomous execution limited to deterministic Build 023 Level-1 Home Assistant tools
+- [x] exact Build 023 safe-control allow list retained
+- [x] hazardous/safety-looking Home Assistant targets retained as prohibited
+- [x] Level 2 and Level 3 tools remain prohibited from autonomous execution
+- [x] automation and tool execution audit evidence
+- [x] authenticated Event Engine runtime status endpoint
+- [x] reversible automation_runs migration
+- [x] migration upgrade/downgrade coverage
+- [x] event-engine trigger/condition/deduplication/privacy tests
+- [x] security/data-model/architecture/integration/operations/build documentation
+- [x] no new credential, cloud service, OAuth registration, or paid dependency required
+- [ ] final Build 027 dev CI green
+- [ ] promoted to main
+- [ ] final Build 027 main CI green
+- [ ] dev synchronized with final main closeout target
+
+## Operator setup
+
+No new credential is required for Build 027. Existing Build 021 Home Assistant and Build 025 MQTT
+configuration are reused. Enabled MQTT-trigger rules are subscribed automatically when the broker is
+available. The Build 023 safe-control allow list remains mandatory before any automation can change a
+Home Assistant light, switch, or scene.
+
 ## Next build
 
-**Build 027 — Event Engine**
+**Build 028 — AI-Assisted Rule Authoring**

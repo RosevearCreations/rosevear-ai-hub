@@ -368,3 +368,25 @@ class Automation(TimestampMixin, Base):
         nullable=True,
         index=True,
     )
+
+
+class AutomationRun(Base):
+    """One persisted deterministic Event Engine evaluation/execution attempt."""
+
+    __tablename__ = "automation_runs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    automation_id: Mapped[int] = mapped_column(
+        ForeignKey("automations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.current_timestamp(),
+        nullable=False,
+        index=True,
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    result_summary: Mapped[Any] = mapped_column(JSON, nullable=False, default=dict)

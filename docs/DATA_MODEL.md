@@ -182,7 +182,7 @@ transaction as the protected database mutation, preventing replay.
 - created_at
 - updated_at
 
-Build 026 makes the `automations` record real. `definition_json` contains strict Rule Schema v1: one trigger, zero or more conditions, one or more Level 0/1 tool actions, cooldown metadata, and optional deduplication metadata. Rule execution and run records remain deferred to Build 027 and later builds.
+Build 026 makes the `automations` record real. `definition_json` contains strict Rule Schema v1: one trigger, zero or more conditions, one or more Level 0/1 tool actions, cooldown metadata, and optional deduplication metadata. Rule execution is activated by Build 027; each matched execution or protected skip can create persistent run evidence.
 
 ## automation_runs
 - id
@@ -191,6 +191,11 @@ Build 026 makes the `automations` record real. `definition_json` contains strict
 - completed_at
 - status
 - result_summary
+
+Build 027 creates this table. `status` records `running`, `success`, `failed`, or `skipped`.
+`result_summary` is bounded structured evidence containing source metadata, action counts, skip/failure
+reason, and an optional deduplication token. MQTT payload plaintext is not stored in run evidence;
+only its SHA-256 fingerprint is retained. Build 029 will add the richer history/failure experience.
 
 ## audit_events
 - id

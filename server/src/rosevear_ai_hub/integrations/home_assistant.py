@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from collections.abc import Callable
+from collections.abc import AsyncIterator, Callable
 from typing import Any
 from urllib.parse import urlparse, urlunparse
 
@@ -121,6 +121,68 @@ class HomeAssistantClient:
             "entities": results[command_types[2]],
         }
 
+    async def state_change_events(self) -> AsyncIterator[dict[str, Any]]:
+        """Subscribe to Home Assistant state_changed events on one authenticated socket."""
+
+        try:
+            async with self._websocket_connect(
+                self.websocket_url,
+                open_timeout=self.timeout_seconds,
+                close_timeout=self.timeout_seconds,
+            ) as websocket:
+                await self._authenticate_websocket(websocket)
+                command_id = 1
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "id": command_id,
+                            "type": "subscribe_events",
+                            "event_type": "state_changed",
+                        }
+                    )
+                )
+                response = await self._recv_matching_result(websocket, command_id)
+                if not response.get("success"):
+                    raise HomeAssistantRequestError(
+                        "Home Assistant rejected the state_changed subscription."
+                    )
+
+                while True:
+                    raw = await websocket.recv()
+                    payload = self._decode_websocket_json(raw)
+                    if payload.get("type") != "event" or payload.get("id") != command_id:
+                        continue
+                    event = payload.get("event")
+                    if isinstance(event, dict) and event.get("event_type") == "state_changed":
+                        yield event
+        except HomeAssistantError:
+            raise
+        except TimeoutError as exc:
+            raise HomeAssistantTimeoutError(
+                f"Home Assistant timed out after {self.timeout_seconds:g} seconds."
+            ) from exc
+        except (OSError, WebSocketException) as exc:
+            raise HomeAssistantUnavailableError(
+                f"Unable to reach Home Assistant at {self.base_url}."
+            ) from exc
+
+    async def _authenticate_websocket(self, websocket: Any) -> None:
+        hello = await self._recv_websocket_json(websocket)
+        if hello.get("type") != "auth_required":
+            raise HomeAssistantRequestError(
+                "Home Assistant WebSocket authentication handshake was incomplete."
+            )
+        await websocket.send(json.dumps({"type": "auth", "access_token": self._token}))
+        auth = await self._recv_websocket_json(websocket)
+        if auth.get("type") == "auth_invalid":
+            raise HomeAssistantAuthenticationError(
+                "Home Assistant rejected the configured access token."
+            )
+        if auth.get("type") != "auth_ok":
+            raise HomeAssistantRequestError(
+                "Home Assistant WebSocket authentication handshake was incomplete."
+            )
+
     async def _safe_service(self, path: str, entity_id: str) -> list[dict[str, Any]]:
         payload = await self._request_json(
             "POST",
@@ -182,22 +244,7 @@ class HomeAssistantClient:
                 open_timeout=self.timeout_seconds,
                 close_timeout=self.timeout_seconds,
             ) as websocket:
-                hello = await self._recv_websocket_json(websocket)
-                if hello.get("type") != "auth_required":
-                    raise HomeAssistantRequestError(
-                        "Home Assistant WebSocket authentication handshake was incomplete."
-                    )
-
-                await websocket.send(json.dumps({"type": "auth", "access_token": self._token}))
-                auth = await self._recv_websocket_json(websocket)
-                if auth.get("type") == "auth_invalid":
-                    raise HomeAssistantAuthenticationError(
-                        "Home Assistant rejected the configured access token."
-                    )
-                if auth.get("type") != "auth_ok":
-                    raise HomeAssistantRequestError(
-                        "Home Assistant WebSocket authentication handshake was incomplete."
-                    )
+                await self._authenticate_websocket(websocket)
 
                 results: dict[str, list[dict[str, Any]]] = {}
                 for command_id, command_type in enumerate(command_types, start=1):
@@ -242,6 +289,9 @@ class HomeAssistantClient:
             raise HomeAssistantTimeoutError(
                 f"Home Assistant timed out after {self.timeout_seconds:g} seconds."
             ) from exc
+        return self._decode_websocket_json(raw)
+
+    def _decode_websocket_json(self, raw: Any) -> dict[str, Any]:
         if isinstance(raw, bytes):
             raw = raw.decode("utf-8", errors="replace")
         if not isinstance(raw, str):

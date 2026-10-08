@@ -1,4 +1,4 @@
-"""Versioned deterministic automation rule schema for Build 026."""
+"""Versioned deterministic automation rule schema used by the Event Engine."""
 
 from __future__ import annotations
 
@@ -18,6 +18,13 @@ RULE_SCHEMA_VERSION = 1
 MAX_CONDITIONS = 20
 MAX_ACTIONS = 20
 MAX_COOLDOWN_SECONDS = 86400
+AUTOMATION_EXECUTABLE_TOOL_KEYS = frozenset(
+    {
+        "home_assistant.light.set",
+        "home_assistant.switch.set",
+        "home_assistant.scene.activate",
+    }
+)
 
 
 class StrictRuleModel(BaseModel):
@@ -162,6 +169,10 @@ def validate_rule_tool_references(
             )
         if enabled and not tool.enabled:
             raise ValueError(f"Enabled automation cannot reference disabled tool: {key}.")
+        if enabled and key not in AUTOMATION_EXECUTABLE_TOOL_KEYS:
+            raise ValueError(
+                f"Enabled automation action has no deterministic Event Engine executor: {key}."
+            )
     return keys
 
 

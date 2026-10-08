@@ -147,7 +147,14 @@ Example:
 }
 ```
 
-Build 026 formalizes this concept as strict Rule Schema v1 and persists validated definitions in the local `automations` table. Owner/Administrator changes use the Build 018 exact confirmation workflow. Rule definitions may reference only Level 0/1 registered tools. Build 026 does not subscribe to events or execute rules; that boundary remains Build 027.
+Build 026 formalizes this concept as strict Rule Schema v1 and persists validated definitions in the local `automations` table. Owner/Administrator changes use the Build 018 exact confirmation workflow. Rule definitions may reference only Level 0/1 registered tools. Build 026 does not subscribe to events or execute rules; that boundary is implemented by Build 027.
+
+Build 027 runs a server-owned Event Engine. Home Assistant `state_changed` WebSocket events and
+authorized MQTT messages enter a bounded queue, then deterministic code evaluates the persisted
+Rule Schema. Conditions use current Home Assistant state, threshold triggers require an actual
+boundary crossing, cooldown and deduplication are checked against persistent run evidence, and only
+the explicitly supported Build 023 Level-1 Home Assistant tool contracts can execute autonomously.
+The Event Engine never asks an LLM whether a rule matches or which tool arguments to use.
 
 ## Home Assistant adapter
 

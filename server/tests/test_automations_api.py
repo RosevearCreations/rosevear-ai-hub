@@ -71,14 +71,14 @@ def approve_change(client: TestClient, payload: dict) -> str:
     return confirmation_id
 
 
-def test_schema_is_versioned_strict_and_execution_is_deferred(tmp_path) -> None:
+def test_schema_is_versioned_strict_and_execution_is_available(tmp_path) -> None:
     client = build_client(tmp_path)
 
     schema = client.get("/api/v1/automations/schema")
     assert schema.status_code == 200
     body = schema.json()
     assert body["schema_version"] == 1
-    assert body["execution_available"] is False
+    assert body["execution_available"] is True
     assert body["supported_triggers"] == ["state_change", "state_threshold", "mqtt_message"]
     assert body["supported_actions"] == ["tool"]
 
