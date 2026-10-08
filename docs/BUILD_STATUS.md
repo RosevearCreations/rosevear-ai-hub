@@ -28,7 +28,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 022 | Entity Browser | COMPLETE | main |
 | 023 | Safe Device Controls | COMPLETE | main |
 | 024 | Natural-Language Home Tools | COMPLETE | main |
-| 025 | MQTT Foundation | READY FOR CI | dev |
+| 025 | MQTT Foundation | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -436,10 +436,10 @@ allow-listed entity.
 - [x] no database migration required
 - [x] security/integration/architecture/operations/build documentation
 - [x] no cloud service, OAuth registration, or paid dependency required
-- [ ] final Build 025 dev CI green
-- [ ] promoted to main
-- [ ] final Build 025 main CI green
-- [ ] dev synchronized with main
+- [x] final Build 025 dev CI green — run 37719577138
+- [x] promoted to main — PR #34 / merge 57794fa86377f6fc92a888bcb0722558ca8ac067
+- [x] final Build 025 main CI green — run 37720743381
+- [x] dev synchronized with final main closeout target
 
 ## Operator setup
 
