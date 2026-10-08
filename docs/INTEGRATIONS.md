@@ -87,3 +87,13 @@ The Home Assistant adapter now exposes only three bounded write families to the 
 
 There is no generic domain/service execution method in the application API. The caller must pass
 through the Build 023 entity allow list, tool-registry risk contract, role checks, and audit layer.
+
+
+## Build 024 natural-language Home Assistant path
+
+The Home chat profile now has a deterministic pre-provider command layer. Recognized explicit home
+imperatives are resolved against current Home Assistant state and the Build 023 safe-control allow
+list, then routed through the same bounded light/switch/scene methods.
+
+The AI provider is bypassed for recognized commands. Ordinary Home-profile questions still use the
+configured provider normally.

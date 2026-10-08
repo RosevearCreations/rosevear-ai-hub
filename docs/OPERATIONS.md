@@ -153,3 +153,25 @@ the allow list immediately. Tool Registry can also disable the light, switch, or
 globally.
 
 No port forwarding, public exposure, or additional cloud service is required.
+
+
+## Build 024 natural-language home commands
+
+No new installation or secret is required.
+
+To use the feature:
+1. keep Home Assistant connected
+2. configure the Build 023 safe-control allow list on Devices
+3. open Chat
+4. select the Home profile
+5. use one explicit command naming exactly one approved entity, for example:
+   - turn on Living room lamp
+   - turn Living room lamp off
+   - activate Movie night scene
+
+If the Hub reports ambiguity or a partial match, repeat the command with the exact friendly name
+shown on Devices. Build 024 deliberately will not guess.
+
+Bulk commands, hazardous targets, non-allow-listed entities, and unsupported actions do not execute.
+Recognized commands bypass Ollama generation; ordinary Home questions continue through the selected
+provider.

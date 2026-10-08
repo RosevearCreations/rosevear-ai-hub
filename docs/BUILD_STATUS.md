@@ -27,6 +27,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 021 | Home Assistant Connection | COMPLETE | main |
 | 022 | Entity Browser | COMPLETE | main |
 | 023 | Safe Device Controls | COMPLETE | main |
+| 024 | Natural-Language Home Tools | READY FOR CI | dev |
 
 ## Build 016 acceptance checklist
 
@@ -361,6 +362,48 @@ No new credential is required beyond Build 021. The existing Home Assistant URL 
 are reused. An Owner/Administrator must manually review and save the low-risk entity allow list
 before any device write can occur.
 
+## Build 024 acceptance checklist
+
+- [x] Home profile deterministic command interception
+- [x] explicit bounded natural-language action parser
+- [x] friendly-name resolution
+- [x] entity-ID and local-ID exact resolution
+- [x] duplicate friendly-name ambiguity handling
+- [x] partial-name no-guess behavior
+- [x] exact restatement requirement for partial/ambiguous targets
+- [x] Build 023 safe-control allow list remains mandatory
+- [x] non-allow-listed target blocking
+- [x] hazardous/safety-sensitive target blocking
+- [x] bulk home-control command blocking
+- [x] unsupported action blocking
+- [x] action/domain validation
+- [x] read-only natural-language execution denied
+- [x] exact allow-listed Level-1 direct-execution rule documented
+- [x] future Level-2 confirmation boundary retained
+- [x] recognized commands bypass LLM device/action selection
+- [x] ordinary Home-profile questions still use provider chat
+- [x] Home Assistant outage blocks recognized command execution
+- [x] Build 023 tool schema / enable-state checks reused
+- [x] Build 023 audit evidence reused for executed actions
+- [x] chat messages persist deterministic action results
+- [x] deterministic home commands work independently of provider runtime state
+- [x] parser/resolver unit coverage
+- [x] chat execution coverage
+- [x] ambiguity no-execution coverage
+- [x] no database migration required
+- [x] security/integration/architecture/operations/build documentation
+- [x] no new credential, cloud service, OAuth registration, or paid dependency
+- [ ] final Build 024 dev CI green
+- [ ] promoted to main
+- [ ] final Build 024 main CI green
+- [ ] dev synchronized with main
+
+## Operator setup
+
+No new credential is required. Keep the Build 021 Home Assistant connection and Build 023 safe
+control allow list. Select the **Home** chat profile and use explicit commands naming one exact
+allow-listed entity.
+
 ## Next build
 
-**Build 024 — Natural-Language Home Tools**
+**Build 025 — MQTT Foundation**

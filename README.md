@@ -90,9 +90,10 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 021 — Home Assistant Connection**
 - **Build 022 — Entity Browser**
 - **Build 023 — Safe Device Controls**
+- **Build 024 — Natural-Language Home Tools**
 
 ## Next build
 
-**Build 024 — Natural-Language Home Tools**
+**Build 025 — MQTT Foundation**
 
 The first functional MVP boundary is **Build 025**.

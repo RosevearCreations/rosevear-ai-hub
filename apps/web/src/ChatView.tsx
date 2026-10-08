@@ -354,7 +354,7 @@ export function ChatView() {
       <section className="chat-panel" aria-label="Local AI chat">
         <header className="chat-header">
           <div>
-            <p className="eyebrow">Build 010</p>
+            <p className="eyebrow">Build 024</p>
             <h1>{activeConversation?.title ?? "Chat"}</h1>
             <small className="profile-summary">
               {activeProfile
@@ -499,7 +499,7 @@ export function ChatView() {
             rows={4}
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
-            placeholder="Ask the local AI…"
+            placeholder="Ask the local AI… Home profile also accepts exact allow-listed home commands."
             disabled={
               status === "streaming" ||
               models.length === 0 ||
