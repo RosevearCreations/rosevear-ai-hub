@@ -84,15 +84,11 @@ class HomeCommandResolution:
 
 
 def load_safe_control_allowlist(session: Session) -> set[str]:
-    setting = session.scalar(
-        select(AppSetting).where(AppSetting.key == _ALLOWLIST_SETTING_KEY)
-    )
+    setting = session.scalar(select(AppSetting).where(AppSetting.key == _ALLOWLIST_SETTING_KEY))
     if setting is None or not isinstance(setting.value_json, list):
         return set()
     return {
-        value.strip()
-        for value in setting.value_json
-        if isinstance(value, str) and value.strip()
+        value.strip() for value in setting.value_json if isinstance(value, str) and value.strip()
     }
 
 
@@ -173,9 +169,7 @@ def _candidate_from_state(item: dict[str, Any]) -> HomeCommandCandidate | None:
 
 
 def _is_hazardous(candidate: HomeCommandCandidate) -> bool:
-    searchable = (
-        candidate.entity_id + " " + candidate.friendly_name
-    ).lower().replace("-", " ")
+    searchable = (candidate.entity_id + " " + candidate.friendly_name).lower().replace("-", " ")
     return any(marker in searchable for marker in _HAZARD_MARKERS)
 
 
@@ -236,13 +230,9 @@ def resolve_home_command(
         )
 
     candidates = [
-        candidate
-        for item in states
-        if (candidate := _candidate_from_state(item)) is not None
+        candidate for item in states if (candidate := _candidate_from_state(item)) is not None
     ]
-    exact = [
-        candidate for candidate in candidates if _matches_exact(parsed.target_text, candidate)
-    ]
+    exact = [candidate for candidate in candidates if _matches_exact(parsed.target_text, candidate)]
 
     if len(exact) > 1:
         return HomeCommandResolution(
@@ -259,9 +249,7 @@ def resolve_home_command(
 
     if not exact:
         partial = [
-            candidate
-            for candidate in candidates
-            if _matches_partial(parsed.target_text, candidate)
+            candidate for candidate in candidates if _matches_partial(parsed.target_text, candidate)
         ]
         if partial:
             names = ", ".join(item.friendly_name for item in partial[:5])
