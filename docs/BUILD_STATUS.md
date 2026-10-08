@@ -32,7 +32,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 026 | Rule Schema | COMPLETE | main |
 | 027 | Event Engine | COMPLETE | main |
 | 028 | AI-Assisted Rule Authoring | COMPLETE | main |
-| 029 | Automation History and Failure Handling | IN PROGRESS | dev |
+| 029 | Automation History and Failure Handling | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -612,10 +612,10 @@ Build 018 confirmation.
 - [x] no database migration required
 - [x] security/architecture/data-model/operations/build documentation
 - [x] no new credential, cloud service, OAuth registration, or paid dependency required
-- [ ] final Build 029 dev CI green
-- [ ] promoted to main
-- [ ] final Build 029 main CI green
-- [ ] dev synchronized with final main closeout target
+- [x] final Build 029 dev CI green — run 37850602230
+- [x] promoted to main — PR #42 / merge 6564d8511214da4fce0625345904cfa994299651
+- [x] final Build 029 main CI green — run 37851620839
+- [x] dev synchronized with final main closeout target
 
 ## Operator setup
 
