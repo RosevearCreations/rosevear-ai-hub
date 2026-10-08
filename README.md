@@ -94,11 +94,7 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 025 — MQTT Foundation**
 - **Build 026 — Rule Schema**
 - **Build 027 — Event Engine**
-
-## Current build
-
-**Build 028 — AI-Assisted Rule Authoring** is implemented on `dev` and is undergoing release
-verification.
+- **Build 028 — AI-Assisted Rule Authoring**
 
 ## Next build
 
