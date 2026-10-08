@@ -156,6 +156,15 @@ boundary crossing, cooldown and deduplication are checked against persistent run
 the explicitly supported Build 023 Level-1 Home Assistant tool contracts can execute autonomously.
 The Event Engine never asks an LLM whether a rule matches or which tool arguments to use.
 
+Build 028 adds AI-assisted authoring in front of this deterministic boundary. The authoring endpoint
+provides the selected AI provider with Rule Schema v1, currently registered Event Engine action
+contracts, bounded Home Assistant entity metadata, the safe-control allow list, and MQTT topic-policy
+metadata. Credentials are never included. Provider output is treated as untrusted structured input:
+the server parses strict JSON, validates Rule Schema v1, rechecks tool risk/enable state, and validates
+every action's arguments against the registered tool schema. The AI draft is not persisted. The
+Owner/Administrator workbench displays the exact JSON and warnings, then reuses the Build 018 Level-2
+confirmation and Build 026 apply path for an explicit human-approved save.
+
 ## Home Assistant adapter
 
 Build 021 implements the first IoT adapter against Home Assistant's authenticated REST API. The

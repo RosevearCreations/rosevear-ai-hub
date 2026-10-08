@@ -31,6 +31,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 025 | MQTT Foundation | COMPLETE | main |
 | 026 | Rule Schema | COMPLETE | main |
 | 027 | Event Engine | COMPLETE | main |
+| 028 | AI-Assisted Rule Authoring | IN PROGRESS | dev |
 
 ## Build 016 acceptance checklist
 
@@ -532,6 +533,52 @@ configuration are reused. Enabled MQTT-trigger rules are subscribed automaticall
 available. The Build 023 safe-control allow list remains mandatory before any automation can change a
 Home Assistant light, switch, or scene.
 
+## Build 028 acceptance checklist
+
+- [x] Owner/Administrator AI authoring boundary
+- [x] provider-neutral authoring path through the existing AI registry
+- [x] bounded 4,000-character authoring request
+- [x] bounded 32,000-character provider response
+- [x] JSON-only structured proposal contract
+- [x] strict Rule Schema v1 parsing after generation
+- [x] current Event Engine action-tool context supplied to the model
+- [x] current Home Assistant entity context supplied without credentials
+- [x] current safe-control allow-list context supplied without credentials
+- [x] current MQTT topic allow-list context supplied without broker credentials
+- [x] prompt/context treated as untrusted data in the system instruction
+- [x] generated tool references revalidated deterministically
+- [x] generated tool arguments revalidated against registered JSON schemas
+- [x] disabled tools and non-Event-Engine tools rejected
+- [x] Level 2 and Level 3 action boundary retained
+- [x] Home Assistant entity and safe-control warnings surfaced for human review
+- [x] MQTT allow-list warnings surfaced for human review
+- [x] drafts never persist automatically
+- [x] drafts recommend disabled creation
+- [x] existing exact Level-2 confirmation required before persistence
+- [x] explicit second approval required before apply
+- [x] authoring audit evidence excludes prompt plaintext
+- [x] provider failures fail closed without saving a rule
+- [x] Owner/Admin Automations workbench
+- [x] exact Rule Schema JSON review surface
+- [x] saved-rule visibility in the workbench
+- [x] backend authoring/role/validation/confirmation coverage
+- [x] web draft/review/confirm/create coverage
+- [x] no database migration required
+- [x] security/architecture/data-model/operations/build documentation
+- [x] no new credential, cloud service, OAuth registration, or paid dependency required
+- [ ] final Build 028 dev CI green
+- [ ] promoted to main
+- [ ] final Build 028 main CI green
+- [ ] dev synchronized with final main closeout target
+
+## Operator setup
+
+No new credential is required. AI-assisted authoring uses the already configured provider layer.
+For the current local-first deployment, install at least one Ollama model. Keep Home Assistant,
+the Build 023 safe-control allow list, and MQTT topic policy configured when those sources are used.
+Every generated rule remains unsaved until an Owner/Administrator explicitly approves its exact
+Build 018 confirmation.
+
 ## Next build
 
-**Build 028 — AI-Assisted Rule Authoring**
+**Build 029 — Automation History and Failure Handling**
