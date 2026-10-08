@@ -297,7 +297,6 @@ def list_automations(db: SessionDependency) -> list[AutomationRuleResponse]:
     return [_response(row) for row in rows]
 
 
-
 @router.post("/author/draft", response_model=AutomationAuthoringResponse)
 async def author_automation_draft(
     payload: AutomationAuthoringRequest,
