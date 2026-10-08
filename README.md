@@ -95,16 +95,12 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 026 — Rule Schema**
 - **Build 027 — Event Engine**
 - **Build 028 — AI-Assisted Rule Authoring**
-
-## Current build
-
-**Build 029 — Automation History and Failure Handling** is implemented on `dev` and is undergoing
-release verification.
+- **Build 029 — Automation History and Failure Handling**
 
 ## Next build
 
 **Build 030 — Notification Layer**
 
-The first functional MVP boundary remains Build 025. Build 029 turns Build 027 run evidence into an
-operator-visible history and closes restart/unexpected-failure gaps without automatically replaying
-physical-world actions whose outcome may be partial or uncertain.
+The first functional MVP boundary remains Build 025. Build 029 is fully promoted: Build 027 run
+evidence is now operator-visible, restart/unexpected-failure gaps are closed, and uncertain
+physical-world actions are never automatically replayed.

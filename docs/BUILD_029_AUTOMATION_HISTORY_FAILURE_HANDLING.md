@@ -2,7 +2,13 @@
 
 ## Status
 
-Implementation is on `dev` pending exact-head CI and promotion evidence.
+Complete on `main`.
+
+Release evidence:
+- verified dev gate: run `37850602230`
+- feature promotion: PR #42
+- feature merge: `6564d8511214da4fce0625345904cfa994299651`
+- verified feature main Production gate: run `37851620839`
 
 ## Scope
 
