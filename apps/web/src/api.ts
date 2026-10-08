@@ -1156,3 +1156,69 @@ export function controlHomeAssistantEntity(
     signal,
   );
 }
+
+
+export interface MQTTStatus {
+  configured: boolean;
+  available: boolean;
+  host: string | null;
+  port: number;
+  tls: boolean;
+  username_configured: boolean;
+  password_configured: boolean;
+  allowed_topics: string[];
+  subscriptions: string[];
+  reconnect_min_seconds: number;
+  reconnect_max_seconds: number;
+  message_count: number;
+  last_error: string | null;
+  message: string;
+}
+
+export interface MQTTMessage {
+  topic: string;
+  payload: string;
+  qos: number;
+  retain: boolean;
+  received_at: string;
+}
+
+export function getMQTTStatus(signal?: AbortSignal): Promise<MQTTStatus> {
+  return authJson<MQTTStatus>("GET", "/api/v1/mqtt/status", undefined, signal);
+}
+
+export function getMQTTMessages(limit = 50, signal?: AbortSignal): Promise<MQTTMessage[]> {
+  return authJson<MQTTMessage[]>(
+    "GET",
+    "/api/v1/mqtt/messages?limit=" + encodeURIComponent(String(limit)),
+    undefined,
+    signal,
+  );
+}
+
+export function subscribeMQTT(
+  topicFilter: string,
+  qos = 0,
+  signal?: AbortSignal,
+): Promise<{ subscribed: boolean; topic_filter: string; qos: number }> {
+  return authJson(
+    "POST",
+    "/api/v1/mqtt/subscriptions",
+    { topic_filter: topicFilter, qos },
+    signal,
+  );
+}
+
+export function publishMQTT(
+  topic: string,
+  payload: string,
+  qos = 0,
+  signal?: AbortSignal,
+): Promise<{ accepted: boolean; topic: string; qos: number; retain: boolean; message_id: number }> {
+  return authJson(
+    "POST",
+    "/api/v1/mqtt/publish",
+    { topic, payload, qos, retain: false },
+    signal,
+  );
+}

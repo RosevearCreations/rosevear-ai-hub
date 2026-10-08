@@ -231,3 +231,23 @@ For recognized exact allow-listed Level-1 commands, the Owner/Admin allow list i
 that permits direct execution and the user's explicit imperative is the exact requested action.
 Build 018 confirmation remains mandatory for future Level-2 actions and is not bypassed by this
 resolver.
+
+
+## MQTT foundation
+
+Build 025 treats MQTT as a private authenticated integration boundary:
+- anonymous broker access is not used; host, username, password, and an allow list are all required
+- the password is resolved through Build 020 and is never returned to the browser
+- the browser talks only to FastAPI and never opens a broker connection
+- publish topics cannot contain MQTT wildcards
+- wildcard subscriptions cannot broaden access beyond an explicitly configured allow-list filter
+- concrete topics are matched against configured MQTT filters before publish or subscription
+- retained publishes are blocked to avoid creating persistent broker-side commands
+- publish payload size is bounded and audit evidence stores only length/hash, not plaintext
+- reconnect uses bounded delay and restores only previously authorized subscriptions
+- recent received messages are bounded in memory and are not written to the audit log by default
+- MQTT is not exposed as an AI tool or automation action in this build
+
+When `MQTT_TLS=false`, broker credentials are not protected from a compromised local network path.
+Use a trusted private LAN/VLAN or enable a broker TLS listener with a certificate trusted by the Hub
+host. Never expose the MQTT listener directly to the public internet.

@@ -242,3 +242,26 @@ chat prompt
 If the prompt is not a recognized home-control command, the normal provider-neutral streaming chat
 path continues unchanged. The architecture intentionally avoids LLM-selected device IDs or generic
 Home Assistant service calls.
+
+
+## Build 025 MQTT foundation
+
+Build 025 adds a server-owned MQTT adapter beside Home Assistant. The browser never opens a broker
+socket and never receives the broker password.
+
+The bounded path is:
+
+authenticated Hub user
+-> MQTT API
+-> topic/filter validation
+-> configured topic allow list
+-> authenticated broker client
+-> local broker
+
+Subscriptions are restored after reconnect. Reconnect delay stays inside the configured minimum and
+maximum. Concrete subscriptions may sit beneath an allow-listed wildcard, but wildcard subscription
+requests must exactly match an allow-list entry so callers cannot widen broker visibility.
+
+MQTT publish remains a human-invoked integration action in Build 025. It is not an AI-executable tool
+and is not yet an automation action. Retained publishes are blocked until a later build deliberately
+defines their lifecycle and safety semantics.

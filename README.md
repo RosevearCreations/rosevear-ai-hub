@@ -91,9 +91,10 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 022 — Entity Browser**
 - **Build 023 — Safe Device Controls**
 - **Build 024 — Natural-Language Home Tools**
+- **Build 025 — MQTT Foundation**
 
 ## Next build
 
-**Build 025 — MQTT Foundation**
+**Build 026 — Rule Schema**
 
-The first functional MVP boundary is **Build 025**.
+The first functional MVP boundary has now been reached through **Build 025**.

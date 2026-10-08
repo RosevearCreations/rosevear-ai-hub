@@ -64,10 +64,36 @@ class Settings(BaseSettings):
         le=60,
         alias="HOME_ASSISTANT_TIMEOUT_SECONDS",
     )
-    mqtt_password: SecretStr | None = Field(
-        default=None,
-        alias="MQTT_PASSWORD",
+    mqtt_host: str = Field(default="", alias="MQTT_HOST")
+    mqtt_port: int = Field(default=1883, ge=1, le=65535, alias="MQTT_PORT")
+    mqtt_username: str = Field(default="", alias="MQTT_USERNAME")
+    mqtt_password: SecretStr | None = Field(default=None, alias="MQTT_PASSWORD")
+    mqtt_tls: bool = Field(default=False, alias="MQTT_TLS")
+    mqtt_client_id: str = Field(
+        default="rosevear-ai-hub",
+        min_length=1,
+        max_length=128,
+        alias="MQTT_CLIENT_ID",
     )
+    mqtt_keepalive_seconds: int = Field(
+        default=60,
+        ge=15,
+        le=300,
+        alias="MQTT_KEEPALIVE_SECONDS",
+    )
+    mqtt_reconnect_min_seconds: int = Field(
+        default=1,
+        ge=1,
+        le=60,
+        alias="MQTT_RECONNECT_MIN_SECONDS",
+    )
+    mqtt_reconnect_max_seconds: int = Field(
+        default=30,
+        ge=1,
+        le=600,
+        alias="MQTT_RECONNECT_MAX_SECONDS",
+    )
+    mqtt_allowed_topics: str = Field(default="", alias="MQTT_ALLOWED_TOPICS")
     knowledge_storage_dir: Path = Field(
         default=Path("./data/knowledge"),
         alias="KNOWLEDGE_STORAGE_DIR",

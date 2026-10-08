@@ -16,6 +16,7 @@ import { ChatView } from "./ChatView";
 import { ConfirmationsView } from "./ConfirmationsView";
 import { HomeAssistantView } from "./HomeAssistantView";
 import { KnowledgeView } from "./KnowledgeView";
+import { MQTTView } from "./MQTTView";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
 import { UsersView } from "./UsersView";
@@ -35,7 +36,7 @@ type AuthState =
   | { kind: "error"; message: string }
   | { kind: "ready"; status: AuthStatus };
 
-const baseSections = ["Home", "Chat", "Knowledge", "Devices", "System"] as const;
+const baseSections = ["Home", "Chat", "Knowledge", "Devices", "MQTT", "System"] as const;
 type Section = (typeof baseSections)[number] | "Users" | "Tools" | "Confirmations" | "Audit" | "Secrets";
 
 export function App() {
@@ -205,6 +206,8 @@ export function App() {
           <KnowledgeView currentUser={user} />
         ) : section === "Devices" ? (
           <HomeAssistantView currentUser={user} />
+        ) : section === "MQTT" ? (
+          <MQTTView currentUser={user} />
         ) : section === "Confirmations" ? (
           <ConfirmationsView />
         ) : section === "Audit" ? (
@@ -222,6 +225,7 @@ export function App() {
             onOpenChat={() => setSection("Chat")}
             onOpenKnowledge={() => setSection("Knowledge")}
             onOpenDevices={() => setSection("Devices")}
+            onOpenMQTT={() => setSection("MQTT")}
           />
         )}
       </main>
@@ -242,18 +246,20 @@ function HomeView({
   onOpenChat,
   onOpenKnowledge,
   onOpenDevices,
+  onOpenMQTT,
 }: {
   health: HealthState;
   ollama: OllamaState;
   onOpenChat: () => void;
   onOpenKnowledge: () => void;
   onOpenDevices: () => void;
+  onOpenMQTT: () => void;
 }) {
   return (
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 023</p>
+          <p className="eyebrow">Build 025</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -311,6 +317,14 @@ function HomeView({
           <p>Allow-listed low-risk lights, switches, and scenes can now be controlled with audit evidence.</p>
           <button type="button" onClick={onOpenDevices}>
             Open devices
+          </button>
+        </article>
+
+        <article className="panel">
+          <h2>MQTT</h2>
+          <p>Authenticated broker messaging is available only through the configured topic allow list.</p>
+          <button type="button" onClick={onOpenMQTT}>
+            Open MQTT
           </button>
         </article>
       </section>
