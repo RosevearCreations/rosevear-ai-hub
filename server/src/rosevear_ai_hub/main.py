@@ -21,7 +21,8 @@ from rosevear_ai_hub.api.profiles import router as profiles_router
 from rosevear_ai_hub.api.providers import router as providers_router
 from rosevear_ai_hub.api.secrets import router as secrets_router
 from rosevear_ai_hub.api.tools import router as tools_router
-from rosevear_ai_hub.auth import require_authenticated, router as auth_router
+from rosevear_ai_hub.auth import require_authenticated
+from rosevear_ai_hub.auth import router as auth_router
 from rosevear_ai_hub.automation_runtime import AutomationEventRuntime
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.logging import configure_logging
