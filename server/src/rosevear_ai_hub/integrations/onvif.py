@@ -80,7 +80,7 @@ def _name_from_scopes(scopes: tuple[str, ...]) -> str | None:
     for prefix in prefixes:
         for scope in scopes:
             if scope.startswith(prefix):
-                candidate = unquote(scope[len(prefix):]).strip()
+                candidate = unquote(scope[len(prefix) :]).strip()
                 if candidate:
                     return candidate[:160]
     return None
