@@ -52,7 +52,7 @@ Build 020 makes secret handling a dedicated security boundary:
 - configuration objects use secret-aware Pydantic fields so values are redacted from representations
 - secret administration audit records contain identity/operation metadata, not submitted plaintext
 - `SECRET_ENCRYPTION_PREVIOUS_KEY` is accepted only as a temporary rotation aid
-- master-key rotation rewraps stored ciphertext under the new current key before the previous key is removed
+- master-key rotation rewraps generic stored secrets and Build 032 encrypted camera RTSP sources under the new current key before the previous key is removed
 
 Encrypted-at-rest storage protects database copies, but it does not protect against a fully
 compromised process that already has access to the live master key. Host account security,
