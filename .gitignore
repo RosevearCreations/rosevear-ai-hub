@@ -26,6 +26,8 @@ data/*.sqlite3
 data/backups/
 data/models/
 data/knowledge/
+data/go2rtc/
+tools/go2rtc/
 
 # Logs
 *.log
