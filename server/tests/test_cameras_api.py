@@ -135,9 +135,6 @@ class FakeGo2RTC:
             local_rtsp_only=True,
         )
 
-    def ensure_placeholder(self, stream_name):
-        self.stream_name = stream_name
-
     def patch_runtime_source(self, stream_name, source_url):
         self.source_url = source_url
 
