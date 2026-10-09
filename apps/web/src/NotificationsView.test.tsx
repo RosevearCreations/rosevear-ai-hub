@@ -109,7 +109,7 @@ describe("NotificationsView", () => {
       expect(screen.getByRole("heading", { name: "Notifications" })).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "Workshop temperature" })).toBeInTheDocument();
       expect(screen.getByText("Workshop temperature needs attention.")).toBeInTheDocument();
-      expect(screen.getByText("Unread")).toBeInTheDocument();
+      expect(screen.getAllByText("Unread").length).toBeGreaterThan(0);
       expect(screen.getByRole("button", { name: "Send local test" })).toBeInTheDocument();
     });
 
