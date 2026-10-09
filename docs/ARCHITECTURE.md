@@ -377,3 +377,30 @@ the camera registry, go2rtc live dashboard, Home Assistant, MQTT, chat, or knowl
 
 Build 034 does not persist Frigate events or execute automations from them. Build 035 will define
 durable event-ingestion/deduplication and automation semantics.
+
+
+## Build 035 camera-event automation path
+
+Build 035 connects the optional Frigate adapter to the existing deterministic Event Engine:
+
+enabled frigate_event rule
+-> bounded loopback Frigate event poll
+-> first-use historical baseline suppression
+-> normalized Frigate event
+-> runtime queue
+-> Rule Schema trigger/condition matching
+-> automatic event-ID deduplication
+-> existing Level-1 action executor
+-> automation run + audit evidence
+-> bounded persistent seen-event checkpoint
+
+The Frigate source remains dormant when no enabled camera-event rule exists. The browser never
+polls Frigate and receives no raw event payload for automation execution.
+
+The first successful poll after camera-event automation becomes active seeds the current Frigate
+history as already seen. This intentionally avoids firing physical actions for old events. Later
+events are checkpointed only after an execution attempt reaches the worker, while the Event Engine
+also persists per-rule deduplication evidence so restart timing cannot silently replay a completed
+camera-triggered action.
+
+Build 035 reuses app_settings for a bounded source checkpoint and therefore requires no migration.
