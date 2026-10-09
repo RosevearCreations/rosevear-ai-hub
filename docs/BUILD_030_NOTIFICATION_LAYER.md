@@ -2,7 +2,13 @@
 
 ## Status
 
-Implementation is on dev pending exact-head CI and promotion evidence.
+Feature promotion verified on main.
+
+- final feature dev CI: run 37875622964 — GREEN
+- feature promotion: PR #44
+- feature merge: 94d082716804e4810b4bbf2c950a9ca710feb436
+- feature main Production CI: run 37876478895 — GREEN
+- release-evidence closeout: pending this documentation-only closeout commit
 
 ## Scope
 

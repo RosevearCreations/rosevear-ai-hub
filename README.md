@@ -97,17 +97,13 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 028 — AI-Assisted Rule Authoring**
 - **Build 029 — Automation History and Failure Handling**
 
-## Current build
-
-**Build 030 — Notification Layer** is implemented on dev and undergoing release verification.
-
-It adds persistent local household notifications, deterministic automation delivery, per-user inbox
-state, and a contextual circled-i help system across every primary application section.
+- **Build 030 — Notification Layer**
 
 ## Next build
 
 **Build 031 — Camera Registry and ONVIF Discovery**
 
-The first functional MVP boundary remains Build 025. Build 030 deliberately remains local-first:
-external email, SMS, push, and webhook delivery are not introduced and continue to require a
-separate confirmed integration design.
+The first functional MVP boundary remains Build 025. Build 030 is fully feature-promoted: it adds
+persistent local household notifications, deterministic automation delivery, per-user inbox state,
+and a contextual circled-i help system across every primary application section. External email,
+SMS, push, and webhook delivery are intentionally not introduced.
