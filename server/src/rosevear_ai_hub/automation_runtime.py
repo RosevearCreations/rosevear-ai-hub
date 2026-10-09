@@ -386,9 +386,7 @@ class AutomationEventRuntime:
         return count
 
     def _load_frigate_seen_state(self, db: Session) -> None:
-        setting = db.scalar(
-            select(AppSetting).where(AppSetting.key == _FRIGATE_SEEN_SETTING_KEY)
-        )
+        setting = db.scalar(select(AppSetting).where(AppSetting.key == _FRIGATE_SEEN_SETTING_KEY))
         if setting is None:
             self._frigate_seen_ids = set()
             self._frigate_seen_initialized = False
