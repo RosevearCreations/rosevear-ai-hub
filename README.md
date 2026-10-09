@@ -98,11 +98,11 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 029 — Automation History and Failure Handling**
 
 - **Build 030 — Notification Layer**
-- **Build 032 — RTSP / go2rtc Integration**
+- **Build 031 — Camera Registry and ONVIF Discovery**
 
 ## Next build
 
-**Build 031 — Camera Registry and ONVIF Discovery**
+**Build 032 — RTSP / go2rtc Integration**
 
 The first functional MVP boundary remains Build 025. Build 031 adds a persistent local camera
 registry plus bounded ONVIF WS-Discovery for private LAN device-service endpoints. Streaming,
