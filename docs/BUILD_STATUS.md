@@ -37,6 +37,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 031 | Camera Registry and ONVIF Discovery | COMPLETE | main via PR #47 |
 | 032 | RTSP / go2rtc Integration | COMPLETE | main via PR #50 |
 | 033 | Camera Dashboard and Health | COMPLETE | main via PR #53 |
+| 034 | Frigate Adapter | IN PROGRESS | dev |
 
 ## Build 016 acceptance checklist
 
@@ -812,7 +813,47 @@ through PR #53 to main merge `9eb8fa52953ff813e026574da46f958ae49a54f6`. Main Pr
 37984006237 passed all four lanes. The protected-main release-evidence closeout is followed by
 synchronization back to dev so both branches carry the final release record.
 
+## Build 034 acceptance checklist
+
+- [x] loopback-only Frigate HTTP adapter
+- [x] strict FRIGATE_BASE_URL validation
+- [x] Frigate service/version status
+- [x] normalized configured-camera capability inventory
+- [x] bounded recent event retrieval
+- [x] event payload normalization
+- [x] maximum event response cap of 100
+- [x] authenticated Frigate status/camera/event API
+- [x] no Frigate write endpoints
+- [x] read_only / household users can view Frigate metadata
+- [x] browser never connects directly to Frigate
+- [x] Frigate panel integrated into Cameras
+- [x] Frigate camera capability display
+- [x] recent object-event display
+- [x] Frigate offline state isolated from camera dashboard
+- [x] backend adapter tests
+- [x] backend API/role tests
+- [x] Frigate web panel tests
+- [x] contextual help updated
+- [x] integration/security/architecture/operations/build documentation
+- [x] backend/desktop version 0.0.34
+- [x] no database migration required
+- [x] no new Hub secret required in supported loopback mode
+- [ ] final Build 034 dev CI green
+- [ ] promoted to main
+- [ ] final Build 034 main Production CI green
+- [ ] release-evidence closeout complete
+- [ ] dev synchronized with final main closeout target
+
+## Operator setup
+
+Frigate is optional. The supported Build 034 mode uses
+`FRIGATE_BASE_URL=http://127.0.0.1:5000` and requires that Frigate's internal API remain
+loopback-only. No Frigate installation is required for the Hub itself to start or for existing
+ONVIF/go2rtc camera functionality to keep working.
+
+Build 034 is read-only. Camera Event Automations begin in Build 035.
+
 ## Next build
 
-**Build 034 — Frigate Adapter**
+**Build 035 — Camera Event Automations**
 
