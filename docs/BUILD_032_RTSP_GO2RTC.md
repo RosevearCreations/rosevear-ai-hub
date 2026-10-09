@@ -49,7 +49,8 @@ RTSP source configuration must:
 
 Credential-bearing RTSP source URLs are encrypted with the existing Hub master encryption key.
 Only sanitized scheme/host/port/credential-present metadata is persisted in cleartext. The source
-URL is not returned through the API or UI after save.
+URL is not returned through the API or UI after save. The existing master-key rewrap operation also
+rewraps camera stream source ciphertext before the previous key is removed.
 
 Hub-managed stream creation uses go2rtc runtime PATCH directly. Neither the stream entry nor its
 credential-bearing source is persisted into go2rtc.yaml, so the YAML file does not become a second
