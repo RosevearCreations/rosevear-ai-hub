@@ -206,7 +206,7 @@ def test_owner_configures_encrypted_rtsp_and_probes(
 def test_rtsp_source_must_be_private_literal_ip(
     tmp_path, monkeypatch, stream_secret_key
 ) -> None:
-    client = build_stream_client(tmp_path, monkeypatch)
+    client = build_stream_client(tmp_path)
     monkeypatch.setattr(
         "rosevear_ai_hub.api.cameras.get_go2rtc_client",
         lambda: FakeGo2RTC(),
@@ -233,7 +233,7 @@ def test_rtsp_source_must_be_private_literal_ip(
 def test_household_user_cannot_configure_camera_stream(
     tmp_path, monkeypatch, stream_secret_key
 ) -> None:
-    client = build_stream_client(tmp_path, monkeypatch)
+    client = build_stream_client(tmp_path)
     monkeypatch.setattr(
         "rosevear_ai_hub.api.cameras.get_go2rtc_client",
         lambda: FakeGo2RTC(),
