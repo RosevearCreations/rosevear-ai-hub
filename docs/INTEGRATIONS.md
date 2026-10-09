@@ -70,6 +70,17 @@ Build 032 owns RTSP/go2rtc transport and must not assume that a discovered ONVIF
 **Priority:** Medium  
 **Role:** Local stream transport.
 
+Build 032 implements the local transport boundary:
+- go2rtc HTTP API access is accepted only through localhost/loopback
+- the supplied Windows config template binds API, RTSP, and WebRTC listeners to loopback
+- camera RTSP/RTSPS sources must resolve from literal private/link-local/loopback IP addresses
+- source URLs may contain camera credentials, but the full value is encrypted in Hub SQLite and never returned after save
+- Hub-managed camera streams are patched directly into go2rtc runtime memory and are not persisted into go2rtc YAML
+- Owner/Administrator can configure, remove, reconcile, and probe streams
+- lower authenticated roles can inspect sanitized transport metadata only
+- no PTZ, talkback, reboot, firmware, public publishing, or cloud streaming is introduced
+- Build 033 owns the multi-camera dashboard and health experience
+
 ## Frigate
 **Priority:** Medium  
 **Role:** Optional local NVR/object-event system.

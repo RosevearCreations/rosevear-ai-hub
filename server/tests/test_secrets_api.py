@@ -1,5 +1,6 @@
 import base64
 import os
+from datetime import UTC, datetime
 
 from fastapi.testclient import TestClient
 from sqlalchemy import select
@@ -8,8 +9,13 @@ from sqlalchemy.orm import sessionmaker
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.database import build_engine, get_session
 from rosevear_ai_hub.main import create_app
-from rosevear_ai_hub.models import AuditEvent, Base, SecretValue
-from rosevear_ai_hub.secrets import key_fingerprint, resolve_secret
+from rosevear_ai_hub.models import AuditEvent, Base, Camera, CameraStream, SecretValue
+from rosevear_ai_hub.secrets import (
+    decrypt_scoped_value,
+    encrypt_scoped_value,
+    key_fingerprint,
+    resolve_secret,
+)
 
 
 def new_key() -> str:
@@ -218,3 +224,71 @@ def test_household_user_cannot_administer_secrets(tmp_path, monkeypatch) -> None
         == 403
     )
     assert client.post("/api/v1/secrets/rewrap").status_code == 403
+
+
+def test_master_key_rewrap_includes_camera_stream_sources(tmp_path, monkeypatch) -> None:
+    old_key = new_key()
+    new_master_key = new_key()
+    client, session_maker = build_client(tmp_path, monkeypatch, current_key=old_key)
+    source = "rtsp://camera-user:camera-password@192.168.68.55/live"
+
+    with session_maker() as session:
+        camera = Camera(
+            endpoint_uuid="rewrap-camera",
+            display_name="Rewrap Camera",
+            host="192.168.68.55",
+            port=80,
+            service_url="http://192.168.68.55/onvif/device_service",
+            discovery_source="onvif_ws_discovery",
+            onvif_types=[],
+            scopes=[],
+            enabled=True,
+            last_seen_at=datetime.now(UTC),
+        )
+        session.add(camera)
+        session.flush()
+        ciphertext, fingerprint = encrypt_scoped_value(
+            source,
+            scope=f"camera.stream.{camera.id}",
+        )
+        stream = CameraStream(
+            camera_id=camera.id,
+            stream_name=f"camera-{camera.id}",
+            source_scheme="rtsp",
+            source_host="192.168.68.55",
+            source_port=554,
+            credentials_present=True,
+            source_ciphertext=ciphertext,
+            key_fingerprint=fingerprint,
+            enabled=True,
+        )
+        session.add(stream)
+        session.commit()
+        stream_id = stream.id
+
+    monkeypatch.setenv("SECRET_ENCRYPTION_KEY", new_master_key)
+    monkeypatch.setenv("SECRET_ENCRYPTION_PREVIOUS_KEY", old_key)
+    get_settings.cache_clear()
+
+    rewrapped = client.post("/api/v1/secrets/rewrap")
+    assert rewrapped.status_code == 200
+    assert rewrapped.json()["rewrapped"] == 1
+
+    monkeypatch.delenv("SECRET_ENCRYPTION_PREVIOUS_KEY", raising=False)
+    get_settings.cache_clear()
+
+    expected_fingerprint = key_fingerprint(
+        base64.urlsafe_b64decode(new_master_key + "=" * (-len(new_master_key) % 4))
+    )
+    with session_maker() as session:
+        stream = session.get(CameraStream, stream_id)
+        assert stream is not None
+        assert stream.key_fingerprint == expected_fingerprint
+        assert source not in stream.source_ciphertext
+        assert (
+            decrypt_scoped_value(
+                stream.source_ciphertext,
+                scope=f"camera.stream.{stream.camera_id}",
+            )
+            == source
+        )

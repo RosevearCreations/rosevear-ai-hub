@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.config import Settings, get_settings
-from rosevear_ai_hub.models import SecretValue, User
+from rosevear_ai_hub.models import CameraStream, SecretValue, User
 
 _CIPHERTEXT_PREFIX: Final = "v1"
 
@@ -248,16 +248,36 @@ def rewrap_all_secrets(
         raise HTTPException(status_code=503, detail="SECRET_ENCRYPTION_KEY is not configured.")
 
     records = session.scalars(select(SecretValue).order_by(SecretValue.id.asc())).all()
+    camera_streams = session.scalars(select(CameraStream).order_by(CameraStream.id.asc())).all()
+
     plaintext_by_id = {record.id: _decrypt_record(record, settings) for record in records}
+    camera_plaintext_by_id = {
+        stream.id: decrypt_scoped_value(
+            stream.source_ciphertext,
+            scope=f"camera.stream.{stream.camera_id}",
+            settings=settings,
+        )
+        for stream in camera_streams
+    }
+
     now = datetime.now(UTC)
+    fingerprint = key_fingerprint(raw_key)
     for record in records:
         record.ciphertext = _encrypt(
             plaintext_by_id[record.id],
             raw_key,
             secret_key=record.secret_key,
         )
-        record.key_fingerprint = key_fingerprint(raw_key)
+        record.key_fingerprint = fingerprint
         record.rotated_at = now
+
+    for stream in camera_streams:
+        stream.source_ciphertext = _encrypt(
+            camera_plaintext_by_id[stream.id],
+            raw_key,
+            secret_key=f"camera.stream.{stream.camera_id}",
+        )
+        stream.key_fingerprint = fingerprint
 
     record_audit_event(
         session,
@@ -266,8 +286,45 @@ def rewrap_all_secrets(
         object_type="secret_store",
         object_id=None,
         action="rewrap",
-        arguments={"secret_count": len(records)},
+        arguments={
+            "secret_count": len(records),
+            "camera_stream_count": len(camera_streams),
+        },
         result={"ok": True},
     )
     session.commit()
-    return len(records)
+    return len(records) + len(camera_streams)
+
+
+def encrypt_scoped_value(
+    plaintext: str,
+    *,
+    scope: str,
+    settings: Settings | None = None,
+) -> tuple[str, str]:
+    """Encrypt an integration-owned value without exposing it through the generic Secrets API."""
+
+    settings = settings or get_settings()
+    raw_key = current_key(settings)
+    if raw_key is None:
+        raise RuntimeError("SECRET_ENCRYPTION_KEY is not configured.")
+    return _encrypt(plaintext, raw_key, secret_key=scope), key_fingerprint(raw_key)
+
+
+def decrypt_scoped_value(
+    ciphertext: str,
+    *,
+    scope: str,
+    settings: Settings | None = None,
+) -> str:
+    """Decrypt an integration-owned value with current/previous-key rotation support."""
+
+    settings = settings or get_settings()
+    for raw_key in (current_key(settings), previous_key(settings)):
+        if raw_key is None:
+            continue
+        try:
+            return _decrypt(ciphertext, raw_key, secret_key=scope)
+        except RuntimeError:
+            continue
+    raise RuntimeError("No configured encryption key can decrypt this scoped value.")

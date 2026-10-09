@@ -35,6 +35,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 029 | Automation History and Failure Handling | COMPLETE | main |
 | 030 | Notification Layer | COMPLETE | main |
 | 031 | Camera Registry and ONVIF Discovery | COMPLETE | main via PR #47 |
+| 032 | RTSP / go2rtc Integration | IN PROGRESS | dev |
 
 ## Build 016 acceptance checklist
 
@@ -717,7 +718,51 @@ Build 031 feature promotion is complete. The exact GREEN dev tree
 The release-evidence closeout is followed by a final fast-forward synchronization of dev to the
 verified main closeout commit.
 
+## Build 032 acceptance checklist
+
+- [x] loopback-only go2rtc HTTP API adapter
+- [x] local go2rtc status/version/listener visibility
+- [x] RTSP/RTSPS source validation restricted to literal private/local IP addresses
+- [x] AES-GCM encrypted camera source URL storage
+- [x] source credentials never returned after save
+- [x] sanitized cleartext transport metadata only
+- [x] Hub-managed go2rtc stream entries are runtime-only and not persisted to YAML
+- [x] credential-bearing source patched to go2rtc runtime memory only
+- [x] Owner/Administrator stream configuration
+- [x] Owner/Administrator stream deletion
+- [x] Owner/Administrator stream probe
+- [x] Owner/Administrator go2rtc reconcile
+- [x] automatic best-effort stream rehydration on Hub startup
+- [x] lower authenticated roles receive sanitized transport metadata only
+- [x] stable local relay endpoint metadata
+- [x] camera transport audit evidence
+- [x] Windows go2rtc startup helper
+- [x] loopback-only go2rtc config template
+- [x] dev-desktop auto-start when go2rtc.exe is installed
+- [x] reversible migration 0016
+- [x] migration upgrade/downgrade coverage
+- [x] go2rtc adapter tests
+- [x] encrypted RTSP API/role/security tests
+- [x] RTSP/go2rtc web UI coverage
+- [x] contextual camera help updated
+- [x] security/data-model/integration/architecture/operations/build documentation
+- [x] no cloud account, OAuth application, API key, or paid dependency required
+- [ ] final Build 032 dev CI green
+- [ ] promoted to main
+- [ ] final Build 032 main Production CI green
+- [ ] release-evidence closeout complete
+- [ ] dev synchronized with final main closeout target
+
+## Operator setup
+
+Real camera transport requires the official go2rtc Windows binary at
+`tools\go2rtc\go2rtc.exe`. The Hub keeps safe defaults for localhost ports 1984/8554/8555 and
+requires the existing `SECRET_ENCRYPTION_KEY` before saving credential-bearing RTSP sources.
+
+Build 032 deliberately stops at transport configuration/probe/reconcile. Build 033 owns the camera
+dashboard and health experience.
+
 ## Next build
 
-**Build 032 — RTSP / go2rtc Integration**
+**Build 033 — Camera Dashboard and Health**
 

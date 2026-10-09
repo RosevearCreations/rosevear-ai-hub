@@ -99,11 +99,12 @@ Major architecture changes require an ADR under `docs/adr/`.
 
 - **Build 030 — Notification Layer**
 - **Build 031 — Camera Registry and ONVIF Discovery**
+- **Build 032 — RTSP / go2rtc Integration**
 
 ## Next build
 
-**Build 032 — RTSP / go2rtc Integration**
+**Build 033 — Camera Dashboard and Health**
 
-The first functional MVP boundary remains Build 025. Build 031 adds a persistent local camera
-registry plus bounded ONVIF WS-Discovery for private LAN device-service endpoints. Streaming,
-camera credentials, RTSP/go2rtc transport, PTZ, and camera device writes remain outside this build.
+The first functional MVP boundary remains Build 025. Build 032 adds encrypted private-LAN RTSP
+source configuration and loopback-only go2rtc transport. Multi-camera live dashboard/health,
+Frigate, PTZ, talkback, and public camera exposure remain outside this build.

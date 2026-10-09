@@ -27,6 +27,7 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "automation_runs",
         "audit_events",
         "cameras",
+        "camera_streams",
         "chat_messages",
         "confirmation_requests",
         "conversations",
@@ -60,6 +61,7 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
     audit_columns = {column["name"] for column in inspector.get_columns("audit_events")}
     secret_columns = {column["name"] for column in inspector.get_columns("secret_values")}
     camera_columns = {column["name"] for column in inspector.get_columns("cameras")}
+    camera_stream_columns = {column["name"] for column in inspector.get_columns("camera_streams")}
     notification_columns = {column["name"] for column in inspector.get_columns("notifications")}
     notification_receipt_columns = {
         column["name"] for column in inspector.get_columns("notification_receipts")
@@ -185,6 +187,23 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "updated_at",
     }.issubset(camera_columns)
     assert {
+        "camera_id",
+        "stream_name",
+        "source_scheme",
+        "source_host",
+        "source_port",
+        "credentials_present",
+        "source_ciphertext",
+        "key_fingerprint",
+        "enabled",
+        "last_sync_at",
+        "last_probe_at",
+        "last_probe_status",
+        "last_error",
+        "created_at",
+        "updated_at",
+    }.issubset(camera_stream_columns)
+    assert {
         "audience",
         "title",
         "message",
@@ -225,6 +244,7 @@ def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
     test_engine = create_engine(f"sqlite:///{database_path}")
     tables = set(inspect(test_engine).get_table_names())
 
+    assert "camera_streams" not in tables
     assert "cameras" not in tables
     assert "notification_receipts" not in tables
     assert "notifications" not in tables

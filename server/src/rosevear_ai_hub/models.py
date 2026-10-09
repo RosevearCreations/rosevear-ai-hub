@@ -380,6 +380,31 @@ class Camera(TimestampMixin, Base):
     )
 
 
+class CameraStream(TimestampMixin, Base):
+    """Encrypted RTSP source configuration for one camera."""
+
+    __tablename__ = "camera_streams"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    camera_id: Mapped[int] = mapped_column(
+        ForeignKey("cameras.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+    )
+    stream_name: Mapped[str] = mapped_column(String(160), nullable=False, unique=True)
+    source_scheme: Mapped[str] = mapped_column(String(16), nullable=False)
+    source_host: Mapped[str] = mapped_column(String(255), nullable=False)
+    source_port: Mapped[int] = mapped_column(Integer, nullable=False)
+    credentials_present: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    source_ciphertext: Mapped[str] = mapped_column(Text, nullable=False)
+    key_fingerprint: Mapped[str] = mapped_column(String(16), nullable=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
+    last_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_probe_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_probe_status: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    last_error: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+
 class Notification(Base):
     """Persistent local household notification introduced by Build 030."""
 

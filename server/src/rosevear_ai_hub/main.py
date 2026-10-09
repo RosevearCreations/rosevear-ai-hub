@@ -26,6 +26,7 @@ from rosevear_ai_hub.api.tools import router as tools_router
 from rosevear_ai_hub.auth import require_authenticated
 from rosevear_ai_hub.auth import router as auth_router
 from rosevear_ai_hub.automation_runtime import AutomationEventRuntime
+from rosevear_ai_hub.camera_runtime import reconcile_camera_streams
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.logging import configure_logging
 from rosevear_ai_hub.schemas import HealthResponse, VersionResponse
@@ -37,6 +38,7 @@ async def _lifespan(application: FastAPI):
     application.state.automation_event_runtime = runtime
     await runtime.start()
     try:
+        reconcile_camera_streams()
         yield
     finally:
         await runtime.stop()

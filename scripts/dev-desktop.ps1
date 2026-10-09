@@ -11,6 +11,15 @@ Push-Location $RepoRoot
 try {
     & $Python -m alembic upgrade head
 
+    $Go2RTCExe = Join-Path $RepoRoot "tools\go2rtc\go2rtc.exe"
+    $Go2RTCLauncher = Join-Path $RepoRoot "scripts\start-go2rtc.ps1"
+    if ((Test-Path $Go2RTCExe) -and (Test-Path $Go2RTCLauncher)) {
+        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $Go2RTCLauncher
+    }
+    else {
+        Write-Host "go2rtc is not installed under tools\go2rtc; camera transport will report offline." -ForegroundColor Yellow
+    }
+
     $Backend = Start-Process -FilePath $Python -ArgumentList "-m", "uvicorn", "rosevear_ai_hub.main:app", "--host", "127.0.0.1", "--port", "8765" -WorkingDirectory $RepoRoot -PassThru
     $Web = Start-Process -FilePath "npm.cmd" -ArgumentList "run", "web:dev" -WorkingDirectory $RepoRoot -PassThru
 

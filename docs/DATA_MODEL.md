@@ -305,3 +305,26 @@ there is no email address, phone number, push token, or external delivery creden
 
 A unique notification_id plus user_id receipt carries personal inbox state. The shared notification
 row remains unchanged when one user reads or dismisses an alert.
+
+
+## camera_streams
+- id
+- camera_id
+- stream_name
+- source_scheme
+- source_host
+- source_port
+- credentials_present
+- source_ciphertext
+- key_fingerprint
+- enabled
+- last_sync_at
+- last_probe_at
+- last_probe_status
+- last_error
+- created_at
+- updated_at
+
+Build 032 stores one optional transport record per camera. The credential-bearing RTSP/RTSPS source
+URL is AES-GCM encrypted with the existing Hub master key; only sanitized scheme/host/port metadata
+is cleartext. The encrypted source is never returned to clients after save.
