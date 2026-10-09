@@ -17,7 +17,9 @@ import { ChatView } from "./ChatView";
 import { ConfirmationsView } from "./ConfirmationsView";
 import { HomeAssistantView } from "./HomeAssistantView";
 import { KnowledgeView } from "./KnowledgeView";
+import { SectionHelp } from "./HelpSystem";
 import { MQTTView } from "./MQTTView";
+import { NotificationsView } from "./NotificationsView";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
 import { UsersView } from "./UsersView";
@@ -37,7 +39,15 @@ type AuthState =
   | { kind: "error"; message: string }
   | { kind: "ready"; status: AuthStatus };
 
-const baseSections = ["Home", "Chat", "Knowledge", "Devices", "MQTT", "System"] as const;
+const baseSections = [
+  "Home",
+  "Chat",
+  "Knowledge",
+  "Devices",
+  "MQTT",
+  "Notifications",
+  "System",
+] as const;
 type Section =
   | (typeof baseSections)[number]
   | "Automations"
@@ -208,6 +218,7 @@ export function App() {
       </aside>
 
       <main id="main-content" className="content" tabIndex={-1}>
+        <SectionHelp section={section} />
         {section === "Chat" ? (
           <ChatView />
         ) : section === "Knowledge" ? (
@@ -216,6 +227,8 @@ export function App() {
           <HomeAssistantView currentUser={user} />
         ) : section === "MQTT" ? (
           <MQTTView currentUser={user} />
+        ) : section === "Notifications" ? (
+          <NotificationsView currentUser={user} />
         ) : section === "Automations" ? (
           <AutomationView />
         ) : section === "Confirmations" ? (
@@ -236,6 +249,7 @@ export function App() {
             onOpenKnowledge={() => setSection("Knowledge")}
             onOpenDevices={() => setSection("Devices")}
             onOpenMQTT={() => setSection("MQTT")}
+            onOpenNotifications={() => setSection("Notifications")}
           />
         )}
       </main>
@@ -257,6 +271,7 @@ function HomeView({
   onOpenKnowledge,
   onOpenDevices,
   onOpenMQTT,
+  onOpenNotifications,
 }: {
   health: HealthState;
   ollama: OllamaState;
@@ -264,12 +279,13 @@ function HomeView({
   onOpenKnowledge: () => void;
   onOpenDevices: () => void;
   onOpenMQTT: () => void;
+  onOpenNotifications: () => void;
 }) {
   return (
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 029</p>
+          <p className="eyebrow">Build 030</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -340,6 +356,14 @@ function HomeView({
           <p>Authenticated broker messaging is available only through the configured topic allow list.</p>
           <button type="button" onClick={onOpenMQTT}>
             Open MQTT
+          </button>
+        </article>
+
+        <article className="panel">
+          <h2>Notifications</h2>
+          <p>Persistent local household alerts can now be created by deterministic automations.</p>
+          <button type="button" onClick={onOpenNotifications}>
+            Open notifications
           </button>
         </article>
       </section>

@@ -1408,3 +1408,122 @@ export function getAutomationHistorySummary(
     signal,
   );
 }
+
+
+export type NotificationSeverity = "info" | "warning" | "urgent";
+export type NotificationStatus = "all" | "unread" | "read";
+
+export interface HubNotification {
+  id: number;
+  audience: "household";
+  title: string;
+  message: string;
+  severity: NotificationSeverity;
+  source_type: string;
+  source_id: string | null;
+  created_by_user_id: number | null;
+  created_at: string;
+  read_at: string | null;
+  dismissed_at: string | null;
+  unread: boolean;
+}
+
+export interface NotificationListResponse {
+  notifications: HubNotification[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface NotificationSummary {
+  total: number;
+  unread: number;
+  info: number;
+  warning: number;
+  urgent: number;
+  newest_at: string | null;
+}
+
+export function getNotifications(
+  options: {
+    status?: NotificationStatus;
+    severity?: NotificationSeverity;
+    limit?: number;
+    offset?: number;
+    signal?: AbortSignal;
+  } = {},
+): Promise<NotificationListResponse> {
+  const params = new URLSearchParams();
+  params.set("status", options.status ?? "all");
+  if (options.severity) params.set("severity", options.severity);
+  params.set("limit", String(options.limit ?? 50));
+  params.set("offset", String(options.offset ?? 0));
+  return authJson<NotificationListResponse>(
+    "GET",
+    "/api/v1/notifications?" + params.toString(),
+    undefined,
+    options.signal,
+  );
+}
+
+export function getNotificationSummary(
+  signal?: AbortSignal,
+): Promise<NotificationSummary> {
+  return authJson<NotificationSummary>(
+    "GET",
+    "/api/v1/notifications/summary",
+    undefined,
+    signal,
+  );
+}
+
+export function markNotificationRead(
+  notificationId: number,
+  signal?: AbortSignal,
+): Promise<HubNotification> {
+  return authJson<HubNotification>(
+    "POST",
+    "/api/v1/notifications/" + notificationId + "/read",
+    {},
+    signal,
+  );
+}
+
+export function markAllNotificationsRead(
+  signal?: AbortSignal,
+): Promise<{ updated: number }> {
+  return authJson<{ updated: number }>(
+    "POST",
+    "/api/v1/notifications/read-all",
+    {},
+    signal,
+  );
+}
+
+export function dismissNotification(
+  notificationId: number,
+  signal?: AbortSignal,
+): Promise<{ updated: number }> {
+  return authJson<{ updated: number }>(
+    "POST",
+    "/api/v1/notifications/" + notificationId + "/dismiss",
+    {},
+    signal,
+  );
+}
+
+export function createTestNotification(
+  severity: NotificationSeverity = "info",
+  signal?: AbortSignal,
+): Promise<HubNotification> {
+  return authJson<HubNotification>(
+    "POST",
+    "/api/v1/notifications/test",
+    {
+      title: "Rosevear AI Hub test notification",
+      message: "The local notification layer is working.",
+      severity,
+    },
+    signal,
+  );
+}
