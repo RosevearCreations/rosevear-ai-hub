@@ -39,6 +39,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 033 | Camera Dashboard and Health | COMPLETE | main via PR #53 |
 | 034 | Frigate Adapter | COMPLETE | main via PR #56 |
 | 035 | Camera Event Automations | COMPLETE | main via PR #59 |
+| 036 | Connector Framework | ACTIVE | dev implementation pending verification |
 
 ## Build 016 acceptance checklist
 
@@ -913,3 +914,34 @@ synchronization back to dev so both branches carry the final release record.
 
 **Build 036 — Connector Framework**
 
+
+
+## Build 036 acceptance checklist
+
+- [x] common business connector descriptor contract
+- [x] normalized connector capabilities and safe status model
+- [x] normalized configuration/unavailable/not-found/write-blocked errors
+- [x] deterministic connector registry with duplicate-key protection
+- [x] read-only-by-default policy
+- [x] business writes blocked by the base framework
+- [x] write confirmation requirement represented in connector metadata
+- [x] Devil n Dove planned read connector registration
+- [x] Rosie Dazzlers planned read connector registration
+- [x] Yard Workers planned read connector registration
+- [x] authenticated business connector list/detail API
+- [x] Business navigation section and connector overview UI
+- [x] contextual circled-i Business help
+- [x] backend framework/API tests
+- [x] web connector overview tests
+- [x] backend/desktop version 0.0.36
+- [x] no database migration required
+- [x] no new secret, OAuth application, cloud account, paid dependency, or external request
+- [ ] final Build 036 dev CI green
+- [ ] promoted to main
+- [ ] final Build 036 main Production CI green
+- [ ] dev synchronized with final main target
+
+## Build 036 operator setup
+
+No manual setup is required. Build 036 deliberately does not ask for Devil n Dove, Rosie Dazzlers,
+or Yard Workers credentials. The three registrations describe the future read surfaces only.
