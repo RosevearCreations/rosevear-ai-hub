@@ -124,7 +124,10 @@ def discover_cameras(
     try:
         devices = discover_onvif_devices()
     except OSError as exc:
-        raise HTTPException(status_code=503, detail="ONVIF discovery is unavailable on this host.") from exc
+        raise HTTPException(
+            status_code=503,
+            detail="ONVIF discovery is unavailable on this host.",
+        ) from exc
 
     now = datetime.now(UTC)
     created_count = 0
