@@ -84,7 +84,8 @@ def reconcile_camera_streams(
         session.commit()
 
     logger.info(
-        "camera transport startup reconcile complete: configured=%s synchronized=%s failed=%s skipped=%s",
+        "camera transport startup reconcile complete: "
+        "configured=%s synchronized=%s failed=%s skipped=%s",
         len(streams),
         synchronized,
         failed,
