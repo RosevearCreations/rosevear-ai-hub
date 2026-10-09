@@ -371,3 +371,21 @@ Camera discovery is a local-network metadata operation, not a trust grant:
 A compromised local camera may still lie about its metadata. Build 031 therefore stores discovery
 metadata as inventory evidence only. Build 032 must independently enforce stream URL, credential,
 network, and transport policy.
+
+
+## Build 032 RTSP / go2rtc transport
+
+go2rtc is treated as a local transport subprocess, not a new trust authority:
+- GO2RTC_BASE_URL must use HTTP on localhost/loopback; LAN/public API addresses are rejected
+- the recommended go2rtc config binds API, RTSP, and WebRTC listeners to loopback
+- RTSP source URLs are accepted only for literal private/link-local/loopback IP addresses
+- credential-bearing source URLs are encrypted with the existing Hub master key
+- the full source URL is never returned through the Hub API/UI after save
+- audit records contain only sanitized scheme/host/port/credential-present metadata
+- go2rtc YAML persists only an empty stream placeholder; the secret source is injected into runtime memory
+- probe/reconcile failures use sanitized error classes and do not persist go2rtc response bodies
+- no public stream publishing, PTZ, talkback, camera reboot, or firmware operation exists
+
+The upstream go2rtc API intentionally treats localhost as trusted. That is why Build 032 does not
+permit a non-loopback API base URL. Host compromise still exposes live process memory and therefore
+remains outside database-at-rest protection.
