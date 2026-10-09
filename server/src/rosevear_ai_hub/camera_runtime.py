@@ -41,9 +41,7 @@ def reconcile_camera_streams(
         return {"configured": 0, "synchronized": 0, "failed": 0, "skipped": 0}
 
     with session_factory() as session:
-        streams = session.scalars(
-            select(CameraStream).order_by(CameraStream.id.asc())
-        ).all()
+        streams = session.scalars(select(CameraStream).order_by(CameraStream.id.asc())).all()
         for stream in streams:
             camera = session.get(Camera, stream.camera_id)
             if camera is None or not camera.enabled or not stream.enabled:
