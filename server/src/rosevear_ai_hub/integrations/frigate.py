@@ -74,9 +74,7 @@ def validate_frigate_base_url(value: str) -> str:
     if parsed.scheme != "http" or not _is_loopback_host(parsed.hostname):
         raise FrigateError("FRIGATE_BASE_URL must use HTTP on localhost/loopback.")
     if parsed.username or parsed.password or parsed.query or parsed.fragment:
-        raise FrigateError(
-            "FRIGATE_BASE_URL must not contain credentials, query, or fragment."
-        )
+        raise FrigateError("FRIGATE_BASE_URL must not contain credentials, query, or fragment.")
     try:
         port = parsed.port or 5000
     except ValueError as exc:
@@ -164,10 +162,13 @@ class FrigateClient:
             if isinstance(payload, str):
                 version = _safe_text(payload, max_length=80) or None
             elif isinstance(payload, dict):
-                version = _safe_text(
-                    payload.get("version") or payload.get("frigate_version"),
-                    max_length=80,
-                ) or None
+                version = (
+                    _safe_text(
+                        payload.get("version") or payload.get("frigate_version"),
+                        max_length=80,
+                    )
+                    or None
+                )
             else:
                 version = None
         return FrigateStatus(
