@@ -51,3 +51,17 @@ None. Do not create credentials for Build 036.
 ## Next build
 
 Build 037 — Devil n Dove Read Connector.
+
+
+## Release evidence
+
+- verified dev head: `c5e27db629afc134b35c8dad53d905787d5793fa`
+- dev CI: run 37999279494 — GREEN
+- protected-main PR gate: run 37999782415 — GREEN
+- promotion PR: #63
+- main merge: `f428d5d1125e4d0aeb446106083dc1bb3404b6d5`
+- main Production CI: run 38000148371 — GREEN
+- all four lanes passed: docs-foundation, backend, web, desktop-windows
+- release-evidence closeout uses protected main and is synchronized back to dev afterward
+
+No manual operator setup was required and no runtime credential or migration was introduced.
