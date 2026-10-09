@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from rosevear_ai_hub.api.home_assistant import HomeAssistantRuntime
 from rosevear_ai_hub.automations import (
     AUTOMATION_EXECUTABLE_TOOL_KEYS,
+    FrigateEventTrigger,
     MQTTMessageTrigger,
     RuleDefinition,
     canonical_rule_dict,
@@ -22,6 +23,7 @@ from rosevear_ai_hub.automations import (
 )
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.confirmations import validate_arguments
+from rosevear_ai_hub.integrations.frigate import FrigateError, get_frigate_client
 from rosevear_ai_hub.integrations.home_assistant import HomeAssistantError
 from rosevear_ai_hub.integrations.mqtt import MQTTConfigurationError, validate_topic_filter
 from rosevear_ai_hub.models import AppSetting, ToolRecord
@@ -55,6 +57,9 @@ class AutomationAuthoringContext:
     allowlisted_action_entities: list[str]
     mqtt_allowed_topics: list[str]
     home_context_available: bool
+    frigate_cameras: list[str]
+    frigate_recent_labels: list[str]
+    frigate_context_available: bool
 
 
 def _clean_name(value: str) -> str:
@@ -129,12 +134,30 @@ async def build_authoring_context(
                 }
             )
 
+    frigate_cameras: list[str] = []
+    frigate_recent_labels: list[str] = []
+    frigate_context_available = False
+    try:
+        frigate = get_frigate_client()
+        camera_rows, event_rows = await asyncio.gather(
+            asyncio.to_thread(frigate.cameras),
+            asyncio.to_thread(frigate.recent_events, limit=50),
+        )
+        frigate_cameras = [item.name for item in camera_rows if item.enabled]
+        frigate_recent_labels = sorted({item.label for item in event_rows if item.label})
+        frigate_context_available = True
+    except FrigateError:
+        pass
+
     return AutomationAuthoringContext(
         tools=tools,
         home_entities=home_entities,
         allowlisted_action_entities=_load_allowlist(db),
         mqtt_allowed_topics=_mqtt_allowed_topics(),
         home_context_available=home_context_available,
+        frigate_cameras=frigate_cameras,
+        frigate_recent_labels=frigate_recent_labels,
+        frigate_context_available=frigate_context_available,
     )
 
 
@@ -154,6 +177,9 @@ def build_authoring_messages(
         "allowlisted_action_entities": context.allowlisted_action_entities,
         "mqtt_allowed_topics": context.mqtt_allowed_topics,
         "home_context_available": context.home_context_available,
+        "frigate_cameras": context.frigate_cameras,
+        "frigate_recent_labels": context.frigate_recent_labels,
+        "frigate_context_available": context.frigate_context_available,
     }
     system = (
         "You draft Rosevear AI Hub automation rules. Return JSON only, with no markdown fences "
@@ -164,7 +190,10 @@ def build_authoring_messages(
         "context. Home Assistant action targets may use only entries in "
         "allowlisted_action_entities; local notification actions do not require an entity target. "
         "MQTT triggers "
-        "should stay within mqtt_allowed_topics when that list is non-empty. Do not add Level 2 "
+        "should stay within mqtt_allowed_topics when that list is non-empty. "
+        "Frigate event triggers should use exact camera names from frigate_cameras when "
+        "camera-specific behavior is requested "
+        "and exact recent labels when available. Do not add Level 2 "
         "or Level 3 actions. The server will validate every field and the human must explicitly "
         "approve a separate exact save confirmation before anything is persisted. "
         "Required response shape follows.\n\n"
@@ -301,6 +330,17 @@ def validate_authoring_draft(
             warnings.append(
                 f"{target} is not currently on the Home Assistant safe-control allow list."
             )
+
+    if isinstance(trigger, FrigateEventTrigger):
+        if not context.frigate_context_available:
+            warnings.append(
+                "Frigate was unavailable, so the camera-event trigger could not be cross-checked."
+            )
+        else:
+            if trigger.camera is not None and trigger.camera not in context.frigate_cameras:
+                warnings.append(f"Frigate did not report an enabled camera named {trigger.camera}.")
+            if context.frigate_recent_labels and trigger.label not in context.frigate_recent_labels:
+                warnings.append(f"Frigate recent events did not include label {trigger.label}.")
 
     if isinstance(trigger, MQTTMessageTrigger):
         topic_filter = trigger.topic_filter

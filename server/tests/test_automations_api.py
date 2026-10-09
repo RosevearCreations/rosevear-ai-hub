@@ -79,7 +79,12 @@ def test_schema_is_versioned_strict_and_execution_is_available(tmp_path) -> None
     body = schema.json()
     assert body["schema_version"] == 1
     assert body["execution_available"] is True
-    assert body["supported_triggers"] == ["state_change", "state_threshold", "mqtt_message"]
+    assert body["supported_triggers"] == [
+        "state_change",
+        "state_threshold",
+        "mqtt_message",
+        "frigate_event",
+    ]
     assert body["supported_actions"] == ["tool"]
 
     invalid = client.post(
@@ -187,3 +192,35 @@ def test_household_user_can_view_but_cannot_change_rules(tmp_path) -> None:
     assert client.get("/api/v1/automations").status_code == 200
     blocked = client.post("/api/v1/automations/confirm", json=create_payload())
     assert blocked.status_code == 403
+
+
+def test_frigate_event_trigger_is_strict_and_validates(tmp_path) -> None:
+    client = build_client(tmp_path)
+    rule = rule_definition("notification.household.send")
+    rule["trigger"] = {
+        "type": "frigate_event",
+        "label": "person",
+        "camera": "camera_one",
+        "zone": "entry",
+        "min_score": 0.7,
+        "require_snapshot": True,
+    }
+    rule["actions"][0]["arguments"] = {
+        "title": "Camera event",
+        "message": "Frigate reported a person event.",
+        "severity": "warning",
+    }
+
+    valid = client.post(
+        "/api/v1/automations/validate",
+        json={"enabled": True, "definition": rule},
+    )
+    assert valid.status_code == 200, valid.text
+
+    invalid = dict(rule)
+    invalid["trigger"] = {**rule["trigger"], "min_score": 1.5}
+    rejected = client.post(
+        "/api/v1/automations/validate",
+        json={"enabled": False, "definition": invalid},
+    )
+    assert rejected.status_code == 422

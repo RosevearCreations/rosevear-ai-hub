@@ -41,6 +41,7 @@ from rosevear_ai_hub.automations import (
     canonical_rule_dict,
     validate_rule_tool_references,
 )
+from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.confirmations import consume_confirmation, prepare_confirmation
 from rosevear_ai_hub.database import get_session
 from rosevear_ai_hub.models import Automation, AutomationRun, User
@@ -99,6 +100,11 @@ class AutomationRuntimeResponse(BaseModel):
     home_assistant_configured: bool
     mqtt_configured: bool
     mqtt_rule_subscriptions: list[str]
+    frigate_configured: bool
+    frigate_online: bool
+    frigate_rule_count: int
+    frigate_seen_event_count: int
+    frigate_last_poll_at: str | None
     last_error: str | None = None
     recovered_interrupted_runs: int = 0
 
@@ -306,7 +312,7 @@ def automation_schema() -> AutomationSchemaResponse:
     return AutomationSchemaResponse(
         schema_version=RULE_SCHEMA_VERSION,
         definition_schema=RuleDefinition.model_json_schema(),
-        supported_triggers=["state_change", "state_threshold", "mqtt_message"],
+        supported_triggers=["state_change", "state_threshold", "mqtt_message", "frigate_event"],
         supported_conditions=["state_equals", "numeric_threshold"],
         supported_actions=["tool"],
         limits={
@@ -332,6 +338,11 @@ def automation_runtime_status(request: Request) -> AutomationRuntimeResponse:
             home_assistant_configured=False,
             mqtt_configured=False,
             mqtt_rule_subscriptions=[],
+            frigate_configured=bool(get_settings().frigate_base_url),
+            frigate_online=False,
+            frigate_rule_count=0,
+            frigate_seen_event_count=0,
+            frigate_last_poll_at=None,
             last_error="Event Engine runtime has not started.",
         )
     return AutomationRuntimeResponse(**runtime.snapshot())

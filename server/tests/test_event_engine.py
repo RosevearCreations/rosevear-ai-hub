@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
 from rosevear_ai_hub.database import build_engine
-from rosevear_ai_hub.event_engine import AutomationEventEngine, MQTTEvent, StateEvent
+from rosevear_ai_hub.event_engine import AutomationEventEngine, FrigateEvent, MQTTEvent, StateEvent
 from rosevear_ai_hub.models import AppSetting, AuditEvent, Automation, AutomationRun, Base
 
 
@@ -262,3 +262,116 @@ async def test_threshold_requires_crossing_not_merely_remaining_above(tmp_path) 
     assert not_crossed == 0
     assert crossed == 1
     assert home.light_calls == [("light.workshop", True)]
+
+
+def frigate_rule() -> dict:
+    return {
+        "schema_version": 1,
+        "trigger": {
+            "type": "frigate_event",
+            "label": "person",
+            "camera": "camera_one",
+            "zone": "entry",
+            "min_score": 0.7,
+            "require_snapshot": True,
+        },
+        "conditions": [],
+        "actions": [
+            {
+                "type": "tool",
+                "tool_key": "notification.household.send",
+                "arguments": {
+                    "title": "Camera event",
+                    "message": "A camera event matched the local automation.",
+                    "severity": "warning",
+                },
+            }
+        ],
+        "cooldown_seconds": 0,
+        "deduplication_key": None,
+    }
+
+
+@pytest.mark.asyncio
+async def test_frigate_event_executes_once_and_is_automatically_deduplicated(tmp_path) -> None:
+    _engine, session_maker = build_engine_and_session(tmp_path)
+    automation_id = seed_rule(session_maker, frigate_rule())
+    event_engine = AutomationEventEngine(session_maker, None)
+    event = FrigateEvent(
+        event_id="frigate-event-1",
+        camera="camera_one",
+        label="person",
+        sub_label=None,
+        start_time=1728480000.0,
+        end_time=1728480010.0,
+        zones=("entry",),
+        has_clip=True,
+        has_snapshot=True,
+        false_positive=False,
+        score=0.92,
+    )
+
+    assert await event_engine.process_frigate_event(event) == 1
+    assert await event_engine.process_frigate_event(event) == 0
+
+    with session_maker() as session:
+        runs = session.scalars(
+            select(AutomationRun)
+            .where(AutomationRun.automation_id == automation_id)
+            .order_by(AutomationRun.id.asc())
+        ).all()
+        assert [run.status for run in runs] == ["success", "skipped"]
+        assert runs[0].result_summary["event"]["source"] == "frigate"
+        assert runs[0].result_summary["event"]["event_id"] == "frigate-event-1"
+        assert runs[1].result_summary["reason"] == "duplicate_event"
+
+
+@pytest.mark.asyncio
+async def test_frigate_trigger_filters_zone_score_and_false_positive(tmp_path) -> None:
+    _engine, session_maker = build_engine_and_session(tmp_path)
+    seed_rule(session_maker, frigate_rule())
+    event_engine = AutomationEventEngine(session_maker, None)
+
+    wrong_zone = FrigateEvent(
+        event_id="frigate-event-2",
+        camera="camera_one",
+        label="person",
+        sub_label=None,
+        start_time=1728480100.0,
+        end_time=None,
+        zones=("driveway",),
+        has_clip=False,
+        has_snapshot=True,
+        false_positive=False,
+        score=0.95,
+    )
+    low_score = FrigateEvent(
+        event_id="frigate-event-3",
+        camera="camera_one",
+        label="person",
+        sub_label=None,
+        start_time=1728480200.0,
+        end_time=None,
+        zones=("entry",),
+        has_clip=False,
+        has_snapshot=True,
+        false_positive=False,
+        score=0.5,
+    )
+    false_positive = FrigateEvent(
+        event_id="frigate-event-4",
+        camera="camera_one",
+        label="person",
+        sub_label=None,
+        start_time=1728480300.0,
+        end_time=None,
+        zones=("entry",),
+        has_clip=False,
+        has_snapshot=True,
+        false_positive=True,
+        score=0.95,
+    )
+
+    assert await event_engine.process_frigate_event(wrong_zone) == 0
+    assert await event_engine.process_frigate_event(low_score) == 0
+    assert await event_engine.process_frigate_event(false_positive) == 0

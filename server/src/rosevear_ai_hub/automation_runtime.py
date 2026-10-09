@@ -1,9 +1,10 @@
-"""Live Build 027 event-source runtime for Home Assistant and MQTT."""
+"""Live event-source runtime for Home Assistant, MQTT, and Frigate."""
 
 from __future__ import annotations
 
 import asyncio
 import logging
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import select
@@ -12,17 +13,30 @@ from sqlalchemy.orm import Session, sessionmaker
 from rosevear_ai_hub.api.home_assistant import get_home_assistant_runtime
 from rosevear_ai_hub.api.mqtt import get_mqtt_runtime
 from rosevear_ai_hub.automation_history import recover_interrupted_automation_runs
-from rosevear_ai_hub.automations import MQTTMessageTrigger, normalize_rule_definition
+from rosevear_ai_hub.automations import (
+    FrigateEventTrigger,
+    MQTTMessageTrigger,
+    normalize_rule_definition,
+)
+from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.database import SessionLocal
-from rosevear_ai_hub.event_engine import AutomationEventEngine, MQTTEvent, StateEvent
+from rosevear_ai_hub.event_engine import (
+    AutomationEventEngine,
+    FrigateEvent,
+    MQTTEvent,
+    StateEvent,
+)
+from rosevear_ai_hub.integrations.frigate import FrigateError, get_frigate_client
 from rosevear_ai_hub.integrations.home_assistant import HomeAssistantError
 from rosevear_ai_hub.integrations.mqtt import MQTTError, MQTTMessageRecord
-from rosevear_ai_hub.models import Automation
+from rosevear_ai_hub.models import AppSetting, Automation
 
 logger = logging.getLogger(__name__)
 
 _QUEUE_CAPACITY = 256
 _RECONCILE_SECONDS = 5.0
+_FRIGATE_SEEN_SETTING_KEY = "frigate.event_runtime.seen_ids"
+_MAX_FRIGATE_SEEN_IDS = 500
 
 
 class AutomationEventRuntime:
@@ -50,6 +64,12 @@ class AutomationEventRuntime:
         self._mqtt_rule_subscriptions: set[str] = set()
         self._last_error: str | None = None
         self._recovered_interrupted_runs = 0
+        self._frigate_rule_count = 0
+        self._frigate_online = False
+        self._frigate_last_poll_at: str | None = None
+        self._frigate_seen_ids: set[str] = set()
+        self._frigate_seen_initialized = False
+        self._frigate_pending_ids: set[str] = set()
 
     async def start(self) -> None:
         if self._running:
@@ -61,6 +81,7 @@ class AutomationEventRuntime:
         try:
             with self._session_factory() as db:
                 self._recovered_interrupted_runs = recover_interrupted_automation_runs(db)
+                self._load_frigate_seen_state(db)
         except Exception as exc:
             self._last_error = f"Automation run recovery failed: {exc}"
             logger.exception("Automation run recovery failed")
@@ -92,6 +113,9 @@ class AutomationEventRuntime:
         self._tasks.append(
             asyncio.create_task(self._mqtt_reconcile_loop(), name="automation-mqtt-reconcile")
         )
+        self._tasks.append(
+            asyncio.create_task(self._frigate_poll_loop(), name="automation-frigate-events")
+        )
         if self._home_assistant_client is not None:
             self._tasks.append(
                 asyncio.create_task(self._home_assistant_loop(), name="automation-ha-events")
@@ -121,6 +145,11 @@ class AutomationEventRuntime:
             "home_assistant_configured": self._home_assistant_client is not None,
             "mqtt_configured": self._mqtt_client is not None,
             "mqtt_rule_subscriptions": sorted(self._mqtt_rule_subscriptions),
+            "frigate_configured": bool(get_settings().frigate_base_url),
+            "frigate_online": self._frigate_online,
+            "frigate_rule_count": self._frigate_rule_count,
+            "frigate_seen_event_count": len(self._frigate_seen_ids),
+            "frigate_last_poll_at": self._frigate_last_poll_at,
             "last_error": self._last_error,
             "recovered_interrupted_runs": self._recovered_interrupted_runs,
         }
@@ -213,8 +242,10 @@ class AutomationEventRuntime:
                     continue
                 if kind == "state":
                     await self._engine.process_state_event(event)
-                else:
+                elif kind == "mqtt":
                     await self._engine.process_mqtt_event(event)
+                else:
+                    await self._engine.process_frigate_event(event)
                 self._processed_events += 1
             except asyncio.CancelledError:
                 raise
@@ -223,6 +254,12 @@ class AutomationEventRuntime:
                 self._last_error = f"Event Engine processing failed: {exc}"
                 logger.exception("Event Engine processing failed")
             finally:
+                if kind == "frigate":
+                    try:
+                        self._mark_frigate_event_seen(event.event_id)
+                    except Exception:
+                        logger.exception("Failed to persist Frigate event runtime checkpoint")
+                    self._frigate_pending_ids.discard(event.event_id)
                 self._queue.task_done()
 
     async def _mqtt_reconcile_loop(self) -> None:
@@ -266,3 +303,134 @@ class AutomationEventRuntime:
                 self._mqtt_rule_subscriptions.add(topic_filter)
             except MQTTError as exc:
                 self._last_error = f"MQTT automation subscription failed: {exc}"
+
+    async def _frigate_poll_loop(self) -> None:
+        while self._running:
+            try:
+                await self._poll_frigate_once()
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                self._last_error = f"Frigate automation polling failed: {exc}"
+                logger.warning(self._last_error)
+            try:
+                await asyncio.wait_for(
+                    self._stopping.wait(),
+                    timeout=get_settings().frigate_event_poll_seconds,
+                )
+            except TimeoutError:
+                pass
+
+    async def _poll_frigate_once(self) -> int:
+        self._frigate_rule_count = self._enabled_frigate_rule_count()
+        if self._frigate_rule_count == 0:
+            return 0
+
+        try:
+            client = get_frigate_client()
+            events = await asyncio.to_thread(
+                client.recent_events,
+                limit=get_settings().frigate_event_limit,
+            )
+        except FrigateError as exc:
+            self._frigate_online = False
+            self._last_error = f"Frigate automation source unavailable: {exc}"
+            return 0
+
+        self._frigate_online = True
+        self._frigate_last_poll_at = datetime.now(UTC).isoformat()
+
+        if not self._frigate_seen_initialized:
+            self._initialize_frigate_seen_ids([event.event_id for event in events])
+            return 0
+
+        queued = 0
+        for event in sorted(events, key=lambda item: (item.start_time, item.event_id)):
+            if event.event_id in self._frigate_seen_ids:
+                continue
+            if event.event_id in self._frigate_pending_ids:
+                continue
+            self._frigate_pending_ids.add(event.event_id)
+            await self._queue.put(
+                (
+                    "frigate",
+                    FrigateEvent(
+                        event_id=event.event_id,
+                        camera=event.camera,
+                        label=event.label,
+                        sub_label=event.sub_label,
+                        start_time=event.start_time,
+                        end_time=event.end_time,
+                        zones=event.zones,
+                        has_clip=event.has_clip,
+                        has_snapshot=event.has_snapshot,
+                        false_positive=event.false_positive,
+                        score=event.score,
+                    ),
+                )
+            )
+            queued += 1
+        return queued
+
+    def _enabled_frigate_rule_count(self) -> int:
+        count = 0
+        with self._session_factory() as db:
+            rows = db.scalars(select(Automation).where(Automation.enabled.is_(True))).all()
+            for row in rows:
+                try:
+                    rule = normalize_rule_definition(dict(row.definition_json or {}))
+                except ValueError:
+                    continue
+                if isinstance(rule.trigger, FrigateEventTrigger):
+                    count += 1
+        return count
+
+    def _load_frigate_seen_state(self, db: Session) -> None:
+        setting = db.scalar(select(AppSetting).where(AppSetting.key == _FRIGATE_SEEN_SETTING_KEY))
+        if setting is None:
+            self._frigate_seen_ids = set()
+            self._frigate_seen_initialized = False
+            return
+        value = setting.value_json
+        self._frigate_seen_ids = (
+            {item for item in value if isinstance(item, str)} if isinstance(value, list) else set()
+        )
+        self._frigate_seen_initialized = True
+
+    def _initialize_frigate_seen_ids(self, event_ids: list[str]) -> None:
+        values = list(dict.fromkeys(event_ids))[-_MAX_FRIGATE_SEEN_IDS:]
+        with self._session_factory() as db:
+            setting = db.scalar(
+                select(AppSetting).where(AppSetting.key == _FRIGATE_SEEN_SETTING_KEY)
+            )
+            if setting is None:
+                setting = AppSetting(key=_FRIGATE_SEEN_SETTING_KEY, value_json=values)
+                db.add(setting)
+            else:
+                setting.value_json = values
+            db.commit()
+        self._frigate_seen_ids = set(values)
+        self._frigate_seen_initialized = True
+
+    def _mark_frigate_event_seen(self, event_id: str) -> None:
+        if not event_id:
+            return
+        self._frigate_seen_ids.add(event_id)
+        with self._session_factory() as db:
+            setting = db.scalar(
+                select(AppSetting).where(AppSetting.key == _FRIGATE_SEEN_SETTING_KEY)
+            )
+            current = (
+                [item for item in setting.value_json if isinstance(item, str)]
+                if setting is not None and isinstance(setting.value_json, list)
+                else []
+            )
+            values = list(dict.fromkeys([*current, event_id]))[-_MAX_FRIGATE_SEEN_IDS:]
+            if setting is None:
+                setting = AppSetting(key=_FRIGATE_SEEN_SETTING_KEY, value_json=values)
+                db.add(setting)
+            else:
+                setting.value_json = values
+            db.commit()
+        self._frigate_seen_ids = set(values)
+        self._frigate_seen_initialized = True

@@ -50,6 +50,11 @@ describe("AutomationView", () => {
             home_assistant_configured: true,
             mqtt_configured: true,
             mqtt_rule_subscriptions: [],
+            frigate_configured: true,
+            frigate_online: true,
+            frigate_rule_count: 2,
+            frigate_seen_event_count: 8,
+            frigate_last_poll_at: "2026-10-09T20:00:00Z",
             last_error: null,
             recovered_interrupted_runs: 1,
           });
@@ -197,6 +202,7 @@ describe("AutomationView", () => {
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Automations" })).toBeInTheDocument();
       expect(screen.getByText("Event Engine running")).toBeInTheDocument();
+      expect(screen.getByText(/Frigate 2 rules · online/)).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "Execution history" })).toBeInTheDocument();
       expect(screen.getByText("Garage scene monitor")).toBeInTheDocument();
       expect(screen.getByText("Entity state is unavailable.")).toBeInTheDocument();

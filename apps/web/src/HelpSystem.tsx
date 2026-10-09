@@ -139,7 +139,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   Automations: {
-    purpose: "Authors deterministic rules, shows Event Engine state, and exposes durable execution/failure history.",
+    purpose: "Authors deterministic rules, including local Frigate event triggers, and exposes runtime and execution history.",
     tasks: [
       "Draft a rule, review exact Rule Schema JSON, then use the Level-2 save confirmation.",
       "Leave new rules disabled until trigger, conditions, targets, and cooldown are verified.",
