@@ -1,5 +1,10 @@
+import base64
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
+
+from rosevear_ai_hub.config import get_settings
 
 from rosevear_ai_hub.database import Base, build_engine, get_session
 from rosevear_ai_hub.integrations.onvif import DiscoveredONVIFDevice
@@ -103,18 +108,19 @@ def test_household_user_can_view_but_cannot_scan(tmp_path, monkeypatch) -> None:
     assert client.post("/api/v1/cameras/discover").status_code == 403
 
 
-def build_stream_client(tmp_path, monkeypatch):
-    import base64
-
-    from rosevear_ai_hub.config import get_settings
-
+@pytest.fixture
+def stream_secret_key(monkeypatch):
     monkeypatch.setenv(
         "SECRET_ENCRYPTION_KEY",
         base64.urlsafe_b64encode(b"x" * 32).decode("ascii").rstrip("="),
     )
     get_settings.cache_clear()
-    client = build_client(tmp_path)
-    return client
+    yield
+    get_settings.cache_clear()
+
+
+def build_stream_client(tmp_path):
+    return build_client(tmp_path)
 
 
 class FakeGo2RTC:
@@ -149,10 +155,12 @@ class FakeGo2RTC:
         self.deleted = stream_name
 
 
-def test_owner_configures_encrypted_rtsp_and_probes(tmp_path, monkeypatch) -> None:
+def test_owner_configures_encrypted_rtsp_and_probes(
+    tmp_path, monkeypatch, stream_secret_key
+) -> None:
     from sqlalchemy import create_engine, text
 
-    client = build_stream_client(tmp_path, monkeypatch)
+    client = build_stream_client(tmp_path)
     fake = FakeGo2RTC()
     monkeypatch.setattr(
         "rosevear_ai_hub.api.cameras.get_go2rtc_client",
@@ -195,7 +203,9 @@ def test_owner_configures_encrypted_rtsp_and_probes(tmp_path, monkeypatch) -> No
     assert probe.json()["producer_count"] == 1
 
 
-def test_rtsp_source_must_be_private_literal_ip(tmp_path, monkeypatch) -> None:
+def test_rtsp_source_must_be_private_literal_ip(
+    tmp_path, monkeypatch, stream_secret_key
+) -> None:
     client = build_stream_client(tmp_path, monkeypatch)
     monkeypatch.setattr(
         "rosevear_ai_hub.api.cameras.get_go2rtc_client",
@@ -220,7 +230,9 @@ def test_rtsp_source_must_be_private_literal_ip(tmp_path, monkeypatch) -> None:
     assert hostname.status_code == 422
 
 
-def test_household_user_cannot_configure_camera_stream(tmp_path, monkeypatch) -> None:
+def test_household_user_cannot_configure_camera_stream(
+    tmp_path, monkeypatch, stream_secret_key
+) -> None:
     client = build_stream_client(tmp_path, monkeypatch)
     monkeypatch.setattr(
         "rosevear_ai_hub.api.cameras.get_go2rtc_client",
