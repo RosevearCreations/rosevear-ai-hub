@@ -248,9 +248,7 @@ def rewrap_all_secrets(
         raise HTTPException(status_code=503, detail="SECRET_ENCRYPTION_KEY is not configured.")
 
     records = session.scalars(select(SecretValue).order_by(SecretValue.id.asc())).all()
-    camera_streams = session.scalars(
-        select(CameraStream).order_by(CameraStream.id.asc())
-    ).all()
+    camera_streams = session.scalars(select(CameraStream).order_by(CameraStream.id.asc())).all()
 
     plaintext_by_id = {record.id: _decrypt_record(record, settings) for record in records}
     camera_plaintext_by_id = {
