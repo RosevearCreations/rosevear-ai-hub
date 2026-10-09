@@ -5,7 +5,6 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
 
 from rosevear_ai_hub.config import get_settings
-
 from rosevear_ai_hub.database import Base, build_engine, get_session
 from rosevear_ai_hub.integrations.onvif import DiscoveredONVIFDevice
 from rosevear_ai_hub.main import create_app
