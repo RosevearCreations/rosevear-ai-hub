@@ -213,6 +213,38 @@ BUILTIN_TOOL_DEFINITIONS: tuple[ToolDefinition, ...] = (
         default_enabled=False,
     ),
     ToolDefinition(
+        tool_key="notification.household.send",
+        display_name="Send household notification",
+        description=(
+            "Create one persistent local in-app notification for authenticated household users. "
+            "This never sends email, SMS, push, or other external messages."
+        ),
+        integration_key="core.notifications",
+        integration_name="Notifications",
+        capabilities=("notification.write", "notification.household"),
+        risk_level=ToolRiskLevel.LOW_RISK_ACTION,
+        input_schema=object_schema(
+            {
+                "title": {"type": "string", "minLength": 1, "maxLength": 160},
+                "message": {"type": "string", "minLength": 1, "maxLength": 2000},
+                "severity": {
+                    "type": "string",
+                    "enum": ["info", "warning", "urgent"],
+                },
+            },
+            required=("title", "message", "severity"),
+        ),
+        output_schema=object_schema(
+            {
+                "accepted": {"type": "boolean"},
+                "notification_id": {"type": "integer", "minimum": 1},
+                "audience": {"type": "string", "enum": ["household"]},
+            },
+            required=("accepted", "notification_id", "audience"),
+        ),
+        default_enabled=True,
+    ),
+    ToolDefinition(
         tool_key="home_assistant.light.set",
         display_name="Set Home Assistant light",
         description=(

@@ -29,6 +29,7 @@ from rosevear_ai_hub.automations import (
 from rosevear_ai_hub.confirmations import validate_arguments
 from rosevear_ai_hub.integrations.home_assistant import HomeAssistantClient, HomeAssistantError
 from rosevear_ai_hub.models import AppSetting, Automation, AutomationRun, ToolRecord
+from rosevear_ai_hub.notifications import create_household_notification
 from rosevear_ai_hub.tool_registry import ToolRiskLevel, sync_builtin_tools
 
 _ALLOWLIST_SETTING_KEY = "home_assistant.safe_control_allowlist"
@@ -539,6 +540,37 @@ class AutomationEventEngine:
             arguments, _ = validate_arguments(tool, dict(action.arguments))
         except HTTPException as exc:
             raise AutomationExecutionError(str(exc.detail)) from exc
+
+        if action.tool_key == "notification.household.send":
+            notification = create_household_notification(
+                db,
+                title=arguments["title"],
+                message=arguments["message"],
+                severity=arguments["severity"],
+                source_type="automation",
+            )
+            record_audit_event(
+                db,
+                actor_user_id=None,
+                event_type="tool.execution.completed",
+                object_type="notification",
+                object_id=str(notification.id),
+                action="automation",
+                arguments={
+                    "title": arguments["title"],
+                    "severity": arguments["severity"],
+                },
+                result={
+                    "ok": True,
+                    "accepted": True,
+                    "notification_id": notification.id,
+                    "audience": "household",
+                },
+                tool_key=tool.tool_key,
+                risk_level=tool.risk_level,
+            )
+            db.flush()
+            return
 
         entity_id = arguments.get("entity_id")
         if not isinstance(entity_id, str):
