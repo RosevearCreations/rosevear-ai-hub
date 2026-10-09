@@ -1,9 +1,11 @@
-"""Authenticated camera registry and ONVIF discovery for Build 031."""
+"""Authenticated camera registry, ONVIF discovery, and RTSP/go2rtc transport."""
 
 from __future__ import annotations
 
+import ipaddress
 from datetime import UTC, datetime
 from typing import Annotated
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
@@ -12,9 +14,16 @@ from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.auth import require_roles
+from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.database import get_session
+from rosevear_ai_hub.integrations.go2rtc import (
+    Go2RTCError,
+    Go2RTCUnavailable,
+    get_go2rtc_client,
+)
 from rosevear_ai_hub.integrations.onvif import DiscoveredONVIFDevice, discover_onvif_devices
-from rosevear_ai_hub.models import Camera, User
+from rosevear_ai_hub.models import Camera, CameraStream, User
+from rosevear_ai_hub.secrets import decrypt_scoped_value, encrypt_scoped_value
 
 router = APIRouter(prefix="/api/v1/cameras", tags=["cameras"])
 
@@ -24,6 +33,24 @@ CameraViewer = Annotated[
 ]
 CameraAdmin = Annotated[User, Depends(require_roles("owner", "administrator"))]
 SessionDependency = Annotated[Session, Depends(get_session)]
+
+
+class CameraStreamResponse(BaseModel):
+    id: int
+    stream_name: str
+    source_scheme: str
+    source_host: str
+    source_port: int
+    credentials_present: bool
+    enabled: bool
+    encrypted: bool = True
+    relay_url: str
+    last_sync_at: datetime | None
+    last_probe_at: datetime | None
+    last_probe_status: str | None
+    last_error: str | None
+    created_at: datetime
+    updated_at: datetime
 
 
 class CameraResponse(BaseModel):
@@ -42,6 +69,7 @@ class CameraResponse(BaseModel):
     last_seen_at: datetime
     created_at: datetime
     updated_at: datetime
+    stream: CameraStreamResponse | None = None
 
 
 class CameraDiscoveryResponse(BaseModel):
@@ -56,7 +84,84 @@ class CameraUpdateRequest(BaseModel):
     enabled: bool | None = None
 
 
-def _to_response(camera: Camera) -> CameraResponse:
+class CameraStreamConfigureRequest(BaseModel):
+    source_url: str = Field(min_length=10, max_length=4096)
+
+
+class CameraStreamMutationResponse(BaseModel):
+    stream: CameraStreamResponse
+    synced: bool
+    message: str
+
+
+class CameraStreamProbeResponse(BaseModel):
+    camera_id: int
+    stream_name: str
+    status: str
+    producer_count: int
+    consumer_count: int
+    probed_at: datetime
+
+
+class CameraStreamDeleteResponse(BaseModel):
+    deleted: bool
+    go2rtc_removed: bool
+
+
+class Go2RTCStatusResponse(BaseModel):
+    configured: bool
+    online: bool
+    version: str | None
+    api_base_url: str
+    rtsp_listen: str | None
+    local_api_only: bool
+    local_rtsp_only: bool
+    error: str | None
+
+
+class Go2RTCReconcileResponse(BaseModel):
+    configured: int
+    synchronized: int
+    failed: int
+    skipped: int
+
+
+def _scope(camera_id: int) -> str:
+    return f"camera.stream.{camera_id}"
+
+
+def _relay_url(stream_name: str) -> str:
+    base = get_settings().go2rtc_rtsp_base_url.rstrip("/")
+    return f"{base}/{stream_name}"
+
+
+def _stream_response(stream: CameraStream) -> CameraStreamResponse:
+    return CameraStreamResponse(
+        id=stream.id,
+        stream_name=stream.stream_name,
+        source_scheme=stream.source_scheme,
+        source_host=stream.source_host,
+        source_port=stream.source_port,
+        credentials_present=stream.credentials_present,
+        enabled=stream.enabled,
+        relay_url=_relay_url(stream.stream_name),
+        last_sync_at=stream.last_sync_at,
+        last_probe_at=stream.last_probe_at,
+        last_probe_status=stream.last_probe_status,
+        last_error=stream.last_error,
+        created_at=stream.created_at,
+        updated_at=stream.updated_at,
+    )
+
+
+def _camera_stream_map(db: Session) -> dict[int, CameraStream]:
+    return {
+        item.camera_id: item
+        for item in db.scalars(select(CameraStream).order_by(CameraStream.id.asc())).all()
+    }
+
+
+def _to_response(camera: Camera, stream: CameraStream | None = None) -> CameraResponse:
     return CameraResponse(
         id=camera.id,
         endpoint_uuid=camera.endpoint_uuid,
@@ -71,7 +176,38 @@ def _to_response(camera: Camera) -> CameraResponse:
         last_seen_at=camera.last_seen_at,
         created_at=camera.created_at,
         updated_at=camera.updated_at,
+        stream=_stream_response(stream) if stream is not None else None,
     )
+
+
+def _validate_rtsp_source(value: str) -> tuple[str, str, int, bool]:
+    if "\r" in value or "\n" in value:
+        raise HTTPException(status_code=422, detail="RTSP source URL contains invalid characters.")
+    parsed = urlparse(value)
+    if parsed.scheme not in {"rtsp", "rtsps"} or not parsed.hostname:
+        raise HTTPException(
+            status_code=422,
+            detail="Camera stream source must be an rtsp:// or rtsps:// URL.",
+        )
+    try:
+        address = ipaddress.ip_address(parsed.hostname.strip("[]"))
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail="Camera stream source host must be a literal local/private IP address.",
+        ) from exc
+    if not (address.is_private or address.is_link_local or address.is_loopback):
+        raise HTTPException(
+            status_code=422,
+            detail="Camera stream source must remain on private/local networking.",
+        )
+    try:
+        port = parsed.port or 554
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="Camera stream source port is invalid.") from exc
+    if not 1 <= port <= 65535:
+        raise HTTPException(status_code=422, detail="Camera stream source port is invalid.")
+    return parsed.scheme, parsed.hostname, port, bool(parsed.username or parsed.password)
 
 
 def _upsert_discovered(
@@ -96,15 +232,39 @@ def _upsert_discovered(
         )
         db.add(camera)
     else:
+        old_host = camera.host
         camera.host = device.host
         camera.port = device.port
         camera.service_url = device.service_url
         camera.onvif_types = list(device.types)
         camera.scopes = list(device.scopes)
         camera.last_seen_at = now
-        if camera.display_name == camera.host and device.name:
+        if camera.display_name == old_host and device.name:
             camera.display_name = device.name
     return camera, created
+
+
+def _decrypt_source(stream: CameraStream) -> str:
+    try:
+        return decrypt_scoped_value(
+            stream.source_ciphertext,
+            scope=_scope(stream.camera_id),
+        )
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Camera stream encryption key is unavailable or cannot decrypt this source.",
+        ) from exc
+
+
+def _sync_stream(stream: CameraStream, source_url: str | None = None) -> bool:
+    source_url = source_url or _decrypt_source(stream)
+    client = get_go2rtc_client()
+    client.ensure_placeholder(stream.stream_name)
+    client.patch_runtime_source(stream.stream_name, source_url)
+    stream.last_sync_at = datetime.now(UTC)
+    stream.last_error = None
+    return True
 
 
 @router.get("", response_model=list[CameraResponse])
@@ -113,7 +273,96 @@ def list_cameras(
     db: SessionDependency,
 ) -> list[CameraResponse]:
     cameras = db.scalars(select(Camera).order_by(Camera.display_name.asc(), Camera.id.asc())).all()
-    return [_to_response(item) for item in cameras]
+    streams = _camera_stream_map(db)
+    return [_to_response(item, streams.get(item.id)) for item in cameras]
+
+
+@router.get("/go2rtc/status", response_model=Go2RTCStatusResponse)
+def go2rtc_status(_actor: CameraViewer) -> Go2RTCStatusResponse:
+    settings = get_settings()
+    try:
+        status = get_go2rtc_client().status()
+        return Go2RTCStatusResponse(
+            configured=True,
+            online=status.online,
+            version=status.version,
+            api_base_url=status.api_base_url,
+            rtsp_listen=status.rtsp_listen,
+            local_api_only=status.local_api_only,
+            local_rtsp_only=status.local_rtsp_only,
+            error=None,
+        )
+    except Go2RTCError as exc:
+        return Go2RTCStatusResponse(
+            configured=bool(settings.go2rtc_base_url),
+            online=False,
+            version=None,
+            api_base_url=settings.go2rtc_base_url,
+            rtsp_listen=None,
+            local_api_only=settings.go2rtc_base_url.startswith(
+                ("http://127.0.0.1", "http://localhost", "http://[::1]")
+            ),
+            local_rtsp_only=False,
+            error=str(exc),
+        )
+
+
+@router.post("/go2rtc/reconcile", response_model=Go2RTCReconcileResponse)
+def reconcile_go2rtc(
+    actor: CameraAdmin,
+    db: SessionDependency,
+) -> Go2RTCReconcileResponse:
+    try:
+        client = get_go2rtc_client()
+        client.status()
+    except Go2RTCError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    streams = db.scalars(select(CameraStream).order_by(CameraStream.id.asc())).all()
+    synchronized = 0
+    failed = 0
+    skipped = 0
+    for stream in streams:
+        camera = db.get(Camera, stream.camera_id)
+        if camera is None or not camera.enabled or not stream.enabled:
+            skipped += 1
+            continue
+        try:
+            source_url = _decrypt_source(stream)
+            client.ensure_placeholder(stream.stream_name)
+            client.patch_runtime_source(stream.stream_name, source_url)
+            stream.last_sync_at = datetime.now(UTC)
+            stream.last_error = None
+            synchronized += 1
+        except HTTPException:
+            stream.last_error = "encrypted_source_unavailable"
+            failed += 1
+        except Go2RTCError:
+            stream.last_error = "go2rtc_sync_failed"
+            failed += 1
+
+    record_audit_event(
+        db,
+        actor_user_id=actor.id,
+        event_type="camera.streams.reconciled",
+        object_type="camera_stream_registry",
+        object_id=None,
+        action="reconcile",
+        arguments={"configured": len(streams)},
+        result={
+            "ok": failed == 0,
+            "synchronized": synchronized,
+            "failed": failed,
+            "skipped": skipped,
+        },
+    )
+    db.commit()
+    return Go2RTCReconcileResponse(
+        configured=len(streams),
+        synchronized=synchronized,
+        failed=failed,
+        skipped=skipped,
+    )
 
 
 @router.post("/discover", response_model=CameraDiscoveryResponse)
@@ -157,6 +406,7 @@ def discover_cameras(
         },
     )
     db.commit()
+    streams = _camera_stream_map(db)
     for camera in cameras:
         db.refresh(camera)
 
@@ -164,8 +414,189 @@ def discover_cameras(
         discovered=len(devices),
         created=created_count,
         updated=updated_count,
-        cameras=[_to_response(item) for item in cameras],
+        cameras=[_to_response(item, streams.get(item.id)) for item in cameras],
     )
+
+
+@router.put("/{camera_id}/stream", response_model=CameraStreamMutationResponse)
+def configure_camera_stream(
+    camera_id: int,
+    payload: CameraStreamConfigureRequest,
+    actor: CameraAdmin,
+    db: SessionDependency,
+) -> CameraStreamMutationResponse:
+    camera = db.get(Camera, camera_id)
+    if camera is None:
+        raise HTTPException(status_code=404, detail="Camera not found.")
+    if not camera.enabled:
+        raise HTTPException(status_code=409, detail="Enable the camera registry entry first.")
+
+    scheme, host, port, credentials_present = _validate_rtsp_source(payload.source_url)
+    try:
+        ciphertext, fingerprint = encrypt_scoped_value(
+            payload.source_url,
+            scope=_scope(camera.id),
+        )
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Encrypted secret storage is locked. Configure SECRET_ENCRYPTION_KEY first.",
+        ) from exc
+
+    stream = db.scalar(select(CameraStream).where(CameraStream.camera_id == camera.id))
+    if stream is None:
+        stream = CameraStream(
+            camera_id=camera.id,
+            stream_name=f"camera-{camera.id}",
+            source_scheme=scheme,
+            source_host=host,
+            source_port=port,
+            credentials_present=credentials_present,
+            source_ciphertext=ciphertext,
+            key_fingerprint=fingerprint,
+            enabled=True,
+        )
+        db.add(stream)
+        db.flush()
+        action = "create"
+    else:
+        stream.source_scheme = scheme
+        stream.source_host = host
+        stream.source_port = port
+        stream.credentials_present = credentials_present
+        stream.source_ciphertext = ciphertext
+        stream.key_fingerprint = fingerprint
+        stream.enabled = True
+        action = "rotate"
+
+    synced = False
+    message = "Encrypted stream source saved; go2rtc is not currently synchronized."
+    try:
+        synced = _sync_stream(stream, payload.source_url)
+        message = "Encrypted stream source saved and synchronized to go2rtc runtime."
+    except Go2RTCError:
+        stream.last_error = "go2rtc_unavailable"
+    record_audit_event(
+        db,
+        actor_user_id=actor.id,
+        event_type="camera.stream.configured",
+        object_type="camera_stream",
+        object_id=str(camera.id),
+        action=action,
+        arguments={
+            "camera_id": camera.id,
+            "stream_name": stream.stream_name,
+            "source_scheme": scheme,
+            "source_host": host,
+            "source_port": port,
+            "credentials_present": credentials_present,
+        },
+        result={"ok": True, "synced": synced},
+    )
+    db.commit()
+    db.refresh(stream)
+    return CameraStreamMutationResponse(
+        stream=_stream_response(stream),
+        synced=synced,
+        message=message,
+    )
+
+
+@router.post("/{camera_id}/stream/probe", response_model=CameraStreamProbeResponse)
+def probe_camera_stream(
+    camera_id: int,
+    actor: CameraAdmin,
+    db: SessionDependency,
+) -> CameraStreamProbeResponse:
+    stream = db.scalar(select(CameraStream).where(CameraStream.camera_id == camera_id))
+    if stream is None:
+        raise HTTPException(status_code=404, detail="Camera stream is not configured.")
+    camera = db.get(Camera, camera_id)
+    if camera is None or not camera.enabled or not stream.enabled:
+        raise HTTPException(status_code=409, detail="Camera stream is disabled.")
+
+    source_url = _decrypt_source(stream)
+    now = datetime.now(UTC)
+    try:
+        client = get_go2rtc_client()
+        client.ensure_placeholder(stream.stream_name)
+        client.patch_runtime_source(stream.stream_name, source_url)
+        stream.last_sync_at = now
+        probe = client.probe_stream(stream.stream_name)
+        status = "online" if probe.producer_count > 0 else "no_producer"
+        stream.last_probe_status = status
+        stream.last_probe_at = now
+        stream.last_error = None if status == "online" else "no_active_producer"
+    except Go2RTCUnavailable as exc:
+        stream.last_probe_status = "unavailable"
+        stream.last_probe_at = now
+        stream.last_error = "go2rtc_unavailable"
+        db.commit()
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Go2RTCError as exc:
+        stream.last_probe_status = "failed"
+        stream.last_probe_at = now
+        stream.last_error = "stream_probe_failed"
+        db.commit()
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    record_audit_event(
+        db,
+        actor_user_id=actor.id,
+        event_type="camera.stream.probed",
+        object_type="camera_stream",
+        object_id=str(camera_id),
+        action="probe",
+        arguments={"camera_id": camera_id, "stream_name": stream.stream_name},
+        result={
+            "ok": status == "online",
+            "status": status,
+            "producer_count": probe.producer_count,
+            "consumer_count": probe.consumer_count,
+        },
+    )
+    db.commit()
+    return CameraStreamProbeResponse(
+        camera_id=camera_id,
+        stream_name=stream.stream_name,
+        status=status,
+        producer_count=probe.producer_count,
+        consumer_count=probe.consumer_count,
+        probed_at=now,
+    )
+
+
+@router.delete("/{camera_id}/stream", response_model=CameraStreamDeleteResponse)
+def delete_camera_stream(
+    camera_id: int,
+    actor: CameraAdmin,
+    db: SessionDependency,
+) -> CameraStreamDeleteResponse:
+    stream = db.scalar(select(CameraStream).where(CameraStream.camera_id == camera_id))
+    if stream is None:
+        return CameraStreamDeleteResponse(deleted=False, go2rtc_removed=False)
+
+    removed = False
+    try:
+        get_go2rtc_client().delete_stream(stream.stream_name)
+        removed = True
+    except Go2RTCError:
+        removed = False
+
+    stream_name = stream.stream_name
+    db.delete(stream)
+    record_audit_event(
+        db,
+        actor_user_id=actor.id,
+        event_type="camera.stream.deleted",
+        object_type="camera_stream",
+        object_id=str(camera_id),
+        action="delete",
+        arguments={"camera_id": camera_id, "stream_name": stream_name},
+        result={"ok": True, "go2rtc_removed": removed},
+    )
+    db.commit()
+    return CameraStreamDeleteResponse(deleted=True, go2rtc_removed=removed)
 
 
 @router.patch("/{camera_id}", response_model=CameraResponse)
@@ -202,4 +633,5 @@ def update_camera(
     )
     db.commit()
     db.refresh(camera)
-    return _to_response(camera)
+    stream = db.scalar(select(CameraStream).where(CameraStream.camera_id == camera.id))
+    return _to_response(camera, stream)
