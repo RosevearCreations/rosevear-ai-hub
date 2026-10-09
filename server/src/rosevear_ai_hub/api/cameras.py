@@ -202,7 +202,7 @@ def _validate_rtsp_source(value: str) -> tuple[str, str, int, bool]:
             detail="Camera stream source must remain on private/local networking.",
         )
     try:
-        port = parsed.port or 554
+        port = parsed.port or (322 if parsed.scheme == "rtsps" else 554)
     except ValueError as exc:
         raise HTTPException(
             status_code=422,
