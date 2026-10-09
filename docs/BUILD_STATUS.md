@@ -37,7 +37,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 031 | Camera Registry and ONVIF Discovery | COMPLETE | main via PR #47 |
 | 032 | RTSP / go2rtc Integration | COMPLETE | main via PR #50 |
 | 033 | Camera Dashboard and Health | COMPLETE | main via PR #53 |
-| 034 | Frigate Adapter | IN PROGRESS | dev |
+| 034 | Frigate Adapter | COMPLETE | main via PR #56 |
 
 ## Build 016 acceptance checklist
 
@@ -838,11 +838,11 @@ synchronization back to dev so both branches carry the final release record.
 - [x] backend/desktop version 0.0.34
 - [x] no database migration required
 - [x] no new Hub secret required in supported loopback mode
-- [ ] final Build 034 dev CI green
-- [ ] promoted to main
-- [ ] final Build 034 main Production CI green
-- [ ] release-evidence closeout complete
-- [ ] dev synchronized with final main closeout target
+- [x] final Build 034 dev CI green — run 37989129587
+- [x] promoted to main — PR #56 / merge 37d7e2d6d0d85b2c719e8c76ca7ba12ae377ff7a
+- [x] final Build 034 main Production CI green — run 37989801553
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
 
 ## Operator setup
 
@@ -852,6 +852,12 @@ loopback-only. No Frigate installation is required for the Hub itself to start o
 ONVIF/go2rtc camera functionality to keep working.
 
 Build 034 is read-only. Camera Event Automations begin in Build 035.
+
+Build 034 feature promotion is complete. The exact GREEN dev tree
+`0f94819a757c5b55d2e597528786028e61cff7f7` passed dev run 37989129587 and was promoted
+through PR #56 to main merge `37d7e2d6d0d85b2c719e8c76ca7ba12ae377ff7a`. Main Production run
+37989801553 passed all four lanes. The protected-main release-evidence closeout is followed by
+synchronization back to dev so both branches carry the final release record.
 
 ## Next build
 
