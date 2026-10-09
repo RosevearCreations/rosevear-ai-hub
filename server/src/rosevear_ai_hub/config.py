@@ -94,6 +94,20 @@ class Settings(BaseSettings):
         alias="MQTT_RECONNECT_MAX_SECONDS",
     )
     mqtt_allowed_topics: str = Field(default="", alias="MQTT_ALLOWED_TOPICS")
+    go2rtc_base_url: str = Field(
+        default="http://127.0.0.1:1984",
+        alias="GO2RTC_BASE_URL",
+    )
+    go2rtc_timeout_seconds: float = Field(
+        default=5.0,
+        gt=0,
+        le=30,
+        alias="GO2RTC_TIMEOUT_SECONDS",
+    )
+    go2rtc_rtsp_base_url: str = Field(
+        default="rtsp://127.0.0.1:8554",
+        alias="GO2RTC_RTSP_BASE_URL",
+    )
     knowledge_storage_dir: Path = Field(
         default=Path("./data/knowledge"),
         alias="KNOWLEDGE_STORAGE_DIR",
