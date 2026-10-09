@@ -424,10 +424,7 @@ def camera_dashboard(
         pass
 
     healthy = sum(item.health == "healthy" for item in items)
-    attention = sum(
-        item.enabled and item.health not in {"healthy", "disabled"}
-        for item in items
-    )
+    attention = sum(item.enabled and item.health not in {"healthy", "disabled"} for item in items)
     return CameraDashboardResponse(
         generated_at=now,
         stale_after_seconds=get_settings().camera_health_stale_seconds,
