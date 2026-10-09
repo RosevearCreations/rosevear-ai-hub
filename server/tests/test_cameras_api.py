@@ -123,6 +123,8 @@ def build_stream_client(tmp_path):
 
 
 class FakeGo2RTC:
+    base_url = "http://127.0.0.1:1984"
+
     def status(self):
         from types import SimpleNamespace
 
@@ -266,3 +268,92 @@ def test_household_user_cannot_configure_camera_stream(
         json={"source_url": "rtsp://user:pass@192.168.68.55/live"},
     )
     assert denied.status_code == 403
+
+
+def test_camera_dashboard_and_fleet_health_refresh(
+    tmp_path, monkeypatch, stream_secret_key
+) -> None:
+    client = build_stream_client(tmp_path)
+    fake = FakeGo2RTC()
+    monkeypatch.setattr(
+        "rosevear_ai_hub.api.cameras.get_go2rtc_client",
+        lambda: fake,
+    )
+    monkeypatch.setattr(
+        "rosevear_ai_hub.api.cameras.discover_onvif_devices",
+        lambda: [discovered_camera()],
+    )
+
+    camera_id = client.post("/api/v1/cameras/discover").json()["cameras"][0]["id"]
+    configured = client.put(
+        f"/api/v1/cameras/{camera_id}/stream",
+        json={"source_url": "rtsp://user:pass@192.168.68.55/live"},
+    )
+    assert configured.status_code == 200
+
+    before = client.get("/api/v1/cameras/dashboard")
+    assert before.status_code == 200
+    before_payload = before.json()
+    assert before_payload["total"] == 1
+    assert before_payload["configured"] == 1
+    assert before_payload["healthy"] == 0
+    assert before_payload["attention"] == 1
+    assert before_payload["cameras"][0]["health"] == "untested"
+    assert "camera-password" not in before.text
+
+    refreshed = client.post("/api/v1/cameras/health/refresh")
+    assert refreshed.status_code == 200
+    assert refreshed.json()["checked"] == 1
+    assert refreshed.json()["healthy"] == 1
+    assert refreshed.json()["failed"] == 0
+
+    after = client.get("/api/v1/cameras/dashboard")
+    assert after.status_code == 200
+    payload = after.json()
+    assert payload["healthy"] == 1
+    assert payload["attention"] == 0
+    item = payload["cameras"][0]
+    assert item["health"] == "healthy"
+    assert item["source_host"] == "192.168.68.55"
+    assert item["viewer_url"].startswith("http://127.0.0.1:1984/stream.html?src=camera-")
+    assert "user:pass" not in after.text
+
+
+def test_household_user_can_view_dashboard_but_cannot_run_health_refresh(
+    tmp_path, monkeypatch, stream_secret_key
+) -> None:
+    client = build_stream_client(tmp_path)
+    monkeypatch.setattr(
+        "rosevear_ai_hub.api.cameras.get_go2rtc_client",
+        lambda: FakeGo2RTC(),
+    )
+    monkeypatch.setattr(
+        "rosevear_ai_hub.api.cameras.discover_onvif_devices",
+        lambda: [discovered_camera()],
+    )
+    assert client.post("/api/v1/cameras/discover").status_code == 200
+    assert (
+        client.post(
+            "/api/v1/auth/users",
+            json={
+                "username": "camera-viewer",
+                "password": "family-password-123",
+                "role": "household_user",
+            },
+        ).status_code
+        == 201
+    )
+    assert client.post("/api/v1/auth/logout").status_code == 200
+    assert (
+        client.post(
+            "/api/v1/auth/login",
+            json={
+                "username": "camera-viewer",
+                "password": "family-password-123",
+            },
+        ).status_code
+        == 200
+    )
+
+    assert client.get("/api/v1/cameras/dashboard").status_code == 200
+    assert client.post("/api/v1/cameras/health/refresh").status_code == 403
