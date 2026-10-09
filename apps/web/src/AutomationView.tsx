@@ -198,11 +198,11 @@ export function AutomationView() {
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 029</p>
+          <p className="eyebrow">Build 035</p>
           <h1>Automations</h1>
           <p className="lede">
-            Author rules with human approval, inspect durable run history, and diagnose failures
-            without automatically replaying uncertain physical-world actions.
+            Author rules with human approval, including local Frigate camera events, inspect durable
+            run history, and diagnose failures without automatically replaying uncertain actions.
           </p>
         </div>
         <div className="health-card" role="status">
@@ -217,6 +217,12 @@ export function AutomationView() {
                 ? runtime.processed_events + " events processed"
                 : "Loading runtime status"}
             </small>
+            {runtime ? (
+              <small>
+                Frigate {runtime.frigate_rule_count} rule
+                {runtime.frigate_rule_count === 1 ? "" : "s"} · {runtime.frigate_online ? "online" : "idle/offline"}
+              </small>
+            ) : null}
           </span>
         </div>
       </header>
