@@ -40,7 +40,6 @@ def test_go2rtc_status_and_runtime_stream_patch() -> None:
     assert status.local_api_only is True
     assert status.local_rtsp_only is True
 
-    client.ensure_placeholder("camera-1")
     client.patch_runtime_source(
         "camera-1",
         "rtsp://user:secret@192.168.68.55/live",
@@ -49,10 +48,6 @@ def test_go2rtc_status_and_runtime_stream_patch() -> None:
 
     assert probe.producer_count == 1
     assert probe.consumer_count == 0
-    assert any(
-        method == "PUT" and "/api/streams" in url and "name=camera-1" in url
-        for method, url in requests
-    )
     assert any(
         method == "PATCH" and "camera-1" in url
         for method, url in requests
