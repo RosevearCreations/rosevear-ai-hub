@@ -356,3 +356,24 @@ Health is computed from existing registry/stream state:
 
 The browser receives only local viewer URLs and sanitized health metadata. No new public listener,
 recording subsystem, or camera device-control path is introduced.
+
+
+## Build 034 Frigate adapter
+
+Build 034 adds a separate optional read-only event-analysis integration beside go2rtc:
+
+authenticated camera viewer
+-> Hub Frigate API
+-> loopback-only Frigate internal HTTP API
+-> normalized service/camera/event metadata
+-> Cameras Frigate panel
+
+The browser never connects to Frigate directly. The adapter validates FRIGATE_BASE_URL before every
+client construction and rejects non-loopback HTTP targets, embedded credentials, queries, and
+fragments.
+
+Frigate remains optional. Failure of the adapter returns an offline/error state without taking down
+the camera registry, go2rtc live dashboard, Home Assistant, MQTT, chat, or knowledge features.
+
+Build 034 does not persist Frigate events or execute automations from them. Build 035 will define
+durable event-ingestion/deduplication and automation semantics.
