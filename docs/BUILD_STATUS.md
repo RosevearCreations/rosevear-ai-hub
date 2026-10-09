@@ -38,6 +38,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 032 | RTSP / go2rtc Integration | COMPLETE | main via PR #50 |
 | 033 | Camera Dashboard and Health | COMPLETE | main via PR #53 |
 | 034 | Frigate Adapter | COMPLETE | main via PR #56 |
+| 035 | Camera Event Automations | IN PROGRESS | dev |
 
 ## Build 016 acceptance checklist
 
@@ -859,7 +860,50 @@ through PR #56 to main merge `37d7e2d6d0d85b2c719e8c76ca7ba12ae377ff7a`. Main Pr
 37989801553 passed all four lanes. The protected-main release-evidence closeout is followed by
 synchronization back to dev so both branches carry the final release record.
 
+## Build 035 acceptance checklist
+
+- [x] frigate_event Rule Schema trigger
+- [x] exact label filter
+- [x] optional camera, sub-label, zone, score, clip, snapshot filters
+- [x] false-positive events ignored by default
+- [x] Frigate polling dormant when no enabled camera-event rule exists
+- [x] bounded FRIGATE_EVENT_POLL_SECONDS setting
+- [x] first-use historical event baseline suppression
+- [x] bounded persistent seen-event checkpoint
+- [x] automatic per-rule Frigate event-ID deduplication
+- [x] chronological unseen-event queueing
+- [x] Frigate events reuse Home Assistant state conditions
+- [x] Frigate events reuse existing deterministic Level-1 action executors
+- [x] Level-2/Level-3 autonomous actions remain prohibited
+- [x] existing safe-control allow list and hazard checks remain enforced
+- [x] no automatic replay after failed/interrupted physical actions
+- [x] runtime reports Frigate rule count, online state, seen-event count, last poll
+- [x] AI rule authoring receives Frigate context when available
+- [x] automation UI exposes Frigate runtime state
+- [x] backend trigger validation tests
+- [x] Event Engine execution/dedup/filter tests
+- [x] Frigate runtime baseline/restart tests
+- [x] web runtime display tests
+- [x] architecture/security/integration/operations/build documentation
+- [x] backend/desktop version 0.0.35
+- [x] no database migration required
+- [x] no new Hub secret or paid dependency
+- [ ] final Build 035 dev CI green
+- [ ] promoted to main
+- [ ] final Build 035 main Production CI green
+- [ ] release-evidence closeout complete
+- [ ] dev synchronized with final main closeout target
+
+## Operator setup
+
+Build 035 adds no migration or secret. Frigate remains optional. Camera-event polling starts only
+when at least one enabled frigate_event rule exists. The first successful poll establishes a
+non-executing baseline of current Frigate history; later unseen events may enter the deterministic
+Event Engine.
+
+Safe default: `FRIGATE_EVENT_POLL_SECONDS=2` with an accepted range of 1–60 seconds.
+
 ## Next build
 
-**Build 035 — Camera Event Automations**
+**Build 036 — Connector Framework**
 
