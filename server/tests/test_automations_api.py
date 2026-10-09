@@ -79,7 +79,12 @@ def test_schema_is_versioned_strict_and_execution_is_available(tmp_path) -> None
     body = schema.json()
     assert body["schema_version"] == 1
     assert body["execution_available"] is True
-    assert body["supported_triggers"] == ["state_change", "state_threshold", "mqtt_message"]
+    assert body["supported_triggers"] == [
+        "state_change",
+        "state_threshold",
+        "mqtt_message",
+        "frigate_event",
+    ]
     assert body["supported_actions"] == ["tool"]
 
     invalid = client.post(
