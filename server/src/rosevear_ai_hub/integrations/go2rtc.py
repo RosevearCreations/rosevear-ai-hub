@@ -105,9 +105,7 @@ class Go2RTCClient:
         except (httpx.ConnectError, httpx.TimeoutException, httpx.NetworkError) as exc:
             raise Go2RTCUnavailable("Local go2rtc service is unavailable.") from exc
         if response.status_code >= 400:
-            raise Go2RTCRejected(
-                f"go2rtc rejected the request with status {response.status_code}."
-            )
+            raise Go2RTCRejected(f"go2rtc rejected the request with status {response.status_code}.")
         return response
 
     def status(self) -> Go2RTCStatus:
@@ -127,9 +125,7 @@ class Go2RTCClient:
             api_base_url=self.base_url,
             rtsp_listen=str(rtsp_listen) if rtsp_listen else None,
             local_api_only=True,
-            local_rtsp_only=_rtsp_listen_is_local(
-                str(rtsp_listen) if rtsp_listen else None
-            ),
+            local_rtsp_only=_rtsp_listen_is_local(str(rtsp_listen) if rtsp_listen else None),
         )
 
     def patch_runtime_source(self, stream_name: str, source_url: str) -> None:
