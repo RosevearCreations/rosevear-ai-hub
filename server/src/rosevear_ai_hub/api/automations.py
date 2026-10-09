@@ -42,6 +42,7 @@ from rosevear_ai_hub.automations import (
     validate_rule_tool_references,
 )
 from rosevear_ai_hub.confirmations import consume_confirmation, prepare_confirmation
+from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.database import get_session
 from rosevear_ai_hub.models import Automation, AutomationRun, User
 from rosevear_ai_hub.providers.base import ProviderRequestError, ProviderUnavailableError
