@@ -358,7 +358,7 @@ local API and does not download third-party binaries.
 6. Open **Cameras** and confirm go2rtc is online, API local-only is Yes, and RTSP local-only is Yes.
 7. Enter each camera's private-LAN RTSP/RTSPS source URL once and save it.
 8. Use **Test RTSP stream** to validate each configured source.
-9. After a go2rtc-only restart, use **Sync go2rtc** to repopulate runtime source URLs.
+9. A full Hub restart automatically repopulates enabled runtime source URLs when go2rtc is available. After a go2rtc-only restart while the Hub remains running, use **Sync go2rtc**.
 
 `scripts\dev-desktop.ps1` automatically starts go2rtc when `tools\go2rtc\go2rtc.exe` exists.
 If the binary is absent, the rest of the Hub still starts and Cameras reports the transport offline.
