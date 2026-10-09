@@ -182,3 +182,24 @@ Build 035 reuses the Build 034 loopback-only Frigate adapter as a deterministic 
 - Frigate remains read-only; Build 035 does not mutate Frigate or camera state directly
 
 Build 036 begins the business Connector Framework and is separate from camera integrations.
+
+
+## Build 036 business connector framework
+
+The Phase 7 business integrations now share a common connector contract and registry.
+
+- stable connector key and human-readable name
+- explicit planned implementation build
+- read-only or approved-write access mode
+- bounded capability declarations
+- normalized configured/available/state/message health
+- normalized safe connector errors
+- no raw token, cookie, provider response, or exception exposure in the browser contract
+- writes blocked by default in the base class
+- metadata declares that any future write path requires confirmation
+- Devil n Dove is reserved for Build 037
+- Rosie Dazzlers is reserved for Build 038
+- Yard Workers is reserved for Build 039
+- Build 040 owns any narrow approved business write
+
+Build 036 performs no external network request and introduces no credential or secret definition.

@@ -123,6 +123,23 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "After an upgrade, run Alembic to head so notifications and notification_receipts exist.",
     ],
   },
+  Business: {
+    purpose: "Shows the common read-first connector boundary for the Rosevear businesses before any live business system is contacted.",
+    tasks: [
+      "Review each registered connector and the resources it will expose.",
+      "Treat Planned as expected until that business's dedicated read build is installed.",
+      "Use the capability list to confirm what later connectors may read before enabling credentials or network access.",
+    ],
+    safety: [
+      "Build 036 makes no external business-system calls and stores no new credentials.",
+      "Business connectors are read-only by default; writes stay blocked until a later build defines a narrow confirmed action.",
+      "Connector errors are normalized before they reach the browser so tokens, cookies, raw responses, and internal exceptions are not exposed.",
+    ],
+    troubleshooting: [
+      "A Planned connector is not an outage; install its dedicated Build 037, 038, or 039 implementation first.",
+      "After a future connector is configured, use its normalized status and Audit evidence rather than exposing raw provider responses.",
+    ],
+  },
   System: {
     purpose: "Represents system-level health and operating context for the local Hub.",
     tasks: [
