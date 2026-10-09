@@ -271,3 +271,37 @@ def rewrap_all_secrets(
     )
     session.commit()
     return len(records)
+
+
+def encrypt_scoped_value(
+    plaintext: str,
+    *,
+    scope: str,
+    settings: Settings | None = None,
+) -> tuple[str, str]:
+    """Encrypt an integration-owned value without exposing it through the generic Secrets API."""
+
+    settings = settings or get_settings()
+    raw_key = current_key(settings)
+    if raw_key is None:
+        raise RuntimeError("SECRET_ENCRYPTION_KEY is not configured.")
+    return _encrypt(plaintext, raw_key, secret_key=scope), key_fingerprint(raw_key)
+
+
+def decrypt_scoped_value(
+    ciphertext: str,
+    *,
+    scope: str,
+    settings: Settings | None = None,
+) -> str:
+    """Decrypt an integration-owned value with current/previous-key rotation support."""
+
+    settings = settings or get_settings()
+    for raw_key in (current_key(settings), previous_key(settings)):
+        if raw_key is None:
+            continue
+        try:
+            return _decrypt(ciphertext, raw_key, secret_key=scope)
+        except RuntimeError:
+            continue
+    raise RuntimeError("No configured encryption key can decrypt this scoped value.")
