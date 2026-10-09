@@ -2,13 +2,15 @@
 
 ## Status
 
-Feature promotion verified on main.
+Feature promotion and release-evidence closeout verified on main.
 
 - final feature dev CI: run 37875622964 — GREEN
 - feature promotion: PR #44
 - feature merge: 94d082716804e4810b4bbf2c950a9ca710feb436
 - feature main Production CI: run 37876478895 — GREEN
-- release-evidence closeout: pending this documentation-only closeout commit
+- release-evidence closeout: PR #45 / merge 22d8099ffa9b9b53aee656c95cc71770ea6e10c3
+- closeout main Production CI: run 37878642137 — GREEN
+- synchronized dev CI: run 37879008035 — GREEN
 
 ## Scope
 
