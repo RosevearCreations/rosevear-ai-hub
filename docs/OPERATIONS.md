@@ -80,8 +80,8 @@ The previous encrypted value is overwritten and is not recoverable from the Hub.
 3. Set the new key as `SECRET_ENCRYPTION_KEY`.
 4. Restart the Hub.
 5. Open **Secrets** and confirm the previous key is reported available.
-6. Choose **Rewrap stored secrets**.
-7. Confirm stored rows show the current key fingerprint.
+6. Choose **Rewrap stored secrets**. Build 032 also rewraps encrypted camera RTSP source URLs in the same transaction.
+7. Confirm stored secret rows and configured camera stream sources use the current key fingerprint.
 8. Verify integrations that depend on stored secrets.
 9. Remove `SECRET_ENCRYPTION_PREVIOUS_KEY`.
 10. Restart the Hub and verify secret status again.
@@ -352,7 +352,7 @@ local API and does not download third-party binaries.
 
 1. Download the official Windows go2rtc binary from the upstream project.
 2. Place it at `tools\go2rtc\go2rtc.exe` under the repository.
-3. Keep `SECRET_ENCRYPTION_KEY` configured; camera source URLs use the same Hub master key.
+3. Keep `SECRET_ENCRYPTION_KEY` configured; camera source URLs use the same Hub master key and participate in the existing master-key rewrap workflow.
 4. Run `powershell -ExecutionPolicy Bypass -File .\scripts\start-go2rtc.ps1`.
 5. The script creates `data\go2rtc\go2rtc.yaml` from the tracked local-only template when missing.
 6. Open **Cameras** and confirm go2rtc is online, API local-only is Yes, and RTSP local-only is Yes.
