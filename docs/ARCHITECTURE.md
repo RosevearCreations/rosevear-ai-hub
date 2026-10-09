@@ -294,3 +294,21 @@ requests must exactly match an allow-list entry so callers cannot widen broker v
 MQTT publish remains a human-invoked integration action in Build 025. It is not an AI-executable tool
 and is not yet an automation action. Retained publishes are blocked until a later build deliberately
 defines their lifecycle and safety semantics.
+
+
+## Build 030 notification layer
+
+Build 030 introduces a local notification boundary between deterministic automation and future
+external messaging.
+
+notification.household.send is a registered Level-1 tool with a strict title, message, and severity
+schema. The Event Engine may execute it autonomously because the action only creates a persistent
+record inside the Hub. It does not contact email, SMS, push, webhook, or cloud providers.
+
+Notifications are shared household records. Read and dismiss state is stored separately per user so
+one person's inbox actions do not hide or acknowledge the notification for another account.
+
+The web application exposes Notifications as a primary section. Build 030 also adds a reusable
+contextual help layer at the application shell: every primary section gets the same accessible
+circled-i entry point while the panel content changes with the active section. This keeps help
+consistent without duplicating interaction logic in each feature view.

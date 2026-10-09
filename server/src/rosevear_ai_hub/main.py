@@ -16,6 +16,7 @@ from rosevear_ai_hub.api.home_assistant_controls import router as home_assistant
 from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.mqtt import router as mqtt_router
+from rosevear_ai_hub.api.notifications import router as notifications_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
 from rosevear_ai_hub.api.providers import router as providers_router
@@ -85,6 +86,7 @@ def create_app() -> FastAPI:
 
     application.include_router(auth_router)
     application.include_router(audit_router)
+    application.include_router(notifications_router)
     application.include_router(automations_router, dependencies=[Depends(require_authenticated)])
     protected = [Depends(require_authenticated)]
     application.include_router(ollama_router, dependencies=protected)

@@ -354,6 +354,73 @@ class SecretValue(TimestampMixin, Base):
     rotated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
+class Notification(Base):
+    """Persistent local household notification introduced by Build 030."""
+
+    __tablename__ = "notifications"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    audience: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="household",
+        index=True,
+    )
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    severity: Mapped[str] = mapped_column(String(32), nullable=False, default="info", index=True)
+    source_type: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        default="system",
+        index=True,
+    )
+    source_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.current_timestamp(),
+        nullable=False,
+        index=True,
+    )
+
+
+class NotificationReceipt(Base):
+    """Per-user read/dismiss state without changing the shared notification."""
+
+    __tablename__ = "notification_receipts"
+    __table_args__ = (
+        UniqueConstraint(
+            "notification_id",
+            "user_id",
+            name="uq_notification_receipts_notification_user",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    notification_id: Mapped[int] = mapped_column(
+        ForeignKey("notifications.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    dismissed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.current_timestamp(),
+        nullable=False,
+    )
+
+
 class Automation(TimestampMixin, Base):
     """Persisted deterministic automation definition introduced by Build 026."""
 

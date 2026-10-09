@@ -23,6 +23,7 @@ AUTOMATION_EXECUTABLE_TOOL_KEYS = frozenset(
         "home_assistant.light.set",
         "home_assistant.switch.set",
         "home_assistant.scene.activate",
+        "notification.household.send",
     }
 )
 

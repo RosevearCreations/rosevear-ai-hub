@@ -279,3 +279,44 @@ has no automatic-retry button or background action replay.
 
 Rollback requires only deploying the prior application version. The `interrupted` status uses the
 existing Build 027 string column and requires no schema downgrade.
+
+
+## Build 030 notification operations
+
+No new environment variable, secret, account, OAuth application, hosted service, or paid provider is
+required.
+
+After deployment:
+1. run alembic upgrade head to apply revision 0014
+2. sign in and open Notifications
+3. Owner or Administrator may choose Send local test
+4. confirm the new item appears unread
+5. mark it read, then dismiss it
+6. open Tools and confirm notification.household.send is enabled at Level 1
+7. when desired, author an automation whose action is notification.household.send
+
+The notification action stays operational without Ollama after a rule is saved because execution is
+deterministic. It also does not require Home Assistant unless the rule's trigger or conditions depend
+on Home Assistant.
+
+External delivery is intentionally absent. Do not add email, SMS, webhook, or push credentials for
+Build 030.
+
+### Contextual help
+
+Every primary navigation section displays a circled i help control. Open it for:
+- section purpose
+- common tasks
+- safety and permission boundaries
+- troubleshooting
+
+The help panel is keyboard reachable and closes with its Close control or Escape.
+
+### Test PC update
+
+Only after the exact Build 030 closeout commit has a GREEN main Production run, follow
+docs/TEST_SERVER_UPDATE.md. The supplied scripts/update-test-server.ps1 refuses to install a
+different origin/main SHA than the release SHA supplied to it.
+
+Build 030 rollback on the test PC requires stopping the Hub, downgrading Alembic to 0013, and
+checking out the prior verified release.
