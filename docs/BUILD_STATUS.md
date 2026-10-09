@@ -33,7 +33,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 027 | Event Engine | COMPLETE | main |
 | 028 | AI-Assisted Rule Authoring | COMPLETE | main |
 | 029 | Automation History and Failure Handling | COMPLETE | main |
-| 030 | Notification Layer | IN PROGRESS | dev |
+| 030 | Notification Layer | COMPLETE | main |
 
 ## Build 016 acceptance checklist
 
@@ -658,9 +658,9 @@ source event to trigger the rule.
 - [x] Windows test-server updater with exact-main SHA protection
 - [x] test-server update and rollback documentation
 - [x] no new credential, OAuth registration, cloud service, or paid dependency required
-- [ ] final Build 030 dev CI green
-- [ ] promoted to main
-- [ ] final Build 030 main CI green
+- [x] final Build 030 dev CI green — run 37875622964
+- [x] promoted to main — PR #44 / merge 94d082716804e4810b4bbf2c950a9ca710feb436
+- [x] final Build 030 main CI green — run 37876478895
 - [ ] release-evidence closeout merged
 - [ ] dev synchronized with final main closeout target
 
@@ -669,8 +669,9 @@ source event to trigger the rule.
 No new variable, account, provider, or external application is required for Build 030. The local
 notification inbox works with the existing SQLite database after Alembic revision 0014 is applied.
 
-The test PC must not be updated until the final Build 030 main closeout SHA and Production run are
-GREEN. Use docs/TEST_SERVER_UPDATE.md and the exact verified SHA at that point.
+The feature tree is promoted and GREEN on main. The test PC must still wait for the final Build 030
+release-evidence closeout SHA and Production run. Use docs/TEST_SERVER_UPDATE.md only with that final
+verified SHA.
 
 ## Next build
 
