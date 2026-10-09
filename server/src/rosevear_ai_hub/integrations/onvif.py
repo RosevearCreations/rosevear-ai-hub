@@ -98,7 +98,11 @@ def parse_probe_matches(payload: bytes) -> list[DiscoveredONVIFDevice]:
 
     results: list[DiscoveredONVIFDevice] = []
     for match in root.findall(".//d:ProbeMatch", _NS):
-        address = match.findtext("a:EndpointReference/a:Address", default="", namespaces=_NS).strip()
+        address = match.findtext(
+            "a:EndpointReference/a:Address",
+            default="",
+            namespaces=_NS,
+        ).strip()
         endpoint_uuid = address.removeprefix("urn:uuid:").strip()
         if not endpoint_uuid:
             endpoint_uuid = address or f"unknown-{uuid.uuid4()}"
@@ -151,8 +155,6 @@ def discover_onvif_devices(
             try:
                 payload, _address = sock.recvfrom(_MAX_DATAGRAM_BYTES)
             except TimeoutError:
-                continue
-            except socket.timeout:
                 continue
             for device in parse_probe_matches(payload):
                 found.setdefault(device.endpoint_uuid, device)
