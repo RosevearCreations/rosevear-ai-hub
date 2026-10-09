@@ -73,22 +73,22 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   Cameras: {
-    purpose: "Discovers ONVIF cameras and manages encrypted local RTSP transport through loopback-only go2rtc.",
+    purpose: "Shows a local multi-camera dashboard, health freshness, ONVIF inventory, and encrypted RTSP transport through loopback-only go2rtc.",
     tasks: [
-      "Owner/Admin can run Scan local network for ONVIF devices.",
-      "Install/start go2rtc locally, then confirm the transport card reports Online and loopback-only.",
-      "Enter a private-LAN RTSP source URL once; the Hub encrypts it and never redisplays the credential-bearing value.",
-      "Use Test RTSP stream to validate transport and Sync go2rtc after a go2rtc restart.",
+      "Use the summary cards to see total, enabled, configured, healthy, and attention-needed cameras.",
+      "Owner/Admin can run health checks to actively verify configured camera producers without exposing credentials.",
+      "Healthy configured cameras can render in local live tiles through the loopback-only go2rtc viewer.",
+      "Use Scan local network, Sync go2rtc, per-camera RTSP configuration, and Test RTSP stream for administration.",
     ],
     safety: [
-      "The go2rtc API is accepted only on localhost/loopback, and the supplied baseline binds RTSP/WebRTC to loopback too.",
-      "Credential-bearing RTSP URLs are encrypted in SQLite and patched only into go2rtc runtime memory, not its YAML file.",
-      "Public RTSP source addresses, PTZ, talkback, and camera device writes remain blocked.",
+      "Live tiles use only a local go2rtc viewer URL containing a non-secret stream name; camera usernames/passwords never enter the browser.",
+      "The desktop CSP allows only the fixed loopback go2rtc endpoint for camera frames/media and does not permit arbitrary remote frames.",
+      "Public RTSP sources, recording, PTZ, talkback, and camera device writes remain outside Build 033.",
     ],
     troubleshooting: [
-      "go2rtc offline: install the official Windows binary under tools/go2rtc and run scripts/start-go2rtc.ps1.",
-      "Stream probe fails: verify the camera RTSP path/credentials and that its private IP is reachable from the Hub machine.",
-      "A full Hub restart rehydrates streams automatically; after a go2rtc-only restart while the Hub stays running, choose Sync go2rtc.",
+      "Live tile unavailable: confirm go2rtc is online, both local-only checks say Yes, and the camera has an RTSP source configured.",
+      "Health is stale: run health checks; the default freshness window is five minutes.",
+      "Health check fails: verify the camera RTSP path/credentials, private IP reachability, and local go2rtc runtime.",
     ],
   },
   MQTT: {
