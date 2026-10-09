@@ -73,19 +73,22 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   Cameras: {
-    purpose: "Discovers compatible ONVIF cameras on the trusted LAN and keeps a persistent local registry.",
+    purpose: "Discovers ONVIF cameras and manages encrypted local RTSP transport through loopback-only go2rtc.",
     tasks: [
-      "Owner/Admin can run Scan local network to send a bounded ONVIF WS-Discovery probe.",
-      "Review discovered address, endpoint UUID, service URL, scopes, and last-seen time.",
-      "Disable a registry entry when a discovered camera should not participate in later camera builds.",
+      "Owner/Admin can run Scan local network for ONVIF devices.",
+      "Install/start go2rtc locally, then confirm the transport card reports Online and loopback-only.",
+      "Enter a private-LAN RTSP source URL once; the Hub encrypts it and never redisplays the credential-bearing value.",
+      "Use Test RTSP stream to validate transport and Sync go2rtc after a go2rtc restart.",
     ],
     safety: [
-      "Build 031 accepts only local/private ONVIF device-service addresses and does not open video streams.",
-      "Discovery does not request camera credentials, perform PTZ actions, or expose any camera service to the public internet.",
+      "The go2rtc API is accepted only on localhost/loopback, and the supplied baseline binds RTSP/WebRTC to loopback too.",
+      "Credential-bearing RTSP URLs are encrypted in SQLite and patched only into go2rtc runtime memory, not its YAML file.",
+      "Public RTSP source addresses, PTZ, talkback, and camera device writes remain blocked.",
     ],
     troubleshooting: [
-      "No cameras found: confirm the camera supports ONVIF discovery and is on the same reachable LAN/VLAN.",
-      "Discovery unavailable: check Windows firewall/multicast policy for UDP 3702 and keep camera services private.",
+      "go2rtc offline: install the official Windows binary under tools/go2rtc and run scripts/start-go2rtc.ps1.",
+      "Stream probe fails: verify the camera RTSP path/credentials and that its private IP is reachable from the Hub machine.",
+      "After a reboot or go2rtc restart, choose Sync go2rtc to rehydrate encrypted sources into runtime memory.",
     ],
   },
   MQTT: {
