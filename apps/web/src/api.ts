@@ -1529,6 +1529,24 @@ export function createTestNotification(
 }
 
 
+export interface CameraStreamRecord {
+  id: number;
+  stream_name: string;
+  source_scheme: string;
+  source_host: string;
+  source_port: number;
+  credentials_present: boolean;
+  enabled: boolean;
+  encrypted: boolean;
+  relay_url: string;
+  last_sync_at: string | null;
+  last_probe_at: string | null;
+  last_probe_status: string | null;
+  last_error: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CameraRecord {
   id: number;
   endpoint_uuid: string;
@@ -1543,6 +1561,7 @@ export interface CameraRecord {
   last_seen_at: string;
   created_at: string;
   updated_at: string;
+  stream: CameraStreamRecord | null;
 }
 
 export interface CameraDiscoveryResult {
@@ -1552,12 +1571,95 @@ export interface CameraDiscoveryResult {
   cameras: CameraRecord[];
 }
 
+export interface Go2RTCStatus {
+  configured: boolean;
+  online: boolean;
+  version: string | null;
+  api_base_url: string;
+  rtsp_listen: string | null;
+  local_api_only: boolean;
+  local_rtsp_only: boolean;
+  error: string | null;
+}
+
+export interface CameraStreamMutationResult {
+  stream: CameraStreamRecord;
+  synced: boolean;
+  message: string;
+}
+
+export interface CameraStreamProbeResult {
+  camera_id: number;
+  stream_name: string;
+  status: string;
+  producer_count: number;
+  consumer_count: number;
+  probed_at: string;
+}
+
+export interface Go2RTCReconcileResult {
+  configured: number;
+  synchronized: number;
+  failed: number;
+  skipped: number;
+}
+
 export function getCameras(signal?: AbortSignal): Promise<CameraRecord[]> {
   return authJson<CameraRecord[]>("GET", "/api/v1/cameras", undefined, signal);
 }
 
+export function getGo2RTCStatus(signal?: AbortSignal): Promise<Go2RTCStatus> {
+  return authJson<Go2RTCStatus>("GET", "/api/v1/cameras/go2rtc/status", undefined, signal);
+}
+
+export function reconcileGo2RTC(signal?: AbortSignal): Promise<Go2RTCReconcileResult> {
+  return authJson<Go2RTCReconcileResult>(
+    "POST",
+    "/api/v1/cameras/go2rtc/reconcile",
+    {},
+    signal,
+  );
+}
+
 export function discoverCameras(signal?: AbortSignal): Promise<CameraDiscoveryResult> {
   return authJson<CameraDiscoveryResult>("POST", "/api/v1/cameras/discover", {}, signal);
+}
+
+export function configureCameraStream(
+  cameraId: number,
+  sourceUrl: string,
+  signal?: AbortSignal,
+): Promise<CameraStreamMutationResult> {
+  return authJson<CameraStreamMutationResult>(
+    "PUT",
+    "/api/v1/cameras/" + cameraId + "/stream",
+    { source_url: sourceUrl },
+    signal,
+  );
+}
+
+export function probeCameraStream(
+  cameraId: number,
+  signal?: AbortSignal,
+): Promise<CameraStreamProbeResult> {
+  return authJson<CameraStreamProbeResult>(
+    "POST",
+    "/api/v1/cameras/" + cameraId + "/stream/probe",
+    {},
+    signal,
+  );
+}
+
+export function deleteCameraStream(
+  cameraId: number,
+  signal?: AbortSignal,
+): Promise<{ deleted: boolean; go2rtc_removed: boolean }> {
+  return authJson(
+    "DELETE",
+    "/api/v1/cameras/" + cameraId + "/stream",
+    undefined,
+    signal,
+  );
 }
 
 export function updateCamera(
