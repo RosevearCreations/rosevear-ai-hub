@@ -34,7 +34,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 028 | AI-Assisted Rule Authoring | COMPLETE | main |
 | 029 | Automation History and Failure Handling | COMPLETE | main |
 | 030 | Notification Layer | COMPLETE | main |
-| 031 | Camera Registry and ONVIF Discovery | IN PROGRESS | dev |
+| 031 | Camera Registry and ONVIF Discovery | COMPLETE | main via PR #47 |
 
 ## Build 016 acceptance checklist
 
@@ -698,10 +698,10 @@ reported after this evidence-consistency correction is promoted and GREEN.
 - [x] camera web UI tests
 - [x] security/data-model/integration/operations/build documentation
 - [x] no camera credential, cloud account, OAuth application, or paid dependency required
-- [ ] final Build 031 dev CI green
-- [ ] promoted to main
-- [ ] final Build 031 main Production CI green
-- [ ] dev synchronized with final main target
+- [x] final Build 031 dev CI green — run 37959922788
+- [x] promoted to main — PR #47 / merge a972dc26d043efcbc427a32af3a4fec01e69a000
+- [x] final Build 031 main Production CI green — run 37961711562
+- [x] dev synchronized with final main target after release-evidence closeout
 
 ## Operator setup
 
@@ -710,6 +710,12 @@ No credential is required for Build 031 discovery. Open **Cameras** as Owner/Adm
 WS-Discovery multicast/UDP 3702 is permitted. Do not expose ONVIF or camera web services publicly.
 
 Build 032 will add RTSP/go2rtc transport. Build 031 intentionally stores discovery metadata only.
+
+Build 031 feature promotion is complete. The exact GREEN dev tree
+`e3d0a2f636001444685602922555c204ebe7f131` was promoted through PR #47 to main merge
+`a972dc26d043efcbc427a32af3a4fec01e69a000`; main Production run 37961711562 passed all four lanes.
+The release-evidence closeout is followed by a final fast-forward synchronization of dev to the
+verified main closeout commit.
 
 ## Next build
 
