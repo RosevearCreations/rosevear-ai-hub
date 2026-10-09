@@ -389,3 +389,20 @@ go2rtc is treated as a local transport subprocess, not a new trust authority:
 The upstream go2rtc API intentionally treats localhost as trusted. That is why Build 032 does not
 permit a non-loopback API base URL. Host compromise still exposes live process memory and therefore
 remains outside database-at-rest protection.
+
+
+## Build 033 camera dashboard and health
+
+The dashboard preserves the Build 032 credential boundary:
+- camera source usernames/passwords remain encrypted server-side and are never returned to the browser
+- live tiles receive only a stable go2rtc stream name in a loopback viewer URL
+- viewer URLs are derived only from the already validated loopback GO2RTC_BASE_URL
+- the Tauri CSP permits camera frames/media only from the fixed 127.0.0.1:1984 transport endpoint
+- dashboard reads are available to authenticated camera-viewer roles but active fleet health probes remain Owner/Administrator-only
+- fleet health audit records contain counts/status only, not source URLs or credentials
+- automatic dashboard polling reads health metadata only; it does not repeatedly decrypt/probe cameras
+- stale health is explicit rather than silently treated as healthy
+- no recording, Frigate analytics, PTZ, talkback, reboot, firmware, or public camera exposure is added
+
+A local user or process able to access the same host account may still inspect local application
+traffic/process memory. Build 033 does not claim to defend against full host compromise.
