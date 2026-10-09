@@ -732,6 +732,7 @@ verified main closeout commit.
 - [x] Owner/Administrator stream deletion
 - [x] Owner/Administrator stream probe
 - [x] Owner/Administrator go2rtc reconcile
+- [x] automatic best-effort stream rehydration on Hub startup
 - [x] lower authenticated roles receive sanitized transport metadata only
 - [x] stable local relay endpoint metadata
 - [x] camera transport audit evidence
