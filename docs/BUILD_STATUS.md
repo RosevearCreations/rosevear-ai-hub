@@ -726,7 +726,7 @@ verified main closeout commit.
 - [x] AES-GCM encrypted camera source URL storage
 - [x] source credentials never returned after save
 - [x] sanitized cleartext transport metadata only
-- [x] empty persisted go2rtc stream placeholders
+- [x] Hub-managed go2rtc stream entries are runtime-only and not persisted to YAML
 - [x] credential-bearing source patched to go2rtc runtime memory only
 - [x] Owner/Administrator stream configuration
 - [x] Owner/Administrator stream deletion
