@@ -341,3 +341,34 @@ Build 031 does not test or open RTSP streams. Streaming begins in Build 032.
 
 Rollback: stop the Hub, run `.\\.venv\\Scripts\\python.exe -m alembic downgrade 0014`, then
 deploy the prior verified release.
+
+
+## Build 032 RTSP / go2rtc operations
+
+Build 032 needs the official go2rtc Windows executable for real camera streaming. CI uses a mocked
+local API and does not download third-party binaries.
+
+### Install and start go2rtc on the Windows Hub machine
+
+1. Download the official Windows go2rtc binary from the upstream project.
+2. Place it at `tools\go2rtc\go2rtc.exe` under the repository.
+3. Keep `SECRET_ENCRYPTION_KEY` configured; camera source URLs use the same Hub master key.
+4. Run `powershell -ExecutionPolicy Bypass -File .\scripts\start-go2rtc.ps1`.
+5. The script creates `data\go2rtc\go2rtc.yaml` from the tracked local-only template when missing.
+6. Open **Cameras** and confirm go2rtc is online, API local-only is Yes, and RTSP local-only is Yes.
+7. Enter each camera's private-LAN RTSP/RTSPS source URL once and save it.
+8. Use **Test RTSP stream** to validate each configured source.
+9. After a go2rtc-only restart, use **Sync go2rtc** to repopulate runtime source URLs.
+
+`scripts\dev-desktop.ps1` automatically starts go2rtc when `tools\go2rtc\go2rtc.exe` exists.
+If the binary is absent, the rest of the Hub still starts and Cameras reports the transport offline.
+
+Optional settings retain safe defaults:
+- `GO2RTC_BASE_URL=http://127.0.0.1:1984`
+- `GO2RTC_TIMEOUT_SECONDS=5`
+- `GO2RTC_RTSP_BASE_URL=rtsp://127.0.0.1:8554`
+
+Do not change GO2RTC_BASE_URL to a LAN/public address. Do not port-forward 1984, 8554, or 8555.
+
+Rollback: stop go2rtc and the Hub, downgrade Alembic to 0015, and deploy the previous verified
+release. This removes Hub transport configuration only; it does not modify physical cameras.
