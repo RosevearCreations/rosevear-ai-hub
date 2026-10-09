@@ -190,7 +190,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     purpose: "Stores supported integration credentials encrypted at rest or reports environment-backed values.",
     tasks: [
       "Enter a replacement value, save/rotate, then verify the consuming integration.",
-      "Use master-key rewrap only while both current and previous encryption keys are correctly configured.",
+      "Use master-key rewrap only while both current and previous encryption keys are correctly configured; Build 032 includes encrypted camera RTSP sources in that rewrap.",
       "Keep environment-backed secrets out of GitHub and application logs.",
     ],
     safety: [
