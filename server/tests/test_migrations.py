@@ -61,9 +61,7 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
     audit_columns = {column["name"] for column in inspector.get_columns("audit_events")}
     secret_columns = {column["name"] for column in inspector.get_columns("secret_values")}
     camera_columns = {column["name"] for column in inspector.get_columns("cameras")}
-    camera_stream_columns = {
-        column["name"] for column in inspector.get_columns("camera_streams")
-    }
+    camera_stream_columns = {column["name"] for column in inspector.get_columns("camera_streams")}
     notification_columns = {column["name"] for column in inspector.get_columns("notifications")}
     notification_receipt_columns = {
         column["name"] for column in inspector.get_columns("notification_receipts")
