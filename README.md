@@ -102,12 +102,12 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 032 — RTSP / go2rtc Integration**
 - **Build 033 — Camera Dashboard and Health**
 - **Build 034 — Frigate Adapter**
+- **Build 035 — Camera Event Automations**
 
 ## Next build
 
-**Build 035 — Camera Event Automations**
+**Build 036 — Connector Framework**
 
-The first functional MVP boundary remains Build 025. Build 034 adds an optional read-only local
-Frigate adapter for service status, configured-camera capability metadata, and bounded recent object
-events. Frigate writes, recording control, PTZ, talkback, and public/remote camera exposure remain
-outside this build.
+The first functional MVP boundary remains Build 025. Build 035 connects normalized local Frigate
+events to the deterministic Event Engine with bounded polling, baseline seeding, event-ID
+deduplication, existing Level-1 action policy, and no retrospective replay of historical events.
