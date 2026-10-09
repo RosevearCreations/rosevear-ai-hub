@@ -199,9 +199,7 @@ def test_owner_configures_encrypted_rtsp_and_probes(
     assert probe.json()["producer_count"] == 1
 
 
-def test_rtsp_source_must_be_private_literal_ip(
-    tmp_path, monkeypatch, stream_secret_key
-) -> None:
+def test_rtsp_source_must_be_private_literal_ip(tmp_path, monkeypatch, stream_secret_key) -> None:
     client = build_stream_client(tmp_path)
     monkeypatch.setattr(
         "rosevear_ai_hub.api.cameras.get_go2rtc_client",
