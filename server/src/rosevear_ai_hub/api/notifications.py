@@ -126,7 +126,13 @@ def notification_summary(
     base = (
         select(Notification, NotificationReceipt)
         .outerjoin(NotificationReceipt, receipt_join)
-        .where(visible, or_(NotificationReceipt.id.is_(None), NotificationReceipt.dismissed_at.is_(None)))
+        .where(
+            visible,
+            or_(
+                NotificationReceipt.id.is_(None),
+                NotificationReceipt.dismissed_at.is_(None),
+            ),
+        )
     )
     rows = db.execute(base).all()
     total = len(rows)
@@ -170,7 +176,12 @@ def list_notifications(
     if severity is not None:
         conditions.append(Notification.severity == severity)
     if notification_status == "unread":
-        conditions.append(or_(NotificationReceipt.id.is_(None), NotificationReceipt.read_at.is_(None)))
+        conditions.append(
+            or_(
+                NotificationReceipt.id.is_(None),
+                NotificationReceipt.read_at.is_(None),
+            )
+        )
     elif notification_status == "read":
         conditions.append(NotificationReceipt.read_at.is_not(None))
 

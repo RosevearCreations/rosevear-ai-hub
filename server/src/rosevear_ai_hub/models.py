@@ -360,11 +360,21 @@ class Notification(Base):
     __tablename__ = "notifications"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    audience: Mapped[str] = mapped_column(String(32), nullable=False, default="household", index=True)
+    audience: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="household",
+        index=True,
+    )
     title: Mapped[str] = mapped_column(String(160), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     severity: Mapped[str] = mapped_column(String(32), nullable=False, default="info", index=True)
-    source_type: Mapped[str] = mapped_column(String(64), nullable=False, default="system", index=True)
+    source_type: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        default="system",
+        index=True,
+    )
     source_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_by_user_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"),
