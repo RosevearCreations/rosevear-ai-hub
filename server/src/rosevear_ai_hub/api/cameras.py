@@ -263,7 +263,6 @@ def _decrypt_source(stream: CameraStream) -> str:
 def _sync_stream(stream: CameraStream, source_url: str | None = None) -> bool:
     source_url = source_url or _decrypt_source(stream)
     client = get_go2rtc_client()
-    client.ensure_placeholder(stream.stream_name)
     client.patch_runtime_source(stream.stream_name, source_url)
     stream.last_sync_at = datetime.now(UTC)
     stream.last_error = None
@@ -332,7 +331,6 @@ def reconcile_go2rtc(
             continue
         try:
             source_url = _decrypt_source(stream)
-            client.ensure_placeholder(stream.stream_name)
             client.patch_runtime_source(stream.stream_name, source_url)
             stream.last_sync_at = datetime.now(UTC)
             stream.last_error = None
@@ -522,7 +520,6 @@ def probe_camera_stream(
     now = datetime.now(UTC)
     try:
         client = get_go2rtc_client()
-        client.ensure_placeholder(stream.stream_name)
         client.patch_runtime_source(stream.stream_name, source_url)
         stream.last_sync_at = now
         probe = client.probe_stream(stream.stream_name)
