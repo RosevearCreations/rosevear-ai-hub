@@ -134,10 +134,11 @@ def frigate_cameras(_actor: FrigateViewer) -> FrigateCamerasResponse:
 @router.get("/events", response_model=FrigateEventsResponse)
 def frigate_events(
     _actor: FrigateViewer,
-    limit: int = Query(default=20, ge=1, le=100),
+    limit: int | None = Query(default=None, ge=1, le=100),
 ) -> FrigateEventsResponse:
+    effective_limit = limit or get_settings().frigate_event_limit
     try:
-        events = get_frigate_client().recent_events(limit=limit)
+        events = get_frigate_client().recent_events(limit=effective_limit)
         return FrigateEventsResponse(
             online=True,
             events=[_event_response(item) for item in events],
