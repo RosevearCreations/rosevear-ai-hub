@@ -338,13 +338,9 @@ def validate_authoring_draft(
             )
         else:
             if trigger.camera is not None and trigger.camera not in context.frigate_cameras:
-                warnings.append(
-                    f"Frigate did not report an enabled camera named {trigger.camera}."
-                )
+                warnings.append(f"Frigate did not report an enabled camera named {trigger.camera}.")
             if context.frigate_recent_labels and trigger.label not in context.frigate_recent_labels:
-                warnings.append(
-                    f"Frigate recent events did not include label {trigger.label}."
-                )
+                warnings.append(f"Frigate recent events did not include label {trigger.label}.")
 
     if isinstance(trigger, MQTTMessageTrigger):
         topic_filter = trigger.topic_filter
