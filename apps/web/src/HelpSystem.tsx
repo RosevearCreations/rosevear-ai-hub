@@ -88,7 +88,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     troubleshooting: [
       "go2rtc offline: install the official Windows binary under tools/go2rtc and run scripts/start-go2rtc.ps1.",
       "Stream probe fails: verify the camera RTSP path/credentials and that its private IP is reachable from the Hub machine.",
-      "After a reboot or go2rtc restart, choose Sync go2rtc to rehydrate encrypted sources into runtime memory.",
+      "A full Hub restart rehydrates streams automatically; after a go2rtc-only restart while the Hub stays running, choose Sync go2rtc.",
     ],
   },
   MQTT: {
