@@ -73,22 +73,22 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   Cameras: {
-    purpose: "Shows a local multi-camera dashboard, health freshness, ONVIF inventory, and encrypted RTSP transport through loopback-only go2rtc.",
+    purpose: "Shows the local camera dashboard, health, ONVIF/RTSP administration, and optional read-only Frigate object events.",
     tasks: [
       "Use the summary cards to see total, enabled, configured, healthy, and attention-needed cameras.",
-      "Owner/Admin can run health checks to actively verify configured camera producers without exposing credentials.",
-      "Healthy configured cameras can render in local live tiles through the loopback-only go2rtc viewer.",
-      "Use Scan local network, Sync go2rtc, per-camera RTSP configuration, and Test RTSP stream for administration.",
+      "Owner/Admin can run health checks and maintain the existing ONVIF and encrypted RTSP configuration.",
+      "Healthy configured cameras render through the loopback-only go2rtc viewer.",
+      "When Frigate is installed locally, review its camera inventory and recent normalized object events in the Frigate adapter panel.",
     ],
     safety: [
-      "Live tiles use only a local go2rtc viewer URL containing a non-secret stream name; camera usernames/passwords never enter the browser.",
-      "The desktop CSP allows only the fixed loopback go2rtc endpoint for camera frames/media and does not permit arbitrary remote frames.",
-      "Public RTSP sources, recording, PTZ, talkback, and camera device writes remain outside Build 033.",
+      "Camera source credentials remain server-side and never enter the browser.",
+      "Frigate Build 034 is read-only: the Hub does not change Frigate configuration, recordings, retention, labels, users, or events.",
+      "The Frigate internal API is accepted only on localhost/loopback; do not expose its unauthenticated internal port to the LAN or internet.",
     ],
     troubleshooting: [
-      "Live tile unavailable: confirm go2rtc is online, both local-only checks say Yes, and the camera has an RTSP source configured.",
-      "Health is stale: run health checks; the default freshness window is five minutes.",
-      "Health check fails: verify the camera RTSP path/credentials, private IP reachability, and local go2rtc runtime.",
+      "Frigate offline is non-fatal: the camera dashboard and go2rtc continue to work without it.",
+      "For Frigate, verify the local service is reachable at FRIGATE_BASE_URL and remains bound to loopback.",
+      "For live-view or camera-health issues, verify go2rtc, RTSP configuration, and private camera reachability separately.",
     ],
   },
   MQTT: {
