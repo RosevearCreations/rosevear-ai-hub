@@ -77,8 +77,20 @@ class MQTTMessageTrigger(StrictRuleModel):
             raise ValueError(str(exc)) from exc
 
 
+class FrigateEventTrigger(StrictRuleModel):
+    type: Literal["frigate_event"]
+    label: str = Field(min_length=1, max_length=80)
+    camera: str | None = Field(default=None, min_length=1, max_length=160)
+    sub_label: str | None = Field(default=None, min_length=1, max_length=160)
+    zone: str | None = Field(default=None, min_length=1, max_length=160)
+    min_score: float | None = Field(default=None, ge=0, le=1)
+    require_clip: bool | None = None
+    require_snapshot: bool | None = None
+    include_false_positives: bool = False
+
+
 RuleTrigger = Annotated[
-    StateChangeTrigger | StateThresholdTrigger | MQTTMessageTrigger,
+    StateChangeTrigger | StateThresholdTrigger | MQTTMessageTrigger | FrigateEventTrigger,
     Field(discriminator="type"),
 ]
 
