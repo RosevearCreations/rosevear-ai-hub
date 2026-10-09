@@ -372,3 +372,34 @@ Do not change GO2RTC_BASE_URL to a LAN/public address. Do not port-forward 1984,
 
 Rollback: stop go2rtc and the Hub, downgrade Alembic to 0015, and deploy the previous verified
 release. This removes Hub transport configuration only; it does not modify physical cameras.
+
+
+## Build 033 camera dashboard and health operations
+
+Build 033 adds no new account, secret, database migration, paid service, or cloud dependency.
+
+After updating:
+1. keep the Build 032 go2rtc binary/configuration and existing camera RTSP sources
+2. open **Cameras**
+3. confirm Local video transport reports Online, API local-only = Yes, and RTSP local-only = Yes
+4. choose **Run health checks** as Owner/Administrator
+5. confirm configured cameras move to Healthy when a producer is available
+6. verify healthy configured cameras display a local live tile
+7. use the summary cards to review cameras needing attention
+
+Health freshness defaults to 300 seconds. Optional override:
+`CAMERA_HEALTH_STALE_SECONDS=300` (accepted range 30–86400 seconds).
+
+The dashboard refreshes metadata periodically but does not automatically run active camera probes.
+This avoids turning UI polling into continuous credential decryption/network probing. Use **Run
+health checks** when active verification is wanted.
+
+If a live tile is unavailable:
+- verify go2rtc is running at 127.0.0.1:1984
+- verify the camera stream is configured and enabled
+- run health checks and review the last probe status
+- verify the Build 033 desktop CSP has not been locally modified to block the loopback viewer
+- do not expose/port-forward go2rtc to solve a local viewing issue
+
+Rollback requires only deploying Build 032. Build 033 adds no schema migration; existing camera
+registry, encrypted RTSP sources, and probe history remain compatible.
