@@ -17,6 +17,7 @@ Build 032 adds the first local camera-stream transport layer on top of the Build
 - Hub-managed camera streams are created through runtime-only PATCH and are not persisted into go2rtc YAML
 - private/literal source-IP validation before encryption or transport
 - Owner/Administrator stream configuration, deletion, probe, and reconcile actions
+- best-effort automatic stream rehydration when the Hub starts and local go2rtc is available
 - authenticated read-only stream metadata for lower roles
 - local relay endpoint metadata
 - camera stream transport audit evidence
@@ -72,7 +73,7 @@ A real camera stream requires the official go2rtc Windows binary:
 6. confirm API local-only = Yes and RTSP local-only = Yes
 7. select a camera, enter its private-LAN RTSP URL once, and save it
 8. use Test RTSP stream to verify the source
-9. after a go2rtc-only restart, use Sync go2rtc to rehydrate encrypted sources into runtime memory
+9. a full Hub restart rehydrates enabled streams automatically; after a go2rtc-only restart while the Hub stays running, use Sync go2rtc
 
 No cloud account, OAuth application, API key, or paid service is required.
 
