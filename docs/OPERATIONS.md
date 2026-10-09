@@ -320,3 +320,24 @@ different origin/main SHA than the release SHA supplied to it.
 
 Build 030 rollback on the test PC requires stopping the Hub, downgrading Alembic to 0013, and
 checking out the prior verified release.
+
+
+## Build 031 camera registry and ONVIF discovery
+
+No camera credential or cloud account is required for discovery.
+
+To discover compatible cameras:
+1. keep the Hub machine and camera on a trusted reachable LAN/VLAN
+2. open **Cameras** as Owner or Administrator
+3. choose **Scan local network**
+4. review the discovered endpoint UUID, private address, ONVIF service URL, scopes, and last-seen time
+5. disable registry entries that should not participate in later camera integrations
+
+If no camera is found, confirm ONVIF is enabled on that camera and that local multicast/UDP 3702 is
+not blocked by Windows Firewall, the camera network, or VLAN policy. Do not port-forward ONVIF or
+camera web services.
+
+Build 031 does not test or open RTSP streams. Streaming begins in Build 032.
+
+Rollback: stop the Hub, run `.\\.venv\\Scripts\\python.exe -m alembic downgrade 0014`, then
+deploy the prior verified release.
