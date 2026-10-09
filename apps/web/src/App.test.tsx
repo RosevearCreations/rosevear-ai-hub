@@ -432,6 +432,8 @@ describe("App", () => {
       expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "Home" })).toBeInTheDocument();
       expect(screen.getByText("owner")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Notifications" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Help for Home" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Confirmations" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Audit" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Secrets" })).toBeInTheDocument();

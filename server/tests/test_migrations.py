@@ -34,6 +34,8 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "documents",
         "knowledge_collections",
         "model_profiles",
+        "notification_receipts",
+        "notifications",
         "integrations",
         "sessions",
         "secret_values",
@@ -56,6 +58,10 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
     automation_run_columns = {column["name"] for column in inspector.get_columns("automation_runs")}
     audit_columns = {column["name"] for column in inspector.get_columns("audit_events")}
     secret_columns = {column["name"] for column in inspector.get_columns("secret_values")}
+    notification_columns = {column["name"] for column in inspector.get_columns("notifications")}
+    notification_receipt_columns = {
+        column["name"] for column in inspector.get_columns("notification_receipts")
+    }
     assert {"model", "provider"}.issubset(conversation_columns)
     assert {"model", "provider"}.issubset(message_columns)
     assert {
@@ -162,6 +168,23 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "created_at",
         "updated_at",
     }.issubset(secret_columns)
+    assert {
+        "audience",
+        "title",
+        "message",
+        "severity",
+        "source_type",
+        "source_id",
+        "created_by_user_id",
+        "created_at",
+    }.issubset(notification_columns)
+    assert {
+        "notification_id",
+        "user_id",
+        "read_at",
+        "dismissed_at",
+        "created_at",
+    }.issubset(notification_receipt_columns)
 
     with test_engine.connect() as connection:
         profile_names = (
@@ -186,6 +209,8 @@ def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
     test_engine = create_engine(f"sqlite:///{database_path}")
     tables = set(inspect(test_engine).get_table_names())
 
+    assert "notification_receipts" not in tables
+    assert "notifications" not in tables
     assert "automation_runs" not in tables
     assert "automations" not in tables
     assert "secret_values" not in tables
