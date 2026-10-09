@@ -204,7 +204,10 @@ def _validate_rtsp_source(value: str) -> tuple[str, str, int, bool]:
     try:
         port = parsed.port or 554
     except ValueError as exc:
-        raise HTTPException(status_code=422, detail="Camera stream source port is invalid.") from exc
+        raise HTTPException(
+            status_code=422,
+            detail="Camera stream source port is invalid.",
+        ) from exc
     if not 1 <= port <= 65535:
         raise HTTPException(status_code=422, detail="Camera stream source port is invalid.")
     return parsed.scheme, parsed.hostname, port, bool(parsed.username or parsed.password)
