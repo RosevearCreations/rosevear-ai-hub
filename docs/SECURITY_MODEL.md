@@ -382,7 +382,7 @@ go2rtc is treated as a local transport subprocess, not a new trust authority:
 - credential-bearing source URLs are encrypted with the existing Hub master key
 - the full source URL is never returned through the Hub API/UI after save
 - audit records contain only sanitized scheme/host/port/credential-present metadata
-- go2rtc YAML persists only an empty stream placeholder; the secret source is injected into runtime memory
+- Hub-managed stream entries and secret sources are injected into go2rtc runtime memory only and are not persisted into go2rtc YAML
 - probe/reconcile failures use sanitized error classes and do not persist go2rtc response bodies
 - no public stream publishing, PTZ, talkback, camera reboot, or firmware operation exists
 
