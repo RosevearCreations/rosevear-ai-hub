@@ -434,3 +434,41 @@ as a separate local service; do not weaken the loopback rule to make the status 
 
 Rollback requires only deploying Build 033. Build 034 adds no database migration or persistent
 Frigate state.
+
+
+## Build 035 camera-event automation operations
+
+Build 035 adds no migration, account, secret, paid service, or new external dependency.
+
+Safe default:
+- `FRIGATE_EVENT_POLL_SECONDS=2` (accepted range 1–60 seconds)
+
+To use camera-event automations:
+1. verify Build 034 Frigate adapter is Online and Local-only in Cameras
+2. open **Automations**
+3. draft or create a rule whose trigger type is `frigate_event`
+4. use an exact Frigate object label and optionally narrow by camera, zone, sub-label, minimum score,
+   clip/snapshot requirement, or false-positive inclusion
+5. keep the rule disabled while reviewing the exact Rule Schema JSON and action targets
+6. prepare and approve the existing Level-2 rule-save confirmation
+7. enable the rule only after final review
+8. inspect Event Engine runtime status for Frigate rule count, online state, seen-event count, and
+   last poll time
+9. verify the next new matching event creates an automation run and expected Level-1 action
+10. review Automation history and Audit for evidence
+
+The first successful poll after Frigate camera-event rules are activated intentionally baselines the
+current event list. Existing historical events are not executed.
+
+If a rule does not fire:
+- confirm at least one frigate_event rule is enabled
+- confirm Frigate is online on the loopback endpoint
+- compare exact camera/label/zone/sub-label filters with recent Frigate events
+- review minimum score and clip/snapshot requirements
+- remember false-positive events are ignored unless explicitly allowed
+- inspect Automation runtime last_error and run history
+
+Do not clear the runtime checkpoint simply to force an event to run again. Use a new source event or
+a deliberately reviewed test path instead.
+
+Rollback requires only deploying Build 034. No schema downgrade is required.
