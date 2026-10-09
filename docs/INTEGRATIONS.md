@@ -88,6 +88,20 @@ Build 032 implements the local transport boundary:
 **Priority:** Medium  
 **Role:** Optional local NVR/object-event system.
 
+Build 034 adds a read-only adapter with a strict local boundary:
+- default internal API endpoint: `http://127.0.0.1:5000`
+- FRIGATE_BASE_URL must remain HTTP on localhost/loopback
+- service/version health is read from the Frigate API
+- configured camera names and detect/record/snapshot capability flags are normalized for display
+- recent events are bounded to 1–100 records and normalized to event id, camera, label, sub-label, timestamps, zones, clip/snapshot flags, false-positive flag, and score
+- the browser talks only to the Hub API; it never receives a Frigate base URL that it must call directly
+- Frigate outages are isolated from the existing ONVIF/go2rtc camera dashboard
+- no Frigate configuration write, event mutation, retention mutation, recording control, user management, or Frigate+ submission is implemented
+- Build 035 owns camera-event automation ingestion and rule integration
+
+The internal Frigate port is intentionally treated as a trusted local-only integration surface. Do
+not expose or port-forward it.
+
 ## Alexa
 Alexa is an endpoint for voice/announcements, not the central automation bus. Prefer Home Assistant as the control layer.
 
