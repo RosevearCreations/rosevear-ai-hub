@@ -79,7 +79,10 @@ Build 032 implements the local transport boundary:
 - Owner/Administrator can configure, remove, reconcile, and probe streams
 - lower authenticated roles can inspect sanitized transport metadata only
 - no PTZ, talkback, reboot, firmware, public publishing, or cloud streaming is introduced
-- Build 033 owns the multi-camera dashboard and health experience
+- Build 033 adds the multi-camera local dashboard, loopback viewer URLs, freshness classification, and Owner/Admin fleet health probes
+- live-view URLs contain only the stable stream name; camera source credentials remain server-side
+- dashboard metadata polling does not trigger active probes; explicit health refresh does
+- Build 034 owns the Frigate adapter and event analytics
 
 ## Frigate
 **Priority:** Medium  

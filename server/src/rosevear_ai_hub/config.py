@@ -108,6 +108,12 @@ class Settings(BaseSettings):
         default="rtsp://127.0.0.1:8554",
         alias="GO2RTC_RTSP_BASE_URL",
     )
+    camera_health_stale_seconds: int = Field(
+        default=300,
+        ge=30,
+        le=86400,
+        alias="CAMERA_HEALTH_STALE_SECONDS",
+    )
     knowledge_storage_dir: Path = Field(
         default=Path("./data/knowledge"),
         alias="KNOWLEDGE_STORAGE_DIR",

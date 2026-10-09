@@ -1604,12 +1604,62 @@ export interface Go2RTCReconcileResult {
   skipped: number;
 }
 
+export interface CameraHealthItem {
+  camera_id: number;
+  display_name: string;
+  enabled: boolean;
+  configured: boolean;
+  health: string;
+  last_seen_at: string;
+  last_probe_at: string | null;
+  last_probe_status: string | null;
+  last_error: string | null;
+  source_host: string | null;
+  stream_name: string | null;
+  viewer_url: string | null;
+}
+
+export interface CameraDashboard {
+  generated_at: string;
+  stale_after_seconds: number;
+  transport_online: boolean;
+  transport_version: string | null;
+  total: number;
+  enabled: number;
+  configured: number;
+  healthy: number;
+  attention: number;
+  cameras: CameraHealthItem[];
+}
+
+export interface CameraHealthRefreshResult {
+  checked: number;
+  healthy: number;
+  failed: number;
+  skipped: number;
+  cameras: CameraHealthItem[];
+}
+
+
 export function getCameras(signal?: AbortSignal): Promise<CameraRecord[]> {
   return authJson<CameraRecord[]>("GET", "/api/v1/cameras", undefined, signal);
 }
 
 export function getGo2RTCStatus(signal?: AbortSignal): Promise<Go2RTCStatus> {
   return authJson<Go2RTCStatus>("GET", "/api/v1/cameras/go2rtc/status", undefined, signal);
+}
+
+export function getCameraDashboard(signal?: AbortSignal): Promise<CameraDashboard> {
+  return authJson<CameraDashboard>("GET", "/api/v1/cameras/dashboard", undefined, signal);
+}
+
+export function refreshCameraHealth(signal?: AbortSignal): Promise<CameraHealthRefreshResult> {
+  return authJson<CameraHealthRefreshResult>(
+    "POST",
+    "/api/v1/cameras/health/refresh",
+    {},
+    signal,
+  );
 }
 
 export function reconcileGo2RTC(signal?: AbortSignal): Promise<Go2RTCReconcileResult> {

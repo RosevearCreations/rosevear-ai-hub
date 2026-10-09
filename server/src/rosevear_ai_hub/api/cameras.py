@@ -5,7 +5,7 @@ from __future__ import annotations
 import ipaddress
 from datetime import UTC, datetime
 from typing import Annotated
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
@@ -126,6 +126,42 @@ class Go2RTCReconcileResponse(BaseModel):
     skipped: int
 
 
+class CameraHealthItem(BaseModel):
+    camera_id: int
+    display_name: str
+    enabled: bool
+    configured: bool
+    health: str
+    last_seen_at: datetime
+    last_probe_at: datetime | None
+    last_probe_status: str | None
+    last_error: str | None
+    source_host: str | None
+    stream_name: str | None
+    viewer_url: str | None
+
+
+class CameraDashboardResponse(BaseModel):
+    generated_at: datetime
+    stale_after_seconds: int
+    transport_online: bool
+    transport_version: str | None
+    total: int
+    enabled: int
+    configured: int
+    healthy: int
+    attention: int
+    cameras: list[CameraHealthItem]
+
+
+class CameraHealthRefreshResponse(BaseModel):
+    checked: int
+    healthy: int
+    failed: int
+    skipped: int
+    cameras: list[CameraHealthItem]
+
+
 def _scope(camera_id: int) -> str:
     return f"camera.stream.{camera_id}"
 
@@ -133,6 +169,65 @@ def _scope(camera_id: int) -> str:
 def _relay_url(stream_name: str) -> str:
     base = get_settings().go2rtc_rtsp_base_url.rstrip("/")
     return f"{base}/{stream_name}"
+
+
+def _viewer_url(stream_name: str) -> str | None:
+    try:
+        base = get_go2rtc_client().base_url
+    except Go2RTCError:
+        return None
+    source = quote(stream_name, safe="")
+    return f"{base}/stream.html?src={source}&mode=webrtc,mse,hls,mjpeg"
+
+
+def _aware(value: datetime | None) -> datetime | None:
+    if value is None:
+        return None
+    return value if value.tzinfo is not None else value.replace(tzinfo=UTC)
+
+
+def _health_status(camera: Camera, stream: CameraStream | None, now: datetime) -> str:
+    if not camera.enabled:
+        return "disabled"
+    if stream is None:
+        return "unconfigured"
+    if not stream.enabled:
+        return "disabled"
+    if stream.last_probe_status != "online":
+        return stream.last_probe_status or "untested"
+    probe_at = _aware(stream.last_probe_at)
+    if probe_at is None:
+        return "untested"
+    stale_after = get_settings().camera_health_stale_seconds
+    if (now - probe_at).total_seconds() > stale_after:
+        return "stale"
+    return "healthy"
+
+
+def _health_item(
+    camera: Camera,
+    stream: CameraStream | None,
+    now: datetime,
+) -> CameraHealthItem:
+    health = _health_status(camera, stream, now)
+    return CameraHealthItem(
+        camera_id=camera.id,
+        display_name=camera.display_name,
+        enabled=camera.enabled,
+        configured=stream is not None,
+        health=health,
+        last_seen_at=camera.last_seen_at,
+        last_probe_at=stream.last_probe_at if stream is not None else None,
+        last_probe_status=stream.last_probe_status if stream is not None else None,
+        last_error=stream.last_error if stream is not None else None,
+        source_host=stream.source_host if stream is not None else None,
+        stream_name=stream.stream_name if stream is not None else None,
+        viewer_url=(
+            _viewer_url(stream.stream_name)
+            if stream is not None and camera.enabled and stream.enabled
+            else None
+        ),
+    )
 
 
 def _stream_response(stream: CameraStream) -> CameraStreamResponse:
@@ -307,6 +402,126 @@ def go2rtc_status(_actor: CameraViewer) -> Go2RTCStatusResponse:
             local_rtsp_only=False,
             error=str(exc),
         )
+
+
+@router.get("/dashboard", response_model=CameraDashboardResponse)
+def camera_dashboard(
+    _actor: CameraViewer,
+    db: SessionDependency,
+) -> CameraDashboardResponse:
+    now = datetime.now(UTC)
+    cameras = db.scalars(select(Camera).order_by(Camera.display_name.asc(), Camera.id.asc())).all()
+    streams = _camera_stream_map(db)
+    items = [_health_item(camera, streams.get(camera.id), now) for camera in cameras]
+
+    transport_online = False
+    transport_version: str | None = None
+    try:
+        status = get_go2rtc_client().status()
+        transport_online = status.online
+        transport_version = status.version
+    except Go2RTCError:
+        pass
+
+    healthy = sum(item.health == "healthy" for item in items)
+    attention = sum(item.enabled and item.health not in {"healthy", "disabled"} for item in items)
+    return CameraDashboardResponse(
+        generated_at=now,
+        stale_after_seconds=get_settings().camera_health_stale_seconds,
+        transport_online=transport_online,
+        transport_version=transport_version,
+        total=len(items),
+        enabled=sum(item.enabled for item in items),
+        configured=sum(item.configured for item in items),
+        healthy=healthy,
+        attention=attention,
+        cameras=items,
+    )
+
+
+@router.post("/health/refresh", response_model=CameraHealthRefreshResponse)
+def refresh_camera_health(
+    actor: CameraAdmin,
+    db: SessionDependency,
+) -> CameraHealthRefreshResponse:
+    now = datetime.now(UTC)
+    cameras = db.scalars(select(Camera).order_by(Camera.display_name.asc(), Camera.id.asc())).all()
+    streams = _camera_stream_map(db)
+    checked = 0
+    healthy = 0
+    failed = 0
+    skipped = 0
+
+    try:
+        client = get_go2rtc_client()
+        client.status()
+    except Go2RTCError:
+        client = None
+
+    for camera in cameras:
+        stream = streams.get(camera.id)
+        if stream is None or not camera.enabled or not stream.enabled:
+            skipped += 1
+            continue
+
+        checked += 1
+        if client is None:
+            stream.last_probe_at = now
+            stream.last_probe_status = "unavailable"
+            stream.last_error = "go2rtc_unavailable"
+            failed += 1
+            continue
+
+        try:
+            source_url = _decrypt_source(stream)
+            client.patch_runtime_source(stream.stream_name, source_url)
+            stream.last_sync_at = now
+            probe = client.probe_stream(stream.stream_name)
+            stream.last_probe_at = now
+            if probe.producer_count > 0:
+                stream.last_probe_status = "online"
+                stream.last_error = None
+                healthy += 1
+            else:
+                stream.last_probe_status = "no_producer"
+                stream.last_error = "no_active_producer"
+                failed += 1
+        except HTTPException:
+            stream.last_probe_at = now
+            stream.last_probe_status = "failed"
+            stream.last_error = "encrypted_source_unavailable"
+            failed += 1
+        except Go2RTCError:
+            stream.last_probe_at = now
+            stream.last_probe_status = "failed"
+            stream.last_error = "stream_probe_failed"
+            failed += 1
+
+    record_audit_event(
+        db,
+        actor_user_id=actor.id,
+        event_type="camera.health.refreshed",
+        object_type="camera_dashboard",
+        object_id=None,
+        action="health_refresh",
+        arguments={"camera_count": len(cameras)},
+        result={
+            "ok": failed == 0,
+            "checked": checked,
+            "healthy": healthy,
+            "failed": failed,
+            "skipped": skipped,
+        },
+    )
+    db.commit()
+    items = [_health_item(camera, streams.get(camera.id), now) for camera in cameras]
+    return CameraHealthRefreshResponse(
+        checked=checked,
+        healthy=healthy,
+        failed=failed,
+        skipped=skipped,
+        cameras=items,
+    )
 
 
 @router.post("/go2rtc/reconcile", response_model=Go2RTCReconcileResponse)

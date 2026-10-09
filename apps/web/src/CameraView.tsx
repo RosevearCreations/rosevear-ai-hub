@@ -1,15 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   configureCameraStream,
   deleteCameraStream,
   discoverCameras,
+  getCameraDashboard,
   getCameras,
   getGo2RTCStatus,
   probeCameraStream,
   reconcileGo2RTC,
+  refreshCameraHealth,
   updateCamera,
   type AuthUser,
+  type CameraDashboard,
   type CameraRecord,
   type Go2RTCStatus,
 } from "./api";
@@ -19,9 +22,24 @@ type LoadState =
   | { kind: "ready"; cameras: CameraRecord[] }
   | { kind: "error"; message: string };
 
+function healthLabel(value: string): string {
+  const labels: Record<string, string> = {
+    healthy: "Healthy",
+    stale: "Stale",
+    untested: "Not tested",
+    unconfigured: "Not configured",
+    disabled: "Disabled",
+    unavailable: "Transport unavailable",
+    failed: "Failed",
+    no_producer: "No active producer",
+  };
+  return labels[value] ?? value.replaceAll("_", " ");
+}
+
 export function CameraView({ currentUser }: { currentUser: AuthUser }) {
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [transport, setTransport] = useState<Go2RTCStatus | null>(null);
+  const [dashboard, setDashboard] = useState<CameraDashboard | null>(null);
   const [sourceUrls, setSourceUrls] = useState<Record<number, string>>({});
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -30,17 +48,19 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
 
   async function refresh(signal?: AbortSignal) {
     try {
-      const [cameras, go2rtc] = await Promise.all([
+      const [cameras, go2rtc, cameraDashboard] = await Promise.all([
         getCameras(signal),
         getGo2RTCStatus(signal),
+        getCameraDashboard(signal),
       ]);
       setState({ kind: "ready", cameras });
       setTransport(go2rtc);
+      setDashboard(cameraDashboard);
     } catch (caught: unknown) {
       if (caught instanceof DOMException && caught.name === "AbortError") return;
       setState({
         kind: "error",
-        message: caught instanceof Error ? caught.message : "Unable to load camera registry.",
+        message: caught instanceof Error ? caught.message : "Unable to load camera dashboard.",
       });
     }
   }
@@ -51,13 +71,22 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
     return () => controller.abort();
   }, []);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      void getCameraDashboard()
+        .then(setDashboard)
+        .catch(() => undefined);
+    }, 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   async function run(action: () => Promise<void>) {
     setBusy(true);
     setMessage("");
     try {
       await action();
     } catch (caught: unknown) {
-      setMessage(caught instanceof Error ? caught.message : "Camera transport request failed.");
+      setMessage(caught instanceof Error ? caught.message : "Camera request failed.");
     } finally {
       setBusy(false);
     }
@@ -82,6 +111,18 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
         "go2rtc synchronized " + result.synchronized + "/" + result.configured +
         " configured stream" + (result.configured === 1 ? "" : "s") + "; " +
         result.failed + " failed, " + result.skipped + " skipped.",
+      );
+      await refresh();
+    });
+  }
+
+  async function runHealthChecks() {
+    await run(async () => {
+      const result = await refreshCameraHealth();
+      setMessage(
+        "Camera health checked " + result.checked + " stream" +
+        (result.checked === 1 ? "" : "s") + ": " + result.healthy +
+        " healthy, " + result.failed + " failed, " + result.skipped + " skipped.",
       );
       await refresh();
     });
@@ -132,22 +173,30 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
     });
   }
 
+  const dashboardByCamera = useMemo(
+    () => new Map((dashboard?.cameras ?? []).map((item) => [item.camera_id, item])),
+    [dashboard],
+  );
+
   return (
-    <section>
+    <section className="camera-view">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 032</p>
-          <h1>Cameras</h1>
+          <p className="eyebrow">Build 033</p>
+          <h1>Camera dashboard</h1>
           <p className="lede">
-            ONVIF registry plus encrypted RTSP source configuration through a local-only go2rtc transport.
+            Local live views, transport health, freshness, and camera configuration without exposing camera credentials.
           </p>
         </div>
-        <div>
+        <div className="camera-toolbar">
           <button type="button" onClick={() => void refresh()} disabled={busy}>
             Refresh
           </button>
           {canAdminister ? (
             <>
+              <button type="button" onClick={() => void runHealthChecks()} disabled={busy}>
+                Run health checks
+              </button>
               <button type="button" onClick={() => void reconcile()} disabled={busy}>
                 Sync go2rtc
               </button>
@@ -159,22 +208,37 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
         </div>
       </header>
 
-      <section className="panel" aria-label="go2rtc transport status">
-        <h2>go2rtc transport</h2>
+      {dashboard ? (
+        <section className="camera-summary" aria-label="Camera health summary">
+          <div><span>Total</span><strong>{dashboard.total}</strong></div>
+          <div><span>Enabled</span><strong>{dashboard.enabled}</strong></div>
+          <div><span>Configured</span><strong>{dashboard.configured}</strong></div>
+          <div><span>Healthy</span><strong>{dashboard.healthy}</strong></div>
+          <div><span>Needs attention</span><strong>{dashboard.attention}</strong></div>
+        </section>
+      ) : null}
+
+      <section className="panel camera-transport-card" aria-label="go2rtc transport status">
+        <div>
+          <h2>Local video transport</h2>
+          <p>
+            {transport?.online
+              ? "go2rtc is online and available to the local dashboard."
+              : "go2rtc is offline; camera inventory remains available but live tiles cannot load."}
+          </p>
+        </div>
         {transport ? (
           <dl className="ha-meta">
             <div><dt>Status</dt><dd>{transport.online ? "Online" : "Offline"}</dd></div>
             <div><dt>Version</dt><dd>{transport.version ?? "Unavailable"}</dd></div>
-            <div><dt>API</dt><dd><code>{transport.api_base_url}</code></dd></div>
-            <div><dt>RTSP listener</dt><dd><code>{transport.rtsp_listen ?? "Unavailable"}</code></dd></div>
             <div><dt>API local-only</dt><dd>{transport.local_api_only ? "Yes" : "No"}</dd></div>
             <div><dt>RTSP local-only</dt><dd>{transport.local_rtsp_only ? "Yes" : "No"}</dd></div>
           </dl>
-        ) : <p>Checking local go2rtc transport…</p>}
+        ) : null}
         {transport?.error ? <p className="auth-error">{transport.error}</p> : null}
-        {transport && !transport.local_rtsp_only ? (
+        {transport && (!transport.local_api_only || !transport.local_rtsp_only) ? (
           <p className="auth-error">
-            go2rtc RTSP is not confirmed as loopback-only. Use the Build 032 local config before treating this transport as private.
+            Live viewing is not considered private until both go2rtc API and RTSP listeners are loopback-only.
           </p>
         ) : null}
       </section>
@@ -182,98 +246,165 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
       {message ? <p className="runtime-status" role="status">{message}</p> : null}
 
       {state.kind === "loading" ? (
-        <section className="panel" role="status">Loading camera registry…</section>
+        <section className="panel" role="status">Loading camera dashboard…</section>
       ) : state.kind === "error" ? (
         <p className="auth-error" role="alert">{state.message}</p>
       ) : state.cameras.length === 0 ? (
         <section className="panel">
           <h2>No cameras discovered yet</h2>
-          <p>Owner or Administrator can run ONVIF discovery on the trusted local network.</p>
+          <p>Owner or Administrator can scan the trusted local network for compatible ONVIF cameras.</p>
         </section>
       ) : (
-        <section className="ha-entity-list" aria-label="Camera registry">
-          {state.cameras.map((camera) => (
-            <article className="ha-entity-card" key={camera.id}>
-              <div>
-                <strong>{camera.display_name}</strong>
-                <small>{camera.enabled ? "Enabled" : "Disabled"} · ONVIF discovered</small>
-              </div>
-              <dl className="ha-meta">
-                <div><dt>Address</dt><dd>{camera.host}:{camera.port}</dd></div>
-                <div><dt>Endpoint</dt><dd><code>{camera.endpoint_uuid}</code></dd></div>
-                <div><dt>Service</dt><dd><code>{camera.service_url}</code></dd></div>
-                <div><dt>Last seen</dt><dd>{new Date(camera.last_seen_at).toLocaleString()}</dd></div>
-              </dl>
-
-              {camera.stream ? (
-                <section className="panel">
-                  <h3>RTSP transport</h3>
-                  <dl className="ha-meta">
-                    <div><dt>Source</dt><dd>{camera.stream.source_scheme}://{camera.stream.source_host}:{camera.stream.source_port}</dd></div>
-                    <div><dt>Credentials</dt><dd>{camera.stream.credentials_present ? "Encrypted" : "Not present"}</dd></div>
-                    <div><dt>go2rtc name</dt><dd><code>{camera.stream.stream_name}</code></dd></div>
-                    <div><dt>Local relay</dt><dd><code>{camera.stream.relay_url}</code></dd></div>
-                    <div><dt>Last probe</dt><dd>{camera.stream.last_probe_status ?? "Not tested"}</dd></div>
-                  </dl>
-                  {camera.stream.last_error ? <p className="auth-error">Transport status: {camera.stream.last_error}</p> : null}
-                  {canAdminister ? (
+        <>
+          <section className="camera-live-grid" aria-label="Live camera dashboard">
+            {state.cameras.map((camera) => {
+              const health = dashboardByCamera.get(camera.id);
+              const canShowLive =
+                Boolean(health?.viewer_url) &&
+                Boolean(transport?.online) &&
+                Boolean(transport?.local_api_only) &&
+                Boolean(transport?.local_rtsp_only);
+              return (
+                <article className="camera-live-card" key={"live-" + camera.id}>
+                  <header>
                     <div>
-                      <button type="button" disabled={busy} onClick={() => void probe(camera)}>
-                        Test RTSP stream
-                      </button>
-                      <button type="button" disabled={busy} onClick={() => void removeStream(camera)}>
-                        Remove RTSP config
-                      </button>
+                      <strong>{camera.display_name}</strong>
+                      <small>{camera.host}</small>
                     </div>
-                  ) : null}
-                </section>
-              ) : canAdminister ? (
-                <section className="panel">
-                  <h3>Configure RTSP transport</h3>
-                  <label>
-                    RTSP source URL
-                    <input
-                      type="password"
-                      autoComplete="off"
-                      placeholder="rtsp://user:password@192.168.x.x/path"
-                      value={sourceUrls[camera.id] ?? ""}
-                      onChange={(event) => setSourceUrls((current) => ({
-                        ...current,
-                        [camera.id]: event.target.value,
-                      }))}
+                    <span className={"camera-health camera-health-" + (health?.health ?? "untested")}>
+                      {healthLabel(health?.health ?? "untested")}
+                    </span>
+                  </header>
+                  {canShowLive && health?.viewer_url ? (
+                    <iframe
+                      className="camera-live-frame"
+                      src={health.viewer_url}
+                      title={camera.display_name + " live view"}
+                      loading="lazy"
+                      sandbox="allow-scripts allow-same-origin"
+                      referrerPolicy="no-referrer"
                     />
-                  </label>
-                  <p>
-                    The source URL is encrypted in the Hub and is never redisplayed. go2rtc receives it only in runtime memory.
-                  </p>
-                  <button type="button" disabled={busy} onClick={() => void saveStream(camera)}>
-                    Save encrypted RTSP source
-                  </button>
-                </section>
-              ) : null}
+                  ) : (
+                    <div className="camera-live-placeholder">
+                      <strong>Live view unavailable</strong>
+                      <small>
+                        {!camera.stream
+                          ? "Configure an RTSP source for this camera."
+                          : !transport?.online
+                            ? "Start the local go2rtc transport."
+                            : "Run a health check and verify loopback-only transport."}
+                      </small>
+                    </div>
+                  )}
+                  <footer>
+                    <span>Last camera discovery: {new Date(camera.last_seen_at).toLocaleString()}</span>
+                    <span>
+                      Last stream check: {health?.last_probe_at
+                        ? new Date(health.last_probe_at).toLocaleString()
+                        : "Not tested"}
+                    </span>
+                  </footer>
+                </article>
+              );
+            })}
+          </section>
 
-              {camera.scopes.length > 0 ? (
-                <details>
-                  <summary>ONVIF scopes</summary>
-                  <ul>{camera.scopes.map((scope) => <li key={scope}><code>{scope}</code></li>)}</ul>
-                </details>
-              ) : null}
-              {canAdminister ? (
-                <button type="button" disabled={busy} onClick={() => void toggle(camera)}>
-                  {camera.enabled ? "Disable registry entry" : "Enable registry entry"}
-                </button>
-              ) : null}
-            </article>
-          ))}
-        </section>
+          <section className="camera-config-section">
+            <header>
+              <h2>Camera configuration</h2>
+              <p>Administrative transport details remain separate from the live dashboard.</p>
+            </header>
+            <div className="ha-entity-list" aria-label="Camera configuration">
+              {state.cameras.map((camera) => {
+                const health = dashboardByCamera.get(camera.id);
+                return (
+                  <article className="ha-entity-card" key={camera.id}>
+                    <div>
+                      <strong>{camera.display_name}</strong>
+                      <small>
+                        {camera.enabled ? "Enabled" : "Disabled"} · {healthLabel(health?.health ?? "untested")}
+                      </small>
+                    </div>
+                    <dl className="ha-meta">
+                      <div><dt>Address</dt><dd>{camera.host}:{camera.port}</dd></div>
+                      <div><dt>Endpoint</dt><dd><code>{camera.endpoint_uuid}</code></dd></div>
+                      <div><dt>Service</dt><dd><code>{camera.service_url}</code></dd></div>
+                      <div><dt>Last seen</dt><dd>{new Date(camera.last_seen_at).toLocaleString()}</dd></div>
+                    </dl>
+
+                    {camera.stream ? (
+                      <section className="panel camera-stream-panel">
+                        <h3>RTSP transport</h3>
+                        <dl className="ha-meta">
+                          <div><dt>Source</dt><dd>{camera.stream.source_scheme}://{camera.stream.source_host}:{camera.stream.source_port}</dd></div>
+                          <div><dt>Credentials</dt><dd>{camera.stream.credentials_present ? "Encrypted" : "Not present"}</dd></div>
+                          <div><dt>go2rtc name</dt><dd><code>{camera.stream.stream_name}</code></dd></div>
+                          <div><dt>Local relay</dt><dd><code>{camera.stream.relay_url}</code></dd></div>
+                          <div><dt>Health</dt><dd>{healthLabel(health?.health ?? "untested")}</dd></div>
+                        </dl>
+                        {camera.stream.last_error ? <p className="auth-error">Transport status: {camera.stream.last_error}</p> : null}
+                        {canAdminister ? (
+                          <div className="camera-actions">
+                            <button type="button" disabled={busy} onClick={() => void probe(camera)}>
+                              Test RTSP stream
+                            </button>
+                            <button type="button" disabled={busy} onClick={() => void removeStream(camera)}>
+                              Remove RTSP config
+                            </button>
+                          </div>
+                        ) : null}
+                      </section>
+                    ) : canAdminister ? (
+                      <section className="panel camera-stream-panel">
+                        <h3>Configure RTSP transport</h3>
+                        <label>
+                          RTSP source URL
+                          <input
+                            type="password"
+                            autoComplete="off"
+                            placeholder="rtsp://user:password@192.168.x.x/path"
+                            value={sourceUrls[camera.id] ?? ""}
+                            onChange={(event) => setSourceUrls((current) => ({
+                              ...current,
+                              [camera.id]: event.target.value,
+                            }))}
+                          />
+                        </label>
+                        <p>
+                          The credential-bearing source is encrypted in the Hub and never redisplayed.
+                        </p>
+                        <button type="button" disabled={busy} onClick={() => void saveStream(camera)}>
+                          Save encrypted RTSP source
+                        </button>
+                      </section>
+                    ) : null}
+
+                    {camera.scopes.length > 0 ? (
+                      <details>
+                        <summary>ONVIF scopes</summary>
+                        <ul>{camera.scopes.map((scope) => <li key={scope}><code>{scope}</code></li>)}</ul>
+                      </details>
+                    ) : null}
+                    {canAdminister ? (
+                      <button type="button" disabled={busy} onClick={() => void toggle(camera)}>
+                        {camera.enabled ? "Disable registry entry" : "Enable registry entry"}
+                      </button>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        </>
       )}
 
       <section className="panel">
         <h2>Build boundary</h2>
         <p>
-          Build 032 adds encrypted RTSP source handling and a local go2rtc relay. It does not add the
-          multi-camera dashboard, browser live-view experience, Frigate events, PTZ, talkback, or
-          public camera exposure. Camera dashboard and health work begins in Build 033.
+          Build 033 adds a local multi-camera dashboard, browser-embedded local go2rtc views, health
+          freshness, and fleet health checks. It does not add Frigate event detection, recording,
+          PTZ, talkback, camera device writes, or public/remote camera exposure. Frigate integration
+          begins in Build 034.
         </p>
       </section>
     </section>

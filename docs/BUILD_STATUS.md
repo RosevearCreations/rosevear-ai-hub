@@ -36,6 +36,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 030 | Notification Layer | COMPLETE | main |
 | 031 | Camera Registry and ONVIF Discovery | COMPLETE | main via PR #47 |
 | 032 | RTSP / go2rtc Integration | COMPLETE | main via PR #50 |
+| 033 | Camera Dashboard and Health | IN PROGRESS | dev |
 
 ## Build 016 acceptance checklist
 
@@ -768,7 +769,44 @@ through PR #50 to main merge `f42352cc56d78d5d1a393994ad83af15aff72e03`. Main Pr
 37978836827 passed all four lanes. The protected-main release-evidence closeout is followed
 immediately by synchronization back to dev so both branches carry the final release record.
 
+## Build 033 acceptance checklist
+
+- [x] multi-camera dashboard summary
+- [x] total / enabled / configured / healthy / attention counters
+- [x] explicit camera health states
+- [x] stale-health threshold with bounded configuration
+- [x] passive dashboard metadata refresh
+- [x] passive refresh does not automatically probe/decrypt camera sources
+- [x] Owner/Administrator fleet health refresh
+- [x] fleet refresh records sanitized audit evidence
+- [x] loopback-only viewer URL derived from validated go2rtc base URL
+- [x] viewer URL contains stable stream name only, never camera credentials
+- [x] embedded local live camera tiles
+- [x] live tiles blocked when go2rtc transport is offline/non-local
+- [x] Tauri CSP limited to fixed 127.0.0.1:1984 camera frame/media/connect source
+- [x] existing ONVIF/RTSP administration retained
+- [x] responsive camera dashboard styling
+- [x] contextual camera dashboard help
+- [x] backend dashboard/health role tests
+- [x] web dashboard/live-tile/health tests
+- [x] architecture/security/integration/operations/build documentation
+- [x] no database migration required
+- [x] no new account, secret, cloud service, API key, or paid dependency
+- [ ] final Build 033 dev CI green
+- [ ] promoted to main
+- [ ] final Build 033 main Production CI green
+- [ ] release-evidence closeout complete
+- [ ] dev synchronized with final main closeout target
+
+## Operator setup
+
+Build 033 needs no new credentials or schema migration. Live tiles reuse the Build 032 local go2rtc
+binary and encrypted camera RTSP configuration. Health freshness defaults to 300 seconds and may be
+adjusted with `CAMERA_HEALTH_STALE_SECONDS`.
+
+Build 033 stops before recording, Frigate analytics, PTZ, talkback, and remote/public camera access.
+
 ## Next build
 
-**Build 033 — Camera Dashboard and Health**
+**Build 034 — Frigate Adapter**
 
