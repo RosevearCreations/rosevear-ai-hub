@@ -1244,6 +1244,11 @@ export interface AutomationRuntime {
   home_assistant_configured: boolean;
   mqtt_configured: boolean;
   mqtt_rule_subscriptions: string[];
+  frigate_configured: boolean;
+  frigate_online: boolean;
+  frigate_rule_count: number;
+  frigate_seen_event_count: number;
+  frigate_last_poll_at: string | null;
   last_error: string | null;
 }
 
