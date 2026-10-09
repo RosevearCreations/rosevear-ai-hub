@@ -255,7 +255,10 @@ class AutomationEventRuntime:
                 logger.exception("Event Engine processing failed")
             finally:
                 if kind == "frigate":
-                    self._mark_frigate_event_seen(event.event_id)
+                    try:
+                        self._mark_frigate_event_seen(event.event_id)
+                    except Exception:
+                        logger.exception("Failed to persist Frigate event runtime checkpoint")
                     self._frigate_pending_ids.discard(event.event_id)
                 self._queue.task_done()
 
