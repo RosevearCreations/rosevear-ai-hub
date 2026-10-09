@@ -39,7 +39,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 033 | Camera Dashboard and Health | COMPLETE | main via PR #53 |
 | 034 | Frigate Adapter | COMPLETE | main via PR #56 |
 | 035 | Camera Event Automations | COMPLETE | main via PR #59 |
-| 036 | Connector Framework | ACTIVE | dev implementation pending verification |
+| 036 | Connector Framework | COMPLETE | main via PR #63 |
 
 ## Build 016 acceptance checklist
 
@@ -936,12 +936,25 @@ synchronization back to dev so both branches carry the final release record.
 - [x] backend/desktop version 0.0.36
 - [x] no database migration required
 - [x] no new secret, OAuth application, cloud account, paid dependency, or external request
-- [ ] final Build 036 dev CI green
-- [ ] promoted to main
-- [ ] final Build 036 main Production CI green
-- [ ] dev synchronized with final main target
+- [x] final Build 036 dev CI green — run 37999279494
+- [x] promoted to main — PR #63 / merge f428d5d1125e4d0aeb446106083dc1bb3404b6d5
+- [x] final Build 036 main Production CI green — run 38000148371
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
 
 ## Build 036 operator setup
 
 No manual setup is required. Build 036 deliberately does not ask for Devil n Dove, Rosie Dazzlers,
 or Yard Workers credentials. The three registrations describe the future read surfaces only.
+
+
+Build 036 feature promotion is complete. The exact GREEN dev tree
+`c5e27db629afc134b35c8dad53d905787d5793fa` passed dev run 37999279494 and the protected
+main PR gate run 37999782415. It was promoted through PR #63 to main merge
+`f428d5d1125e4d0aeb446106083dc1bb3404b6d5`. Main Production run 38000148371 passed all
+four lanes. This protected-main release-evidence closeout is followed by synchronization back to dev
+so both branches carry the final release record.
+
+## Next build
+
+**Build 037 — Devil n Dove Read Connector**
