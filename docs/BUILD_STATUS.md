@@ -34,6 +34,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 028 | AI-Assisted Rule Authoring | COMPLETE | main |
 | 029 | Automation History and Failure Handling | COMPLETE | main |
 | 030 | Notification Layer | COMPLETE | main |
+| 031 | Camera Registry and ONVIF Discovery | IN PROGRESS | dev |
 
 ## Build 016 acceptance checklist
 
@@ -674,6 +675,43 @@ Build 030 feature promotion and release-evidence closeout are complete. The clos
 synchronized dev run 37879008035. The test PC must use the final verified Build 030 repository SHA
 reported after this evidence-consistency correction is promoted and GREEN.
 
+
+## Build 031 acceptance checklist
+
+- [x] persistent camera registry
+- [x] ONVIF WS-Discovery Probe
+- [x] endpoint UUID de-duplication
+- [x] normalized private device-service URL, host, port, types, scopes, display name, and last-seen time
+- [x] public/non-literal discovery addresses rejected before persistence
+- [x] Owner/Administrator-only discovery
+- [x] authenticated household/read-only registry viewing
+- [x] Owner/Administrator registry enable/disable administration
+- [x] discovery completion audit evidence
+- [x] registry update audit evidence
+- [x] Cameras primary navigation section
+- [x] contextual circled-i camera help
+- [x] explicit no-stream/no-PTZ/no-public-exposure boundary
+- [x] reversible camera migration 0015
+- [x] migration upgrade/downgrade coverage
+- [x] ONVIF parser/security tests
+- [x] camera registry API/role tests
+- [x] camera web UI tests
+- [x] security/data-model/integration/operations/build documentation
+- [x] no camera credential, cloud account, OAuth application, or paid dependency required
+- [ ] final Build 031 dev CI green
+- [ ] promoted to main
+- [ ] final Build 031 main Production CI green
+- [ ] dev synchronized with final main target
+
+## Operator setup
+
+No credential is required for Build 031 discovery. Open **Cameras** as Owner/Administrator and use
+**Scan local network**. If no device appears, verify ONVIF is enabled on the camera and that local
+WS-Discovery multicast/UDP 3702 is permitted. Do not expose ONVIF or camera web services publicly.
+
+Build 032 will add RTSP/go2rtc transport. Build 031 intentionally stores discovery metadata only.
+
 ## Next build
 
-**Build 031 — Camera Registry and ONVIF Discovery**
+**Build 032 — RTSP / go2rtc Integration**
+
