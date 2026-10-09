@@ -101,12 +101,13 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 031 — Camera Registry and ONVIF Discovery**
 - **Build 032 — RTSP / go2rtc Integration**
 - **Build 033 — Camera Dashboard and Health**
+- **Build 034 — Frigate Adapter**
 
 ## Next build
 
-**Build 034 — Frigate Adapter**
+**Build 035 — Camera Event Automations**
 
-The first functional MVP boundary remains Build 025. Build 033 adds a local multi-camera live
-dashboard, health freshness, fleet health checks, and loopback-only browser viewing through go2rtc.
-Frigate events, recording, PTZ, talkback, camera device writes, and public camera exposure remain
+The first functional MVP boundary remains Build 025. Build 034 adds an optional read-only local
+Frigate adapter for service status, configured-camera capability metadata, and bounded recent object
+events. Frigate writes, recording control, PTZ, talkback, and public/remote camera exposure remain
 outside this build.

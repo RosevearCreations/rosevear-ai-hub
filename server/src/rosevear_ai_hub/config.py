@@ -114,6 +114,22 @@ class Settings(BaseSettings):
         le=86400,
         alias="CAMERA_HEALTH_STALE_SECONDS",
     )
+    frigate_base_url: str = Field(
+        default="http://127.0.0.1:5000",
+        alias="FRIGATE_BASE_URL",
+    )
+    frigate_timeout_seconds: float = Field(
+        default=5.0,
+        gt=0,
+        le=30,
+        alias="FRIGATE_TIMEOUT_SECONDS",
+    )
+    frigate_event_limit: int = Field(
+        default=20,
+        ge=1,
+        le=100,
+        alias="FRIGATE_EVENT_LIMIT",
+    )
     knowledge_storage_dir: Path = Field(
         default=Path("./data/knowledge"),
         alias="KNOWLEDGE_STORAGE_DIR",

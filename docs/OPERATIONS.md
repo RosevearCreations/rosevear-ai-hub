@@ -403,3 +403,34 @@ If a live tile is unavailable:
 
 Rollback requires only deploying Build 032. Build 033 adds no schema migration; existing camera
 registry, encrypted RTSP sources, and probe history remain compatible.
+
+
+## Build 034 Frigate adapter operations
+
+Frigate is optional. The Hub remains fully usable when it is not installed.
+
+Safe default settings:
+- `FRIGATE_BASE_URL=http://127.0.0.1:5000`
+- `FRIGATE_TIMEOUT_SECONDS=5`
+- `FRIGATE_EVENT_LIMIT=20`
+
+For Build 034, the Hub supports only Frigate's local internal API on loopback. Do not point
+FRIGATE_BASE_URL at another LAN machine and do not expose/port-forward Frigate's internal port.
+
+When Frigate is installed on the same Windows/server host or otherwise made available only through a
+loopback endpoint:
+1. keep its internal API bound to localhost/loopback
+2. start Frigate before or after the Hub; the dependency is optional and can recover on refresh
+3. open **Cameras**
+4. find **Frigate adapter**
+5. confirm Status = Online and Local-only = Yes
+6. review Frigate camera capability flags and recent object events
+7. use **Refresh Frigate** after changing Frigate configuration or restarting it
+
+No new Hub secret is required by the Build 034 loopback-internal mode.
+
+Build 034 never changes Frigate configuration or recordings. If Frigate is offline, troubleshoot it
+as a separate local service; do not weaken the loopback rule to make the status card turn green.
+
+Rollback requires only deploying Build 033. Build 034 adds no database migration or persistent
+Frigate state.

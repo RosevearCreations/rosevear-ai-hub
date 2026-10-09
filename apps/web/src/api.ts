@@ -1719,3 +1719,67 @@ export function updateCamera(
 ): Promise<CameraRecord> {
   return authJson<CameraRecord>("PATCH", "/api/v1/cameras/" + cameraId, changes, signal);
 }
+
+
+export interface FrigateStatus {
+  configured: boolean;
+  online: boolean;
+  version: string | null;
+  base_url: string;
+  local_only: boolean;
+  error: string | null;
+}
+
+export interface FrigateCamera {
+  name: string;
+  enabled: boolean;
+  detect_enabled: boolean;
+  record_enabled: boolean;
+  snapshots_enabled: boolean;
+}
+
+export interface FrigateCameras {
+  online: boolean;
+  cameras: FrigateCamera[];
+  error: string | null;
+}
+
+export interface FrigateEvent {
+  event_id: string;
+  camera: string;
+  label: string;
+  sub_label: string | null;
+  start_time: number;
+  end_time: number | null;
+  zones: string[];
+  has_clip: boolean;
+  has_snapshot: boolean;
+  false_positive: boolean;
+  score: number | null;
+}
+
+export interface FrigateEvents {
+  online: boolean;
+  events: FrigateEvent[];
+  error: string | null;
+}
+
+export function getFrigateStatus(signal?: AbortSignal): Promise<FrigateStatus> {
+  return authJson<FrigateStatus>("GET", "/api/v1/frigate/status", undefined, signal);
+}
+
+export function getFrigateCameras(signal?: AbortSignal): Promise<FrigateCameras> {
+  return authJson<FrigateCameras>("GET", "/api/v1/frigate/cameras", undefined, signal);
+}
+
+export function getFrigateEvents(
+  limit = 20,
+  signal?: AbortSignal,
+): Promise<FrigateEvents> {
+  return authJson<FrigateEvents>(
+    "GET",
+    "/api/v1/frigate/events?limit=" + encodeURIComponent(String(limit)),
+    undefined,
+    signal,
+  );
+}
