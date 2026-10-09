@@ -103,7 +103,7 @@ Major architecture changes require an ADR under `docs/adr/`.
 
 **Build 031 — Camera Registry and ONVIF Discovery**
 
-The first functional MVP boundary remains Build 025. Build 030 is fully feature-promoted: it adds
+The first functional MVP boundary remains Build 025. Build 030 is fully promoted: it adds
 persistent local household notifications, deterministic automation delivery, per-user inbox state,
 and a contextual circled-i help system across every primary application section. External email,
 SMS, push, and webhook delivery are intentionally not introduced.

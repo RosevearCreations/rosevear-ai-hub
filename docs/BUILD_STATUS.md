@@ -661,17 +661,18 @@ source event to trigger the rule.
 - [x] final Build 030 dev CI green — run 37875622964
 - [x] promoted to main — PR #44 / merge 94d082716804e4810b4bbf2c950a9ca710feb436
 - [x] final Build 030 main CI green — run 37876478895
-- [ ] release-evidence closeout merged
-- [ ] dev synchronized with final main closeout target
+- [x] release-evidence closeout merged — PR #45 / merge 22d8099ffa9b9b53aee656c95cc71770ea6e10c3
+- [x] dev synchronized with release-evidence closeout — run 37879008035
 
 ## Operator setup
 
 No new variable, account, provider, or external application is required for Build 030. The local
 notification inbox works with the existing SQLite database after Alembic revision 0014 is applied.
 
-The feature tree is promoted and GREEN on main. The test PC must still wait for the final Build 030
-release-evidence closeout SHA and Production run. Use docs/TEST_SERVER_UPDATE.md only with that final
-verified SHA.
+Build 030 feature promotion and release-evidence closeout are complete. The closeout merge
+22d8099ffa9b9b53aee656c95cc71770ea6e10c3 passed main Production run 37878642137 and the
+synchronized dev run 37879008035. The test PC must use the final verified Build 030 repository SHA
+reported after this evidence-consistency correction is promoted and GREEN.
 
 ## Next build
 
