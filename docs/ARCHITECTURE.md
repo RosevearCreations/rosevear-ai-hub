@@ -323,8 +323,8 @@ authenticated Owner/Admin
 -> private RTSP URL validation
 -> AES-GCM encrypted camera_streams record
 -> loopback-only go2rtc HTTP API
--> empty persisted stream placeholder
--> runtime-only RTSP source patch
+-> runtime-only go2rtc stream/source patch
+-> no Hub-managed camera source persisted in go2rtc YAML
 -> local RTSP relay
 
 The browser receives sanitized transport metadata but never the credential-bearing source URL.
