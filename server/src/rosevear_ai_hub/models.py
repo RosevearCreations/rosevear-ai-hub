@@ -354,6 +354,32 @@ class SecretValue(TimestampMixin, Base):
     rotated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
+class Camera(TimestampMixin, Base):
+    """Persistent ONVIF camera registry entry introduced by Build 031."""
+
+    __tablename__ = "cameras"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    endpoint_uuid: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    display_name: Mapped[str] = mapped_column(String(160), nullable=False)
+    host: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    port: Mapped[int] = mapped_column(Integer, nullable=False)
+    service_url: Mapped[str] = mapped_column(String(1024), nullable=False)
+    discovery_source: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        default="onvif_ws_discovery",
+    )
+    onvif_types: Mapped[Any] = mapped_column(JSON, nullable=False, default=list)
+    scopes: Mapped[Any] = mapped_column(JSON, nullable=False, default=list)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
+    last_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        index=True,
+    )
+
+
 class Notification(Base):
     """Persistent local household notification introduced by Build 030."""
 
