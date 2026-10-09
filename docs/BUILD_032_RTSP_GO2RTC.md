@@ -14,7 +14,7 @@ Build 032 adds the first local camera-stream transport layer on top of the Build
 - one stable go2rtc stream name per camera
 - credentials are never returned by the Hub after save
 - go2rtc receives credential-bearing source URLs only through runtime PATCH
-- go2rtc YAML persists only an empty stream placeholder, never the source credential
+- Hub-managed camera streams are created through runtime-only PATCH and are not persisted into go2rtc YAML
 - private/literal source-IP validation before encryption or transport
 - Owner/Administrator stream configuration, deletion, probe, and reconcile actions
 - authenticated read-only stream metadata for lower roles
@@ -51,8 +51,9 @@ Credential-bearing RTSP source URLs are encrypted with the existing Hub master e
 Only sanitized scheme/host/port/credential-present metadata is persisted in cleartext. The source
 URL is not returned through the API or UI after save.
 
-go2rtc stream creation persists an empty stream placeholder only. The source URL is added through
-go2rtc runtime PATCH, so go2rtc.yaml does not become a second credential store.
+Hub-managed stream creation uses go2rtc runtime PATCH directly. Neither the stream entry nor its
+credential-bearing source is persisted into go2rtc.yaml, so the YAML file does not become a second
+camera credential store.
 
 ## Migration
 
