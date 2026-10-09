@@ -38,7 +38,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 032 | RTSP / go2rtc Integration | COMPLETE | main via PR #50 |
 | 033 | Camera Dashboard and Health | COMPLETE | main via PR #53 |
 | 034 | Frigate Adapter | COMPLETE | main via PR #56 |
-| 035 | Camera Event Automations | IN PROGRESS | dev |
+| 035 | Camera Event Automations | COMPLETE | main via PR #59 |
 
 ## Build 016 acceptance checklist
 
@@ -888,11 +888,11 @@ synchronization back to dev so both branches carry the final release record.
 - [x] backend/desktop version 0.0.35
 - [x] no database migration required
 - [x] no new Hub secret or paid dependency
-- [ ] final Build 035 dev CI green
-- [ ] promoted to main
-- [ ] final Build 035 main Production CI green
-- [ ] release-evidence closeout complete
-- [ ] dev synchronized with final main closeout target
+- [x] final Build 035 dev CI green — run 37994790023
+- [x] promoted to main — PR #59 / merge 9a0aa3edb478cf831bbe2572e0da9c135f36f67b
+- [x] final Build 035 main Production CI green — run 37995199684
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
 
 ## Operator setup
 
@@ -902,6 +902,12 @@ non-executing baseline of current Frigate history; later unseen events may enter
 Event Engine.
 
 Safe default: `FRIGATE_EVENT_POLL_SECONDS=2` with an accepted range of 1–60 seconds.
+
+Build 035 feature promotion is complete. The exact GREEN dev tree
+`f154326fcf51b739c6cc7040cdcdf79ff785fce0` passed dev run 37994790023 and was promoted
+through PR #59 to main merge `9a0aa3edb478cf831bbe2572e0da9c135f36f67b`. Main Production run
+37995199684 passed all four lanes. The protected-main release-evidence closeout is followed by
+synchronization back to dev so both branches carry the final release record.
 
 ## Next build
 
