@@ -132,15 +132,6 @@ class Go2RTCClient:
             ),
         )
 
-    def ensure_placeholder(self, stream_name: str) -> None:
-        """Persist only an empty stream name, never a credential-bearing source URL."""
-
-        self._request(
-            "PUT",
-            "/api/streams",
-            params={"name": stream_name, "src": ""},
-        )
-
     def patch_runtime_source(self, stream_name: str, source_url: str) -> None:
         """Set the source only in go2rtc runtime memory."""
 
