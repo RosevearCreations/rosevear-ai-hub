@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { FrigatePanel } from "./FrigatePanel";
+
 import {
   configureCameraStream,
   deleteCameraStream,
@@ -182,7 +184,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
     <section className="camera-view">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 033</p>
+          <p className="eyebrow">Build 034</p>
           <h1>Camera dashboard</h1>
           <p className="lede">
             Local live views, transport health, freshness, and camera configuration without exposing camera credentials.
@@ -242,6 +244,8 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
           </p>
         ) : null}
       </section>
+
+      <FrigatePanel />
 
       {message ? <p className="runtime-status" role="status">{message}</p> : null}
 
@@ -401,10 +405,10 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
       <section className="panel">
         <h2>Build boundary</h2>
         <p>
-          Build 033 adds a local multi-camera dashboard, browser-embedded local go2rtc views, health
-          freshness, and fleet health checks. It does not add Frigate event detection, recording,
-          PTZ, talkback, camera device writes, or public/remote camera exposure. Frigate integration
-          begins in Build 034.
+          Build 034 adds a read-only local Frigate adapter for camera inventory and recent object
+          events. It does not add recording control, Frigate configuration writes, PTZ, talkback,
+          camera device writes, or public/remote camera exposure. Camera event automations begin in
+          Build 035.
         </p>
       </section>
     </section>
