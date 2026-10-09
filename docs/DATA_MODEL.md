@@ -236,15 +236,24 @@ contain the encryption master key or plaintext values. `key_fingerprint` is a no
 fingerprint prefix used to identify which configured master key wrapped a row. Environment-backed
 secrets are not copied into this table and take precedence when both sources are configured.
 
-## camera_registry
+## cameras
 - id
-- name
-- integration_id
-- protocol
-- host_reference
-- capabilities_json
+- endpoint_uuid
+- display_name
+- host
+- port
+- service_url
+- discovery_source
+- onvif_types
+- scopes
 - enabled
-- last_health_at
+- last_seen_at
+- created_at
+- updated_at
+
+Build 031 persists normalized ONVIF discovery metadata only. The endpoint UUID is the stable
+de-duplication key. No camera username, password, RTSP credential, video frame, or recording is
+stored in this table. ONVIF scopes and types are treated as untrusted device-supplied metadata.
 
 ## design rule
 
