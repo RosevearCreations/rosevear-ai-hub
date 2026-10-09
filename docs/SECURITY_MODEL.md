@@ -427,3 +427,29 @@ Frigate's internal API is intentionally unauthenticated in its trusted internal 
 Build 034 therefore refuses to use that API over a non-loopback address. If a future build needs
 Frigate on another host, it must add an authenticated transport design rather than weakening this
 boundary.
+
+
+## Build 035 camera-event automations
+
+Camera events can cause existing Level-1 actions, so Build 035 treats Frigate events as untrusted
+local input rather than as authorization.
+
+Security boundaries:
+- only enabled rules with an explicit frigate_event trigger activate Frigate polling
+- the source remains the Build 034 loopback-only Frigate adapter
+- arbitrary Frigate JSON is never passed to automation actions
+- trigger matching is limited to normalized camera, label, sub-label, zone, score, clip/snapshot,
+  and false-positive fields
+- false-positive events are rejected by default
+- every matching event receives automatic per-rule event-ID deduplication even when the rule author
+  does not supply a custom deduplication key
+- historical events present during first activation are baselined and not retrospectively executed
+- Home Assistant action targets still require the safe-control allow list and hazardous-target
+  checks
+- only existing Level-1 deterministic tools may execute; Level-2 and Level-3 tools remain blocked
+- interrupted or failed physical-world actions are not automatically retried
+- no image, clip, raw Frigate payload, or camera credential is written to automation history
+
+The bounded seen-event checkpoint is operational state, not an authorization record. If it is lost,
+the Event Engine's persisted per-rule event-ID deduplication still protects events that previously
+produced a run; unmatched historical events may be reconsidered but cannot bypass rule filters.
