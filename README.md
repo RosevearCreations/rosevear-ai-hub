@@ -98,12 +98,12 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 029 — Automation History and Failure Handling**
 
 - **Build 030 — Notification Layer**
+- **Build 032 — RTSP / go2rtc Integration**
 
 ## Next build
 
 **Build 031 — Camera Registry and ONVIF Discovery**
 
-The first functional MVP boundary remains Build 025. Build 030 is fully promoted: it adds
-persistent local household notifications, deterministic automation delivery, per-user inbox state,
-and a contextual circled-i help system across every primary application section. External email,
-SMS, push, and webhook delivery are intentionally not introduced.
+The first functional MVP boundary remains Build 025. Build 031 adds a persistent local camera
+registry plus bounded ONVIF WS-Discovery for private LAN device-service endpoints. Streaming,
+camera credentials, RTSP/go2rtc transport, PTZ, and camera device writes remain outside this build.
