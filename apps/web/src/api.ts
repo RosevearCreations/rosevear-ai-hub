@@ -1527,3 +1527,43 @@ export function createTestNotification(
     signal,
   );
 }
+
+
+export interface CameraRecord {
+  id: number;
+  endpoint_uuid: string;
+  display_name: string;
+  host: string;
+  port: number;
+  service_url: string;
+  discovery_source: string;
+  onvif_types: string[];
+  scopes: string[];
+  enabled: boolean;
+  last_seen_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CameraDiscoveryResult {
+  discovered: number;
+  created: number;
+  updated: number;
+  cameras: CameraRecord[];
+}
+
+export function getCameras(signal?: AbortSignal): Promise<CameraRecord[]> {
+  return authJson<CameraRecord[]>("GET", "/api/v1/cameras", undefined, signal);
+}
+
+export function discoverCameras(signal?: AbortSignal): Promise<CameraDiscoveryResult> {
+  return authJson<CameraDiscoveryResult>("POST", "/api/v1/cameras/discover", {}, signal);
+}
+
+export function updateCamera(
+  cameraId: number,
+  changes: { display_name?: string; enabled?: boolean },
+  signal?: AbortSignal,
+): Promise<CameraRecord> {
+  return authJson<CameraRecord>("PATCH", "/api/v1/cameras/" + cameraId, changes, signal);
+}

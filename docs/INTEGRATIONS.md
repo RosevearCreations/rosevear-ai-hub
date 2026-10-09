@@ -55,6 +55,17 @@ Build 009 defines the adapter contract only. No cloud adapter is registered, no 
 **Priority:** Medium  
 **Role:** Camera discovery and capability inspection.
 
+Build 031 implements bounded WS-Discovery for local ONVIF network video devices:
+- discovery is initiated server-side by Owner/Administrator only
+- the standard multicast Probe is used for device discovery
+- endpoint UUID, local device-service URL, host/port, types, scopes, display name, and last-seen time are normalized into the local camera registry
+- discovery responses are filtered to literal private/link-local/loopback service addresses
+- discovery metadata is persisted without camera credentials
+- registry viewing is authenticated; registry enable/disable administration is Owner/Administrator-only
+- no RTSP transport, video proxying, PTZ, or camera device writes are introduced
+
+Build 032 owns RTSP/go2rtc transport and must not assume that a discovered ONVIF device is safe to stream without additional validation.
+
 ## RTSP / go2rtc
 **Priority:** Medium  
 **Role:** Local stream transport.

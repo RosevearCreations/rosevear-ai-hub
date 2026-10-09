@@ -8,6 +8,7 @@ const sections = [
   "Chat",
   "Knowledge",
   "Devices",
+  "Cameras",
   "MQTT",
   "Notifications",
   "System",

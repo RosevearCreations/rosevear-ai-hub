@@ -13,6 +13,7 @@ import {
 import { AutomationView } from "./AutomationView";
 import { AuditView } from "./AuditView";
 import { AuthView } from "./AuthView";
+import { CameraView } from "./CameraView";
 import { ChatView } from "./ChatView";
 import { ConfirmationsView } from "./ConfirmationsView";
 import { HomeAssistantView } from "./HomeAssistantView";
@@ -44,6 +45,7 @@ const baseSections = [
   "Chat",
   "Knowledge",
   "Devices",
+  "Cameras",
   "MQTT",
   "Notifications",
   "System",
@@ -225,6 +227,8 @@ export function App() {
           <KnowledgeView currentUser={user} />
         ) : section === "Devices" ? (
           <HomeAssistantView currentUser={user} />
+        ) : section === "Cameras" ? (
+          <CameraView currentUser={user} />
         ) : section === "MQTT" ? (
           <MQTTView currentUser={user} />
         ) : section === "Notifications" ? (
@@ -248,6 +252,7 @@ export function App() {
             onOpenChat={() => setSection("Chat")}
             onOpenKnowledge={() => setSection("Knowledge")}
             onOpenDevices={() => setSection("Devices")}
+            onOpenCameras={() => setSection("Cameras")}
             onOpenMQTT={() => setSection("MQTT")}
             onOpenNotifications={() => setSection("Notifications")}
           />
@@ -270,6 +275,7 @@ function HomeView({
   onOpenChat,
   onOpenKnowledge,
   onOpenDevices,
+  onOpenCameras,
   onOpenMQTT,
   onOpenNotifications,
 }: {
@@ -278,6 +284,7 @@ function HomeView({
   onOpenChat: () => void;
   onOpenKnowledge: () => void;
   onOpenDevices: () => void;
+  onOpenCameras: () => void;
   onOpenMQTT: () => void;
   onOpenNotifications: () => void;
 }) {
@@ -285,7 +292,7 @@ function HomeView({
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 030</p>
+          <p className="eyebrow">Build 031</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
@@ -349,6 +356,14 @@ function HomeView({
         <article className="panel">
           <h2>Automations</h2>
           <p>AI-assisted drafting now feeds deterministic Rule Schema validation and exact human approval.</p>
+        </article>
+
+        <article className="panel">
+          <h2>Cameras</h2>
+          <p>ONVIF discovery and a persistent local camera registry are available; streaming begins in Build 032.</p>
+          <button type="button" onClick={onOpenCameras}>
+            Open cameras
+          </button>
         </article>
 
         <article className="panel">

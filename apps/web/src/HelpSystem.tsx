@@ -72,6 +72,22 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Control denied: verify entity type, allow-list membership, tool enable state, and current HA state.",
     ],
   },
+  Cameras: {
+    purpose: "Discovers compatible ONVIF cameras on the trusted LAN and keeps a persistent local registry.",
+    tasks: [
+      "Owner/Admin can run Scan local network to send a bounded ONVIF WS-Discovery probe.",
+      "Review discovered address, endpoint UUID, service URL, scopes, and last-seen time.",
+      "Disable a registry entry when a discovered camera should not participate in later camera builds.",
+    ],
+    safety: [
+      "Build 031 accepts only local/private ONVIF device-service addresses and does not open video streams.",
+      "Discovery does not request camera credentials, perform PTZ actions, or expose any camera service to the public internet.",
+    ],
+    troubleshooting: [
+      "No cameras found: confirm the camera supports ONVIF discovery and is on the same reachable LAN/VLAN.",
+      "Discovery unavailable: check Windows firewall/multicast policy for UDP 3702 and keep camera services private.",
+    ],
+  },
   MQTT: {
     purpose: "Connects to the authenticated local MQTT broker within an explicit topic allow list.",
     tasks: [

@@ -354,3 +354,20 @@ Security boundaries:
 - help content is static application guidance and never executes commands, tools, or retrieved text
 
 No Build 030 configuration value is a secret and no new network egress is added.
+
+
+## Build 031 camera discovery
+
+Camera discovery is a local-network metadata operation, not a trust grant:
+- only Owner/Administrator accounts may initiate ONVIF WS-Discovery
+- the backend emits a bounded Probe to the standard WS-Discovery multicast endpoint
+- discovered device-service XAddr values are accepted only for literal private, link-local, or loopback IP addresses
+- public addresses and arbitrary hostnames from discovery responses are rejected before persistence
+- camera-provided names, scopes, types, UUIDs, and URLs remain untrusted data
+- the browser never opens a camera socket directly
+- no camera credential, RTSP stream, PTZ action, device reboot, firmware operation, or public exposure is introduced
+- registry enable/disable changes and discovery completion are audit-recorded
+
+A compromised local camera may still lie about its metadata. Build 031 therefore stores discovery
+metadata as inventory evidence only. Build 032 must independently enforce stream URL, credential,
+network, and transport policy.
