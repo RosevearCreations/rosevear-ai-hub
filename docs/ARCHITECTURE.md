@@ -404,3 +404,24 @@ also persists per-rule deduplication evidence so restart timing cannot silently 
 camera-triggered action.
 
 Build 035 reuses app_settings for a bounded source checkpoint and therefore requires no migration.
+
+
+## Build 036 business connector framework
+
+Build 036 introduces a common server-owned boundary for business systems:
+
+authenticated Hub user
+-> /api/v1/business
+-> connector registry
+-> normalized descriptor/status/capabilities
+-> future concrete read adapter
+-> normalized read result
+
+The framework has no network client of its own. Every connector declares a stable key, display name,
+planned build, access mode, capabilities, safe health state, and whether writes require confirmation.
+The base write method is fail-closed and raises a normalized write-blocked error.
+
+Devil n Dove, Rosie Dazzlers, and Yard Workers are registered as planned read-only connectors so
+Builds 037–039 can supply concrete adapters without changing the shared API/UI contract. Build 040
+must define every allowed write explicitly; the framework does not provide a generic arbitrary write
+or remote-command escape hatch.

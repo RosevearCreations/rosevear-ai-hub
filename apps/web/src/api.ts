@@ -1788,3 +1788,68 @@ export function getFrigateEvents(
     signal,
   );
 }
+
+
+export type BusinessConnectorState =
+  | "planned"
+  | "unconfigured"
+  | "configured"
+  | "online"
+  | "offline"
+  | "error";
+
+export interface BusinessConnectorCapability {
+  key: string;
+  label: string;
+  description: string;
+  access: "read_only" | "approved_write";
+}
+
+export interface BusinessConnectorStatus {
+  state: BusinessConnectorState;
+  configured: boolean;
+  available: boolean;
+  message: string;
+  retryable: boolean;
+}
+
+export interface BusinessConnectorRecord {
+  key: string;
+  display_name: string;
+  description: string;
+  planned_build: number;
+  access_mode: "read_only" | "approved_write";
+  writes_require_confirmation: boolean;
+  capabilities: BusinessConnectorCapability[];
+  status: BusinessConnectorStatus;
+}
+
+export interface BusinessConnectorListResponse {
+  framework_version: string;
+  read_only_default: boolean;
+  write_confirmation_required: boolean;
+  connectors: BusinessConnectorRecord[];
+}
+
+export function getBusinessConnectors(
+  signal?: AbortSignal,
+): Promise<BusinessConnectorListResponse> {
+  return authJson<BusinessConnectorListResponse>(
+    "GET",
+    "/api/v1/business/connectors",
+    undefined,
+    signal,
+  );
+}
+
+export function getBusinessConnector(
+  connectorKey: string,
+  signal?: AbortSignal,
+): Promise<BusinessConnectorRecord> {
+  return authJson<BusinessConnectorRecord>(
+    "GET",
+    "/api/v1/business/connectors/" + encodeURIComponent(connectorKey),
+    undefined,
+    signal,
+  );
+}

@@ -14,6 +14,7 @@ import { AutomationView } from "./AutomationView";
 import { AuditView } from "./AuditView";
 import { AuthView } from "./AuthView";
 import { CameraView } from "./CameraView";
+import { BusinessView } from "./BusinessView";
 import { ChatView } from "./ChatView";
 import { ConfirmationsView } from "./ConfirmationsView";
 import { HomeAssistantView } from "./HomeAssistantView";
@@ -46,6 +47,7 @@ const baseSections = [
   "Knowledge",
   "Devices",
   "Cameras",
+  "Business",
   "MQTT",
   "Notifications",
   "System",
@@ -229,6 +231,8 @@ export function App() {
           <HomeAssistantView currentUser={user} />
         ) : section === "Cameras" ? (
           <CameraView currentUser={user} />
+        ) : section === "Business" ? (
+          <BusinessView />
         ) : section === "MQTT" ? (
           <MQTTView currentUser={user} />
         ) : section === "Notifications" ? (
@@ -292,7 +296,7 @@ function HomeView({
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 031</p>
+          <p className="eyebrow">Build 036</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,

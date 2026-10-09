@@ -472,3 +472,15 @@ Do not clear the runtime checkpoint simply to force an event to run again. Use a
 a deliberately reviewed test path instead.
 
 Rollback requires only deploying Build 034. No schema downgrade is required.
+
+
+## Build 036 business connector operations
+
+No external setup is required.
+
+Open **Business** in the Hub to inspect the three planned connectors and the shared framework policy.
+All three correctly report **Planned** until their dedicated read builds arrive.
+
+Build 036 adds no environment variable, secret, OAuth registration, API key, migration, hosted
+service, or paid dependency. Rollback is therefore code-only: return to the previous verified main
+commit and restart/rebuild the Hub. No database downgrade is required.

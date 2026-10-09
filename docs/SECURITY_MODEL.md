@@ -453,3 +453,21 @@ Security boundaries:
 The bounded seen-event checkpoint is operational state, not an authorization record. If it is lost,
 the Event Engine's persisted per-rule event-ID deduplication still protects events that previously
 produced a run; unmatched historical events may be reconsidered but cannot bypass rule filters.
+
+
+## Build 036 business connector security boundary
+
+Business connectors are treated as external trust boundaries even when the connected application is
+owned by the household.
+
+- connector metadata is authenticated
+- the framework stores no credential and makes no external request
+- connector reads are the default; generic writes do not exist
+- the base write path fails closed with a normalized write-blocked error
+- every future write remains subject to an explicit Build 040 contract and confirmation policy
+- browser responses contain normalized status/capability data, not tokens, cookies, raw upstream
+  response bodies, stack traces, or arbitrary internal exception text
+- connector keys are unique and code-owned so one adapter cannot silently replace another
+
+Builds 037–039 must add provider-specific SSRF/URL, authentication, timeout, pagination, data-minimum,
+and redaction rules before enabling live reads.

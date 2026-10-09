@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from rosevear_ai_hub import __version__
 from rosevear_ai_hub.api.audit import router as audit_router
+from rosevear_ai_hub.api.business import router as business_router
 from rosevear_ai_hub.api.automations import router as automations_router
 from rosevear_ai_hub.api.cameras import router as cameras_router
 from rosevear_ai_hub.api.chat import router as chat_router
@@ -101,6 +102,7 @@ def create_app() -> FastAPI:
     application.include_router(home_assistant_router, dependencies=protected)
     application.include_router(home_assistant_controls_router, dependencies=protected)
     application.include_router(mqtt_router, dependencies=protected)
+    application.include_router(business_router, dependencies=protected)
     application.include_router(secrets_router, dependencies=protected)
     application.include_router(tools_router, dependencies=protected)
     application.include_router(chat_router, dependencies=protected)
