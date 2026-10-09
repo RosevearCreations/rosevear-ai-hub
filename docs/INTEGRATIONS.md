@@ -75,7 +75,7 @@ Build 032 implements the local transport boundary:
 - the supplied Windows config template binds API, RTSP, and WebRTC listeners to loopback
 - camera RTSP/RTSPS sources must resolve from literal private/link-local/loopback IP addresses
 - source URLs may contain camera credentials, but the full value is encrypted in Hub SQLite and never returned after save
-- go2rtc YAML receives only empty stream placeholders; credential-bearing source URLs are patched into runtime memory
+- Hub-managed camera streams are patched directly into go2rtc runtime memory and are not persisted into go2rtc YAML
 - Owner/Administrator can configure, remove, reconcile, and probe streams
 - lower authenticated roles can inspect sanitized transport metadata only
 - no PTZ, talkback, reboot, firmware, public publishing, or cloud streaming is introduced
