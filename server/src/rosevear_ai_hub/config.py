@@ -130,6 +130,12 @@ class Settings(BaseSettings):
         le=100,
         alias="FRIGATE_EVENT_LIMIT",
     )
+    frigate_event_poll_seconds: float = Field(
+        default=2.0,
+        ge=1.0,
+        le=60.0,
+        alias="FRIGATE_EVENT_POLL_SECONDS",
+    )
     knowledge_storage_dir: Path = Field(
         default=Path("./data/knowledge"),
         alias="KNOWLEDGE_STORAGE_DIR",
