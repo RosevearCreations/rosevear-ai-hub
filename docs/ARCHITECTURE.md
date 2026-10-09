@@ -312,3 +312,21 @@ The web application exposes Notifications as a primary section. Build 030 also a
 contextual help layer at the application shell: every primary section gets the same accessible
 circled-i entry point while the panel content changes with the active section. This keeps help
 consistent without duplicating interaction logic in each feature view.
+
+
+## Build 032 camera transport
+
+Camera streaming now has a separate local transport layer:
+
+authenticated Owner/Admin
+-> camera registry entry
+-> private RTSP URL validation
+-> AES-GCM encrypted camera_streams record
+-> loopback-only go2rtc HTTP API
+-> empty persisted stream placeholder
+-> runtime-only RTSP source patch
+-> local RTSP relay
+
+The browser receives sanitized transport metadata but never the credential-bearing source URL.
+Build 032 does not proxy media through FastAPI. Build 033 will own dashboard/health presentation
+without weakening the local-only go2rtc boundary.
