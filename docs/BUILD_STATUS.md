@@ -36,7 +36,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 030 | Notification Layer | COMPLETE | main |
 | 031 | Camera Registry and ONVIF Discovery | COMPLETE | main via PR #47 |
 | 032 | RTSP / go2rtc Integration | COMPLETE | main via PR #50 |
-| 033 | Camera Dashboard and Health | IN PROGRESS | dev |
+| 033 | Camera Dashboard and Health | COMPLETE | main via PR #53 |
 
 ## Build 016 acceptance checklist
 
@@ -792,11 +792,11 @@ immediately by synchronization back to dev so both branches carry the final rele
 - [x] architecture/security/integration/operations/build documentation
 - [x] no database migration required
 - [x] no new account, secret, cloud service, API key, or paid dependency
-- [ ] final Build 033 dev CI green
-- [ ] promoted to main
-- [ ] final Build 033 main Production CI green
-- [ ] release-evidence closeout complete
-- [ ] dev synchronized with final main closeout target
+- [x] final Build 033 dev CI green — run 37983356417
+- [x] promoted to main — PR #53 / merge 9eb8fa52953ff813e026574da46f958ae49a54f6
+- [x] final Build 033 main Production CI green — run 37984006237
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
 
 ## Operator setup
 
@@ -805,6 +805,12 @@ binary and encrypted camera RTSP configuration. Health freshness defaults to 300
 adjusted with `CAMERA_HEALTH_STALE_SECONDS`.
 
 Build 033 stops before recording, Frigate analytics, PTZ, talkback, and remote/public camera access.
+
+Build 033 feature promotion is complete. The exact GREEN dev tree
+`d23df1c133afb0171501abe56bae75d1faccc5f7` passed dev run 37983356417 and was promoted
+through PR #53 to main merge `9eb8fa52953ff813e026574da46f958ae49a54f6`. Main Production run
+37984006237 passed all four lanes. The protected-main release-evidence closeout is followed by
+synchronization back to dev so both branches carry the final release record.
 
 ## Next build
 
