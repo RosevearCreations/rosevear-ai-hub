@@ -330,3 +330,29 @@ authenticated Owner/Admin
 The browser receives sanitized transport metadata but never the credential-bearing source URL.
 Build 032 does not proxy media through FastAPI. Build 033 will own dashboard/health presentation
 without weakening the local-only go2rtc boundary.
+
+
+## Build 033 camera dashboard and health
+
+Build 033 adds a presentation/health layer without creating a second media transport:
+
+authenticated camera viewer
+-> camera dashboard API
+-> sanitized camera/stream health metadata
+-> loopback-only go2rtc viewer URL using stable stream name
+-> embedded local live tile
+
+Owner/Administrator health refresh performs bounded producer probes through the existing go2rtc
+adapter and updates the existing camera_streams last-probe fields. Dashboard reads never decrypt or
+return camera source credentials.
+
+Health is computed from existing registry/stream state:
+- disabled
+- unconfigured
+- untested
+- healthy
+- stale
+- unavailable / failed / no_producer
+
+The browser receives only local viewer URLs and sanitized health metadata. No new public listener,
+recording subsystem, or camera device-control path is introduced.
