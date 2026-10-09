@@ -48,7 +48,4 @@ def test_go2rtc_status_and_runtime_stream_patch() -> None:
 
     assert probe.producer_count == 1
     assert probe.consumer_count == 0
-    assert any(
-        method == "PATCH" and "camera-1" in url
-        for method, url in requests
-    )
+    assert any(method == "PATCH" and "camera-1" in url for method, url in requests)
