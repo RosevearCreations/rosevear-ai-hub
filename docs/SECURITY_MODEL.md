@@ -406,3 +406,24 @@ The dashboard preserves the Build 032 credential boundary:
 
 A local user or process able to access the same host account may still inspect local application
 traffic/process memory. Build 033 does not claim to defend against full host compromise.
+
+
+## Build 034 Frigate adapter
+
+Frigate is an optional read-only local dependency.
+
+Security boundaries:
+- FRIGATE_BASE_URL must use HTTP on localhost/loopback
+- embedded URL credentials, query strings, fragments, public addresses, and LAN addresses are rejected
+- the Hub uses only bounded GET requests for version, configuration metadata, and recent events
+- the adapter exposes no POST/PATCH/PUT/DELETE path to Frigate
+- recent events are normalized into a narrow response schema; arbitrary Frigate event payload data is not forwarded
+- event lists are capped at 100 records
+- Frigate failures are sanitized before reaching the browser
+- the browser never receives camera credentials or a direct Frigate session
+- Frigate being offline does not weaken existing go2rtc/ONVIF safety boundaries
+
+Frigate's internal API is intentionally unauthenticated in its trusted internal deployment mode.
+Build 034 therefore refuses to use that API over a non-loopback address. If a future build needs
+Frigate on another host, it must add an authenticated transport design rather than weakening this
+boundary.
