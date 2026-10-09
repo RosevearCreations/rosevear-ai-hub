@@ -145,7 +145,11 @@ class Go2RTCClient:
         self._request("DELETE", "/api/streams", params={"src": stream_name})
 
     def probe_stream(self, stream_name: str) -> StreamProbe:
-        response = self._request("GET", "/api/streams", params={"src": stream_name})
+        response = self._request(
+            "GET",
+            "/api/streams",
+            params={"src": stream_name, "video": "all"},
+        )
         try:
             payload: Any = response.json()
         except ValueError as exc:
