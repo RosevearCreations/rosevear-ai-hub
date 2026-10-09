@@ -35,7 +35,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 029 | Automation History and Failure Handling | COMPLETE | main |
 | 030 | Notification Layer | COMPLETE | main |
 | 031 | Camera Registry and ONVIF Discovery | COMPLETE | main via PR #47 |
-| 032 | RTSP / go2rtc Integration | IN PROGRESS | dev |
+| 032 | RTSP / go2rtc Integration | COMPLETE | main via PR #50 |
 
 ## Build 016 acceptance checklist
 
@@ -747,11 +747,11 @@ verified main closeout commit.
 - [x] contextual camera help updated
 - [x] security/data-model/integration/architecture/operations/build documentation
 - [x] no cloud account, OAuth application, API key, or paid dependency required
-- [ ] final Build 032 dev CI green
-- [ ] promoted to main
-- [ ] final Build 032 main Production CI green
-- [ ] release-evidence closeout complete
-- [ ] dev synchronized with final main closeout target
+- [x] final Build 032 dev CI green — run 37978292252
+- [x] promoted to main — PR #50 / merge f42352cc56d78d5d1a393994ad83af15aff72e03
+- [x] final Build 032 main Production CI green — run 37978836827
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
 
 ## Operator setup
 
@@ -761,6 +761,12 @@ requires the existing `SECRET_ENCRYPTION_KEY` before saving credential-bearing R
 
 Build 032 deliberately stops at transport configuration/probe/reconcile. Build 033 owns the camera
 dashboard and health experience.
+
+Build 032 feature promotion is complete. The exact GREEN dev tree
+`2a7e2b491ae8d91404ed4123f774cb178adf4466` passed dev run 37978292252 and was promoted
+through PR #50 to main merge `f42352cc56d78d5d1a393994ad83af15aff72e03`. Main Production run
+37978836827 passed all four lanes. The protected-main release-evidence closeout is followed
+immediately by synchronization back to dev so both branches carry the final release record.
 
 ## Next build
 
