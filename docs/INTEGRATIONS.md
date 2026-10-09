@@ -163,3 +163,22 @@ credentials or a second IoT authority.
 - MQTT topic policy remains governed by `MQTT_ALLOWED_TOPICS`; the Event Engine cannot widen it.
 - Home Assistant actions still pass the Build 023 tool, allow-list, domain, and hazard checks.
 - Source outages are isolated from chat/knowledge and use bounded reconnect/reconciliation loops.
+
+
+## Build 035 Frigate event source for automations
+
+Build 035 reuses the Build 034 loopback-only Frigate adapter as a deterministic event source.
+
+- event polling starts only while at least one enabled frigate_event rule exists
+- FRIGATE_EVENT_POLL_SECONDS defaults to 2 seconds and is bounded to 1–60 seconds
+- each poll remains bounded by FRIGATE_EVENT_LIMIT
+- the first successful poll creates a baseline without executing historical events
+- subsequent unseen event IDs enter the Event Engine in chronological order
+- rule filters may match label and optionally camera, sub-label, zone, score, clip/snapshot state,
+  and false-positive inclusion
+- Frigate events can use existing Home Assistant state conditions
+- actions remain restricted to already-supported deterministic Level-1 tools
+- event IDs are automatically deduplicated per automation
+- Frigate remains read-only; Build 035 does not mutate Frigate or camera state directly
+
+Build 036 begins the business Connector Framework and is separate from camera integrations.
