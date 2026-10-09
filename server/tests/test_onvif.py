@@ -52,3 +52,17 @@ def test_parse_probe_match_rejects_public_xaddr() -> None:
 
 def test_parse_probe_match_ignores_malformed_xml() -> None:
     assert parse_probe_matches(b"<not-closed") == []
+
+
+def test_parse_probe_match_rejects_invalid_port() -> None:
+    payload = b"""<?xml version="1.0"?>
+    <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+      xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+      xmlns:d="http://schemas.xmlsoap.org/ws/2005/04/discovery">
+      <s:Body><d:ProbeMatches><d:ProbeMatch>
+        <a:EndpointReference><a:Address>urn:uuid:camera-bad-port</a:Address></a:EndpointReference>
+        <d:XAddrs>http://192.168.68.55:not-a-port/onvif/device_service</d:XAddrs>
+      </d:ProbeMatch></d:ProbeMatches></s:Body>
+    </s:Envelope>"""
+
+    assert parse_probe_matches(payload) == []
