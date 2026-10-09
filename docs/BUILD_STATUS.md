@@ -33,6 +33,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 027 | Event Engine | COMPLETE | main |
 | 028 | AI-Assisted Rule Authoring | COMPLETE | main |
 | 029 | Automation History and Failure Handling | COMPLETE | main |
+| 030 | Notification Layer | IN PROGRESS | dev |
 
 ## Build 016 acceptance checklist
 
@@ -624,6 +625,53 @@ runs and filter by outcome. A failed or interrupted physical-world action is int
 replayed automatically; correct the underlying issue, inspect the run evidence, and allow a new
 source event to trigger the rule.
 
+## Build 030 acceptance checklist
+
+- [x] persistent local household notifications
+- [x] per-user read state
+- [x] per-user dismiss state
+- [x] info/warning/urgent severity vocabulary
+- [x] authenticated notification list and summary APIs
+- [x] bounded notification filtering and pagination
+- [x] Owner/Admin local notification test endpoint
+- [x] notification creation audit evidence
+- [x] Level-1 notification.household.send tool contract
+- [x] deterministic Event Engine notification executor
+- [x] automation authoring context includes the notification tool
+- [x] no Home Assistant dependency for notification execution
+- [x] no email/SMS/push/cloud delivery introduced
+- [x] external messaging remains Level-2 and out of scope
+- [x] persistent Notifications UI for all authenticated roles
+- [x] read/dismiss controls are per account
+- [x] notification severity and source visibility
+- [x] Owner/Admin Send local test action
+- [x] contextual circled-i help control on every primary application section
+- [x] detailed common-task help
+- [x] detailed safety/permission help
+- [x] detailed troubleshooting help
+- [x] keyboard Escape/close behavior for help panel
+- [x] reversible notifications migration 0014
+- [x] migration upgrade/downgrade coverage
+- [x] notification API and Event Engine coverage
+- [x] notification UI coverage
+- [x] contextual help coverage for every primary section
+- [x] Windows test-server updater with exact-main SHA protection
+- [x] test-server update and rollback documentation
+- [x] no new credential, OAuth registration, cloud service, or paid dependency required
+- [ ] final Build 030 dev CI green
+- [ ] promoted to main
+- [ ] final Build 030 main CI green
+- [ ] release-evidence closeout merged
+- [ ] dev synchronized with final main closeout target
+
+## Operator setup
+
+No new variable, account, provider, or external application is required for Build 030. The local
+notification inbox works with the existing SQLite database after Alembic revision 0014 is applied.
+
+The test PC must not be updated until the final Build 030 main closeout SHA and Production run are
+GREEN. Use docs/TEST_SERVER_UPDATE.md and the exact verified SHA at that point.
+
 ## Next build
 
-**Build 030 — Notification Layer**
+**Build 031 — Camera Registry and ONVIF Discovery**

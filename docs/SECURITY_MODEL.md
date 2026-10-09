@@ -334,3 +334,23 @@ Build 029 exposes only the bounded evidence already stored by the deterministic 
 The no-auto-retry policy is intentional: after a connection loss or process restart, the Hub may not
 be able to prove whether a physical action completed. Replaying it automatically would be less safe
 than waiting for a new source event after review.
+
+
+## Build 030 notifications and contextual help
+
+The household notification tool is Level 1 because it changes only local Hub state. It cannot send
+data outside the Hub.
+
+Security boundaries:
+- strict notification title, message, and severity schema
+- bounded 160-character title and 2,000-character message
+- authenticated inbox reads
+- read and dismiss state belongs to the current user only
+- test notification creation is Owner/Administrator-only
+- automation execution rechecks tool enable, risk, and schema state
+- external email, SMS, push, webhook, or third-party messaging is not implemented
+- external messages remain Level 2 under the Source of Truth
+- notification creation is auditable
+- help content is static application guidance and never executes commands, tools, or retrieved text
+
+No Build 030 configuration value is a secret and no new network egress is added.
