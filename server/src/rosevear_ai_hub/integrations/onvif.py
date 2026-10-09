@@ -66,7 +66,10 @@ def _safe_service_url(value: str) -> tuple[str, int] | None:
         return None
     if not _private_ip(parsed.hostname):
         return None
-    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    try:
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    except ValueError:
+        return None
     if not 1 <= port <= 65535:
         return None
     return parsed.hostname, port
