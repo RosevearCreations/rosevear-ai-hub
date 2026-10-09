@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.automations import (
     AUTOMATION_EXECUTABLE_TOOL_KEYS,
+    FrigateEventTrigger,
     MQTTMessageTrigger,
     NumericThresholdCondition,
     RuleDefinition,
@@ -82,6 +83,21 @@ class MQTTEvent:
     received_at: str
 
 
+@dataclass(frozen=True)
+class FrigateEvent:
+    event_id: str
+    camera: str
+    label: str
+    sub_label: str | None
+    start_time: float
+    end_time: float | None
+    zones: tuple[str, ...]
+    has_clip: bool
+    has_snapshot: bool
+    false_positive: bool
+    score: float | None
+
+
 def _utc_now() -> datetime:
     return datetime.now(UTC)
 
@@ -140,7 +156,7 @@ def _blocked_reason(entity_id: str, friendly_name: str | None) -> str | None:
     return None
 
 
-def _event_fingerprint(event: StateEvent | MQTTEvent) -> tuple[str, dict[str, Any]]:
+def _event_fingerprint(event: StateEvent | MQTTEvent | FrigateEvent) -> tuple[str, dict[str, Any]]:
     if isinstance(event, StateEvent):
         summary = {
             "source": "home_assistant",
@@ -150,7 +166,7 @@ def _event_fingerprint(event: StateEvent | MQTTEvent) -> tuple[str, dict[str, An
             "occurred_at": event.occurred_at,
             "source_event_id": event.source_event_id,
         }
-    else:
+    elif isinstance(event, MQTTEvent):
         payload_hash = hashlib.sha256(event.payload.encode("utf-8")).hexdigest()
         summary = {
             "source": "mqtt",
@@ -159,6 +175,21 @@ def _event_fingerprint(event: StateEvent | MQTTEvent) -> tuple[str, dict[str, An
             "retain": event.retain,
             "payload_sha256": payload_hash,
             "received_at": event.received_at,
+        }
+    else:
+        summary = {
+            "source": "frigate",
+            "event_id": event.event_id,
+            "camera": event.camera,
+            "label": event.label,
+            "sub_label": event.sub_label,
+            "start_time": event.start_time,
+            "end_time": event.end_time,
+            "zones": list(event.zones),
+            "has_clip": event.has_clip,
+            "has_snapshot": event.has_snapshot,
+            "false_positive": event.false_positive,
+            "score": event.score,
         }
     canonical = json.dumps(
         summary,
@@ -187,7 +218,10 @@ class AutomationEventEngine:
     async def process_mqtt_event(self, event: MQTTEvent) -> int:
         return await self._process_event(event)
 
-    async def _process_event(self, event: StateEvent | MQTTEvent) -> int:
+    async def process_frigate_event(self, event: FrigateEvent) -> int:
+        return await self._process_event(event)
+
+    async def _process_event(self, event: StateEvent | MQTTEvent | FrigateEvent) -> int:
         event_hash, event_summary = _event_fingerprint(event)
         with self._session_factory() as db:
             automations = db.scalars(
@@ -212,18 +246,29 @@ class AutomationEventEngine:
                     continue
 
                 deduplication_token = None
-                if rule.deduplication_key:
+                if isinstance(event, FrigateEvent):
+                    material = (
+                        f"frigate:{event.event_id}:"
+                        f"{rule.deduplication_key or 'automatic-camera-event-dedup'}"
+                    )
+                    deduplication_token = hashlib.sha256(material.encode("utf-8")).hexdigest()
+                elif rule.deduplication_key:
                     material = f"{rule.deduplication_key}:{event_hash}"
                     deduplication_token = hashlib.sha256(material.encode("utf-8")).hexdigest()
-                    if self._duplicate_seen(db, automation.id, deduplication_token):
-                        self._record_skipped(
-                            db,
-                            automation,
-                            event_summary,
-                            "duplicate_event",
-                            deduplication_token,
-                        )
-                        continue
+
+                if deduplication_token and self._duplicate_seen(
+                    db,
+                    automation.id,
+                    deduplication_token,
+                ):
+                    self._record_skipped(
+                        db,
+                        automation,
+                        event_summary,
+                        "duplicate_event",
+                        deduplication_token,
+                    )
+                    continue
 
                 if self._cooldown_active(db, automation.id, rule.cooldown_seconds):
                     self._record_skipped(
@@ -246,7 +291,11 @@ class AutomationEventEngine:
                 executed += 1
             return executed
 
-    def _trigger_matches(self, rule: RuleDefinition, event: StateEvent | MQTTEvent) -> bool:
+    def _trigger_matches(
+        self,
+        rule: RuleDefinition,
+        event: StateEvent | MQTTEvent | FrigateEvent,
+    ) -> bool:
         trigger = rule.trigger
         if isinstance(trigger, StateChangeTrigger):
             if not isinstance(event, StateEvent) or event.entity_id != trigger.entity_id:
@@ -275,9 +324,37 @@ class AutomationEventEngine:
                 and topic_matches_sub(trigger.topic_filter, event.topic)
                 and (trigger.payload_equals is None or trigger.payload_equals == event.payload)
             )
+
+        if isinstance(trigger, FrigateEventTrigger):
+            if not isinstance(event, FrigateEvent):
+                return False
+            if event.label != trigger.label:
+                return False
+            if trigger.camera is not None and event.camera != trigger.camera:
+                return False
+            if trigger.sub_label is not None and event.sub_label != trigger.sub_label:
+                return False
+            if trigger.zone is not None and trigger.zone not in event.zones:
+                return False
+            if trigger.min_score is not None:
+                if event.score is None or event.score < trigger.min_score:
+                    return False
+            if trigger.require_clip is not None and event.has_clip != trigger.require_clip:
+                return False
+            if (
+                trigger.require_snapshot is not None
+                and event.has_snapshot != trigger.require_snapshot
+            ):
+                return False
+            if event.false_positive and not trigger.include_false_positives:
+                return False
+            return True
         return False
 
-    async def _state_snapshot(self, event: StateEvent | MQTTEvent) -> dict[str, dict[str, Any]]:
+    async def _state_snapshot(
+        self,
+        event: StateEvent | MQTTEvent | FrigateEvent,
+    ) -> dict[str, dict[str, Any]]:
         states: dict[str, dict[str, Any]] = {}
         if self._home_assistant_client is not None:
             try:
