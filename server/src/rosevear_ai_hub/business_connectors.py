@@ -199,12 +199,22 @@ DEFAULT_BUSINESS_CONNECTORS = ConnectorRegistry(
             ConnectorDescriptor(
                 key="devilndove",
                 display_name="Devil n Dove",
-                description="Read-first view of shop commerce, catalogue, inventory, and order data.",
+                description=(
+                    "Read-first view of shop commerce, catalogue, inventory, and order data."
+                ),
                 planned_build=37,
                 capabilities=(
-                    _capability("catalogue.read", "Catalogue", "Read products and listing metadata."),
+                    _capability(
+                        "catalogue.read",
+                        "Catalogue",
+                        "Read products and listing metadata.",
+                    ),
                     _capability("orders.read", "Orders", "Read order and fulfilment summaries."),
-                    _capability("inventory.read", "Inventory", "Read stock and maker inventory state."),
+                    _capability(
+                        "inventory.read",
+                        "Inventory",
+                        "Read stock and maker inventory state.",
+                    ),
                 ),
             )
         ),
@@ -212,7 +222,9 @@ DEFAULT_BUSINESS_CONNECTORS = ConnectorRegistry(
             ConnectorDescriptor(
                 key="rosiedazzlers",
                 display_name="Rosie Dazzlers",
-                description="Read-first view of detailing customers, bookings, jobs, and inventory.",
+                description=(
+                    "Read-first view of detailing customers, bookings, jobs, and inventory."
+                ),
                 planned_build=38,
                 capabilities=(
                     _capability("bookings.read", "Bookings", "Read booking and appointment data."),
@@ -232,7 +244,11 @@ DEFAULT_BUSINESS_CONNECTORS = ConnectorRegistry(
                     _capability("clients.read", "Clients", "Read client and contract summaries."),
                     _capability("jobs.read", "Jobs", "Read scheduled and historical job data."),
                     _capability("crew.read", "Crew", "Read employee and assignment summaries."),
-                    _capability("equipment.read", "Equipment", "Read equipment and availability state."),
+                    _capability(
+                        "equipment.read",
+                        "Equipment",
+                        "Read equipment and availability state.",
+                    ),
                 ),
             )
         ),
