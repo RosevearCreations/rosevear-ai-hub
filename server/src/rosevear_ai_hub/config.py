@@ -150,6 +150,20 @@ class Settings(BaseSettings):
         le=60,
         alias="DEVILNDOVE_TIMEOUT_SECONDS",
     )
+    rosiedazzlers_base_url: str = Field(
+        default="https://rosiedazzlers.ca",
+        alias="ROSIEDAZZLERS_BASE_URL",
+    )
+    rosiedazzlers_staff_session_token: SecretStr | None = Field(
+        default=None,
+        alias="ROSIEDAZZLERS_STAFF_SESSION_TOKEN",
+    )
+    rosiedazzlers_timeout_seconds: float = Field(
+        default=8.0,
+        gt=0,
+        le=60,
+        alias="ROSIEDAZZLERS_TIMEOUT_SECONDS",
+    )
     knowledge_storage_dir: Path = Field(
         default=Path("./data/knowledge"),
         alias="KNOWLEDGE_STORAGE_DIR",
