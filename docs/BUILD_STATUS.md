@@ -40,6 +40,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 034 | Frigate Adapter | COMPLETE | main via PR #56 |
 | 035 | Camera Event Automations | COMPLETE | main via PR #59 |
 | 036 | Connector Framework | COMPLETE | main via PR #63 |
+| 037 | Devil n Dove Read Connector | ACTIVE | feature implementation awaiting CI |
 
 ## Build 016 acceptance checklist
 
@@ -958,3 +959,49 @@ so both branches carry the final release record.
 ## Next build
 
 **Build 037 — Devil n Dove Read Connector**
+
+
+## Build 037 acceptance checklist
+
+- [x] concrete Devil n Dove implementation of the Build 036 connector contract
+- [x] GET-only server-side Devil n Dove client
+- [x] remote HTTPS enforcement with loopback-only HTTP exception
+- [x] existing Devil n Dove bearer-compatible admin session authentication reused
+- [x] Devil n Dove credential added to Build 020 secret definitions
+- [x] environment-backed `DEVILNDOVE_ADMIN_TOKEN` supported
+- [x] configurable `DEVILNDOVE_BASE_URL` and bounded timeout
+- [x] lightweight Product picker used for catalogue reads
+- [x] catalogue reads capped at 50 records
+- [x] order reads capped at 100 records
+- [x] Inventory-owned read contract used for inventory
+- [x] inventory reads capped at 100 records and tools excluded
+- [x] no arbitrary upstream path or method passthrough
+- [x] normalized bounded upstream fields
+- [x] connector status does not spend live D1 read quota
+- [x] sanitized configuration, authentication, network, and provider errors
+- [x] authenticated Hub read endpoint for connector resources
+- [x] Business UI live read controls and bounded preview
+- [x] contextual circled-i Business help updated
+- [x] backend adapter, framework, and API tests
+- [x] web read-preview tests
+- [x] backend and desktop version 0.0.37
+- [x] no database migration required
+- [x] no new paid dependency or Devil n Dove repository change
+- [x] business writes remain blocked
+- [ ] final Build 037 dev CI green
+- [ ] promoted to main through protected PR
+- [ ] final Build 037 main Production CI green
+- [ ] release-evidence closeout complete
+- [ ] dev synchronized with final main closeout target
+
+## Build 037 operator setup
+
+Build 037 can deploy while unconfigured. Live reads require a currently valid Devil n Dove admin
+session credential stored as **Secrets → Devil n Dove admin token** or
+`DEVILNDOVE_ADMIN_TOKEN`. The credential is bearer-equivalent, can expire or be revoked, and never
+enters browser state. The default origin is `https://devilndove.com`; no Devil n Dove application
+change is required.
+
+## Next build
+
+**Build 038 — Rosie Dazzlers Read Connector**
