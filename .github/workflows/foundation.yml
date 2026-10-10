@@ -83,6 +83,13 @@ jobs:
           workspaces: "apps/desktop/src-tauri -> target"
       - name: Install Node workspaces
         run: npm install
+      - name: Validate Windows recovery PowerShell syntax
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/install-hub-recovery-task.ps1')) { [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null }
+          if ($errors.Count -gt 0) { $errors | Format-List; exit 1 }
       - name: Check Rust shell
         run: npm run desktop:check
       - name: Build Windows desktop executable
