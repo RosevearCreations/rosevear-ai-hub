@@ -82,10 +82,28 @@ def _registry(session: Session) -> ConnectorRegistry:
         )
     except RuntimeError:
         rosiedazzlers_credential = None
+    try:
+        yardworkers_access_token = resolve_secret(
+            session,
+            "yardworkers.access_token",
+            settings,
+        )
+    except RuntimeError:
+        yardworkers_access_token = None
+    try:
+        yardworkers_anon_key = resolve_secret(
+            session,
+            "yardworkers.anon_key",
+            settings,
+        )
+    except RuntimeError:
+        yardworkers_anon_key = None
     return build_business_connector_registry(
         settings=settings,
         devilndove_credential=devilndove_credential,
         rosiedazzlers_credential=rosiedazzlers_credential,
+        yardworkers_access_token=yardworkers_access_token,
+        yardworkers_anon_key=yardworkers_anon_key,
     )
 
 
