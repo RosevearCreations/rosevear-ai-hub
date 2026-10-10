@@ -2,7 +2,7 @@
 
 ## Status
 
-Feature implementation active on `build-039-yardworkers-read-connector`.
+COMPLETE — promoted to `main` through PR #72.
 
 ## Goal
 
@@ -101,5 +101,13 @@ Build 039 covers:
 
 ## Promotion evidence
 
-To be completed after feature dev CI, protected-main promotion, Production validation, release
-closeout, and final dev synchronization are GREEN.
+- final GREEN dev integration tree: `b2e69035fe9459629b2c219e15700acd7e67af4d`
+- final feature dev CI: run 38060792723 — docs/backend/web/Windows GREEN
+- backend result: 173 passed, 9 warnings
+- protected-main promotion gate: run 38061206759 — all four lanes GREEN
+- feature promotion: PR #72
+- main feature merge: `2633b96598ba10cd833a3b384996b05c46e6c165`
+- main Production validation: run 38061484574 — all four lanes GREEN
+- Windows Production artifact: `rosevear-ai-hub-windows` uploaded successfully
+- release-evidence closeout: protected-main PR following the green feature Production run
+- final operation: synchronize `dev` to the release-evidence `main` target and verify GREEN
