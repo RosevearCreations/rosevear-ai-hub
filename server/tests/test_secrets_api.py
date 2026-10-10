@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
-from rosevear_ai_hub.config import get_settings
+from rosevear_ai_hub.config import Settings, get_settings
 from rosevear_ai_hub.database import build_engine, get_session
 from rosevear_ai_hub.main import create_app
 from rosevear_ai_hub.models import AuditEvent, Base, Camera, CameraStream, SecretValue
@@ -29,6 +29,9 @@ def build_client(
     current_key: str | None = None,
     previous_key: str | None = None,
 ):
+    # Test-managed environment values must not fall back to the operator's .env file.
+    # This protects real local encrypted credentials without touching the file.
+    monkeypatch.setitem(Settings.model_config, "env_file", None)
     if current_key is None:
         monkeypatch.delenv("SECRET_ENCRYPTION_KEY", raising=False)
     else:
