@@ -136,6 +136,20 @@ class Settings(BaseSettings):
         le=60.0,
         alias="FRIGATE_EVENT_POLL_SECONDS",
     )
+    devilndove_base_url: str = Field(
+        default="https://devilndove.com",
+        alias="DEVILNDOVE_BASE_URL",
+    )
+    devilndove_admin_token: SecretStr | None = Field(
+        default=None,
+        alias="DEVILNDOVE_ADMIN_TOKEN",
+    )
+    devilndove_timeout_seconds: float = Field(
+        default=8.0,
+        gt=0,
+        le=60,
+        alias="DEVILNDOVE_TIMEOUT_SECONDS",
+    )
     knowledge_storage_dir: Path = Field(
         default=Path("./data/knowledge"),
         alias="KNOWLEDGE_STORAGE_DIR",

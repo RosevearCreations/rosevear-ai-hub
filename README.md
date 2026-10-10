@@ -103,11 +103,13 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 033 — Camera Dashboard and Health**
 - **Build 034 — Frigate Adapter**
 - **Build 035 — Camera Event Automations**
+- **Build 036 — Connector Framework**
+- **Build 037 — Devil n Dove Read Connector**
 
 ## Next build
 
-**Build 036 — Connector Framework**
+**Build 038 — Rosie Dazzlers Read Connector**
 
-The first functional MVP boundary remains Build 025. Build 035 connects normalized local Frigate
-events to the deterministic Event Engine with bounded polling, baseline seeding, event-ID
-deduplication, existing Level-1 action policy, and no retrospective replay of historical events.
+Build 037 adds GET-only, bounded Devil n Dove catalogue, order, and inventory reads through the
+common business connector framework. Devil n Dove remains the source of truth and all business
+writes remain blocked.

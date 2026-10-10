@@ -484,3 +484,33 @@ All three correctly report **Planned** until their dedicated read builds arrive.
 Build 036 adds no environment variable, secret, OAuth registration, API key, migration, hosted
 service, or paid dependency. Rollback is therefore code-only: return to the previous verified main
 commit and restart/rebuild the Hub. No database downgrade is required.
+
+
+## Build 037 Devil n Dove read connector operations
+
+Build 037 requires no database migration, new paid dependency, or Devil n Dove code deployment.
+The Hub can start with the connector unconfigured.
+
+To enable live reads:
+1. Keep `DEVILNDOVE_BASE_URL=https://devilndove.com` unless testing against a deliberate local
+   origin.
+2. Obtain a currently valid Devil n Dove administrator session credential. Devil n Dove's existing
+   admin request resolver accepts that session through a server-side Bearer header.
+3. Prefer **Secrets → Devil n Dove admin token** so the value is encrypted at rest by Build 020.
+   `DEVILNDOVE_ADMIN_TOKEN` is also supported for environment-managed deployment.
+4. If using the encrypted Secrets store, `SECRET_ENCRYPTION_KEY` must already be configured.
+5. Open **Business**. A configured connector reports `configured` without making a network call.
+6. Use **Read Catalogue**, **Read Orders**, or **Read Inventory**. Each action performs one bounded
+   GET request through the Hub backend.
+7. If the session expires or is revoked, sign in to Devil n Dove again and rotate the Hub secret.
+
+Safe defaults:
+- `DEVILNDOVE_TIMEOUT_SECONDS=8`
+- catalogue maximum: 50 records
+- orders maximum: 100 records
+- inventory maximum: 100 records
+- Inventory tools excluded
+- no automatic polling, refresh loop, background synchronization, cache copy, or write
+
+Rollback is schema-neutral: clear the Devil n Dove credential and deploy Build 036. No business
+record is deleted or changed because Build 037 never writes to Devil n Dove.

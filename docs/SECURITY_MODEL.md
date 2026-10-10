@@ -471,3 +471,29 @@ owned by the household.
 
 Builds 037–039 must add provider-specific SSRF/URL, authentication, timeout, pagination, data-minimum,
 and redaction rules before enabling live reads.
+
+
+## Build 037 Devil n Dove business-read boundary
+
+Build 037 contacts a production business system, so the connector is deliberately narrower than a
+generic HTTP proxy.
+
+- only three code-owned GET paths are callable: Product picker, Orders, and Inventory read contract
+- callers cannot supply an arbitrary upstream path or HTTP method
+- the Devil n Dove admin credential is bearer-equivalent and is resolved only on the backend
+- environment secrets take precedence; encrypted Secrets storage remains available through Build 020
+- raw credentials, cookies, Authorization headers, upstream bodies, and exceptions are not returned
+  in connector metadata
+- remote base URLs require HTTPS and cannot contain credentials, query strings, fragments, or API
+  paths
+- catalogue responses are capped at 50 records; orders and inventory at 100
+- large upstream fields are not forwarded when they are not needed for the Hub read model
+- connector status is configuration-only and does not silently spend Devil n Dove D1 read budget
+- authentication, network, and provider errors are translated into sanitized connector errors
+- inherited business writes remain hard-blocked; Build 037 introduces no state-changing Devil n Dove
+  endpoint
+
+Because the current credential is an admin session secret, compromise carries the authority of that
+Devil n Dove session outside the Hub. Protect the Hub host and encryption key, rotate the credential
+after suspected exposure, and do not copy it into browser storage, logs, screenshots, or source
+control.
