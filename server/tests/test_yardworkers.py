@@ -16,15 +16,11 @@ def test_yardworkers_base_url_requires_https_except_loopback() -> None:
     assert validate_yardworkers_base_url("https://example.supabase.co/") == (
         "https://example.supabase.co"
     )
-    assert validate_yardworkers_base_url("http://127.0.0.1:54321") == (
-        "http://127.0.0.1:54321"
-    )
+    assert validate_yardworkers_base_url("http://127.0.0.1:54321") == ("http://127.0.0.1:54321")
     with pytest.raises(YardWorkersConfigurationError, match="must use HTTPS"):
         validate_yardworkers_base_url("http://example.supabase.co")
     with pytest.raises(YardWorkersConfigurationError, match="without an API path"):
-        validate_yardworkers_base_url(
-            "https://example.supabase.co/functions/v1/core-data-read"
-        )
+        validate_yardworkers_base_url("https://example.supabase.co/functions/v1/core-data-read")
 
 
 def test_yardworkers_client_uses_exact_protected_jobs_read_contract() -> None:
