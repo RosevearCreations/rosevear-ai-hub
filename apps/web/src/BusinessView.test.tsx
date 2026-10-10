@@ -114,13 +114,38 @@ function connectorPayload(configured = false) {
         planned_build: 39,
         access_mode: "read_only",
         writes_require_confirmation: true,
-        capabilities: [],
+        capabilities: [
+          {
+            key: "clients.read",
+            label: "Clients",
+            description: "Read clients.",
+            access: "read_only",
+          },
+          {
+            key: "jobs.read",
+            label: "Jobs",
+            description: "Read jobs.",
+            access: "read_only",
+          },
+          {
+            key: "crew.read",
+            label: "Crew",
+            description: "Read crew.",
+            access: "read_only",
+          },
+          {
+            key: "equipment.read",
+            label: "Equipment",
+            description: "Read equipment.",
+            access: "read_only",
+          },
+        ],
         status: {
-          state: "planned",
+          state: "unconfigured",
           configured: false,
           available: false,
           message:
-            "Yard Workers read connector is reserved for Build 039.",
+            "Yard Workers read access is ready but the access token and API key are not configured.",
           retryable: false,
         },
       },
@@ -130,7 +155,7 @@ function connectorPayload(configured = false) {
 
 describe("BusinessView", () => {
   test(
-    "shows Build 038 with live connectors awaiting credentials",
+    "shows Build 039 with live connectors awaiting credentials",
     async () => {
       vi.stubGlobal(
         "fetch",
@@ -181,6 +206,16 @@ describe("BusinessView", () => {
         expect(
           screen.getByText(
             /Configure the Rosie Dazzlers staff session token in Secrets/i,
+          ),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", {
+            name: "Read Clients",
+          }),
+        ).toBeDisabled();
+        expect(
+          screen.getByText(
+            /Configure both the Yard Workers access token and API key in Secrets/i,
           ),
         ).toBeInTheDocument();
       });
@@ -286,12 +321,16 @@ describe("BusinessView", () => {
 
       render(<BusinessView />);
 
-      const button = await screen.findByRole(
+      const buttons = await screen.findAllByRole(
         "button",
         { name: "Read Jobs" },
       );
+      const button = buttons.find(
+        (candidate) => !(candidate as HTMLButtonElement).disabled,
+      );
+      expect(button).toBeDefined();
       expect(button).toBeEnabled();
-      fireEvent.click(button);
+      fireEvent.click(button!);
 
       await waitFor(() => {
         expect(
@@ -301,6 +340,64 @@ describe("BusinessView", () => {
         ).toBeInTheDocument();
         expect(screen.getByText(/booking-42/)).toBeInTheDocument();
         expect(screen.getByText(/Customer One/)).toBeInTheDocument();
+      });
+    },
+  test(
+    "loads a bounded Yard Workers equipment preview",
+    async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (input: RequestInfo | URL) => {
+          const url = String(input);
+          if (url.includes("/yardworkers/read/equipment")) {
+            return {
+              ok: true,
+              json: async () => ({
+                connector_key: "yardworkers",
+                resource: "equipment",
+                records: [
+                  {
+                    equipment_id: "equipment-42",
+                    equipment_code: "EQ-42",
+                    item_name: "Commercial mower",
+                  },
+                ],
+                next_cursor: null,
+              }),
+            };
+          }
+          const payload = connectorPayload(false);
+          payload.connectors[2].status = {
+            state: "configured",
+            configured: true,
+            available: false,
+            message: "Yard Workers read access is configured.",
+            retryable: false,
+          };
+          return {
+            ok: true,
+            json: async () => payload,
+          };
+        }),
+      );
+
+      render(<BusinessView />);
+
+      const button = await screen.findByRole(
+        "button",
+        { name: "Read Equipment" },
+      );
+      expect(button).toBeEnabled();
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("heading", {
+            name: /Yard Workers Equipment — 1 record/,
+          }),
+        ).toBeInTheDocument();
+        expect(screen.getByText(/equipment-42/)).toBeInTheDocument();
+        expect(screen.getByText(/Commercial mower/)).toBeInTheDocument();
       });
     },
   );
