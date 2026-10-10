@@ -342,6 +342,8 @@ describe("BusinessView", () => {
         expect(screen.getByText(/Customer One/)).toBeInTheDocument();
       });
     },
+  );
+
   test(
     "loads a bounded Yard Workers equipment preview",
     async () => {
