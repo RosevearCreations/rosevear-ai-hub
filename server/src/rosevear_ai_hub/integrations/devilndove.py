@@ -228,9 +228,7 @@ class DevilNDoveClient:
         except ValueError as exc:
             raise DevilNDoveRequestError("Devil n Dove returned invalid JSON.") from exc
         if not isinstance(payload, dict) or payload.get("ok") is not True:
-            raise DevilNDoveRequestError(
-                "Devil n Dove reported that the confirmed write failed."
-            )
+            raise DevilNDoveRequestError("Devil n Dove reported that the confirmed write failed.")
         return payload
 
     def catalogue(
@@ -411,9 +409,7 @@ class DevilNDoveClient:
                 "Devil n Dove story summary must contain 1 to 500 characters."
             )
         if len(clean_body) > 5000:
-            raise DevilNDoveRequestError(
-                "Devil n Dove story body must be at most 5000 characters."
-            )
+            raise DevilNDoveRequestError("Devil n Dove story body must be at most 5000 characters.")
 
         payload = self._post_json(
             "/api/admin/product-story-notes",
@@ -437,15 +433,11 @@ class DevilNDoveClient:
         )
         note = payload.get("note")
         if not isinstance(note, dict):
-            raise DevilNDoveRequestError(
-                "Devil n Dove returned an invalid story-draft response."
-            )
+            raise DevilNDoveRequestError("Devil n Dove returned an invalid story-draft response.")
         note_id = _integer(note.get("product_story_public_note_id"), minimum=0)
         returned_product_id = _integer(note.get("product_id"), minimum=0)
         if returned_product_id != int(product_id) or note_id <= 0:
-            raise DevilNDoveRequestError(
-                "Devil n Dove returned an invalid story-draft identity."
-            )
+            raise DevilNDoveRequestError("Devil n Dove returned an invalid story-draft identity.")
         return {
             "accepted": True,
             "product_id": returned_product_id,
