@@ -1,4 +1,4 @@
-"""Bounded read-only Yard Workers integration for Build 039."""
+"""Bounded Yard Workers reads plus one Build 040 confirmed private job-comment write."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 import httpx
 
 _CORE_DATA_PATH = "/functions/v1/core-data-read"
+_JOBS_MANAGE_PATH = "/functions/v1/jobs-manage"
 _LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "::1"}
 
 
@@ -144,7 +145,7 @@ class YardWorkersClient:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self._access_token}",
             "apikey": self._anon_key,
-            "User-Agent": "Rosevear-AI-Hub/0.0.39",
+            "User-Agent": "Rosevear-AI-Hub/0.0.40",
         }
         body = {
             "module_key": "jobs",
