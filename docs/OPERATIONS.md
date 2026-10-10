@@ -568,3 +568,31 @@ Defaults:
 
 Rollback is schema-neutral: clear the Yard Workers credentials and deploy Build 038. No Yard Workers
 record is changed because Build 039 calls only the protected Shared Core read contract.
+
+
+## Build 040 confirmed business write operations
+
+No migration or new credential is required.
+
+For Devil n Dove:
+1. open Business and confirm the connector is configured
+2. enter an existing product ID and the proposed story draft
+3. select **Prepare exact confirmation**
+4. review the exact product ID and text, then **Approve exact write**
+5. select **Execute confirmed write**
+6. review the resulting Draft / Needs-review record in Devil n Dove before any later publication
+
+For Yard Workers:
+1. sign in with a current access token whose profile has Jobs create permission and Supervisor+ role
+2. enter the numeric job ID and internal comment
+3. prepare, review, approve, then execute the exact write
+4. verify the comment remains internal and is not a special instruction
+
+Rosie Dazzlers has no Build 040 write.
+
+If execution fails or times out, do not retry blindly. The confirmation is already consumed. Inspect
+the source system to determine whether the mutation occurred, then prepare a new confirmation only
+when another action is actually needed.
+
+Rollback is schema-neutral: deploy Build 039. Existing drafts/comments remain source-system records;
+rollback does not delete them.

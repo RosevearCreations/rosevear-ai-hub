@@ -67,6 +67,86 @@ def object_schema(
 
 BUILTIN_TOOL_DEFINITIONS: tuple[ToolDefinition, ...] = (
     ToolDefinition(
+        tool_key="business.devilndove.story_draft.create",
+        display_name="Create Devil n Dove story draft",
+        description=(
+            "Create one review-only Devil n Dove product story draft. "
+            "The Hub cannot approve or publish the draft."
+        ),
+        integration_key="business.devilndove",
+        integration_name="Devil n Dove",
+        capabilities=("business.write", "business.devilndove.story_draft.write"),
+        risk_level=ToolRiskLevel.CONFIRMATION_REQUIRED,
+        input_schema=object_schema(
+            {
+                "product_id": {"type": "integer", "minimum": 1},
+                "heading": {"type": "string", "minLength": 1, "maxLength": 180},
+                "summary": {"type": "string", "minLength": 1, "maxLength": 500},
+                "body": {"type": "string", "maxLength": 5000},
+            },
+            required=("product_id", "heading", "summary", "body"),
+        ),
+        output_schema=object_schema(
+            {
+                "accepted": {"type": "boolean"},
+                "product_id": {"type": "integer", "minimum": 1},
+                "note_id": {"type": "integer", "minimum": 1},
+                "display_status": {"type": "string", "enum": ["draft"]},
+                "privacy_status": {"type": "string", "enum": ["needs_review"]},
+            },
+            required=(
+                "accepted",
+                "product_id",
+                "note_id",
+                "display_status",
+                "privacy_status",
+            ),
+        ),
+        default_enabled=True,
+    ),
+    ToolDefinition(
+        tool_key="business.yardworkers.job_comment.create",
+        display_name="Create private Yard Workers job comment",
+        description=(
+            "Create one private internal Yard Workers job update comment. "
+            "The Hub cannot make it client-visible or a special instruction."
+        ),
+        integration_key="business.yardworkers",
+        integration_name="Yard Workers",
+        capabilities=("business.write", "business.yardworkers.job_comment.write"),
+        risk_level=ToolRiskLevel.CONFIRMATION_REQUIRED,
+        input_schema=object_schema(
+            {
+                "job_id": {"type": "integer", "minimum": 1},
+                "comment_text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000,
+                },
+            },
+            required=("job_id", "comment_text"),
+        ),
+        output_schema=object_schema(
+            {
+                "accepted": {"type": "boolean"},
+                "comment_id": {"type": "string", "minLength": 1},
+                "job_id": {"type": "integer", "minimum": 1},
+                "comment_type": {"type": "string", "enum": ["update"]},
+                "visible_to_client": {"type": "boolean", "enum": [False]},
+                "is_special_instruction": {"type": "boolean", "enum": [False]},
+            },
+            required=(
+                "accepted",
+                "comment_id",
+                "job_id",
+                "comment_type",
+                "visible_to_client",
+                "is_special_instruction",
+            ),
+        ),
+        default_enabled=True,
+    ),
+    ToolDefinition(
         tool_key="automation.rule.change",
         display_name="Change automation rule",
         description=(

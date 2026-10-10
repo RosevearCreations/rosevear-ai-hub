@@ -514,3 +514,23 @@ already enforces signed-in identity, active profile state, module view permissio
 read models, and read-only behavior. The Hub adds a second narrow boundary: fixed resource mappings,
 HTTPS-only remote transport, backend-only credentials, record caps, field minimization, and
 fail-closed writes.
+
+
+## Build 040 narrow confirmed-write path
+
+```text
+Business UI
+  -> prepare exact Level-2 confirmation
+  -> Owner/Admin approval
+  -> POST /api/v1/business/connectors/{connector}/write/{operation}
+  -> exact tool key + canonical argument verification
+  -> consume + commit single-use confirmation
+  -> connector exact write adapter
+       -> Devil n Dove draft story only
+       -> Yard Workers private job comment only
+  -> normalized result + immutable Hub audit evidence
+```
+
+The external provider call intentionally occurs after confirmation consumption. This avoids replay
+when an external timeout leaves the remote outcome uncertain. Build 040 does not add an outbox,
+background retry queue, generic business write dispatcher, or cross-system transaction coordinator.

@@ -146,3 +146,60 @@ def test_authentication_error_is_sanitized() -> None:
     ) as caught:
         client.orders(limit=10)
     assert "secret-value" not in str(caught.value)
+
+
+def test_devilndove_story_write_is_forced_to_review_only_draft() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert request.url.path == "/api/admin/product-story-notes"
+        assert request.headers["Authorization"] == "Bearer admin-credential"
+        payload = __import__("json").loads(request.content)
+        assert payload["action"] == "save"
+        assert payload["product_id"] == 42
+        assert payload["display_status"] == "draft"
+        assert payload["privacy_status"] == "needs_review"
+        assert payload["story_source"] == "rosevear_ai_hub"
+        assert payload["story_heading"] == "Workshop story"
+        assert payload["story_summary"] == "A review-only summary."
+        assert payload["story_body"] == "Draft body"
+        assert "published" not in str(payload)
+        return httpx.Response(
+            200,
+            json={
+                "ok": True,
+                "note": {
+                    "product_story_public_note_id": 77,
+                    "product_id": 42,
+                    "display_status": "draft",
+                    "privacy_status": "needs_review",
+                },
+            },
+        )
+
+    client = DevilNDoveClient(
+        "https://devilndove.com",
+        "admin-credential",
+        transport=httpx.MockTransport(handler),
+    )
+    result = client.create_story_draft(
+        product_id=42,
+        heading="Workshop story",
+        summary="A review-only summary.",
+        body="Draft body",
+    )
+
+    assert result == {
+        "accepted": True,
+        "product_id": 42,
+        "note_id": 77,
+        "display_status": "draft",
+        "privacy_status": "needs_review",
+    }
+
+
+def test_devilndove_rejects_credential_header_injection() -> None:
+    with pytest.raises(DevilNDoveConfigurationError, match="header characters"):
+        DevilNDoveClient(
+            "https://devilndove.com",
+            "credential\r\nInjected: yes",
+        )

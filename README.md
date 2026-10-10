@@ -107,11 +107,12 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 037 — Devil n Dove Read Connector**
 - **Build 038 — Rosie Dazzlers Read Connector**
 - **Build 039 — Yard Workers Read Connector**
+- **Build 040 — Narrow Confirmed Business Writes**
 
 ## Next build
 
-**Build 040 — Narrow Confirmed Business Writes**
+**Build 041 — Local Speech-to-Text**
 
-Build 039 adds bounded Yard Workers client, job, crew, and equipment reads through the existing
-protected Shared Core endpoint. The Hub reuses Yard Workers' current Supabase identity and Jobs
-module view authority; all business writes remain blocked.
+Build 040 adds two exact Level-2 confirmed business writes: a Devil n Dove review-only product-story
+draft and a Yard Workers private internal job update comment. Rosie Dazzlers remains read-only, and
+every unlisted business write stays fail-closed.

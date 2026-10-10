@@ -542,3 +542,22 @@ administrative APIs.
 A Yard Workers access token carries the permissions of its signed-in user. Protect the Hub host and
 encryption key, rotate expired or exposed tokens, and never replace this credential with a
 service-role key for convenience.
+
+
+## Build 040 confirmed business-write boundary
+
+Build 040 treats external mutation as a one-shot Level-2 action.
+
+- only two tool keys are writable: Devil n Dove story draft and Yard Workers private job comment
+- Owner/Admin must approve exact canonical arguments before execution
+- confirmations are single-use and consumed before the outbound request
+- timeouts and ambiguous provider outcomes never cause automatic replay
+- Devil n Dove status is forced to `draft` / `needs_review`; publishing is outside the contract
+- Yard Workers client visibility, special-instruction state, and job-instruction mutation are forced off
+- Rosie Dazzlers remains read-only
+- all non-allow-listed write operations inherit the fail-closed connector base implementation
+- provider credentials and raw provider errors never enter browser responses or audit arguments
+
+Because an external service cannot participate in the Hub's SQLite transaction, consuming the
+confirmation before network mutation is the safer failure mode: uncertain outcomes require source
+inspection and a newly prepared confirmation rather than replay.

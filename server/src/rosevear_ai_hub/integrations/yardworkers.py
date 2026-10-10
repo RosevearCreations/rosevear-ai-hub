@@ -1,4 +1,4 @@
-"""Bounded read-only Yard Workers integration for Build 039."""
+"""Bounded Yard Workers reads plus one Build 040 confirmed private job-comment write."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 import httpx
 
 _CORE_DATA_PATH = "/functions/v1/core-data-read"
+_JOBS_MANAGE_PATH = "/functions/v1/jobs-manage"
 _LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "::1"}
 
 
@@ -144,7 +145,7 @@ class YardWorkersClient:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self._access_token}",
             "apikey": self._anon_key,
-            "User-Agent": "Rosevear-AI-Hub/0.0.39",
+            "User-Agent": "Rosevear-AI-Hub/0.0.40",
         }
         body = {
             "module_key": "jobs",
@@ -347,3 +348,100 @@ class YardWorkersClient:
                 }
             )
         return YardWorkersReadPage(records=tuple(records))
+
+    def create_private_job_comment(
+        self,
+        *,
+        job_id: int,
+        comment_text: str,
+    ) -> dict[str, Any]:
+        """Create one internal-only job update without changing instructions or client visibility."""
+
+        if isinstance(job_id, bool) or int(job_id) <= 0:
+            raise YardWorkersRequestError("Yard Workers job_id must be a positive integer.")
+        clean_comment = str(comment_text or "").strip()
+        if not clean_comment or len(clean_comment) > 2000:
+            raise YardWorkersRequestError(
+                "Yard Workers private job comment must contain 1 to 2000 characters."
+            )
+
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self._access_token}",
+            "apikey": self._anon_key,
+            "User-Agent": "Rosevear-AI-Hub/0.0.40",
+        }
+        body = {
+            "entity": "job_comment",
+            "action": "create",
+            "job_id": int(job_id),
+            "comment_type": "update",
+            "comment_text": clean_comment,
+            "is_special_instruction": False,
+            "visible_to_client": False,
+            "set_job_instruction": False,
+        }
+
+        try:
+            with httpx.Client(
+                base_url=self.base_url,
+                timeout=self.timeout_seconds,
+                transport=self._transport,
+                follow_redirects=False,
+                headers=headers,
+            ) as client:
+                response = client.post(_JOBS_MANAGE_PATH, json=body)
+        except httpx.TimeoutException as exc:
+            raise YardWorkersUnavailableError(
+                "Yard Workers timed out during a confirmed write request."
+            ) from exc
+        except httpx.RequestError as exc:
+            raise YardWorkersUnavailableError(
+                "Yard Workers is unavailable for confirmed write access."
+            ) from exc
+
+        if response.status_code in {401, 403}:
+            raise YardWorkersAuthenticationError(
+                "Yard Workers rejected the configured access token, Jobs create permission, "
+                "or Supervisor+ role required for confirmed writes."
+            )
+        if response.status_code in {408, 425, 429, 502, 503, 504}:
+            raise YardWorkersUnavailableError(
+                "Yard Workers is temporarily unavailable for confirmed write access."
+            )
+        if response.status_code < 200 or response.status_code >= 300:
+            raise YardWorkersRequestError(
+                f"Yard Workers confirmed write failed with HTTP {response.status_code}."
+            )
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            raise YardWorkersRequestError("Yard Workers returned invalid JSON.") from exc
+        if not isinstance(payload, dict) or payload.get("ok") is not True:
+            raise YardWorkersRequestError(
+                "Yard Workers reported that the confirmed write failed."
+            )
+        record = payload.get("record")
+        if not isinstance(record, dict):
+            raise YardWorkersRequestError(
+                "Yard Workers returned an invalid job-comment response."
+            )
+        try:
+            returned_job_id = int(record.get("job_id") or 0)
+        except (TypeError, ValueError):
+            returned_job_id = 0
+        record_id = str(record.get("id") or "").strip()
+        if returned_job_id != int(job_id) or not record_id:
+            raise YardWorkersRequestError(
+                "Yard Workers returned an invalid job-comment identity."
+            )
+        return {
+            "accepted": True,
+            "comment_id": record_id,
+            "job_id": returned_job_id,
+            "comment_type": "update",
+            "visible_to_client": False,
+            "is_special_instruction": False,
+        }
+

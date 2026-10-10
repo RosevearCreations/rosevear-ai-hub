@@ -43,6 +43,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 037 | Devil n Dove Read Connector | COMPLETE | main via PR #66 |
 | 038 | Rosie Dazzlers Read Connector | COMPLETE | main via PR #69 |
 | 039 | Yard Workers Read Connector | COMPLETE | main via PR #72 |
+| 040 | Narrow Confirmed Business Writes | ACTIVE | dev feature branch |
 
 ## Build 016 acceptance checklist
 
@@ -1110,6 +1111,43 @@ four lanes; the backend reported 173 passed tests with 9 warnings and the Window
 artifact was uploaded successfully. This protected-main release-evidence closeout is followed by
 synchronization back to dev so both branches carry the final release record.
 
+## Build 040 acceptance checklist
+
+- [x] implementation begins from synchronized Build 039 closeout SHA 5b601ac1ed304b02a6a2fe590477c5e652a0447a
+- [x] current source mutation contracts reviewed in all three connected business repositories
+- [x] Devil n Dove exact review-only story-draft operation selected
+- [x] Devil n Dove publish/approval/status mutation is not exposed
+- [x] Yard Workers exact private internal job-comment operation selected
+- [x] Yard Workers client visibility, special-instruction, and job-instruction mutation forced off
+- [x] Rosie Dazzlers remains read-only because current save APIs are broader than Build 040 safety scope
+- [x] two Level-2 confirmation-required tool definitions registered
+- [x] exact canonical argument schemas with bounded text and positive record IDs
+- [x] Owner/Admin confirmed-write execution endpoint
+- [x] confirmation consumed before external mutation to prevent replay
+- [x] failed/uncertain provider outcomes are never automatically retried
+- [x] success, blocked, failed, and uncertain writes generate Hub audit evidence
+- [x] Business UI separates prepare, approve, and execute steps
+- [x] contextual circled-i Business help updated
+- [x] adapter, connector, confirmation/replay, and web flow tests added
+- [x] backend and desktop version 0.0.40
+- [x] no Hub or source-system database migration
+- [x] no new package or paid service dependency
+- [x] no source-system repository change required
+- [ ] final Build 040 dev CI green
+- [ ] promoted to main
+- [ ] protected-main promotion gate green
+- [ ] final Build 040 main Production CI green
+- [ ] release-evidence closeout complete
+- [ ] dev synchronized with final main closeout target
+
+## Build 040 operator policy
+
+Build 040 does not enable general business editing. Devil n Dove can only receive a new
+Draft / Needs-review product story record. Yard Workers can only receive a private internal update
+comment. Rosie Dazzlers has no write operation. Each write requires a fresh exact Level-2
+confirmation. The confirmation is consumed before contacting the source system; after a timeout or
+failure, inspect the source system before preparing another confirmation.
+
 ## Next build
 
-**Build 040 — Narrow Confirmed Business Writes**
+**Build 041 — Local Speech-to-Text**

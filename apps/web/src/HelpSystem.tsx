@@ -125,24 +125,25 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
   },
   Business: {
     purpose:
-      "Provides the read-first business connector boundary, including bounded live Devil n Dove, Rosie Dazzlers, and Yard Workers reads through Builds 037–039.",
+      "Provides bounded live reads for all three businesses plus Build 040's two exact Level-2 confirmed writes: a Devil n Dove review-only story draft and a Yard Workers private internal job comment.",
     tasks: [
-      "Store the Devil n Dove admin session credential under Secrets → Devil n Dove admin token, or supply DEVILNDOVE_ADMIN_TOKEN to the backend.",
-      "Store the Rosie Dazzlers opaque staff-session token under Secrets → Rosie Dazzlers staff session token, or supply ROSIEDAZZLERS_STAFF_SESSION_TOKEN to the backend.",
-      "For Yard Workers, store a current signed-in Supabase access token and the project anon/publishable API key under Secrets. The signed-in user needs Jobs module view access.",
-      "Open Business and use the connector-specific Read buttons for a bounded live preview of the source system.",
+      "Keep the existing business credentials in Secrets; Build 040 introduces no new provider credential.",
+      "For Devil n Dove, enter a product ID and draft wording, then Prepare exact confirmation, review the arguments, Approve exact write, and Execute confirmed write.",
+      "For Yard Workers, enter the numeric job ID and internal update, then use the same three-stage confirmation flow. The signed-in Yard Workers user needs Jobs create access and Supervisor+ authority.",
+      "Use the existing Read buttons for bounded previews. Rosie Dazzlers remains strictly read-only in Build 040.",
     ],
     safety: [
-      "All business writes remain hard-blocked by the shared connector contract.",
-      "Devil n Dove remains GET-only. Rosie Dazzlers uses an exact four-endpoint read allow list. Yard Workers uses only its exact read-only POST /functions/v1/core-data-read contract.",
-      "All business credentials stay server-side, remote origins require HTTPS, read sizes are capped, and upstream responses are normalized before display.",
-      "Yard Workers client-site street addresses are intentionally omitted from Hub previews.",
+      "There is no generic business write proxy. Only business.devilndove.story_draft.create and business.yardworkers.job_comment.create are registered write tools.",
+      "Devil n Dove is forced to display_status=draft and privacy_status=needs_review; the Hub cannot approve or publish the story.",
+      "Yard Workers is forced to comment_type=update, visible_to_client=false, is_special_instruction=false, and set_job_instruction=false.",
+      "Rosie Dazzlers inherits the hard-blocked base write path because its current mutation APIs are broader than this safety boundary.",
+      "Exact confirmation is consumed before the external request. A timeout, provider error, or ambiguous result is never automatically retried; inspect the source system before preparing a new confirmation.",
     ],
     troubleshooting: [
       "Unconfigured: add or rotate every required connector credential in Secrets; session-style access tokens can expire.",
-      "Rosie Dazzlers authentication failed: sign in again, copy the current rd_staff_session token value, and replace the stored Hub secret.",
-      "Yard Workers authentication failed: sign in again for a fresh access token and confirm that user has Jobs module view permission; also verify the paired API key.",
-      "Unavailable: verify the relevant connector base URL, internet reachability, and source application or Supabase service health before retrying.",
+      "Confirmation mismatch or replay rejection: prepare a new exact confirmation only for the intended arguments.",
+      "Yard Workers write rejected: refresh the access token and verify Jobs create permission plus Supervisor+ role.",
+      "After a failed/uncertain write, inspect the source system first because the approval has already been consumed and the Hub deliberately will not retry it.",
     ],
   },
   System: {

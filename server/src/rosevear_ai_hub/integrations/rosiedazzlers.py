@@ -174,7 +174,7 @@ class RosieDazzlersClient:
         headers = {
             "Accept": "application/json",
             "Cookie": f"rd_staff_session={self._staff_session_token}",
-            "User-Agent": "Rosevear-AI-Hub/0.0.39",
+            "User-Agent": "Rosevear-AI-Hub/0.0.40",
         }
         try:
             with httpx.Client(
