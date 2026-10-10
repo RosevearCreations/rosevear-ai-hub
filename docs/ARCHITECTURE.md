@@ -425,3 +425,31 @@ Devil n Dove, Rosie Dazzlers, and Yard Workers are registered as planned read-on
 Builds 037–039 can supply concrete adapters without changing the shared API/UI contract. Build 040
 must define every allowed write explicitly; the framework does not provide a generic arbitrary write
 or remote-command escape hatch.
+
+
+## Build 037 Devil n Dove read adapter
+
+The first concrete business adapter sits behind the Build 036 `BusinessConnector` contract:
+
+```text
+Browser / Tauri
+    |
+    | authenticated Hub request
+    v
+FastAPI /api/v1/business/connectors/devilndove/read/{resource}
+    |
+    | resolve server-side Devil n Dove credential
+    v
+DevilNDoveReadConnector
+    |
+    +-- catalogue -> GET /api/admin/product-picker
+    +-- orders    -> GET /api/admin/orders
+    +-- inventory -> GET /api/admin/contracts/inventory-read
+    |
+    v
+Devil n Dove (system of record)
+```
+
+The Hub stores no replicated Product, Order, or Inventory table in this build. Records are normalized
+in memory and returned to the authenticated caller. The connector does not expose a generic URL,
+method, request body, or provider-response passthrough, and its inherited write path remains blocked.

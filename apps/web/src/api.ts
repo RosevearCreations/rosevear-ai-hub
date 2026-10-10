@@ -1853,3 +1853,32 @@ export function getBusinessConnector(
     signal,
   );
 }
+
+export interface BusinessConnectorReadResponse {
+  connector_key: string;
+  resource: string;
+  records: Record<string, unknown>[];
+  next_cursor: string | null;
+}
+
+export function readBusinessConnector(
+  connectorKey: string,
+  resource: string,
+  limit = 20,
+  cursor?: string,
+  signal?: AbortSignal,
+): Promise<BusinessConnectorReadResponse> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (cursor) params.set("cursor", cursor);
+  return authJson<BusinessConnectorReadResponse>(
+    "GET",
+    "/api/v1/business/connectors/" +
+      encodeURIComponent(connectorKey) +
+      "/read/" +
+      encodeURIComponent(resource) +
+      "?" +
+      params.toString(),
+    undefined,
+    signal,
+  );
+}

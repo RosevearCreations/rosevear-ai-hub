@@ -203,3 +203,26 @@ The Phase 7 business integrations now share a common connector contract and regi
 - Build 040 owns any narrow approved business write
 
 Build 036 performs no external network request and introduces no credential or secret definition.
+
+
+## Build 037 Devil n Dove read connector
+
+Build 037 activates the first Phase 7 business connector without copying mutable shop truth into the
+Hub.
+
+- default remote origin: `https://devilndove.com`
+- remote origins require HTTPS; loopback HTTP remains available for local testing
+- authentication uses an existing Devil n Dove admin session credential as a server-side Bearer value
+- the credential may come from `DEVILNDOVE_ADMIN_TOKEN` or the encrypted Build 020 Secrets store
+- the browser never receives the credential and never calls Devil n Dove directly
+- catalogue reads use `GET /api/admin/product-picker` and are capped at 50
+- order reads use `GET /api/admin/orders` and are capped by the Hub at 100
+- inventory reads use `GET /api/admin/contracts/inventory-read` and are capped at 100
+- Inventory tool rows are excluded from the Build 037 read by default
+- upstream records are normalized instead of being passed through wholesale
+- connector status does not probe the shop; network access occurs only after an explicit read
+- all write operations remain blocked by the Build 036 connector contract
+
+The current credential is an administrator session secret, not a permanent service key. It can
+expire or be revoked and must be rotated when that occurs. A future dedicated service credential
+should replace it if Devil n Dove defines one.
