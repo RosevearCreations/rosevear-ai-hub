@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from rosevear_ai_hub.business_connectors import (
     DEFAULT_BUSINESS_CONNECTORS,
     ConnectorConfigurationError,
+    ConnectorOperationNotFoundError,
     ConnectorRegistry,
     ConnectorWriteBlockedError,
     DevilNDoveReadConnector,
@@ -52,13 +53,13 @@ def test_default_registry_is_read_first_and_fail_closed() -> None:
     ]
 
     devilndove = DEFAULT_BUSINESS_CONNECTORS.get("devilndove")
-    assert devilndove.descriptor.access_mode.value == "read_only"
+    assert devilndove.descriptor.access_mode.value == "approved_write"
     assert devilndove.descriptor.writes_require_confirmation is True
     assert devilndove.status().state.value == "unconfigured"
     with pytest.raises(ConnectorConfigurationError):
         devilndove.read("catalogue")
-    with pytest.raises(ConnectorWriteBlockedError):
-        devilndove.write("example", {"value": 1})
+    with pytest.raises(ConnectorConfigurationError):
+        devilndove.write("story_draft", {"product_id": 1})
 
     rosiedazzlers = DEFAULT_BUSINESS_CONNECTORS.get("rosiedazzlers")
     assert rosiedazzlers.descriptor.access_mode.value == "read_only"
@@ -70,13 +71,13 @@ def test_default_registry_is_read_first_and_fail_closed() -> None:
         rosiedazzlers.write("example", {"value": 1})
 
     yardworkers = DEFAULT_BUSINESS_CONNECTORS.get("yardworkers")
-    assert yardworkers.descriptor.access_mode.value == "read_only"
+    assert yardworkers.descriptor.access_mode.value == "approved_write"
     assert yardworkers.descriptor.writes_require_confirmation is True
     assert yardworkers.status().state.value == "unconfigured"
     with pytest.raises(ConnectorConfigurationError):
         yardworkers.read("jobs")
-    with pytest.raises(ConnectorWriteBlockedError):
-        yardworkers.write("example", {"value": 1})
+    with pytest.raises(ConnectorConfigurationError):
+        yardworkers.write("job_comment", {"job_id": 1})
 
 
 def test_devilndove_connector_reads_bounded_catalogue() -> None:
@@ -123,7 +124,7 @@ def test_devilndove_connector_reads_bounded_catalogue() -> None:
     assert result.next_cursor == "41"
     assert result.records[0]["product_id"] == 42
     assert result.records[0]["name"] == "Copper Dove"
-    with pytest.raises(ConnectorWriteBlockedError):
+    with pytest.raises(ConnectorOperationNotFoundError):
         connector.write(
             "product.update",
             {"product_id": 42},
@@ -221,7 +222,7 @@ def test_yardworkers_connector_reads_bounded_equipment() -> None:
     assert result.next_cursor is None
     assert result.records[0]["equipment_id"] == "equipment-42"
     assert result.records[0]["item_name"] == "Commercial mower"
-    with pytest.raises(ConnectorWriteBlockedError):
+    with pytest.raises(ConnectorOperationNotFoundError):
         connector.write(
             "equipment.update",
             {"equipment_id": "equipment-42"},
