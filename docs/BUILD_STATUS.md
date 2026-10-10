@@ -42,7 +42,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 036 | Connector Framework | COMPLETE | main via PR #63 |
 | 037 | Devil n Dove Read Connector | COMPLETE | main via PR #66 |
 | 038 | Rosie Dazzlers Read Connector | COMPLETE | main via PR #69 |
-| 039 | Yard Workers Read Connector | ACTIVE | dev feature branch |
+| 039 | Yard Workers Read Connector | COMPLETE | main via PR #72 |
 
 ## Build 016 acceptance checklist
 
@@ -1086,12 +1086,12 @@ synchronization back to dev so both branches carry the final release record.
 - [x] no database migration required
 - [x] no new paid dependency or Yard Workers repository change
 - [x] business writes remain blocked
-- [ ] final Build 039 dev CI green
-- [ ] promoted to main
-- [ ] protected-main promotion gate green
-- [ ] final Build 039 main Production CI green
-- [ ] release-evidence closeout complete through protected-main closeout
-- [ ] dev synchronized with final main closeout target after closeout promotion
+- [x] final Build 039 dev CI green — run 38060792723
+- [x] promoted to main — PR #72 / merge 2633b96598ba10cd833a3b384996b05c46e6c165
+- [x] protected-main promotion gate green — run 38061206759
+- [x] final Build 039 main Production CI green — run 38061484574
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
 
 ## Build 039 operator setup
 
@@ -1101,6 +1101,14 @@ Yard Workers access token** and **Secrets → Yard Workers API key**. The access
 active and have Jobs module view permission. Environment fallbacks are YARDWORKERS_ACCESS_TOKEN and
 YARDWORKERS_ANON_KEY. The default Supabase project origin is
 `https://jmqvkgiqlimdhcofwkxr.supabase.co`; no Yard Workers application change is required.
+
+Build 039 feature promotion is complete. The exact GREEN dev tree
+`b2e69035fe9459629b2c219e15700acd7e67af4d` passed dev run 38060792723 and protected-main
+promotion gate run 38061206759. It was promoted through PR #72 to main merge
+`2633b96598ba10cd833a3b384996b05c46e6c165`. Main Production run 38061484574 passed all
+four lanes; the backend reported 173 passed tests with 9 warnings and the Windows executable
+artifact was uploaded successfully. This protected-main release-evidence closeout is followed by
+synchronization back to dev so both branches carry the final release record.
 
 ## Next build
 
