@@ -76,9 +76,7 @@ def test_reads_are_get_only_bounded_and_normalized() -> None:
                     ],
                 },
             )
-        if request.url.path == (
-            "/api/admin/contracts/inventory-read"
-        ):
+        if request.url.path == ("/api/admin/contracts/inventory-read"):
             assert request.url.params["limit"] == "100"
             assert request.url.params["include_tools"] == "false"
             return httpx.Response(
@@ -99,9 +97,7 @@ def test_reads_are_get_only_bounded_and_normalized() -> None:
                             "stock_unit_label": "package",
                             "supplier_name": "Supplier",
                             "supplier_sku": "BLACK-1",
-                            "captured_ingredients": (
-                                "large upstream field"
-                            ),
+                            "captured_ingredients": ("large upstream field"),
                         }
                     ],
                 },
@@ -126,10 +122,7 @@ def test_reads_are_get_only_bounded_and_normalized() -> None:
     assert inventory.records[0]["available_quantity"] == 6
     assert "captured_ingredients" not in inventory.records[0]
     assert all(method == "GET" for method, _, _ in seen)
-    assert all(
-        auth == "Bearer admin-credential"
-        for _, _, auth in seen
-    )
+    assert all(auth == "Bearer admin-credential" for _, _, auth in seen)
 
 
 def test_authentication_error_is_sanitized() -> None:

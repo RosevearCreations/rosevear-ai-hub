@@ -17,9 +17,7 @@ from rosevear_ai_hub.main import create_app
 
 
 def build_client(tmp_path):
-    engine = build_engine(
-        f"sqlite:///{tmp_path / 'business-connectors.db'}"
-    )
+    engine = build_engine(f"sqlite:///{tmp_path / 'business-connectors.db'}")
     Base.metadata.create_all(engine)
     session_maker = sessionmaker(
         bind=engine,
@@ -46,10 +44,7 @@ def build_client(tmp_path):
 
 def test_default_registry_is_read_first_and_fail_closed() -> None:
     connectors = DEFAULT_BUSINESS_CONNECTORS.list()
-    assert [
-        connector.descriptor.key
-        for connector in connectors
-    ] == [
+    assert [connector.descriptor.key for connector in connectors] == [
         "devilndove",
         "rosiedazzlers",
         "yardworkers",
@@ -78,9 +73,7 @@ def test_default_registry_is_read_first_and_fail_closed() -> None:
 def test_devilndove_connector_reads_bounded_catalogue() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"
-        assert request.headers["Authorization"] == (
-            "Bearer test-admin-credential"
-        )
+        assert request.headers["Authorization"] == ("Bearer test-admin-credential")
         assert request.url.path == "/api/admin/product-picker"
         assert request.url.params["limit"] == "50"
         return httpx.Response(
@@ -145,18 +138,12 @@ def test_authenticated_business_catalogue_is_safe(tmp_path) -> None:
     assert payload["framework_version"] == "1"
     assert payload["read_only_default"] is True
     assert payload["write_confirmation_required"] is True
-    assert [
-        item["key"]
-        for item in payload["connectors"]
-    ] == [
+    assert [item["key"] for item in payload["connectors"]] == [
         "devilndove",
         "rosiedazzlers",
         "yardworkers",
     ]
-    states = {
-        item["key"]: item["status"]["state"]
-        for item in payload["connectors"]
-    }
+    states = {item["key"]: item["status"]["state"] for item in payload["connectors"]}
     assert states == {
         "devilndove": "unconfigured",
         "rosiedazzlers": "planned",
@@ -165,41 +152,26 @@ def test_authenticated_business_catalogue_is_safe(tmp_path) -> None:
     assert "authorization" not in str(payload).lower()
     assert "cookie" not in str(payload).lower()
 
-    detail = client.get(
-        "/api/v1/business/connectors/devilndove"
-    )
+    detail = client.get("/api/v1/business/connectors/devilndove")
     assert detail.status_code == 200
     assert detail.json()["planned_build"] == 37
 
-    missing = client.get(
-        "/api/v1/business/connectors/not-a-connector"
-    )
+    missing = client.get("/api/v1/business/connectors/not-a-connector")
     assert missing.status_code == 404
 
-    read_without_credential = client.get(
-        "/api/v1/business/connectors/devilndove/read/catalogue"
-    )
+    read_without_credential = client.get("/api/v1/business/connectors/devilndove/read/catalogue")
     assert read_without_credential.status_code == 503
-    assert (
-        "not configured"
-        in read_without_credential.json()["detail"].lower()
-    )
+    assert "not configured" in read_without_credential.json()["detail"].lower()
 
-    post_response = client.post(
-        "/api/v1/business/connectors/devilndove"
-    )
+    post_response = client.post("/api/v1/business/connectors/devilndove")
     assert post_response.status_code == 405
 
 
 def test_business_catalogue_requires_authentication(tmp_path) -> None:
     client = build_client(tmp_path)
     assert client.post("/api/v1/auth/logout").status_code == 200
-    assert client.get(
-        "/api/v1/business/connectors"
-    ).status_code == 401
-    assert client.get(
-        "/api/v1/business/connectors/devilndove/read/catalogue"
-    ).status_code == 401
+    assert client.get("/api/v1/business/connectors").status_code == 401
+    assert client.get("/api/v1/business/connectors/devilndove/read/catalogue").status_code == 401
 
 
 def test_environment_credential_marks_connector_configured(
@@ -213,9 +185,7 @@ def test_environment_credential_marks_connector_configured(
     get_settings.cache_clear()
     try:
         client = build_client(tmp_path)
-        response = client.get(
-            "/api/v1/business/connectors/devilndove"
-        )
+        response = client.get("/api/v1/business/connectors/devilndove")
         assert response.status_code == 200
         payload = response.json()
         assert payload["status"]["state"] == "configured"

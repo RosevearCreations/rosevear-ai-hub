@@ -142,8 +142,7 @@ class BusinessConnector(ABC):
 
         del operation, payload
         raise ConnectorWriteBlockedError(
-            f"{self.descriptor.display_name} writes are blocked by the "
-            "connector framework."
+            f"{self.descriptor.display_name} writes are blocked by the connector framework."
         )
 
 
@@ -178,8 +177,7 @@ class PlannedReadConnector(BusinessConnector):
     ) -> ConnectorReadResult:
         del resource, cursor, limit
         raise ConnectorUnavailableError(
-            f"{self.descriptor.display_name} read connector is not "
-            "implemented yet."
+            f"{self.descriptor.display_name} read connector is not implemented yet."
         )
 
 
@@ -197,27 +195,18 @@ class ConnectorRegistry:
     def register(self, connector: BusinessConnector) -> None:
         key = connector.descriptor.key
         if not key or key != key.strip().lower():
-            raise ValueError(
-                "Connector keys must be non-empty lowercase canonical values."
-            )
+            raise ValueError("Connector keys must be non-empty lowercase canonical values.")
         if key in self._connectors:
-            raise ValueError(
-                f"Connector key {key!r} is already registered."
-            )
+            raise ValueError(f"Connector key {key!r} is already registered.")
         self._connectors[key] = connector
 
     def list(self) -> tuple[BusinessConnector, ...]:
-        return tuple(
-            self._connectors[key]
-            for key in sorted(self._connectors)
-        )
+        return tuple(self._connectors[key] for key in sorted(self._connectors))
 
     def get(self, key: str) -> BusinessConnector:
         connector = self._connectors.get(key)
         if connector is None:
-            raise ConnectorNotFoundError(
-                f"Unknown business connector: {key}."
-            )
+            raise ConnectorNotFoundError(f"Unknown business connector: {key}.")
         return connector
 
 
@@ -236,9 +225,7 @@ def _capability(
 DEVILNDOVE_DESCRIPTOR = ConnectorDescriptor(
     key="devilndove",
     display_name="Devil n Dove",
-    description=(
-        "Read-only view of live shop catalogue, order, and inventory data."
-    ),
+    description=("Read-only view of live shop catalogue, order, and inventory data."),
     planned_build=37,
     capabilities=(
         _capability(
@@ -280,9 +267,7 @@ class DevilNDoveReadConnector(BusinessConnector):
 
     def status(self) -> ConnectorStatus:
         try:
-            validate_devilndove_base_url(
-                self.settings.devilndove_base_url
-            )
+            validate_devilndove_base_url(self.settings.devilndove_base_url)
         except DevilNDoveConfigurationError as exc:
             return ConnectorStatus(
                 state=ConnectorState.ERROR,
@@ -296,10 +281,7 @@ class DevilNDoveReadConnector(BusinessConnector):
                 state=ConnectorState.UNCONFIGURED,
                 configured=False,
                 available=False,
-                message=(
-                    "Devil n Dove read access is ready but no credential "
-                    "is configured."
-                ),
+                message=("Devil n Dove read access is ready but no credential is configured."),
                 retryable=False,
             )
         return ConnectorStatus(
@@ -332,9 +314,7 @@ class DevilNDoveReadConnector(BusinessConnector):
         limit: int = 100,
     ) -> ConnectorReadResult:
         if not self._credential:
-            raise ConnectorConfigurationError(
-                "Devil n Dove admin credential is not configured."
-            )
+            raise ConnectorConfigurationError("Devil n Dove admin credential is not configured.")
         normalized = resource.strip().lower()
         aliases = {
             "catalogue": "catalogue",
@@ -360,15 +340,13 @@ class DevilNDoveReadConnector(BusinessConnector):
             elif canonical == "orders":
                 if cursor:
                     raise ConnectorResourceNotFoundError(
-                        "Devil n Dove orders do not expose a cursor "
-                        "in Build 037."
+                        "Devil n Dove orders do not expose a cursor in Build 037."
                     )
                 page = client.orders(limit=min(limit, 100))
             else:
                 if cursor:
                     raise ConnectorResourceNotFoundError(
-                        "Devil n Dove inventory does not expose a cursor "
-                        "in Build 037."
+                        "Devil n Dove inventory does not expose a cursor in Build 037."
                     )
                 page = client.inventory(limit=min(limit, 100))
         except DevilNDoveAuthenticationError as exc:
@@ -408,8 +386,7 @@ def build_business_connector_registry(
                     key="rosiedazzlers",
                     display_name="Rosie Dazzlers",
                     description=(
-                        "Read-first view of detailing customers, bookings, "
-                        "jobs, and inventory."
+                        "Read-first view of detailing customers, bookings, jobs, and inventory."
                     ),
                     planned_build=38,
                     capabilities=(
@@ -441,8 +418,7 @@ def build_business_connector_registry(
                     key="yardworkers",
                     display_name="Yard Workers",
                     description=(
-                        "Read-first view of landscaping clients, jobs, "
-                        "crews, and equipment."
+                        "Read-first view of landscaping clients, jobs, crews, and equipment."
                     ),
                     planned_build=39,
                     capabilities=(

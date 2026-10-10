@@ -73,13 +73,9 @@ def validate_devilndove_base_url(value: str) -> str:
     try:
         port = parsed.port
     except ValueError as exc:
-        raise DevilNDoveConfigurationError(
-            "DEVILNDOVE_BASE_URL contains an invalid port."
-        ) from exc
+        raise DevilNDoveConfigurationError("DEVILNDOVE_BASE_URL contains an invalid port.") from exc
     if port is not None and not 1 <= port <= 65535:
-        raise DevilNDoveConfigurationError(
-            "DEVILNDOVE_BASE_URL contains an invalid port."
-        )
+        raise DevilNDoveConfigurationError("DEVILNDOVE_BASE_URL contains an invalid port.")
     return normalized
 
 
@@ -117,9 +113,7 @@ class DevilNDoveClient:
         self.base_url = validate_devilndove_base_url(base_url)
         self._credential = credential.strip()
         if not self._credential:
-            raise DevilNDoveConfigurationError(
-                "Devil n Dove admin credential is not configured."
-            )
+            raise DevilNDoveConfigurationError("Devil n Dove admin credential is not configured.")
         if timeout_seconds <= 0 or timeout_seconds > 60:
             raise DevilNDoveConfigurationError(
                 "DEVILNDOVE_TIMEOUT_SECONDS must be greater than 0 and at most 60."
@@ -172,17 +166,11 @@ class DevilNDoveClient:
         try:
             payload = response.json()
         except ValueError as exc:
-            raise DevilNDoveRequestError(
-                "Devil n Dove returned invalid JSON."
-            ) from exc
+            raise DevilNDoveRequestError("Devil n Dove returned invalid JSON.") from exc
         if not isinstance(payload, dict):
-            raise DevilNDoveRequestError(
-                "Devil n Dove returned an invalid read response."
-            )
+            raise DevilNDoveRequestError("Devil n Dove returned an invalid read response.")
         if payload.get("ok") is False:
-            raise DevilNDoveRequestError(
-                "Devil n Dove reported that the read request failed."
-            )
+            raise DevilNDoveRequestError("Devil n Dove reported that the read request failed.")
         return payload
 
     def catalogue(
@@ -211,9 +199,7 @@ class DevilNDoveClient:
         payload = self._request_json("/api/admin/product-picker", params=params)
         raw_products = payload.get("products")
         if not isinstance(raw_products, list):
-            raise DevilNDoveRequestError(
-                "Devil n Dove returned an invalid catalogue response."
-            )
+            raise DevilNDoveRequestError("Devil n Dove returned an invalid catalogue response.")
 
         records: list[dict[str, Any]] = []
         for raw in raw_products[:bounded_limit]:
@@ -255,9 +241,7 @@ class DevilNDoveClient:
         )
         raw_orders = payload.get("orders")
         if not isinstance(raw_orders, list):
-            raise DevilNDoveRequestError(
-                "Devil n Dove returned an invalid orders response."
-            )
+            raise DevilNDoveRequestError("Devil n Dove returned an invalid orders response.")
 
         records: list[dict[str, Any]] = []
         for raw in raw_orders[:bounded_limit]:
@@ -274,13 +258,10 @@ class DevilNDoveClient:
                     "customer_email": _text(raw.get("customer_email")),
                     "order_status": _text(raw.get("order_status")),
                     "payment_status": _text(
-                        raw.get("derived_payment_status")
-                        or raw.get("payment_status")
+                        raw.get("derived_payment_status") or raw.get("payment_status")
                     ),
                     "fulfillment_type": _text(raw.get("fulfillment_type")),
-                    "currency": (
-                        _text(raw.get("currency"), max_length=8) or "CAD"
-                    ),
+                    "currency": (_text(raw.get("currency"), max_length=8) or "CAD"),
                     "total_cents": _integer(
                         raw.get("total_cents"),
                         minimum=0,
@@ -312,9 +293,7 @@ class DevilNDoveClient:
         )
         raw_items = payload.get("items")
         if not isinstance(raw_items, list):
-            raise DevilNDoveRequestError(
-                "Devil n Dove returned an invalid inventory response."
-            )
+            raise DevilNDoveRequestError("Devil n Dove returned an invalid inventory response.")
 
         records: list[dict[str, Any]] = []
         for raw in raw_items[:bounded_limit]:
@@ -334,22 +313,14 @@ class DevilNDoveClient:
                     "external_key": _text(raw.get("external_key")),
                     "item_name": name,
                     "category": _text(raw.get("category")),
-                    "on_hand_quantity": _integer(
-                        raw.get("on_hand_quantity")
-                    ),
-                    "reserved_quantity": _integer(
-                        raw.get("reserved_quantity")
-                    ),
-                    "available_quantity": _integer(
-                        raw.get("available_quantity")
-                    ),
+                    "on_hand_quantity": _integer(raw.get("on_hand_quantity")),
+                    "reserved_quantity": _integer(raw.get("reserved_quantity")),
+                    "available_quantity": _integer(raw.get("available_quantity")),
                     "unit_cost_cents": _integer(
                         raw.get("unit_cost_cents"),
                         minimum=0,
                     ),
-                    "stock_unit_label": _text(
-                        raw.get("stock_unit_label")
-                    ),
+                    "stock_unit_label": _text(raw.get("stock_unit_label")),
                     "supplier_name": _text(raw.get("supplier_name")),
                     "supplier_sku": _text(raw.get("supplier_sku")),
                 }

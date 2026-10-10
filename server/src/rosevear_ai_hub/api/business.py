@@ -91,9 +91,7 @@ def _serialize(
         description=descriptor.description,
         planned_build=descriptor.planned_build,
         access_mode=descriptor.access_mode.value,
-        writes_require_confirmation=(
-            descriptor.writes_require_confirmation
-        ),
+        writes_require_confirmation=(descriptor.writes_require_confirmation),
         capabilities=[
             ConnectorCapabilityResponse(
                 key=capability.key,
@@ -122,10 +120,7 @@ def list_business_connectors(
         framework_version="1",
         read_only_default=True,
         write_confirmation_required=True,
-        connectors=[
-            _serialize(connector)
-            for connector in registry.list()
-        ],
+        connectors=[_serialize(connector) for connector in registry.list()],
     )
 
 
