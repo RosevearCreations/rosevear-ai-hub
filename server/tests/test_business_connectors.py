@@ -10,6 +10,7 @@ from rosevear_ai_hub.business_connectors import (
     ConnectorUnavailableError,
     ConnectorWriteBlockedError,
     DevilNDoveReadConnector,
+    RosieDazzlersReadConnector,
 )
 from rosevear_ai_hub.config import Settings, get_settings
 from rosevear_ai_hub.database import Base, build_engine, get_session
@@ -59,15 +60,23 @@ def test_default_registry_is_read_first_and_fail_closed() -> None:
     with pytest.raises(ConnectorWriteBlockedError):
         devilndove.write("example", {"value": 1})
 
-    for key in ("rosiedazzlers", "yardworkers"):
-        connector = DEFAULT_BUSINESS_CONNECTORS.get(key)
-        assert connector.descriptor.access_mode.value == "read_only"
-        assert connector.descriptor.writes_require_confirmation is True
-        assert connector.status().state.value == "planned"
-        with pytest.raises(ConnectorUnavailableError):
-            connector.read("example")
-        with pytest.raises(ConnectorWriteBlockedError):
-            connector.write("example", {"value": 1})
+    rosiedazzlers = DEFAULT_BUSINESS_CONNECTORS.get("rosiedazzlers")
+    assert rosiedazzlers.descriptor.access_mode.value == "read_only"
+    assert rosiedazzlers.descriptor.writes_require_confirmation is True
+    assert rosiedazzlers.status().state.value == "unconfigured"
+    with pytest.raises(ConnectorConfigurationError):
+        rosiedazzlers.read("bookings")
+    with pytest.raises(ConnectorWriteBlockedError):
+        rosiedazzlers.write("example", {"value": 1})
+
+    yardworkers = DEFAULT_BUSINESS_CONNECTORS.get("yardworkers")
+    assert yardworkers.descriptor.access_mode.value == "read_only"
+    assert yardworkers.descriptor.writes_require_confirmation is True
+    assert yardworkers.status().state.value == "planned"
+    with pytest.raises(ConnectorUnavailableError):
+        yardworkers.read("example")
+    with pytest.raises(ConnectorWriteBlockedError):
+        yardworkers.write("example", {"value": 1})
 
 
 def test_devilndove_connector_reads_bounded_catalogue() -> None:
@@ -121,6 +130,56 @@ def test_devilndove_connector_reads_bounded_catalogue() -> None:
         )
 
 
+def test_rosiedazzlers_connector_reads_bounded_jobs() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.headers["Cookie"] == "rd_staff_session=test-staff-session"
+        assert request.url.path == "/api/detailer/jobs"
+        assert request.url.params["scope"] == "workspace"
+        return httpx.Response(
+            200,
+            json={
+                "ok": True,
+                "jobs": [
+                    {
+                        "id": "booking-42",
+                        "service_date": "2026-10-12",
+                        "start_slot": "AM",
+                        "status": "confirmed",
+                        "job_status": "scheduled",
+                        "current_workflow_stage": "arrival",
+                        "customer_name": "Customer",
+                        "package_code": "complete",
+                        "vehicle_size": "medium",
+                        "assigned_to": "Detailer",
+                        "progress_enabled": True,
+                    }
+                ],
+            },
+        )
+
+    connector = RosieDazzlersReadConnector(
+        Settings(
+            ROSIEDAZZLERS_BASE_URL="https://rosiedazzlers.ca",
+            ROSIEDAZZLERS_TIMEOUT_SECONDS=2,
+        ),
+        credential="test-staff-session",
+        transport=httpx.MockTransport(handler),
+    )
+    assert connector.status().state.value == "configured"
+
+    result = connector.read("jobs.read", limit=500)
+    assert result.resource == "jobs"
+    assert result.next_cursor is None
+    assert result.records[0]["booking_id"] == "booking-42"
+    assert result.records[0]["workflow_stage"] == "arrival"
+    with pytest.raises(ConnectorWriteBlockedError):
+        connector.write(
+            "booking.update",
+            {"booking_id": "booking-42"},
+        )
+
+
 def test_registry_rejects_duplicate_connector_keys() -> None:
     connector = DEFAULT_BUSINESS_CONNECTORS.get("devilndove")
     registry = ConnectorRegistry((connector,))
@@ -146,7 +205,7 @@ def test_authenticated_business_catalogue_is_safe(tmp_path) -> None:
     states = {item["key"]: item["status"]["state"] for item in payload["connectors"]}
     assert states == {
         "devilndove": "unconfigured",
-        "rosiedazzlers": "planned",
+        "rosiedazzlers": "unconfigured",
         "yardworkers": "planned",
     }
     assert "authorization" not in str(payload).lower()
@@ -191,5 +250,26 @@ def test_environment_credential_marks_connector_configured(
         assert payload["status"]["state"] == "configured"
         assert payload["status"]["configured"] is True
         assert "environment-admin-credential" not in str(payload)
+    finally:
+        get_settings.cache_clear()
+
+
+def test_rosiedazzlers_environment_credential_marks_connector_configured(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv(
+        "ROSIEDAZZLERS_STAFF_SESSION_TOKEN",
+        "environment-staff-session",
+    )
+    get_settings.cache_clear()
+    try:
+        client = build_client(tmp_path)
+        response = client.get("/api/v1/business/connectors/rosiedazzlers")
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["status"]["state"] == "configured"
+        assert payload["status"]["configured"] is True
+        assert "environment-staff-session" not in str(payload)
     finally:
         get_settings.cache_clear()
