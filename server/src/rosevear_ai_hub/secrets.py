@@ -62,9 +62,7 @@ SECRET_DEFINITIONS: tuple[SecretDefinition, ...] = (
     SecretDefinition(
         secret_key="yardworkers.access_token",
         display_name="Yard Workers access token",
-        description=(
-            "Supabase user access token used only for Build 039 protected read requests."
-        ),
+        description=("Supabase user access token used only for Build 039 protected read requests."),
         environment_variable="YARDWORKERS_ACCESS_TOKEN",
     ),
     SecretDefinition(
