@@ -18,7 +18,6 @@ $scriptPath = Join-Path $PSScriptRoot "hub-recovery.ps1"
 if (-not (Test-Path $scriptPath)) { throw "Recovery script missing." }
 $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument ('-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "{0}"' -f $scriptPath) -WorkingDirectory $root
 $trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
-$trigger.Repetition = $null
 $settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 4) -StartWhenAvailable
 # Use a separate repeated trigger. It does not replace the existing startup task.
 $daily = New-ScheduledTaskTrigger -Daily -At (Get-Date).Date.AddMinutes(5)
