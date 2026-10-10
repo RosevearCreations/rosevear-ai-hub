@@ -276,3 +276,19 @@ copying mutable landscaping truth into the Hub.
 The current user access token can expire or be revoked. Rotate it by signing in to Yard Workers
 again; Build 039 intentionally does not add a permanent service-role credential or duplicate
 authorization system.
+
+
+## Build 040 narrow confirmed business writes
+
+Business connectors remain read-first. Build 040 adds only two code-owned mutation contracts:
+
+- Devil n Dove `business.devilndove.story_draft.create` calls only
+  `POST /api/admin/product-story-notes` and always creates a Draft / Needs-review record.
+- Yard Workers `business.yardworkers.job_comment.create` calls only
+  `POST /functions/v1/jobs-manage` and always creates a private internal update comment.
+- Rosie Dazzlers remains read-only because its current mutation endpoints are broad save/upsert
+  contracts rather than suitably narrow operations.
+
+Both writes reuse existing backend-only credentials, require an exact Level-2 confirmation, consume
+the approval before the provider request, and never retry automatically. No generic method/path/body
+proxy exists.
