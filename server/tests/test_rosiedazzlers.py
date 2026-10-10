@@ -1,3 +1,4 @@
+import json
 import httpx
 import pytest
 
@@ -32,7 +33,7 @@ def test_read_contracts_are_bounded_normalized_and_cookie_authenticated() -> Non
         )
         if request.url.path == "/api/admin/bookings_search":
             assert request.method == "POST"
-            payload = __import__("json").loads(request.content)
+            payload = json.loads(request.content)
             assert payload == {"limit": 100}
             return httpx.Response(
                 200,
@@ -62,7 +63,7 @@ def test_read_contracts_are_bounded_normalized_and_cookie_authenticated() -> Non
             )
         if request.url.path == "/api/admin/customers_list":
             assert request.method == "POST"
-            payload = __import__("json").loads(request.content)
+            payload = json.loads(request.content)
             assert payload == {"limit": 100}
             return httpx.Response(
                 200,
