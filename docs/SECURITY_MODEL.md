@@ -497,3 +497,24 @@ Because the current credential is an admin session secret, compromise carries th
 Devil n Dove session outside the Hub. Protect the Hub host and encryption key, rotate the credential
 after suspected exposure, and do not copy it into browser storage, logs, screenshots, or source
 control.
+
+
+## Build 038 Rosie Dazzlers business-read boundary
+
+Build 038 reuses Rosie Dazzlers' existing staff-session authority without exposing that session to
+the browser or adding a second business identity system.
+
+- the Hub stores only the opaque `rd_staff_session` token value as a backend secret
+- remote Rosie Dazzlers origins require HTTPS; HTTP is accepted only for loopback testing
+- the browser calls only the authenticated Hub business API
+- the Rosie client accepts exactly four method/path pairs and has no generic request proxy
+- bookings/customers preserve Rosie Dazzlers' existing read-only POST contracts; jobs/inventory use GET
+- response fields are normalized and large/private upstream-only fields are dropped
+- booking reads omit customer email/phone, progress tokens, coordinates, and free-form notes
+- job reads omit trusted-service/arrival coordinates, progress tokens, and notes
+- customer contact information is exposed only through the explicit authenticated customer read
+- connector status is configuration-only and does not probe Rosie Dazzlers
+- inherited business writes remain hard-blocked
+
+The staff session can expire or be revoked. Treat the token as equivalent to an authenticated staff
+browser session, protect the Hub encryption key and host, and rotate the secret after signing in again.
