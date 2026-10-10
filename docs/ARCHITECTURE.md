@@ -453,3 +453,31 @@ Devil n Dove (system of record)
 The Hub stores no replicated Product, Order, or Inventory table in this build. Records are normalized
 in memory and returned to the authenticated caller. The connector does not expose a generic URL,
 method, request body, or provider-response passthrough, and its inherited write path remains blocked.
+
+
+## Build 038 Rosie Dazzlers read adapter
+
+```text
+Web/PWA or Tauri
+    |
+    v
+FastAPI /api/v1/business/connectors/rosiedazzlers/read/{resource}
+    |
+    | resolve backend-only Rosie Dazzlers staff session token
+    v
+RosieDazzlersReadConnector
+    |
+    v
+RosieDazzlersClient exact read allow list
+    |-- POST /api/admin/bookings_search
+    |-- POST /api/admin/customers_list
+    |-- GET  /api/detailer/jobs?scope=workspace
+    |-- GET  /api/admin/catalog_inventory_list
+    |
+    v
+Rosie Dazzlers (system of record)
+```
+
+The two POST calls above are existing query/list contracts, not write operations. Build 038 does not
+introduce a generic HTTP pass-through and does not add a Rosie Dazzlers database or synchronization
+table to the Hub.
