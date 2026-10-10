@@ -355,7 +355,9 @@ class YardWorkersClient:
         job_id: int,
         comment_text: str,
     ) -> dict[str, Any]:
-        """Create one internal-only job update without changing instructions or client visibility."""
+        """Create one internal-only job update without changing instructions or
+        client visibility.
+        """
 
         if isinstance(job_id, bool) or int(job_id) <= 0:
             raise YardWorkersRequestError("Yard Workers job_id must be a positive integer.")
