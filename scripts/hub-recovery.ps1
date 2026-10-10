@@ -76,7 +76,7 @@ if (& $WebProbe) {
     }
     Write-RecoveryLog "Starting web preview on strict port 5173."
     # Strict port prevents silent fallback to 5174 and duplicate previews.
-    Start-Process -FilePath "cmd.exe" -ArgumentList @("/d", "/c", "npm.cmd run web:dev -- --strictPort") -WorkingDirectory $Root -WindowStyle Hidden
+    Start-Process -FilePath "cmd.exe" -ArgumentList @("/d", "/c", "npm.cmd --workspace apps/web run dev -- --host 127.0.0.1 --strictPort") -WorkingDirectory $Root -WindowStyle Hidden
     if (-not (Wait-Healthy $WebProbe $StartupTimeoutSeconds)) {
         Write-RecoveryLog "ERROR Web did not become healthy."
         exit 2
