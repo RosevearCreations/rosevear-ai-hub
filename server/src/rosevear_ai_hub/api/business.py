@@ -155,9 +155,9 @@ def get_business_connector(
 def read_business_connector(
     connector_key: str,
     resource: str,
+    session: Annotated[Session, Depends(get_session)],
     limit: int = Query(default=20, ge=1, le=100),
     cursor: str | None = Query(default=None, max_length=128),
-    session: Annotated[Session, Depends(get_session)],
 ) -> ConnectorReadResponse:
     registry = _registry(session)
     try:
