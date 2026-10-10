@@ -260,9 +260,7 @@ def _capability(
 DEVILNDOVE_DESCRIPTOR = ConnectorDescriptor(
     key="devilndove",
     display_name="Devil n Dove",
-    description=(
-        "Bounded shop reads plus one confirmed review-only product-story draft write."
-    ),
+    description=("Bounded shop reads plus one confirmed review-only product-story draft write."),
     planned_build=37,
     access_mode=ConnectorAccessMode.APPROVED_WRITE,
     capabilities=(
