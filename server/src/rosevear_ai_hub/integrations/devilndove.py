@@ -1,4 +1,4 @@
-"""Read-only Devil n Dove business API adapter for Build 037."""
+"""Bounded Devil n Dove read adapter plus Build 040 confirmed draft write."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ class DevilNDoveUnavailableError(DevilNDoveError):
 
 
 class DevilNDoveRequestError(DevilNDoveError):
-    """Devil n Dove returned an unusable read response."""
+    """Devil n Dove returned an unusable provider response."""
 
 
 @dataclass(frozen=True)
@@ -100,7 +100,7 @@ def _nullable_text(value: Any, *, max_length: int = 240) -> str | None:
 
 
 class DevilNDoveClient:
-    """Server-side GET-only client for existing Devil n Dove admin read contracts."""
+    """Server-side client for bounded Devil n Dove reads and one confirmed draft write."""
 
     def __init__(
         self,
@@ -114,6 +114,14 @@ class DevilNDoveClient:
         self._credential = credential.strip()
         if not self._credential:
             raise DevilNDoveConfigurationError("Devil n Dove admin credential is not configured.")
+        if "\r" in self._credential or "\n" in self._credential:
+            raise DevilNDoveConfigurationError(
+                "Devil n Dove admin credential contains invalid header characters."
+            )
+        if len(self._credential) > 8192:
+            raise DevilNDoveConfigurationError(
+                "Devil n Dove admin credential is unexpectedly long."
+            )
         if timeout_seconds <= 0 or timeout_seconds > 60:
             raise DevilNDoveConfigurationError(
                 "DEVILNDOVE_TIMEOUT_SECONDS must be greater than 0 and at most 60."
@@ -130,7 +138,7 @@ class DevilNDoveClient:
         headers = {
             "Accept": "application/json",
             "Authorization": f"Bearer {self._credential}",
-            "User-Agent": "Rosevear-AI-Hub/0.0.39",
+            "User-Agent": "Rosevear-AI-Hub/0.0.40",
         }
         try:
             with httpx.Client(
@@ -171,6 +179,58 @@ class DevilNDoveClient:
             raise DevilNDoveRequestError("Devil n Dove returned an invalid read response.")
         if payload.get("ok") is False:
             raise DevilNDoveRequestError("Devil n Dove reported that the read request failed.")
+        return payload
+
+    def _post_json(
+        self,
+        path: str,
+        *,
+        body: dict[str, Any],
+    ) -> dict[str, Any]:
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self._credential}",
+            "User-Agent": "Rosevear-AI-Hub/0.0.40",
+        }
+        try:
+            with httpx.Client(
+                base_url=self.base_url,
+                timeout=self.timeout_seconds,
+                transport=self._transport,
+                follow_redirects=False,
+                headers=headers,
+            ) as client:
+                response = client.post(path, json=body)
+        except httpx.TimeoutException as exc:
+            raise DevilNDoveUnavailableError(
+                "Devil n Dove timed out during a confirmed write request."
+            ) from exc
+        except httpx.RequestError as exc:
+            raise DevilNDoveUnavailableError(
+                "Devil n Dove is unavailable for confirmed write access."
+            ) from exc
+
+        if response.status_code in {401, 403}:
+            raise DevilNDoveAuthenticationError(
+                "Devil n Dove rejected the configured admin credential."
+            )
+        if response.status_code in {408, 425, 429, 502, 503, 504}:
+            raise DevilNDoveUnavailableError(
+                "Devil n Dove is temporarily unavailable for confirmed write access."
+            )
+        if response.status_code < 200 or response.status_code >= 300:
+            raise DevilNDoveRequestError(
+                f"Devil n Dove confirmed write failed with HTTP {response.status_code}."
+            )
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            raise DevilNDoveRequestError("Devil n Dove returned invalid JSON.") from exc
+        if not isinstance(payload, dict) or payload.get("ok") is not True:
+            raise DevilNDoveRequestError(
+                "Devil n Dove reported that the confirmed write failed."
+            )
         return payload
 
     def catalogue(
@@ -326,3 +386,70 @@ class DevilNDoveClient:
                 }
             )
         return DevilNDoveReadPage(records=tuple(records))
+
+    def create_story_draft(
+        self,
+        *,
+        product_id: int,
+        heading: str,
+        summary: str,
+        body: str,
+    ) -> dict[str, Any]:
+        """Create one public-story draft that cannot be published by this Hub call."""
+
+        if isinstance(product_id, bool) or int(product_id) <= 0:
+            raise DevilNDoveRequestError("Devil n Dove product_id must be a positive integer.")
+        clean_heading = str(heading or "").strip()
+        clean_summary = str(summary or "").strip()
+        clean_body = str(body or "").strip()
+        if not clean_heading or len(clean_heading) > 180:
+            raise DevilNDoveRequestError(
+                "Devil n Dove story heading must contain 1 to 180 characters."
+            )
+        if not clean_summary or len(clean_summary) > 500:
+            raise DevilNDoveRequestError(
+                "Devil n Dove story summary must contain 1 to 500 characters."
+            )
+        if len(clean_body) > 5000:
+            raise DevilNDoveRequestError(
+                "Devil n Dove story body must be at most 5000 characters."
+            )
+
+        payload = self._post_json(
+            "/api/admin/product-story-notes",
+            body={
+                "action": "save",
+                "product_id": int(product_id),
+                "story_heading": clean_heading,
+                "story_summary": clean_summary,
+                "story_body": clean_body,
+                "process_notes": "",
+                "care_notes": "",
+                "local_pickup_note": "",
+                "display_status": "draft",
+                "story_source": "rosevear_ai_hub",
+                "privacy_status": "needs_review",
+                "review_notes": (
+                    "Created from Rosevear AI Hub. Review privacy and wording before public use."
+                ),
+                "internal_notes": "",
+            },
+        )
+        note = payload.get("note")
+        if not isinstance(note, dict):
+            raise DevilNDoveRequestError(
+                "Devil n Dove returned an invalid story-draft response."
+            )
+        note_id = _integer(note.get("product_story_public_note_id"), minimum=0)
+        returned_product_id = _integer(note.get("product_id"), minimum=0)
+        if returned_product_id != int(product_id) or note_id <= 0:
+            raise DevilNDoveRequestError(
+                "Devil n Dove returned an invalid story-draft identity."
+            )
+        return {
+            "accepted": True,
+            "product_id": returned_product_id,
+            "note_id": note_id,
+            "display_status": "draft",
+            "privacy_status": "needs_review",
+        }
