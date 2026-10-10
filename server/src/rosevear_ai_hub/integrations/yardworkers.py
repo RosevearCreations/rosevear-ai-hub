@@ -421,23 +421,17 @@ class YardWorkersClient:
         except ValueError as exc:
             raise YardWorkersRequestError("Yard Workers returned invalid JSON.") from exc
         if not isinstance(payload, dict) or payload.get("ok") is not True:
-            raise YardWorkersRequestError(
-                "Yard Workers reported that the confirmed write failed."
-            )
+            raise YardWorkersRequestError("Yard Workers reported that the confirmed write failed.")
         record = payload.get("record")
         if not isinstance(record, dict):
-            raise YardWorkersRequestError(
-                "Yard Workers returned an invalid job-comment response."
-            )
+            raise YardWorkersRequestError("Yard Workers returned an invalid job-comment response.")
         try:
             returned_job_id = int(record.get("job_id") or 0)
         except (TypeError, ValueError):
             returned_job_id = 0
         record_id = str(record.get("id") or "").strip()
         if returned_job_id != int(job_id) or not record_id:
-            raise YardWorkersRequestError(
-                "Yard Workers returned an invalid job-comment identity."
-            )
+            raise YardWorkersRequestError("Yard Workers returned an invalid job-comment identity.")
         return {
             "accepted": True,
             "comment_id": record_id,
@@ -446,4 +440,3 @@ class YardWorkersClient:
             "visible_to_client": False,
             "is_special_instruction": False,
         }
-
