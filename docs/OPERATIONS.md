@@ -514,3 +514,31 @@ Safe defaults:
 
 Rollback is schema-neutral: clear the Devil n Dove credential and deploy Build 036. No business
 record is deleted or changed because Build 037 never writes to Devil n Dove.
+
+
+## Build 038 Rosie Dazzlers read connector operations
+
+Build 038 requires no database migration, paid dependency, or Rosie Dazzlers repository deployment.
+The Hub can run with this connector unconfigured.
+
+Setup:
+
+1. Keep `ROSIEDAZZLERS_BASE_URL=https://rosiedazzlers.ca` unless testing against a deliberate local loopback origin.
+2. Sign in to Rosie Dazzlers with a staff account that can read the required operations data.
+3. In the browser's developer tools, inspect the Rosie Dazzlers site cookies and copy only the value of `rd_staff_session`; do not copy the cookie name or other cookies.
+4. Prefer **Secrets → Rosie Dazzlers staff session token** so Build 020 encrypts the token at rest. Environment-managed deployments may use `ROSIEDAZZLERS_STAFF_SESSION_TOKEN`.
+5. Open **Business** and confirm Rosie Dazzlers reports `configured`.
+6. Use **Read Bookings**, **Read Customers**, **Read Jobs**, and **Read Inventory** for bounded explicit reads.
+7. If the source returns 401/403, sign in to Rosie Dazzlers again and rotate the stored token.
+
+Defaults:
+
+- `ROSIEDAZZLERS_BASE_URL=https://rosiedazzlers.ca`
+- `ROSIEDAZZLERS_TIMEOUT_SECONDS=8`
+- Hub booking cap: 100
+- Hub customer cap: 100
+- Hub job cap: 80
+- Hub inventory cap: 100
+
+Rollback is schema-neutral: clear the Rosie Dazzlers secret and deploy Build 037. No Rosie Dazzlers
+record is changed because Build 038 exposes only read contracts through the Hub.
