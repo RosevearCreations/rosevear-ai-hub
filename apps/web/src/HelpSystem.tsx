@@ -124,20 +124,22 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   Business: {
-    purpose: "Shows the common read-first connector boundary for the Rosevear businesses before any live business system is contacted.",
+    purpose:
+      "Provides the read-first business connector boundary, including bounded live Devil n Dove reads introduced in Build 037.",
     tasks: [
-      "Review each registered connector and the resources it will expose.",
-      "Treat Planned as expected until that business's dedicated read build is installed.",
-      "Use the capability list to confirm what later connectors may read before enabling credentials or network access.",
+      "Store the Devil n Dove admin session credential under Secrets → Devil n Dove admin token, or supply DEVILNDOVE_ADMIN_TOKEN to the backend.",
+      "Open Business and use Read Catalogue, Read Orders, or Read Inventory for a bounded live preview.",
+      "Treat Rosie Dazzlers and Yard Workers as Planned until Builds 038 and 039.",
     ],
     safety: [
-      "Build 036 makes no external business-system calls and stores no new credentials.",
-      "Business connectors are read-only by default; writes stay blocked until a later build defines a narrow confirmed action.",
-      "Connector errors are normalized before they reach the browser so tokens, cookies, raw responses, and internal exceptions are not exposed.",
+      "Devil n Dove access is GET-only in Build 037; the inherited write method remains hard-blocked.",
+      "The bearer-equivalent Devil n Dove admin credential stays server-side and is never returned to the browser.",
+      "Remote Devil n Dove origins require HTTPS, read sizes are capped, and upstream responses are normalized before display.",
     ],
     troubleshooting: [
-      "A Planned connector is not an outage; install its dedicated Build 037, 038, or 039 implementation first.",
-      "After a future connector is configured, use its normalized status and Audit evidence rather than exposing raw provider responses.",
+      "Unconfigured: add or rotate the Devil n Dove admin credential in Secrets; the existing admin session can expire.",
+      "Authentication failed: sign in to Devil n Dove again and replace the expired or revoked credential.",
+      "Unavailable: verify DEVILNDOVE_BASE_URL, internet reachability, and Devil n Dove service health before retrying.",
     ],
   },
   System: {
