@@ -66,9 +66,7 @@ def test_registry_exposes_normalized_builtin_contracts(tmp_path) -> None:
     assert light["input_schema"]["required"] == ["entity_id", "state"]
 
     devilndove_write = next(
-        item
-        for item in tools
-        if item["tool_key"] == "business.devilndove.story_draft.create"
+        item for item in tools if item["tool_key"] == "business.devilndove.story_draft.create"
     )
     assert devilndove_write["risk_level"] == 2
     assert devilndove_write["confirmation_policy"] == "required"
@@ -81,9 +79,7 @@ def test_registry_exposes_normalized_builtin_contracts(tmp_path) -> None:
     ]
 
     yardworkers_write = next(
-        item
-        for item in tools
-        if item["tool_key"] == "business.yardworkers.job_comment.create"
+        item for item in tools if item["tool_key"] == "business.yardworkers.job_comment.create"
     )
     assert yardworkers_write["risk_level"] == 2
     assert yardworkers_write["confirmation_policy"] == "required"
