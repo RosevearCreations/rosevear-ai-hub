@@ -284,7 +284,10 @@ DEVILNDOVE_DESCRIPTOR = ConnectorDescriptor(
         _capability(
             "story_draft.write",
             "Create story draft",
-            "Create one review-only product-story draft; publishing is never allowed by this write.",
+            (
+                "Create one review-only product-story draft; publishing is never "
+                "allowed by this write."
+            ),
             access=ConnectorAccessMode.APPROVED_WRITE,
         ),
     ),
@@ -353,7 +356,10 @@ YARDWORKERS_DESCRIPTOR = ConnectorDescriptor(
         _capability(
             "job_comment.write",
             "Create private job comment",
-            "Create one internal update comment that is never client-visible or a special instruction.",
+            (
+                "Create one internal update comment that is never client-visible "
+                "or a special instruction."
+            ),
             access=ConnectorAccessMode.APPROVED_WRITE,
         ),
     ),
