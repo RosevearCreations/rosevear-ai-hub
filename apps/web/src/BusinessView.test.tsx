@@ -244,4 +244,65 @@ describe("BusinessView", () => {
       });
     },
   );
+
+  test(
+    "loads a bounded Rosie Dazzlers jobs preview",
+    async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (input: RequestInfo | URL) => {
+          const url = String(input);
+          if (url.includes("/rosiedazzlers/read/jobs")) {
+            return {
+              ok: true,
+              json: async () => ({
+                connector_key: "rosiedazzlers",
+                resource: "jobs",
+                records: [
+                  {
+                    booking_id: "booking-42",
+                    customer_name: "Customer One",
+                    job_status: "scheduled",
+                  },
+                ],
+                next_cursor: null,
+              }),
+            };
+          }
+          const payload = connectorPayload(false);
+          payload.connectors[1].status = {
+            state: "configured",
+            configured: true,
+            available: false,
+            message: "Rosie Dazzlers read access is configured.",
+            retryable: false,
+          };
+          return {
+            ok: true,
+            json: async () => payload,
+          };
+        }),
+      );
+
+      render(<BusinessView />);
+
+      const button = await screen.findByRole(
+        "button",
+        { name: "Read Jobs" },
+      );
+      expect(button).toBeEnabled();
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("heading", {
+            name: /Rosie Dazzlers Jobs — 1 record/,
+          }),
+        ).toBeInTheDocument();
+        expect(screen.getByText(/booking-42/)).toBeInTheDocument();
+        expect(screen.getByText(/Customer One/)).toBeInTheDocument();
+      });
+    },
+  );
+
 });
