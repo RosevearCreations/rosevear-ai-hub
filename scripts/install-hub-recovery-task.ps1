@@ -21,8 +21,15 @@ $trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
 $settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 4) -StartWhenAvailable
 # Use a separate repeated trigger. It does not replace the existing startup task.
 $daily = New-ScheduledTaskTrigger -Daily -At (Get-Date).Date.AddMinutes(5)
-$daily.Repetition.Interval = "PT5M"
-$daily.Repetition.Duration = "P1D"
+# The ScheduledTasks CIM trigger does not expose a writable Repetition property
+# on some Windows PowerShell versions. Construct the supported CIM repetition
+# settings and attach them using the underlying task scheduler XML schema.
+$repetition = New-CimInstance -ClientOnly -Namespace root/Microsoft/Windows/TaskScheduler -ClassName MSFT_TaskRepetitionPattern -Property @{
+    Interval = "PT5M"
+    Duration = "P1D"
+    StopAtDurationEnd = $false
+}
+$daily.CimInstanceProperties["Repetition"].Value = $repetition
 $principal = New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Highest
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger @($trigger, $daily) -Settings $settings -Principal $principal | Out-Null
 Write-Host "Installed five-minute recovery task. Existing startup task unchanged."
