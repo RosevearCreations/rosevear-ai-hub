@@ -396,4 +396,3 @@ def write_business_connector(
         confirmation_id=payload.confirmation_id,
         result=write_result.result,
     )
-
