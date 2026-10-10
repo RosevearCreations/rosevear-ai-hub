@@ -83,8 +83,18 @@ Clear the credential and deploy Build 036. No schema downgrade or business-data 
 
 ## Release evidence
 
-Pending dev CI, protected-main promotion, main Production CI, release-evidence closeout, and final
-dev synchronization.
+Build 037 passed the complete feature-promotion chain:
+
+- dev integration: run 38018166942 — GREEN across docs, backend, web, and desktop-windows
+- protected-main promotion gate: run 38018435266 — GREEN across all four lanes
+- promotion PR: #66
+- main merge: `e32ba9730b81c835a1ee6d461863e508715e30f2`
+- main Production: run 38018791124 — GREEN across all four lanes
+- backend Production tests: 158 passed, 9 warnings
+- Windows Production executable build and artifact upload: successful
+
+This release-evidence closeout is promoted through protected main and then synchronized back to dev,
+leaving both long-lived branches on the same final Build 037 release record.
 
 ## Next build
 
