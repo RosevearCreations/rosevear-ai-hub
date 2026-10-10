@@ -125,21 +125,21 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
   },
   Business: {
     purpose:
-      "Provides the read-first business connector boundary, including bounded live Devil n Dove reads introduced in Build 037.",
+      "Provides the read-first business connector boundary, including bounded live Devil n Dove and Rosie Dazzlers reads through Builds 037–038.",
     tasks: [
       "Store the Devil n Dove admin session credential under Secrets → Devil n Dove admin token, or supply DEVILNDOVE_ADMIN_TOKEN to the backend.",
-      "Open Business and use Read Catalogue, Read Orders, or Read Inventory for a bounded live preview.",
-      "Treat Rosie Dazzlers and Yard Workers as Planned until Builds 038 and 039.",
+      "Store the Rosie Dazzlers opaque staff-session token under Secrets → Rosie Dazzlers staff session token, or supply ROSIEDAZZLERS_STAFF_SESSION_TOKEN to the backend.",
+      "Open Business and use the connector-specific Read buttons for a bounded live preview; Yard Workers remains planned for Build 039.",
     ],
     safety: [
-      "Devil n Dove access is GET-only in Build 037; the inherited write method remains hard-blocked.",
-      "The bearer-equivalent Devil n Dove admin credential stays server-side and is never returned to the browser.",
-      "Remote Devil n Dove origins require HTTPS, read sizes are capped, and upstream responses are normalized before display.",
+      "All business writes remain hard-blocked by the shared connector contract.",
+      "Devil n Dove remains GET-only. Rosie Dazzlers uses an exact four-endpoint read allow list because its existing bookings/customers list contracts are read-only POST endpoints while jobs/inventory are GET.",
+      "Both business credentials stay server-side, remote origins require HTTPS, read sizes are capped, and upstream responses are normalized before display.",
     ],
     troubleshooting: [
-      "Unconfigured: add or rotate the Devil n Dove admin credential in Secrets; the existing admin session can expire.",
-      "Authentication failed: sign in to Devil n Dove again and replace the expired or revoked credential.",
-      "Unavailable: verify DEVILNDOVE_BASE_URL, internet reachability, and Devil n Dove service health before retrying.",
+      "Unconfigured: add or rotate the relevant business credential in Secrets; both current session-style credentials can expire.",
+      "Rosie Dazzlers authentication failed: sign in to Rosie Dazzlers again, copy the current rd_staff_session token value, and replace the stored Hub secret.",
+      "Unavailable: verify DEVILNDOVE_BASE_URL or ROSIEDAZZLERS_BASE_URL, internet reachability, and the source application's service health before retrying.",
     ],
   },
   System: {

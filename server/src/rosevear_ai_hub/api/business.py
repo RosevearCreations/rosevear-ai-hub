@@ -67,16 +67,25 @@ class ConnectorReadResponse(BaseModel):
 def _registry(session: Session) -> ConnectorRegistry:
     settings = get_settings()
     try:
-        credential = resolve_secret(
+        devilndove_credential = resolve_secret(
             session,
             "devilndove.admin_token",
             settings,
         )
     except RuntimeError:
-        credential = None
+        devilndove_credential = None
+    try:
+        rosiedazzlers_credential = resolve_secret(
+            session,
+            "rosiedazzlers.staff_session_token",
+            settings,
+        )
+    except RuntimeError:
+        rosiedazzlers_credential = None
     return build_business_connector_registry(
         settings=settings,
-        devilndove_credential=credential,
+        devilndove_credential=devilndove_credential,
+        rosiedazzlers_credential=rosiedazzlers_credential,
     )
 
 

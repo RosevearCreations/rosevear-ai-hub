@@ -16,6 +16,14 @@ from rosevear_ai_hub.integrations.devilndove import (
     DevilNDoveUnavailableError,
     validate_devilndove_base_url,
 )
+from rosevear_ai_hub.integrations.rosiedazzlers import (
+    RosieDazzlersAuthenticationError,
+    RosieDazzlersClient,
+    RosieDazzlersConfigurationError,
+    RosieDazzlersRequestError,
+    RosieDazzlersUnavailableError,
+    validate_rosiedazzlers_base_url,
+)
 
 
 class ConnectorAccessMode(StrEnum):
@@ -247,6 +255,36 @@ DEVILNDOVE_DESCRIPTOR = ConnectorDescriptor(
 )
 
 
+ROSIEDAZZLERS_DESCRIPTOR = ConnectorDescriptor(
+    key="rosiedazzlers",
+    display_name="Rosie Dazzlers",
+    description=("Read-only view of detailing bookings, customers, jobs, and inventory."),
+    planned_build=38,
+    capabilities=(
+        _capability(
+            "bookings.read",
+            "Bookings",
+            "Read bounded booking and appointment summaries.",
+        ),
+        _capability(
+            "customers.read",
+            "Customers",
+            "Read bounded customer profile and history summaries.",
+        ),
+        _capability(
+            "jobs.read",
+            "Jobs",
+            "Read bounded active detailing job workspace data.",
+        ),
+        _capability(
+            "inventory.read",
+            "Inventory",
+            "Read bounded gear and consumable state.",
+        ),
+    ),
+)
+
+
 class DevilNDoveReadConnector(BusinessConnector):
     """Build 037 adapter over existing Devil n Dove GET-only contracts."""
 
@@ -365,11 +403,132 @@ class DevilNDoveReadConnector(BusinessConnector):
         )
 
 
+class RosieDazzlersReadConnector(BusinessConnector):
+    """Build 038 adapter over existing Rosie Dazzlers read-only contracts."""
+
+    def __init__(
+        self,
+        settings: Settings | None = None,
+        *,
+        credential: str | None = None,
+        transport: Any | None = None,
+    ) -> None:
+        self.settings = settings or get_settings()
+        self._credential = (credential or "").strip()
+        self._transport = transport
+
+    @property
+    def descriptor(self) -> ConnectorDescriptor:
+        return ROSIEDAZZLERS_DESCRIPTOR
+
+    def status(self) -> ConnectorStatus:
+        try:
+            validate_rosiedazzlers_base_url(self.settings.rosiedazzlers_base_url)
+        except RosieDazzlersConfigurationError as exc:
+            return ConnectorStatus(
+                state=ConnectorState.ERROR,
+                configured=False,
+                available=False,
+                message=str(exc),
+                retryable=False,
+            )
+        if not self._credential:
+            return ConnectorStatus(
+                state=ConnectorState.UNCONFIGURED,
+                configured=False,
+                available=False,
+                message=(
+                    "Rosie Dazzlers read access is ready but no staff session token is configured."
+                ),
+                retryable=False,
+            )
+        return ConnectorStatus(
+            state=ConnectorState.CONFIGURED,
+            configured=True,
+            available=False,
+            message=(
+                "Rosie Dazzlers read access is configured. Availability is "
+                "checked only when a bounded read is requested."
+            ),
+            retryable=False,
+        )
+
+    def _client(self) -> RosieDazzlersClient:
+        try:
+            return RosieDazzlersClient(
+                self.settings.rosiedazzlers_base_url,
+                self._credential,
+                timeout_seconds=self.settings.rosiedazzlers_timeout_seconds,
+                transport=self._transport,
+            )
+        except RosieDazzlersConfigurationError as exc:
+            raise ConnectorConfigurationError(str(exc)) from exc
+
+    def read(
+        self,
+        resource: str,
+        *,
+        cursor: str | None = None,
+        limit: int = 100,
+    ) -> ConnectorReadResult:
+        if not self._credential:
+            raise ConnectorConfigurationError(
+                "Rosie Dazzlers staff session token is not configured."
+            )
+        if cursor:
+            raise ConnectorResourceNotFoundError(
+                "Rosie Dazzlers resources do not expose a cursor in Build 038."
+            )
+        normalized = resource.strip().lower()
+        aliases = {
+            "bookings": "bookings",
+            "bookings.read": "bookings",
+            "customers": "customers",
+            "customers.read": "customers",
+            "jobs": "jobs",
+            "jobs.read": "jobs",
+            "inventory": "inventory",
+            "inventory.read": "inventory",
+        }
+        canonical = aliases.get(normalized)
+        if canonical is None:
+            raise ConnectorResourceNotFoundError(
+                f"Rosie Dazzlers does not expose the read resource {resource!r}."
+            )
+
+        client = self._client()
+        try:
+            if canonical == "bookings":
+                page = client.bookings(limit=min(limit, 100))
+            elif canonical == "customers":
+                page = client.customers(limit=min(limit, 100))
+            elif canonical == "jobs":
+                page = client.jobs(limit=min(limit, 80))
+            else:
+                page = client.inventory(limit=min(limit, 100))
+        except RosieDazzlersAuthenticationError as exc:
+            raise ConnectorAuthenticationError(str(exc)) from exc
+        except RosieDazzlersUnavailableError as exc:
+            raise ConnectorUnavailableError(str(exc)) from exc
+        except RosieDazzlersConfigurationError as exc:
+            raise ConnectorConfigurationError(str(exc)) from exc
+        except RosieDazzlersRequestError as exc:
+            raise ConnectorError(str(exc)) from exc
+
+        return ConnectorReadResult(
+            resource=canonical,
+            records=page.records,
+            next_cursor=page.next_cursor,
+        )
+
+
 def build_business_connector_registry(
     *,
     settings: Settings | None = None,
     devilndove_credential: str | None = None,
     devilndove_transport: Any | None = None,
+    rosiedazzlers_credential: str | None = None,
+    rosiedazzlers_transport: Any | None = None,
 ) -> ConnectorRegistry:
     """Build the runtime registry with credentials injected server-side."""
 
@@ -381,37 +540,10 @@ def build_business_connector_registry(
                 credential=devilndove_credential,
                 transport=devilndove_transport,
             ),
-            PlannedReadConnector(
-                ConnectorDescriptor(
-                    key="rosiedazzlers",
-                    display_name="Rosie Dazzlers",
-                    description=(
-                        "Read-first view of detailing customers, bookings, jobs, and inventory."
-                    ),
-                    planned_build=38,
-                    capabilities=(
-                        _capability(
-                            "bookings.read",
-                            "Bookings",
-                            "Read booking and appointment data.",
-                        ),
-                        _capability(
-                            "customers.read",
-                            "Customers",
-                            "Read customer profile summaries.",
-                        ),
-                        _capability(
-                            "jobs.read",
-                            "Jobs",
-                            "Read detailing job and service history.",
-                        ),
-                        _capability(
-                            "inventory.read",
-                            "Inventory",
-                            "Read gear and consumable state.",
-                        ),
-                    ),
-                )
+            RosieDazzlersReadConnector(
+                settings,
+                credential=rosiedazzlers_credential,
+                transport=rosiedazzlers_transport,
             ),
             PlannedReadConnector(
                 ConnectorDescriptor(

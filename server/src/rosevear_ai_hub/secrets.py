@@ -51,6 +51,14 @@ SECRET_DEFINITIONS: tuple[SecretDefinition, ...] = (
         ),
         environment_variable="DEVILNDOVE_ADMIN_TOKEN",
     ),
+    SecretDefinition(
+        secret_key="rosiedazzlers.staff_session_token",
+        display_name="Rosie Dazzlers staff session token",
+        description=(
+            "Opaque Rosie Dazzlers staff-session token used only for Build 038 read requests."
+        ),
+        environment_variable="ROSIEDAZZLERS_STAFF_SESSION_TOKEN",
+    ),
 )
 
 _DEFINITIONS_BY_KEY = {item.secret_key: item for item in SECRET_DEFINITIONS}
@@ -113,6 +121,7 @@ def environment_secret(
         "HOME_ASSISTANT_TOKEN": settings.home_assistant_token,
         "MQTT_PASSWORD": settings.mqtt_password,
         "DEVILNDOVE_ADMIN_TOKEN": settings.devilndove_admin_token,
+        "ROSIEDAZZLERS_STAFF_SESSION_TOKEN": (settings.rosiedazzlers_staff_session_token),
     }.get(definition.environment_variable)
     return configured.get_secret_value() if configured else None
 

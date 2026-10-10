@@ -105,11 +105,12 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 035 — Camera Event Automations**
 - **Build 036 — Connector Framework**
 - **Build 037 — Devil n Dove Read Connector**
+- **Build 038 — Rosie Dazzlers Read Connector**
 
 ## Next build
 
-**Build 038 — Rosie Dazzlers Read Connector**
+**Build 039 — Yard Workers Read Connector**
 
-Build 037 adds GET-only, bounded Devil n Dove catalogue, order, and inventory reads through the
-common business connector framework. Devil n Dove remains the source of truth and all business
-writes remain blocked.
+Build 038 adds bounded Rosie Dazzlers booking, customer, job, and inventory reads through the common
+business connector framework. The Hub reuses Rosie Dazzlers' existing staff-session authority and
+existing read-only application contracts; all business writes remain blocked.

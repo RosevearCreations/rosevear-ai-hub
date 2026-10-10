@@ -72,13 +72,38 @@ function connectorPayload(configured = false) {
         planned_build: 38,
         access_mode: "read_only",
         writes_require_confirmation: true,
-        capabilities: [],
+        capabilities: [
+          {
+            key: "bookings.read",
+            label: "Bookings",
+            description: "Read bookings.",
+            access: "read_only",
+          },
+          {
+            key: "customers.read",
+            label: "Customers",
+            description: "Read customers.",
+            access: "read_only",
+          },
+          {
+            key: "jobs.read",
+            label: "Jobs",
+            description: "Read jobs.",
+            access: "read_only",
+          },
+          {
+            key: "inventory.read",
+            label: "Inventory",
+            description: "Read inventory.",
+            access: "read_only",
+          },
+        ],
         status: {
-          state: "planned",
+          state: "unconfigured",
           configured: false,
           available: false,
           message:
-            "Rosie Dazzlers read connector is reserved for Build 038.",
+            "Rosie Dazzlers read access is ready but no staff session token is configured.",
           retryable: false,
         },
       },
@@ -105,7 +130,7 @@ function connectorPayload(configured = false) {
 
 describe("BusinessView", () => {
   test(
-    "shows Build 037 with Devil n Dove awaiting credentials",
+    "shows Build 038 with live connectors awaiting credentials",
     async () => {
       vi.stubGlobal(
         "fetch",
@@ -146,6 +171,16 @@ describe("BusinessView", () => {
         expect(
           screen.getByText(
             /Configure the Devil n Dove admin credential in Secrets/i,
+          ),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", {
+            name: "Read Bookings",
+          }),
+        ).toBeDisabled();
+        expect(
+          screen.getByText(
+            /Configure the Rosie Dazzlers staff session token in Secrets/i,
           ),
         ).toBeInTheDocument();
       });
@@ -203,10 +238,71 @@ describe("BusinessView", () => {
         ).toBeInTheDocument();
         expect(
           screen.getByText(
-            /More catalogue records are available/,
+            /More records are available for this resource/,
           ),
         ).toBeInTheDocument();
       });
     },
   );
+
+  test(
+    "loads a bounded Rosie Dazzlers jobs preview",
+    async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (input: RequestInfo | URL) => {
+          const url = String(input);
+          if (url.includes("/rosiedazzlers/read/jobs")) {
+            return {
+              ok: true,
+              json: async () => ({
+                connector_key: "rosiedazzlers",
+                resource: "jobs",
+                records: [
+                  {
+                    booking_id: "booking-42",
+                    customer_name: "Customer One",
+                    job_status: "scheduled",
+                  },
+                ],
+                next_cursor: null,
+              }),
+            };
+          }
+          const payload = connectorPayload(false);
+          payload.connectors[1].status = {
+            state: "configured",
+            configured: true,
+            available: false,
+            message: "Rosie Dazzlers read access is configured.",
+            retryable: false,
+          };
+          return {
+            ok: true,
+            json: async () => payload,
+          };
+        }),
+      );
+
+      render(<BusinessView />);
+
+      const button = await screen.findByRole(
+        "button",
+        { name: "Read Jobs" },
+      );
+      expect(button).toBeEnabled();
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("heading", {
+            name: /Rosie Dazzlers Jobs — 1 record/,
+          }),
+        ).toBeInTheDocument();
+        expect(screen.getByText(/booking-42/)).toBeInTheDocument();
+        expect(screen.getByText(/Customer One/)).toBeInTheDocument();
+      });
+    },
+  );
+
 });

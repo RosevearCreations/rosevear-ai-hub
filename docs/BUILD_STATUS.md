@@ -41,6 +41,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 035 | Camera Event Automations | COMPLETE | main via PR #59 |
 | 036 | Connector Framework | COMPLETE | main via PR #63 |
 | 037 | Devil n Dove Read Connector | COMPLETE | main via PR #66 |
+| 038 | Rosie Dazzlers Read Connector | ACTIVE | dev feature branch |
 
 ## Build 016 acceptance checklist
 
@@ -1012,6 +1013,45 @@ four lanes; the backend reported 158 passed tests with 9 warnings. This protecte
 release-evidence closeout is followed by synchronization back to dev so both branches carry the
 final release record.
 
+## Build 038 acceptance checklist
+
+- [x] concrete Rosie Dazzlers implementation of the Build 036 connector contract
+- [x] remote HTTPS enforcement with loopback-only HTTP exception
+- [x] existing opaque Rosie Dazzlers `rd_staff_session` authentication reused
+- [x] Rosie Dazzlers credential added to Build 020 secret definitions
+- [x] environment-backed `ROSIEDAZZLERS_STAFF_SESSION_TOKEN` supported
+- [x] configurable `ROSIEDAZZLERS_BASE_URL` and bounded timeout
+- [x] exact four-endpoint read allow list; no arbitrary path or method passthrough
+- [x] booking reads capped at 100 through existing read-only bookings search contract
+- [x] customer reads capped at 100 through existing read-only customer list contract
+- [x] job reads capped at 80 through existing detailer workspace contract
+- [x] inventory reads capped at 100 through existing inventory list contract
+- [x] normalized/privacy-minimized upstream records
+- [x] connector status does not contact Rosie Dazzlers
+- [x] authenticated Hub read endpoint reused for Rosie Dazzlers resources
+- [x] Business UI live read controls and bounded preview
+- [x] contextual circled-i Business help updated
+- [x] backend adapter/framework/API tests
+- [x] web read-preview tests
+- [x] backend and desktop version 0.0.38
+- [x] no database migration required
+- [x] no new paid dependency or Rosie Dazzlers repository change
+- [x] business writes remain blocked
+- [ ] final Build 038 dev CI green
+- [ ] promoted to main
+- [ ] protected-main promotion gate green
+- [ ] final Build 038 main Production CI green
+- [ ] release-evidence closeout complete through protected-main closeout
+- [ ] dev synchronized with final main closeout target after closeout promotion
+
+## Build 038 operator setup
+
+Build 038 can deploy while unconfigured. Live reads require a current Rosie Dazzlers staff session
+token stored as **Secrets → Rosie Dazzlers staff session token** or
+`ROSIEDAZZLERS_STAFF_SESSION_TOKEN`. The token is the value of the Rosie Dazzlers
+`rd_staff_session` cookie, can expire or be revoked, and never enters browser state. The default
+origin is `https://rosiedazzlers.ca`; no Rosie Dazzlers application change is required.
+
 ## Next build
 
-**Build 038 — Rosie Dazzlers Read Connector**
+**Build 039 — Yard Workers Read Connector**
