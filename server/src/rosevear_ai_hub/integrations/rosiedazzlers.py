@@ -83,9 +83,7 @@ def validate_rosiedazzlers_base_url(value: str) -> str:
     try:
         port = parsed.port
     except ValueError as exc:
-        raise RosieDazzlersConfigurationError(
-            "ROSIEDAZZLERS_BASE_URL contains an invalid port."
-        ) from exc
+        raise RosieDazzlersConfigurationError("ROSIEDAZZLERS_BASE_URL contains an invalid port.") from exc
     if port is not None and not 1 <= port <= 65535:
         raise RosieDazzlersConfigurationError(
             "ROSIEDAZZLERS_BASE_URL contains an invalid port."
@@ -218,17 +216,11 @@ class RosieDazzlersClient:
         try:
             payload = response.json()
         except ValueError as exc:
-            raise RosieDazzlersRequestError(
-                "Rosie Dazzlers returned invalid JSON."
-            ) from exc
+            raise RosieDazzlersRequestError("Rosie Dazzlers returned invalid JSON.") from exc
         if not isinstance(payload, dict):
-            raise RosieDazzlersRequestError(
-                "Rosie Dazzlers returned an invalid read response."
-            )
+            raise RosieDazzlersRequestError("Rosie Dazzlers returned an invalid read response.")
         if payload.get("ok") is False:
-            raise RosieDazzlersRequestError(
-                "Rosie Dazzlers reported that the read request failed."
-            )
+            raise RosieDazzlersRequestError("Rosie Dazzlers reported that the read request failed.")
         return payload
 
     def bookings(self, *, limit: int = 100) -> RosieDazzlersReadPage:
@@ -242,9 +234,7 @@ class RosieDazzlersClient:
         )
         raw_rows = payload.get("bookings")
         if not isinstance(raw_rows, list):
-            raise RosieDazzlersRequestError(
-                "Rosie Dazzlers returned an invalid bookings response."
-            )
+            raise RosieDazzlersRequestError("Rosie Dazzlers returned an invalid bookings response.")
 
         records: list[dict[str, Any]] = []
         for raw in raw_rows[:bounded_limit]:
@@ -299,9 +289,7 @@ class RosieDazzlersClient:
                 {
                     "customer_id": customer_id or None,
                     "customer_name": customer_name,
-                    "customer_email": _nullable_text(
-                        raw.get("email") or raw.get("customer_email")
-                    ),
+                    "customer_email": _nullable_text(raw.get("email") or raw.get("customer_email")),
                     "customer_phone": _nullable_text(
                         raw.get("phone") or raw.get("customer_phone"),
                         max_length=64,
@@ -329,9 +317,7 @@ class RosieDazzlersClient:
         )
         raw_rows = payload.get("jobs")
         if not isinstance(raw_rows, list):
-            raise RosieDazzlersRequestError(
-                "Rosie Dazzlers returned an invalid jobs response."
-            )
+            raise RosieDazzlersRequestError("Rosie Dazzlers returned an invalid jobs response.")
 
         records: list[dict[str, Any]] = []
         for raw in raw_rows[:bounded_limit]:
