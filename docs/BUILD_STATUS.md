@@ -41,7 +41,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 035 | Camera Event Automations | COMPLETE | main via PR #59 |
 | 036 | Connector Framework | COMPLETE | main via PR #63 |
 | 037 | Devil n Dove Read Connector | COMPLETE | main via PR #66 |
-| 038 | Rosie Dazzlers Read Connector | ACTIVE | dev feature branch |
+| 038 | Rosie Dazzlers Read Connector | COMPLETE | main via PR #69 |
 
 ## Build 016 acceptance checklist
 
@@ -1037,12 +1037,12 @@ final release record.
 - [x] no database migration required
 - [x] no new paid dependency or Rosie Dazzlers repository change
 - [x] business writes remain blocked
-- [ ] final Build 038 dev CI green
-- [ ] promoted to main
-- [ ] protected-main promotion gate green
-- [ ] final Build 038 main Production CI green
-- [ ] release-evidence closeout complete through protected-main closeout
-- [ ] dev synchronized with final main closeout target after closeout promotion
+- [x] final Build 038 dev CI green — run 38054235678
+- [x] promoted to main — PR #69 / merge d562ca796fa05a88853977b46fa22553dba3c573
+- [x] protected-main promotion gate green — run 38054594711
+- [x] final Build 038 main Production CI green — run 38055745019
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
 
 ## Build 038 operator setup
 
@@ -1051,6 +1051,14 @@ token stored as **Secrets → Rosie Dazzlers staff session token** or
 `ROSIEDAZZLERS_STAFF_SESSION_TOKEN`. The token is the value of the Rosie Dazzlers
 `rd_staff_session` cookie, can expire or be revoked, and never enters browser state. The default
 origin is `https://rosiedazzlers.ca`; no Rosie Dazzlers application change is required.
+
+Build 038 feature promotion is complete. The exact GREEN dev tree
+`c91aac71776723e6628a8378b696f584a2215316` passed dev run 38054235678 and protected-main
+promotion gate run 38054594711. It was promoted through PR #69 to main merge
+`d562ca796fa05a88853977b46fa22553dba3c573`. Main Production run 38055745019 passed all
+four lanes; the backend reported 164 passed tests with 9 warnings and the Windows executable
+artifact was uploaded successfully. This protected-main release-evidence closeout is followed by
+synchronization back to dev so both branches carry the final release record.
 
 ## Next build
 
