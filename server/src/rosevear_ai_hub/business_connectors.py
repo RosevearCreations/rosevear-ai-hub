@@ -24,6 +24,14 @@ from rosevear_ai_hub.integrations.rosiedazzlers import (
     RosieDazzlersUnavailableError,
     validate_rosiedazzlers_base_url,
 )
+from rosevear_ai_hub.integrations.yardworkers import (
+    YardWorkersAuthenticationError,
+    YardWorkersClient,
+    YardWorkersConfigurationError,
+    YardWorkersRequestError,
+    YardWorkersUnavailableError,
+    validate_yardworkers_base_url,
+)
 
 
 class ConnectorAccessMode(StrEnum):
@@ -285,6 +293,36 @@ ROSIEDAZZLERS_DESCRIPTOR = ConnectorDescriptor(
 )
 
 
+YARDWORKERS_DESCRIPTOR = ConnectorDescriptor(
+    key="yardworkers",
+    display_name="Yard Workers",
+    description=("Read-only view of landscaping clients, jobs, crews, and equipment."),
+    planned_build=39,
+    capabilities=(
+        _capability(
+            "clients.read",
+            "Clients",
+            "Read client, site, and service-document summaries.",
+        ),
+        _capability(
+            "jobs.read",
+            "Jobs",
+            "Read scheduled and historical job data.",
+        ),
+        _capability(
+            "crew.read",
+            "Crew",
+            "Read active employee identity summaries.",
+        ),
+        _capability(
+            "equipment.read",
+            "Equipment",
+            "Read active equipment identity summaries.",
+        ),
+    ),
+)
+
+
 class DevilNDoveReadConnector(BusinessConnector):
     """Build 037 adapter over existing Devil n Dove GET-only contracts."""
 
@@ -522,6 +560,135 @@ class RosieDazzlersReadConnector(BusinessConnector):
         )
 
 
+class YardWorkersReadConnector(BusinessConnector):
+    """Build 039 adapter over Yard Workers' protected Shared Core read contract."""
+
+    def __init__(
+        self,
+        settings: Settings | None = None,
+        *,
+        access_token: str | None = None,
+        anon_key: str | None = None,
+        transport: Any | None = None,
+    ) -> None:
+        self.settings = settings or get_settings()
+        self._access_token = (access_token or "").strip()
+        self._anon_key = (anon_key or "").strip()
+        self._transport = transport
+
+    @property
+    def descriptor(self) -> ConnectorDescriptor:
+        return YARDWORKERS_DESCRIPTOR
+
+    def status(self) -> ConnectorStatus:
+        try:
+            validate_yardworkers_base_url(self.settings.yardworkers_base_url)
+        except YardWorkersConfigurationError as exc:
+            return ConnectorStatus(
+                state=ConnectorState.ERROR,
+                configured=False,
+                available=False,
+                message=str(exc),
+                retryable=False,
+            )
+        missing: list[str] = []
+        if not self._access_token:
+            missing.append("access token")
+        if not self._anon_key:
+            missing.append("API key")
+        if missing:
+            return ConnectorStatus(
+                state=ConnectorState.UNCONFIGURED,
+                configured=False,
+                available=False,
+                message=(
+                    "Yard Workers read access is ready but the "
+                    + " and ".join(missing)
+                    + " is not configured."
+                ),
+                retryable=False,
+            )
+        return ConnectorStatus(
+            state=ConnectorState.CONFIGURED,
+            configured=True,
+            available=False,
+            message=(
+                "Yard Workers read access is configured. Availability is checked only "
+                "when a bounded read is requested."
+            ),
+            retryable=False,
+        )
+
+    def _client(self) -> YardWorkersClient:
+        try:
+            return YardWorkersClient(
+                self.settings.yardworkers_base_url,
+                self._access_token,
+                self._anon_key,
+                timeout_seconds=self.settings.yardworkers_timeout_seconds,
+                transport=self._transport,
+            )
+        except YardWorkersConfigurationError as exc:
+            raise ConnectorConfigurationError(str(exc)) from exc
+
+    def read(
+        self,
+        resource: str,
+        *,
+        cursor: str | None = None,
+        limit: int = 100,
+    ) -> ConnectorReadResult:
+        if not self._access_token or not self._anon_key:
+            raise ConnectorConfigurationError(
+                "Yard Workers access token and API key are not configured."
+            )
+        if cursor:
+            raise ConnectorResourceNotFoundError(
+                "Yard Workers resources do not expose a cursor in Build 039."
+            )
+        normalized = resource.strip().lower()
+        aliases = {
+            "clients": "clients",
+            "clients.read": "clients",
+            "jobs": "jobs",
+            "jobs.read": "jobs",
+            "crew": "crew",
+            "crew.read": "crew",
+            "equipment": "equipment",
+            "equipment.read": "equipment",
+        }
+        canonical = aliases.get(normalized)
+        if canonical is None:
+            raise ConnectorResourceNotFoundError(
+                f"Yard Workers does not expose the read resource {resource!r}."
+            )
+
+        client = self._client()
+        try:
+            if canonical == "clients":
+                page = client.clients(limit=min(limit, 100))
+            elif canonical == "jobs":
+                page = client.jobs(limit=min(limit, 100))
+            elif canonical == "crew":
+                page = client.crew(limit=min(limit, 100))
+            else:
+                page = client.equipment(limit=min(limit, 100))
+        except YardWorkersAuthenticationError as exc:
+            raise ConnectorAuthenticationError(str(exc)) from exc
+        except YardWorkersUnavailableError as exc:
+            raise ConnectorUnavailableError(str(exc)) from exc
+        except YardWorkersConfigurationError as exc:
+            raise ConnectorConfigurationError(str(exc)) from exc
+        except YardWorkersRequestError as exc:
+            raise ConnectorError(str(exc)) from exc
+
+        return ConnectorReadResult(
+            resource=canonical,
+            records=page.records,
+            next_cursor=page.next_cursor,
+        )
+
+
 def build_business_connector_registry(
     *,
     settings: Settings | None = None,
@@ -529,6 +696,9 @@ def build_business_connector_registry(
     devilndove_transport: Any | None = None,
     rosiedazzlers_credential: str | None = None,
     rosiedazzlers_transport: Any | None = None,
+    yardworkers_access_token: str | None = None,
+    yardworkers_anon_key: str | None = None,
+    yardworkers_transport: Any | None = None,
 ) -> ConnectorRegistry:
     """Build the runtime registry with credentials injected server-side."""
 
@@ -545,37 +715,11 @@ def build_business_connector_registry(
                 credential=rosiedazzlers_credential,
                 transport=rosiedazzlers_transport,
             ),
-            PlannedReadConnector(
-                ConnectorDescriptor(
-                    key="yardworkers",
-                    display_name="Yard Workers",
-                    description=(
-                        "Read-first view of landscaping clients, jobs, crews, and equipment."
-                    ),
-                    planned_build=39,
-                    capabilities=(
-                        _capability(
-                            "clients.read",
-                            "Clients",
-                            "Read client and contract summaries.",
-                        ),
-                        _capability(
-                            "jobs.read",
-                            "Jobs",
-                            "Read scheduled and historical job data.",
-                        ),
-                        _capability(
-                            "crew.read",
-                            "Crew",
-                            "Read employee and assignment summaries.",
-                        ),
-                        _capability(
-                            "equipment.read",
-                            "Equipment",
-                            "Read equipment and availability state.",
-                        ),
-                    ),
-                )
+            YardWorkersReadConnector(
+                settings,
+                access_token=yardworkers_access_token,
+                anon_key=yardworkers_anon_key,
+                transport=yardworkers_transport,
             ),
         )
     )

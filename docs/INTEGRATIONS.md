@@ -250,3 +250,29 @@ Rosie Dazzlers' two list contracts use POST for historical application reasons e
 read-only. Build 038 preserves those contracts rather than changing the production detailing app just
 to alter HTTP semantics. The Hub allow list prevents that exception from becoming a generic POST
 proxy.
+
+
+## Build 039 Yard Workers read connector
+
+Build 039 activates Yard Workers through its existing protected Shared Core read contract without
+copying mutable landscaping truth into the Hub.
+
+- default project origin: `https://jmqvkgiqlimdhcofwkxr.supabase.co`
+- remote origins require HTTPS; loopback HTTP remains available for testing
+- the Hub sends a current signed-in Supabase access token and the project's anon/publishable API key
+- both values may come from Build 020 Secrets or environment configuration
+- every request targets exactly `POST /functions/v1/core-data-read`
+- every Build 039 request fixes `module_key` to `jobs`; the upstream user must have Jobs view access
+- Clients requests use the canonical customer, customer_site, and service_document read models
+- Jobs requests use the canonical job read model
+- Crew requests use the canonical active profile read model
+- Equipment requests use the canonical active equipment read model
+- the Hub caps every returned resource at 100 normalized records
+- client-site street addresses are not included in the Hub projection
+- responses must explicitly confirm `read_only: true`
+- connector status does not probe Supabase or spend read budget
+- all writes remain blocked by the Build 036 connector contract
+
+The current user access token can expire or be revoked. Rotate it by signing in to Yard Workers
+again; Build 039 intentionally does not add a permanent service-role credential or duplicate
+authorization system.

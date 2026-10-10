@@ -518,3 +518,27 @@ the browser or adding a second business identity system.
 
 The staff session can expire or be revoked. Treat the token as equivalent to an authenticated staff
 browser session, protect the Hub encryption key and host, and rotate the secret after signing in again.
+
+
+## Build 039 Yard Workers business-read boundary
+
+Build 039 reuses Yard Workers' protected Shared Core authority rather than exposing its broader
+administrative APIs.
+
+- the browser never receives the Yard Workers access token or Supabase API key
+- the access token belongs to an actual signed-in Yard Workers user and is validated upstream
+- the upstream profile must be active and have Jobs module view permission
+- the Hub calls one exact code-owned path: `POST /functions/v1/core-data-read`
+- callers cannot change the upstream method, path, module, entity names, headers, or request body
+- remote project origins require HTTPS and cannot contain credentials, query strings, fragments, or API paths
+- credentials reject CR/LF header injection and have bounded lengths
+- upstream payloads must explicitly assert `read_only: true`
+- result sizes are capped and fields are normalized before they enter browser state
+- client-site street addresses are deliberately omitted
+- authentication, network, and provider details are translated into sanitized errors
+- connector status is configuration-only and does not silently consume Supabase reads
+- inherited business writes remain hard-blocked
+
+A Yard Workers access token carries the permissions of its signed-in user. Protect the Hub host and
+encryption key, rotate expired or exposed tokens, and never replace this credential with a
+service-role key for convenience.

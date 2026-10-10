@@ -7,10 +7,10 @@ from rosevear_ai_hub.business_connectors import (
     DEFAULT_BUSINESS_CONNECTORS,
     ConnectorConfigurationError,
     ConnectorRegistry,
-    ConnectorUnavailableError,
     ConnectorWriteBlockedError,
     DevilNDoveReadConnector,
     RosieDazzlersReadConnector,
+    YardWorkersReadConnector,
 )
 from rosevear_ai_hub.config import Settings, get_settings
 from rosevear_ai_hub.database import Base, build_engine, get_session
@@ -72,9 +72,9 @@ def test_default_registry_is_read_first_and_fail_closed() -> None:
     yardworkers = DEFAULT_BUSINESS_CONNECTORS.get("yardworkers")
     assert yardworkers.descriptor.access_mode.value == "read_only"
     assert yardworkers.descriptor.writes_require_confirmation is True
-    assert yardworkers.status().state.value == "planned"
-    with pytest.raises(ConnectorUnavailableError):
-        yardworkers.read("example")
+    assert yardworkers.status().state.value == "unconfigured"
+    with pytest.raises(ConnectorConfigurationError):
+        yardworkers.read("jobs")
     with pytest.raises(ConnectorWriteBlockedError):
         yardworkers.write("example", {"value": 1})
 
@@ -180,6 +180,54 @@ def test_rosiedazzlers_connector_reads_bounded_jobs() -> None:
         )
 
 
+def test_yardworkers_connector_reads_bounded_equipment() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert request.headers["Authorization"] == "Bearer test-access-token"
+        assert request.headers["apikey"] == "test-anon-key"
+        assert request.url.path == "/functions/v1/core-data-read"
+        return httpx.Response(
+            200,
+            json={
+                "ok": True,
+                "read_only": True,
+                "data": {
+                    "equipment": [
+                        {
+                            "id": "equipment-42",
+                            "equipment_code": "EQ-42",
+                            "item_name": "Commercial mower",
+                            "equipment_category": "mower",
+                            "is_active": True,
+                        }
+                    ]
+                },
+            },
+        )
+
+    connector = YardWorkersReadConnector(
+        Settings(
+            YARDWORKERS_BASE_URL="https://example.supabase.co",
+            YARDWORKERS_TIMEOUT_SECONDS=2,
+        ),
+        access_token="test-access-token",
+        anon_key="test-anon-key",
+        transport=httpx.MockTransport(handler),
+    )
+    assert connector.status().state.value == "configured"
+
+    result = connector.read("equipment.read", limit=500)
+    assert result.resource == "equipment"
+    assert result.next_cursor is None
+    assert result.records[0]["equipment_id"] == "equipment-42"
+    assert result.records[0]["item_name"] == "Commercial mower"
+    with pytest.raises(ConnectorWriteBlockedError):
+        connector.write(
+            "equipment.update",
+            {"equipment_id": "equipment-42"},
+        )
+
+
 def test_registry_rejects_duplicate_connector_keys() -> None:
     connector = DEFAULT_BUSINESS_CONNECTORS.get("devilndove")
     registry = ConnectorRegistry((connector,))
@@ -206,7 +254,7 @@ def test_authenticated_business_catalogue_is_safe(tmp_path) -> None:
     assert states == {
         "devilndove": "unconfigured",
         "rosiedazzlers": "unconfigured",
-        "yardworkers": "planned",
+        "yardworkers": "unconfigured",
     }
     assert "authorization" not in str(payload).lower()
     assert "cookie" not in str(payload).lower()
@@ -250,6 +298,32 @@ def test_environment_credential_marks_connector_configured(
         assert payload["status"]["state"] == "configured"
         assert payload["status"]["configured"] is True
         assert "environment-admin-credential" not in str(payload)
+    finally:
+        get_settings.cache_clear()
+
+
+def test_yardworkers_environment_credentials_mark_connector_configured(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv(
+        "YARDWORKERS_ACCESS_TOKEN",
+        "environment-access-token",
+    )
+    monkeypatch.setenv(
+        "YARDWORKERS_ANON_KEY",
+        "environment-anon-key",
+    )
+    get_settings.cache_clear()
+    try:
+        client = build_client(tmp_path)
+        response = client.get("/api/v1/business/connectors/yardworkers")
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["status"]["state"] == "configured"
+        assert payload["status"]["configured"] is True
+        assert "environment-access-token" not in str(payload)
+        assert "environment-anon-key" not in str(payload)
     finally:
         get_settings.cache_clear()
 
