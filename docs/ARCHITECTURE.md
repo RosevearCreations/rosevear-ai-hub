@@ -481,3 +481,36 @@ Rosie Dazzlers (system of record)
 The two POST calls above are existing query/list contracts, not write operations. Build 038 does not
 introduce a generic HTTP pass-through and does not add a Rosie Dazzlers database or synchronization
 table to the Hub.
+
+
+## Build 039 Yard Workers read adapter
+
+```text
+Web/PWA or Tauri
+    |
+    v
+FastAPI /api/v1/business/connectors/yardworkers/read/{resource}
+    |
+    | resolve backend-only access token + Supabase API key
+    v
+YardWorkersReadConnector
+    |
+    v
+YardWorkersClient
+    |
+    +-- Clients   -> customer + customer_site + service_document
+    +-- Jobs      -> job
+    +-- Crew      -> profile
+    +-- Equipment -> equipment
+    |
+    | exact POST /functions/v1/core-data-read
+    | fixed module_key=jobs
+    v
+Yard Workers Supabase project (system of record)
+```
+
+Build 039 does not replicate Yard Workers tables into the Hub. The upstream Shared Core function
+already enforces signed-in identity, active profile state, module view permission, bounded canonical
+read models, and read-only behavior. The Hub adds a second narrow boundary: fixed resource mappings,
+HTTPS-only remote transport, backend-only credentials, record caps, field minimization, and
+fail-closed writes.
