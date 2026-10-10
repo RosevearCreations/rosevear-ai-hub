@@ -248,6 +248,7 @@ def read_business_connector(
         next_cursor=result.next_cursor,
     )
 
+
 @router.post(
     "/connectors/{connector_key}/write/{operation}",
     response_model=ConnectorWriteResponse,
