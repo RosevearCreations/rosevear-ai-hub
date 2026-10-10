@@ -40,7 +40,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 034 | Frigate Adapter | COMPLETE | main via PR #56 |
 | 035 | Camera Event Automations | COMPLETE | main via PR #59 |
 | 036 | Connector Framework | COMPLETE | main via PR #63 |
-| 037 | Devil n Dove Read Connector | ACTIVE | feature implementation awaiting CI |
+| 037 | Devil n Dove Read Connector | COMPLETE | main via PR #66 |
 
 ## Build 016 acceptance checklist
 
@@ -988,11 +988,12 @@ so both branches carry the final release record.
 - [x] no database migration required
 - [x] no new paid dependency or Devil n Dove repository change
 - [x] business writes remain blocked
-- [ ] final Build 037 dev CI green
-- [ ] promoted to main through protected PR
-- [ ] final Build 037 main Production CI green
-- [ ] release-evidence closeout complete
-- [ ] dev synchronized with final main closeout target
+- [x] final Build 037 dev CI green — run 38018166942
+- [x] promoted to main — PR #66 / merge e32ba9730b81c835a1ee6d461863e508715e30f2
+- [x] protected-main promotion gate green — run 38018435266
+- [x] final Build 037 main Production CI green — run 38018791124
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
 
 ## Build 037 operator setup
 
@@ -1001,6 +1002,15 @@ session credential stored as **Secrets → Devil n Dove admin token** or
 `DEVILNDOVE_ADMIN_TOKEN`. The credential is bearer-equivalent, can expire or be revoked, and never
 enters browser state. The default origin is `https://devilndove.com`; no Devil n Dove application
 change is required.
+
+
+Build 037 feature promotion is complete. The exact GREEN dev tree
+`62f866052ca23de1449be1cd57830b748e66e4f8` passed dev run 38018166942 and protected-main
+promotion gate run 38018435266. It was promoted through PR #66 to main merge
+`e32ba9730b81c835a1ee6d461863e508715e30f2`. Main Production run 38018791124 passed all
+four lanes; the backend reported 158 passed tests with 9 warnings. This protected-main
+release-evidence closeout is followed by synchronization back to dev so both branches carry the
+final release record.
 
 ## Next build
 
