@@ -14,12 +14,52 @@ type ConnectorState =
 
 type ReadState =
   | { kind: "idle" }
-  | { kind: "loading"; resource: string }
-  | { kind: "ready"; data: BusinessConnectorReadResponse }
-  | { kind: "error"; resource: string; message: string };
+  | {
+      kind: "loading";
+      connectorKey: string;
+      displayName: string;
+      resource: string;
+    }
+  | {
+      kind: "ready";
+      displayName: string;
+      data: BusinessConnectorReadResponse;
+    }
+  | {
+      kind: "error";
+      connectorKey: string;
+      displayName: string;
+      resource: string;
+      message: string;
+    };
+
+const READ_RESOURCES: Record<string, string[]> = {
+  devilndove: ["catalogue", "orders", "inventory"],
+  rosiedazzlers: ["bookings", "customers", "jobs", "inventory"],
+};
 
 function titleCase(value: string) {
   return value ? value[0].toUpperCase() + value.slice(1) : value;
+}
+
+function connectorReadSummary(connectorKey: string) {
+  if (connectorKey === "devilndove") {
+    return "Reads are server-side, bounded, and GET-only. The configured admin credential is never returned to this browser.";
+  }
+  if (connectorKey === "rosiedazzlers") {
+    return "Reads are server-side and bounded. Rosie Dazzlers keeps its existing read-only contracts: bookings/customers use read-only POST endpoints, while jobs/inventory use GET. The staff session token never reaches this browser.";
+  }
+  return "";
+}
+
+function connectorSetupHint(connectorKey: string) {
+  if (connectorKey === "devilndove") {
+    return "Configure the Devil n Dove admin credential in Secrets before live reads are enabled.";
+  }
+  if (connectorKey === "rosiedazzlers") {
+    return "Configure the Rosie Dazzlers staff session token in Secrets before live reads are enabled.";
+  }
+  return "";
 }
 
 export function BusinessView() {
@@ -52,13 +92,30 @@ export function BusinessView() {
     return () => controller.abort();
   }, []);
 
-  const readDevilNDove = (resource: string) => {
-    setReadState({ kind: "loading", resource });
-    readBusinessConnector("devilndove", resource, 20)
-      .then((data) => setReadState({ kind: "ready", data }))
+  const readConnector = (
+    connectorKey: string,
+    displayName: string,
+    resource: string,
+  ) => {
+    setReadState({
+      kind: "loading",
+      connectorKey,
+      displayName,
+      resource,
+    });
+    readBusinessConnector(connectorKey, resource, 20)
+      .then((data) =>
+        setReadState({
+          kind: "ready",
+          displayName,
+          data,
+        }),
+      )
       .catch((error: unknown) => {
         setReadState({
           kind: "error",
+          connectorKey,
+          displayName,
           resource,
           message:
             error instanceof Error
@@ -72,12 +129,12 @@ export function BusinessView() {
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 037</p>
+          <p className="eyebrow">Build 038</p>
           <h1>Business connectors</h1>
           <p className="lede">
-            Devil n Dove now supports bounded live catalogue, order,
-            and inventory reads. Rosie Dazzlers and Yard Workers
-            remain planned; all business writes stay blocked.
+            Devil n Dove and Rosie Dazzlers now provide bounded live
+            read access through the Hub. Yard Workers remains planned;
+            all business writes stay blocked.
           </p>
         </div>
       </header>
@@ -108,90 +165,88 @@ export function BusinessView() {
             className="dashboard-grid"
             aria-label="Business connector catalogue"
           >
-            {state.data.connectors.map((connector) => (
-              <article className="panel" key={connector.key}>
-                <p className="eyebrow">
-                  Build{" "}
-                  {String(connector.planned_build).padStart(3, "0")}
-                </p>
-                <h2>{connector.display_name}</h2>
-                <p>{connector.description}</p>
-                <p>
-                  <strong>Status:</strong> {connector.status.state}
-                </p>
-                <p>{connector.status.message}</p>
-                <h3>Read capabilities</h3>
-                <ul>
-                  {connector.capabilities.map((capability) => (
-                    <li key={capability.key}>
-                      <strong>{capability.label}:</strong>{" "}
-                      {capability.description}
-                    </li>
-                  ))}
-                </ul>
+            {state.data.connectors.map((connector) => {
+              const resources = READ_RESOURCES[connector.key] || [];
+              return (
+                <article className="panel" key={connector.key}>
+                  <p className="eyebrow">
+                    Build{" "}
+                    {String(connector.planned_build).padStart(3, "0")}
+                  </p>
+                  <h2>{connector.display_name}</h2>
+                  <p>{connector.description}</p>
+                  <p>
+                    <strong>Status:</strong> {connector.status.state}
+                  </p>
+                  <p>{connector.status.message}</p>
+                  <h3>Read capabilities</h3>
+                  <ul>
+                    {connector.capabilities.map((capability) => (
+                      <li key={capability.key}>
+                        <strong>{capability.label}:</strong>{" "}
+                        {capability.description}
+                      </li>
+                    ))}
+                  </ul>
 
-                {connector.key === "devilndove" ? (
-                  <div>
-                    <h3>Live read preview</h3>
-                    <p>
-                      Reads are server-side, bounded, and GET-only.
-                      The configured admin credential is never
-                      returned to this browser.
-                    </p>
-                    <div className="button-row">
-                      {[
-                        "catalogue",
-                        "orders",
-                        "inventory",
-                      ].map((resource) => (
-                        <button
-                          className="secondary"
-                          disabled={
-                            !connector.status.configured ||
-                            readState.kind === "loading"
-                          }
-                          key={resource}
-                          onClick={() =>
-                            readDevilNDove(resource)
-                          }
-                          type="button"
-                        >
-                          Read {titleCase(resource)}
-                        </button>
-                      ))}
+                  {resources.length ? (
+                    <div>
+                      <h3>Live read preview</h3>
+                      <p>{connectorReadSummary(connector.key)}</p>
+                      <div className="button-row">
+                        {resources.map((resource) => (
+                          <button
+                            className="secondary"
+                            disabled={
+                              !connector.status.configured ||
+                              readState.kind === "loading"
+                            }
+                            key={resource}
+                            onClick={() =>
+                              readConnector(
+                                connector.key,
+                                connector.display_name,
+                                resource,
+                              )
+                            }
+                            type="button"
+                          >
+                            Read {titleCase(resource)}
+                          </button>
+                        ))}
+                      </div>
+                      {!connector.status.configured ? (
+                        <p className="small">
+                          {connectorSetupHint(connector.key)}
+                        </p>
+                      ) : null}
                     </div>
-                    {!connector.status.configured ? (
-                      <p className="small">
-                        Configure the Devil n Dove admin credential
-                        in Secrets before live reads are enabled.
-                      </p>
-                    ) : null}
-                  </div>
-                ) : null}
-              </article>
-            ))}
+                  ) : null}
+                </article>
+              );
+            })}
           </section>
 
           {readState.kind === "loading" ? (
             <section className="panel" role="status">
-              Reading Devil n Dove {readState.resource}…
+              Reading {readState.displayName} {readState.resource}…
             </section>
           ) : readState.kind === "error" ? (
             <section className="panel">
-              <h2>Devil n Dove read failed</h2>
+              <h2>{readState.displayName} read failed</h2>
               <p>{readState.message}</p>
             </section>
           ) : readState.kind === "ready" ? (
             <section className="panel">
               <p className="eyebrow">Read-only live data</p>
               <h2>
-                Devil n Dove{" "}
+                {readState.displayName}{" "}
                 {titleCase(readState.data.resource)} —{" "}
                 {readState.data.records.length} record(s)
               </h2>
               {readState.data.next_cursor ? (
                 <p className="small">
-                  More catalogue records are available.
+                  More records are available for this resource.
                 </p>
               ) : null}
               <pre>
