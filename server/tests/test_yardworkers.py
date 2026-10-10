@@ -29,7 +29,7 @@ def test_yardworkers_client_uses_exact_protected_jobs_read_contract() -> None:
         assert request.url.path == "/functions/v1/core-data-read"
         assert request.headers["Authorization"] == "Bearer signed-user-token"
         assert request.headers["apikey"] == "public-project-key"
-        assert request.headers["User-Agent"] == "Rosevear-AI-Hub/0.0.39"
+        assert request.headers["User-Agent"] == "Rosevear-AI-Hub/0.0.40"
         body = json.loads(request.content)
         assert body == {
             "module_key": "jobs",
@@ -271,3 +271,78 @@ def test_yardworkers_requires_read_only_confirmation() -> None:
 
     with pytest.raises(YardWorkersRequestError, match="read-only contract"):
         client.jobs(limit=5)
+
+
+def test_yardworkers_private_job_comment_forces_internal_safe_flags() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert request.url.path == "/functions/v1/jobs-manage"
+        assert request.headers["Authorization"] == "Bearer signed-user-token"
+        assert request.headers["apikey"] == "public-project-key"
+        body = json.loads(request.content)
+        assert body == {
+            "entity": "job_comment",
+            "action": "create",
+            "job_id": 42,
+            "comment_type": "update",
+            "comment_text": "Crew confirmed site cleanup.",
+            "is_special_instruction": False,
+            "visible_to_client": False,
+            "set_job_instruction": False,
+        }
+        return httpx.Response(
+            200,
+            json={
+                "ok": True,
+                "record": {
+                    "id": "comment-42",
+                    "job_id": 42,
+                    "comment_text": "Crew confirmed site cleanup.",
+                    "visible_to_client": False,
+                },
+            },
+        )
+
+    client = YardWorkersClient(
+        "https://example.supabase.co",
+        "signed-user-token",
+        "public-project-key",
+        transport=httpx.MockTransport(handler),
+    )
+    result = client.create_private_job_comment(
+        job_id=42,
+        comment_text="Crew confirmed site cleanup.",
+    )
+
+    assert result == {
+        "accepted": True,
+        "comment_id": "comment-42",
+        "job_id": 42,
+        "comment_type": "update",
+        "visible_to_client": False,
+        "is_special_instruction": False,
+    }
+
+
+def test_yardworkers_private_job_comment_rejects_provider_details() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        del request
+        return httpx.Response(
+            403,
+            json={"error": "secret provider detail", "token": "never expose"},
+        )
+
+    client = YardWorkersClient(
+        "https://example.supabase.co",
+        "signed-user-token",
+        "public-project-key",
+        transport=httpx.MockTransport(handler),
+    )
+    with pytest.raises(YardWorkersAuthenticationError) as exc_info:
+        client.create_private_job_comment(
+            job_id=42,
+            comment_text="Internal update",
+        )
+
+    assert "Supervisor+" in str(exc_info.value)
+    assert "never expose" not in str(exc_info.value)

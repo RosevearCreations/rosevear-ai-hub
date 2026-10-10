@@ -1882,3 +1882,32 @@ export function readBusinessConnector(
     signal,
   );
 }
+
+
+export interface BusinessConnectorWriteResponse {
+  connector_key: string;
+  operation: string;
+  confirmation_id: string;
+  result: Record<string, unknown>;
+}
+
+export function executeBusinessWrite(
+  connectorKey: string,
+  operation: string,
+  confirmationId: string,
+  argumentsValue: Record<string, unknown>,
+  signal?: AbortSignal,
+): Promise<BusinessConnectorWriteResponse> {
+  return authJson<BusinessConnectorWriteResponse>(
+    "POST",
+    "/api/v1/business/connectors/" +
+      encodeURIComponent(connectorKey) +
+      "/write/" +
+      encodeURIComponent(operation),
+    {
+      confirmation_id: confirmationId,
+      arguments: argumentsValue,
+    },
+    signal,
+  );
+}

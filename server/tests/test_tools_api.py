@@ -41,6 +41,8 @@ def test_registry_exposes_normalized_builtin_contracts(tmp_path) -> None:
         "home_assistant.switch.set",
         "notification.household.send",
         "automation.rule.change",
+        "business.devilndove.story_draft.create",
+        "business.yardworkers.job_comment.create",
         "knowledge.document.delete",
     ]
 
@@ -63,6 +65,30 @@ def test_registry_exposes_normalized_builtin_contracts(tmp_path) -> None:
     assert light["enabled"] is True
     assert light["input_schema"]["required"] == ["entity_id", "state"]
 
+    devilndove_write = next(
+        item for item in tools if item["tool_key"] == "business.devilndove.story_draft.create"
+    )
+    assert devilndove_write["risk_level"] == 2
+    assert devilndove_write["confirmation_policy"] == "required"
+    assert devilndove_write["enabled"] is True
+    assert devilndove_write["input_schema"]["required"] == [
+        "product_id",
+        "heading",
+        "summary",
+        "body",
+    ]
+
+    yardworkers_write = next(
+        item for item in tools if item["tool_key"] == "business.yardworkers.job_comment.create"
+    )
+    assert yardworkers_write["risk_level"] == 2
+    assert yardworkers_write["confirmation_policy"] == "required"
+    assert yardworkers_write["enabled"] is True
+    assert yardworkers_write["input_schema"]["required"] == [
+        "job_id",
+        "comment_text",
+    ]
+
     delete = next(item for item in tools if item["tool_key"] == "knowledge.document.delete")
     assert delete["risk_level"] == 2
     assert delete["risk_label"] == "confirmation_required"
@@ -76,15 +102,18 @@ def test_registry_summary_reports_capabilities_and_risk_counts(tmp_path) -> None
     response = client.get("/api/v1/tools/summary")
     assert response.status_code == 200
     payload = response.json()
-    assert payload["tool_count"] == 8
-    assert payload["enabled_count"] == 7
+    assert payload["tool_count"] == 10
+    assert payload["enabled_count"] == 9
     assert payload["disabled_count"] == 1
     assert payload["counts_by_risk"]["read"] == 2
     assert payload["counts_by_risk"]["low_risk_action"] == 4
-    assert payload["counts_by_risk"]["confirmation_required"] == 2
+    assert payload["counts_by_risk"]["confirmation_required"] == 4
     assert payload["capabilities"] == [
         "ai.generate",
         "automation.write",
+        "business.devilndove.story_draft.write",
+        "business.write",
+        "business.yardworkers.job_comment.write",
         "home.light.control",
         "home.read",
         "home.scene.activate",

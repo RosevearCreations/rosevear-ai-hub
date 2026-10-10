@@ -31,7 +31,7 @@ function connectorPayload(configured = false) {
         display_name: "Devil n Dove",
         description: "Read-only live shop data.",
         planned_build: 37,
-        access_mode: "read_only",
+        access_mode: "approved_write",
         writes_require_confirmation: true,
         capabilities: [
           {
@@ -51,6 +51,12 @@ function connectorPayload(configured = false) {
             label: "Inventory",
             description: "Read inventory.",
             access: "read_only",
+          },
+          {
+            key: "story_draft.write",
+            label: "Create story draft",
+            description: "Create a review-only story draft.",
+            access: "approved_write",
           },
         ],
         status: {
@@ -112,7 +118,7 @@ function connectorPayload(configured = false) {
         display_name: "Yard Workers",
         description: "Read-first landscaping data.",
         planned_build: 39,
-        access_mode: "read_only",
+        access_mode: "approved_write",
         writes_require_confirmation: true,
         capabilities: [
           {
@@ -139,6 +145,12 @@ function connectorPayload(configured = false) {
             description: "Read equipment.",
             access: "read_only",
           },
+          {
+            key: "job_comment.write",
+            label: "Create private job comment",
+            description: "Create a private internal job comment.",
+            access: "approved_write",
+          },
         ],
         status: {
           state: "unconfigured",
@@ -155,7 +167,7 @@ function connectorPayload(configured = false) {
 
 describe("BusinessView", () => {
   test(
-    "shows Build 039 with live connectors awaiting credentials",
+    "shows Build 040 with narrow confirmed writes and Rosie read-only",
     async () => {
       vi.stubGlobal(
         "fetch",
@@ -186,7 +198,10 @@ describe("BusinessView", () => {
           screen.getByText(/Read-only by default: Yes/),
         ).toBeInTheDocument();
         expect(
-          screen.getByText(/writes stay blocked/i),
+          screen.getByText(/Two narrow writes are available only through exact confirmation/i),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/Rosie Dazzlers strictly read-only/i),
         ).toBeInTheDocument();
         expect(
           screen.getByRole("button", {
@@ -401,6 +416,181 @@ describe("BusinessView", () => {
         expect(screen.getByText(/equipment-42/)).toBeInTheDocument();
         expect(screen.getByText(/Commercial mower/)).toBeInTheDocument();
       });
+    },
+  );
+
+
+  test(
+    "prepares, approves, and executes an exact Devil n Dove draft write",
+    async () => {
+      const argumentsValue = {
+        product_id: 42,
+        heading: "Workshop story",
+        summary: "Review-only summary",
+        body: "Draft body",
+      };
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+          const url = String(input);
+          if (url.endsWith("/api/v1/confirmations")) {
+            expect(init?.method).toBe("POST");
+            expect(JSON.parse(String(init?.body))).toEqual({
+              tool_key: "business.devilndove.story_draft.create",
+              arguments: argumentsValue,
+            });
+            return {
+              ok: true,
+              json: async () => ({
+                id: "confirmation-dd",
+                requested_by_user_id: 1,
+                decided_by_user_id: null,
+                tool_key: "business.devilndove.story_draft.create",
+                risk_level: 2,
+                arguments: argumentsValue,
+                arguments_hash: "a".repeat(64),
+                preview: {
+                  tool_key: "business.devilndove.story_draft.create",
+                  tool_name: "Create Devil n Dove story draft",
+                  description: "Create one review-only story draft.",
+                  risk_level: 2,
+                  risk_label: "confirmation_required",
+                  summary: "Create Devil n Dove story draft",
+                  arguments: argumentsValue,
+                },
+                status: "pending",
+                expires_at: "2026-10-10T16:00:00Z",
+                decided_at: null,
+                consumed_at: null,
+                created_at: "2026-10-10T15:00:00Z",
+                updated_at: "2026-10-10T15:00:00Z",
+              }),
+            };
+          }
+          if (url.endsWith("/api/v1/confirmations/confirmation-dd/approve")) {
+            return {
+              ok: true,
+              json: async () => ({
+                id: "confirmation-dd",
+                requested_by_user_id: 1,
+                decided_by_user_id: 1,
+                tool_key: "business.devilndove.story_draft.create",
+                risk_level: 2,
+                arguments: argumentsValue,
+                arguments_hash: "a".repeat(64),
+                preview: {
+                  tool_key: "business.devilndove.story_draft.create",
+                  tool_name: "Create Devil n Dove story draft",
+                  description: "Create one review-only story draft.",
+                  risk_level: 2,
+                  risk_label: "confirmation_required",
+                  summary: "Create Devil n Dove story draft",
+                  arguments: argumentsValue,
+                },
+                status: "approved",
+                expires_at: "2026-10-10T16:00:00Z",
+                decided_at: "2026-10-10T15:01:00Z",
+                consumed_at: null,
+                created_at: "2026-10-10T15:00:00Z",
+                updated_at: "2026-10-10T15:01:00Z",
+              }),
+            };
+          }
+          if (url.includes("/devilndove/write/story_draft")) {
+            expect(JSON.parse(String(init?.body))).toEqual({
+              confirmation_id: "confirmation-dd",
+              arguments: argumentsValue,
+            });
+            return {
+              ok: true,
+              json: async () => ({
+                connector_key: "devilndove",
+                operation: "story_draft",
+                confirmation_id: "confirmation-dd",
+                result: {
+                  accepted: true,
+                  product_id: 42,
+                  note_id: 91,
+                  display_status: "draft",
+                  privacy_status: "needs_review",
+                },
+              }),
+            };
+          }
+          return {
+            ok: true,
+            json: async () => connectorPayload(true),
+          };
+        }),
+      );
+
+      render(<BusinessView />);
+
+      fireEvent.change(
+        await screen.findByLabelText("Devil n Dove product ID"),
+        { target: { value: "42" } },
+      );
+      fireEvent.change(screen.getByLabelText("Devil n Dove story heading"), {
+        target: { value: "Workshop story" },
+      });
+      fireEvent.change(screen.getByLabelText("Devil n Dove story summary"), {
+        target: { value: "Review-only summary" },
+      });
+      fireEvent.change(screen.getByLabelText("Devil n Dove story body"), {
+        target: { value: "Draft body" },
+      });
+
+      const prepareButtons = screen.getAllByRole("button", {
+        name: "Prepare exact confirmation",
+      });
+      fireEvent.click(prepareButtons[0]);
+
+      const approve = await screen.findByRole("button", {
+        name: "Approve exact write",
+      });
+      fireEvent.click(approve);
+
+      const execute = await screen.findByRole("button", {
+        name: "Execute confirmed write",
+      });
+      fireEvent.click(execute);
+
+      await waitFor(() => {
+        expect(screen.getByText(/"note_id": 91/)).toBeInTheDocument();
+        expect(screen.getByText(/"display_status": "draft"/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/"privacy_status": "needs_review"/),
+        ).toBeInTheDocument();
+      });
+    },
+  );
+
+  test(
+    "exposes only a private Yard Workers write and no Rosie Dazzlers write form",
+    async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => ({
+          ok: true,
+          json: async () => connectorPayload(true),
+        })),
+      );
+
+      render(<BusinessView />);
+
+      await screen.findByRole("heading", { name: "Business connectors" });
+      expect(
+        screen.getByLabelText("Yard Workers private job comment"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Client visibility and special-instruction changes are forced off/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Rosie Dazzlers strictly read-only/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByLabelText(/Rosie Dazzlers.*write/i),
+      ).not.toBeInTheDocument();
     },
   );
 
