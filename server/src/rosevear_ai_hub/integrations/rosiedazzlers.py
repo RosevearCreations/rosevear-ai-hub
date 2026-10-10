@@ -86,9 +86,7 @@ def validate_rosiedazzlers_base_url(value: str) -> str:
         message = "ROSIEDAZZLERS_BASE_URL contains an invalid port."
         raise RosieDazzlersConfigurationError(message) from exc
     if port is not None and not 1 <= port <= 65535:
-        raise RosieDazzlersConfigurationError(
-            "ROSIEDAZZLERS_BASE_URL contains an invalid port."
-        )
+        raise RosieDazzlersConfigurationError("ROSIEDAZZLERS_BASE_URL contains an invalid port.")
     return normalized
 
 
