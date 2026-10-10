@@ -1,4 +1,4 @@
-"""Shared read-first framework for Rosevear business connectors."""
+"""Shared read-first framework with narrowly approved confirmed business writes."""
 
 from __future__ import annotations
 
@@ -95,6 +95,14 @@ class ConnectorReadResult:
     next_cursor: str | None = None
 
 
+@dataclass(frozen=True)
+class ConnectorWriteResult:
+    """Normalized result for one narrowly approved confirmed write."""
+
+    operation: str
+    result: dict[str, Any]
+
+
 class ConnectorError(RuntimeError):
     """Base error whose public message is safe to expose."""
 
@@ -131,6 +139,10 @@ class ConnectorWriteBlockedError(ConnectorError):
     code = "connector_write_blocked"
 
 
+class ConnectorOperationNotFoundError(ConnectorError):
+    code = "connector_operation_not_found"
+
+
 class BusinessConnector(ABC):
     """Contract implemented by every concrete business connector."""
 
@@ -153,8 +165,12 @@ class BusinessConnector(ABC):
     ) -> ConnectorReadResult:
         """Read one bounded resource family."""
 
-    def write(self, operation: str, payload: dict[str, Any]) -> None:
-        """Fail closed until a later build defines a narrow approved write."""
+    def write(
+        self,
+        operation: str,
+        payload: dict[str, Any],
+    ) -> ConnectorWriteResult:
+        """Fail closed unless a concrete connector overrides one exact approved write."""
 
         del operation, payload
         raise ConnectorWriteBlockedError(
@@ -230,19 +246,25 @@ def _capability(
     key: str,
     label: str,
     description: str,
+    *,
+    access: ConnectorAccessMode = ConnectorAccessMode.READ_ONLY,
 ) -> ConnectorCapability:
     return ConnectorCapability(
         key=key,
         label=label,
         description=description,
+        access=access,
     )
 
 
 DEVILNDOVE_DESCRIPTOR = ConnectorDescriptor(
     key="devilndove",
     display_name="Devil n Dove",
-    description=("Read-only view of live shop catalogue, order, and inventory data."),
+    description=(
+        "Bounded shop reads plus one confirmed review-only product-story draft write."
+    ),
     planned_build=37,
+    access_mode=ConnectorAccessMode.APPROVED_WRITE,
     capabilities=(
         _capability(
             "catalogue.read",
@@ -258,6 +280,12 @@ DEVILNDOVE_DESCRIPTOR = ConnectorDescriptor(
             "inventory.read",
             "Inventory",
             "Read bounded active maker inventory from the Inventory contract.",
+        ),
+        _capability(
+            "story_draft.write",
+            "Create story draft",
+            "Create one review-only product-story draft; publishing is never allowed by this write.",
+            access=ConnectorAccessMode.APPROVED_WRITE,
         ),
     ),
 )
@@ -296,8 +324,11 @@ ROSIEDAZZLERS_DESCRIPTOR = ConnectorDescriptor(
 YARDWORKERS_DESCRIPTOR = ConnectorDescriptor(
     key="yardworkers",
     display_name="Yard Workers",
-    description=("Read-only view of landscaping clients, jobs, crews, and equipment."),
+    description=(
+        "Bounded landscaping reads plus one confirmed private internal job-comment write."
+    ),
     planned_build=39,
+    access_mode=ConnectorAccessMode.APPROVED_WRITE,
     capabilities=(
         _capability(
             "clients.read",
@@ -318,6 +349,12 @@ YARDWORKERS_DESCRIPTOR = ConnectorDescriptor(
             "equipment.read",
             "Equipment",
             "Read active equipment identity summaries.",
+        ),
+        _capability(
+            "job_comment.write",
+            "Create private job comment",
+            "Create one internal update comment that is never client-visible or a special instruction.",
+            access=ConnectorAccessMode.APPROVED_WRITE,
         ),
     ),
 )
@@ -439,6 +476,41 @@ class DevilNDoveReadConnector(BusinessConnector):
             records=page.records,
             next_cursor=page.next_cursor,
         )
+
+    def write(
+        self,
+        operation: str,
+        payload: dict[str, Any],
+    ) -> ConnectorWriteResult:
+        if not self._credential:
+            raise ConnectorConfigurationError("Devil n Dove admin credential is not configured.")
+        canonical = {
+            "story_draft": "story_draft",
+            "story_draft.write": "story_draft",
+        }.get(operation.strip().lower())
+        if canonical is None:
+            raise ConnectorOperationNotFoundError(
+                f"Devil n Dove does not expose the confirmed write operation {operation!r}."
+            )
+
+        client = self._client()
+        try:
+            result = client.create_story_draft(
+                product_id=payload.get("product_id"),
+                heading=payload.get("heading"),
+                summary=payload.get("summary"),
+                body=payload.get("body"),
+            )
+        except DevilNDoveAuthenticationError as exc:
+            raise ConnectorAuthenticationError(str(exc)) from exc
+        except DevilNDoveUnavailableError as exc:
+            raise ConnectorUnavailableError(str(exc)) from exc
+        except DevilNDoveConfigurationError as exc:
+            raise ConnectorConfigurationError(str(exc)) from exc
+        except DevilNDoveRequestError as exc:
+            raise ConnectorError(str(exc)) from exc
+
+        return ConnectorWriteResult(operation=canonical, result=result)
 
 
 class RosieDazzlersReadConnector(BusinessConnector):
@@ -687,6 +759,41 @@ class YardWorkersReadConnector(BusinessConnector):
             records=page.records,
             next_cursor=page.next_cursor,
         )
+
+    def write(
+        self,
+        operation: str,
+        payload: dict[str, Any],
+    ) -> ConnectorWriteResult:
+        if not self._access_token or not self._anon_key:
+            raise ConnectorConfigurationError(
+                "Yard Workers access token and API key are not configured."
+            )
+        canonical = {
+            "job_comment": "job_comment",
+            "job_comment.write": "job_comment",
+        }.get(operation.strip().lower())
+        if canonical is None:
+            raise ConnectorOperationNotFoundError(
+                f"Yard Workers does not expose the confirmed write operation {operation!r}."
+            )
+
+        client = self._client()
+        try:
+            result = client.create_private_job_comment(
+                job_id=payload.get("job_id"),
+                comment_text=payload.get("comment_text"),
+            )
+        except YardWorkersAuthenticationError as exc:
+            raise ConnectorAuthenticationError(str(exc)) from exc
+        except YardWorkersUnavailableError as exc:
+            raise ConnectorUnavailableError(str(exc)) from exc
+        except YardWorkersConfigurationError as exc:
+            raise ConnectorConfigurationError(str(exc)) from exc
+        except YardWorkersRequestError as exc:
+            raise ConnectorError(str(exc)) from exc
+
+        return ConnectorWriteResult(operation=canonical, result=result)
 
 
 def build_business_connector_registry(
