@@ -1,6 +1,6 @@
 """Authenticated business connector catalogue and bounded read API."""
 
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
@@ -115,7 +115,7 @@ def _serialize(
 
 @router.get("/connectors", response_model=ConnectorListResponse)
 def list_business_connectors(
-    session: Session = Depends(get_session),
+    session: Annotated[Session, Depends(get_session)],
 ) -> ConnectorListResponse:
     registry = _registry(session)
     return ConnectorListResponse(
@@ -135,7 +135,7 @@ def list_business_connectors(
 )
 def get_business_connector(
     connector_key: str,
-    session: Session = Depends(get_session),
+    session: Annotated[Session, Depends(get_session)],
 ) -> ConnectorResponse:
     registry = _registry(session)
     try:
@@ -157,7 +157,7 @@ def read_business_connector(
     resource: str,
     limit: int = Query(default=20, ge=1, le=100),
     cursor: str | None = Query(default=None, max_length=128),
-    session: Session = Depends(get_session),
+    session: Annotated[Session, Depends(get_session)],
 ) -> ConnectorReadResponse:
     registry = _registry(session)
     try:
