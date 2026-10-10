@@ -217,21 +217,35 @@ This is the canonical implementation sequence. Build numbers are never reused.
 ### Build 039 — YW Read Connector
 ### Build 040 — Narrow Approved Business Writes
 
-## Phase 8 — Voice and Mobile
+## Phase 8 — Windows Server Reliability
 
-### Build 041 — Local Speech-to-Text
-### Build 042 — Local Text-to-Speech
-### Build 043 — Voice Commands and Confirmations
-### Build 044 — Installable PWA
-### Build 045 — Private Remote Access via Tailscale
+### Build 041 — Automatic Service Recovery, Camera Streaming Repair & Startup Cleanup
+- preserve the working Ree auto-login / Windows Task Scheduler installation and Home Assistant VM
+- replace redundant Tauri development startup dependency with independently managed API and web services
+- use stable working directory, fixed ports, process ownership checks, health probes, and bounded retries
+- restart a crashed API or web service without blindly killing unrelated Python/Node processes
+- write separate startup, crash, restart, and failure logs with clear status checks
+- repair go2rtc startup and configuration while keeping camera credentials protected
+- test missing binary, unavailable camera streams, reconnect, and healthy-no-op paths
+- keep MQTT and Ollama availability checks; avoid duplicate instances
+- preserve user-managed local startup scripts and .env; do not overwrite untracked files
+- avoid new paid services; document operator validation and rollback
 
-## Phase 9 — Hardening
+## Phase 9 — Voice and Mobile
 
-### Build 046 — Backup and Restore
-### Build 047 — Performance and Resource-Budget Review
-### Build 048 — Threat Model and Security Review
-### Build 049 — Disaster Recovery Drill
-### Build 050 — Production Readiness and Roadmap Renewal
+### Build 042 — Local Speech-to-Text
+### Build 043 — Local Text-to-Speech
+### Build 044 — Voice Commands and Confirmations
+### Build 045 — Installable PWA
+### Build 046 — Private Remote Access via Tailscale
+
+## Phase 10 — Hardening
+
+### Build 047 — Backup and Restore
+### Build 048 — Performance and Resource-Budget Review
+### Build 049 — Threat Model and Security Review
+### Build 050 — Disaster Recovery Drill
+### Build 051 — Production Readiness and Roadmap Renewal
 
 ## Build execution rules
 
