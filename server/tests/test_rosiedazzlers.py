@@ -167,10 +167,7 @@ def test_read_contracts_are_bounded_normalized_and_cookie_authenticated() -> Non
     assert inventory.records[0]["usage_unit"] == "ml"
     assert "amazon_url" not in inventory.records[0]
     assert [method for method, _, _ in seen] == ["POST", "POST", "GET", "GET"]
-    assert all(
-        cookie == "rd_staff_session=opaque-session-token"
-        for _, _, cookie in seen
-    )
+    assert all(cookie == "rd_staff_session=opaque-session-token" for _, _, cookie in seen)
 
 
 def test_authentication_error_is_sanitized() -> None:
