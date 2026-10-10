@@ -43,6 +43,14 @@ SECRET_DEFINITIONS: tuple[SecretDefinition, ...] = (
         description="Password used by the MQTT connector beginning in Build 025.",
         environment_variable="MQTT_PASSWORD",
     ),
+    SecretDefinition(
+        secret_key="devilndove.admin_token",
+        display_name="Devil n Dove admin token",
+        description=(
+            "Bearer-equivalent admin session credential used only for Build 037 read requests."
+        ),
+        environment_variable="DEVILNDOVE_ADMIN_TOKEN",
+    ),
 )
 
 _DEFINITIONS_BY_KEY = {item.secret_key: item for item in SECRET_DEFINITIONS}
@@ -104,6 +112,7 @@ def environment_secret(
     configured = {
         "HOME_ASSISTANT_TOKEN": settings.home_assistant_token,
         "MQTT_PASSWORD": settings.mqtt_password,
+        "DEVILNDOVE_ADMIN_TOKEN": settings.devilndove_admin_token,
     }.get(definition.environment_variable)
     return configured.get_secret_value() if configured else None
 
