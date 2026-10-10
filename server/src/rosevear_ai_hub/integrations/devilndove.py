@@ -130,7 +130,7 @@ class DevilNDoveClient:
         headers = {
             "Accept": "application/json",
             "Authorization": f"Bearer {self._credential}",
-            "User-Agent": "Rosevear-AI-Hub/0.0.38",
+            "User-Agent": "Rosevear-AI-Hub/0.0.39",
         }
         try:
             with httpx.Client(
