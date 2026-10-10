@@ -2,7 +2,7 @@
 
 ## Status
 
-Feature implementation in progress on `build-038-rosiedazzlers-read-connector`.
+COMPLETE — promoted to `main` through PR #69.
 
 ## Goal
 
@@ -90,5 +90,13 @@ Build 038 adds coverage for:
 
 ## Promotion evidence
 
-To be completed after the feature branch, protected-main gate, Production run, closeout, and final
-dev synchronization are GREEN.
+- final GREEN dev integration tree: `c91aac71776723e6628a8378b696f584a2215316`
+- final feature dev CI: run 38054235678 — docs/backend/web/Windows GREEN
+- backend result: 164 passed, 9 warnings
+- protected-main promotion gate: run 38054594711 — all four lanes GREEN
+- feature promotion: PR #69
+- main feature merge: `d562ca796fa05a88853977b46fa22553dba3c573`
+- main Production validation: run 38055745019 — all four lanes GREEN
+- Windows Production artifact: `rosevear-ai-hub-windows` uploaded successfully
+- release-evidence closeout: protected-main PR following the green feature Production run
+- final operation: synchronize `dev` to the release-evidence `main` target and verify GREEN
