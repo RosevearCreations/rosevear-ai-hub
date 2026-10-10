@@ -542,3 +542,29 @@ Defaults:
 
 Rollback is schema-neutral: clear the Rosie Dazzlers secret and deploy Build 037. No Rosie Dazzlers
 record is changed because Build 038 exposes only read contracts through the Hub.
+
+
+## Build 039 Yard Workers read connector operations
+
+Build 039 requires no Hub migration, Yard Workers migration, paid dependency, or Yard Workers source
+deployment. The Hub can run with this connector unconfigured.
+
+Setup:
+
+1. Keep `YARDWORKERS_BASE_URL=https://jmqvkgiqlimdhcofwkxr.supabase.co` unless testing against a deliberate local loopback Supabase origin.
+2. Sign in to Yard Workers as an active user with Jobs module view permission and obtain the current Supabase access token.
+3. Use the Yard Workers project's current anon/publishable API key paired with that session.
+4. Prefer **Secrets → Yard Workers access token** and **Secrets → Yard Workers API key** so Build 020 encrypts both values at rest. Environment-managed deployments may use `YARDWORKERS_ACCESS_TOKEN` and `YARDWORKERS_ANON_KEY`.
+5. Open **Business** and confirm Yard Workers reports `configured` without making a source request.
+6. Use **Read Clients**, **Read Jobs**, **Read Crew**, or **Read Equipment**. Each action performs one bounded protected Shared Core read.
+7. If the source returns 401/403, sign in again for a fresh access token and verify Jobs module view permission before rotating the stored secret.
+
+Defaults:
+
+- `YARDWORKERS_BASE_URL=https://jmqvkgiqlimdhcofwkxr.supabase.co`
+- `YARDWORKERS_TIMEOUT_SECONDS=8`
+- Hub maximum: 100 returned records per explicit resource read
+- no automatic polling, refresh loop, synchronization copy, or write
+
+Rollback is schema-neutral: clear the Yard Workers credentials and deploy Build 038. No Yard Workers
+record is changed because Build 039 calls only the protected Shared Core read contract.
