@@ -61,9 +61,7 @@ def validate_yardworkers_base_url(value: str) -> str:
             "YARDWORKERS_BASE_URL must identify the Supabase project origin without an API path."
         )
     if parsed.scheme != "https" and parsed.hostname not in _LOOPBACK_HOSTS:
-        raise YardWorkersConfigurationError(
-            "Remote Yard Workers origins must use HTTPS."
-        )
+        raise YardWorkersConfigurationError("Remote Yard Workers origins must use HTTPS.")
     try:
         port = parsed.port
     except ValueError as exc:
