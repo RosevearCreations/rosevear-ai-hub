@@ -36,6 +36,7 @@ type ReadState =
 const READ_RESOURCES: Record<string, string[]> = {
   devilndove: ["catalogue", "orders", "inventory"],
   rosiedazzlers: ["bookings", "customers", "jobs", "inventory"],
+  yardworkers: ["clients", "jobs", "crew", "equipment"],
 };
 
 function titleCase(value: string) {
@@ -49,6 +50,9 @@ function connectorReadSummary(connectorKey: string) {
   if (connectorKey === "rosiedazzlers") {
     return "Reads are server-side and bounded. Rosie Dazzlers keeps its existing read-only contracts: bookings/customers use read-only POST endpoints, while jobs/inventory use GET. The staff session token never reaches this browser.";
   }
+  if (connectorKey === "yardworkers") {
+    return "Reads are server-side and bounded through Yard Workers' protected Shared Core endpoint. The signed-in access token and Supabase API key never reach this browser.";
+  }
   return "";
 }
 
@@ -58,6 +62,9 @@ function connectorSetupHint(connectorKey: string) {
   }
   if (connectorKey === "rosiedazzlers") {
     return "Configure the Rosie Dazzlers staff session token in Secrets before live reads are enabled.";
+  }
+  if (connectorKey === "yardworkers") {
+    return "Configure both the Yard Workers access token and API key in Secrets before live reads are enabled.";
   }
   return "";
 }
@@ -129,12 +136,12 @@ export function BusinessView() {
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 038</p>
+          <p className="eyebrow">Build 039</p>
           <h1>Business connectors</h1>
           <p className="lede">
-            Devil n Dove and Rosie Dazzlers now provide bounded live
-            read access through the Hub. Yard Workers remains planned;
-            all business writes stay blocked.
+            Devil n Dove, Rosie Dazzlers, and Yard Workers now provide
+            bounded live read access through the Hub. All business writes
+            stay blocked.
           </p>
         </div>
       </header>

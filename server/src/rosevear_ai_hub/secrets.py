@@ -59,6 +59,20 @@ SECRET_DEFINITIONS: tuple[SecretDefinition, ...] = (
         ),
         environment_variable="ROSIEDAZZLERS_STAFF_SESSION_TOKEN",
     ),
+    SecretDefinition(
+        secret_key="yardworkers.access_token",
+        display_name="Yard Workers access token",
+        description=("Supabase user access token used only for Build 039 protected read requests."),
+        environment_variable="YARDWORKERS_ACCESS_TOKEN",
+    ),
+    SecretDefinition(
+        secret_key="yardworkers.anon_key",
+        display_name="Yard Workers API key",
+        description=(
+            "Supabase anon/publishable API key paired with Build 039 protected read requests."
+        ),
+        environment_variable="YARDWORKERS_ANON_KEY",
+    ),
 )
 
 _DEFINITIONS_BY_KEY = {item.secret_key: item for item in SECRET_DEFINITIONS}
@@ -122,6 +136,8 @@ def environment_secret(
         "MQTT_PASSWORD": settings.mqtt_password,
         "DEVILNDOVE_ADMIN_TOKEN": settings.devilndove_admin_token,
         "ROSIEDAZZLERS_STAFF_SESSION_TOKEN": (settings.rosiedazzlers_staff_session_token),
+        "YARDWORKERS_ACCESS_TOKEN": settings.yardworkers_access_token,
+        "YARDWORKERS_ANON_KEY": settings.yardworkers_anon_key,
     }.get(definition.environment_variable)
     return configured.get_secret_value() if configured else None
 

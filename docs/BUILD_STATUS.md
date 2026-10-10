@@ -42,6 +42,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 036 | Connector Framework | COMPLETE | main via PR #63 |
 | 037 | Devil n Dove Read Connector | COMPLETE | main via PR #66 |
 | 038 | Rosie Dazzlers Read Connector | COMPLETE | main via PR #69 |
+| 039 | Yard Workers Read Connector | ACTIVE | dev feature branch |
 
 ## Build 016 acceptance checklist
 
@@ -1060,6 +1061,47 @@ four lanes; the backend reported 164 passed tests with 9 warnings and the Window
 artifact was uploaded successfully. This protected-main release-evidence closeout is followed by
 synchronization back to dev so both branches carry the final release record.
 
+## Build 039 acceptance checklist
+
+- [x] concrete Yard Workers implementation of the Build 036 connector contract
+- [x] verified against Yard Workers source commit 8514825087326bdfe8b5de0e0c96d937ac7c10ee
+- [x] existing protected Shared Core read endpoint reused without Yard Workers source changes
+- [x] remote HTTPS enforcement with loopback-only HTTP exception
+- [x] signed-in Supabase access token and paired API key remain backend-only
+- [x] Yard Workers credentials added to Build 020 secret definitions
+- [x] environment-backed YARDWORKERS_ACCESS_TOKEN and YARDWORKERS_ANON_KEY supported
+- [x] configurable YARDWORKERS_BASE_URL and bounded timeout
+- [x] exact POST /functions/v1/core-data-read contract; no arbitrary path or method passthrough
+- [x] fixed Jobs module view authority for all Build 039 reads
+- [x] Clients, Jobs, Crew, and Equipment resources capped at 100 returned records
+- [x] upstream read_only=true confirmation required
+- [x] normalized/privacy-minimized records; client-site street addresses omitted
+- [x] connector status performs no network request
+- [x] authenticated Hub read endpoint reused
+- [x] Business UI live read controls and bounded preview
+- [x] contextual circled-i Business help updated
+- [x] backend adapter/framework/API tests
+- [x] web read-preview tests
+- [x] backend and desktop version 0.0.39
+- [x] no database migration required
+- [x] no new paid dependency or Yard Workers repository change
+- [x] business writes remain blocked
+- [ ] final Build 039 dev CI green
+- [ ] promoted to main
+- [ ] protected-main promotion gate green
+- [ ] final Build 039 main Production CI green
+- [ ] release-evidence closeout complete through protected-main closeout
+- [ ] dev synchronized with final main closeout target after closeout promotion
+
+## Build 039 operator setup
+
+Build 039 can deploy while unconfigured. Live reads require both a current signed-in Yard Workers
+Supabase access token and the project anon/publishable API key, preferably stored as **Secrets →
+Yard Workers access token** and **Secrets → Yard Workers API key**. The access-token user must be
+active and have Jobs module view permission. Environment fallbacks are YARDWORKERS_ACCESS_TOKEN and
+YARDWORKERS_ANON_KEY. The default Supabase project origin is
+`https://jmqvkgiqlimdhcofwkxr.supabase.co`; no Yard Workers application change is required.
+
 ## Next build
 
-**Build 039 — Yard Workers Read Connector**
+**Build 040 — Narrow Confirmed Business Writes**
