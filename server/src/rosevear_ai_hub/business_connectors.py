@@ -258,9 +258,7 @@ DEVILNDOVE_DESCRIPTOR = ConnectorDescriptor(
 ROSIEDAZZLERS_DESCRIPTOR = ConnectorDescriptor(
     key="rosiedazzlers",
     display_name="Rosie Dazzlers",
-    description=(
-        "Read-only view of detailing bookings, customers, jobs, and inventory."
-    ),
+    description=("Read-only view of detailing bookings, customers, jobs, and inventory."),
     planned_build=38,
     capabilities=(
         _capability(
@@ -440,8 +438,7 @@ class RosieDazzlersReadConnector(BusinessConnector):
                 configured=False,
                 available=False,
                 message=(
-                    "Rosie Dazzlers read access is ready but no staff session token "
-                    "is configured."
+                    "Rosie Dazzlers read access is ready but no staff session token is configured."
                 ),
                 retryable=False,
             )
