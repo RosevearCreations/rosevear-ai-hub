@@ -226,3 +226,27 @@ Hub.
 The current credential is an administrator session secret, not a permanent service key. It can
 expire or be revoked and must be rotated when that occurs. A future dedicated service credential
 should replace it if Devil n Dove defines one.
+
+
+## Build 038 Rosie Dazzlers read connector
+
+Build 038 activates Rosie Dazzlers without copying mutable detailing truth into the Hub.
+
+- default remote origin: `https://rosiedazzlers.ca`
+- remote origins require HTTPS; loopback HTTP remains available for local testing
+- authentication reuses the existing opaque `rd_staff_session` token, stored only on the Hub
+- the token may come from `ROSIEDAZZLERS_STAFF_SESSION_TOKEN` or the encrypted Build 020 Secrets store
+- the browser never receives the token and never calls Rosie Dazzlers directly
+- bookings use the existing read-only `POST /api/admin/bookings_search` contract and are capped by the Hub at 100
+- customers use the existing read-only `POST /api/admin/customers_list` contract and are capped by the Hub at 100
+- jobs use `GET /api/detailer/jobs?scope=workspace` and are capped at 80
+- inventory uses `GET /api/admin/catalog_inventory_list` and is capped by the Hub at 100
+- the client has an exact method/path allow list; no arbitrary upstream URL or method passthrough exists
+- upstream records are normalized and privacy-minimized instead of being passed through wholesale
+- connector status does not probe Rosie Dazzlers; network access occurs only after an explicit read
+- all write operations remain blocked by the Build 036 connector contract
+
+Rosie Dazzlers' two list contracts use POST for historical application reasons even though they are
+read-only. Build 038 preserves those contracts rather than changing the production detailing app just
+to alter HTTP semantics. The Hub allow list prevents that exception from becoming a generic POST
+proxy.
