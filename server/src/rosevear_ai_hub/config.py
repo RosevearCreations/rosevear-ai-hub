@@ -164,6 +164,24 @@ class Settings(BaseSettings):
         le=60,
         alias="ROSIEDAZZLERS_TIMEOUT_SECONDS",
     )
+    yardworkers_base_url: str = Field(
+        default="https://jmqvkgiqlimdhcofwkxr.supabase.co",
+        alias="YARDWORKERS_BASE_URL",
+    )
+    yardworkers_access_token: SecretStr | None = Field(
+        default=None,
+        alias="YARDWORKERS_ACCESS_TOKEN",
+    )
+    yardworkers_anon_key: SecretStr | None = Field(
+        default=None,
+        alias="YARDWORKERS_ANON_KEY",
+    )
+    yardworkers_timeout_seconds: float = Field(
+        default=8.0,
+        gt=0,
+        le=60,
+        alias="YARDWORKERS_TIMEOUT_SECONDS",
+    )
     knowledge_storage_dir: Path = Field(
         default=Path("./data/knowledge"),
         alias="KNOWLEDGE_STORAGE_DIR",
