@@ -2532,3 +2532,10 @@ h1 {
 .speech-actions { display: flex; gap: 0.55rem; flex-wrap: wrap; }
 .speech-info { color: #525252; line-height: 1.4; }
 .speech-panel .chat-error, .speech-panel .chat-notice { margin: 0; }
+
+
+/* Build 043 — opt-in offline text-to-speech */
+.tts-message-actions { display: flex; align-items: center; gap: 0.65rem; margin-top: 0.6rem; }
+.tts-message-actions small, .tts-availability { color: #525252; }
+.tts-message-actions button { padding: 0.45rem 0.75rem; }
+.tts-availability { display: block; margin: 0.5rem 0; }

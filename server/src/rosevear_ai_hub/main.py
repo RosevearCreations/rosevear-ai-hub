@@ -26,6 +26,7 @@ from rosevear_ai_hub.api.providers import router as providers_router
 from rosevear_ai_hub.api.secrets import router as secrets_router
 from rosevear_ai_hub.api.speech import router as speech_router
 from rosevear_ai_hub.api.tools import router as tools_router
+from rosevear_ai_hub.api.tts import router as tts_router
 from rosevear_ai_hub.auth import require_authenticated, require_roles
 from rosevear_ai_hub.auth import router as auth_router
 from rosevear_ai_hub.automation_runtime import AutomationEventRuntime
@@ -107,6 +108,10 @@ def create_app() -> FastAPI:
     application.include_router(secrets_router, dependencies=protected)
     application.include_router(
         speech_router,
+        dependencies=[Depends(require_roles("owner", "administrator", "household_user"))],
+    )
+    application.include_router(
+        tts_router,
         dependencies=[Depends(require_roles("owner", "administrator", "household_user"))],
     )
     application.include_router(tools_router, dependencies=protected)

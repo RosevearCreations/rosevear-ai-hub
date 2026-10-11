@@ -1150,7 +1150,7 @@ failure, inspect the source system before preparing another confirmation.
 
 ## Next build
 
-**Build 042 — Local Speech-to-Text**
+**Build 044 — Voice Commands and Confirmations**
 
 
 ## Build 041 — Automatic Service Recovery, Camera Streaming Repair & Startup Cleanup
@@ -1184,3 +1184,19 @@ Core Windows service-recovery acceptance is GREEN. Do not interpret that as succ
 - [ ] Post-merge main Production CI evidence and release closeout
 
 Build 043 remains Local Text-to-Speech. Build 044 remains Voice Commands and Confirmations.
+
+
+## Build 043 — Local Text-to-Speech
+
+- [x] Authenticated local Windows SAPI TTS status and synthesis endpoints
+- [x] Bounded text, temporary input/output cleanup, sanitized errors and validated PCM WAV
+- [x] Explicit Speak/Speak excerpt/Stop voice on completed assistant messages
+- [x] Single active browser player with cancellation and object URL cleanup
+- [x] Contextual circled-i Chat help; no automated voice, cloud voice or paid provider
+- [x] Backend and web regression tests; no database migration or startup task edits
+- [ ] Dev/main CI and protected promotion evidence
+- [ ] Windows server version 0.0.43 and authenticated browser session verification
+- [ ] Physical Windows SAPI voice playback and Stop acceptance
+- [ ] Post-merge main Production CI evidence
+
+See `docs/BUILD_043_LOCAL_TTS.md` for setup, privacy, rollback and operational acceptance. Build 044 is the next planned milestone.
