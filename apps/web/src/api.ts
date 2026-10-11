@@ -1945,3 +1945,42 @@ export async function transcribeLocalWav(audio: Blob, signal?: AbortSignal): Pro
   const result = (await response.json()) as { text: string };
   return result.text;
 }
+
+export interface LocalTtsStatus {
+  available: boolean;
+  engine: "windows_sapi";
+  message: string;
+  max_text_characters: number;
+}
+
+export function getLocalTtsStatus(signal?: AbortSignal): Promise<LocalTtsStatus> {
+  return getJson<LocalTtsStatus>("/api/v1/tts/status", signal);
+}
+
+export async function synthesizeLocalSpeech(text: string, signal?: AbortSignal): Promise<Blob> {
+  const response = await fetch(API_BASE_URL + "/api/v1/tts/synthesize", {
+    method: "POST",
+    credentials: "include",
+    headers: { Accept: "audio/wav", "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+    signal,
+  });
+  if (!response.ok) {
+    let detail = "Local voice failed with status " + response.status;
+    try {
+      const payload = (await response.json()) as { detail?: string };
+      if (payload.detail) detail = payload.detail;
+    } catch {
+      // Preserve the status fallback.
+    }
+    throw new Error(detail);
+  }
+  if (!(response.headers.get("content-type") ?? "").includes("audio/wav")) {
+    throw new Error("Local voice service returned unexpected audio.");
+  }
+  const wav = await response.blob();
+  if (wav.size < 44 || wav.size > 20 * 1024 * 1024) {
+    throw new Error("Local voice response had an invalid size.");
+  }
+  return wav;
+}

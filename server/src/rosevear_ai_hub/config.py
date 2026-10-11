@@ -94,6 +94,17 @@ class Settings(BaseSettings):
         alias="MQTT_RECONNECT_MAX_SECONDS",
     )
     mqtt_allowed_topics: str = Field(default="", alias="MQTT_ALLOWED_TOPICS")
+    tts_enabled: bool = Field(default=True, alias="TTS_ENABLED")
+    tts_sapi_script_path: Path = Field(
+        default=Path("./scripts/tts-sapi.ps1"),
+        alias="TTS_SAPI_SCRIPT_PATH",
+    )
+    tts_timeout_seconds: int = Field(
+        default=60,
+        ge=5,
+        le=180,
+        alias="TTS_TIMEOUT_SECONDS",
+    )
     speech_executable_path: Path = Field(
         default=Path("./tools/whisper/whisper-cli.exe"),
         alias="SPEECH_EXECUTABLE_PATH",
