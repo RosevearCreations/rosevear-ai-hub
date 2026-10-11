@@ -25,7 +25,7 @@ def test_same_origin_web_assets_and_api_are_accessible(tmp_path, monkeypatch):
     assert client.get("/manifest.webmanifest").status_code == 200
     assert client.get("/sw.js").status_code == 200
     assert client.get("/health").json()["status"] == "ok"
-    assert client.get("/version").json()["version"] == "0.0.46"
+    assert client.get("/version").json()["version"] == "0.0.47"
     assert client.get("/.env").status_code == 404
     assert client.get("/api/v1/speech/status").status_code == 401
 
