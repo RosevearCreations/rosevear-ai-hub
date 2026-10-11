@@ -90,6 +90,13 @@ jobs:
           $errors = $null
           foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/enable-tailscale-serve.ps1')) { [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null }
           if ($errors.Count -gt 0) { $errors | Format-List; exit 1 }
+      - name: Prevent reserved PowerShell HOME assignment in Tailscale preflight
+        shell: pwsh
+        run: |
+          $source = Get-Content -LiteralPath 'scripts/enable-tailscale-serve.ps1' -Raw
+          if ($source -match '(?im)^\s*\$HOME\s*=') {
+            throw 'Tailscale preflight may not assign to PowerShell automatic variable HOME.'
+          }
       - name: Check Rust shell
         run: npm run desktop:check
       - name: Build Windows desktop executable
