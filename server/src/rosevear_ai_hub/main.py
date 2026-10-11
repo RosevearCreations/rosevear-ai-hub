@@ -3,7 +3,7 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -60,9 +60,11 @@ def create_app() -> FastAPI:
     application = FastAPI(
         title=settings.app_name,
         version=__version__,
-        docs_url="/docs",
-        redoc_url="/redoc",
-        openapi_url="/openapi.json",
+        # Do not publish a map of internal home/business write APIs to browsers.
+        # Programmatic local schema generation remains available via app.openapi().
+        docs_url=None,
+        redoc_url=None,
+        openapi_url=None,
         lifespan=_lifespan,
     )
 
@@ -74,6 +76,18 @@ def create_app() -> FastAPI:
         allow_headers=["Accept", "Content-Type"],
         expose_headers=["X-Generation-ID"],
     )
+
+    @application.middleware("http")
+    async def security_response_headers(request: Request, call_next):
+        # No client-side caching of private data or authenticated API responses.
+        # Leave static PWA assets to their existing service-worker policy.
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        if request.url.path.startswith("/api/v1/"):
+            response.headers["Cache-Control"] = "no-store"
+        return response
 
     logger = logging.getLogger(__name__)
     logger.info("application configured")

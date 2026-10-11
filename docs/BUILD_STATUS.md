@@ -51,7 +51,8 @@ This file records completed and active builds. The roadmap remains authoritative
 | 045 | Installable PWA | COMPLETE | main |
 | 046 | Private Remote Access via Tailscale + Dual Private Access | COMPLETE | main |
 | 047 | Encrypted Backup and Safe Restore | COMPLETE | main via PR #115 |
-| 048 | Performance and Resource-Budget Review | IN PROGRESS | production checks pending |
+| 048 | Performance and Resource-Budget Review | COMPLETE | main via PR #120 |
+| 049 | Threat Model and Security Review | IN PROGRESS | promotion checks pending |
 
 ## Build 016 acceptance checklist
 
@@ -1291,3 +1292,18 @@ Code release is **GREEN and COMPLETE**. The verified `dev` candidate and PR #115
 - [ ] on-Windows idle/normal-workload measurements recorded (separate operator acceptance)
 
 See docs/BUILD_048_PERFORMANCE_RESOURCE_BUDGET.md. No database migrations.
+
+## Build 049 — Threat Model and Security Review
+
+- [x] prioritized threat register covering local network, remote clients, sessions, backups and device controls
+- [x] disable public interactive API documentation and HTTP schema
+- [x] revoke active target-account sessions with password rotation
+- [x] private API no-store + browser anti-framing, no-referrer, nosniff response headers
+- [x] deterministic backend regression tests and Windows/local acceptance guide
+- [x] explicit residual-risk checklist for ACLs, Caddy certificates, network and backup security
+- [ ] development backend/web/Windows/docs CI GREEN
+- [ ] production pull-request CI GREEN
+- [ ] post-merge production main CI GREEN
+- [ ] operator negative remote-access tests and Windows acceptance (not established by CI)
+
+See docs/BUILD_049_THREAT_MODEL_SECURITY_REVIEW.md. No migrations.
