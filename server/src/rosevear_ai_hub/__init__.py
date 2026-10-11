@@ -1,3 +1,3 @@
 """Rosevear AI Hub backend package."""
 
-__version__ = "0.0.40"
+__version__ = "0.0.42"

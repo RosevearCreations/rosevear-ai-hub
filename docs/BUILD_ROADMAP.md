@@ -234,6 +234,12 @@ This is the canonical implementation sequence. Build numbers are never reused.
 ## Phase 9 — Voice and Mobile
 
 ### Build 042 — Local Speech-to-Text
+- opt-in browser microphone recording with editable transcript in Chat
+- browser PCM16 WAV encoding and max recording limit
+- authenticated, bounded local speech API and fail-closed model discovery
+- optional whisper.cpp engine and GGML model files installed only by operator
+- no cloud transcription, automatic chat submission, or voice-command execution
+- tests for auth, audio validation, temporary audio cleanup and browser WAV encoder
 ### Build 043 — Local Text-to-Speech
 ### Build 044 — Voice Commands and Confirmations
 ### Build 045 — Installable PWA

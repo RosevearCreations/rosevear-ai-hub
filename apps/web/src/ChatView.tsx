@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { SpeechToTextPanel } from "./SpeechToTextPanel";
+
 import {
   cancelGeneration,
   createConversation,
@@ -354,7 +356,7 @@ export function ChatView() {
       <section className="chat-panel" aria-label="Local AI chat">
         <header className="chat-header">
           <div>
-            <p className="eyebrow">Build 024</p>
+            <p className="eyebrow">Build 042</p>
             <h1>{activeConversation?.title ?? "Chat"}</h1>
             <small className="profile-summary">
               {activeProfile
@@ -511,6 +513,10 @@ export function ChatView() {
                 void sendMessage();
               }
             }}
+          />
+          <SpeechToTextPanel
+            disabled={status === "streaming"}
+            onTranscript={(text) => setPrompt((current) => [current.trim(), text.trim()].filter(Boolean).join(" "))}
           />
           <div className="composer-actions">
             {status === "streaming" ? (
