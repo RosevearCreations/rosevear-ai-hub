@@ -248,6 +248,13 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - no cloud API, no automatic speaking or commands, no model downloads
 - backend/web tests, Windows acceptance and rollback guide
 ### Build 044 — Voice Commands and Confirmations
+- authenticated deterministic preview of bounded spoken single-target commands
+- separate editable voice draft, never automatically submitted to Chat
+- explicit preview and user-confirmed low-risk Home Assistant action via existing audited controller
+- forbid bulk, ambiguous, unsafe, unsupported or non-allowlisted actions
+- non-commands enter Chat composer only after explicit separate click
+- no higher-risk voice execution, no voice-only confirmation
+- backend and web tests for authorization, blocked actions, exact preview and stale invalidation
 ### Build 045 — Installable PWA
 ### Build 046 — Private Remote Access via Tailscale
 
