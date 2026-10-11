@@ -94,8 +94,14 @@ def _snapshot_database(source: Path, snapshot: Path) -> None:
     try:
         live = sqlite3.connect(f"{source.as_uri()}?mode=ro", uri=True, timeout=15)
         try:
-            with sqlite3.connect(snapshot) as target:
+            # sqlite3's connection context manager does not close the database.
+            # Close handles explicitly so Windows can remove temporary snapshots.
+            target = sqlite3.connect(snapshot)
+            try:
                 live.backup(target, pages=100, sleep=0.1)
+                target.commit()
+            finally:
+                target.close()
         finally:
             live.close()
     except sqlite3.DatabaseError as exc:
