@@ -2525,3 +2525,10 @@ h1 {
     flex-direction: column;
   }
 }
+
+
+/* Build 042 — optional local-only speech transcription */
+.speech-panel { display: grid; gap: 0.5rem; padding: 0.7rem 0; }
+.speech-actions { display: flex; gap: 0.55rem; flex-wrap: wrap; }
+.speech-info { color: #525252; line-height: 1.4; }
+.speech-panel .chat-error, .speech-panel .chat-notice { margin: 0; }
