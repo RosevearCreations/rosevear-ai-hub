@@ -601,3 +601,15 @@ rollback does not delete them.
 ## Build 047 — Encrypted Backup and Restore
 
 See [Build 047 operator runbook](BUILD_047_BACKUP_AND_RESTORE.md) for opt-in local encrypted SQLite snapshots, offline key escrow, per-file integrity checks, restore drill to a fresh directory, and manual production recovery after API shutdown. No unattended backup schedule is installed automatically. Home Assistant VM, MQTT broker, Ollama models, Windows startup tasks, private CA and environment keys need separate backups.
+
+
+## Build 050 — Disaster Recovery Drill (opt-in)
+
+The encrypted Build 047 archive can be rehearsed without a live restore using
+an isolated temporary workspace. Run the Build 050 synthetic smoke and real
+archive rehearsal as separate operator actions, with protected passphrase files
+outside Git and no plaintext values in chat. Successful CI proves only synthetic
+recovery, not off-machine hardware or full Home Assistant/MQTT/Ollama recovery.
+Refer to [Build 050 operator runbook](BUILD_050_DISASTER_RECOVERY_DRILL.md)
+for Windows commands, recovery exclusions, safe manual cutover and remaining
+RTO/RPO decisions. No automatic backup or restart task is added.
