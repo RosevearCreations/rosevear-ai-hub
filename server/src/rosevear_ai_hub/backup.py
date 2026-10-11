@@ -190,7 +190,9 @@ def _decrypt(archive: Path, plaintext: Path, secret: bytes) -> None:
                     writer.write(decryptor.update(block))
                 writer.write(decryptor.finalize())
         except InvalidTag as exc:
-            raise BackupError("Archive authentication failed: wrong passphrase or damaged file.") from exc
+            raise BackupError(
+                "Archive authentication failed: wrong passphrase or damaged file."
+            ) from exc
 
 
 def _extract_validated(tar_path: Path, destination: Path) -> dict[str, object]:
