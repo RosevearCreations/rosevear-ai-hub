@@ -3,6 +3,7 @@
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
 
+from rosevear_ai_hub import __version__
 from rosevear_ai_hub.config import Settings
 from rosevear_ai_hub.database import build_engine, get_session
 from rosevear_ai_hub.main import create_app
