@@ -101,7 +101,7 @@ jobs:
         shell: pwsh
         run: |
           $source = Get-Content -LiteralPath 'scripts/configure-lan-https.ps1' -Raw
-          foreach ($needle in @('admin off', 'tls internal', 'remote_ip', 'bind $LanIPv4', 'Get-NetConnectionProfile', 'New-NetFirewallRule', '-RemoteAddress $TrustedLanCIDRs', '127.0.0.1:8765', 'if (-not $Enable)', 'if ($Disable)')) {
+          foreach ($needle in @('admin off', 'tls internal', 'remote_ip', 'bind $LanIPv4', 'Get-NetConnectionProfile', 'New-NetFirewallRule', 'RemoteAddress = $TrustedLanCIDRs', '127.0.0.1:8765', 'if (-not $Enable)', 'if ($Disable)')) {
             if (-not $source.Contains($needle)) { throw "Missing private LAN guard: $needle" }
           }
           if ($source -match '(?im)^\s*\$HOME\s*=' -or $source.Contains('tailscale funnel')) { throw 'Unsafe LAN script change' }
