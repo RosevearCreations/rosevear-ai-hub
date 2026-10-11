@@ -67,3 +67,15 @@ Official references:
 - SQLite online backup: https://www.sqlite.org/backup.html
 - Python sqlite3 backup: https://docs.python.org/3/library/sqlite3.html#sqlite3.Connection.backup
 - Python cryptography AES-GCM: https://cryptography.io/en/latest/hazmat/primitives/symmetric-encryption/
+
+
+## Release record
+
+- **Dev verification:** GREEN on the final Build 047 tree; backend lint/format/tests, web tests/build, docs checks and Windows desktop/recovery checks passed.
+- **Production promotion:** PR #115 — `Build 047 — production promotion: encrypted backup and safe restore`.
+- **Production commit:** `b6c5a7adde6d831f8df4e057dbe886f07c2446f4`.
+- **Production tree:** `ab12137e10f6f3c4a15003690b8fc8feeaf25f03`, identical to the verified dev candidate tree.
+- **Main Production CI:** GREEN, workflow run `38155340556`.
+- **Version:** `0.0.47`.
+- **Remaining operator acceptance:** perform an offline recovery drill on the Windows test server using a real encrypted backup. This is deliberately separate from code promotion and must not overwrite the live Hub.
+- **Next queued build:** Build 048 — Performance and Resource-Budget Review.
