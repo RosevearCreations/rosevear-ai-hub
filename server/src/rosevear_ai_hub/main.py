@@ -25,8 +25,8 @@ from rosevear_ai_hub.api.profiles import router as profiles_router
 from rosevear_ai_hub.api.providers import router as providers_router
 from rosevear_ai_hub.api.secrets import router as secrets_router
 from rosevear_ai_hub.api.speech import router as speech_router
-from rosevear_ai_hub.api.tts import router as tts_router
 from rosevear_ai_hub.api.tools import router as tools_router
+from rosevear_ai_hub.api.tts import router as tts_router
 from rosevear_ai_hub.auth import require_authenticated, require_roles
 from rosevear_ai_hub.auth import router as auth_router
 from rosevear_ai_hub.automation_runtime import AutomationEventRuntime
