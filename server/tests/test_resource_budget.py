@@ -106,24 +106,25 @@ def test_resource_endpoint_only_owner_and_administrator(tmp_path, monkeypatch):
     )
     assert added.status_code == 201
     client.post("/api/v1/auth/logout")
-    assert client.post(
+    login = client.post(
         "/api/v1/auth/login",
         json={"username": "family", "password": "family-budget-secret-123"},
-    ).status_code == 200
+    )
+    assert login.status_code == 200
     assert client.get(address).status_code == 403
     client.post("/api/v1/auth/logout")
-    assert client.post(
+    login = client.post(
         "/api/v1/auth/login",
         json={"username": "owner", "password": "budget-owner-secret-123"},
-    ).status_code == 200
-    family_id = added.json()["id"]
-    promote = client.patch(
-        f"/api/v1/auth/users/{family_id}", json={"role": "administrator"}
     )
+    assert login.status_code == 200
+    family_id = added.json()["id"]
+    promote = client.patch(f"/api/v1/auth/users/{family_id}", json={"role": "administrator"})
     assert promote.status_code == 200
     client.post("/api/v1/auth/logout")
-    assert client.post(
+    login = client.post(
         "/api/v1/auth/login",
         json={"username": "family", "password": "family-budget-secret-123"},
-    ).status_code == 200
+    )
+    assert login.status_code == 200
     assert client.get(address).status_code == 200
