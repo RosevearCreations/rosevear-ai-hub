@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 import wave
 from pathlib import Path
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel
@@ -18,6 +19,8 @@ from pydantic import BaseModel
 from rosevear_ai_hub.config import Settings, get_settings
 
 router = APIRouter(prefix="/api/v1/speech", tags=["speech"])
+SpeechSettings = Annotated[Settings, Depends(get_settings)]
+SpeechUpload = Annotated[UploadFile, File(...)]
 MAX_WAV_BYTES = 1_100_000
 MAX_DURATION_SECONDS = 30
 REQUIRED_SAMPLE_RATE = 16000
@@ -40,7 +43,7 @@ def _available(settings: Settings) -> bool:
 
 
 @router.get("/status", response_model=SpeechStatus)
-def speech_status(settings: Settings = Depends(get_settings)) -> SpeechStatus:
+def speech_status(settings: SpeechSettings) -> SpeechStatus:
     enabled = _available(settings)
     return SpeechStatus(
         available=enabled,
@@ -77,11 +80,13 @@ def _validate_wav(data: bytes) -> None:
 
 @router.post("/transcribe", response_model=TranscriptionResponse)
 def transcribe(
-    audio: UploadFile = File(...),
-    settings: Settings = Depends(get_settings),
+    audio: SpeechUpload,
+    settings: SpeechSettings,
 ) -> TranscriptionResponse:
     if not _available(settings):
-        raise HTTPException(status_code=503, detail="Local speech engine or model is not installed.")
+        raise HTTPException(
+            status_code=503, detail="Local speech engine or model is not installed."
+        )
     if audio.content_type not in ("audio/wav", "audio/x-wav", "audio/wave"):
         raise HTTPException(status_code=415, detail="Only local PCM WAV audio is supported.")
 
@@ -121,7 +126,8 @@ def transcribe(
         transcript_path = transcript_base.with_suffix(".txt")
         if result.returncode != 0 or not transcript_path.is_file():
             raise HTTPException(
-                status_code=502, detail="Local speech recognition failed. Check the installed model."
+                status_code=502,
+                detail="Local speech recognition failed. Check the installed model.",
             )
         transcript = transcript_path.read_text(encoding="utf-8").strip()
         if not transcript or len(transcript) > 8000:
