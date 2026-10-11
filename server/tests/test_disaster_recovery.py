@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from rosevear_ai_hub.backup import create_backup
+from rosevear_ai_hub.backup import BackupError, create_backup
 from rosevear_ai_hub.disaster_recovery import (
     DrillError,
     drill_archive,
@@ -100,7 +100,7 @@ def test_wrong_password_and_tampering_never_publish_green_evidence(tmp_path):
     payload = bytearray(archive.read_bytes())
     payload[len(payload) // 2] ^= 1
     damaged.write_bytes(payload)
-    with pytest.raises(Exception):
+    with pytest.raises(BackupError):
         drill_archive(damaged, password, work, evidence)
     assert not evidence.exists()
     assert list(work.iterdir()) == []
