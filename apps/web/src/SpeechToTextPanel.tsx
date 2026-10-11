@@ -69,7 +69,7 @@ export function SpeechToTextPanel({
       requestRef.current = controller;
       const text = await transcribeLocalWav(wav, controller.signal);
       onTranscript(text);
-      setNotice("Transcript added to your message. Review and edit before sending.");
+      setNotice("Speech captured as a separate draft. Review the words below.");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to transcribe audio.");
     } finally {
@@ -114,7 +114,7 @@ export function SpeechToTextPanel({
       {error ? <p className="chat-error" role="alert">{error}</p> : null}
       <small className="speech-info">
         Microphone access is optional. No cloud speech service. Audio is discarded after local processing;
-        recognized text stays editable until you press Send.
+        recognized text is never submitted automatically and requires explicit review.
       </small>
     </div>
   );
