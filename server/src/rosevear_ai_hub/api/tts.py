@@ -39,13 +39,20 @@ class SpeechRequest(BaseModel):
     @classmethod
     def validate_text(cls, text: str) -> str:
         cleaned = text.strip()
-        if not cleaned or any(ord(character) < 32 and character not in "\n\r\t" for character in cleaned):
+        if not cleaned or any(
+            ord(character) < 32 and character not in "
+\r\t" for character in cleaned
+        ):
             raise ValueError("Speech text must be non-empty and contain no control characters.")
         return cleaned
 
 
 def _engine(settings: Settings) -> str | None:
-    if not settings.tts_enabled or sys.platform != "win32" or not settings.tts_sapi_script_path.is_file():
+    if (
+        not settings.tts_enabled
+        or sys.platform != "win32"
+        or not settings.tts_sapi_script_path.is_file()
+    ):
         return None
     return shutil.which("powershell.exe")
 
@@ -77,7 +84,9 @@ def _read_local_wav(path: Path) -> bytes:
             ):
                 raise ValueError("Unsupported audio format.")
     except (EOFError, OSError, ValueError, wave.Error) as exc:
-        raise HTTPException(status_code=502, detail="Local voice engine returned invalid WAV.") from exc
+        raise HTTPException(
+            status_code=502, detail="Local voice engine returned invalid WAV."
+        ) from exc
     return path.read_bytes()
 
 
@@ -113,7 +122,9 @@ def synthesize(request: SpeechRequest, settings: TTSSettings) -> Response:
                 timeout=settings.tts_timeout_seconds,
             )
         except (OSError, subprocess.TimeoutExpired) as exc:
-            raise HTTPException(status_code=503, detail="Local voice engine unavailable or timed out.") from exc
+            raise HTTPException(
+                status_code=503, detail="Local voice engine unavailable or timed out."
+            ) from exc
         if result.returncode != 0:
             raise HTTPException(status_code=502, detail="Local voice synthesis failed.")
         wav = _read_local_wav(wav_path)
