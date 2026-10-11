@@ -19,7 +19,7 @@ Extension to Build 046, not a replacement for Build 047 (Backup and Restore). No
 2. Download the official Caddy Windows executable from https://caddyserver.com/download and save it as C:\Users\Ree\rosevearaihub\tools\caddy\caddy.exe. It runs ON THE SERVER ONLY. Do not put downloaded binaries or CA/private keys into GitHub.
 3. In repository-root PowerShell run the check-only preflight, replacing examples with the selected server LAN IP and trusted LAN subnet:
 
-   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\configure-lan-https.ps1 -LanIPv4 "192.168.68.50" -TrustedLanCIDRs @("192.168.68.0/24")
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\configure-lan-https.ps1 -LanIPv4 "192.168.68.50" -TrustedLanCIDRs "192.168.68.0/24"
 
    This deliberately makes NO network or firewall changes. The script requires the Caddy binary, healthy loopback-only Hub, functioning production web manifest, an active Private Windows adapter, enabled Private firewall with inbound blocking, unoccupied HTTPS port, and a deliberately selected private /24 through /32 client range.
 4. After reviewing the preflight, open Administrator PowerShell and repeat the same command with -Enable. The opt-in action creates a generated data/lan-access/Caddyfile, validates it, adds one narrow named Windows Firewall allow rule for Caddy TCP/8443 on the chosen server IP and approved clients, then starts Caddy. A failed startup removes the newly created firewall rule.
