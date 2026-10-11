@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SpeechToTextPanel } from "./SpeechToTextPanel";
+import { useLocalTextToSpeech } from "./localTextToSpeech";
 
 import {
   cancelGeneration,
@@ -21,6 +22,7 @@ import {
 type ChatStatus = "idle" | "streaming" | "cancelled" | "error";
 
 export function ChatView() {
+  const tts = useLocalTextToSpeech();
   const [models, setModels] = useState<OllamaModel[]>([]);
   const [providers, setProviders] = useState<ProviderStatus[]>([]);
   const [profiles, setProfiles] = useState<ModelProfile[]>([]);
@@ -356,7 +358,7 @@ export function ChatView() {
       <section className="chat-panel" aria-label="Local AI chat">
         <header className="chat-header">
           <div>
-            <p className="eyebrow">Build 042</p>
+            <p className="eyebrow">Build 043</p>
             <h1>{activeConversation?.title ?? "Chat"}</h1>
             <small className="profile-summary">
               {activeProfile
@@ -470,6 +472,27 @@ export function ChatView() {
                     : "We"}
                 </strong>
                 <p>{message.content || (message.status === "streaming" ? "…" : "")}</p>
+                {message.role === "assistant" && message.status === "complete" && message.content ? (
+                  <div className="tts-message-actions">
+                    {tts.activeMessageId === message.id ? (
+                      <button type="button" onClick={tts.stop} aria-label="Stop local voice">
+                        Stop voice
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={!tts.available}
+                        onClick={() => void tts.speak(message.id, message.content)}
+                        aria-label={message.content.length > 600 ? "Speak first 600 characters locally" : "Speak reply locally"}
+                      >
+                        {message.content.length > 600 ? "Speak excerpt" : "Speak"}
+                      </button>
+                    )}
+                    {tts.activeMessageId === message.id ? (
+                      <small role="status">{tts.playing ? "Playing locally" : "Preparing local voice…"}</small>
+                    ) : null}
+                  </div>
+                ) : null}
                 {message.role === "assistant" && message.status !== "complete" ? (
                   <small className="message-status">{message.status}</small>
                 ) : null}
@@ -478,6 +501,8 @@ export function ChatView() {
           )}
         </div>
 
+        <small className="tts-availability" role="status">{tts.availabilityMessage}</small>
+        {tts.error ? <p className="chat-error" role="alert">{tts.error}</p> : null}
         {retryNotice ? (
           <p className="chat-notice" role="status">
             {retryNotice}
