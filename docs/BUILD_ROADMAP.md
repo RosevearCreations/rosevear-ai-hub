@@ -241,6 +241,12 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - no cloud transcription, automatic chat submission, or voice-command execution
 - tests for auth, audio validation, temporary audio cleanup and browser WAV encoder
 ### Build 043 — Local Text-to-Speech
+- Windows built-in offline SAPI voice service and temporary PCM WAV
+- authenticated, bounded text input with sanitized failure handling
+- optional Speak / Stop voice on completed assistant Chat responses
+- local browser playback, abort/revoke on stop; excerpt for longer messages
+- no cloud API, no automatic speaking or commands, no model downloads
+- backend/web tests, Windows acceptance and rollback guide
 ### Build 044 — Voice Commands and Confirmations
 ### Build 045 — Installable PWA
 ### Build 046 — Private Remote Access via Tailscale
