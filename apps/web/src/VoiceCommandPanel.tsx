@@ -34,7 +34,6 @@ export function VoiceCommandPanel({
     controllerRef.current = null;
     setPreview(null);
     setReviewed("");
-    setNotice("");
   }, [draft]);
 
   useEffect(() => () => controllerRef.current?.abort(), []);
