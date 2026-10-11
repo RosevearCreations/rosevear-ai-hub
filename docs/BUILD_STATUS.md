@@ -1275,3 +1275,18 @@ See `docs/BUILD_046_TAILSCALE_PRIVATE_ACCESS.md`. Next Build 047 — Backup and 
 - [ ] on-Windows idle/normal-workload measurements recorded (separate operator acceptance)
 
 See docs/BUILD_048_PERFORMANCE_RESOURCE_BUDGET.md. No database migrations.
+
+## Build 049 — Threat Model and Security Review
+
+- [x] prioritized threat register covering local network, remote clients, sessions, backups and device controls
+- [x] disable public interactive API documentation and HTTP schema
+- [x] revoke active target-account sessions with password rotation
+- [x] private API no-store + browser anti-framing, no-referrer, nosniff response headers
+- [x] deterministic backend regression tests and Windows/local acceptance guide
+- [x] explicit residual-risk checklist for ACLs, Caddy certificates, network and backup security
+- [ ] development backend/web/Windows/docs CI GREEN
+- [ ] production pull-request CI GREEN
+- [ ] post-merge production main CI GREEN
+- [ ] operator negative remote-access tests and Windows acceptance (not established by CI)
+
+See docs/BUILD_049_THREAT_MODEL_SECURITY_REVIEW.md. No migrations.
