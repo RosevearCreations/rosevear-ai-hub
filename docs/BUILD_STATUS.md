@@ -52,7 +52,8 @@ This file records completed and active builds. The roadmap remains authoritative
 | 046 | Private Remote Access via Tailscale + Dual Private Access | COMPLETE | main |
 | 047 | Encrypted Backup and Safe Restore | COMPLETE | main via PR #115 |
 | 048 | Performance and Resource-Budget Review | COMPLETE | main via PR #120 |
-| 049 | Threat Model and Security Review | IN PROGRESS | promotion checks pending |
+| 049 | Threat Model and Security Review | COMPLETE | main via PR #122 |
+| 050 | Disaster Recovery Drill | IN PROGRESS | production checks pending |
 
 ## Build 016 acceptance checklist
 
@@ -1307,3 +1308,18 @@ See docs/BUILD_048_PERFORMANCE_RESOURCE_BUDGET.md. No database migrations.
 - [ ] operator negative remote-access tests and Windows acceptance (not established by CI)
 
 See docs/BUILD_049_THREAT_MODEL_SECURITY_REVIEW.md. No migrations.
+
+## Build 050 — Disaster Recovery Drill
+
+- [x] synthetic encrypted archive round-trip, file contents and SQLite schema/record checks
+- [x] read-only operator-archive rehearsal to an isolated temporary directory
+- [x] no-clobber JSON evidence with archive hash, file/byte counts and SQLite integrity
+- [x] wrong-passphrase and tamper refusal; cleanup and live-source-preservation tests
+- [x] dedicated Windows recovery tests and synthetic command-line smoke gate
+- [x] operator-runbook for backups, separate master key, offline escrow, gaps and RPO/RTO
+- [ ] development CI all checks GREEN
+- [ ] production PR CI all checks GREEN
+- [ ] post-merge main production CI GREEN
+- [ ] local Windows operator synthetic + real household archive rehearsals (separate acceptance)
+
+See docs/BUILD_050_DISASTER_RECOVERY_DRILL.md. No migrations or service restarts.
