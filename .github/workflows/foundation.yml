@@ -82,8 +82,10 @@ jobs:
           cache: pip
       - name: Install backend and test dependencies
         run: python -m pip install -e ".[dev]"
-      - name: Windows encrypted backup and staged restore tests
-        run: python -m pytest server/tests/test_backup_restore.py
+      - name: Windows encrypted backup and isolated recovery tests
+        run: python -m pytest server/tests/test_backup_restore.py server/tests/test_disaster_recovery.py
+      - name: Windows end-to-end synthetic recovery smoke drill
+        run: python -m rosevear_ai_hub.disaster_recovery synthetic --work-dir "${{ runner.temp }}"
 
   desktop-windows:
     runs-on: windows-latest
