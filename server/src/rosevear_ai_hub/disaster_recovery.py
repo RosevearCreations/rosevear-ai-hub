@@ -194,9 +194,19 @@ def main(argv: list[str] | None = None) -> int:
             result = drill_archive(
                 args.archive, args.passphrase_file, args.work_dir, args.evidence
             )
-    except (BackupError, DrillError, OSError, sqlite3.DatabaseError, tarfile.TarError, ValueError) as exc:
+    except (
+        BackupError,
+        DrillError,
+        OSError,
+        sqlite3.DatabaseError,
+        tarfile.TarError,
+        ValueError,
+    ) as exc:
         # Do not expose private paths, passwords, or backing-store details in logs.
-        print(f"Recovery drill FAILED ({type(exc).__name__}). No live data changed.", file=sys.stderr)
+        print(
+            f"Recovery drill FAILED ({type(exc).__name__}). No live data changed.",
+            file=sys.stderr,
+        )
         return 1
     print(
         f"Recovery drill PASS: {result['drill_type']}; "
