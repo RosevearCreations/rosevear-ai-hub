@@ -264,6 +264,13 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - secure context guidance for localhost versus LAN HTTP; Build 046 handles remote HTTPS
 - automated installation/privacy behavior tests, Windows install verification and rollback
 ### Build 046 — Private Remote Access via Tailscale
+- optional Tailscale Serve private HTTPS 443 reverse proxy to loopback FastAPI 8765; never Funnel
+- production PWA served from FastAPI origin to avoid remote-browser localhost API calls
+- preserve local Vite and Tauri API routing without LAN bind or wildcard CORS
+- Secure HTTP-only SameSite session cookie when connecting via HTTPS
+- opt-in, check-first PowerShell setup refuses conflicting Serve/Funnel and nonloopback binds
+- System section guidance, restricted tailnet grants, signed-in user roles and rollback help
+- automated static frontend, authentication and web routing tests; real remote client acceptance
 
 ## Phase 10 — Hardening
 
