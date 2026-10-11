@@ -161,9 +161,12 @@ def test_read_only_account_cannot_preview_actions(tmp_path):
     )
     assert response.status_code == 201
     client.post("/api/v1/auth/logout")
-    assert client.post(
-        "/api/v1/auth/login",
-        json={"username": "viewer", "password": "long-viewer-password"},
-    ).status_code == 200
+    assert (
+        client.post(
+            "/api/v1/auth/login",
+            json={"username": "viewer", "password": "long-viewer-password"},
+        ).status_code
+        == 200
+    )
     assert preview(client, "turn on living room lamp").status_code == 403
     assert fake.actions == []
