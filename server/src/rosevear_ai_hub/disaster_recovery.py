@@ -12,6 +12,7 @@ import json
 import secrets
 import sqlite3
 import sys
+import tarfile
 import tempfile
 from contextlib import closing
 from datetime import UTC, datetime
@@ -140,7 +141,9 @@ def drill_synthetic(work_dir: Path, evidence: Path | None = None) -> dict[str, o
         passphrase_file.write_text(secrets.token_urlsafe(48), encoding="utf-8")
         archive = sandbox / "synthetic.hubbackup"
         create_backup(root, archive, passphrase_file)
-        result = _rehearse_archive(archive, passphrase_file, sandbox / "isolated")
+        isolated = sandbox / "isolated"
+        isolated.mkdir()
+        result = _rehearse_archive(archive, passphrase_file, isolated)
         recovered = sandbox / "isolated" / "recovered"
         if (recovered / "data" / "knowledge" / "sample.txt").read_text(
             encoding="utf-8"
@@ -191,7 +194,7 @@ def main(argv: list[str] | None = None) -> int:
             result = drill_archive(
                 args.archive, args.passphrase_file, args.work_dir, args.evidence
             )
-    except (BackupError, DrillError, OSError, sqlite3.DatabaseError, ValueError) as exc:
+    except (BackupError, DrillError, OSError, sqlite3.DatabaseError, tarfile.TarError, ValueError) as exc:
         # Do not expose private paths, passwords, or backing-store details in logs.
         print(f"Recovery drill FAILED ({type(exc).__name__}). No live data changed.", file=sys.stderr)
         return 1
