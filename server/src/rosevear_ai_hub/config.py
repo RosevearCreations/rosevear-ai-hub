@@ -21,6 +21,14 @@ class Settings(BaseSettings):
     app_env: str = Field(default="development", alias="APP_ENV")
     app_host: str = Field(default="127.0.0.1", alias="APP_HOST")
     app_port: int = Field(default=8765, alias="APP_PORT")
+    remote_web_enabled: bool = Field(
+        default=True,
+        alias="REMOTE_WEB_ENABLED",
+    )
+    remote_web_dist_dir: Path = Field(
+        default=Path("./apps/web/dist"),
+        alias="REMOTE_WEB_DIST_DIR",
+    )
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     database_url: str = Field(
         default="sqlite:///./data/rosevear_ai_hub.db",

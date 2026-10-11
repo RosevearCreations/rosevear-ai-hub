@@ -124,7 +124,16 @@ export type ChatStreamEvent =
       retry_after_seconds: number;
     };
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8765";
+// Local Vite/Tauri development keeps its loopback API. A Tailscale HTTPS page
+// uses its own origin for both app and API; never call a remote device's localhost.
+export function defaultApiBaseForHostname(hostname: string): string {
+  return ["localhost", "127.0.0.1", "tauri.localhost"].includes(hostname)
+    ? "http://127.0.0.1:8765"
+    : "";
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ??
+  defaultApiBaseForHostname(window.location.hostname);
 
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(API_BASE_URL + path, {

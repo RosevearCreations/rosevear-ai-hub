@@ -142,14 +142,14 @@ def _issue_session(db: Session, user: User) -> str:
     return raw_token
 
 
-def _set_session_cookie(response: Response, token: str) -> None:
+def _set_session_cookie(response: Response, token: str, request: Request) -> None:
     settings = get_settings()
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
         value=token,
         max_age=settings.auth_session_hours * 3600,
         httponly=True,
-        secure=settings.auth_cookie_secure,
+        secure=settings.auth_cookie_secure or request.url.scheme == "https",
         samesite="strict",
         path="/",
     )
@@ -248,6 +248,7 @@ def auth_status(
 def bootstrap_owner(
     payload: CredentialsRequest,
     response: Response,
+    request: Request,
     db: Annotated[Session, Depends(get_session)],
 ) -> UserResponse:
     if _user_count(db) != 0:
@@ -285,7 +286,7 @@ def bootstrap_owner(
     db.commit()
     db.refresh(owner)
     token = _issue_session(db, owner)
-    _set_session_cookie(response, token)
+    _set_session_cookie(response, token, request)
     return _user_response(owner)
 
 
@@ -293,6 +294,7 @@ def bootstrap_owner(
 def login(
     payload: CredentialsRequest,
     response: Response,
+    request: Request,
     db: Annotated[Session, Depends(get_session)],
 ) -> UserResponse:
     user = db.scalar(select(User).where(User.username == payload.username))
@@ -302,7 +304,7 @@ def login(
         raise HTTPException(status_code=403, detail="This account is disabled.")
 
     token = _issue_session(db, user)
-    _set_session_cookie(response, token)
+    _set_session_cookie(response, token, request)
     return _user_response(user)
 
 

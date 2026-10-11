@@ -22,6 +22,7 @@ import { KnowledgeView } from "./KnowledgeView";
 import { SectionHelp } from "./HelpSystem";
 import { MQTTView } from "./MQTTView";
 import { PwaInstallPanel } from "./PwaInstallPanel";
+import { RemoteAccessPanel } from "./RemoteAccessPanel";
 import { NotificationsView } from "./NotificationsView";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
@@ -251,6 +252,18 @@ export function App() {
           <ToolsView />
         ) : section === "Users" ? (
           <UsersView currentUser={user} />
+        ) : section === "System" ? (
+          <>
+            <header className="page-header">
+              <div>
+                <p className="eyebrow">Build 046</p>
+                <h1>System</h1>
+                <p className="lede">Local health and secure tailnet access.</p>
+              </div>
+              <SystemHealth health={health} />
+            </header>
+            <RemoteAccessPanel />
+          </>
         ) : (
           <HomeView
             health={health}
