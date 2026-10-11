@@ -40,3 +40,7 @@ logs/
 Thumbs.db
 .vscode/
 .idea/
+
+# Private LAN HTTPS runtime certificate keys, generated Caddyfile, and downloaded binary
+data/lan-access/
+tools/caddy/
