@@ -1261,3 +1261,17 @@ See `docs/BUILD_046_TAILSCALE_PRIVATE_ACCESS.md`. Next Build 047 — Backup and 
 - [x] operator recovery and master-key escrow documented
 - [ ] dev CI, protected main promotion and production CI (pending release verification)
 - [ ] on-server offline recovery drill (operator acceptance)
+
+## Build 048 — Performance and Resource-Budget Review
+
+- [x] read-only resource collector: API resident memory, CPU seconds, host RAM and workspace-volume free disk
+- [x] owner/administrator-only resource endpoint, Cache-Control no-store, generic errors and data minimization
+- [x] advisory warning boundaries, no automatic cleanup/termination/polling/telemetry
+- [x] manual Refresh panel on System, version supplied by running API instead of stale Home Build 036
+- [x] backend threshold and role tests, web GiB formatter test and Windows review guide
+- [ ] development CI all lanes GREEN
+- [ ] production PR checks GREEN
+- [ ] post-merge main Production workflow GREEN
+- [ ] on-Windows idle/normal-workload measurements recorded (separate operator acceptance)
+
+See docs/BUILD_048_PERFORMANCE_RESOURCE_BUDGET.md. No database migrations.
