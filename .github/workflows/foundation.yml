@@ -88,7 +88,7 @@ jobs:
         run: |
           $tokens = $null
           $errors = $null
-          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/enable-tailscale-serve.ps1')) { [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null }
+          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/enable-tailscale-serve.ps1', 'scripts/configure-lan-https.ps1')) { [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null }
           if ($errors.Count -gt 0) { $errors | Format-List; exit 1 }
       - name: Prevent reserved PowerShell HOME assignment in Tailscale preflight
         shell: pwsh
@@ -97,6 +97,14 @@ jobs:
           if ($source -match '(?im)^\s*\$HOME\s*=') {
             throw 'Tailscale preflight may not assign to PowerShell automatic variable HOME.'
           }
+      - name: Guard opt-in LAN HTTPS setup and firewall scoping
+        shell: pwsh
+        run: |
+          $source = Get-Content -LiteralPath 'scripts/configure-lan-https.ps1' -Raw
+          foreach ($needle in @('admin off', 'tls internal', 'remote_ip', 'bind $LanIPv4', 'Get-NetConnectionProfile', 'New-NetFirewallRule', '-RemoteAddress $TrustedLanCIDRs', '127.0.0.1:8765', 'if (-not $Enable)', 'if ($Disable)')) {
+            if (-not $source.Contains($needle)) { throw "Missing private LAN guard: $needle" }
+          }
+          if ($source -match '(?im)^\s*\$HOME\s*=' -or $source.Contains('tailscale funnel')) { throw 'Unsafe LAN script change' }
       - name: Check Rust shell
         run: npm run desktop:check
       - name: Build Windows desktop executable
