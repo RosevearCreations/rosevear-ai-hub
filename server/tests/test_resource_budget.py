@@ -28,7 +28,9 @@ def test_resource_budget_is_deterministic_and_only_exposes_coarse_totals(monkeyp
     monkeypatch.setattr(
         resource_budget.shutil,
         "disk_usage",
-        lambda _path: SimpleNamespace(total=100 * resource_budget.GIB, free=30 * resource_budget.GIB),
+        lambda _path: SimpleNamespace(
+            total=100 * resource_budget.GIB, free=30 * resource_budget.GIB
+        ),
     )
     result = resource_budget.collect_resource_snapshot()
     assert result["status"] == "within_guidelines"
@@ -115,7 +117,10 @@ def test_resource_endpoint_only_owner_and_administrator(tmp_path, monkeypatch):
         json={"username": "owner", "password": "budget-owner-secret-123"},
     ).status_code == 200
     family_id = added.json()["id"]
-    assert client.patch(f"/api/v1/auth/users/{family_id}", json={"role": "administrator"}).status_code == 200
+    promote = client.patch(
+        f"/api/v1/auth/users/{family_id}", json={"role": "administrator"}
+    )
+    assert promote.status_code == 200
     client.post("/api/v1/auth/logout")
     assert client.post(
         "/api/v1/auth/login",
