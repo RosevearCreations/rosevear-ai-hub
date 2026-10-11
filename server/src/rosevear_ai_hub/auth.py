@@ -424,6 +424,13 @@ def update_user(
     user.enabled = desired_enabled
     if payload.new_password is not None:
         user.password_hash = hash_password(payload.new_password)
+        # All sessions for this user, including the current one, are revoked
+        # atomically with password rotation. Other accounts remain signed in.
+        db.execute(
+            update(HubSession)
+            .where(HubSession.user_id == user.id, HubSession.revoked_at.is_(None))
+            .values(revoked_at=datetime.now(UTC))
+        )
 
     _record_auth_event(
         db,
