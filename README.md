@@ -108,11 +108,22 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 038 — Rosie Dazzlers Read Connector**
 - **Build 039 — Yard Workers Read Connector**
 - **Build 040 — Narrow Confirmed Business Writes**
+- **Build 041 — Automatic Service Recovery, Camera Streaming Repair & Startup Cleanup**
+- **Build 042 — Local Speech-to-Text**
+- **Build 043 — Local Text-to-Speech**
+- **Build 044 — Voice Commands and Confirmations**
+- **Build 045 — Installable PWA**
+- **Build 046 — Private Remote Access via Tailscale**
+- **Build 047 — Encrypted Backup and Safe Restore** *(release candidate during promotion)*
+
+## Current build
+
+**Build 047 — Encrypted Backup and Safe Restore**
+
+Build 047 creates authenticated encrypted local recovery archives from the live SQLite database plus
+selected local knowledge/go2rtc data, verifies their manifests and hashes, and restores only into a
+new staging directory. It never overwrites a running Hub or uploads backups to a cloud provider.
 
 ## Next build
 
-**Build 041 — Local Speech-to-Text**
-
-Build 040 adds two exact Level-2 confirmed business writes: a Devil n Dove review-only product-story
-draft and a Yard Workers private internal job update comment. Rosie Dazzlers remains read-only, and
-every unlisted business write stays fail-closed.
+**Build 048 — Performance and Resource-Budget Review**
