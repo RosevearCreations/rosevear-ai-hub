@@ -1911,3 +1911,37 @@ export function executeBusinessWrite(
     signal,
   );
 }
+
+export interface SpeechStatusResponse {
+  available: boolean;
+  engine: string;
+  message: string;
+  max_duration_seconds: number;
+}
+
+export function getSpeechStatus(signal?: AbortSignal): Promise<SpeechStatusResponse> {
+  return getJson<SpeechStatusResponse>("/api/v1/speech/status", signal);
+}
+
+export async function transcribeLocalWav(audio: Blob, signal?: AbortSignal): Promise<string> {
+  const form = new FormData();
+  form.append("audio", audio, "microphone.wav");
+  const response = await fetch(API_BASE_URL + "/api/v1/speech/transcribe", {
+    method: "POST",
+    credentials: "include",
+    body: form,
+    signal,
+  });
+  if (!response.ok) {
+    let detail = "Transcription failed with status " + response.status;
+    try {
+      const error = (await response.json()) as { detail?: string };
+      if (error.detail) detail = error.detail;
+    } catch {
+      // Preserve fallback.
+    }
+    throw new Error(detail);
+  }
+  const result = (await response.json()) as { text: string };
+  return result.text;
+}
