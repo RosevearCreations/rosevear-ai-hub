@@ -66,9 +66,7 @@ def _read_recovery_database(root: Path) -> int:
     return count
 
 
-def _rehearse_archive(
-    archive: Path, passphrase_file: Path, scratch: Path
-) -> dict[str, object]:
+def _rehearse_archive(archive: Path, passphrase_file: Path, scratch: Path) -> dict[str, object]:
     recovered = scratch / "recovered"
     # Restore validates GCM authentication, per-file manifest SHA256s and SQLite.
     # It refuses any existing root; no file is moved to the live installation.
@@ -191,9 +189,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "synthetic":
             result = drill_synthetic(args.work_dir, args.evidence)
         else:
-            result = drill_archive(
-                args.archive, args.passphrase_file, args.work_dir, args.evidence
-            )
+            result = drill_archive(args.archive, args.passphrase_file, args.work_dir, args.evidence)
     except (
         BackupError,
         DrillError,
