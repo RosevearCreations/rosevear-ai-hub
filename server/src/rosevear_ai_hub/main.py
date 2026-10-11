@@ -4,6 +4,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from rosevear_ai_hub import __version__
@@ -121,6 +122,16 @@ def create_app() -> FastAPI:
     application.include_router(confirmations_router, dependencies=protected)
     application.include_router(knowledge_router, dependencies=protected)
     application.include_router(knowledge_admin_router, dependencies=protected)
+    # The production frontend is served from the SAME origin as authenticated APIs.
+    # Tailscale Serve terminates HTTPS and proxies ONLY to loopback API port 8765.
+    # StaticFiles is mounted last to avoid shadowing API and health routes.
+    web_dist = settings.remote_web_dist_dir.resolve()
+    if settings.remote_web_enabled and (web_dist / "index.html").is_file():
+        application.mount(
+            "/",
+            StaticFiles(directory=str(web_dist), html=True),
+            name="production-web",
+        )
     return application
 
 
