@@ -61,10 +61,13 @@ def sign_in(client):
 def test_speech_is_authenticated(tmp_path):
     client, _ = build_client(tmp_path)
     assert client.get("/api/v1/speech/status").status_code == 401
-    assert client.post(
-        "/api/v1/speech/transcribe",
-        files={"audio": ("recording.wav", wav_audio(), "audio/wav")},
-    ).status_code == 401
+    assert (
+        client.post(
+            "/api/v1/speech/transcribe",
+            files={"audio": ("recording.wav", wav_audio(), "audio/wav")},
+        ).status_code
+        == 401
+    )
 
 
 def test_disabled_when_binary_or_model_missing(tmp_path):

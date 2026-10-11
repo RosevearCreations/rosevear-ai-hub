@@ -26,7 +26,7 @@ from rosevear_ai_hub.api.providers import router as providers_router
 from rosevear_ai_hub.api.secrets import router as secrets_router
 from rosevear_ai_hub.api.speech import router as speech_router
 from rosevear_ai_hub.api.tools import router as tools_router
-from rosevear_ai_hub.auth import require_authenticated
+from rosevear_ai_hub.auth import require_authenticated, require_roles
 from rosevear_ai_hub.auth import router as auth_router
 from rosevear_ai_hub.automation_runtime import AutomationEventRuntime
 from rosevear_ai_hub.camera_runtime import reconcile_camera_streams
@@ -105,7 +105,10 @@ def create_app() -> FastAPI:
     application.include_router(mqtt_router, dependencies=protected)
     application.include_router(business_router, dependencies=protected)
     application.include_router(secrets_router, dependencies=protected)
-    application.include_router(speech_router, dependencies=protected)
+    application.include_router(
+        speech_router,
+        dependencies=[Depends(require_roles("owner", "administrator", "household_user"))],
+    )
     application.include_router(tools_router, dependencies=protected)
     application.include_router(chat_router, dependencies=protected)
     application.include_router(confirmations_router, dependencies=protected)
