@@ -1231,3 +1231,20 @@ See `docs/BUILD_044_VOICE_COMMANDS.md`. Build 045 — Installable PWA remains ne
 - [ ] Separate push-triggered main Production CI verified
 
 See `docs/BUILD_045_INSTALLABLE_PWA.md` for security, smoke tests and rollback. Next is Build 046 — Private Remote Access via Tailscale.
+
+
+## Build 046 — Private Remote Access via Tailscale
+
+- [x] Added opt-in private HTTPS Tailscale Serve plan with loopback-only FastAPI target
+- [x] Serve production PWA and API from the same local backend origin
+- [x] Remote browsers use relative /api; local Vite/Tauri retain existing loopback API
+- [x] HTTPS logins set Secure/HttpOnly/SameSite session cookies; Hub role checks remain
+- [x] Windows preflight/enable script refuses insecure listener, missing build and existing Serve/Funnel configs
+- [x] System/private-access UI and circled-i help, no remote login claims or private information displayed
+- [x] Unit tests for HTTPS cookie and remote/local routing; no paid service, migration or public exposure
+- [ ] Dev and main CI verified and promoted
+- [ ] Main push Production CI verified GREEN
+- [ ] Operator installs/joins Tailscale, restricts ACL grants, authorizes background Serve and checks client HTTPS/PWA login
+- [ ] Confirm off-tailnet client cannot access and streaming limitations are understood
+
+See `docs/BUILD_046_TAILSCALE_PRIVATE_ACCESS.md`. Next Build 047 — Backup and Restore.
