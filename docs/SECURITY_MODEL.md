@@ -561,3 +561,8 @@ Build 040 treats external mutation as a one-shot Level-2 action.
 Because an external service cannot participate in the Hub's SQLite transaction, consuming the
 confirmation before network mutation is the safer failure mode: uncertain outcomes require source
 inspection and a newly prepared confirmation rather than replay.
+
+
+## Build 047 encrypted recovery safety
+
+Only the operator may invoke the local offline backup CLI. All backup content is authenticated and encrypted before publication using a separate 20+ byte passphrase file; never copy encryption keys or passphrases into GitHub or application logs. The SQLite online backup API avoids copying active WAL files directly. Restore extracts only to a new directory after verifying AES-GCM authentication, all archive filenames and SHA256 hashes, and SQLite integrity. Direct overwrite, symlinks and unsafe tar members are disallowed. No network or backup HTTP endpoint is introduced. The encryption master key for separately encrypted stored credentials must be safeguarded outside this backup.

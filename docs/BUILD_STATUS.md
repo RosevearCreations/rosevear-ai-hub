@@ -1248,3 +1248,16 @@ See `docs/BUILD_045_INSTALLABLE_PWA.md` for security, smoke tests and rollback. 
 - [ ] Confirm off-tailnet client cannot access and streaming limitations are understood
 
 See `docs/BUILD_046_TAILSCALE_PRIVATE_ACCESS.md`. Next Build 047 — Backup and Restore.
+
+
+## Build 047 — Encrypted Backup and Restore
+
+- [x] SQLite online backup snapshot with integrity validation
+- [x] authenticated encrypted archive using scrypt and AES-256-GCM
+- [x] knowledge originals and local go2rtc configuration included
+- [x] manifest SHA-256 hashes and safe-path validation
+- [x] verify and restore into new directory, never overwrite live data
+- [x] local CLI only; no network endpoint, migration or cloud service
+- [x] operator recovery and master-key escrow documented
+- [ ] dev CI, protected main promotion and production CI (pending release verification)
+- [ ] on-server offline recovery drill (operator acceptance)
