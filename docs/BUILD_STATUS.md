@@ -1168,3 +1168,19 @@ failure, inspect the source system before preparing another confirmation.
 - [ ] Camera feeds are not configured: go2rtc streams endpoint previously returned `{}`; end-to-end video not verified
 
 Core Windows service-recovery acceptance is GREEN. Do not interpret that as successful capture/playback from Bell, SkyBell, NOOIE, Littlelf, Blink, or other cloud-managed cameras. Camera feed onboarding remains separate and model-specific. Production release status is conditional on the outstanding CI evidence. See `docs/BUILD_041_AUTOMATIC_RECOVERY.md`.
+
+
+## Build 042 — Local Speech-to-Text
+
+- [x] Implemented authenticated local STT status and transcription endpoints
+- [x] Explicit optional local whisper.cpp binary + GGML model paths, no automatic downloads
+- [x] 20-second browser microphone recorder and editable Chat transcript (no auto-send)
+- [x] WAV PCM16 mono/16 kHz validation, size/time bounds, safe local subprocess and temp-file cleanup
+- [x] Backend and browser WAV unit tests added
+- [x] Contextual circled-i Chat help and local setup/rollback documentation
+- [x] No database migration, no paid provider, no Windows startup changes
+- [ ] Full dev CI and PR/main promotion acceptance
+- [ ] Local Windows microphone and real Whisper model acceptance (requires optional installed engine/model)
+- [ ] Post-merge main Production CI evidence and release closeout
+
+Build 043 remains Local Text-to-Speech. Build 044 remains Voice Commands and Confirmations.
