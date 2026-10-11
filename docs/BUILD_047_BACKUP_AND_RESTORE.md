@@ -67,3 +67,10 @@ Official references:
 - SQLite online backup: https://www.sqlite.org/backup.html
 - Python sqlite3 backup: https://docs.python.org/3/library/sqlite3.html#sqlite3.Connection.backup
 - Python cryptography AES-GCM: https://cryptography.io/en/latest/hazmat/primitives/symmetric-encryption/
+
+## Build 047 Windows compatibility hotfix
+
+- SQLite `Connection.__exit__` commits or rolls back transactions but does not close the connection. The online snapshot's destination connection and the test fixture connections now explicitly close before TemporaryDirectory cleanup, preventing Windows `WinError 32` file locks.
+- An independent GitHub Actions `backup-windows` job executes the actual encrypted backup/restore tests on Windows; compiling the Rust desktop executable alone cannot validate Windows SQLite file-handle behavior.
+- The hotfix does not change backup format, encryption keys, paths, scheduling, network exposure, or automatic restoration.
+- The test-server update script stops on any test failure. Do not use `-SkipVerification` to work around this error; install the verified hotfix when its final `main` release is GREEN and rerun full verification.
