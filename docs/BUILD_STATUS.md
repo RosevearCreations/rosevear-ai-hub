@@ -1150,4 +1150,21 @@ failure, inspect the source system before preparing another confirmation.
 
 ## Next build
 
-**Build 041 — Local Speech-to-Text**
+**Build 042 — Local Speech-to-Text**
+
+
+## Build 041 — Automatic Service Recovery, Camera Streaming Repair & Startup Cleanup
+
+- [x] Recovery runner and companion scheduler installer merged to `main` (#81, #87)
+- [x] Verified recovery runner was installed on Windows server at `eecab70ecbbb9163258a196ca520d283f82635d1`
+- [x] Backend tests plus web checks passed on Windows test server after update
+- [x] PR #87 CI run 38094872846 passed docs/backend/web/Windows desktop lanes
+- [x] Five-minute recovery task `Rosevear AI Hub Recovery` executes with result 0, leaving original logon startup task intact
+- [x] Controlled go2rtc restart: PID 8636 → 18484
+- [x] Controlled web Vite restart: PID 24508 → 10160; HTTP 200
+- [x] Controlled backend API restart: PID 24000 → 28668; `API recovered.`; health `ok`
+- [x] The API, web and go2rtc healthy-state and recovery logs validated
+- [ ] Separate post-merge Production CI push run not independently verified through connected GitHub workflow interface
+- [ ] Camera feeds are not configured: go2rtc streams endpoint previously returned `{}`; end-to-end video not verified
+
+Core Windows service-recovery acceptance is GREEN. Do not interpret that as successful capture/playback from Bell, SkyBell, NOOIE, Littlelf, Blink, or other cloud-managed cameras. Camera feed onboarding remains separate and model-specific. Production release status is conditional on the outstanding CI evidence. See `docs/BUILD_041_AUTOMATIC_RECOVERY.md`.
