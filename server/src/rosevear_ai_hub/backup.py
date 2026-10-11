@@ -177,9 +177,7 @@ def _decrypt(archive: Path, plaintext: Path, secret: bytes) -> None:
         tag = reader.read(TAG_SIZE)
         reader.seek(header_len)
         remaining = size - header_len - TAG_SIZE
-        decryptor = Cipher(
-            algorithms.AES(_key(secret, salt)), modes.GCM(nonce, tag)
-        ).decryptor()
+        decryptor = Cipher(algorithms.AES(_key(secret, salt)), modes.GCM(nonce, tag)).decryptor()
         try:
             with plaintext.open("xb") as writer:
                 while remaining:
