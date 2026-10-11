@@ -51,6 +51,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 045 | Installable PWA | COMPLETE | main |
 | 046 | Private Remote Access via Tailscale + Dual Private Access | COMPLETE | main |
 | 047 | Encrypted Backup and Safe Restore | COMPLETE | main via PR #115 |
+| 048 | Performance and Resource-Budget Review | IN PROGRESS | production checks pending |
 
 ## Build 016 acceptance checklist
 
@@ -1276,3 +1277,17 @@ See `docs/BUILD_046_TAILSCALE_PRIVATE_ACCESS.md`. Next Build 047 — Backup and 
 ### Build 047 release closeout
 
 Code release is **GREEN and COMPLETE**. The verified `dev` candidate and PR #115 `main` merge had the same Git tree (`ab12137e10f6f3c4a15003690b8fc8feeaf25f03`). The on-server recovery drill remains a deliberate operator acceptance task and does not reopen the code release. Next queued build: **Build 048 — Performance and Resource-Budget Review**.
+
+## Build 048 — Performance and Resource-Budget Review
+
+- [x] read-only resource collector: API resident memory, CPU seconds, host RAM and workspace-volume free disk
+- [x] owner/administrator-only resource endpoint, Cache-Control no-store, generic errors and data minimization
+- [x] advisory warning boundaries, no automatic cleanup/termination/polling/telemetry
+- [x] manual Refresh panel on System, version supplied by running API instead of stale Home Build 036
+- [x] backend threshold and role tests, web GiB formatter test and Windows review guide
+- [ ] development CI all lanes GREEN
+- [ ] production PR checks GREEN
+- [ ] post-merge main Production workflow GREEN
+- [ ] on-Windows idle/normal-workload measurements recorded (separate operator acceptance)
+
+See docs/BUILD_048_PERFORMANCE_RESOURCE_BUDGET.md. No database migrations.
