@@ -43,7 +43,14 @@ This file records completed and active builds. The roadmap remains authoritative
 | 037 | Devil n Dove Read Connector | COMPLETE | main via PR #66 |
 | 038 | Rosie Dazzlers Read Connector | COMPLETE | main via PR #69 |
 | 039 | Yard Workers Read Connector | COMPLETE | main via PR #72 |
-| 040 | Narrow Confirmed Business Writes | ACTIVE | dev feature branch |
+| 040 | Narrow Confirmed Business Writes | COMPLETE | main |
+| 041 | Automatic Service Recovery, Camera Streaming Repair & Startup Cleanup | COMPLETE | main |
+| 042 | Local Speech-to-Text | COMPLETE | main |
+| 043 | Local Text-to-Speech | COMPLETE | main |
+| 044 | Voice Commands and Confirmations | COMPLETE | main |
+| 045 | Installable PWA | COMPLETE | main |
+| 046 | Private Remote Access via Tailscale + Dual Private Access follow-up | COMPLETE | main |
+| 047 | Encrypted Backup and Safe Restore | RELEASE CANDIDATE | dev via PR #114; main promotion pending |
 
 ## Build 016 acceptance checklist
 
@@ -1248,3 +1255,16 @@ See `docs/BUILD_045_INSTALLABLE_PWA.md` for security, smoke tests and rollback. 
 - [ ] Confirm off-tailnet client cannot access and streaming limitations are understood
 
 See `docs/BUILD_046_TAILSCALE_PRIVATE_ACCESS.md`. Next Build 047 — Backup and Restore.
+
+
+## Build 047 — Encrypted Backup and Restore
+
+- [x] SQLite online backup snapshot with integrity validation
+- [x] authenticated encrypted archive using scrypt and AES-256-GCM
+- [x] knowledge originals and local go2rtc configuration included
+- [x] manifest SHA-256 hashes and safe-path validation
+- [x] verify and restore into new directory, never overwrite live data
+- [x] local CLI only; no network endpoint, migration or cloud service
+- [x] operator recovery and master-key escrow documented
+- [ ] dev CI, protected main promotion and production CI (pending release verification)
+- [ ] on-server offline recovery drill (operator acceptance)
