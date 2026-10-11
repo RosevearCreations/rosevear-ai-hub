@@ -1216,3 +1216,18 @@ See `docs/BUILD_043_LOCAL_TTS.md` for setup, privacy, rollback and operational a
 - [ ] Separate main push Production CI confirmed
 
 See `docs/BUILD_044_VOICE_COMMANDS.md`. Build 045 — Installable PWA remains next.
+
+
+## Build 045 — Installable PWA
+
+- [x] Added standalone scoped manifest, 192px/512px PNG icons and browser metadata
+- [x] Implemented service worker with tightly bounded public asset cache and secure offline screen
+- [x] Excludes all API/authentication, signed-in pages, chat, device actions, cameras, uploads and remote endpoints from caching
+- [x] Added opt-in install prompt, online/offline feedback, desktop/mobile installation instructions and circled-i help
+- [x] Added Vitest coverage for manifest, install prompt, worker request boundary and offline privacy
+- [x] Maintained existing Windows logon/recovery tasks and backend ports without migration or paid service
+- [ ] Dev/main CI fully green and promotion
+- [ ] Windows PWA installation and offline fallback operator acceptance
+- [ ] Separate push-triggered main Production CI verified
+
+See `docs/BUILD_045_INSTALLABLE_PWA.md` for security, smoke tests and rollback. Next is Build 046 — Private Remote Access via Tailscale.
