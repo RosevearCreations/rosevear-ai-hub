@@ -90,12 +90,12 @@ if (-not (Test-Path -LiteralPath $CaddyExe)) {
 $ipAddress = Get-NetIPAddress -IPAddress $LanIPv4 -AddressFamily IPv4 -ErrorAction Stop |
     Select-Object -First 1
 $adapter = Get-NetAdapter -InterfaceIndex $ipAddress.InterfaceIndex -ErrorAction Stop
-$profile = Get-NetConnectionProfile -InterfaceIndex $ipAddress.InterfaceIndex -ErrorAction Stop
+$networkProfile = Get-NetConnectionProfile -InterfaceIndex $ipAddress.InterfaceIndex -ErrorAction Stop
 if ($adapter.Status -ne "Up" -or $adapter.Name -match 'Tailscale|VPN|vEthernet' -or
     $adapter.InterfaceDescription -match 'Tailscale|VPN|Virtual|WireGuard') {
     throw "Chosen IP is not on an active household LAN interface."
 }
-if ($profile.NetworkCategory -ne "Private") {
+if ($networkProfile.NetworkCategory -ne "Private") {
     throw "The selected Windows network must be Private; refusing a Public interface."
 }
 $firewall = Get-NetFirewallProfile -Name Private -ErrorAction Stop
