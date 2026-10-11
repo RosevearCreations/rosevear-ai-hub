@@ -79,3 +79,9 @@ Official references:
 - **Version:** `0.0.47`.
 - **Remaining operator acceptance:** perform an offline recovery drill on the Windows test server using a real encrypted backup. This is deliberately separate from code promotion and must not overwrite the live Hub.
 - **Next queued build:** Build 048 — Performance and Resource-Budget Review.
+## Build 047 Windows compatibility hotfix
+
+- SQLite `Connection.__exit__` commits or rolls back transactions but does not close the connection. The online snapshot's destination connection and the test fixture connections now explicitly close before TemporaryDirectory cleanup, preventing Windows `WinError 32` file locks.
+- An independent GitHub Actions `backup-windows` job executes the actual encrypted backup/restore tests on Windows; compiling the Rust desktop executable alone cannot validate Windows SQLite file-handle behavior.
+- The hotfix does not change backup format, encryption keys, paths, scheduling, network exposure, or automatic restoration.
+- The test-server update script stops on any test failure. Do not use `-SkipVerification` to work around this error; install the verified hotfix when its final `main` release is GREEN and rerun full verification.

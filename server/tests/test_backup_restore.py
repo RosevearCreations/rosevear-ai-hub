@@ -3,6 +3,7 @@
 import io
 import sqlite3
 import tarfile
+from contextlib import closing
 from pathlib import Path
 
 import pytest
@@ -23,7 +24,7 @@ def setup_hub(tmp_path: Path) -> tuple[Path, Path]:
     root = tmp_path / "hub"
     database = root / "data" / "rosevear_ai_hub.db"
     database.parent.mkdir(parents=True)
-    with sqlite3.connect(database) as db:
+    with closing(sqlite3.connect(database)) as db:
         db.execute("PRAGMA journal_mode=WAL")
         db.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT)")
         db.execute("INSERT INTO users (username) VALUES ('owner')")
@@ -61,7 +62,7 @@ def test_online_snapshot_is_encrypted_verified_and_restorable(tmp_path: Path) ->
         "Private household workshop notes"
     )
     assert not (target / ".env").exists()
-    with sqlite3.connect(target / "database/hub.sqlite3") as db:
+    with closing(sqlite3.connect(target / "database/hub.sqlite3")) as db:
         assert db.execute("SELECT username FROM users").fetchone() == ("owner",)
     assert (root / "data/knowledge/docs/handbook.txt").read_text() == "new work"
 
