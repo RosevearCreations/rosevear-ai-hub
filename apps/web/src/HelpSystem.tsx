@@ -14,13 +14,16 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Confirm the backend and Ollama health cards are online.",
       "Use the dashboard cards to move directly into Chat, Knowledge, Devices, MQTT, Automations, or Notifications.",
       "Treat Home as the first place to check after an update or restart.",
+      "Build 045: use the sidebar Install the Hub panel on localhost or HTTPS. A browser may also offer Install app in its menu.",
     ],
     safety: [
       "Home is an overview; physical changes still pass through the permission and tool layers.",
+      "Offline PWA mode never caches logged-in pages, conversation text, camera streams, private state, or queued device actions.",
       "An offline provider does not disable local dashboards, saved history, or deterministic automations.",
     ],
     troubleshooting: [
       "Backend offline: start or restart the FastAPI process and verify port 8765.",
+      "PWA install missing: use http://127.0.0.1:5173 on the server or HTTPS; ordinary LAN HTTP addresses do not qualify as secure contexts.",
       "Ollama offline: start Ollama locally and verify the configured base URL.",
     ],
   },

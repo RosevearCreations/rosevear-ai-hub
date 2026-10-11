@@ -256,6 +256,13 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - no higher-risk voice execution, no voice-only confirmation
 - backend and web tests for authorization, blocked actions, exact preview and stale invalidation
 ### Build 045 — Installable PWA
+- Web app manifest and correctly sized 192/512 PNG icons
+- explicit install prompt with Windows/iOS/Android fallback guidance
+- versioned service worker caches only public app shell metadata and hashed build assets
+- network-first navigation with generic safe offline screen; never cache signed-in HTML
+- no API/device/camera/websocket caching, replay, background writes or unsafe offline access
+- secure context guidance for localhost versus LAN HTTP; Build 046 handles remote HTTPS
+- automated installation/privacy behavior tests, Windows install verification and rollback
 ### Build 046 — Private Remote Access via Tailscale
 
 ## Phase 10 — Hardening

@@ -21,6 +21,7 @@ import { HomeAssistantView } from "./HomeAssistantView";
 import { KnowledgeView } from "./KnowledgeView";
 import { SectionHelp } from "./HelpSystem";
 import { MQTTView } from "./MQTTView";
+import { PwaInstallPanel } from "./PwaInstallPanel";
 import { NotificationsView } from "./NotificationsView";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
@@ -212,6 +213,7 @@ export function App() {
           </ul>
         </nav>
 
+        <PwaInstallPanel />
         <div className="account-card">
           <strong>{user.username}</strong>
           <small>{roleLabel(user)}</small>
