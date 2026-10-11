@@ -2539,3 +2539,11 @@ h1 {
 .tts-message-actions small, .tts-availability { color: #525252; }
 .tts-message-actions button { padding: 0.45rem 0.75rem; }
 .tts-availability { display: block; margin: 0.5rem 0; }
+
+
+/* Build 044 - voice commands remain separate from Chat until reviewed. */
+.voice-command-panel { display: grid; gap: 0.55rem; margin-top: 0.9rem; padding: 0.75rem; border: 1px solid #bbb; border-radius: 0.7rem; }
+.voice-command-panel h3, .voice-command-panel p { margin: 0; }
+.voice-command-panel textarea { width: 100%; min-height: 3.5rem; }
+.voice-preview { padding: 0.6rem; border: 1px solid #999; border-radius: 0.5rem; display: grid; gap: 0.5rem; }
+.voice-command-panel small { line-height: 1.4; }
