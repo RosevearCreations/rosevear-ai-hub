@@ -13,9 +13,7 @@ def test_same_origin_web_assets_and_api_are_accessible(tmp_path, monkeypatch):
     public = tmp_path / "web"
     public.mkdir()
     (public / "index.html").write_text("<title>Private Hub</title>", encoding="utf-8")
-    (public / "manifest.webmanifest").write_text(
-        '{"display":"standalone"}', encoding="utf-8"
-    )
+    (public / "manifest.webmanifest").write_text('{"display":"standalone"}', encoding="utf-8")
     (public / "sw.js").write_text("/* public service worker */", encoding="utf-8")
     (tmp_path / ".env").write_text("SECRET=not-for-browser", encoding="utf-8")
     settings = Settings(_env_file=None, REMOTE_WEB_DIST_DIR=public)
@@ -34,9 +32,7 @@ def test_same_origin_web_assets_and_api_are_accessible(tmp_path, monkeypatch):
 
 def test_static_app_can_be_disabled(tmp_path, monkeypatch):
     (tmp_path / "index.html").write_text("private static landing", encoding="utf-8")
-    settings = Settings(
-        _env_file=None, REMOTE_WEB_DIST_DIR=tmp_path, REMOTE_WEB_ENABLED=False
-    )
+    settings = Settings(_env_file=None, REMOTE_WEB_DIST_DIR=tmp_path, REMOTE_WEB_ENABLED=False)
     monkeypatch.setattr("rosevear_ai_hub.main.get_settings", lambda: settings)
     assert TestClient(create_app()).get("/").status_code == 404
 
