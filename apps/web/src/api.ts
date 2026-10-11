@@ -14,6 +14,27 @@ export interface AuthStatus {
   user: AuthUser | null;
 }
 
+export interface HubVersionResponse {
+  service: string;
+  version: string;
+  environment: string;
+}
+
+export interface ResourceBudgetResponse {
+  sampled_at_utc: string;
+  scope: "api_process_and_host";
+  status: "within_guidelines" | "attention";
+  signals: Array<"api_memory" | "host_memory" | "workspace_disk">;
+  api_process: { rss_bytes: number; cpu_seconds_total: number };
+  host_memory: { total_bytes: number; available_bytes: number };
+  workspace_volume: { total_bytes: number; free_bytes: number };
+  guidelines: {
+    api_rss_warning_bytes: number;
+    min_host_available_bytes: number;
+    min_workspace_free_bytes: number;
+  };
+}
+
 export interface HealthResponse {
   status: "ok";
   service: string;
@@ -253,6 +274,14 @@ export function updateUser(
   signal?: AbortSignal,
 ): Promise<AuthUser> {
   return authJson<AuthUser>("PATCH", "/api/v1/auth/users/" + userId, changes, signal);
+}
+
+export function getHubVersion(signal?: AbortSignal): Promise<HubVersionResponse> {
+  return getJson<HubVersionResponse>("/version", signal);
+}
+
+export function getResourceBudget(signal?: AbortSignal): Promise<ResourceBudgetResponse> {
+  return getJson<ResourceBudgetResponse>("/api/v1/system/resource-budget", signal);
 }
 
 export function getHealth(signal?: AbortSignal): Promise<HealthResponse> {
