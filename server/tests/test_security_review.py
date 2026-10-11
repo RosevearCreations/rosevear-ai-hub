@@ -74,10 +74,11 @@ def test_rotating_password_revokes_target_sessions_but_not_other_accounts(tmp_pa
         },
     )
     assert created.status_code == 201
-    assert family.post(
+    response = family.post(
         "/api/v1/auth/login",
         json={"username": "family", "password": "old-family-password-123"},
-    ).status_code == 200
+    )
+    assert response.status_code == 200
     assert family.get("/api/v1/auth/me").status_code == 200
 
     changed = owner.patch(
@@ -88,14 +89,16 @@ def test_rotating_password_revokes_target_sessions_but_not_other_accounts(tmp_pa
     # Even a session previously authorized on another device is no longer valid.
     assert family.get("/api/v1/auth/me").status_code == 401
     assert owner.get("/api/v1/auth/me").status_code == 200
-    assert family.post(
+    response = family.post(
         "/api/v1/auth/login",
         json={"username": "family", "password": "old-family-password-123"},
-    ).status_code == 401
-    assert family.post(
+    )
+    assert response.status_code == 401
+    response = family.post(
         "/api/v1/auth/login",
         json={"username": "family", "password": "new-family-password-456"},
-    ).status_code == 200
+    )
+    assert response.status_code == 200
 
 
 def test_self_password_rotation_expires_current_cookie_and_requires_login(tmp_path):
@@ -106,16 +109,19 @@ def test_self_password_rotation_expires_current_cookie_and_requires_login(tmp_pa
     )
     assert boot.status_code == 201
     owner_id = boot.json()["id"]
-    assert client.patch(
+    response = client.patch(
         f"/api/v1/auth/users/{owner_id}",
         json={"new_password": "next-owner-password-456"},
-    ).status_code == 200
+    )
+    assert response.status_code == 200
     assert client.get("/api/v1/auth/me").status_code == 401
-    assert client.post(
+    response = client.post(
         "/api/v1/auth/login",
         json={"username": "owner", "password": "first-owner-password-123"},
-    ).status_code == 401
-    assert client.post(
+    )
+    assert response.status_code == 401
+    response = client.post(
         "/api/v1/auth/login",
         json={"username": "owner", "password": "next-owner-password-456"},
-    ).status_code == 200
+    )
+    assert response.status_code == 200
