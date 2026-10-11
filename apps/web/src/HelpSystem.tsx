@@ -163,18 +163,25 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   System: {
-    purpose: "Represents system-level health and operating context for the local Hub.",
+    purpose: "Shows system health and the Build 046 private Tailscale access procedure.",
     tasks: [
-      "Use Home health cards, Audit, Tools, Secrets, and Notifications for the detailed subsystem views.",
-      "After updates, verify /health, /version, migrations, and the four CI lanes before treating the build as ready.",
+      "On the Windows server, update Build 046, verify /version and confirm the production web loads at http://127.0.0.1:8765/.",
+      "Install Tailscale on the server and approved client devices, sign into the same private tailnet, and review Tailscale network access rules.",
+      "Run scripts/enable-tailscale-serve.ps1 first without flags to check local safety, then use -Enable only after inspecting any existing Serve/Funnel configuration.",
+      "Use the private https://*.ts.net URL printed by tailscale serve status. Log into the Hub as normal on each device.",
     ],
     safety: [
-      "Keep FastAPI, Ollama, MQTT, Home Assistant admin services, and future camera services off the public internet.",
-      "Service restarts are Level-2 operations when introduced through Hub tooling.",
+      "Never use Tailscale Funnel, router port forwarding, public DNS proxies or wildcard API origins for the Hub.",
+      "Tailnet membership alone does not replace Hub password/role checks. Restrict access with Tailscale grants or ACLs.",
+      "Keep Hub API and go2rtc/Ollama listeners bound to 127.0.0.1; private HTTPS is terminated by Tailscale Serve.",
+      "A remote PWA still cannot queue offline actions, view cached private data or bypass confirmations.",
     ],
     troubleshooting: [
-      "If a service is unavailable, verify its local process, configured port, and trusted-LAN reachability.",
-      "Use Audit for durable evidence instead of relying on transient console output.",
+      "If the remote app loads but APIs fail, check Build 046 is deployed: frontend calls same-origin /api instead of the remote device's localhost.",
+      "If Tailscale Serve is unavailable, complete the Tailscale device login and HTTPS approval first. No public exposure is necessary.",
+      "If the browser reports 401 Unauthorized, sign into the Hub; never disable the app's authentication.",
+      "If / does not load on port 8765, rebuild the web dist and restart only the Hub API.",
+      "Some camera streams may need a separate secure same-origin viewer; never expose go2rtc's unauthenticated ports.",
     ],
   },
   Automations: {

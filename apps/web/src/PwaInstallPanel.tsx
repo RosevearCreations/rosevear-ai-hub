@@ -89,8 +89,9 @@ export function PwaInstallPanel() {
             On iPhone/iPad Safari: Share → Add to Home Screen.
           </small>
           <small>
-            Use this PC's http://127.0.0.1:5173 address or an HTTPS site. The installed app
-            still requires the local server, network access, and your normal account login.
+            On the home server use http://127.0.0.1:5173. On a Tailscale-connected device,
+            use the private https://*.ts.net address from your administrator.
+            The installed app still requires network access and your normal account login.
           </small>
         </div>
       ) : null}
