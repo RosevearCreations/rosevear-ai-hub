@@ -3,6 +3,7 @@
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
 
+from rosevear_ai_hub import __version__
 from rosevear_ai_hub.config import Settings
 from rosevear_ai_hub.database import build_engine, get_session
 from rosevear_ai_hub.main import create_app
@@ -25,7 +26,7 @@ def test_same_origin_web_assets_and_api_are_accessible(tmp_path, monkeypatch):
     assert client.get("/manifest.webmanifest").status_code == 200
     assert client.get("/sw.js").status_code == 200
     assert client.get("/health").json()["status"] == "ok"
-    assert client.get("/version").json()["version"] == "0.0.46"
+    assert client.get("/version").json()["version"] == "0.0.47"
     assert client.get("/.env").status_code == 404
     assert client.get("/api/v1/speech/status").status_code == 401
 
