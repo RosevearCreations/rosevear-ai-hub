@@ -94,6 +94,20 @@ class Settings(BaseSettings):
         alias="MQTT_RECONNECT_MAX_SECONDS",
     )
     mqtt_allowed_topics: str = Field(default="", alias="MQTT_ALLOWED_TOPICS")
+    speech_executable_path: Path = Field(
+        default=Path("./tools/whisper/whisper-cli.exe"),
+        alias="SPEECH_EXECUTABLE_PATH",
+    )
+    speech_model_path: Path = Field(
+        default=Path("./data/speech/ggml-base.en.bin"),
+        alias="SPEECH_MODEL_PATH",
+    )
+    speech_timeout_seconds: int = Field(
+        default=120,
+        ge=10,
+        le=600,
+        alias="SPEECH_TIMEOUT_SECONDS",
+    )
     go2rtc_base_url: str = Field(
         default="http://127.0.0.1:1984",
         alias="GO2RTC_BASE_URL",
