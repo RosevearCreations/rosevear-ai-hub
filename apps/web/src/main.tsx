@@ -18,3 +18,13 @@ createRoot(root).render(
     </ErrorBoundary>
   </StrictMode>,
 );
+
+// Register on localhost and HTTPS. Never cache API or private page data.
+// Public SW deliberately ignores Vite /src and HMR while developing.
+if ("serviceWorker" in navigator && window.isSecureContext) {
+  window.addEventListener("load", () => {
+    void navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {
+      // Browser can continue normally without offline launcher support.
+    });
+  });
+}

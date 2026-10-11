@@ -2547,3 +2547,11 @@ h1 {
 .voice-command-panel textarea { width: 100%; min-height: 3.5rem; }
 .voice-preview { padding: 0.6rem; border: 1px solid #999; border-radius: 0.5rem; display: grid; gap: 0.5rem; }
 .voice-command-panel small { line-height: 1.4; }
+
+/* Build 045: lightweight install controls, no private offline screens */
+.pwa-install-panel { border: 1px solid #d4d4d4; border-radius: .75rem; padding: .8rem; display: grid; gap: .45rem; margin: 1rem 0; }
+.pwa-install-panel strong { font-size: .9rem; }
+.pwa-install-panel small, .pwa-install-label { color: #525252; line-height: 1.45; }
+.pwa-install-panel button { min-height: 2.5rem; border: 1px solid #737373; border-radius: .45rem; background: #fff; cursor: pointer; }
+.pwa-install-help { display: grid; gap: .6rem; padding-top: .4rem; }
+@media (max-width: 600px) { .pwa-install-panel { margin: .6rem 0; } }
