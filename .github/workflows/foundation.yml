@@ -70,6 +70,21 @@ jobs:
       - name: Production build
         run: npm run build
 
+  backup-windows:
+    # Run actual backup operations on Windows. Desktop Rust compilation alone
+    # cannot catch locked SQLite handles and TemporaryDirectory WinError 32.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install backend and test dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Windows encrypted backup and staged restore tests
+        run: python -m pytest server/tests/test_backup_restore.py
+
   desktop-windows:
     runs-on: windows-latest
     steps:
