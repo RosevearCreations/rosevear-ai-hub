@@ -30,12 +30,16 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Choose the profile that matches the job: General, Coding, Home, Workshop, or Business.",
       "Select an installed model, open or create a conversation, then send the request.",
       "Use Knowledge for citation-heavy document questions when you need explicit evidence.",
+      "For speech: install whisper-cli and a local model, then Record locally; review the transcript before Send.",
     ],
     safety: [
+      "Local microphone transcription never sends chat or executes a device command automatically; review the editable text.",
       "AI text is not authority for physical or business state.",
       "High-risk actions remain blocked or require exact confirmation even when requested in chat.",
     ],
     troubleshooting: [
+      "Speech unavailable: install the local whisper.cpp executable and GGML model; see Build 042 setup guide.",
+      "Microphone unavailable: use localhost/HTTPS and grant microphone permission in the browser.",
       "No model available: install or start an Ollama model.",
       "Generation failure: keep the conversation; provider recovery does not erase history.",
     ],
