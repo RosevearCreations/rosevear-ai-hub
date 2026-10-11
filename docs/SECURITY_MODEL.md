@@ -566,3 +566,20 @@ inspection and a newly prepared confirmation rather than replay.
 ## Build 047 encrypted recovery safety
 
 Only the operator may invoke the local offline backup CLI. All backup content is authenticated and encrypted before publication using a separate 20+ byte passphrase file; never copy encryption keys or passphrases into GitHub or application logs. The SQLite online backup API avoids copying active WAL files directly. Restore extracts only to a new directory after verifying AES-GCM authentication, all archive filenames and SHA256 hashes, and SQLite integrity. Direct overwrite, symlinks and unsafe tar members are disallowed. No network or backup HTTP endpoint is introduced. The encryption master key for separately encrypted stored credentials must be safeguarded outside this backup.
+
+
+## Build 049 threat-model review and session/response hardening
+
+See [Build 049 threat register and operator acceptance](BUILD_049_THREAT_MODEL_SECURITY_REVIEW.md).
+The new API rules revoke all active sessions for a user during their password
+rotation; HTTP interactive API docs and schema are no longer exposed; private
+API responses carry Cache-Control: no-store; browsers receive nosniff,
+DENY framing, and no-referrer headers. No new secrets, schemas, hosting costs,
+firewall listeners or automated physical device actions were introduced.
+
+**Residual risks explicitly OPEN:** previously observed broad tailnet policy
+must be restricted and verified manually; Templar's private Caddy CA warning
+must be resolved with verified trust; real on-server negative ACL tests, backup
+passphrase escrow, account-login brute-force handling, CSP compatibility,
+Windows host security and the Build 050 recovery drill have not been proven
+by GitHub CI. These must not be marked GREEN by a code merge alone.

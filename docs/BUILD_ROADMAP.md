@@ -294,6 +294,13 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - cross-platform resource measurements with deterministic boundary tests; no polling or task scheduler
 - Windows acceptance measurements and rollback; no automatic tuning, service termination, or upload
 ### Build 049 — Threat Model and Security Review
+- assess attacker-controlled LAN clients, stolen sessions, leaked credentials, exposed API schema, untrusted input, backups and physical controls
+- revoke all sessions of a user when the account password is changed, within the password-change transaction
+- stop serving unauthenticated interactive API schema/documentation endpoints; preserve local programmatic OpenAPI tooling
+- use no-store for /api/v1 responses and browser anti-clickjacking, no-referrer and nosniff headers without changing PWA asset caching
+- maintain explicit roles, no public listener, no new privileges or automatic security configuration
+- negative authorization, password-session revocation, headers, docs exposure and regression tests, Windows operator checklist
+- record accepted residual risks and a private LAN/Tailscale certificate/ACL acceptance checklist
 ### Build 050 — Disaster Recovery Drill
 ### Build 051 — Production Readiness and Roadmap Renewal
 
