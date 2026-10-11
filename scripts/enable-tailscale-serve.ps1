@@ -23,8 +23,21 @@ function Test-LoopbackListener {
 
 Push-Location $Root
 try {
-    if (-not (Get-Command tailscale.exe -ErrorAction SilentlyContinue)) {
-        throw "Tailscale is not installed or tailscale.exe is not in PATH. Install and sign in using the official Windows app first."
+    # Windows installers do not always add the official Tailscale CLI to PATH.
+    # Resolve the executable without mutating the operator's machine PATH.
+    $TailscaleCommand = Get-Command tailscale.exe -ErrorAction SilentlyContinue
+    if ($TailscaleCommand) {
+        $TailscaleExe = $TailscaleCommand.Source
+    }
+    else {
+        $TailscaleExe = @(
+            "$env:ProgramFiles\Tailscale\tailscale.exe"
+            "${env:ProgramFiles(x86)}\Tailscale\tailscale.exe"
+            "$env:LOCALAPPDATA\Tailscale\tailscale.exe"
+        ) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+    }
+    if (-not $TailscaleExe) {
+        throw "Tailscale executable not found. Install and sign in using the official Windows app first."
     }
     Test-LoopbackListener
 
@@ -36,13 +49,13 @@ try {
     if ($Health.status -ne "ok") {
         throw "Hub API health did not return ok."
     }
-    $Home = Invoke-WebRequest -Uri "$ApiUrl/" -UseBasicParsing -TimeoutSec 10
+    $HomeResponse = Invoke-WebRequest -Uri "$ApiUrl/" -UseBasicParsing -TimeoutSec 10
     $Manifest = Invoke-WebRequest -Uri "$ApiUrl/manifest.webmanifest" -UseBasicParsing -TimeoutSec 10
-    if ($Home.StatusCode -ne 200 -or $Manifest.StatusCode -ne 200) {
+    if ($HomeResponse.StatusCode -ne 200 -or $Manifest.StatusCode -ne 200) {
         throw "Same-origin production frontend is not served on port 8765. Restart the updated API."
     }
 
-    $TailnetRaw = (& tailscale.exe status --json) -join "`n"
+    $TailnetRaw = (& $TailscaleExe status --json) -join "`n"
     if ($LASTEXITCODE -ne 0) {
         throw "Tailscale daemon is not available."
     }
@@ -54,7 +67,7 @@ try {
     Write-Host "Local API and same-origin production frontend are healthy." -ForegroundColor Green
     Write-Host "Tailscale connected. No router forwarding or Windows listener changes are needed." -ForegroundColor Green
 
-    $ServeRaw = (& tailscale.exe serve status --json 2>&1) -join "`n"
+    $ServeRaw = (& $TailscaleExe serve status --json 2>&1) -join "`n"
     if ($LASTEXITCODE -ne 0) {
         throw "Could not inspect existing Tailscale Serve/Funnel configuration. Refusing to modify it."
     }
@@ -65,7 +78,7 @@ try {
     $AlreadyConfigured = ($TcpEntries -gt 0 -or $WebEntries -gt 0 -or $FunnelEntries -gt 0)
     if ($AlreadyConfigured) {
         Write-Host "Existing Serve or Funnel configuration detected. No changes made." -ForegroundColor Yellow
-        & tailscale.exe serve status
+        & $TailscaleExe serve status
         if ($Enable) {
             throw "Review/remove conflicting Serve or Funnel configuration yourself before enabling Hub."
         }
@@ -79,11 +92,11 @@ try {
     }
 
     Write-Host "Enabling PRIVATE tailnet HTTPS reverse proxy, never Tailscale Funnel..." -ForegroundColor Cyan
-    & tailscale.exe serve --bg --https=443 $TailscaleTarget
+    & $TailscaleExe serve --bg --https=443 $TailscaleTarget
     if ($LASTEXITCODE -ne 0) {
         throw "Tailscale Serve did not activate. Confirm tailnet HTTPS permission in the Tailscale app."
     }
-    & tailscale.exe serve status
+    & $TailscaleExe serve status
     if ($LASTEXITCODE -ne 0) {
         throw "Tailscale Serve status could not be checked."
     }
