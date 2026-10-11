@@ -596,3 +596,8 @@ when another action is actually needed.
 
 Rollback is schema-neutral: deploy Build 039. Existing drafts/comments remain source-system records;
 rollback does not delete them.
+
+
+## Build 047 — Encrypted Backup and Restore
+
+See [Build 047 operator runbook](BUILD_047_BACKUP_AND_RESTORE.md) for opt-in local encrypted SQLite snapshots, offline key escrow, per-file integrity checks, restore drill to a fresh directory, and manual production recovery after API shutdown. No unattended backup schedule is installed automatically. Home Assistant VM, MQTT broker, Ollama models, Windows startup tasks, private CA and environment keys need separate backups.
