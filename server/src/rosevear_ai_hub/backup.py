@@ -90,6 +90,7 @@ def _sqlite_check(path: Path) -> None:
 def _snapshot_database(source: Path, snapshot: Path) -> None:
     if not source.is_file() or source.is_symlink():
         raise BackupError("Source SQLite database is missing or a symbolic link.")
+    _sqlite_check(source)
     try:
         live = sqlite3.connect(f"{source.as_uri()}?mode=ro", uri=True, timeout=15)
         try:
@@ -177,9 +178,7 @@ def _decrypt(archive: Path, plaintext: Path, secret: bytes) -> None:
         tag = reader.read(TAG_SIZE)
         reader.seek(header_len)
         remaining = size - header_len - TAG_SIZE
-        decryptor = Cipher(
-            algorithms.AES(_key(secret, salt)), modes.GCM(nonce, tag)
-        ).decryptor()
+        decryptor = Cipher(algorithms.AES(_key(secret, salt)), modes.GCM(nonce, tag)).decryptor()
         try:
             with plaintext.open("xb") as writer:
                 while remaining:

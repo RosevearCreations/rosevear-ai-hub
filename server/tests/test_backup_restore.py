@@ -128,7 +128,10 @@ def test_authenticated_malicious_tar_member_not_extracted(tmp_path: Path) -> Non
 
 def test_corrupt_sqlite_is_rejected(tmp_path: Path) -> None:
     root, secret = setup_hub(tmp_path)
-    (root / "data" / "rosevear_ai_hub.db").write_bytes(b"not sqlite")
+    database = root / "data" / "rosevear_ai_hub.db"
+    for extension in ("-wal", "-shm"):
+        Path(str(database) + extension).unlink(missing_ok=True)
+    database.write_bytes(b"not sqlite")
     with pytest.raises(BackupError, match="SQLite"):
         create_backup(root, tmp_path / "corrupt.hubbackup", secret)
     assert not (tmp_path / "corrupt.hubbackup").exists()
@@ -137,15 +140,35 @@ def test_corrupt_sqlite_is_rejected(tmp_path: Path) -> None:
 def test_cli_commands_and_too_short_password(tmp_path: Path, capsys) -> None:
     root, secret = setup_hub(tmp_path)
     output = tmp_path / "snapshot.hubbackup"
-    assert main(
-        ["create", "--source-root", str(root), "--destination", str(output),
-         "--passphrase-file", str(secret)]
-    ) == 0
+    assert (
+        main(
+            [
+                "create",
+                "--source-root",
+                str(root),
+                "--destination",
+                str(output),
+                "--passphrase-file",
+                str(secret),
+            ]
+        )
+        == 0
+    )
     assert main(["verify", "--archive", str(output), "--passphrase-file", str(secret)]) == 0
-    assert main(
-        ["restore", "--archive", str(output),
-         "--target-root", str(tmp_path / "restored"), "--passphrase-file", str(secret)]
-    ) == 0
+    assert (
+        main(
+            [
+                "restore",
+                "--archive",
+                str(output),
+                "--target-root",
+                str(tmp_path / "restored"),
+                "--passphrase-file",
+                str(secret),
+            ]
+        )
+        == 0
+    )
     short = tmp_path / "short.txt"
     short.write_text("short", encoding="utf-8")
     assert main(["verify", "--archive", str(output), "--passphrase-file", str(short)]) == 1
