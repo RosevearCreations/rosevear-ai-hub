@@ -40,8 +40,7 @@ class SpeechRequest(BaseModel):
     def validate_text(cls, text: str) -> str:
         cleaned = text.strip()
         if not cleaned or any(
-            ord(character) < 32 and character not in "
-\r\t" for character in cleaned
+            ord(character) < 32 and character not in "\n\r\t" for character in cleaned
         ):
             raise ValueError("Speech text must be non-empty and contain no control characters.")
         return cleaned
