@@ -282,6 +282,11 @@ This is the canonical implementation sequence. Build numbers are never reused.
 ## Phase 10 — Hardening
 
 ### Build 047 — Backup and Restore
+- opt-in encrypted local archive (SQLite online snapshot, knowledge originals, go2rtc configuration)
+- streaming AES-256-GCM + scrypt and verified manifest hashes, no plaintext archive publication
+- CLI create / verify / staged restore-to-new-directory; never live overwrite
+- passphrase stored separately, no automatic cloud upload or scheduler, explicit offline recovery guide
+- tamper, incorrect key, malicious entry, symlink, corrupt database and overwrite refusal tests
 ### Build 048 — Performance and Resource-Budget Review
 ### Build 049 — Threat Model and Security Review
 ### Build 050 — Disaster Recovery Drill
