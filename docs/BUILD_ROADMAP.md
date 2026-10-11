@@ -272,6 +272,13 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - System section guidance, restricted tailnet grants, signed-in user roles and rollback help
 - automated static frontend, authentication and web routing tests; real remote client acceptance
 
+### Build 046 follow-up — Dual Private Access (LAN HTTPS and remote Tailnet)
+- optional Caddy internal-CA HTTPS on one chosen Private LAN interface and TCP/8443; browser only on household PCs
+- per-subnet IPv4 allow rules both in Caddy and Windows Firewall; never bind Hub API to LAN
+- check-first and operator-enabled Windows configuration; precise rollback, private certificate trust guidance
+- retain approved-device Tailscale Serve for offsite access; replace default allow-all tailnet grants before enabling
+- same-origin API client routing, private LAN diagnostics, Windows script CI checks; no automatic remote activation
+
 ## Phase 10 — Hardening
 
 ### Build 047 — Backup and Restore
