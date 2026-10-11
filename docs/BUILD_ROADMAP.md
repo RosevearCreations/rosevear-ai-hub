@@ -302,6 +302,13 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - negative authorization, password-session revocation, headers, docs exposure and regression tests, Windows operator checklist
 - record accepted residual risks and a private LAN/Tailscale certificate/ACL acceptance checklist
 ### Build 050 — Disaster Recovery Drill
+- opt-in encrypted archive recovery rehearsal into isolated temporary storage, never over the live Hub
+- synthetic end-to-end create, decrypt, integrity, document/config and SQLite record verification
+- real-backup drill with GCM/manifest validation, SQLite table check and metadata-only evidence
+- tampered archive/wrong passphrase/missing workspace/overwrite refusal and cleanup regression tests
+- Linux backend and dedicated Windows backup/recovery CI coverage
+- Windows operator disaster-recovery runbook: archive storage, safe scratch, offline master-key escrow, RPO/RTO evidence, rollback, exclusions, manual acceptance
+- no network access, auto-restore, data migration, cloud service or service restarts
 ### Build 051 — Production Readiness and Roadmap Renewal
 
 ## Build execution rules

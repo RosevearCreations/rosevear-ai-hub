@@ -583,3 +583,14 @@ must be resolved with verified trust; real on-server negative ACL tests, backup
 passphrase escrow, account-login brute-force handling, CSP compatibility,
 Windows host security and the Build 050 recovery drill have not been proven
 by GitHub CI. These must not be marked GREEN by a code merge alone.
+
+
+## Build 050 isolated recovery rehearsal
+
+Disaster-recovery drill extracts encrypted backups only under an explicitly
+provided existing scratch directory, verifies GCM/hash/SQLite integrity and
+cleans temporary plaintext on completion. Operators must use encrypted storage
+and protected user accounts because recovered private files do exist briefly
+on disk. Evidence reports omit secrets and are exclusive-create so older
+results cannot be silently overwritten. Real archive acceptance is distinct
+from synthetic CI; external services and master keys are not included.
