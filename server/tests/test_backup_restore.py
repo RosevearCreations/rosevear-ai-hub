@@ -128,7 +128,10 @@ def test_authenticated_malicious_tar_member_not_extracted(tmp_path: Path) -> Non
 
 def test_corrupt_sqlite_is_rejected(tmp_path: Path) -> None:
     root, secret = setup_hub(tmp_path)
-    (root / "data" / "rosevear_ai_hub.db").write_bytes(b"not sqlite")
+    database = root / "data" / "rosevear_ai_hub.db"
+    for extension in ("-wal", "-shm"):
+        Path(str(database) + extension).unlink(missing_ok=True)
+    database.write_bytes(b"not sqlite")
     with pytest.raises(BackupError, match="SQLite"):
         create_backup(root, tmp_path / "corrupt.hubbackup", secret)
     assert not (tmp_path / "corrupt.hubbackup").exists()
