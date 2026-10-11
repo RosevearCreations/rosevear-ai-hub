@@ -1984,3 +1984,27 @@ export async function synthesizeLocalSpeech(text: string, signal?: AbortSignal):
   }
   return wav;
 }
+
+export interface VoiceCommandPreview {
+  status: string;
+  message: string;
+  confirmation_required: boolean;
+  executable: boolean;
+  entity_id: string | null;
+  friendly_name: string | null;
+  action: HomeAssistantControlAction | null;
+  confirmation_rule: string | null;
+}
+
+/** Read-only: never calls the device-control endpoint. */
+export function previewVoiceCommand(
+  transcript: string,
+  signal?: AbortSignal,
+): Promise<VoiceCommandPreview> {
+  return authJson<VoiceCommandPreview>(
+    "POST",
+    "/api/v1/voice/preview",
+    { transcript },
+    signal,
+  );
+}

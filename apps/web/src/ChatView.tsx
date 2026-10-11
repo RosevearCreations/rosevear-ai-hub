@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SpeechToTextPanel } from "./SpeechToTextPanel";
+import { VoiceCommandPanel } from "./VoiceCommandPanel";
 import { useLocalTextToSpeech } from "./localTextToSpeech";
 
 import {
@@ -33,6 +34,7 @@ export function ChatView() {
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [prompt, setPrompt] = useState("");
+  const [voiceDraft, setVoiceDraft] = useState("");
   const [status, setStatus] = useState<ChatStatus>("idle");
   const [error, setError] = useState("");
   const [modelLoadError, setModelLoadError] = useState("");
@@ -358,7 +360,7 @@ export function ChatView() {
       <section className="chat-panel" aria-label="Local AI chat">
         <header className="chat-header">
           <div>
-            <p className="eyebrow">Build 043</p>
+            <p className="eyebrow">Build 044</p>
             <h1>{activeConversation?.title ?? "Chat"}</h1>
             <small className="profile-summary">
               {activeProfile
@@ -541,7 +543,15 @@ export function ChatView() {
           />
           <SpeechToTextPanel
             disabled={status === "streaming"}
-            onTranscript={(text) => setPrompt((current) => [current.trim(), text.trim()].filter(Boolean).join(" "))}
+            onTranscript={setVoiceDraft}
+          />
+          <VoiceCommandPanel
+            draft={voiceDraft}
+            disabled={status === "streaming"}
+            onDraftChange={setVoiceDraft}
+            onUseAsChat={(text) =>
+              setPrompt((current) => [current.trim(), text].filter(Boolean).join(" "))
+            }
           />
           <div className="composer-actions">
             {status === "streaming" ? (
