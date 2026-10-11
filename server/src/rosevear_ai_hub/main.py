@@ -24,6 +24,7 @@ from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
 from rosevear_ai_hub.api.providers import router as providers_router
 from rosevear_ai_hub.api.secrets import router as secrets_router
+from rosevear_ai_hub.api.speech import router as speech_router
 from rosevear_ai_hub.api.tools import router as tools_router
 from rosevear_ai_hub.auth import require_authenticated
 from rosevear_ai_hub.auth import router as auth_router
@@ -104,6 +105,7 @@ def create_app() -> FastAPI:
     application.include_router(mqtt_router, dependencies=protected)
     application.include_router(business_router, dependencies=protected)
     application.include_router(secrets_router, dependencies=protected)
+    application.include_router(speech_router, dependencies=protected)
     application.include_router(tools_router, dependencies=protected)
     application.include_router(chat_router, dependencies=protected)
     application.include_router(confirmations_router, dependencies=protected)
