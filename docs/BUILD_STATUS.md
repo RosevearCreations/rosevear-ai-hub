@@ -1200,3 +1200,19 @@ Build 043 remains Local Text-to-Speech. Build 044 remains Voice Commands and Con
 - [ ] Post-merge main Production CI evidence
 
 See `docs/BUILD_043_LOCAL_TTS.md` for setup, privacy, rollback and operational acceptance. Build 044 is the next planned milestone.
+
+
+## Build 044 — Voice Commands and Confirmations
+
+- [x] Authenticated read-only server preview reusing deterministic Home-language safety resolution
+- [x] Separate transcript/command field with explicit review and confirm, never automatic chat/device action
+- [x] Exact allow-listed low-risk light/switch/scene actions reuse audited Home Assistant control API
+- [x] Prohibit unsafe, bulk, ambiguous, unsupported or non-allowlisted voice commands
+- [x] Backend and web regression coverage including permissions and stale preview
+- [x] No database migration, cloud service, paid service or startup-task changes
+- [ ] Final dev/main CI promotion GREEN
+- [ ] Test-server backend verified v0.0.44 and browser reauthenticated
+- [ ] Real local voice/confirm/device action end-to-end tested and audited
+- [ ] Separate main push Production CI confirmed
+
+See `docs/BUILD_044_VOICE_COMMANDS.md`. Build 045 — Installable PWA remains next.
