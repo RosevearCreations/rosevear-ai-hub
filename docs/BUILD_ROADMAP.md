@@ -288,6 +288,11 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - passphrase stored separately, no automatic cloud upload or scheduler, explicit offline recovery guide
 - tamper, incorrect key, malicious entry, symlink, corrupt database and overwrite refusal tests
 ### Build 048 — Performance and Resource-Budget Review
+- restricted, on-demand read-only API process memory/CPU counters and host RAM/disk headroom
+- explicit advisory thresholds and no path, token, account or process inventory exposure
+- owner/admin System panel with manual refresh and dynamic backend version label
+- cross-platform resource measurements with deterministic boundary tests; no polling or task scheduler
+- Windows acceptance measurements and rollback; no automatic tuning, service termination, or upload
 ### Build 049 — Threat Model and Security Review
 ### Build 050 — Disaster Recovery Drill
 ### Build 051 — Production Readiness and Roadmap Renewal

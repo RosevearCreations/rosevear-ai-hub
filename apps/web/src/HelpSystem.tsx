@@ -163,8 +163,10 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   System: {
-    purpose: "Shows system health and the Build 046 private Tailscale access procedure.",
+    purpose: "Shows server health, administrator-only resource budgets, and the private LAN/Tailscale access procedure.",
     tasks: [
+      "Open the resource budget panel as Owner/Admin, select Refresh to sample memory and disk once; no background polling is performed.",
+      "Compare observed values to the documented guidelines; warnings do not shut down Ollama, MQTT, cameras or automations.",
       "On the Windows server, update Build 046, verify /version and confirm the production web loads at http://127.0.0.1:8765/.",
       "Install Tailscale on the server and approved client devices, sign into the same private tailnet, and review Tailscale network access rules.",
       "Run scripts/enable-tailscale-serve.ps1 first without flags to check local safety, then use -Enable only after inspecting any existing Serve/Funnel configuration.",
