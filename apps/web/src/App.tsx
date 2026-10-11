@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   getAuthStatus,
   getHealth,
+  getHubVersion,
   getOllamaStatus,
   logout,
   type AuthStatus,
@@ -23,6 +24,7 @@ import { SectionHelp } from "./HelpSystem";
 import { MQTTView } from "./MQTTView";
 import { PwaInstallPanel } from "./PwaInstallPanel";
 import { RemoteAccessPanel } from "./RemoteAccessPanel";
+import { ResourceBudgetPanel } from "./ResourceBudgetPanel";
 import { NotificationsView } from "./NotificationsView";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
@@ -68,6 +70,7 @@ export function App() {
   const [health, setHealth] = useState<HealthState>({ kind: "loading" });
   const [ollama, setOllama] = useState<OllamaState>({ kind: "loading" });
   const [section, setSection] = useState<Section>("Home");
+  const [hubVersion, setHubVersion] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -90,6 +93,10 @@ export function App() {
     if (!authenticatedUser) return;
 
     const controller = new AbortController();
+
+    getHubVersion(controller.signal)
+      .then((result) => setHubVersion(result.version))
+      .catch(() => setHubVersion(null));
 
     getHealth(controller.signal)
       .then((data) => setHealth({ kind: "online", data }))
@@ -256,16 +263,18 @@ export function App() {
           <>
             <header className="page-header">
               <div>
-                <p className="eyebrow">Build 046</p>
+                <p className="eyebrow">{hubVersion ? `Version ${hubVersion}` : "System"}</p>
                 <h1>System</h1>
                 <p className="lede">Local health and secure tailnet access.</p>
               </div>
               <SystemHealth health={health} />
             </header>
             <RemoteAccessPanel />
+            {canAdminister && <ResourceBudgetPanel />}
           </>
         ) : (
           <HomeView
+            version={hubVersion}
             health={health}
             ollama={ollama}
             onOpenChat={() => setSection("Chat")}
@@ -289,6 +298,7 @@ function roleLabel(user: AuthUser): string {
 }
 
 function HomeView({
+  version,
   health,
   ollama,
   onOpenChat,
@@ -298,6 +308,7 @@ function HomeView({
   onOpenMQTT,
   onOpenNotifications,
 }: {
+  version: string | null;
   health: HealthState;
   ollama: OllamaState;
   onOpenChat: () => void;
@@ -311,7 +322,7 @@ function HomeView({
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 036</p>
+          <p className="eyebrow">{version ? `Version ${version}` : "Rosevear AI Hub"}</p>
           <h1>Home</h1>
           <p className="lede">
             One private interface for AI, household systems, workshop knowledge,
