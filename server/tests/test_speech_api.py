@@ -89,7 +89,8 @@ def test_rejects_unsupported_audio_before_process_execution(tmp_path, monkeypatc
     )
     samples = [
         (b"not a wav", "audio/wav", 422),
-        (wav_audio(31), "audio/wav", 413),
+        (wav_audio(31), "audio/wav", 422),
+        (b"x" * 1_100_001, "audio/wav", 413),
         (wav_audio(), "application/octet-stream", 415),
     ]
     for data, mime, expected in samples:
