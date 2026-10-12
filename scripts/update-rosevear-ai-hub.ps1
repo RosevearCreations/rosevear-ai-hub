@@ -12,7 +12,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\update-rosevear-ai
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\update-rosevear-ai-hub.ps1 -ApplyMigrations
 #>
 param(
-    [string]$RepoRoot = (Split-Path -Parent $PSScriptRoot),
+    [string]$RepoRoot = "",
     [ValidatePattern("^(|[0-9a-fA-F]{40})$")]
     [string]$ExpectedCommit = "",
     [switch]$ApplyMigrations,
@@ -28,6 +28,18 @@ function Invoke-Step {
     & $Action
     if ($LASTEXITCODE -ne 0) {
         throw "$Label failed (exit $LASTEXITCODE). No restart was performed."
+    }
+}
+
+if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
+    if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+        $RepoRoot = Split-Path -Parent $PSScriptRoot
+    }
+    elseif (Test-Path -LiteralPath (Join-Path (Get-Location).Path ".git")) {
+        $RepoRoot = (Get-Location).Path
+    }
+    else {
+        throw "Repository path could not be determined. Run the saved .ps1 from the repo's scripts folder or pass -RepoRoot."
     }
 }
 
