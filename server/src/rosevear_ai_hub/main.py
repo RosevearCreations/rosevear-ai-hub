@@ -20,6 +20,7 @@ from rosevear_ai_hub.api.home_assistant import router as home_assistant_router
 from rosevear_ai_hub.api.home_assistant_controls import router as home_assistant_controls_router
 from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
+from rosevear_ai_hub.api.knowledge_reviews import router as knowledge_reviews_router
 from rosevear_ai_hub.api.mqtt import router as mqtt_router
 from rosevear_ai_hub.api.notifications import router as notifications_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
@@ -142,6 +143,7 @@ def create_app() -> FastAPI:
     application.include_router(chat_router, dependencies=protected)
     application.include_router(confirmations_router, dependencies=protected)
     application.include_router(knowledge_router, dependencies=protected)
+    application.include_router(knowledge_reviews_router)
     application.include_router(knowledge_admin_router, dependencies=protected)
     # The production frontend is served from the SAME origin as authenticated APIs.
     # Tailscale Serve terminates HTTPS and proxies ONLY to loopback API port 8765.

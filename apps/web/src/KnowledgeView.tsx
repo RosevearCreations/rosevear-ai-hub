@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { KnowledgeProjectWorkspace } from "./KnowledgeProjectWorkspace";
 
 import {
   answerKnowledge,
@@ -312,7 +313,7 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
       const result = await uploadKnowledgeDocument(file, collectionId);
       if (result.duplicate) {
         setNotice(
-          `${file.name} matches an existing document. No duplicate copy was created.`,
+          `${file.name} already exists in the local library under another source record. No copy or automatic project move was created.`,
         );
       } else {
         setDocuments((current) => [
@@ -433,7 +434,7 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
     <section className="knowledge-view" aria-label="Knowledge ingestion, indexing, and retrieval">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 015</p>
+          <p className="eyebrow">Build 055</p>
           <h1>Knowledge</h1>
           <p className="lede">
             Administer private collections and documents, re-index local knowledge, and
@@ -757,6 +758,20 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
           })}
         </div>
       </section>
+
+      <KnowledgeProjectWorkspace
+        collections={collections}
+        documents={documents}
+        canReview={canDeleteDocuments}
+        onSelectProject={(id) => {
+          setSearchCollectionId(String(id));
+          setSearchDocumentId("");
+          setSearchResult(null);
+          setAnswerResult(null);
+          setNotice("Project search scope selected. Enter a query above and search for source citations.");
+        }}
+        onIndexed={refreshDocuments}
+      />
 
       <div className="knowledge-grid">
         <form className="panel knowledge-upload" onSubmit={(event) => void submitUpload(event)}>
