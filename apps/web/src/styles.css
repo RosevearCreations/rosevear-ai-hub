@@ -2656,3 +2656,82 @@ h1 {
 .workshop-item h3,.workshop-item p { margin: 0; }
 .workshop-form { display: grid; gap: .8rem; }
 .workshop-form button { justify-self: start; }
+
+
+/* Build 057 operator screenshot corrections: prevent label and input collisions. */
+.business-connectors-grid > .business-connector-card,
+.mqtt-actions-grid > .mqtt-action-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.business-connector-card .business-write-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.85rem;
+  align-content: start;
+  margin-top: 1.25rem;
+}
+.business-write-form > h3,
+.business-write-form > p { margin: 0; }
+.business-write-form > label,
+.mqtt-action-card > label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.4rem;
+  min-width: 0;
+  font-weight: 600;
+}
+.business-write-form input,
+.business-write-form textarea,
+.mqtt-action-card input,
+.mqtt-action-card textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #8a8a8a;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #171717;
+}
+.business-write-form textarea,
+.mqtt-action-card textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+.business-write-form > button,
+.mqtt-action-card > button {
+  justify-self: start;
+  max-width: 100%;
+  white-space: normal;
+}
+.business-read-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+.business-read-actions > button { min-width: 0; }
+.mqtt-actions-grid > .mqtt-action-card {
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+}
+.mqtt-action-card > h2,
+.mqtt-action-card > small { margin: 0; }
+.connection-guidance {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.8rem;
+  margin-top: 0.75rem;
+  border: 1px solid #ad8f62;
+  border-radius: 0.65rem;
+  background: #fffaf1;
+  color: #332b21;
+}
+.connection-guidance p { margin: 0; line-height: 1.55; }
+@media (max-width: 960px) {
+  .business-connectors-grid,
+  .mqtt-actions-grid { grid-template-columns: minmax(0, 1fr); }
+}
