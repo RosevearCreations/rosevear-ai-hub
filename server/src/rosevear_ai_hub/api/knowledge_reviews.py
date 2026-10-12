@@ -41,7 +41,9 @@ def _read_review(document: KnowledgeDocument) -> ReviewResponse | None:
         return None
     review = metadata.get("hub_source_review")
     if not isinstance(review, dict) or review.get("status") not in (
-        "needs_review", "approved", "flagged"
+        "needs_review",
+        "approved",
+        "flagged",
     ):
         return None
     return ReviewResponse(
