@@ -50,8 +50,13 @@ function Get-VerifiedPid {
     }
     $expected = [System.IO.Path]::GetFullPath($Python)
     $actual = [System.IO.Path]::GetFullPath($process.ExecutablePath)
-    if (![string]::Equals($expected, $actual, [System.StringComparison]::OrdinalIgnoreCase)
-        -or $process.CommandLine -notmatch "rosevear_ai_hub\.main:app") {
+    $sameExecutable = [string]::Equals(
+        $expected,
+        $actual,
+        [System.StringComparison]::OrdinalIgnoreCase
+    )
+    $isHubCommand = [bool]($process.CommandLine -match 'rosevear_ai_hub\.main:app')
+    if ((-not $sameExecutable) -or (-not $isHubCommand)) {
         throw "Port 8765 belongs to an unverified process; refusing to stop it."
     }
     return [int]$pids[0]
