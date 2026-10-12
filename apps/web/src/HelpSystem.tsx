@@ -62,17 +62,19 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
   Knowledge: {
     purpose: "Ingests private files, organizes collections, searches indexed content, and produces citations.",
     tasks: [
-      "Create or select a collection before ingesting a document.",
+      "Create or select a collection before ingesting a document. Build 055 adds one source-review workbench for each project.",
       "Upload PDF, TXT, Markdown, or DOCX files, then index/re-index as needed.",
-      "Use search filters and citations to verify the exact source behind an answer.",
+      "Select Search this project to scope existing cited evidence results to one collection.",
+      "Owner/Admin can review or flag an existing source and manually index up to three queued sources sequentially.",
     ],
     safety: [
       "Local-only collections should remain local unless you deliberately configure a non-local provider later.",
       "Document deletion is a confirmed Level-2 action and cannot be silently replayed.",
+      "Private review notes remain owner/admin only. Source approval is not permission to publish or upload.",
     ],
     troubleshooting: [
       "Needs indexing: re-index the document after confirming Ollama embeddings are available.",
-      "Duplicate upload: the content hash intentionally prevents identical source duplication.",
+      "Duplicate upload: the content hash intentionally prevents identical source duplication across collections; move the existing source intentionally rather than copying.",
     ],
   },
   Devices: {
