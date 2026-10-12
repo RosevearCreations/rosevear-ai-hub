@@ -2589,3 +2589,18 @@ h1 {
 .local-diagnostic-card summary { cursor: pointer; font-weight: 650; padding: .4rem 0; }
 .local-diagnostic-card li { margin: .5rem 0; line-height: 1.5; }
 .local-diagnostic-card button { margin-top: .5rem; }
+
+
+/* Build 054 — private camera event timeline and review workbench */
+.camera-event-timeline { display: grid; gap: .9rem; }
+.camera-event-timeline h3, .camera-event-timeline p { margin: 0; }
+.camera-timeline-filters { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,10rem),1fr)); gap: .65rem; }
+.camera-timeline-filters label, .camera-review-form label { display: grid; gap: .35rem; font-weight: 600; }
+.camera-timeline-filters select, .camera-review-form select, .camera-review-form textarea { width: 100%; padding: .55rem; border: 1px solid #999; border-radius: .4rem; color: #222; background: #fff; }
+.camera-review-form { display: grid; gap: .55rem; padding: .5rem; border-top: 1px solid #ddd; }
+.camera-review-form summary { cursor: pointer; font-weight: 650; }
+.camera-review-form textarea { min-height: 5rem; resize: vertical; }
+.camera-review-form button { justify-self: start; }
+.camera-review-archive { display: grid; gap: .5rem; padding-top: 1rem; border-top: 1px solid #ccc; overflow-wrap: anywhere; }
+.camera-export-guard { display: grid; justify-items: start; gap: .6rem; }
+.camera-export-guard label { display: flex; gap: .5rem; align-items: flex-start; }

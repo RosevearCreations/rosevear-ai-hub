@@ -97,11 +97,13 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Use the summary cards to see total, enabled, configured, healthy, and attention-needed cameras.",
       "Owner/Admin can run health checks and maintain the existing ONVIF and encrypted RTSP configuration.",
       "Healthy configured cameras render through the loopback-only go2rtc viewer.",
-      "When Frigate is installed locally, review its camera inventory and recent normalized object events in the Frigate adapter panel.",
+      "In Cameras, filter Frigate timeline events by camera, object and review state; order newest or oldest first.",
+      "Owner/Admin can add private local event notes, flag/review events, and manually export up to 100 review metadata rows after acknowledgement.",
     ],
     safety: [
       "Camera source credentials remain server-side and never enter the browser.",
-      "Frigate Build 034 is read-only: the Hub does not change Frigate configuration, recordings, retention, labels, users, or events.",
+      "Build 054 saves only Hub-local event review metadata, never modifying Frigate recordings, labels, retention, streams, or event sources.",
+      "Review-note CSV exports contain private local notes; store or delete them securely. No camera clips are exported.",
       "The Frigate internal API is accepted only on localhost/loopback; do not expose its unauthenticated internal port to the LAN or internet.",
     ],
     troubleshooting: [

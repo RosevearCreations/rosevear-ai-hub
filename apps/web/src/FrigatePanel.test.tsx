@@ -68,8 +68,8 @@ test("shows local Frigate cameras and recent normalized events", async () => {
   render(<FrigatePanel />);
 
   expect(await screen.findByRole("heading", { name: "Frigate adapter" })).toBeInTheDocument();
-  expect(screen.getByText("front_door")).toBeInTheDocument();
-  expect(screen.getByText("person")).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "front_door" })).toBeInTheDocument();
+  expect(screen.getByText("person", { selector: "strong" })).toBeInTheDocument();
   expect(screen.getByText("visitor · front_door")).toBeInTheDocument();
   expect(screen.getByText("porch")).toBeInTheDocument();
 });
