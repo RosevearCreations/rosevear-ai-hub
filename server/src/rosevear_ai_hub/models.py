@@ -526,3 +526,64 @@ class AutomationRun(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     status: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
     result_summary: Mapped[Any] = mapped_column(JSON, nullable=False, default=dict)
+
+
+class WorkshopStation(TimestampMixin, Base):
+    """Named local workstation for any project. Not a machine controller."""
+
+    __tablename__ = "workshop_stations"
+    __table_args__ = (
+        UniqueConstraint("project_key", "name", name="uq_workshop_station_project_name"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    project_key: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    description: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    hazards_json: Mapped[Any] = mapped_column(JSON, nullable=False, default=list)
+    disabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class WorkshopEquipment(TimestampMixin, Base):
+    """Local equipment record, never permission to activate hazardous machinery."""
+
+    __tablename__ = "workshop_equipment"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    project_key: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
+    station_id: Mapped[int | None] = mapped_column(
+        ForeignKey("workshop_stations.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    name: Mapped[str] = mapped_column(String(160), nullable=False)
+    equipment_type: Mapped[str] = mapped_column(String(80), nullable=False)
+    activity_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    readiness_status: Mapped[str] = mapped_column(
+        String(24), nullable=False, default="unverified", index=True
+    )
+    maintenance_due_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    last_inspected_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    notes: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    disabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class WorkshopInspection(Base):
+    """Append-only manual workshop observation, not a certification or run command."""
+
+    __tablename__ = "workshop_inspections"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    equipment_id: Mapped[int] = mapped_column(
+        ForeignKey("workshop_equipment.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    review_status: Mapped[str] = mapped_column(String(24), nullable=False)
+    note: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    checked_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    checked_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.current_timestamp(), nullable=False
+    )

@@ -59,6 +59,26 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Generation failure: keep the conversation; provider recovery does not erase history.",
     ],
   },
+  Workshop: {
+    purpose: "Build 057: private multi-project workstations, equipment and manual safety readiness evidence.",
+    tasks: [
+      "Register project-specific workstations, hazardous activity labels and equipment as initially unverified.",
+      "Filter by project, review maintenance status, and record manual inspection observations.",
+      "Inspect history and blocked status before undertaking separate external safety procedures.",
+      "Apply Build 057 Alembic migration 0018 after verifying an encrypted restorable backup while the API is stopped.",
+    ],
+    safety: [
+      "No inspection record is a permit to operate lasers, CNC, forges, electrical or chemical equipment.",
+      "Observed OK still requires independent safety review; unsafe observations mark equipment blocked.",
+      "No automatic machine control, remote execution, background task or connector writes are enabled.",
+      "Only Owner/Administrator can manage the private workshop register; writes are audited.",
+    ],
+    troubleshooting: [
+      "Workshop API error: verify local database is migrated through Alembic revision 0018.",
+      "Cannot select a workstation: confirm its project key matches the equipment project.",
+      "No recent inspection: manually verify and record a new observation, never assume safe readiness.",
+    ],
+  },
   Knowledge: {
     purpose: "Ingests private files, organizes collections, searches indexed content, and produces citations.",
     tasks: [

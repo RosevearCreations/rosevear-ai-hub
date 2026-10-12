@@ -32,6 +32,7 @@ from rosevear_ai_hub.api.speech import router as speech_router
 from rosevear_ai_hub.api.tools import router as tools_router
 from rosevear_ai_hub.api.tts import router as tts_router
 from rosevear_ai_hub.api.voice import router as voice_router
+from rosevear_ai_hub.api.workshop import router as workshop_router
 from rosevear_ai_hub.auth import require_authenticated, require_roles
 from rosevear_ai_hub.auth import router as auth_router
 from rosevear_ai_hub.automation_runtime import AutomationEventRuntime
@@ -118,6 +119,7 @@ def create_app() -> FastAPI:
     application.include_router(cameras_router)
     application.include_router(frigate_router)
     application.include_router(camera_reviews_router)
+    application.include_router(workshop_router, dependencies=[Depends(require_authenticated)])
     application.include_router(audit_router)
     application.include_router(notifications_router)
     application.include_router(automations_router, dependencies=[Depends(require_authenticated)])
