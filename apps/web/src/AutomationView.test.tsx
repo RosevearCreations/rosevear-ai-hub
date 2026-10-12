@@ -240,7 +240,7 @@ describe("AutomationView", () => {
         screen.getByText("Automation created disabled. Enable it only after final review."),
       ).toBeInTheDocument();
       expect(screen.getAllByText("Workshop motion light").length).toBeGreaterThan(0);
-      expect(screen.getByText("Disabled")).toBeInTheDocument();
+      expect(screen.getByText("Disabled", { selector: ".automation-rule-card span" })).toBeInTheDocument();
     });
   });
 });
