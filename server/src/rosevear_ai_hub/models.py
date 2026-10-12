@@ -8,6 +8,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Float,
     Integer,
     String,
     Text,
@@ -403,6 +404,23 @@ class CameraStream(TimestampMixin, Base):
     last_probe_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_probe_status: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
     last_error: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+
+class CameraEventReview(TimestampMixin, Base):
+    """Owner-reviewed Frigate event metadata; no raw media or RTSP source."""
+
+    __tablename__ = "camera_event_reviews"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    event_id: Mapped[str] = mapped_column(String(160), unique=True, nullable=False)
+    camera_name: Mapped[str] = mapped_column(String(160), nullable=False)
+    object_label: Mapped[str] = mapped_column(String(100), nullable=False)
+    event_start_time: Mapped[float] = mapped_column(Float, nullable=False, index=True)
+    review_status: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
+    note: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    reviewed_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
 
 
 class Notification(Base):

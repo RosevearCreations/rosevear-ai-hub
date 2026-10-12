@@ -43,7 +43,21 @@ This file records completed and active builds. The roadmap remains authoritative
 | 037 | Devil n Dove Read Connector | COMPLETE | main via PR #66 |
 | 038 | Rosie Dazzlers Read Connector | COMPLETE | main via PR #69 |
 | 039 | Yard Workers Read Connector | COMPLETE | main via PR #72 |
-| 040 | Narrow Confirmed Business Writes | ACTIVE | dev feature branch |
+| 040 | Narrow Confirmed Business Writes | COMPLETE | main |
+| 041 | Automatic Service Recovery, Camera Streaming Repair & Startup Cleanup | COMPLETE | main |
+| 042 | Local Speech-to-Text | COMPLETE | main |
+| 043 | Local Text-to-Speech | COMPLETE | main |
+| 044 | Voice Commands and Confirmations | COMPLETE | main |
+| 045 | Installable PWA | COMPLETE | main |
+| 046 | Private Remote Access via Tailscale + Dual Private Access | COMPLETE | main |
+| 047 | Encrypted Backup and Safe Restore | COMPLETE | main via PR #115 |
+| 048 | Performance and Resource-Budget Review | COMPLETE | main via PR #120 |
+| 049 | Threat Model and Security Review | COMPLETE | main via PR #122 |
+| 050 | Disaster Recovery Drill | COMPLETE | main via PR #124 |
+| 051 | Production Readiness and Roadmap Renewal | COMPLETE | main via PR #126 |
+| 052 | Unified Operations Dashboard & Guided Onboarding | COMPLETE | main via PR #128; Production run 38190554356 GREEN |
+| 053 | Local Service Diagnostics & Guided Repair | COMPLETE | main via PR #130; Production run 38247217278 GREEN |
+| 054 | Cameras and Event Timeline Workbench | IMPLEMENTED | dev/main release checks pending |
 
 ## Build 016 acceptance checklist
 
@@ -1259,8 +1273,16 @@ See `docs/BUILD_046_TAILSCALE_PRIVATE_ACCESS.md`. Next Build 047 — Backup and 
 - [x] verify and restore into new directory, never overwrite live data
 - [x] local CLI only; no network endpoint, migration or cloud service
 - [x] operator recovery and master-key escrow documented
-- [ ] dev CI, protected main promotion and production CI (pending release verification)
-- [ ] on-server offline recovery drill (operator acceptance)
+- [x] dev CI GREEN on verified Build 047 tree
+- [x] protected main promotion via PR #115
+- [x] push-triggered main Production CI GREEN — workflow run 38155340556
+- [x] production commit recorded — `b6c5a7adde6d831f8df4e057dbe886f07c2446f4`
+- [ ] on-server offline recovery drill (operator acceptance; intentionally separate from code release)
+
+
+### Build 047 release closeout
+
+Code release is **GREEN and COMPLETE**. The verified `dev` candidate and PR #115 `main` merge had the same Git tree (`ab12137e10f6f3c4a15003690b8fc8feeaf25f03`). The on-server recovery drill remains a deliberate operator acceptance task and does not reopen the code release. Next queued build: **Build 048 — Performance and Resource-Budget Review**.
 
 ## Build 048 — Performance and Resource-Budget Review
 
@@ -1291,7 +1313,6 @@ See docs/BUILD_048_PERFORMANCE_RESOURCE_BUDGET.md. No database migrations.
 
 See docs/BUILD_049_THREAT_MODEL_SECURITY_REVIEW.md. No migrations.
 
-
 ## Build 050 — Disaster Recovery Drill
 
 - [x] synthetic encrypted archive round-trip, file contents and SQLite schema/record checks
@@ -1306,7 +1327,6 @@ See docs/BUILD_049_THREAT_MODEL_SECURITY_REVIEW.md. No migrations.
 - [ ] local Windows operator synthetic + real household archive rehearsals (separate acceptance)
 
 See docs/BUILD_050_DISASTER_RECOVERY_DRILL.md. No migrations or service restarts.
-
 
 ## Build 051 — Production Readiness and Roadmap Renewal
 
@@ -1352,3 +1372,19 @@ See docs/BUILD_052_OPERATIONS_DASHBOARD.md. Next Build 053 — Local Service Dia
 - [ ] Windows device, browser, camera and VM acceptance (operator owned)
 
 See docs/BUILD_053_LOCAL_SERVICE_DIAGNOSTICS.md. Next Build 054 — Cameras and Event Timeline Workbench.
+
+
+## Build 054 — Cameras and Event Timeline Workbench
+
+- [x] Camera/object/review filtering and newest/oldest timeline sorting
+- [x] Owner/admin SQLite review notes with 0017 additive migration
+- [x] Cached local metadata view when Frigate is offline
+- [x] Explicit private metadata-only CSV acknowledgement; 100 rows and spreadsheet formula protection
+- [x] No RTSP credentials, clips, snapshots, Frigate writes or automatic cleanup
+- [x] UI/backend tests, migration review, Windows generic updater
+- [ ] dev CI five jobs GREEN
+- [ ] production PR five jobs GREEN
+- [ ] separate post-merge main Production CI GREEN
+- [ ] Windows physical server backup/migration and viewer acceptance (manual)
+
+See docs/BUILD_054_CAMERA_TIMELINE.md. Next Build 055 — Knowledge Projects & Collection Workspace.

@@ -28,6 +28,7 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
         "audit_events",
         "cameras",
         "camera_streams",
+        "camera_event_reviews",
         "chat_messages",
         "confirmation_requests",
         "conversations",
@@ -62,6 +63,9 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
     secret_columns = {column["name"] for column in inspector.get_columns("secret_values")}
     camera_columns = {column["name"] for column in inspector.get_columns("cameras")}
     camera_stream_columns = {column["name"] for column in inspector.get_columns("camera_streams")}
+    camera_review_columns = {column["name"] for column in inspector.get_columns("camera_event_reviews")}
+    assert {"event_id", "camera_name", "object_label", "event_start_time", "review_status",
+            "note", "reviewed_by_user_id"}.issubset(camera_review_columns)
     notification_columns = {column["name"] for column in inspector.get_columns("notifications")}
     notification_receipt_columns = {
         column["name"] for column in inspector.get_columns("notification_receipts")
@@ -245,6 +249,7 @@ def test_migrations_are_reversible_to_base(tmp_path, monkeypatch) -> None:
     tables = set(inspect(test_engine).get_table_names())
 
     assert "camera_streams" not in tables
+    assert "camera_event_reviews" not in tables
     assert "cameras" not in tables
     assert "notification_receipts" not in tables
     assert "notifications" not in tables
