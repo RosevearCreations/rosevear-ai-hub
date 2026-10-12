@@ -625,3 +625,7 @@ The Python script touches only seven fixed unauthenticated GET routes on
 metadata-only, exclusive-create evidence file when requested.
 See docs/BUILD_051_PRODUCTION_READINESS.md for operator acceptance matrix,
 unverified Caddy certificate and Tailscale ACL checks, and rollback.
+
+## Build 052 — Home operations dashboard
+
+After installing the verified Build 052 release, open Home from an authenticated browser on Templar. Home, Workshop and Business filter five read-only service summaries without modifying devices, secrets or business records. Use manual Refresh overview and the guided setup buttons to open the relevant existing page. Frigate remains optional; a denied or failed status is Not verified rather than Offline. See docs/BUILD_052_OPERATIONS_DASHBOARD.md. Next: Build 053 — Local Service Diagnostics & Guided Repair.

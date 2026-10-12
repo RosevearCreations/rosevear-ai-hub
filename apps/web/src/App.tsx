@@ -26,6 +26,7 @@ import { PwaInstallPanel } from "./PwaInstallPanel";
 import { RemoteAccessPanel } from "./RemoteAccessPanel";
 import { ResourceBudgetPanel } from "./ResourceBudgetPanel";
 import { NotificationsView } from "./NotificationsView";
+import { OperationsDashboard } from "./OperationsDashboard";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
 import { UsersView } from "./UsersView";
@@ -275,6 +276,8 @@ export function App() {
         ) : (
           <HomeView
             version={hubVersion}
+            role={user.role}
+            onNavigate={(target) => setSection(target as Section)}
             health={health}
             ollama={ollama}
             onOpenChat={() => setSection("Chat")}
@@ -299,6 +302,8 @@ function roleLabel(user: AuthUser): string {
 
 function HomeView({
   version,
+  role,
+  onNavigate,
   health,
   ollama,
   onOpenChat,
@@ -309,6 +314,8 @@ function HomeView({
   onOpenNotifications,
 }: {
   version: string | null;
+  role: AuthUser["role"];
+  onNavigate: (target: string) => void;
   health: HealthState;
   ollama: OllamaState;
   onOpenChat: () => void;
@@ -332,84 +339,18 @@ function HomeView({
         <SystemHealth health={health} />
       </header>
 
-      <section className="dashboard-grid" aria-label="Hub overview">
+      <OperationsDashboard role={role} onNavigate={onNavigate} />
+      <section className="dashboard-grid" aria-label="Local AI and knowledge shortcuts">
         <article className="panel">
           <h2>Local AI</h2>
           <OllamaHealth ollama={ollama} />
-          <p>General, Coding, Home, Workshop, and Business profiles are available.</p>
-          <button type="button" onClick={onOpenChat}>
-            Open chat
-          </button>
+          <p>Local chat uses the configured models and profiles.</p>
+          <button type="button" onClick={onOpenChat}>Open chat</button>
         </article>
-
         <article className="panel">
           <h2>Knowledge</h2>
-          <p>Private ingestion, citations, collection administration, re-indexing, and deletion are available.</p>
-          <button type="button" onClick={onOpenKnowledge}>
-            Open knowledge
-          </button>
-        </article>
-
-        <article className="panel">
-          <h2>Secret management</h2>
-          <p>Environment-backed and encrypted-at-rest secret storage with rotation safeguards is active.</p>
-        </article>
-
-        <article className="panel">
-          <h2>Audit log</h2>
-          <p>Actor, tool, sanitized inputs, results, confirmation evidence, timestamps, and filters are active.</p>
-        </article>
-
-        <article className="panel">
-          <h2>Confirmations</h2>
-          <p>Exact action previews, approve/reject decisions, expiry, and replay prevention are active.</p>
-        </article>
-
-        <article className="panel">
-          <h2>Tool registry</h2>
-          <p>Normalized tool contracts, capabilities, risk levels, and enable state are active.</p>
-        </article>
-
-        <article className="panel">
-          <h2>Local accounts</h2>
-          <p>Authentication, sessions, roles, and owner/admin user management are active.</p>
-        </article>
-
-        <article className="panel">
-          <h2>Home Assistant</h2>
-          <p>Allow-listed low-risk lights, switches, and scenes can now be controlled with audit evidence.</p>
-          <button type="button" onClick={onOpenDevices}>
-            Open devices
-          </button>
-        </article>
-
-        <article className="panel">
-          <h2>Automations</h2>
-          <p>AI-assisted drafting now feeds deterministic Rule Schema validation and exact human approval.</p>
-        </article>
-
-        <article className="panel">
-          <h2>Cameras</h2>
-          <p>ONVIF discovery and a persistent local camera registry are available; streaming begins in Build 032.</p>
-          <button type="button" onClick={onOpenCameras}>
-            Open cameras
-          </button>
-        </article>
-
-        <article className="panel">
-          <h2>MQTT</h2>
-          <p>Authenticated broker messaging is available only through the configured topic allow list.</p>
-          <button type="button" onClick={onOpenMQTT}>
-            Open MQTT
-          </button>
-        </article>
-
-        <article className="panel">
-          <h2>Notifications</h2>
-          <p>Persistent local household alerts can now be created by deterministic automations.</p>
-          <button type="button" onClick={onOpenNotifications}>
-            Open notifications
-          </button>
+          <p>Explore local collections and grounded sources.</p>
+          <button type="button" onClick={onOpenKnowledge}>Open knowledge</button>
         </article>
       </section>
     </>
