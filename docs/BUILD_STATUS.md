@@ -57,7 +57,8 @@ This file records completed and active builds. The roadmap remains authoritative
 | 051 | Production Readiness and Roadmap Renewal | COMPLETE | main via PR #126 |
 | 052 | Unified Operations Dashboard & Guided Onboarding | COMPLETE | main via PR #128; Production run 38190554356 GREEN |
 | 053 | Local Service Diagnostics & Guided Repair | COMPLETE | main via PR #130; Production run 38247217278 GREEN |
-| 054 | Cameras and Event Timeline Workbench | IMPLEMENTED | dev/main release checks pending |
+| 054 | Cameras and Event Timeline Workbench | COMPLETE | main via PR #132; Production run 38256907082 GREEN |
+| 055 | Knowledge Projects & Collection Workspace | IMPLEMENTED | dev/main verification pending |
 
 ## Build 016 acceptance checklist
 
@@ -1388,3 +1389,19 @@ See docs/BUILD_053_LOCAL_SERVICE_DIAGNOSTICS.md. Next Build 054 — Cameras and 
 - [ ] Windows physical server backup/migration and viewer acceptance (manual)
 
 See docs/BUILD_054_CAMERA_TIMELINE.md. Next Build 055 — Knowledge Projects & Collection Workspace.
+
+
+## Build 055 — Knowledge Projects & Collection Workspace
+
+- [x] Per-project source summaries and explicit search/evidence context
+- [x] Local owner/admin source review, bounded notes and audit without note text
+- [x] Duplicate-aware multi-project source routing remains manual
+- [x] Up to three explicit sequential local indexing jobs per confirmation
+- [x] No schema migration, automatic uploads, publications or background tasks
+- [x] Generic updater PSScriptRoot-empty fix and local operator guide
+- [ ] Five dev CI jobs GREEN
+- [ ] Five production PR CI jobs GREEN
+- [ ] Independent post-merge main Production CI GREEN
+- [ ] Windows Hub operator acceptance (separate)
+
+See docs/BUILD_055_KNOWLEDGE_PROJECTS.md. Next Build 056 — Automations Operations Console.

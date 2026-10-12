@@ -634,6 +634,29 @@ export function answerKnowledge(
 }
 
 
+
+export interface KnowledgeSourceReview {
+  document_id: number;
+  status: "needs_review" | "approved" | "flagged";
+  note: string;
+  updated_at: string;
+  reviewed_by_user_id: number | null;
+}
+
+export function getKnowledgeReviews(signal?: AbortSignal): Promise<KnowledgeSourceReview[]> {
+  return authJson<KnowledgeSourceReview[]>("GET", "/api/v1/knowledge/reviews?limit=100", undefined, signal);
+}
+
+export function reviewKnowledgeDocument(
+  documentId: number,
+  review: Pick<KnowledgeSourceReview, "status" | "note">,
+  signal?: AbortSignal,
+): Promise<KnowledgeSourceReview> {
+  return authJson<KnowledgeSourceReview>(
+    "PATCH", "/api/v1/knowledge/documents/" + documentId + "/review", review, signal,
+  );
+}
+
 export interface KnowledgeAdminStatus {
   collection_count: number;
   local_only_collection_count: number;

@@ -133,3 +133,10 @@ GitHub main push run [38247217278](https://github.com/RosevearCreations/rosevear
 ## Next queued build
 
 **Build 055 — Knowledge Projects & Collection Workspace**.
+
+
+## Build 055 — Knowledge Projects & Collection Workspace
+
+Private cross-project source review, indexed-status summaries, manually bounded sequential
+indexing with existing cited search, and a more robust reusable Windows updater. See
+[Build 055 operator runbook](docs/BUILD_055_KNOWLEDGE_PROJECTS.md).

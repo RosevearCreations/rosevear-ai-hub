@@ -2604,3 +2604,21 @@ h1 {
 .camera-review-archive { display: grid; gap: .5rem; padding-top: 1rem; border-top: 1px solid #ccc; overflow-wrap: anywhere; }
 .camera-export-guard { display: grid; justify-items: start; gap: .6rem; }
 .camera-export-guard label { display: flex; gap: .5rem; align-items: flex-start; }
+
+
+/* Build 055 — flexible local knowledge projects and bounded source review */
+.knowledge-project-workspace { display: grid; gap: .9rem; margin: 1rem 0; }
+.knowledge-project-workspace > header h2, .knowledge-project-workspace > header p { margin: .3rem 0; }
+.knowledge-project-cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,13rem),1fr)); gap: .75rem; }
+.knowledge-project-cards button { display: grid; gap: .35rem; text-align: left; padding: .8rem; border: 1px solid #aaa; background: #fff; border-radius: .65rem; color: #222; }
+.knowledge-project-cards button[aria-pressed="true"] { border: 2px solid #333; font-weight: 650; }
+.knowledge-project-cards small, .knowledge-project-source small { display: block; color: #555; }
+.knowledge-project-tools { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; }
+.knowledge-project-tools label, .knowledge-project-source details label { display: grid; gap: .35rem; }
+.knowledge-project-tools select, .knowledge-project-source textarea { padding: .5rem; border: 1px solid #999; border-radius: .4rem; color: #222; background: #fff; }
+.knowledge-project-sources { display: grid; gap: .65rem; }
+.knowledge-project-source { border: 1px solid #aaa; border-radius: .5rem; display: grid; gap: .5rem; padding: .8rem; overflow-wrap: anywhere; }
+.knowledge-project-source details summary { cursor: pointer; font-weight: 600; }
+.knowledge-project-source textarea { width: 100%; min-height: 4rem; resize: vertical; }
+.knowledge-project-review-actions { display: flex; gap: .4rem; flex-wrap: wrap; padding: .4rem 0; }
+.knowledge-project-queue { display: grid; gap: .5rem; justify-items: start; border-top: 1px solid #aaa; padding-top: .9rem; }
