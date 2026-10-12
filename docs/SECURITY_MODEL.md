@@ -594,3 +594,15 @@ and protected user accounts because recovered private files do exist briefly
 on disk. Evidence reports omit secrets and are exclusive-create so older
 results cannot be silently overwritten. Real archive acceptance is distinct
 from synthetic CI; external services and master keys are not included.
+
+
+## Build 051 — read-only production readiness boundary
+
+The operator-run checker uses ONLY anonymous GET routes on the fixed
+127.0.0.1:8765 loopback API. It does not accept an arbitrary host, redirect
+to another URL, use cookies, modify house controls, probe camera devices, or
+read secrets. Evidence stores only sanitized booleans/timestamps/versions,
+not HTTP bodies or machine identity. Windows preflight refuses Hub API
+listeners on nonloopback addresses. This is not a network penetration test:
+Caddy certificate trust, firewall scope and real Tailscale ACL negative tests
+remain explicit, non-CI operator gates. See BUILD_051_PRODUCTION_READINESS.md.

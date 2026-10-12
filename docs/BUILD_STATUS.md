@@ -53,7 +53,8 @@ This file records completed and active builds. The roadmap remains authoritative
 | 047 | Encrypted Backup and Safe Restore | COMPLETE | main via PR #115 |
 | 048 | Performance and Resource-Budget Review | COMPLETE | main via PR #120 |
 | 049 | Threat Model and Security Review | COMPLETE | main via PR #122 |
-| 050 | Disaster Recovery Drill | IN PROGRESS | production checks pending |
+| 050 | Disaster Recovery Drill | COMPLETE | main via PR #124 |
+| 051 | Production Readiness and Roadmap Renewal | IN PROGRESS | main review pending |
 
 ## Build 016 acceptance checklist
 
@@ -1323,3 +1324,19 @@ See docs/BUILD_049_THREAT_MODEL_SECURITY_REVIEW.md. No migrations.
 - [ ] local Windows operator synthetic + real household archive rehearsals (separate acceptance)
 
 See docs/BUILD_050_DISASTER_RECOVERY_DRILL.md. No migrations or service restarts.
+
+## Build 051 — Production Readiness and Roadmap Renewal
+
+- [x] read-only loopback-only API health/version/private-route security preflight
+- [x] no redirects, environment proxy or operator-supplied host
+- [x] exclusive-create metadata-only JSON; never return credentials or API bodies
+- [x] fail-closed Windows check for nonloopback Hub API listeners
+- [x] negative tests for version drift, unsafe public route, redirect, network failures
+- [x] operator production acceptance matrix separates GitHub CI and home LAN/Tailscale/recovery evidence
+- [x] roadmap renewed to Build 052–060 with practical multi-project application scope
+- [ ] development five-check CI GREEN
+- [ ] production PR five-check CI GREEN
+- [ ] separate post-merge main Production GREEN
+- [ ] live Windows operator preflight, network certificate/ACL and real archive acceptance (manual)
+
+See docs/BUILD_051_PRODUCTION_READINESS.md. No migrations or service changes.
