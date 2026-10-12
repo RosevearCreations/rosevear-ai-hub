@@ -2114,3 +2114,85 @@ export function previewVoiceCommand(
     signal,
   );
 }
+
+/** Build 057 workshop records are local, manual and not machine commands. */
+export type WorkshopActivity = "general" | "laser" | "cnc" | "forge" | "electrical" | "chemical" | "other";
+export type WorkshopReadiness = "unverified" | "review_required" | "attention" | "blocked";
+export type WorkshopObservation = "observed_ok" | "needs_service" | "unsafe";
+
+export interface WorkshopStation {
+  id: number;
+  project_key: string;
+  name: string;
+  description: string;
+  hazards_json: string[];
+  disabled: boolean;
+  created_at: string;
+}
+
+export interface WorkshopEquipment {
+  id: number;
+  project_key: string;
+  station_id: number | null;
+  name: string;
+  equipment_type: string;
+  activity_type: WorkshopActivity;
+  readiness_status: WorkshopReadiness;
+  maintenance_due_at: string | null;
+  last_inspected_at: string | null;
+  notes: string;
+  disabled: boolean;
+  created_at: string;
+}
+
+export interface WorkshopInspection {
+  id: number;
+  equipment_id: number;
+  review_status: WorkshopObservation;
+  note: string;
+  checked_at: string;
+  checked_by_user_id: number | null;
+}
+
+export interface WorkshopSummary {
+  equipment_count: number;
+  unverified: number;
+  review_required: number;
+  attention: number;
+  blocked: number;
+  maintenance_overdue: number;
+  scope: "manual_records_only";
+  automatic_equipment_control: false;
+  counts_limited_to_first: number;
+}
+
+export function getWorkshopStations(signal?: AbortSignal) {
+  return authJson<WorkshopStation[]>("GET", "/api/v1/workshop/stations", undefined, signal);
+}
+export function createWorkshopStation(input: {
+  project_key: string; name: string; description: string; hazards_json: string[];
+}) {
+  return authJson<WorkshopStation>("POST", "/api/v1/workshop/stations", input);
+}
+export function getWorkshopEquipment(signal?: AbortSignal) {
+  return authJson<WorkshopEquipment[]>("GET", "/api/v1/workshop/equipment", undefined, signal);
+}
+export function createWorkshopEquipment(input: {
+  project_key: string; station_id: number | null; name: string; equipment_type: string;
+  activity_type: WorkshopActivity; notes: string;
+}) {
+  return authJson<WorkshopEquipment>("POST", "/api/v1/workshop/equipment", input);
+}
+export function getWorkshopSummary(signal?: AbortSignal) {
+  return authJson<WorkshopSummary>("GET", "/api/v1/workshop/readiness", undefined, signal);
+}
+export function getWorkshopInspections(equipmentId: number) {
+  return authJson<WorkshopInspection[]>("GET", `/api/v1/workshop/equipment/${equipmentId}/inspections`);
+}
+export function recordWorkshopInspection(
+  equipmentId: number, input: { review_status: WorkshopObservation; note: string },
+) {
+  return authJson<WorkshopInspection>(
+    "POST", `/api/v1/workshop/equipment/${equipmentId}/inspections`, input,
+  );
+}

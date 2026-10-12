@@ -147,3 +147,12 @@ indexing with existing cited search, and a more robust reusable Windows updater.
 Read-only event-rule operations evidence, human-approved exact pause/enable, and a safe
 Windows backend-only stop-update-start workflow that keeps the independent client
 restart script unchanged. See [Build 056 runbook](docs/BUILD_056_AUTOMATION_OPERATIONS.md).
+
+
+## Build 057 — Workshop Equipment & Safety Readiness
+
+Local multi-project workstation and equipment register, manual maintenance
+observations and high-risk activity notices. All records require human review;
+no machinery control. Additive database migration `0018` requires a
+verified backup and operator-controlled stopped-backend migration before use.
+See [Build 057 runbook](docs/BUILD_057_WORKSHOP_EQUIPMENT.md).
