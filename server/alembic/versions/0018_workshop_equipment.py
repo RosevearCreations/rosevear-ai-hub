@@ -24,11 +24,23 @@ def upgrade() -> None:
         sa.Column("description", sa.String(500), nullable=False),
         sa.Column("hazards_json", sa.JSON(), nullable=False),
         sa.Column("disabled", sa.Boolean(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("(CURRENT_TIMESTAMP)")),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("(CURRENT_TIMESTAMP)")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("(CURRENT_TIMESTAMP)"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("(CURRENT_TIMESTAMP)"),
+        ),
         sa.UniqueConstraint("project_key", "name", name="uq_workshop_station_project_name"),
     )
-    op.create_index("ix_workshop_stations_project_key", "workshop_stations", ["project_key"])
+    op.create_index(
+        "ix_workshop_stations_project_key", "workshop_stations", ["project_key"]
+    )
     op.create_table(
         "workshop_equipment",
         sa.Column("id", sa.Integer(), primary_key=True),
@@ -42,13 +54,29 @@ def upgrade() -> None:
         sa.Column("last_inspected_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("notes", sa.String(500), nullable=False),
         sa.Column("disabled", sa.Boolean(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("(CURRENT_TIMESTAMP)")),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("(CURRENT_TIMESTAMP)")),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("(CURRENT_TIMESTAMP)"),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("(CURRENT_TIMESTAMP)"),
+        ),
         sa.ForeignKeyConstraint(["station_id"], ["workshop_stations.id"], ondelete="SET NULL"),
     )
-    op.create_index("ix_workshop_equipment_project_key", "workshop_equipment", ["project_key"])
-    op.create_index("ix_workshop_equipment_station_id", "workshop_equipment", ["station_id"])
-    op.create_index("ix_workshop_equipment_readiness_status", "workshop_equipment", ["readiness_status"])
+    op.create_index(
+        "ix_workshop_equipment_project_key", "workshop_equipment", ["project_key"]
+    )
+    op.create_index(
+        "ix_workshop_equipment_station_id", "workshop_equipment", ["station_id"]
+    )
+    op.create_index(
+        "ix_workshop_equipment_readiness_status", "workshop_equipment", ["readiness_status"]
+    )
     op.create_table(
         "workshop_inspections",
         sa.Column("id", sa.Integer(), primary_key=True),
@@ -56,11 +84,18 @@ def upgrade() -> None:
         sa.Column("review_status", sa.String(24), nullable=False),
         sa.Column("note", sa.String(500), nullable=False),
         sa.Column("checked_by_user_id", sa.Integer(), nullable=True),
-        sa.Column("checked_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("(CURRENT_TIMESTAMP)")),
+        sa.Column(
+            "checked_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("(CURRENT_TIMESTAMP)"),
+        ),
         sa.ForeignKeyConstraint(["equipment_id"], ["workshop_equipment.id"], ondelete="RESTRICT"),
         sa.ForeignKeyConstraint(["checked_by_user_id"], ["users.id"], ondelete="SET NULL"),
     )
-    op.create_index("ix_workshop_inspections_equipment_id", "workshop_inspections", ["equipment_id"])
+    op.create_index(
+        "ix_workshop_inspections_equipment_id", "workshop_inspections", ["equipment_id"]
+    )
 
 
 def downgrade() -> None:

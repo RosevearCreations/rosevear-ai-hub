@@ -532,7 +532,9 @@ class WorkshopStation(TimestampMixin, Base):
     """Named local workstation for any project. Not a machine controller."""
 
     __tablename__ = "workshop_stations"
-    __table_args__ = (UniqueConstraint("project_key", "name", name="uq_workshop_station_project_name"),)
+    __table_args__ = (
+        UniqueConstraint("project_key", "name", name="uq_workshop_station_project_name"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     project_key: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
