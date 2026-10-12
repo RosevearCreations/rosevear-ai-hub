@@ -201,10 +201,13 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Draft a rule, review exact Rule Schema JSON, then use the Level-2 save confirmation.",
       "Leave new rules disabled until trigger, conditions, targets, and cooldown are verified.",
       "Inspect execution history before changing a rule after a failure or interruption.",
+      "Build 056 Operations shows event trigger readiness, dropped events, cooldown and last observed run; no clock scheduler is implied.",
+      "Prepare an exact pause/enable confirmation, verify the details, and approve or reject it separately.",
     ],
     safety: [
       "AI may draft rules but never saves or executes them by itself.",
       "Failed/interrupted physical actions are not automatically replayed because the remote outcome may be uncertain.",
+      "The rule can appear event-ready from configuration alone even when a broker or device is unreachable. Never infer a confirmed connection.",
     ],
     troubleshooting: [
       "Draft rejected: fix unsupported tools, arguments, entities, or MQTT policy mismatches.",
