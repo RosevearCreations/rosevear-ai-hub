@@ -103,10 +103,19 @@ jobs:
       - name: Validate Windows recovery PowerShell syntax
         shell: pwsh
         run: |
-          $tokens = $null
-          $errors = $null
-          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/enable-tailscale-serve.ps1', 'scripts/configure-lan-https.ps1', 'scripts/check-production-readiness.ps1', 'scripts/update-rosevear-ai-hub.ps1', 'scripts/restart-hub-backend.ps1', 'scripts/update-hub-backend.ps1')) { [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null }
-          if ($errors.Count -gt 0) { $errors | Format-List; exit 1 }
+          $allErrors = @()
+          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/enable-tailscale-serve.ps1', 'scripts/configure-lan-https.ps1', 'scripts/check-production-readiness.ps1', 'scripts/update-rosevear-ai-hub.ps1', 'scripts/restart-hub-backend.ps1', 'scripts/update-hub-backend.ps1')) {
+            $tokens = $null
+            $parseErrors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$parseErrors) | Out-Null
+            foreach ($parseError in @($parseErrors)) {
+              $allErrors += "$file : $($parseError.ToString())"
+            }
+          }
+          if ($allErrors.Count -gt 0) {
+            $allErrors | ForEach-Object { Write-Error $_ }
+            exit 1
+          }
       - name: Prevent reserved PowerShell HOME assignment in Tailscale preflight
         shell: pwsh
         run: |
