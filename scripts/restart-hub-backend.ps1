@@ -22,6 +22,8 @@ if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
 }
 $RepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 $Python = Join-Path $RepoRoot ".venv\Scripts\python.exe"
+$UserPython = Join-Path $env:LOCALAPPDATA "Programs\Python\Python311\python.exe"
+. (Join-Path $PSScriptRoot "hub-backend-identity.ps1")
 $Logs = Join-Path $RepoRoot "logs"
 New-Item -ItemType Directory -Path $Logs -Force | Out-Null
 $Log = Join-Path $Logs "hub-backend-maintenance.log"
@@ -48,17 +50,27 @@ function Get-VerifiedPid {
     if ($null -eq $process -or !$process.ExecutablePath -or !$process.CommandLine) {
         throw "Cannot verify ownership of 8765; refusing to stop it."
     }
-    $expected = [System.IO.Path]::GetFullPath($Python)
-    $actual = [System.IO.Path]::GetFullPath($process.ExecutablePath)
-    $sameExecutable = [string]::Equals(
-        $expected,
-        $actual,
-        [System.StringComparison]::OrdinalIgnoreCase
-    )
-    $isHubCommand = [bool]($process.CommandLine -match 'rosevear_ai_hub\.main:app')
-    if ((-not $sameExecutable) -or (-not $isHubCommand)) {
+    # The operator's existing backend may use per-user Python 3.11 rather than
+    # the project venv. Require the exact app invocation AND a real Hub /version.
+    $apiIdentity = $null
+    try {
+        $apiIdentity = Invoke-RestMethod -Uri "http://127.0.0.1:8765/version" -TimeoutSec 4
+    }
+    catch {
+        throw "Port 8765 is occupied but Hub identity cannot be confirmed. Refusing to stop it."
+    }
+    $verified = Test-HubBackendIdentity `
+        -ActualExecutable $process.ExecutablePath `
+        -ExpectedVenvPython $Python `
+        -ExpectedUserPython $UserPython `
+        -CommandLine $process.CommandLine `
+        -ServiceName ([string]$apiIdentity.service) `
+        -Version ([string]$apiIdentity.version)
+    if (-not $verified) {
         throw "Port 8765 belongs to an unverified process; refusing to stop it."
     }
+    Note "Verified Rosevear AI Hub process identity: PID $($pids[0]); local version $($apiIdentity.version)."
+
     return [int]$pids[0]
 }
 function Get-ApiVersion {

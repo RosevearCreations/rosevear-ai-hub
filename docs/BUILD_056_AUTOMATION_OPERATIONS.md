@@ -42,9 +42,9 @@ adds an opt-in, dedicated backend maintenance path.
 2. **Pause your existing Hub recovery Scheduled Task manually**, not Home
    Assistant/Ollama. The script explicitly requires typing `PAUSED`.
    It inspects port **8765** and refuses to stop any process that is not
-   the expected local `.venv\Scripts\python.exe` with
-   `rosevear_ai_hub.main:app` in its command line, or one listening outside
-   loopback. If another process owns the port, stop and investigate manually.
+   approved local `.venv\Scripts\python.exe` or per-user Python 3.11
+   executable, with `-m uvicorn rosevear_ai_hub.main:app` and a verified
+   local Hub `/version` response, or one listening outside loopback. If another process owns the port, stop and investigate manually.
 3. The backend procedure performs a controlled stop, runs the safe generic
    updater (`git fetch`, fast-forward-only merge, pip, npm/web build and
    optional backend/web tests), then starts one verified API process at
@@ -76,3 +76,15 @@ Build 056. Exact confirmation workflow is required for rule changes. Windows
 PowerShell scripts undergo parser checks in the Windows CI lane; no CI
 procedure attempts to alter actual household Scheduled Tasks or live services.
 Use existing release rollback procedures, preserving rules and audit evidence.
+
+### Build 056 backend identity hotfix
+
+An existing Hub installation was observed serving `0.0.55` on loopback
+`127.0.0.1:8765` from the operator's per-user Python 3.11 install instead
+of `.venv`. The backend maintenance inspector now accepts **either exact
+approved interpreter path** only if the verified Hub uvicorn module and live
+`/version` service identity also match; otherwise it refuses the process.
+`-Action Inspect` is read-only, and the existing recovery task must be
+paused before any explicit stop/restart operation. CI now tests both accepted
+startup patterns and multiple rejected impersonators. This does not prove the
+physical Windows server has been migrated/restarted.
