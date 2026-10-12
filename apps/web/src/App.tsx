@@ -20,6 +20,7 @@ import { ChatView } from "./ChatView";
 import { ConfirmationsView } from "./ConfirmationsView";
 import { HomeAssistantView } from "./HomeAssistantView";
 import { KnowledgeView } from "./KnowledgeView";
+import { WorkshopView } from "./WorkshopView";
 import { LocalDiagnosticsPanel } from "./LocalDiagnosticsPanel";
 import { SectionHelp } from "./HelpSystem";
 import { MQTTView } from "./MQTTView";
@@ -61,6 +62,7 @@ const baseSections = [
 type Section =
   | (typeof baseSections)[number]
   | "Automations"
+  | "Workshop"
   | "Users"
   | "Tools"
   | "Confirmations"
@@ -172,7 +174,7 @@ export function App() {
   const user = auth.status.user;
   const canAdminister = user.role === "owner" || user.role === "administrator";
   const sections: Section[] = canAdminister
-    ? [...baseSections, "Automations", "Confirmations", "Audit", "Secrets", "Tools", "Users"]
+    ? [...baseSections, "Workshop", "Automations", "Confirmations", "Audit", "Secrets", "Tools", "Users"]
     : [...baseSections];
 
   async function signOut() {
@@ -239,6 +241,8 @@ export function App() {
           <ChatView />
         ) : section === "Knowledge" ? (
           <KnowledgeView currentUser={user} />
+        ) : section === "Workshop" ? (
+          <WorkshopView />
         ) : section === "Devices" ? (
           <HomeAssistantView currentUser={user} />
         ) : section === "Cameras" ? (
