@@ -310,6 +310,60 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - Windows operator disaster-recovery runbook: archive storage, safe scratch, offline master-key escrow, RPO/RTO evidence, rollback, exclusions, manual acceptance
 - no network access, auto-restore, data migration, cloud service or service restarts
 ### Build 051 — Production Readiness and Roadmap Renewal
+- read-only, no-credential loopback readiness preflight for API version, health, anonymous access denial and browser security headers
+- Windows API binding guard and no-clobber metadata-only acceptance report
+- distinguish code-CI GREEN from household firewall/Tailscale, certificate, encrypted real backup and device operator acceptance
+- renew the roadmap around usable applications with multi-business/workshop scope, accessible workflows and optional Frigate
+
+## Phase 11 — Practical Applications and Operator Experience
+
+### Build 052 — Unified Operations Dashboard & Guided Onboarding
+- replace siloed home status cards with useful, accessible daily operator views
+- user-selectable Home, Workshop and Business contexts; no single project baked into core
+- compact read-only health/attention summaries, onboarding progress, and clear disabled/unconfigured service states
+- help icons and guided steps for local-first account, Ollama, MQTT, Home Assistant and camera setup
+- do not expose secrets or execute real-world actions from dashboard cards
+
+### Build 053 — Local Service Diagnostics & Guided Repair
+- clear dependency/status diagnostics for Hub, Ollama, HA, MQTT and go2rtc
+- explicit operator-run fix instructions, stable log pointers, safe no-duplicate-start checks
+- avoid automatic restarts or dangerous "repair everything" buttons
+
+### Build 054 — Cameras and Event Timeline Workbench
+- filter/sort camera events and known stream health without exposing RTSP credentials
+- local event annotation, review and export guards; Frigate offline remains supported
+- permission checks and storage/retention warnings
+
+### Build 055 — Knowledge Projects & Collection Workspace
+- multi-project document collections, source review and status clarity
+- safer ingest/duplicate handling and useful citations in project context
+- bounded work queues without automatic uploads
+
+### Build 056 — Automations Operations Console
+- human-readable schedule/event state, failures and replay-prevention evidence
+- guarded draft → preview → confirm flows for permitted low-risk actions only
+- never unlock high-risk device writes by default
+
+### Build 057 — Workshop Equipment & Safety Readiness
+- configurable workstation/equipment inventory and maintenance-readiness records
+- notices for hazardous activities; no automatic CNC/forge/laser execution
+- allow offline, multi-project work without paid services
+
+### Build 058 — Business Connector Operations Workspace
+- unified read-only Devil n Dove, Rosie Dazzlers and Yard Workers status panels
+- scoped freshness and evidence, owner-approved narrow write workflow only
+- no shared credentials in browser, logs or exports
+
+### Build 059 — Conversation, Voice and Knowledge UX
+- improve local text/voice chat usability, model/profile switching and grounded answers
+- explicit microphone/speech opt-in, clear tool confirmation, transcript editing
+- avoid automatic publication or non-approved home-control actions
+
+### Build 060 — Guided Release Adoption & Practical Workflow Acceptance
+- owner-operated acceptance cards for common home/workshop/business tasks
+- fast failed-service triage and traceable build-to-build observations
+- maintain CI, security, backup and Windows compatibility gates
+
 
 ## Build execution rules
 
