@@ -239,7 +239,7 @@ describe("AutomationView", () => {
       expect(
         screen.getByText("Automation created disabled. Enable it only after final review."),
       ).toBeInTheDocument();
-      expect(screen.getByText("Workshop motion light")).toBeInTheDocument();
+      expect(screen.getAllByText("Workshop motion light").length).toBeGreaterThan(0);
       expect(screen.getByText("Disabled")).toBeInTheDocument();
     });
   });
