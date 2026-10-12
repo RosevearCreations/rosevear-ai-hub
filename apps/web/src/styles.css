@@ -2639,3 +2639,20 @@ h1 {
 .automation-operational-rule dt { font-size: .8rem; }
 .automation-operational-rule dd { margin: 0; overflow-wrap: anywhere; }
 .automation-operations-pending { display: grid; gap: .6rem; border: 2px solid currentColor; border-radius: .5rem; padding: .9rem; }
+
+
+/* Build 057 — local multi-project workshop readiness */
+.workshop-view { display: grid; gap: 1rem; }
+.workshop-warning { border: 2px solid #73511c; border-radius: .65rem; padding: .9rem; background: #fff8e8; color: #33220e; line-height: 1.6; }
+.workshop-stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(8.7rem,1fr)); gap: .6rem; }
+.workshop-stats > div { border: 1px solid #aaa; padding: .75rem; border-radius: .5rem; }
+.workshop-stats dt { font-size: .82rem; }
+.workshop-stats dd { margin: .3rem 0 0; font-size: 1.45rem; font-weight: 700; }
+.workshop-view .panel { padding: 1rem; }
+.workshop-view label { display: grid; gap: .35rem; max-width: 34rem; }
+.workshop-view input,.workshop-view select,.workshop-view textarea { border: 1px solid #999; padding: .55rem; border-radius: .45rem; max-width: 100%; background: white; color: #171717; }
+.workshop-items { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,15rem),1fr)); gap: .7rem; }
+.workshop-item { border: 1px solid #999; border-radius: .6rem; padding: 1rem; display: grid; gap: .6rem; justify-items: start; }
+.workshop-item h3,.workshop-item p { margin: 0; }
+.workshop-form { display: grid; gap: .8rem; }
+.workshop-form button { justify-self: start; }

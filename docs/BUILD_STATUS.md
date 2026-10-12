@@ -58,7 +58,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 052 | Unified Operations Dashboard & Guided Onboarding | COMPLETE | main via PR #128; Production run 38190554356 GREEN |
 | 053 | Local Service Diagnostics & Guided Repair | COMPLETE | main via PR #130; Production run 38247217278 GREEN |
 | 054 | Cameras and Event Timeline Workbench | COMPLETE | main via PR #132; Production run 38256907082 GREEN |
-| 055 | Knowledge Projects & Collection Workspace | COMPLETE | main via PR #136; Production run 38268949178 GREEN |\n| 056 | Automations Operations Console | IMPLEMENTED | dev/main verification pending |
+| 055 | Knowledge Projects & Collection Workspace | COMPLETE | main via PR #136; Production run 38268949178 GREEN |\n| 056 | Automations Operations Console | COMPLETE | main via PR #140; hotfix run 38285112776 GREEN |\n| 057 | Workshop Equipment & Safety Readiness | IMPLEMENTED | dev/main verification pending |
 
 ## Build 016 acceptance checklist
 
@@ -1421,3 +1421,19 @@ See docs/BUILD_055_KNOWLEDGE_PROJECTS.md. Next Build 056 — Automations Operati
 - [ ] Real Windows backup, migration and service acceptance (operator controlled)
 
 See docs/BUILD_056_AUTOMATION_OPERATIONS.md. Next Build 057 — Workshop Equipment & Safety Readiness.
+
+
+## Build 057 — Workshop Equipment & Safety Readiness
+
+- [x] Multi-project owner/admin workstation and equipment register
+- [x] Explicit hazard labels, statuses, overdue maintenance and manual inspection history
+- [x] "Observed OK" never authorizes equipment operation
+- [x] Cross-project workstation guard, role checks and audited writes
+- [x] Additive Alembic migration 0018 and isolated regression tests
+- [x] Help, runbook, server version and no device control
+- [ ] 5 development CI jobs GREEN
+- [ ] 5 production PR CI jobs GREEN
+- [ ] independent main push Production CI GREEN
+- [ ] real Windows backup/migration & manual operator acceptance
+
+Next: Build 058 — Business Connector Operations Workspace.
