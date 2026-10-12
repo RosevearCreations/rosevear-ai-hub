@@ -1311,6 +1311,7 @@ export interface AutomationRuntime {
   frigate_seen_event_count: number;
   frigate_last_poll_at: string | null;
   last_error: string | null;
+  recovered_interrupted_runs?: number;
 }
 
 export interface AutomationDraft {
