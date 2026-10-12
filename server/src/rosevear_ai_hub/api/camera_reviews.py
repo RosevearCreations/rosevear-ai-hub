@@ -88,8 +88,11 @@ def upsert_event_review(
         raise HTTPException(status_code=422, detail="Note contains invalid characters.")
     try:
         matched = next(
-            (item for item in get_frigate_client().recent_events(limit=100)
-             if item.event_id == event_id),
+            (
+                item
+                for item in get_frigate_client().recent_events(limit=100)
+                if item.event_id == event_id
+            ),
             None,
         )
     except FrigateError as exc:
@@ -158,10 +161,17 @@ def export_review_metadata(
     writer.writerow(["event_id", "camera", "label", "start_epoch", "review_status", "note"])
     for item in _recent(db, 100):
         writer.writerow(
-            [_csv_cell(value) for value in (
-                item.event_id, item.camera_name, item.object_label,
-                item.event_start_time, item.review_status, item.note,
-            )]
+            [
+                _csv_cell(value)
+                for value in (
+                    item.event_id,
+                    item.camera_name,
+                    item.object_label,
+                    item.event_start_time,
+                    item.review_status,
+                    item.note,
+                )
+            ]
         )
     return Response(
         content=output.getvalue(),
