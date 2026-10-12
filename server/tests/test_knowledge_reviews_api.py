@@ -69,21 +69,21 @@ def test_source_review_persists_without_losing_ingestion_metadata(tmp_path) -> N
 def test_review_limits_and_unknown_document_do_not_write(tmp_path) -> None:
     client, _ = make_client(tmp_path)
     assert (
-    client.patch(
+        client.patch(
             "/api/v1/knowledge/documents/89/review",
             json={"status": "approved", "note": ""},
         ).status_code
         == 404
     )
     assert (
-    client.patch(
+        client.patch(
             "/api/v1/knowledge/documents/7/review",
             json={"status": "approved", "note": "x" * 501},
         ).status_code
         == 422
     )
     assert (
-    client.patch(
+        client.patch(
             "/api/v1/knowledge/documents/7/review",
             json={"status": "deleted", "note": ""},
         ).status_code
@@ -95,14 +95,14 @@ def test_review_limits_and_unknown_document_do_not_write(tmp_path) -> None:
 def test_viewer_cannot_read_review_notes_or_change_review(tmp_path) -> None:
     client, _ = make_client(tmp_path)
     assert (
-    client.patch(
+        client.patch(
             "/api/v1/knowledge/documents/7/review",
             json={"status": "approved", "note": "Owner-only source assessment"},
         ).status_code
         == 200
     )
     assert (
-    client.post(
+        client.post(
             "/api/v1/auth/users",
             json={
                 "username": "review-reader",
@@ -114,7 +114,7 @@ def test_viewer_cannot_read_review_notes_or_change_review(tmp_path) -> None:
     )
     assert client.post("/api/v1/auth/logout").status_code == 200
     assert (
-    client.post(
+        client.post(
             "/api/v1/auth/login",
             json={"username": "review-reader", "password": "reader-password-123"},
         ).status_code
@@ -122,7 +122,7 @@ def test_viewer_cannot_read_review_notes_or_change_review(tmp_path) -> None:
     )
     assert client.get("/api/v1/knowledge/reviews").status_code == 403
     assert (
-    client.patch(
+        client.patch(
             "/api/v1/knowledge/documents/7/review",
             json={"status": "flagged", "note": "Not permitted"},
         ).status_code
