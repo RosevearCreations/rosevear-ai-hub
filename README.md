@@ -108,11 +108,28 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 038 — Rosie Dazzlers Read Connector**
 - **Build 039 — Yard Workers Read Connector**
 - **Build 040 — Narrow Confirmed Business Writes**
+- **Build 041 — Automatic Service Recovery, Camera Streaming Repair & Startup Cleanup**
+- **Build 042 — Local Speech-to-Text**
+- **Build 043 — Local Text-to-Speech**
+- **Build 044 — Voice Commands and Confirmations**
+- **Build 045 — Installable PWA**
+- **Build 046 — Private Remote Access via Tailscale**
+- **Build 047 — Encrypted Backup and Safe Restore**
+- **Build 048 — Performance and Resource-Budget Review**
+- **Build 049 — Threat Model and Security Review**
+- **Build 050 — Disaster Recovery Drill**
+- **Build 051 — Production Readiness and Roadmap Renewal**
+- **Build 052 — Unified Operations Dashboard & Guided Onboarding**
 
-## Next build
+## Current production release
 
-**Build 041 — Local Speech-to-Text**
+**Build 053** is the last independently verified production release before Build 054.
+GitHub main push run [38247217278](https://github.com/RosevearCreations/rosevear-ai-hub/actions/runs/38190554356) passed. Release code CI does not prove the Windows Hub has been updated or that home-network/camera recovery checks are accepted.
 
-Build 040 adds two exact Level-2 confirmed business writes: a Devil n Dove review-only product-story
-draft and a Yard Workers private internal job update comment. Rosie Dazzlers remains read-only, and
-every unlisted business write stays fail-closed.
+## Active build
+
+**Build 054 — Cameras and Event Timeline Workbench** (implementation and promotion tracked in [Build Status](docs/BUILD_STATUS.md)).
+
+## Next queued build
+
+**Build 055 — Knowledge Projects & Collection Workspace**.
