@@ -140,3 +140,10 @@ GitHub main push run [38247217278](https://github.com/RosevearCreations/rosevear
 Private cross-project source review, indexed-status summaries, manually bounded sequential
 indexing with existing cited search, and a more robust reusable Windows updater. See
 [Build 055 operator runbook](docs/BUILD_055_KNOWLEDGE_PROJECTS.md).
+
+
+## Build 056 — Automation operations & backend maintenance
+
+Read-only event-rule operations evidence, human-approved exact pause/enable, and a safe
+Windows backend-only stop-update-start workflow that keeps the independent client
+restart script unchanged. See [Build 056 runbook](docs/BUILD_056_AUTOMATION_OPERATIONS.md).
