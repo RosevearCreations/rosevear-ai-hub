@@ -118,7 +118,7 @@ jobs:
           }
       - name: Verify accepted and rejected Hub Python process identities
         shell: pwsh
-        run: .\\scripts\\test-hub-backend-identity.ps1
+        run: ./scripts/test-hub-backend-identity.ps1
       - name: Prevent reserved PowerShell HOME assignment in Tailscale preflight
         shell: pwsh
         run: |
