@@ -97,9 +97,7 @@ def _station_for_project(db: Session, station_id: int | None, project_key: str) 
         return
     station = db.get(WorkshopStation, station_id)
     if station is None or station.disabled or station.project_key != project_key:
-        raise HTTPException(
-            status_code=422, detail="Select an active workstation in this project."
-        )
+        raise HTTPException(status_code=422, detail="Select an active workstation in this project.")
 
 
 @router.get("/stations", response_model=list[StationOut])
@@ -118,8 +116,12 @@ def create_station(body: StationCreate, actor: Maintainer, db: Database):
     try:
         db.flush()
         record_audit_event(
-            db, actor_user_id=actor.id, event_type="workshop.station.created",
-            object_type="workshop_station", object_id=str(item.id), action="create",
+            db,
+            actor_user_id=actor.id,
+            event_type="workshop.station.created",
+            object_type="workshop_station",
+            object_id=str(item.id),
+            action="create",
             arguments={"project_key": item.project_key, "name": item.name},
             result={"ok": True},
         )
