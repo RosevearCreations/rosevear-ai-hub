@@ -4,9 +4,9 @@ Read-only tests for strict Hub backend identity matching. No process is stopped.
 #>
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "hub-backend-identity.ps1")
-$venv = 'C:\Users\Ree\rosevearaihub\.venv\Scripts\python.exe'
-$globalPython = 'C:\Users\Ree\AppData\Local\Programs\Python\Python311\python.exe'
-$command = '"C:\Users\Ree\AppData\Local\Programs\Python\Python311\python.exe" -m uvicorn rosevear_ai_hub.main:app --host 127.0.0.1 --port 8765'
+$venv = 'C:\Users\HubTest\rosevearaihub\.venv\Scripts\python.exe'
+$globalPython = 'C:\Users\HubTest\AppData\Local\Programs\Python\Python311\python.exe'
+$command = '"C:\Users\HubTest\AppData\Local\Programs\Python\Python311\python.exe" -m uvicorn rosevear_ai_hub.main:app --host 127.0.0.1 --port 8765'
 $valid = @{
     ActualExecutable = $globalPython
     ExpectedVenvPython = $venv
