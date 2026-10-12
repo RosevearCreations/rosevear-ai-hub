@@ -2555,3 +2555,25 @@ h1 {
 .pwa-install-panel button { min-height: 2.5rem; border: 1px solid #737373; border-radius: .45rem; background: #fff; cursor: pointer; }
 .pwa-install-help { display: grid; gap: .6rem; padding-top: .4rem; }
 @media (max-width: 600px) { .pwa-install-panel { margin: .6rem 0; } }
+
+/* Build 052: approachable contextual read-only overview */
+.operations-dashboard { display: grid; gap: 1rem; margin-bottom: 1.2rem; }
+.operations-toolbar { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: .75rem; }
+.operations-toolbar h2, .operations-toolbar p { margin: 0; }
+.operations-contexts { display: flex; flex-wrap: wrap; gap: .5rem; border: 1px solid #d2d2d2; border-radius: .65rem; padding: .8rem; }
+.operations-contexts legend { font-weight: 650; padding: 0 .3rem; }
+.operations-contexts button[aria-pressed="true"] { border: 2px solid #333; background: #ededed; font-weight: 700; }
+.operations-summary { font-weight: 600; margin: .2rem 0; }
+.operations-timestamp { color: #555; }
+.operations-status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .8rem; }
+.operations-status-grid .panel { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
+.operations-status-grid .panel h3, .operations-status-grid .panel p { margin: 0; }
+.operations-status-grid .panel button { margin-top: auto; }
+.operations-state { border: 1px solid #777; border-radius: .35rem; padding: .2rem .5rem; display: inline-block; }
+.operations-attention { border-color: #b35f00; }
+.operations-ready { border-color: #287440; }
+.operations-unknown, .operations-optional { border-color: #777; }
+.operations-guide ol { display: grid; gap: 1rem; padding-left: 1.3rem; }
+.operations-guide li { padding-left: .15rem; }
+.operations-guide li p { margin: .35rem 0; }
+@media (max-width: 600px) { .operations-toolbar { display: grid; } }

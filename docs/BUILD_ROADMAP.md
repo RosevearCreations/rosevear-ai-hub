@@ -318,6 +318,7 @@ This is the canonical implementation sequence. Build numbers are never reused.
 ## Phase 11 — Practical Applications and Operator Experience
 
 ### Build 052 — Unified Operations Dashboard & Guided Onboarding
+- implement read-only contextual dashboard with manual refresh and safe state summaries
 - replace siloed home status cards with useful, accessible daily operator views
 - user-selectable Home, Workshop and Business contexts; no single project baked into core
 - compact read-only health/attention summaries, onboarding progress, and clear disabled/unconfigured service states

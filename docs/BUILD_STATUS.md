@@ -54,7 +54,8 @@ This file records completed and active builds. The roadmap remains authoritative
 | 048 | Performance and Resource-Budget Review | COMPLETE | main via PR #120 |
 | 049 | Threat Model and Security Review | COMPLETE | main via PR #122 |
 | 050 | Disaster Recovery Drill | COMPLETE | main via PR #124 |
-| 051 | Production Readiness and Roadmap Renewal | IN PROGRESS | main review pending |
+| 051 | Production Readiness and Roadmap Renewal | COMPLETE | main via PR #126 |
+| 052 | Unified Operations Dashboard & Guided Onboarding | IN PROGRESS | production checks pending |
 
 ## Build 016 acceptance checklist
 
@@ -1340,3 +1341,17 @@ See docs/BUILD_050_DISASTER_RECOVERY_DRILL.md. No migrations or service restarts
 - [ ] live Windows operator preflight, network certificate/ACL and real archive acceptance (manual)
 
 See docs/BUILD_051_PRODUCTION_READINESS.md. No migrations or service changes.
+
+## Build 052 — Unified Operations Dashboard & Guided Onboarding
+
+- [x] read-only user-selectable Home / Workshop / Business contexts
+- [x] safe service status summaries, optional/unconfigured and inaccessible state distinctions
+- [x] manual Refresh only, no background polling, writes or privileged action bypass
+- [x] guided setup steps and accessible buttons opening existing pages
+- [x] source/permission caution and regression tests; version 0.0.52
+- [ ] development five CI jobs GREEN
+- [ ] production candidate five CI jobs GREEN
+- [ ] independent post-merge main production GREEN
+- [ ] operator local Windows/TEMPLAR acceptance (separate)
+
+See docs/BUILD_052_OPERATIONS_DASHBOARD.md. Next Build 053 — Local Service Diagnostics & Guided Repair.

@@ -9,8 +9,11 @@ interface HelpTopic {
 
 const HELP_TOPICS: Record<string, HelpTopic> = {
   Home: {
-    purpose: "Shows overall Hub health and shortcuts to the major local-first capabilities.",
+    purpose: "Build 052: a read-only contextual operations overview, with guided setup and local AI shortcuts.",
     tasks: [
+      "Choose Home, Workshop, or Business to filter status cards for that working context.",
+      "Use Refresh overview to request fresh read-only service states, then open each section for details.",
+      "A Not configured or Not verified card is not a device failure. Frigate is optional.",
       "Confirm the backend and Ollama health cards are online.",
       "Use the dashboard cards to move directly into Chat, Knowledge, Devices, MQTT, Automations, or Notifications.",
       "Treat Home as the first place to check after an update or restart.",
