@@ -5,7 +5,6 @@ from sqlalchemy.orm import sessionmaker
 
 from rosevear_ai_hub.database import Base, build_engine, get_session
 from rosevear_ai_hub.main import create_app
-
 from test_frigate_api import FakeFrigate
 
 
