@@ -2622,3 +2622,20 @@ h1 {
 .knowledge-project-source textarea { width: 100%; min-height: 4rem; resize: vertical; }
 .knowledge-project-review-actions { display: flex; gap: .4rem; flex-wrap: wrap; padding: .4rem 0; }
 .knowledge-project-queue { display: grid; gap: .5rem; justify-items: start; border-top: 1px solid #aaa; padding-top: .9rem; }
+
+
+/* Build 056 automation operations and evidence */
+.automation-operations-console { display: grid; gap: .9rem; margin: 1rem 0; }
+.automation-operations-console h2, .automation-operations-console p { margin: .25rem 0; }
+.automation-operations-stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,9rem),1fr)); gap: .5rem; }
+.automation-operations-stats > div { display: grid; gap: .3rem; border: 1px solid #aaa; border-radius: .5rem; padding: .65rem; }
+.automation-operations-stats dt { font-size: .85rem; }
+.automation-operations-stats dd { margin: 0; font-size: 1.2rem; font-weight: 700; }
+.automation-operations-console label { display: grid; gap: .4rem; max-width: 20rem; }
+.automation-operations-console select { padding: .5rem; background: #fff; color: #222; border: 1px solid #999; border-radius: .4rem; }
+.automation-operational-rules { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,16rem),1fr)); gap: .6rem; }
+.automation-operational-rule { display: grid; gap: .5rem; align-content: start; border: 1px solid #aaa; border-radius: .6rem; padding: .8rem; }
+.automation-operational-rule dl { display: grid; gap: .4rem; }
+.automation-operational-rule dt { font-size: .8rem; }
+.automation-operational-rule dd { margin: 0; overflow-wrap: anywhere; }
+.automation-operations-pending { display: grid; gap: .6rem; border: 2px solid currentColor; border-radius: .5rem; padding: .9rem; }

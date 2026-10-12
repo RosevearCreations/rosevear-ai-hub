@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { AutomationOperationsConsole } from "./AutomationOperationsConsole";
 
 import {
   applyAutomationChange,
@@ -50,7 +51,7 @@ export function AutomationView() {
       const [rules, modelPayload, runtimePayload, historyPayload, summaryPayload] =
         await Promise.all([
           getAutomations(),
-          getOllamaModels(),
+          getOllamaModels().catch(() => ({ models: [] })),
           getAutomationRuntime(),
           getAutomationHistory({ limit: 25 }),
           getAutomationHistorySummary(),
@@ -198,7 +199,7 @@ export function AutomationView() {
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 035</p>
+          <p className="eyebrow">Build 056</p>
           <h1>Automations</h1>
           <p className="lede">
             Author rules with human approval, including local Frigate camera events, inspect durable
@@ -229,6 +230,14 @@ export function AutomationView() {
 
       {error ? <p className="auth-error" role="alert">{error}</p> : null}
       {notice ? <p className="automation-notice" role="status">{notice}</p> : null}
+
+      <AutomationOperationsConsole
+        rules={automations}
+        history={history}
+        runtime={runtime}
+        summary={historySummary}
+        onChanged={refresh}
+      />
 
       <section className="automation-layout">
         <article className="panel automation-author">
