@@ -1323,3 +1323,17 @@ See docs/BUILD_050_DISASTER_RECOVERY_DRILL.md. No migrations or service restarts
 - [ ] live Windows operator preflight, network certificate/ACL and real archive acceptance (manual)
 
 See docs/BUILD_051_PRODUCTION_READINESS.md. No migrations or service changes.
+
+## Build 052 — Unified Operations Dashboard & Guided Onboarding
+
+- [x] read-only user-selectable Home / Workshop / Business contexts
+- [x] safe service status summaries, optional/unconfigured and inaccessible state distinctions
+- [x] manual Refresh only, no background polling, writes or privileged action bypass
+- [x] guided setup steps and accessible buttons opening existing pages
+- [x] source/permission caution and regression tests; version 0.0.52
+- [ ] development five CI jobs GREEN
+- [ ] production candidate five CI jobs GREEN
+- [ ] independent post-merge main production GREEN
+- [ ] operator local Windows/TEMPLAR acceptance (separate)
+
+See docs/BUILD_052_OPERATIONS_DASHBOARD.md. Next Build 053 — Local Service Diagnostics & Guided Repair.
