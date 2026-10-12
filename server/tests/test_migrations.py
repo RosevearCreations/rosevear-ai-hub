@@ -80,10 +80,18 @@ def test_upgrade_to_head_creates_current_schema(tmp_path, monkeypatch) -> None:
     }.issubset(camera_review_columns)
     station_columns = {column["name"] for column in inspector.get_columns("workshop_stations")}
     equipment_columns = {column["name"] for column in inspector.get_columns("workshop_equipment")}
-    inspection_columns = {column["name"] for column in inspector.get_columns("workshop_inspections")}
+    inspection_columns = {
+        column["name"] for column in inspector.get_columns("workshop_inspections")
+    }
     assert {"project_key", "name", "hazards_json", "disabled"}.issubset(station_columns)
-    assert {"project_key", "station_id", "activity_type", "readiness_status",
-            "maintenance_due_at", "last_inspected_at"}.issubset(equipment_columns)
+    assert {
+        "project_key",
+        "station_id",
+        "activity_type",
+        "readiness_status",
+        "maintenance_due_at",
+        "last_inspected_at",
+    }.issubset(equipment_columns)
     assert {"equipment_id", "review_status", "checked_by_user_id", "checked_at"}.issubset(
         inspection_columns
     )
