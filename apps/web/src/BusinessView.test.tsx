@@ -540,6 +540,10 @@ describe("BusinessView", () => {
         target: { value: "Draft body" },
       });
 
+      expect(screen.getByLabelText("Devil n Dove product ID").closest("form"))
+        .toHaveClass("business-write-form");
+      expect(screen.getByLabelText("Devil n Dove story heading").closest("form"))
+        .toHaveClass("business-write-form");
       const prepareButtons = screen.getAllByRole("button", {
         name: "Prepare exact confirmation",
       });
