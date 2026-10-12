@@ -163,4 +163,22 @@ describe("HomeAssistantView", () => {
     expect(screen.queryByRole("button", { name: "Turn on" })).not.toBeInTheDocument();
     expect(screen.getByText("This account is read-only and cannot operate Home Assistant entities.")).toBeInTheDocument();
   });
+  test("Home Assistant timeout offers configuration guidance without device actions", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/api/v1/home-assistant/status")) {
+        return { ok: true, json: async () => ({
+          configured: true, available: false, base_url: "http://192.0.2.11",
+          url_configured: true, token_configured: true,
+          message: "Home Assistant timed out after 5 seconds.",
+        }) };
+      }
+      return { ok: false, status: 503, json: async () => ({}) };
+    }));
+    render(<HomeAssistantView currentUser={owner} />);
+    expect(await screen.findByText("Home Assistant unavailable")).toBeInTheDocument();
+    expect(screen.getByText("Connection check on the Hub server")).toBeInTheDocument();
+    expect(screen.getByText(/default Home Assistant web\/API port is 8123/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Turn on" })).not.toBeInTheDocument();
+  });
 });

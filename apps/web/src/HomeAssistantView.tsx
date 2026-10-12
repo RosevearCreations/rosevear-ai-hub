@@ -195,6 +195,17 @@ export function HomeAssistantView({ currentUser }: { currentUser: AuthUser }) {
                 </strong>
                 <span>{loadState.status.message}</span>
               </div>
+              {!loadState.status.available && (
+                <div className="connection-guidance" role="note">
+                  <strong>Connection check on the Hub server</strong>
+                  <p>Confirm Home Assistant is running and reachable from the Windows Hub
+                    computer. The default Home Assistant web/API port is 8123; check
+                    that the configured URL includes the correct port for your VM.
+                    A configured token does not prove the API is reachable.</p>
+                  <p>After checking network reachability and the token, select Refresh.
+                    No devices or allow-list settings are changed by this check.</p>
+                </div>
+              )}
             </article>
             <article className="panel">
               <h2>Configuration</h2>

@@ -95,7 +95,7 @@ export function FrigatePanel({ canAdminister = false }: { canAdminister?: boolea
           Refresh Frigate
         </button>
         <dl className="ha-meta">
-          <div><dt>Status</dt><dd>{state.status.online ? "Online" : "Offline"}</dd></div>
+          <div><dt>Status</dt><dd>{state.status.online ? "Online" : "Offline — optional"}</dd></div>
           <div><dt>Version</dt><dd>{state.status.version ?? "Unavailable"}</dd></div>
           <div><dt>API</dt><dd><code>{state.status.base_url}</code></dd></div>
           <div><dt>Local-only</dt><dd>{state.status.local_only ? "Yes" : "No"}</dd></div>
@@ -134,8 +134,13 @@ export function FrigatePanel({ canAdminister = false }: { canAdminister?: boolea
         <section className="panel">
           <h3>Frigate is optional</h3>
           <p>
-            The camera dashboard and go2rtc continue working without Frigate. Install/configure
-            Frigate later if object-event analytics are wanted.
+            Frigate is not responding at its configured local API. This is not a Hub
+            camera failure: the camera registry and go2rtc can work without Frigate.
+          </p>
+          <p>
+            If object-event detection is wanted, confirm Frigate is installed and
+            running on the Hub host, check the configured local API address and port,
+            then select Refresh Frigate. No Frigate service is started by this page.
           </p>
         </section>
         <CameraEventTimeline events={[]} online={false} canAdminister={canAdminister} />
