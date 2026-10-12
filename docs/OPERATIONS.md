@@ -613,3 +613,15 @@ recovery, not off-machine hardware or full Home Assistant/MQTT/Ollama recovery.
 Refer to [Build 050 operator runbook](BUILD_050_DISASTER_RECOVERY_DRILL.md)
 for Windows commands, recovery exclusions, safe manual cutover and remaining
 RTO/RPO decisions. No automatic backup or restart task is added.
+
+
+## Build 051 — local production readiness (read-only)
+
+After installing a verified 0.0.51 main commit and restarting only the Hub
+API, run the provided scripts/check-production-readiness.ps1 script in an
+ordinary server PowerShell session. It refuses a non-loopback API listener.
+The Python script touches only seven fixed unauthenticated GET routes on
+127.0.0.1:8765, has no automatic repair function, and may write a
+metadata-only, exclusive-create evidence file when requested.
+See docs/BUILD_051_PRODUCTION_READINESS.md for operator acceptance matrix,
+unverified Caddy certificate and Tailscale ACL checks, and rollback.
