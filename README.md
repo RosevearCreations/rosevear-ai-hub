@@ -123,13 +123,13 @@ Major architecture changes require an ADR under `docs/adr/`.
 
 ## Current production release
 
-**Build 052** is the last independently verified production release before Build 053.
-GitHub main push run [38190554356](https://github.com/RosevearCreations/rosevear-ai-hub/actions/runs/38190554356) passed. Release code CI does not prove the Windows Hub has been updated or that home-network/camera recovery checks are accepted.
+**Build 053** is the last independently verified production release before Build 054.
+GitHub main push run [38247217278](https://github.com/RosevearCreations/rosevear-ai-hub/actions/runs/38190554356) passed. Release code CI does not prove the Windows Hub has been updated or that home-network/camera recovery checks are accepted.
 
 ## Active build
 
-**Build 053 — Local Service Diagnostics & Guided Repair** (implementation and promotion tracked in [Build Status](docs/BUILD_STATUS.md)).
+**Build 054 — Cameras and Event Timeline Workbench** (implementation and promotion tracked in [Build Status](docs/BUILD_STATUS.md)).
 
 ## Next queued build
 
-**Build 054 — Cameras and Event Timeline Workbench**.
+**Build 055 — Knowledge Projects & Collection Workspace**.

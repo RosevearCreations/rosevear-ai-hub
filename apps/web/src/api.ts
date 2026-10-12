@@ -1827,6 +1827,50 @@ export function getFrigateEvents(
   );
 }
 
+export interface CameraEventReview {
+  event_id: string;
+  camera_name: string;
+  object_label: string;
+  event_start_time: number;
+  review_status: "needs_review" | "reviewed" | "flagged";
+  note: string;
+  reviewed_by_user_id: number | null;
+  updated_at: string;
+}
+
+export function getCameraEventReviews(signal?: AbortSignal): Promise<CameraEventReview[]> {
+  return authJson<CameraEventReview[]>("GET", "/api/v1/frigate/reviews?limit=100", undefined, signal);
+}
+
+export function saveCameraEventReview(
+  eventId: string,
+  payload: Pick<CameraEventReview, "review_status" | "note">,
+  signal?: AbortSignal,
+): Promise<CameraEventReview> {
+  return authJson<CameraEventReview>(
+    "PUT", "/api/v1/frigate/events/" + encodeURIComponent(eventId) + "/review", payload, signal,
+  );
+}
+
+export async function exportCameraReviewCsv(signal?: AbortSignal): Promise<void> {
+  const response = await fetch(
+    API_BASE_URL + "/api/v1/frigate/reviews/export.csv?acknowledgement=PRIVATE_METADATA_ONLY",
+    { method: "GET", credentials: "include", signal, headers: { Accept: "text/csv" } },
+  );
+  if (!response.ok) throw new Error("CSV export rejected");
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  try {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "hub-camera-event-reviews.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
 
 export type BusinessConnectorState =
   | "planned"

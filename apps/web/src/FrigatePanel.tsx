@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CameraEventTimeline } from "./CameraEventTimeline";
 
 import {
   getFrigateCameras,
@@ -24,7 +25,7 @@ function eventTime(epochSeconds: number): string {
   return new Date(epochSeconds * 1000).toLocaleString();
 }
 
-export function FrigatePanel() {
+export function FrigatePanel({ canAdminister = false }: { canAdminister?: boolean }) {
   const [state, setState] = useState<FrigateState>({ kind: "loading" });
   const [busy, setBusy] = useState(false);
 
@@ -83,7 +84,7 @@ export function FrigatePanel() {
     <section className="frigate-panel">
       <header className="panel frigate-status-card">
         <div>
-          <p className="eyebrow">Build 034</p>
+          <p className="eyebrow">Build 054</p>
           <h2>Frigate adapter</h2>
           <p>
             Optional local object-event integration. The Hub reads Frigate through its loopback-only
@@ -125,34 +126,11 @@ export function FrigatePanel() {
             ))}
           </section>
 
-          <section className="panel">
-            <h3>Recent Frigate events</h3>
-            {state.events.length === 0 ? (
-              <p>No recent object events were returned.</p>
-            ) : (
-              <div className="frigate-event-list">
-                {state.events.map((event) => (
-                  <article className="frigate-event-card" key={event.event_id}>
-                    <header>
-                      <div>
-                        <strong>{event.label}</strong>
-                        <small>{event.sub_label ? event.sub_label + " · " : ""}{event.camera}</small>
-                      </div>
-                      <time>{eventTime(event.start_time)}</time>
-                    </header>
-                    <dl className="ha-meta">
-                      <div><dt>Zones</dt><dd>{event.zones.length ? event.zones.join(", ") : "None"}</dd></div>
-                      <div><dt>Snapshot</dt><dd>{event.has_snapshot ? "Available" : "No"}</dd></div>
-                      <div><dt>Clip</dt><dd>{event.has_clip ? "Available" : "No"}</dd></div>
-                      <div><dt>Score</dt><dd>{event.score === null ? "Unavailable" : event.score.toFixed(2)}</dd></div>
-                    </dl>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
+          <CameraEventTimeline events={state.events} online={state.status.online}
+            canAdminister={canAdminister} />
         </>
       ) : (
+        <>
         <section className="panel">
           <h3>Frigate is optional</h3>
           <p>
@@ -160,6 +138,8 @@ export function FrigatePanel() {
             Frigate later if object-event analytics are wanted.
           </p>
         </section>
+        <CameraEventTimeline events={[]} online={false} canAdminister={canAdminister} />
+        </>
       )}
     </section>
   );

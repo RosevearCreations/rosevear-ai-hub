@@ -184,7 +184,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
     <section className="camera-view">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 034</p>
+          <p className="eyebrow">Build 054</p>
           <h1>Camera dashboard</h1>
           <p className="lede">
             Local live views, transport health, freshness, and camera configuration without exposing camera credentials.
@@ -245,7 +245,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
         ) : null}
       </section>
 
-      <FrigatePanel />
+      <FrigatePanel canAdminister={canAdminister} />
 
       {message ? <p className="runtime-status" role="status">{message}</p> : null}
 

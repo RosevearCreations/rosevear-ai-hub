@@ -56,7 +56,8 @@ This file records completed and active builds. The roadmap remains authoritative
 | 050 | Disaster Recovery Drill | COMPLETE | main via PR #124 |
 | 051 | Production Readiness and Roadmap Renewal | COMPLETE | main via PR #126 |
 | 052 | Unified Operations Dashboard & Guided Onboarding | COMPLETE | main via PR #128; Production run 38190554356 GREEN |
-| 053 | Local Service Diagnostics & Guided Repair | IMPLEMENTED | dev/main CI and promotion pending |
+| 053 | Local Service Diagnostics & Guided Repair | COMPLETE | main via PR #130; Production run 38247217278 GREEN |
+| 054 | Cameras and Event Timeline Workbench | IMPLEMENTED | dev/main release checks pending |
 
 ## Build 016 acceptance checklist
 
@@ -1371,3 +1372,19 @@ See docs/BUILD_052_OPERATIONS_DASHBOARD.md. Next Build 053 — Local Service Dia
 - [ ] Windows device, browser, camera and VM acceptance (operator owned)
 
 See docs/BUILD_053_LOCAL_SERVICE_DIAGNOSTICS.md. Next Build 054 — Cameras and Event Timeline Workbench.
+
+
+## Build 054 — Cameras and Event Timeline Workbench
+
+- [x] Camera/object/review filtering and newest/oldest timeline sorting
+- [x] Owner/admin SQLite review notes with 0017 additive migration
+- [x] Cached local metadata view when Frigate is offline
+- [x] Explicit private metadata-only CSV acknowledgement; 100 rows and spreadsheet formula protection
+- [x] No RTSP credentials, clips, snapshots, Frigate writes or automatic cleanup
+- [x] UI/backend tests, migration review, Windows generic updater
+- [ ] dev CI five jobs GREEN
+- [ ] production PR five jobs GREEN
+- [ ] separate post-merge main Production CI GREEN
+- [ ] Windows physical server backup/migration and viewer acceptance (manual)
+
+See docs/BUILD_054_CAMERA_TIMELINE.md. Next Build 055 — Knowledge Projects & Collection Workspace.
