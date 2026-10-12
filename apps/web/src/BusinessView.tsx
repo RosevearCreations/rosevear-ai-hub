@@ -285,13 +285,13 @@ export function BusinessView() {
           </section>
 
           <section
-            className="dashboard-grid"
+            className="dashboard-grid business-connectors-grid"
             aria-label="Business connector catalogue"
           >
             {state.data.connectors.map((connector) => {
               const resources = READ_RESOURCES[connector.key] || [];
               return (
-                <article className="panel" key={connector.key}>
+                <article className="panel business-connector-card" key={connector.key}>
                   <p className="eyebrow">
                     Build{" "}
                     {String(connector.planned_build).padStart(3, "0")}
@@ -317,7 +317,7 @@ export function BusinessView() {
                     <div>
                       <h3>Live read preview</h3>
                       <p>{connectorReadSummary(connector.key)}</p>
-                      <div className="button-row">
+                      <div className="button-row business-read-actions">
                         {resources.map((resource) => (
                           <button
                             className="secondary"
@@ -344,6 +344,7 @@ export function BusinessView() {
 
                   {connector.key === "devilndove" ? (
                     <form
+                      className="business-write-form"
                       onSubmit={(event) => {
                         event.preventDefault();
                         prepareWrite({
@@ -429,6 +430,7 @@ export function BusinessView() {
 
                   {connector.key === "yardworkers" ? (
                     <form
+                      className="business-write-form"
                       onSubmit={(event) => {
                         event.preventDefault();
                         prepareWrite({

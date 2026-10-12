@@ -156,3 +156,13 @@ observations and high-risk activity notices. All records require human review;
 no machinery control. Additive database migration `0018` requires a
 verified backup and operator-controlled stopped-backend migration before use.
 See [Build 057 runbook](docs/BUILD_057_WORKSHOP_EQUIPMENT.md).
+
+
+### Build 057 UI and integration diagnostics patch
+
+The Business connector story-draft fields and MQTT subscribe/publish fields use
+responsive stacked layouts, with no overlapping labels. A disabled action
+continues to require configured credentials and a working upstream session.
+Home Assistant and MQTT unavailable states display read-only checks; Frigate
+is explicitly optional and does not block the separate camera registry.
+See [screenshot review](docs/BUILD_057_UI_DIAGNOSTICS.md).

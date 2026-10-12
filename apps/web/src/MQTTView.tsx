@@ -83,7 +83,7 @@ export function MQTTView({ currentUser }: { currentUser: AuthUser }) {
   }
 
   return (
-    <section>
+    <section className="mqtt-view">
       <header className="page-header">
         <div>
           <p className="eyebrow">Build 025</p>
@@ -110,6 +110,16 @@ export function MQTTView({ currentUser }: { currentUser: AuthUser }) {
             </strong>
             <span>{loadState.status.message}</span>
           </div>
+          {!loadState.status.available && (
+            <div className="connection-guidance" role="note">
+              <strong>Broker connection needs attention</strong>
+              <p>Check that the MQTT broker/add-on is running and reachable from the Hub
+                server on the configured port, and that broker credentials are valid.
+                A saved username and password do not confirm a working connection.</p>
+              <p>Try Refresh after checking the broker. Messages cannot be published
+                or subscribed while the connection is unavailable.</p>
+            </div>
+          )}
         </article>
         <article className="panel">
           <h2>Configuration</h2>
@@ -142,8 +152,8 @@ export function MQTTView({ currentUser }: { currentUser: AuthUser }) {
       </section>
 
       {canWrite ? (
-        <section className="dashboard-grid" aria-label="MQTT actions">
-          <article className="panel">
+        <section className="dashboard-grid mqtt-actions-grid" aria-label="MQTT actions">
+          <article className="panel mqtt-action-card">
             <h2>Subscribe</h2>
             <label>
               <span>Allowed topic or filter</span>
@@ -164,7 +174,7 @@ export function MQTTView({ currentUser }: { currentUser: AuthUser }) {
             </button>
           </article>
 
-          <article className="panel">
+          <article className="panel mqtt-action-card">
             <h2>Publish test message</h2>
             <label>
               <span>Allowed concrete topic</span>
