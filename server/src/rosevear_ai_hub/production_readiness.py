@@ -78,9 +78,7 @@ def check_readiness(
             success(path, 404) for path in ("/docs", "/redoc", "/openapi.json")
         ),
         "unauthenticated_user_is_denied": protected("/api/v1/auth/me"),
-        "unauthenticated_resources_are_denied": protected(
-            "/api/v1/system/resource-budget"
-        ),
+        "unauthenticated_resources_are_denied": protected("/api/v1/system/resource-budget"),
     }
     return {
         "schema_version": 1,
@@ -113,9 +111,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     # Fail before making requests if the evidence destination cannot be safely written.
     if args.evidence is not None and (
-        args.evidence.is_symlink()
-        or args.evidence.exists()
-        or not args.evidence.parent.is_dir()
+        args.evidence.is_symlink() or args.evidence.exists() or not args.evidence.parent.is_dir()
     ):
         print("Readiness refused: evidence path unavailable.", file=sys.stderr)
         return 2
