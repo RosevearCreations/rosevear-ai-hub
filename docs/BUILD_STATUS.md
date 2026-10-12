@@ -1337,3 +1337,18 @@ See docs/BUILD_051_PRODUCTION_READINESS.md. No migrations or service changes.
 - [ ] operator local Windows/TEMPLAR acceptance (separate)
 
 See docs/BUILD_052_OPERATIONS_DASHBOARD.md. Next Build 053 — Local Service Diagnostics & Guided Repair.
+
+
+## Build 053 — Local Service Diagnostics & Guided Repair
+
+- [x] Five existing read-only local status checks, no new API or database schema
+- [x] Owner/admin-only guided Windows checks and stable recovery-log pointer
+- [x] No raw sensitive errors/hosts/credentials in summaries, unavailable != offline
+- [x] No automatic process repair, MQTT publish, device commands or restarts
+- [x] Pure classifier regression tests; version 0.0.53
+- [ ] Five dev CI jobs GREEN
+- [ ] Five production PR CI jobs GREEN
+- [ ] Independent post-merge main Production CI GREEN
+- [ ] Windows device, browser, camera and VM acceptance (operator owned)
+
+See docs/BUILD_053_LOCAL_SERVICE_DIAGNOSTICS.md. Next Build 054 — Cameras and Event Timeline Workbench.

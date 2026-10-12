@@ -20,6 +20,7 @@ import { ChatView } from "./ChatView";
 import { ConfirmationsView } from "./ConfirmationsView";
 import { HomeAssistantView } from "./HomeAssistantView";
 import { KnowledgeView } from "./KnowledgeView";
+import { LocalDiagnosticsPanel } from "./LocalDiagnosticsPanel";
 import { SectionHelp } from "./HelpSystem";
 import { MQTTView } from "./MQTTView";
 import { PwaInstallPanel } from "./PwaInstallPanel";
@@ -270,6 +271,7 @@ export function App() {
               </div>
               <SystemHealth health={health} />
             </header>
+            {canAdminister && <LocalDiagnosticsPanel onNavigate={(target) => setSection(target as Section)} />}
             <RemoteAccessPanel />
             {canAdminister && <ResourceBudgetPanel />}
           </>
