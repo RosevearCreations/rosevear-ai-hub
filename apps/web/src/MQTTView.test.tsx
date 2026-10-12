@@ -58,6 +58,10 @@ describe("MQTTView", () => {
   test("shows state and performs bounded MQTT actions", async () => {
     render(<MQTTView currentUser={owner} />);
     await waitFor(() => expect(screen.getByText("MQTT broker online")).toBeInTheDocument());
+    expect(screen.getByLabelText("MQTT subscription topic").closest("article"))
+      .toHaveClass("mqtt-action-card");
+    expect(screen.getByLabelText("MQTT publish payload").closest("article"))
+      .toHaveClass("mqtt-action-card");
 
     fireEvent.change(screen.getByLabelText("MQTT subscription topic"), {
       target: { value: "rosevear/sensors/#" },
@@ -80,5 +84,29 @@ describe("MQTTView", () => {
     await waitFor(() => expect(screen.getByText("MQTT broker online")).toBeInTheDocument());
     expect(screen.queryByRole("button", { name: "Subscribe" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Publish" })).not.toBeInTheDocument();
+  });
+  test("reconnecting broker shows recovery guidance and disables actions", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/api/v1/mqtt/status")) {
+        return { ok: true, json: async () => ({
+          configured: true, available: false, host: "192.0.2.10", port: 1883, tls: false,
+          username_configured: true, password_configured: true,
+          allowed_topics: ["rosevear/#"], subscriptions: [],
+          reconnect_min_seconds: 1, reconnect_max_seconds: 30,
+          message_count: 0, last_error: null,
+          message: "MQTT connection is starting or reconnecting.",
+        }) };
+      }
+      return { ok: true, json: async () => [] };
+    }));
+    render(<MQTTView currentUser={owner} />);
+    expect(await screen.findByText("MQTT reconnecting")).toBeInTheDocument();
+    expect(screen.getByText("Broker connection needs attention")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("MQTT publish topic"), {
+      target: { value: "rosevear/test" },
+    });
+    expect(screen.getByRole("button", { name: "Publish" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Subscribe" })).toBeDisabled();
   });
 });

@@ -1437,3 +1437,14 @@ See docs/BUILD_056_AUTOMATION_OPERATIONS.md. Next Build 057 — Workshop Equipme
 - [ ] real Windows backup/migration & manual operator acceptance
 
 Next: Build 058 — Business Connector Operations Workspace.
+
+
+## Build 057 screenshot acceptance follow-up
+
+- [x] Business story and MQTT forms: responsive controls and distinct labels
+- [x] Home Assistant/MQTT unavailability guidance; no new write actions
+- [x] Frigate explicitly optional when local service is offline
+- [x] UI regression checks; no backend migration
+- [ ] Real Windows service reachability and credential acceptance (operator-controlled)
+
+See docs/BUILD_057_UI_DIAGNOSTICS.md.

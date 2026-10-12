@@ -106,6 +106,9 @@ test("Frigate remains optional when the local service is offline", async () => {
   render(<FrigatePanel />);
 
   expect(await screen.findByText("Frigate is optional")).toBeInTheDocument();
+  expect(screen.getByText(/Frigate is not responding at its configured local API/))
+    .toBeInTheDocument();
+  expect(screen.getByText(/Offline — optional/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Refresh Frigate" }));
   await waitFor(() => expect(refreshes).toBeGreaterThanOrEqual(6));
 });
