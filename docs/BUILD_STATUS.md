@@ -58,7 +58,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 052 | Unified Operations Dashboard & Guided Onboarding | COMPLETE | main via PR #128; Production run 38190554356 GREEN |
 | 053 | Local Service Diagnostics & Guided Repair | COMPLETE | main via PR #130; Production run 38247217278 GREEN |
 | 054 | Cameras and Event Timeline Workbench | COMPLETE | main via PR #132; Production run 38256907082 GREEN |
-| 055 | Knowledge Projects & Collection Workspace | IMPLEMENTED | dev/main verification pending |
+| 055 | Knowledge Projects & Collection Workspace | COMPLETE | main via PR #136; Production run 38268949178 GREEN |\n| 056 | Automations Operations Console | IMPLEMENTED | dev/main verification pending |
 
 ## Build 016 acceptance checklist
 
@@ -1405,3 +1405,19 @@ See docs/BUILD_054_CAMERA_TIMELINE.md. Next Build 055 — Knowledge Projects & C
 - [ ] Windows Hub operator acceptance (separate)
 
 See docs/BUILD_055_KNOWLEDGE_PROJECTS.md. Next Build 056 — Automations Operations Console.
+
+
+## Build 056 — Automations Operations Console
+
+- [x] Rule trigger source/readiness, queue, evidence and retry-prevention statuses
+- [x] Exact confirmation required for owner-controlled pause/enable; no replay
+- [x] Ollama outage no longer blocks existing operations/status/history
+- [x] Backend maintenance with verified port/process ownership, explicit stop/start and version checks
+- [x] Persistent maintenance logs and Windows .cmd console capture
+- [x] Windows PowerShell parser gates and operator runbook
+- [ ] dev CI five jobs GREEN
+- [ ] production PR CI five jobs GREEN
+- [ ] independent post-merge main CI GREEN
+- [ ] Real Windows backup, migration and service acceptance (operator controlled)
+
+See docs/BUILD_056_AUTOMATION_OPERATIONS.md. Next Build 057 — Workshop Equipment & Safety Readiness.
