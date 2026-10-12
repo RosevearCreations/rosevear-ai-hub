@@ -166,8 +166,9 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   System: {
-    purpose: "Shows server health, administrator-only resource budgets, and the private LAN/Tailscale access procedure.",
+    purpose: "Shows owner/admin service diagnostics, server health, resource budgets, and the private LAN/Tailscale access procedure.",
     tasks: [
+      "Use Local service diagnostics as Owner/Admin to inspect Hub, Ollama, Home Assistant, MQTT and go2rtc; expand guided checks and manually inspect Windows logs without automatic repairs.",
       "Open the resource budget panel as Owner/Admin, select Refresh to sample memory and disk once; no background polling is performed.",
       "Compare observed values to the documented guidelines; warnings do not shut down Ollama, MQTT, cameras or automations.",
       "On the Windows server, update Build 046, verify /version and confirm the production web loads at http://127.0.0.1:8765/.",
@@ -182,6 +183,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "A remote PWA still cannot queue offline actions, view cached private data or bypass confirmations.",
     ],
     troubleshooting: [
+      "If a diagnostic is Not verified, confirm Hub account permissions and inspect the relevant local service logs; do not assume an outage or disclose raw errors.",
       "If the remote app loads but APIs fail, check Build 046 is deployed: frontend calls same-origin /api instead of the remote device's localhost.",
       "If Tailscale Serve is unavailable, complete the Tailscale device login and HTTPS approval first. No public exposure is necessary.",
       "If the browser reports 401 Unauthorized, sign into the Hub; never disable the app's authentication.",

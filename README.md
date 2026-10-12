@@ -115,13 +115,21 @@ Major architecture changes require an ADR under `docs/adr/`.
 - **Build 045 — Installable PWA**
 - **Build 046 — Private Remote Access via Tailscale**
 - **Build 047 — Encrypted Backup and Safe Restore**
+- **Build 048 — Performance and Resource-Budget Review**
+- **Build 049 — Threat Model and Security Review**
+- **Build 050 — Disaster Recovery Drill**
+- **Build 051 — Production Readiness and Roadmap Renewal**
+- **Build 052 — Unified Operations Dashboard & Guided Onboarding**
 
 ## Current production release
 
-**Build 047 — Encrypted Backup and Safe Restore** is code-complete and production GREEN on
-`main` commit `b6c5a7adde6d831f8df4e057dbe886f07c2446f4` via PR #115. The separate
-on-server offline recovery drill remains an operator acceptance task.
+**Build 052** is the last independently verified production release before Build 053.
+GitHub main push run [38190554356](https://github.com/RosevearCreations/rosevear-ai-hub/actions/runs/38190554356) passed. Release code CI does not prove the Windows Hub has been updated or that home-network/camera recovery checks are accepted.
 
-## Next build
+## Active build
 
-**Build 048 — Performance and Resource-Budget Review**
+**Build 053 — Local Service Diagnostics & Guided Repair** (implementation and promotion tracked in [Build Status](docs/BUILD_STATUS.md)).
+
+## Next queued build
+
+**Build 054 — Cameras and Event Timeline Workbench**.
