@@ -20,10 +20,13 @@ def make_client(tmp_path, monkeypatch):
     app = create_app()
     app.dependency_overrides[get_session] = dependency
     client = TestClient(app)
-    assert client.post(
-        "/api/v1/auth/bootstrap",
-        json={"username": "owner", "password": "owner-password-123"},
-    ).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/bootstrap",
+            json={"username": "owner", "password": "owner-password-123"},
+        ).status_code
+        == 201
+    )
     monkeypatch.setattr(
         "rosevear_ai_hub.api.camera_reviews.get_frigate_client", lambda: FakeFrigate()
     )
@@ -55,18 +58,27 @@ def test_admin_reviews_and_export_is_explicit_and_safe(tmp_path, monkeypatch) ->
 
 def test_unknown_event_and_overlong_note_do_not_persist(tmp_path, monkeypatch) -> None:
     client = make_client(tmp_path, monkeypatch)
-    assert client.put(
-        "/api/v1/frigate/events/unknown/review",
-        json={"review_status": "reviewed", "note": "No such event"},
-    ).status_code == 404
-    assert client.put(
-        "/api/v1/frigate/events/event-1/review",
-        json={"review_status": "reviewed", "note": "x" * 501},
-    ).status_code == 422
-    assert client.put(
-        "/api/v1/frigate/events/event-1/review",
-        json={"review_status": "unapproved", "note": ""},
-    ).status_code == 422
+    assert (
+        client.put(
+            "/api/v1/frigate/events/unknown/review",
+            json={"review_status": "reviewed", "note": "No such event"},
+        ).status_code
+        == 404
+    )
+    assert (
+        client.put(
+            "/api/v1/frigate/events/event-1/review",
+            json={"review_status": "reviewed", "note": "x" * 501},
+        ).status_code
+        == 422
+    )
+    assert (
+        client.put(
+            "/api/v1/frigate/events/event-1/review",
+            json={"review_status": "unapproved", "note": ""},
+        ).status_code
+        == 422
+    )
     assert client.get("/api/v1/frigate/reviews").json() == []
 
 
@@ -86,27 +98,39 @@ def test_viewer_can_read_provider_events_but_not_private_reviews(tmp_path, monke
     )
     assert created.status_code == 201
     assert client.post("/api/v1/auth/logout").status_code == 200
-    assert client.post(
-        "/api/v1/auth/login",
-        json={"username": "viewer", "password": "viewer-password-123"},
-    ).status_code == 200
+    assert (
+        client.post(
+            "/api/v1/auth/login",
+            json={"username": "viewer", "password": "viewer-password-123"},
+        ).status_code
+        == 200
+    )
     assert client.get("/api/v1/frigate/events").status_code == 200
     assert client.get("/api/v1/frigate/reviews").status_code == 403
-    assert client.put(
-        "/api/v1/frigate/events/event-1/review",
-        json={"review_status": "flagged", "note": "Not allowed"},
-    ).status_code == 403
-    assert client.get(
-        "/api/v1/frigate/reviews/export.csv?acknowledgement=PRIVATE_METADATA_ONLY"
-    ).status_code == 403
+    assert (
+        client.put(
+            "/api/v1/frigate/events/event-1/review",
+            json={"review_status": "flagged", "note": "Not allowed"},
+        ).status_code
+        == 403
+    )
+    assert (
+        client.get(
+            "/api/v1/frigate/reviews/export.csv?acknowledgement=PRIVATE_METADATA_ONLY"
+        ).status_code
+        == 403
+    )
 
 
 def test_offline_frigate_keeps_local_review_index(tmp_path, monkeypatch) -> None:
     client = make_client(tmp_path, monkeypatch)
-    assert client.put(
-        "/api/v1/frigate/events/event-1/review",
-        json={"review_status": "needs_review", "note": "Call back"},
-    ).status_code == 200
+    assert (
+        client.put(
+            "/api/v1/frigate/events/event-1/review",
+            json={"review_status": "needs_review", "note": "Call back"},
+        ).status_code
+        == 200
+    )
 
     class Offline:
         def recent_events(self, *, limit):
