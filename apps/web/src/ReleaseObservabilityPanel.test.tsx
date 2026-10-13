@@ -49,7 +49,7 @@ describe("Build 062 local release view", () => {
         source: "operator_self_attestation_only", machine_verified: false,
       },
       integration_recovery: {
-        scope: "private_operator_self_report",
+        scope: "operator_self_report",
         ledger_state: "operator_reported",
         integrations: [{
           integration: "mqtt", status: "operator_reported_working",
