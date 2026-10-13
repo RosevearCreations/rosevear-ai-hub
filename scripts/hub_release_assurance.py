@@ -9,9 +9,10 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sqlite3
 from pathlib import Path
 
-from hub_release_manager import database_revision, verify_backup
+from hub_release_manager import Refusal, database_revision, verify_backup
 
 SHA = re.compile(r"^[0-9a-f]{40}$")
 PASS = "PASS"
@@ -118,7 +119,12 @@ def collect(root: Path) -> dict:
 
     private = root / "logs" / "private-recovery"
     key = private / "backup-key.dpapi"
-    backup_provisioned = private.is_dir() and not private.is_symlink() and key.is_file() and not key.is_symlink()
+    backup_provisioned = (
+        private.is_dir()
+        and not private.is_symlink()
+        and key.is_file()
+        and not key.is_symlink()
+    )
     backup_verified = False
     if private.is_dir() and not private.is_symlink():
         evidence = sorted(private.glob("hub-*-verified.json"), reverse=True)
@@ -129,11 +135,11 @@ def collect(root: Path) -> dict:
                 verify_backup(path)
                 backup_verified = True
                 break
-            except (OSError, KeyError, TypeError, ValueError, RuntimeError):
+            except (OSError, KeyError, TypeError, ValueError, RuntimeError, Refusal):
                 pass
     try:
         actual_schema = database_revision(root)
-    except (OSError, ValueError, RuntimeError, KeyError):
+    except (OSError, ValueError, RuntimeError, KeyError, Refusal, sqlite3.Error):
         actual_schema = None
     return assess(
         active,
