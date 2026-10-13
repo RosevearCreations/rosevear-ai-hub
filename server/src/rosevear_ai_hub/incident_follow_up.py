@@ -60,16 +60,20 @@ def integration_diagnostics(observations: dict | None = None) -> dict:
         state = observations.get(name)
         if not isinstance(state, str) or state not in STATES:
             state = "unknown"
-        result.append({
-            "integration": name,
-            "state": state,
-            "next_action": (
-                "none" if state == "healthy"
-                else "review_local_configuration" if state == "not_configured"
-                else "inspect_local_service_health"
-            ),
-            "live_probe_performed": False,
-        })
+        result.append(
+            {
+                "integration": name,
+                "state": state,
+                "next_action": (
+                    "none"
+                    if state == "healthy"
+                    else "review_local_configuration"
+                    if state == "not_configured"
+                    else "inspect_local_service_health"
+                ),
+                "live_probe_performed": False,
+            }
+        )
     return {
         "scope": "operator_supplied_status_only",
         "integrations": result,
