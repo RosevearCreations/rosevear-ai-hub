@@ -118,6 +118,40 @@ export function ReleaseObservabilityPanel() {
             No operator declaration automatically closes a system incident.</p>
           <p>Review on the server using <code>docs/BUILD_064_RELEASE_INCIDENT_TRIAGE.md</code>.
             The web interface reads evidence only; no automatic retries or fixes are triggered.</p>
+          <h3>Build 066 — Guided integration recovery &amp; operator acceptance</h3>
+          <p>Follow the steps below on the Windows server, then record an optional, private
+            acceptance checklist. Reports are not independent service-health verification.
+            No restart, publish, camera discovery or configuration change is triggered.</p>
+          {!snapshot.integration_recovery ? (
+            <p>Integration recovery evidence is unavailable from this backend version.</p>
+          ) : (
+            <>
+              <p>Operator ledger: <strong>{snapshot.integration_recovery.ledger_state.replaceAll("_", " ")}</strong>.
+                {" "}No service is machine-verified by this checklist.</p>
+              <ul aria-label="Integration recovery instructions">
+                {snapshot.integration_recovery.integrations.map((item) => (
+                  <li key={item.integration}>
+                    <strong>{({
+                      home_assistant: "Home Assistant",
+                      mqtt: "MQTT",
+                      ollama: "Ollama",
+                      frigate: "Frigate",
+                      go2rtc: "go2rtc",
+                    } as Record<string, string>)[item.integration] ?? item.integration}</strong>:
+                    {" "}{item.status.replaceAll("_", " ")}
+                    {" "}({item.completed_checks}/{item.required_checks} reported checks).
+                    {" "}Last review: {timestamp(item.last_review_utc)}.
+                    <ol>
+                      {item.steps.map((step) => <li key={step}>{step}</li>)}
+                    </ol>
+                  </li>
+                ))}
+              </ul>
+              <p>Record evidence locally using
+                <code> docs/BUILD_066_INTEGRATION_RECOVERY.md</code>;
+                never include tokens, addresses or passwords in the checklist.</p>
+            </>
+          )}
           <p><strong>Automatic-enrollment acceptance: not verified by this panel.</strong></p>
           <p>Configured tasks and GREEN CI do not prove physical rollback, private backup restoration, running process identity or signed-in Windows operation.</p>
           <p>On the server check <code>logs\hub-release-adoption.log</code>,
