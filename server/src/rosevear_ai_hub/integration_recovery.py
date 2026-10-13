@@ -69,7 +69,10 @@ def integration_acceptance(root: Path, now: datetime | None = None) -> dict:
                 raise ValueError("invalid review count")
             for review in reviews:
                 if not isinstance(review, dict) or set(review) != {
-                    "integration", "status", "checks", "observed_at_utc"
+                    "integration",
+                    "status",
+                    "checks",
+                    "observed_at_utc",
                 }:
                     raise ValueError("invalid review fields")
                 name = review["integration"]
