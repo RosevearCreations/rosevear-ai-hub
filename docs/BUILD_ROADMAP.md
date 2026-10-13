@@ -392,6 +392,15 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - explicit release-health cohorts and operator acceptance evidence for distinct same-schema versions
 - bound failure triage to immutable release identity, recovery journal and real device observations
 - improve metadata-only UI without automatic migration or external service changes
+- bounded seven-day daily cohorts by fixed release-status enums, never raw log text or guessed SHA attribution
+- immutable 40-character distinct release references and six-step private operator self-attestation
+- incomplete/stale/invalid reports and truncated log coverage remain visible, no autonomous enrollment
+
+### Build 064 — Release Incident Triage & Recovery Evidence Continuity
+- classify recurring HOLD/FAILED/ROLLED_BACK outcomes and distinguish repeated incidents
+- preserve a privacy-safe operator incident review and follow-up trail without exposing raw log contents
+- keep recovery exercises and migration approvals supervised, fail closed on absent evidence
+
 
 
 

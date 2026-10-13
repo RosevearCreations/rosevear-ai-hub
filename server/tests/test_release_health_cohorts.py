@@ -1,7 +1,7 @@
 """Build 063: never confuse fixed log cohorts with physical recovery proof."""
 
-from datetime import UTC, datetime, timedelta
 import json
+from datetime import UTC, datetime, timedelta
 
 from rosevear_ai_hub.release_health_cohorts import classify_log, operator_evidence
 
@@ -69,7 +69,10 @@ def test_symlink_log_refused(tmp_path):
     logs.mkdir()
     private = tmp_path / "private.log"
     private.write_text("2026-10-13T19:00:00+00:00 ADOPTED x: private\n")
-    (logs / "hub-release-adoption.log").symlink_to(private)
+    try:
+        (logs / "hub-release-adoption.log").symlink_to(private)
+    except (OSError, NotImplementedError):
+        return  # Nonprivileged Windows runners may prohibit symlink creation.
     assert classify_log(tmp_path, NOW)["state"] == "unavailable"
 
 
