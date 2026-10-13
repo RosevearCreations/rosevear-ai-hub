@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "baseline_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "candidate_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "schema_revision": "0018",
+  "recovery_mode": "same_schema_rollback_readopt",
+  "observed_at_utc": "2026-10-13T20:00:00+00:00",
+  "operator_attested": false,
+  "steps": {
+    "baseline_runtime_health": false,
+    "rollback_runtime_health": false,
+    "authenticated_browser_acceptance": false,
+    "readoption_runtime_health": false,
+    "recovery_task_interoperability": false,
+    "restorable_encrypted_backup": false
+  }
+}
