@@ -35,7 +35,10 @@ export function summarizeOperations(
   });
   const signals: Signal[] = [];
   if (ha.status === "fulfilled" && ha.value && typeof ha.value === "object") {
-    const data = ha.value as { configured: boolean; available: boolean };
+    const data = ha.value as {
+      configured: boolean; available: boolean;
+      url_configured?: boolean; token_configured?: boolean;
+    };
     signals.push({
       key: "ha",
       title: "Home Assistant",
@@ -43,12 +46,22 @@ export function summarizeOperations(
       status: data.available ? "ready" : data.configured ? "attention" : "optional",
       detail: data.available
         ? "Connected."
-        : data.configured ? "Configured but unavailable." : "Not configured yet.",
+        : data.configured
+          ? "Saved connection details, but the Home Assistant API is not responding. " +
+            "Check the HA VM, local port 8123, URL and access token in Devices."
+          : data.url_configured === false
+            ? "Home Assistant URL is missing. Review Devices setup."
+            : data.token_configured === false
+              ? "Home Assistant token is missing. Review protected Devices setup."
+              : "Home Assistant is not configured. Open Devices.",
     });
   } else signals.push(unavailable("ha", "Home Assistant", "Devices"));
 
   if (mqtt.status === "fulfilled" && mqtt.value && typeof mqtt.value === "object") {
-    const data = mqtt.value as { configured: boolean; available: boolean };
+    const data = mqtt.value as {
+      configured: boolean; available: boolean;
+      username_configured?: boolean; password_configured?: boolean;
+    };
     signals.push({
       key: "mqtt",
       title: "MQTT",
@@ -56,7 +69,10 @@ export function summarizeOperations(
       status: data.available ? "ready" : data.configured ? "attention" : "optional",
       detail: data.available
         ? "Broker connected."
-        : data.configured ? "Configured but unavailable." : "Optional broker not configured.",
+        : data.configured
+          ? "Saved broker settings, but no active MQTT connection. " +
+            "Check broker availability, port, credentials and TLS in MQTT."
+          : "MQTT broker is not configured. Review MQTT setup.",
     });
   } else signals.push(unavailable("mqtt", "MQTT", "MQTT"));
 
@@ -68,7 +84,8 @@ export function summarizeOperations(
       section: "Cameras",
       status: data.total === 0 ? "optional" : data.attention > 0 ? "attention" : "ready",
       detail: data.total === 0
-        ? "No cameras registered yet."
+        ? "No cameras are registered in this Hub database. " +
+          "Existing physical cameras are not automatically imported; check Cameras and ONVIF discovery."
         : `${data.healthy} healthy · ${data.attention} need review.`,
     });
   } else signals.push(unavailable("camera", "Cameras", "Cameras"));

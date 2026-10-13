@@ -43,9 +43,9 @@ jobs:
       - name: Install backend and development dependencies
         run: python -m pip install --upgrade pip && pip install -e ".[dev]"
       - name: Lint
-        run: ruff check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py
+        run: ruff check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
       - name: Format check
-        run: ruff format --check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py
+        run: ruff format --check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
       - name: Test
         run: pytest
 
@@ -93,7 +93,7 @@ jobs:
       - name: Install backend and test dependencies
         run: python -m pip install -e ".[dev]"
       - name: Windows encrypted backup and isolated recovery tests
-        run: python -m pytest server/tests/test_backup_restore.py server/tests/test_disaster_recovery.py server/tests/test_production_readiness.py server/tests/test_release_manager.py server/tests/test_release_assurance.py server/tests/test_release_observability.py server/tests/test_release_health_cohorts.py
+        run: python -m pytest server/tests/test_backup_restore.py server/tests/test_disaster_recovery.py server/tests/test_production_readiness.py server/tests/test_release_manager.py server/tests/test_release_assurance.py server/tests/test_release_observability.py server/tests/test_release_health_cohorts.py server/tests/test_release_incident_triage.py
       - name: Windows end-to-end synthetic recovery smoke drill
         run: python -m rosevear_ai_hub.disaster_recovery synthetic --work-dir "${{ runner.temp }}"
 

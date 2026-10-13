@@ -34,3 +34,22 @@ describe("Build 052 operations summary", () => {
     expect(JSON.stringify(results)).not.toContain("http://");
   });
 });
+
+describe("Build 064 Home operator guidance", () => {
+  it("points to VM and broker checks without exposing private connection values", () => {
+    const result = summarizeOperations([
+      ok({ configured: true, available: false, url_configured: true,
+        token_configured: true, base_url: "http://hidden.local:8123" }),
+      ok({ configured: true, available: false, username_configured: true,
+        password_configured: true, last_error: "token=PRIVATE" }),
+      ok({ total: 0, healthy: 0, attention: 0, transport_online: true }),
+      ok({ document_count: 0, needs_indexing_count: 0 }),
+      ok({ connectors: [] }),
+    ]);
+    expect(result[0].detail).toContain("HA VM");
+    expect(result[1].detail).toContain("broker availability");
+    expect(result[2].detail).toContain("not automatically imported");
+    expect(JSON.stringify(result)).not.toContain("hidden.local");
+    expect(JSON.stringify(result)).not.toContain("PRIVATE");
+  });
+});
