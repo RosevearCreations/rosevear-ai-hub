@@ -1498,3 +1498,18 @@ See docs/BUILD_060_GUIDED_RELEASE_ADOPTION.md. Next: Build 061 — Release Recov
 - [ ] Real Windows server adoption/rollback acceptance (owner-controlled, not implied by CI)
 
 See docs/BUILD_061_RELEASE_ASSURANCE.md. Next: Build 062 — Managed Enrollment Acceptance & Update Observability.
+
+
+## Build 062 — Managed Enrollment Acceptance & Update Observability
+- [x] Read-only local updater/evidence summary with owner/admin protected no-store API
+- [x] Fixed enum statuses, 40-character SHAs and validated UTC timestamps; no raw logs/secrets
+- [x] Bounded Windows Scheduled Task and Application failure-event inspection, no mutation
+- [x] System owner-only manual Refresh panel; never represents metadata as live rollback acceptance
+- [x] Tests for missing/invalid evidence, privacy isolation, owner/household permissions and UI manual refresh
+- [x] Preserve five CI jobs, current schema, backup files, Windows settings and home services
+- [ ] Dev five-job CI GREEN
+- [ ] Production PR five-job CI GREEN
+- [ ] Independent main push five-job CI GREEN
+- [ ] On-server Windows task install/failover acceptance (not authorized or inferred)
+
+See docs/BUILD_062_MANAGED_ENROLLMENT_OBSERVABILITY.md. Next: Build 063 — Release Health Cohorts & Supervised Recovery Evidence.

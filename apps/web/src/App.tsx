@@ -30,6 +30,7 @@ import { ResourceBudgetPanel } from "./ResourceBudgetPanel";
 import { NotificationsView } from "./NotificationsView";
 import { OperationsDashboard } from "./OperationsDashboard";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
+import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
 import { UsersView } from "./UsersView";
@@ -286,6 +287,7 @@ export function App() {
             </header>
             {canAdminister && <LocalDiagnosticsPanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <ReleaseAcceptancePanel onNavigate={(target) => setSection(target as Section)} />}
+            {canAdminister && <ReleaseObservabilityPanel />}
             <RemoteAccessPanel />
             {canAdminister && <ResourceBudgetPanel />}
           </>
