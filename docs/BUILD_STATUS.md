@@ -1530,3 +1530,19 @@ See docs/BUILD_062_MANAGED_ENROLLMENT_OBSERVABILITY.md. Next: Build 063 — Rele
 - [ ] Actual home Windows failover acceptance (requires separate real-world operator evidence)
 
 See docs/BUILD_063_RELEASE_HEALTH_RECOVERY.md. Next: Build 064 — Release Incident Triage & Recovery Evidence Continuity.
+
+
+## Build 064 — Release Incident Triage & Recovery Evidence Continuity
+
+- [x] Privacy-safe recurring HOLD/FAILED/ROLLED_BACK aggregation by category/day
+- [x] Optional strictly validated operator review ledger; never mark machine verified or automatically close failures
+- [x] Owner-only no-store, manual-refresh System release incident display
+- [x] Home page specific guidance for Home Assistant, MQTT and empty camera registry observed in screenshot
+- [x] Test missing/malformed/private incident data, no writes, and home diagnostics
+- [x] No SQL, scheduled-task, backup, camera, MQTT publish or Windows process changes
+- [ ] dev CI five jobs GREEN
+- [ ] production PR CI five jobs GREEN
+- [ ] independent main push five jobs GREEN
+- [ ] actual Windows Home Assistant/MQTT/camera and release rollback acceptance (separate operator gate)
+
+See docs/BUILD_064_RELEASE_INCIDENT_TRIAGE.md. Next: Build 065 — Incident Follow-Up Routing & Integration Diagnostics.
