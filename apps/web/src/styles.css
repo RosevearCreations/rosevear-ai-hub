@@ -2735,3 +2735,34 @@ h1 {
   .business-connectors-grid,
   .mqtt-actions-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+
+/* Build 058: responsive, metadata-only connector operations workspace */
+.business-operations-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.business-operations-heading > div { min-width: 0; flex: 1 1 22rem; }
+.business-operations-heading > button { flex: 0 1 auto; max-width: 100%; white-space: normal; }
+.business-operations-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0;
+}
+.business-operations-item {
+  min-width: 0;
+  padding: 0.9rem;
+  border: 1px solid #c6c6c6;
+  border-radius: 0.6rem;
+  overflow-wrap: anywhere;
+}
+.business-operations-item h3 { margin-top: 0; }
+.business-operations-item ul { padding-left: 1.3rem; }
+.business-operations-item li { margin-bottom: 0.45rem; }
+@media (max-width: 850px) {
+  .business-operations-list { grid-template-columns: minmax(0, 1fr); }
+}
