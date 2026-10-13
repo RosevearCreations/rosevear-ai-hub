@@ -21,6 +21,20 @@ describe("Build 062 local release view", () => {
       last_alert_recorded_utc: null, installed_runtime_verified: false,
       rollback_rehearsal_verified: false, off_machine_recovery_verified: false,
       enrollment_ready: false, reason: "Metadata only",
+      health_cohorts: {
+        scope: "last_7_days", state: "partial", events_counted: 2,
+        unparsed_lines: 1, history_partial: true, grouped_by: "utc_day_not_release_sha",
+        days: [{
+          utc_day: "2026-10-13",
+          counts: { CURRENT: 0, READY: 0, HOLD: 1, ADOPTED: 0, FAILED: 1,
+                    ROLLED_BACK: 0, ROLLBACK_FAILED: 0 },
+        }],
+      },
+      supervised_recovery: {
+        status: "operator_reported_complete", observed_utc: "2026-10-13T19:00:00Z",
+        distinct_same_schema_releases: true, reported_steps: 6, required_steps: 6,
+        source: "operator_self_attestation_only", machine_verified: false,
+      },
     });
     render(<ReleaseObservabilityPanel />);
     fireEvent.click(screen.getByRole("button", { name: "Refresh release evidence" }));
@@ -28,6 +42,9 @@ describe("Build 062 local release view", () => {
     expect(screen.getByText("Automatic-enrollment acceptance: not verified by this panel.")).toBeTruthy();
     expect(screen.getByText("configured")).toBeTruthy();
     expect(screen.getByText("aaaaaaaaaaaa")).toBeTruthy();
+    expect(screen.getByText(/History is truncated to a bounded sample/)).toBeTruthy();
+    expect(screen.getByText(/not independently machine-verified/)).toBeTruthy();
+    expect(screen.getByText(/FAILED: 1/)).toBeTruthy();
   });
   it("hides raw remote exception details", async () => {
     vi.mocked(getReleaseObservability).mockRejectedValue(new Error("password=SECRET"));

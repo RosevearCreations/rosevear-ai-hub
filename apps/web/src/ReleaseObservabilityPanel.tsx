@@ -43,7 +43,7 @@ export function ReleaseObservabilityPanel() {
   }
   return (
     <section className="panel release-observability" aria-label="Managed release and update observability">
-      <h2>Build 062 — Managed release &amp; update status</h2>
+      <h2>Build 063 — Release health &amp; supervised recovery</h2>
       <p>Owner-only, on-demand local evidence. Refresh never enrolls, restarts, migrates, or recovers services.</p>
       <button type="button" disabled={loading} onClick={() => void refresh()}>
         {loading ? "Reading local evidence…" : "Refresh release evidence"}
@@ -64,6 +64,40 @@ export function ReleaseObservabilityPanel() {
             <dt>Failure event 610, last seven days</dt><dd>{snapshot.failure_event_610}</dd>
             <dt>Last recorded alert</dt><dd>{timestamp(snapshot.last_alert_recorded_utc)}</dd>
           </dl>
+          <h3>Recent release health cohorts (UTC, last seven days)</h3>
+          <p>Counts group the recognized local log states by day, not by release SHA. Old, incomplete
+            or damaged logs cannot support a complete success rate.</p>
+          <p>Log sampling: <strong>{snapshot.health_cohorts.state}</strong>; recognized events:{" "}
+            {snapshot.health_cohorts.events_counted}; unparsed lines:{" "}
+            {snapshot.health_cohorts.unparsed_lines}.</p>
+          {snapshot.health_cohorts.history_partial && (
+            <p>History is truncated to a bounded sample. Do not treat totals as exhaustive.</p>
+          )}
+          {snapshot.health_cohorts.days.length === 0 ? (
+            <p>No valid recent release events found.</p>
+          ) : (
+            <ul aria-label="UTC release health days">
+              {snapshot.health_cohorts.days.map((cohort) => (
+                <li key={cohort.utc_day}>
+                  <strong>{cohort.utc_day}</strong>:
+                  {" "}{Object.entries(cohort.counts)
+                    .filter(([, count]) => count > 0)
+                    .map(([state, count]) => `${state}: ${count}`)
+                    .join(" · ")}
+                </li>
+              ))}
+            </ul>
+          )}
+          <h3>Supervised recovery evidence</h3>
+          <p>Operator report: <strong>{snapshot.supervised_recovery.status.replaceAll("_", " ")}</strong>.
+            Completed checklist steps: {snapshot.supervised_recovery.reported_steps} /
+            {snapshot.supervised_recovery.required_steps}.
+          </p>
+          <p>Evidence recorded: {timestamp(snapshot.supervised_recovery.observed_utc)}.
+            Even a complete self-attestation is <strong>not independently machine-verified</strong>.</p>
+          <p>The checklist must document a supervised rollback and re-adoption between two
+            different releases at the same database schema. See
+            <code> docs/BUILD_063_RELEASE_HEALTH_RECOVERY.md</code>.</p>
           <p><strong>Automatic-enrollment acceptance: not verified by this panel.</strong></p>
           <p>Configured tasks and GREEN CI do not prove physical rollback, private backup restoration, running process identity or signed-in Windows operation.</p>
           <p>On the server check <code>logs\hub-release-adoption.log</code>,
