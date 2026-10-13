@@ -104,7 +104,7 @@ jobs:
         shell: pwsh
         run: |
           $allErrors = @()
-          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/enable-tailscale-serve.ps1', 'scripts/configure-lan-https.ps1', 'scripts/check-production-readiness.ps1', 'scripts/update-rosevear-ai-hub.ps1', 'scripts/restart-hub-backend.ps1', 'scripts/update-hub-backend.ps1', 'scripts/hub-backend-identity.ps1', 'scripts/test-hub-backend-identity.ps1')) {
+          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/enable-tailscale-serve.ps1', 'scripts/configure-lan-https.ps1', 'scripts/check-production-readiness.ps1', 'scripts/update-rosevear-ai-hub.ps1', 'scripts/restart-hub-backend.ps1', 'scripts/update-hub-backend.ps1', 'scripts/hub-backend-identity.ps1', 'scripts/test-hub-backend-identity.ps1', 'scripts/hub-release-policy.ps1', 'scripts/test-hub-release-policy.ps1', 'scripts/hub-auto-update.ps1', 'scripts/install-hub-auto-update.ps1', 'scripts/restart-hub-web.ps1')) {
             $tokens = $null
             $parseErrors = $null
             [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$parseErrors) | Out-Null
@@ -119,6 +119,9 @@ jobs:
       - name: Verify accepted and rejected Hub Python process identities
         shell: pwsh
         run: ./scripts/test-hub-backend-identity.ps1
+      - name: Verify Build 060 release eligibility and Vite process ownership
+        shell: pwsh
+        run: ./scripts/test-hub-release-policy.ps1
       - name: Prevent reserved PowerShell HOME assignment in Tailscale preflight
         shell: pwsh
         run: |

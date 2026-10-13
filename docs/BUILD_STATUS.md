@@ -1463,3 +1463,21 @@ Manual Chat-to-Knowledge question handoff, query-evidence invalidation, safer
 conversation switching and new-chat failures, plain-language privacy and confirmation
 instructions and mobile layout. See [Build 059 operator runbook](BUILD_059_CONVERSATION_VOICE_KNOWLEDGE.md).
 
+
+
+## Build 060 — Guided Release Adoption & Practical Workflow Acceptance
+
+- [x] Home/Workshop/Business manual acceptance cards on owner/admin System page
+- [x] Local-browser checklist and metadata-only copyable handoff; not a live audit or machine status
+- [x] Explicit opt-in hourly Windows Scheduled Task with no new inbound access or credentials
+- [x] Exact main SHA + independent push + five-job GREEN gate (no PR-only acceptance)
+- [x] Approved remote, clean main, fast-forward-only, migration HOLD and single-run lock
+- [x] Verify known API/Vite ownership; no blind process kill, forced reset, device writes or VM changes
+- [x] Backend and web restart through existing safe recovery path; local log and JSON evidence
+- [x] Windows pure-policy regression cases, syntax gate and Web tests
+- [ ] dev CI five jobs GREEN
+- [ ] main promotion PR five jobs GREEN
+- [ ] independent main push Production CI GREEN
+- [ ] Windows user has opted in via one-time task installation and completed physical acceptance
+
+See docs/BUILD_060_GUIDED_RELEASE_ADOPTION.md. Next: Build 061 — Release Recovery Assurance & Verified Backup Gates.
