@@ -3,6 +3,8 @@
 import importlib.util
 import json
 import os
+import subprocess
+import time
 from contextlib import nullcontext
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -215,6 +217,44 @@ def test_controller_lock_releases_after_exception(tmp_path):
             with manager.controller_lock(path):
                 pass
         raise RuntimeError("simulate controller failure")
+    with manager.controller_lock(path):
+        pass
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows FileShare.None interoperability")
+def test_real_powershell_lock_is_busy_and_released_on_owner_exit(tmp_path):
+    path = tmp_path / "maintenance.lock"
+    ready = tmp_path / "ready"
+    stop = tmp_path / "stop"
+    path.write_bytes(b"0")
+
+    def quote(value):
+        return "'" + str(value).replace("'", "''") + "'"
+
+    script = (
+        f"$h=[IO.File]::Open({quote(path)},'Open','ReadWrite','None'); "
+        f"[IO.File]::WriteAllText({quote(ready)},'ready'); "
+        "$deadline=(Get-Date).AddSeconds(15); "
+        f"while (!(Test-Path -LiteralPath {quote(stop)}) -and (Get-Date) -lt $deadline) "
+        "{Start-Sleep -Milliseconds 100}; $h.Dispose()"
+    )
+    process = subprocess.Popen(
+        ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        creationflags=subprocess.CREATE_NO_WINDOW,
+    )
+    try:
+        deadline = time.monotonic() + 10
+        while not ready.exists() and time.monotonic() < deadline:
+            time.sleep(0.05)
+        assert ready.exists()
+        with pytest.raises(manager.Refusal, match="BUSY"):
+            with manager.controller_lock(path):
+                pass
+    finally:
+        stop.touch()
+        process.wait(timeout=20)
     with manager.controller_lock(path):
         pass
 
