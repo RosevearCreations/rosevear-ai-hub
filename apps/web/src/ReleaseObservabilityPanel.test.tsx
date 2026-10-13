@@ -30,6 +30,19 @@ describe("Build 062 local release view", () => {
                     ROLLED_BACK: 0, ROLLBACK_FAILED: 0 },
         }],
       },
+      incident_triage: {
+        scope: "bounded_local_history", observation: "partial",
+        groups: [{ category: "adoption_failure", observed_events: 2,
+          affected_days: 2, recurring_across_days: true }],
+        recovery_follow_up: "needs_operator_review", no_automatic_incident_closure: true,
+        explanation: "operator confirmation required",
+      },
+      incident_reviews: {
+        state: "operator_reported", reviewed_records: 1,
+        open_records: 0, investigating_records: 1,
+        operator_reported_resolved_records: 0,
+        latest_review_utc: "2026-10-13T19:00:00Z", authoritative: false,
+      },
       supervised_recovery: {
         status: "operator_reported_complete", observed_utc: "2026-10-13T19:00:00Z",
         distinct_same_schema_releases: true, reported_steps: 6, required_steps: 6,
@@ -45,6 +58,7 @@ describe("Build 062 local release view", () => {
     expect(screen.getByText(/History is truncated to a bounded sample/)).toBeTruthy();
     expect(screen.getByText(/not independently machine-verified/)).toBeTruthy();
     expect(screen.getByText(/FAILED: 1/)).toBeTruthy();
+    expect(screen.getByText(/Repeated across days; investigate/)).toBeTruthy();
   });
   it("hides raw remote exception details", async () => {
     vi.mocked(getReleaseObservability).mockRejectedValue(new Error("password=SECRET"));

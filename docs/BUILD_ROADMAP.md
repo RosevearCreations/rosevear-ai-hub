@@ -400,6 +400,15 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - classify recurring HOLD/FAILED/ROLLED_BACK outcomes and distinguish repeated incidents
 - preserve a privacy-safe operator incident review and follow-up trail without exposing raw log contents
 - keep recovery exercises and migration approvals supervised, fail closed on absent evidence
+- summarize bounded seven-day adoption failure/hold/rollback event counts, affected days and recurrence without invented IDs
+- read an optional local operator-only review ledger with fixed enums and no private freeform data
+- clarify Home Assistant VM/API, MQTT broker and camera-registry diagnostics on the Home page, without commanding devices
+
+### Build 065 — Incident Follow-Up Routing & Integration Diagnostics
+- guide authorized owner diagnostics across release, HA, MQTT and camera integrations
+- preserve explicit operator acknowledgment and safe non-disruptive read-only evidence
+- no unaudited external actions, remote credentials, autonomous schema changes or destructive recovery
+
 
 
 

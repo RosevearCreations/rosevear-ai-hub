@@ -98,6 +98,26 @@ export function ReleaseObservabilityPanel() {
           <p>The checklist must document a supervised rollback and re-adoption between two
             different releases at the same database schema. See
             <code> docs/BUILD_063_RELEASE_HEALTH_RECOVERY.md</code>.</p>
+          <h3>Build 064 — Release incident triage</h3>
+          <p>Incident counts are observations, not unique incidents: retries can create
+            more than one event. Classification: <strong>{snapshot.incident_triage.observation}</strong>.</p>
+          <ul aria-label="Release incident categories">
+            {snapshot.incident_triage.groups.map((group) => (
+              <li key={group.category}>
+                <strong>{group.category.replaceAll("_", " ")}</strong>:
+                {" "}{group.observed_events} event(s) across {group.affected_days} day(s).
+                {" "}{group.recurring_across_days ? "Repeated across days; investigate." : "No multi-day recurrence established."}
+              </li>
+            ))}
+          </ul>
+          <p>Recovery follow-up: {snapshot.incident_triage.recovery_follow_up.replaceAll("_", " ")}.</p>
+          <p>Operator review ledger: <strong>{snapshot.incident_reviews.state.replaceAll("_", " ")}</strong>;
+            {" "}{snapshot.incident_reviews.open_records} open,
+            {" "}{snapshot.incident_reviews.investigating_records} investigating,
+            {" "}{snapshot.incident_reviews.operator_reported_resolved_records} reported resolved.
+            No operator declaration automatically closes a system incident.</p>
+          <p>Review on the server using <code>docs/BUILD_064_RELEASE_INCIDENT_TRIAGE.md</code>.
+            The web interface reads evidence only; no automatic retries or fixes are triggered.</p>
           <p><strong>Automatic-enrollment acceptance: not verified by this panel.</strong></p>
           <p>Configured tasks and GREEN CI do not prove physical rollback, private backup restoration, running process identity or signed-in Windows operation.</p>
           <p>On the server check <code>logs\hub-release-adoption.log</code>,

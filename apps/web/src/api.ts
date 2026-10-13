@@ -38,6 +38,8 @@ export interface ReleaseObservabilityResponse {
   reason: string;
   health_cohorts: ReleaseHealthCohorts;
   supervised_recovery: SupervisedRecoveryEvidence;
+  incident_triage: ReleaseIncidentTriage;
+  incident_reviews: ReleaseIncidentReviews;
 }
 
 export type ReleaseOutcome =
@@ -62,6 +64,30 @@ export interface SupervisedRecoveryEvidence {
   required_steps: number;
   source: "operator_self_attestation_only";
   machine_verified: false;
+}
+
+export interface ReleaseIncidentTriage {
+  scope: "bounded_local_history";
+  observation: "partial" | "sampled";
+  groups: Array<{
+    category: "adoption_failure" | "adoption_hold" | "recovery_incident";
+    observed_events: number;
+    affected_days: number;
+    recurring_across_days: boolean;
+  }>;
+  recovery_follow_up: "needs_operator_review" | "operator_reported";
+  no_automatic_incident_closure: true;
+  explanation: string;
+}
+
+export interface ReleaseIncidentReviews {
+  state: "not_recorded" | "invalid" | "empty" | "operator_reported";
+  reviewed_records: number;
+  open_records: number;
+  investigating_records: number;
+  operator_reported_resolved_records: number;
+  latest_review_utc: string | null;
+  authoritative: false;
 }
 
 export interface ResourceBudgetResponse {
