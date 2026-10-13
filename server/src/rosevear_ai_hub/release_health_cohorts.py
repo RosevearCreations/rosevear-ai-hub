@@ -101,10 +101,7 @@ def classify_log(root: Path, now: datetime | None = None) -> dict:
         day = stamp.date().isoformat()
         bucket = buckets.setdefault(day, {key: 0 for key in OUTCOMES})
         bucket[match.group(2)] += 1
-    groups = [
-        {"utc_day": key, "counts": buckets[key]}
-        for key in sorted(buckets, reverse=True)
-    ]
+    groups = [{"utc_day": key, "counts": buckets[key]} for key in sorted(buckets, reverse=True)]
     return {
         "scope": "last_7_days",
         "state": "partial" if partial or unparsed else "available",
