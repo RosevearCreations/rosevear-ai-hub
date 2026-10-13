@@ -16,7 +16,13 @@ from pathlib import Path
 
 SHA = re.compile(r"^[0-9a-f]{40}$")
 STATES = {
-    "CURRENT", "READY", "HOLD", "ADOPTED", "FAILED", "ROLLED_BACK", "ROLLBACK_FAILED",
+    "CURRENT",
+    "READY",
+    "HOLD",
+    "ADOPTED",
+    "FAILED",
+    "ROLLED_BACK",
+    "ROLLBACK_FAILED",
 }
 TASK_STATES = {"not_installed", "configured", "disabled", "mismatch", "unavailable"}
 RECOVERY_STATES = {"enabled", "disabled", "mismatch", "unavailable"}
@@ -69,9 +75,15 @@ def task_evidence(root: Path) -> dict:
     try:
         result = subprocess.run(
             [
-                "powershell.exe", "-NoProfile", "-NonInteractive",
-                "-ExecutionPolicy", "Bypass", "-File", str(script),
-                "-RepoRoot", str(root),
+                "powershell.exe",
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(script),
+                "-RepoRoot",
+                str(root),
             ],
             capture_output=True,
             text=True,
@@ -85,11 +97,14 @@ def task_evidence(root: Path) -> dict:
             return unknown
         return {
             "adoption_task": data.get("adoption_task")
-            if data.get("adoption_task") in TASK_STATES else "unavailable",
+            if data.get("adoption_task") in TASK_STATES
+            else "unavailable",
             "recovery_task": data.get("recovery_task")
-            if data.get("recovery_task") in RECOVERY_STATES else "unavailable",
+            if data.get("recovery_task") in RECOVERY_STATES
+            else "unavailable",
             "event_610": data.get("event_610")
-            if data.get("event_610") in EVENT_STATES else "unavailable",
+            if data.get("event_610") in EVENT_STATES
+            else "unavailable",
         }
     except (OSError, ValueError, subprocess.TimeoutExpired):
         return unknown
@@ -110,10 +125,7 @@ def collect_release_observability(root: Path) -> dict:
     active_sha = safe_sha(active.get("sha"))
     last_sha = safe_sha(status.get("release"))
     phase = journal.get("phase")
-    journal_state = (
-        phase if phase in {"activating", "committed", "rolled_back"}
-        else "unverified"
-    )
+    journal_state = phase if phase in {"activating", "committed", "rolled_back"} else "unverified"
     alert_at = safe_time(prior_alert.get("notified_utc"))
 
     # A committed pointer or a passed CI job cannot prove actual process
