@@ -20,7 +20,7 @@ MAX_AGE = timedelta(days=14)
 GUIDANCE = {
     "home_assistant": (
         "Confirm the Home Assistant virtual machine is powered on.",
-        "Check the Hub's private Home Assistant URL and token locally; do not share them.",
+        "Check the Hub's saved Home Assistant URL and token locally; do not share them.",
         "Refresh Home Assistant and confirm the expected entities are visible.",
     ),
     "mqtt": (
@@ -34,7 +34,7 @@ GUIDANCE = {
         "Confirm an expected installed model is listed and usable.",
     ),
     "frigate": (
-        "Confirm the Frigate service is running and its private address is configured.",
+        "Confirm the Frigate service is running and its local address is configured.",
         "Inspect the local Frigate connection without sharing camera credentials.",
         "Confirm expected camera events or a clear empty-event state in the Hub.",
     ),
@@ -119,7 +119,7 @@ def integration_acceptance(root: Path, now: datetime | None = None) -> dict:
             }
         )
     return {
-        "scope": "private_operator_self_report",
+        "scope": "operator_self_report",
         "ledger_state": state,
         "integrations": rows,
         "machine_verified": False,
