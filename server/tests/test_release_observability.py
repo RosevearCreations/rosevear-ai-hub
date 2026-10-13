@@ -165,3 +165,26 @@ def test_endpoint_owner_only_and_no_store(tmp_path, monkeypatch):
         == 200
     )
     assert client.get(path).status_code == 403
+
+
+def test_health_cohorts_api_never_leaks_private_logs(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    logdir = tmp_path / "logs"
+    logdir.mkdir()
+    (logdir / "hub-release-adoption.log").write_text(
+        "2026-10-13T19:00:00+00:00 HOLD preflight: token=DO_NOT_LEAK\\n"
+    )
+    monkeypatch.setattr(
+        release_observability,
+        "task_evidence",
+        lambda root: {
+            "adoption_task": "not_installed",
+            "recovery_task": "unavailable",
+            "event_610": "none",
+        },
+    )
+    summary = release_observability.collect_release_observability(tmp_path)
+    assert "health_cohorts" in summary
+    assert "supervised_recovery" in summary
+    assert summary["supervised_recovery"]["machine_verified"] is False
+    assert "DO_NOT_LEAK" not in json.dumps(summary)

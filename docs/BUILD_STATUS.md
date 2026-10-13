@@ -1513,3 +1513,20 @@ See docs/BUILD_061_RELEASE_ASSURANCE.md. Next: Build 062 — Managed Enrollment 
 - [ ] On-server Windows task install/failover acceptance (not authorized or inferred)
 
 See docs/BUILD_062_MANAGED_ENROLLMENT_OBSERVABILITY.md. Next: Build 063 — Release Health Cohorts & Supervised Recovery Evidence.
+
+
+## Build 063 — Release Health Cohorts & Supervised Recovery Evidence
+
+- [x] Manual-refresh, bounded last-seven-day daily outcome cohorts from local adoption log
+- [x] Privacy-safe time/status parser: no raw logs or false SHA attribution
+- [x] Detect truncated/malformed history and display partial evidence instead of invented success rates
+- [x] Private optional six-gate supervised recovery operator self-attestation for distinct same-schema releases
+- [x] Explicit self-report labeling: never machine verified and never auto-enroll Windows Scheduled Tasks
+- [x] Owner/admin System page integration and synthetic backend/frontend regression checks
+- [x] Operator guide with false-by-default example; no secrets, data migration, runtime restart, VM or device writes
+- [ ] dev CI five jobs GREEN
+- [ ] production pull-request CI five jobs GREEN
+- [ ] independent post-merge main push CI five jobs GREEN
+- [ ] Actual home Windows failover acceptance (requires separate real-world operator evidence)
+
+See docs/BUILD_063_RELEASE_HEALTH_RECOVERY.md. Next: Build 064 — Release Incident Triage & Recovery Evidence Continuity.

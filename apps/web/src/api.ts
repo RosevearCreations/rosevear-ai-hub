@@ -36,6 +36,32 @@ export interface ReleaseObservabilityResponse {
   off_machine_recovery_verified: false;
   enrollment_ready: false;
   reason: string;
+  health_cohorts: ReleaseHealthCohorts;
+  supervised_recovery: SupervisedRecoveryEvidence;
+}
+
+export type ReleaseOutcome =
+  | "CURRENT" | "READY" | "HOLD" | "ADOPTED" | "FAILED"
+  | "ROLLED_BACK" | "ROLLBACK_FAILED";
+
+export interface ReleaseHealthCohorts {
+  scope: "last_7_days";
+  state: "unavailable" | "partial" | "available";
+  days: Array<{ utc_day: string; counts: Record<ReleaseOutcome, number> }>;
+  events_counted: number;
+  unparsed_lines: number;
+  history_partial: boolean;
+  grouped_by: "utc_day_not_release_sha";
+}
+
+export interface SupervisedRecoveryEvidence {
+  status: "not_recorded" | "invalid" | "stale" | "operator_reported_complete" | "operator_reported_incomplete";
+  observed_utc: string | null;
+  distinct_same_schema_releases: boolean;
+  reported_steps: number;
+  required_steps: number;
+  source: "operator_self_attestation_only";
+  machine_verified: false;
 }
 
 export interface ResourceBudgetResponse {
