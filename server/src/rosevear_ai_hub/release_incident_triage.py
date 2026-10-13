@@ -38,12 +38,14 @@ def classify_incidents(cohorts: dict, recovery: dict) -> dict:
                     hits += value
             count += hits
             affected_days += int(hits > 0)
-        buckets.append({
-            "category": category,
-            "observed_events": count,
-            "affected_days": affected_days,
-            "recurring_across_days": affected_days >= 2,
-        })
+        buckets.append(
+            {
+                "category": category,
+                "observed_events": count,
+                "affected_days": affected_days,
+                "recurring_across_days": affected_days >= 2,
+            }
+        )
     partial = cohorts.get("state") != "available" or bool(cohorts.get("history_partial"))
     recovery_incomplete = recovery.get("status") != "operator_reported_complete"
     return {
