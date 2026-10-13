@@ -1579,3 +1579,20 @@ Next proposed: Build 066 — Guided Integration Recovery & Operator Acceptance.
 
 See docs/BUILD_066_INTEGRATION_RECOVERY.md.
 Next: Build 067 — Integration Health Evidence & Safe Remediation Readiness.
+
+
+## Build 067 — Integration Health Evidence & Safe Remediation Readiness
+
+- [x] Manual, independent read-only Home Assistant/MQTT/Ollama/Frigate/go2rtc status evidence
+- [x] Camera registry counts distinguished from physical camera absence
+- [x] Tauri-only Restart Hub applications interface, including backend-unavailable recovery screen
+- [x] Existing Windows identity-verified backend restart script invoked with fixed arguments
+- [x] Desktop self-restart via Tauri, exact opt-in confirmation and duplicate-operation guard
+- [x] Native/frontend regression tests and local Windows operator guide
+- [ ] Dev CI 5/5 GREEN
+- [ ] Production PR CI 5/5 GREEN
+- [ ] Independent main CI 5/5 GREEN
+- [ ] Actual Windows server and desktop restart/reconnect acceptance
+
+See docs/BUILD_067_INTEGRATION_HEALTH_RESTART.md.
+Next: Build 068 — Supervised Restart Acceptance & Runtime Recovery Evidence.
