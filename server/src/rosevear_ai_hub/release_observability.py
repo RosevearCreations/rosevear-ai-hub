@@ -52,6 +52,10 @@ def safe_time(value: object) -> str | None:
         return None
 
 
+def is_windows() -> bool:
+    return os.name == "nt"
+
+
 def task_evidence(root: Path) -> dict:
     """Invoke our static, read-only local Windows task and event inspector."""
     unknown = {
@@ -60,7 +64,7 @@ def task_evidence(root: Path) -> dict:
         "event_610": "unavailable",
     }
     script = root / "scripts" / "inspect-hub-release-tasks.ps1"
-    if os.name != "nt" or script.is_symlink() or not script.is_file():
+    if not is_windows() or script.is_symlink() or not script.is_file():
         return unknown
     try:
         result = subprocess.run(

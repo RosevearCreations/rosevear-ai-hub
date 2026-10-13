@@ -79,7 +79,7 @@ def test_malformed_and_oversized_documents_never_escape(tmp_path, monkeypatch):
 
 
 def test_windows_task_result_is_strictly_enumerated(tmp_path, monkeypatch):
-    monkeypatch.setattr(release_observability.os, "name", "nt")
+    monkeypatch.setattr(release_observability, "is_windows", lambda: True)
     (tmp_path / "scripts").mkdir()
     (tmp_path / "scripts" / "inspect-hub-release-tasks.ps1").write_text("read only fixture")
     monkeypatch.setattr(release_observability.subprocess, "run",

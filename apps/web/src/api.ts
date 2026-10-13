@@ -20,6 +20,24 @@ export interface HubVersionResponse {
   environment: string;
 }
 
+export interface ReleaseObservabilityResponse {
+  scope: "local_read_only";
+  adoption_state: "CURRENT" | "READY" | "HOLD" | "ADOPTED" | "FAILED" | "ROLLED_BACK" | "ROLLBACK_FAILED" | "UNVERIFIED";
+  last_attempt_utc: string | null;
+  last_release: string | null;
+  active_release: string | null;
+  journal_state: "activating" | "committed" | "rolled_back" | "unverified";
+  adoption_task: "not_installed" | "configured" | "disabled" | "mismatch" | "unavailable";
+  recovery_task: "enabled" | "disabled" | "mismatch" | "unavailable";
+  failure_event_610: "present" | "none" | "unavailable";
+  last_alert_recorded_utc: string | null;
+  installed_runtime_verified: false;
+  rollback_rehearsal_verified: false;
+  off_machine_recovery_verified: false;
+  enrollment_ready: false;
+  reason: string;
+}
+
 export interface ResourceBudgetResponse {
   sampled_at_utc: string;
   scope: "api_process_and_host";
@@ -2195,4 +2213,9 @@ export function recordWorkshopInspection(
   return authJson<WorkshopInspection>(
     "POST", `/api/v1/workshop/equipment/${equipmentId}/inspections`, input,
   );
+}
+
+
+export function getReleaseObservability(signal?: AbortSignal): Promise<ReleaseObservabilityResponse> {
+  return getJson<ReleaseObservabilityResponse>("/api/v1/system/release-observability", signal);
 }
