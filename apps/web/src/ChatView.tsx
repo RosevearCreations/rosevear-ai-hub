@@ -206,7 +206,6 @@ export function ChatView({ onAskWithCitations }: { onAskWithCitations?: (questio
     setError("");
     setRetryNotice("");
     setStatus("streaming");
-    setPrompt("");
 
     let conversationId = selectedConversationId;
     if (conversationId === null) {
@@ -228,6 +227,9 @@ export function ChatView({ onAskWithCitations }: { onAskWithCitations?: (questio
         return;
       }
     }
+
+    // Keep the draft until a new conversation is safely created.
+    setPrompt("");
 
     const optimisticUser: ChatMessage = {
       id: -Date.now(),

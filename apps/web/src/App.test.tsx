@@ -646,7 +646,9 @@ describe("App", () => {
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent("Request failed with status 404");
     });
-    expect(screen.getByLabelText("Message")).toHaveValue("Keep this careful draft");
+    await waitFor(() => {
+      expect(screen.getByLabelText("Message")).toHaveValue("Keep this careful draft");
+    });
   });
 
 });
