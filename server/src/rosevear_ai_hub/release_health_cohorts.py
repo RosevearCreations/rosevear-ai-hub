@@ -6,12 +6,11 @@ No backups, migrations, scheduler or process operations are performed.
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
-
-import json
 
 LOG_BYTES = 131072
 WINDOW_DAYS = 7
@@ -44,7 +43,7 @@ def parse_utc(value: Any) -> datetime | None:
 
 def _safe_regular(path: Path) -> bool:
     """Refuse symlinked log path or parent; never follow another directory."""
-    return not path.is_symlink() and not path.parent.is_symlink() and path.is_file()
+    return all(not candidate.is_symlink() for candidate in (path, path.parent, path.parent.parent)) and path.is_file()
 
 
 def classify_log(root: Path, now: datetime | None = None) -> dict:
