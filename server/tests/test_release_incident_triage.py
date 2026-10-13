@@ -36,18 +36,22 @@ def test_missing_or_partial_history_never_reports_certainty():
 def test_no_private_notes_or_references_are_returned(tmp_path):
     folder = tmp_path / "logs" / "hub-deployment"
     folder.mkdir(parents=True)
-    (folder / "release-incident-reviews.json").write_text(json.dumps({
-        "schema_version": 1,
-        "reviews": [
+    (folder / "release-incident-reviews.json").write_text(
+        json.dumps(
             {
-                "reference": "review-1",
-                "category": "adoption_failure",
-                "status": "investigating",
-                "reviewed_at_utc": NOW.isoformat(),
-                "notes": "password=SECRET and private home IP 192.168.2.1",
+                "schema_version": 1,
+                "reviews": [
+                    {
+                        "reference": "review-1",
+                        "category": "adoption_failure",
+                        "status": "investigating",
+                        "reviewed_at_utc": NOW.isoformat(),
+                        "notes": "password=SECRET and private home IP 192.168.2.1",
+                    }
+                ],
             }
-        ],
-    }))
+        )
+    )
     before = list(tmp_path.rglob("*"))
     result = incident_reviews(tmp_path, NOW)
     assert result["state"] == "operator_reported"
