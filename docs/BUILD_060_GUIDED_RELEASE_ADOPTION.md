@@ -1,5 +1,10 @@
 # Build 060 — Guided Release Adoption & Practical Workflow Acceptance
 
+**Windows follow-up:** the isolated release-slot controller supersedes the
+live-install staging procedure below. Follow [Windows release slots](WINDOWS_RELEASE_SLOTS.md)
+for supervised schema/baseline acceptance, rollback, private backup enrollment
+and hourly scheduling. Do not install the old procedure over an unverified runtime.
+
 ## Goal and security posture
 
 The owner can opt in **once** to a Windows Scheduled Task that checks for

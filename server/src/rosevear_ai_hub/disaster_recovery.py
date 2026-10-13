@@ -66,7 +66,9 @@ def _read_recovery_database(root: Path) -> int:
     return count
 
 
-def _rehearse_archive(archive: Path, passphrase_file: Path, scratch: Path) -> dict[str, object]:
+def _rehearse_archive(
+    archive: Path, passphrase_file: Path | bytes, scratch: Path
+) -> dict[str, object]:
     recovered = scratch / "recovered"
     # Restore validates GCM authentication, per-file manifest SHA256s and SQLite.
     # It refuses any existing root; no file is moved to the live installation.
@@ -96,13 +98,15 @@ def _write_evidence(destination: Path | None, record: dict[str, object]) -> None
 
 
 def drill_archive(
-    archive: Path, passphrase_file: Path, work_dir: Path, evidence: Path | None = None
+    archive: Path, passphrase_file: Path | bytes, work_dir: Path, evidence: Path | None = None
 ) -> dict[str, object]:
     """Rehearse a REAL encrypted backup, discarding extracted plaintext on exit."""
     parent = _check_workspace(work_dir, evidence)
     if not archive.is_file() or archive.is_symlink():
         raise DrillError("Encrypted archive is missing or is a symbolic link.")
-    if not passphrase_file.is_file() or passphrase_file.is_symlink():
+    if not isinstance(passphrase_file, bytes) and (
+        not passphrase_file.is_file() or passphrase_file.is_symlink()
+    ):
         raise DrillError("Passphrase file is missing or is a symbolic link.")
     with tempfile.TemporaryDirectory(dir=parent, prefix=".hub50-recovery-") as temp:
         verified = _rehearse_archive(archive, passphrase_file, Path(temp))

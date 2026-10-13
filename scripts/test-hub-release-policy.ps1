@@ -39,3 +39,9 @@ if (Test-HubWebProcessIdentity -ActualExecutable $web.ActualExecutable -CommandL
 $web.CommandLine = 'node.exe C:\Users\HubTest\other\node_modules\vite\bin\vite.js --host 127.0.0.1 --strictPort'
 if (Test-HubWebProcessIdentity -ActualExecutable $web.ActualExecutable -CommandLine $web.CommandLine -RepoRoot $web.RepoRoot) { throw 'Unrelated Vite listener allowed.' }
 Write-Host 'Build 060 local release eligibility, origin and web ownership tests passed.' -ForegroundColor Green
+$web.CommandLine = '"C:\Program Files\nodejs\node.exe" "C:\Users\HubTest\rosevearaihub\node_modules\.bin\\..\vite\bin\vite.js" --host 127.0.0.1 --strictPort'
+if (-not (Test-HubWebProcessIdentity -ActualExecutable $web.ActualExecutable -CommandLine $web.CommandLine -RepoRoot $web.RepoRoot)) { throw 'Actual npm-generated Vite path was rejected.' }
+$web.CommandLine = '"C:\Program Files\nodejs\node.exe" "C:\Users\HubTest\rosevearaihub\node_modules\vite\bin\vite.js"'
+if (-not (Test-HubWebProcessIdentity -ActualExecutable $web.ActualExecutable -CommandLine $web.CommandLine -RepoRoot $web.RepoRoot -LoopbackListenerVerified)) { throw 'Legacy Vite must be accepted after independent loopback listener verification.' }
+$web.CommandLine += '.unrelated'
+if (Test-HubWebProcessIdentity -ActualExecutable $web.ActualExecutable -CommandLine $web.CommandLine -RepoRoot $web.RepoRoot -LoopbackListenerVerified) { throw 'Vite substring accepted without an exact normalized argument.' }

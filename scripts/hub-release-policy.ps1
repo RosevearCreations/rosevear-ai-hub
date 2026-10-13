@@ -34,7 +34,8 @@ function Test-HubWebProcessIdentity {
     param(
         [string]$ActualExecutable,
         [string]$CommandLine,
-        [string]$RepoRoot
+        [string]$RepoRoot,
+        [switch]$LoopbackListenerVerified
     )
     if (!$ActualExecutable -or !$CommandLine -or !$RepoRoot) { return $false }
     try {
@@ -42,18 +43,24 @@ function Test-HubWebProcessIdentity {
         $exe = [System.IO.Path]::GetFullPath($ActualExecutable)
     } catch { return $false }
     if ([System.IO.Path]::GetFileName($exe) -ine 'node.exe') { return $false }
-    $command = $CommandLine.Replace('/', '\')
     $permitted = @(
         "$root\node_modules\vite\bin\vite.js",
         "$root\apps\web\node_modules\vite\bin\vite.js"
     )
     $isRepoVite = $false
-    foreach ($path in $permitted) {
-        if ($command.IndexOf($path, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
-            $isRepoVite = $true
+    foreach ($match in [regex]::Matches($CommandLine, '(?<!\S)(?:"([^"\r\n]+)"|(\S+))(?=\s|$)')) {
+        $argument = $match.Groups[1].Value
+        if (-not $argument) { $argument = $match.Groups[2].Value }
+        try { $normalized = [IO.Path]::GetFullPath($argument.Replace('/', '\')) }
+        catch { continue }
+        foreach ($path in $permitted) {
+            if ([string]::Equals($normalized, $path, [StringComparison]::OrdinalIgnoreCase)) {
+                $isRepoVite = $true
+            }
         }
     }
     return [bool]($isRepoVite -and
-        $CommandLine -match '(?i)--host(?:=|\s+)127\.0\.0\.1(?:\s|$)' -and
-        $CommandLine -match '(?i)--strictPort(?:\s|$)')
+        ($LoopbackListenerVerified -or (
+            $CommandLine -match '(?i)--host(?:=|\s+)127\.0\.0\.1(?:\s|$)' -and
+            $CommandLine -match '(?i)--strictPort(?:\s|$)')))
 }

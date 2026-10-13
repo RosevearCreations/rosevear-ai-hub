@@ -67,6 +67,24 @@ def test_online_snapshot_is_encrypted_verified_and_restorable(tmp_path: Path) ->
     assert (root / "data/knowledge/docs/handbook.txt").read_text() == "new work"
 
 
+def test_in_memory_passphrase_supports_isolated_rehearsal(tmp_path: Path) -> None:
+    from rosevear_ai_hub.disaster_recovery import drill_archive
+
+    root, file = setup_hub(tmp_path)
+    secret = file.read_bytes()
+    encrypted = tmp_path / "memory-key.hubbackup"
+    create_backup(root, encrypted, secret)
+    scratch = tmp_path / "scratch"
+    scratch.mkdir()
+    result = drill_archive(encrypted, secret, scratch)
+    assert result["status"] == "pass"
+    assert result["restore_to_live_installation"] is False
+    assert list(scratch.iterdir()) == []
+    assert inspect_backup(encrypted, secret)["files"] == 3
+    with pytest.raises(BackupError):
+        inspect_backup(encrypted, b"incorrect in-memory recovery passphrase")
+
+
 def test_wrong_key_tampering_and_existing_destination_fail_closed(tmp_path: Path) -> None:
     root, passphrase = setup_hub(tmp_path)
     destination = tmp_path / "snapshot.hubbackup"
