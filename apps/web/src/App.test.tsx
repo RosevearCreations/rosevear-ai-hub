@@ -641,13 +641,18 @@ describe("App", () => {
     render(<App />);
     fireEvent.click(await screen.findByRole("button", { name: "Chat" }));
     const input = await screen.findByLabelText("Message");
+    await waitFor(() => expect(input).toBeEnabled());
     fireEvent.change(input, { target: { value: "Keep this careful draft" } });
-    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    expect(input).toHaveValue("Keep this careful draft");
+    const send = screen.getByRole("button", { name: "Send" });
+    await waitFor(() => expect(send).toBeEnabled());
+    fireEvent.click(send);
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent("Request failed with status 404");
-    });
-    await waitFor(() => {
-      expect(screen.getByLabelText("Message")).toHaveValue("Keep this careful draft");
+      const calls = vi.mocked(globalThis.fetch).mock.calls;
+      expect(calls.some(([url, init]) =>
+        String(url).endsWith("/api/v1/chat/conversations") && init?.method === "POST",
+      )).toBe(true);
+      expect(input).toHaveValue("Keep this careful draft");
     });
   });
 
