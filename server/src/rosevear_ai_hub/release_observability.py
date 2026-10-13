@@ -15,6 +15,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from rosevear_ai_hub.release_health_cohorts import classify_log, operator_evidence
+from rosevear_ai_hub.release_incident_triage import classify_incidents, incident_reviews
 
 SHA = re.compile(r"^[0-9a-f]{40}$")
 STATES = {
@@ -123,6 +124,8 @@ def collect_release_observability(root: Path) -> dict:
     tasks = task_evidence(root)
     cohorts = classify_log(root)
     recovery = operator_evidence(root)
+    incidents = classify_incidents(cohorts, recovery)
+    reviews = incident_reviews(root)
 
     adoption = status.get("state")
     adoption = adoption if adoption in STATES else "UNVERIFIED"
@@ -138,6 +141,8 @@ def collect_release_observability(root: Path) -> dict:
         "scope": "local_read_only",
         "health_cohorts": cohorts,
         "supervised_recovery": recovery,
+        "incident_triage": incidents,
+        "incident_reviews": reviews,
         "adoption_state": adoption,
         "last_attempt_utc": safe_time(status.get("checked_utc")),
         "last_release": last_sha,
