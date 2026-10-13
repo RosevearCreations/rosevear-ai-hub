@@ -5,8 +5,8 @@ from pathlib import Path
 from fastapi import APIRouter, Response, status
 from fastapi.exceptions import HTTPException
 
-from rosevear_ai_hub.resource_budget import collect_resource_snapshot
 from rosevear_ai_hub.release_observability import collect_release_observability
+from rosevear_ai_hub.resource_budget import collect_resource_snapshot
 
 router = APIRouter(prefix="/api/v1/system", tags=["system"])
 
