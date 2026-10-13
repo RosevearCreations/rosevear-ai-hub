@@ -62,7 +62,17 @@ jobs:
           cache: npm
           cache-dependency-path: apps/web/package.json
       - name: Install web dependencies
-        run: npm install
+        run: npm install --include=optional
+      - name: Verify Rollup Linux native dependency
+        shell: bash
+        run: |
+          # npm sometimes omits an optional platform-specific Rollup package,
+          # especially on cached hosted runners. Only repair this CI workspace.
+          if ! node -e "require('rollup')"; then
+            version=$(node -p "require('rollup/package.json').version")
+            npm install --no-save --package-lock=false --ignore-scripts --include=optional "@rollup/rollup-linux-x64-gnu@$version"
+            node -e "require('rollup')"
+          fi
       - name: Type check
         run: npm run typecheck
       - name: Test
