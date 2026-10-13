@@ -1546,3 +1546,20 @@ See docs/BUILD_063_RELEASE_HEALTH_RECOVERY.md. Next: Build 064 — Release Incid
 - [ ] actual Windows Home Assistant/MQTT/camera and release rollback acceptance (separate operator gate)
 
 See docs/BUILD_064_RELEASE_INCIDENT_TRIAGE.md. Next: Build 065 — Incident Follow-Up Routing & Integration Diagnostics.
+
+
+## Build 065 — Incident Follow-Up Routing & Integration Diagnostics
+
+- [x] Deterministic operator-role routing for adoption failure, hold and recovery incidents
+- [x] Read-only fixed-schema integration statuses for Home Assistant, MQTT, Ollama, Frigate and go2rtc
+- [x] Unknown status is never presented as healthy; operator confirmation required for all routes
+- [x] Owner/admin release-observability snapshot integrates both advisory sections
+- [x] Unit tests for malformed input, privacy and no automatic remediation
+- [ ] dev five-job CI GREEN
+- [ ] production PR five-job CI GREEN
+- [ ] main independent post-merge CI GREEN
+- [ ] On-server Home Assistant, MQTT and camera registry diagnostics (requires actual authenticated Windows connection)
+- [ ] Actual Windows deployment and runtime health verified
+
+No scheduled-task, credentials, Windows process, backup or device changes are made.
+Next proposed: Build 066 — Guided Integration Recovery & Operator Acceptance.
