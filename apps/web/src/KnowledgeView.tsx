@@ -32,7 +32,13 @@ import {
 
 const SUPPORTED_FILE_TYPES = ".pdf,.txt,.md,.docx";
 
-export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
+export function KnowledgeView({
+  currentUser,
+  initialQuestion = "",
+}: {
+  currentUser: AuthUser;
+  initialQuestion?: string;
+}) {
   const [collections, setCollections] = useState<KnowledgeCollection[]>([]);
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
   const [adminStatus, setAdminStatus] = useState<KnowledgeAdminStatus | null>(null);
@@ -50,7 +56,7 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
   const [indexResults, setIndexResults] = useState<Map<number, KnowledgeIndexResponse>>(
     new Map(),
   );
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialQuestion);
   const [searchMode, setSearchMode] = useState<KnowledgeSearchMode>("auto");
   const [searchCollectionId, setSearchCollectionId] = useState("");
   const [searchDocumentId, setSearchDocumentId] = useState("");
@@ -405,7 +411,7 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
 
   async function submitGroundedAnswer() {
     const query = searchQuery.trim();
-    if (!query || !answerModel || answering) {
+    if (!query || !answerModel || answering || searching || !searchResult || searchResult.query !== query) {
       return;
     }
 
@@ -434,7 +440,7 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
     <section className="knowledge-view" aria-label="Knowledge ingestion, indexing, and retrieval">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 055</p>
+          <p className="eyebrow">Build 059</p>
           <h1>Knowledge</h1>
           <p className="lede">
             Administer private collections and documents, re-index local knowledge, and
@@ -452,6 +458,13 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
         </div>
       </header>
 
+      {initialQuestion ? (
+        <p className="knowledge-handoff-note" role="status">
+          Question moved from Chat as editable text. No search or AI answer ran automatically.
+          Choose a collection, then select Search to retrieve source evidence.
+        </p>
+      ) : null}
+
       <form className="panel knowledge-search" onSubmit={(event) => void submitSearch(event)}>
         <div>
           <h2>Search local knowledge</h2>
@@ -466,9 +479,13 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
           <input
             type="search"
             value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
+            onChange={(event) => {
+              setSearchQuery(event.target.value);
+              setSearchResult(null);
+              setAnswerResult(null);
+            }}
             placeholder="What do our local documents say about…"
-            disabled={searching}
+            disabled={searching || answering}
           />
         </label>
 
@@ -477,8 +494,12 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
             <span>Mode</span>
             <select
               value={searchMode}
-              onChange={(event) => setSearchMode(event.target.value as KnowledgeSearchMode)}
-              disabled={searching}
+              onChange={(event) => {
+                setSearchMode(event.target.value as KnowledgeSearchMode);
+                setSearchResult(null);
+                setAnswerResult(null);
+              }}
+              disabled={searching || answering}
             >
               <option value="auto">Auto</option>
               <option value="semantic">Semantic only</option>
@@ -493,8 +514,10 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
               onChange={(event) => {
                 setSearchCollectionId(event.target.value);
                 setSearchDocumentId("");
+                setSearchResult(null);
+                setAnswerResult(null);
               }}
-              disabled={searching}
+              disabled={searching || answering}
             >
               <option value="">All collections</option>
               {collections.map((collection) => (
@@ -509,8 +532,12 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
             <span>Source</span>
             <select
               value={searchDocumentId}
-              onChange={(event) => setSearchDocumentId(event.target.value)}
-              disabled={searching}
+              onChange={(event) => {
+                setSearchDocumentId(event.target.value);
+                setSearchResult(null);
+                setAnswerResult(null);
+              }}
+              disabled={searching || answering}
             >
               <option value="">All documents</option>
               {filteredSourceDocuments.map((document) => (
@@ -524,7 +551,7 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
           <button
             type="submit"
             className="primary-button"
-            disabled={!searchQuery.trim() || searching}
+            disabled={!searchQuery.trim() || searching || answering}
           >
             {searching ? "Searching…" : "Search"}
           </button>
@@ -616,7 +643,7 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
               type="button"
               className="primary-button"
               onClick={() => void submitGroundedAnswer()}
-              disabled={!answerModel || answering || !searchQuery.trim()}
+              disabled={!answerModel || answering || searching || !searchQuery.trim() || searchResult.query !== searchQuery.trim()}
             >
               {answering ? "Checking evidence…" : "Ask with citations"}
             </button>
@@ -633,6 +660,7 @@ export function KnowledgeView({ currentUser }: { currentUser: AuthUser }) {
             <div className="grounded-answer-result" role="status">
               <strong>{answerResult.grounding_status.replaceAll("_", " ")}</strong>
               <p>{answerResult.answer}</p>
+              <small>Verified citations below open the matching local evidence. If evidence is insufficient or rejected, the answer must not be treated as verified.</small>
               {answerResult.citations.length > 0 ? (
                 <div className="grounded-citations">
                   {answerResult.citations.map((citation) => (

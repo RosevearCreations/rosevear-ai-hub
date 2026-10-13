@@ -31,9 +31,11 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   Chat: {
-    purpose: "Provides provider-aware AI conversations with saved history, profiles, and grounded local tools.",
+    purpose: "Build 059: provider-aware local chat with saved history, explicit voice review and a manual route to cited Knowledge answers.",
     tasks: [
       "Choose the profile that matches the job: General, Coding, Home, Workshop, or Business.",
+      "Write a question in Chat and choose Check this question in Knowledge to transfer an editable draft. Search and citation generation are separate manual actions.",
+      "Streaming chat temporarily disables conversation switching; stop the reply first if you need another conversation.",
       "Select an installed model, open or create a conversation, then send the request.",
       "Use Knowledge for citation-heavy document questions when you need explicit evidence.",
       "For speech recognition: install whisper-cli and a local model, then Record locally; review the transcript before Send.",
@@ -43,6 +45,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
     safety: [
       "Local microphone transcription never sends chat or executes a device command automatically; review the editable text.",
+      "Changing a Knowledge query, collection, source or mode clears previously shown evidence so old citations are not mistaken for new results.",
       "Local Windows SAPI voice playback is opt-in, offline and never acts as a tool command; generated WAV files are temporary.",
       "Voice recognition does not prove identity: every action requires the current authenticated account and an explicit confirmation click.",
       "Do not execute hazardous, bulk, ambiguous, or unapproved speech. Sensitive Level-2 actions keep the existing separate approval process.",
