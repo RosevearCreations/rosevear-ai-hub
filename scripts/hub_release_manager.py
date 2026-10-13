@@ -257,13 +257,44 @@ def verify_backup(evidence, max_hours=24):
     return record
 
 
+def windows_sharing_violation(path, error):
+    if getattr(error, "winerror", None) in {32, 33}:
+        return True
+    if os.name != "nt" or error.errno != 13:
+        return False
+    # The CRT may discard Win32's sharing code and expose only EACCES. Probe
+    # with CreateFileW to distinguish contention from a real ACL denial.
+    import ctypes
+    from ctypes import wintypes
+
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    create = kernel.CreateFileW
+    create.argtypes = [
+        wintypes.LPCWSTR,
+        wintypes.DWORD,
+        wintypes.DWORD,
+        ctypes.c_void_p,
+        wintypes.DWORD,
+        wintypes.DWORD,
+        wintypes.HANDLE,
+    ]
+    create.restype = wintypes.HANDLE
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel.CloseHandle.restype = wintypes.BOOL
+    handle = create(str(path), 0xC0000000, 7, None, 3, 0x80, None)
+    if handle == ctypes.c_void_p(-1).value:
+        return ctypes.get_last_error() in {32, 33}
+    kernel.CloseHandle(handle)
+    return False
+
+
 @contextlib.contextmanager
 def controller_lock(path):
     path.parent.mkdir(parents=True, exist_ok=True)
     try:
         handle = path.open("a+b")
     except OSError as error:
-        if getattr(error, "winerror", None) in {32, 33}:
+        if windows_sharing_violation(path, error):
             raise Refusal("BUSY: Windows recovery holds the maintenance lock.") from None
         raise
     with handle:
