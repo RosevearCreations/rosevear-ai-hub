@@ -375,6 +375,16 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - validate encrypted real-backup restore evidence without touching live data
 - design migration approval and rollback procedure; no silent schema changes
 - examine updater health, start-on-login behavior and explicit operator alerts
+- read-only, no-network assurance report for managed release pointer, rollback journal, same-schema retained release and backup metadata
+- explicitly mark browser acceptance, actual failover test, off-machine restore and Task Scheduler configuration UNVERIFIED
+- preserve fail-closed startup, no surprise schema DDL, no home device control and no automatic enrollment
+- add Linux/Windows regression coverage for malformed status, interrupted journal, stale backup metadata and schema mismatch
+
+### Build 062 — Managed Enrollment Acceptance & Update Observability
+- owner-confirmed local deployment and recovery acceptance, after a tested distinct same-schema rollback
+- read-only scheduled-task and event evidence, failed-release notification review, safe bounded retention
+- no unattended migration, Home Assistant or camera side effects
+
 
 
 

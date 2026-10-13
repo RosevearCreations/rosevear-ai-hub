@@ -1481,3 +1481,20 @@ instructions and mobile layout. See [Build 059 operator runbook](BUILD_059_CONVE
 - [ ] Windows user has opted in via one-time task installation and completed physical acceptance
 
 See docs/BUILD_060_GUIDED_RELEASE_ADOPTION.md. Next: Build 061 — Release Recovery Assurance & Verified Backup Gates.
+
+
+## Build 061 — Release Recovery Assurance & Verified Backup Gates
+
+- [x] Read-only local release assurance console and clickable Windows .cmd shortcut
+- [x] Managed SHA, retained release metadata, journal and schema alignment classification
+- [x] Fresh prior encrypted backup evidence is hash/freshness checked, not recreated or restored by the report
+- [x] Distinct same-schema rollback baseline required to pass metadata check
+- [x] Explicit UNVERIFIED gates for real Windows failover, browser acceptance, off-machine backups and Scheduled Task
+- [x] Unit tests for malformed records, interrupted recovery, source mismatch, absent key, schema drift and no filesystem writes
+- [x] No live server access, new SQL migration, backend API, device writes or background task
+- [ ] Dev CI 5/5 GREEN
+- [ ] Production PR CI 5/5 GREEN
+- [ ] Independent post-merge main Production CI 5/5 GREEN
+- [ ] Real Windows server adoption/rollback acceptance (owner-controlled, not implied by CI)
+
+See docs/BUILD_061_RELEASE_ASSURANCE.md. Next: Build 062 — Managed Enrollment Acceptance & Update Observability.
