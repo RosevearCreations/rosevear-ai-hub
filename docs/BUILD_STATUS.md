@@ -58,7 +58,8 @@ This file records completed and active builds. The roadmap remains authoritative
 | 052 | Unified Operations Dashboard & Guided Onboarding | COMPLETE | main via PR #128; Production run 38190554356 GREEN |
 | 053 | Local Service Diagnostics & Guided Repair | COMPLETE | main via PR #130; Production run 38247217278 GREEN |
 | 054 | Cameras and Event Timeline Workbench | COMPLETE | main via PR #132; Production run 38256907082 GREEN |
-| 055 | Knowledge Projects & Collection Workspace | COMPLETE | main via PR #136; Production run 38268949178 GREEN |\n| 056 | Automations Operations Console | COMPLETE | main via PR #140; hotfix run 38285112776 GREEN |\n| 057 | Workshop Equipment & Safety Readiness | COMPLETE | main; UI follow-up production run 38291329247 GREEN |\n| 058 | Business Connector Operations Workspace | IMPLEMENTED | dev/main verification pending |
+| 055 | Knowledge Projects & Collection Workspace | COMPLETE | main via PR #136; Production run 38268949178 GREEN |\n| 056 | Automations Operations Console | COMPLETE | main via PR #140; hotfix run 38285112776 GREEN |\n| 057 | Workshop Equipment & Safety Readiness | COMPLETE | main; UI follow-up production run 38291329247 GREEN |
+| 058 | Business Connector Operations Workspace | IMPLEMENTED | dev/main verification pending |
 
 ## Build 016 acceptance checklist
 
