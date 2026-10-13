@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { BusinessOperationsWorkspace, type BusinessEvidenceLedger } from "./BusinessOperationsWorkspace";
+
 import {
   approveConfirmation,
   createConfirmation,
@@ -113,6 +115,9 @@ function writeError(error: unknown) {
 export function BusinessView() {
   const [state, setState] = useState<ConnectorState>({ kind: "loading" });
   const [readState, setReadState] = useState<ReadState>({ kind: "idle" });
+  const [readEvidence, setReadEvidence] = useState<BusinessEvidenceLedger>({});
+  const [checkedAt, setCheckedAt] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [writeState, setWriteState] = useState<WriteState>({ kind: "idle" });
   const [storyProductId, setStoryProductId] = useState("");
   const [storyHeading, setStoryHeading] = useState("");
@@ -124,7 +129,10 @@ export function BusinessView() {
   useEffect(() => {
     const controller = new AbortController();
     getBusinessConnectors(controller.signal)
-      .then((data) => setState({ kind: "ready", data }))
+      .then((data) => {
+        setState({ kind: "ready", data });
+        setCheckedAt(new Date().toISOString());
+      })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
         setState({
@@ -138,6 +146,22 @@ export function BusinessView() {
     return () => controller.abort();
   }, []);
 
+  const refreshConnectors = () => {
+    setRefreshing(true);
+    getBusinessConnectors()
+      .then((data) => {
+        setState({ kind: "ready", data });
+        setCheckedAt(new Date().toISOString());
+      })
+      .catch((error: unknown) => {
+        setState({
+          kind: "error",
+          message: error instanceof Error ? error.message : "Business connector catalogue unavailable",
+        });
+      })
+      .finally(() => setRefreshing(false));
+  };
+
   const readConnector = (
     connectorKey: string,
     displayName: string,
@@ -150,13 +174,25 @@ export function BusinessView() {
       resource,
     });
     readBusinessConnector(connectorKey, resource, 20)
-      .then((data) =>
+      .then((data) => {
         setReadState({
           kind: "ready",
           displayName,
           data,
-        }),
-      )
+        });
+        setReadEvidence((previous) => ({
+          ...previous,
+          [connectorKey]: {
+            ...previous[connectorKey],
+            [resource]: {
+              state: "verified",
+              checkedAt: new Date().toISOString(),
+              recordCount: data.records.length,
+              hasMore: Boolean(data.next_cursor),
+            },
+          },
+        }));
+      })
       .catch((error: unknown) => {
         setReadState({
           kind: "error",
@@ -165,6 +201,16 @@ export function BusinessView() {
           resource,
           message: error instanceof Error ? error.message : "Read failed",
         });
+        setReadEvidence((previous) => ({
+          ...previous,
+          [connectorKey]: {
+            ...previous[connectorKey],
+            [resource]: {
+              state: "failed",
+              checkedAt: new Date().toISOString(),
+            },
+          },
+        }));
       });
   };
 
@@ -246,7 +292,7 @@ export function BusinessView() {
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 040</p>
+          <p className="eyebrow">Build 058</p>
           <h1>Business connectors</h1>
           <p className="lede">
             All three businesses retain bounded live reads. Two narrow
@@ -265,9 +311,17 @@ export function BusinessView() {
         <section className="panel">
           <h2>Connector catalogue unavailable</h2>
           <p>{state.message}</p>
+          <button type="button" disabled={refreshing} onClick={refreshConnectors}>Retry connector catalogue</button>
         </section>
       ) : (
         <>
+          <BusinessOperationsWorkspace
+            connectors={state.data.connectors}
+            evidence={readEvidence}
+            checkedAt={checkedAt}
+            refreshing={refreshing}
+            onRefresh={refreshConnectors}
+          />
           <section className="panel">
             <h2>Framework policy</h2>
             <p>
