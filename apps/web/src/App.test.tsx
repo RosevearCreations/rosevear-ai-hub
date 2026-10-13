@@ -625,7 +625,7 @@ describe("App", () => {
     const fetchMock = vi.mocked(globalThis.fetch);
     expect(fetchMock.mock.calls.some(([path]) => String(path).endsWith("/api/v1/knowledge/search"))).toBe(false);
     expect(fetchMock.mock.calls.some(([path]) => String(path).endsWith("/api/v1/knowledge/answer"))).toBe(false);
-    fireEvent.click(screen.getByRole("button", { name: "Search", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
     expect(await screen.findByText("Local factual evidence")).toBeInTheDocument();
     fireEvent.change(searchInput, { target: { value: "Different question" } });
     expect(screen.queryByText("Local factual evidence")).not.toBeInTheDocument();
