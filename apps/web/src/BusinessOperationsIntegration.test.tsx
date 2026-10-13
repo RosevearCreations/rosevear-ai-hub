@@ -35,7 +35,7 @@ function connectorPayload() {
 
 describe("Business Build 058 integration", () => {
   test("readiness refresh never triggers an upstream read", async () => {
-    const fetchMock = vi.fn(async () => ({
+    const fetchMock = vi.fn(async (_path: RequestInfo | URL) => ({
       ok: true,
       json: async () => connectorPayload(),
     }));
