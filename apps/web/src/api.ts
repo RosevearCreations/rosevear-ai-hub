@@ -40,6 +40,7 @@ export interface ReleaseObservabilityResponse {
   supervised_recovery: SupervisedRecoveryEvidence;
   incident_triage: ReleaseIncidentTriage;
   incident_reviews: ReleaseIncidentReviews;
+  integration_recovery?: IntegrationRecoveryReport;
 }
 
 export type ReleaseOutcome =
@@ -88,6 +89,23 @@ export interface ReleaseIncidentReviews {
   operator_reported_resolved_records: number;
   latest_review_utc: string | null;
   authoritative: false;
+}
+
+export interface IntegrationRecoveryReport {
+  scope: "operator_self_report";
+  ledger_state: "not_recorded" | "empty" | "invalid" | "operator_reported";
+  integrations: Array<{
+    integration: "home_assistant" | "mqtt" | "ollama" | "frigate" | "go2rtc";
+    status: "not_recorded" | "investigating" | "blocked" | "operator_reported_working" | "stale";
+    completed_checks: number;
+    required_checks: number;
+    last_review_utc: string | null;
+    steps: string[];
+    machine_verified: false;
+  }>;
+  machine_verified: false;
+  automatic_recovery: false;
+  explanation: string;
 }
 
 export interface ResourceBudgetResponse {

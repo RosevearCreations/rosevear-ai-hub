@@ -48,6 +48,20 @@ describe("Build 062 local release view", () => {
         distinct_same_schema_releases: true, reported_steps: 6, required_steps: 6,
         source: "operator_self_attestation_only", machine_verified: false,
       },
+      integration_recovery: {
+        scope: "operator_self_report",
+        ledger_state: "operator_reported",
+        integrations: [{
+          integration: "mqtt", status: "operator_reported_working",
+          completed_checks: 3, required_checks: 3,
+          last_review_utc: "2026-10-13T19:00:00Z",
+          steps: ["Check the broker state", "Check private connection settings"],
+          machine_verified: false,
+        }],
+        machine_verified: false,
+        automatic_recovery: false,
+        explanation: "Self reported only",
+      },
     });
     render(<ReleaseObservabilityPanel />);
     fireEvent.click(screen.getByRole("button", { name: "Refresh release evidence" }));
@@ -59,6 +73,10 @@ describe("Build 062 local release view", () => {
     expect(screen.getByText(/not independently machine-verified/)).toBeTruthy();
     expect(screen.getByText(/FAILED: 1/)).toBeTruthy();
     expect(screen.getByText(/Repeated across days; investigate/)).toBeTruthy();
+    expect(screen.getByText("Build 066 — Guided integration recovery & operator acceptance")).toBeTruthy();
+    expect(screen.getByText("Check the broker state")).toBeTruthy();
+    expect(screen.getByText(/3\/3 reported checks/)).toBeTruthy();
+    expect(screen.getByText(/No service is machine-verified by this checklist/)).toBeTruthy();
   });
   it("hides raw remote exception details", async () => {
     vi.mocked(getReleaseObservability).mockRejectedValue(new Error("password=SECRET"));

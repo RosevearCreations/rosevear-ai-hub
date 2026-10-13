@@ -15,6 +15,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from rosevear_ai_hub.incident_follow_up import follow_up_routes, integration_diagnostics
+from rosevear_ai_hub.integration_recovery import integration_acceptance
 from rosevear_ai_hub.release_health_cohorts import classify_log, operator_evidence
 from rosevear_ai_hub.release_incident_triage import classify_incidents, incident_reviews
 
@@ -146,6 +147,7 @@ def collect_release_observability(root: Path) -> dict:
         "incident_reviews": reviews,
         "incident_follow_up": follow_up_routes(incidents, reviews),
         "integration_diagnostics": integration_diagnostics(),
+        "integration_recovery": integration_acceptance(root),
         "adoption_state": adoption,
         "last_attempt_utc": safe_time(status.get("checked_utc")),
         "last_release": last_sha,
