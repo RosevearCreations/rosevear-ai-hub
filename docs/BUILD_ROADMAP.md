@@ -384,6 +384,15 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - owner-confirmed local deployment and recovery acceptance, after a tested distinct same-schema rollback
 - read-only scheduled-task and event evidence, failed-release notification review, safe bounded retention
 - no unattended migration, Home Assistant or camera side effects
+- operator-refresh System panel with owner/admin API and fixed sanitized local adoption/journal/alert evidence
+- strict Windows task-action inspection and seven-day failure Event 610 presence; no task writes
+- never infer rollback, DPAPI decryption, or live process acceptance from metadata
+
+### Build 063 — Release Health Cohorts & Supervised Recovery Evidence
+- explicit release-health cohorts and operator acceptance evidence for distinct same-schema versions
+- bound failure triage to immutable release identity, recovery journal and real device observations
+- improve metadata-only UI without automatic migration or external service changes
+
 
 
 
