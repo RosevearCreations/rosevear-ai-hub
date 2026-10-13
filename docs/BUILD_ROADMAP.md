@@ -364,6 +364,18 @@ This is the canonical implementation sequence. Build numbers are never reused.
 - owner-operated acceptance cards for common home/workshop/business tasks
 - fast failed-service triage and traceable build-to-build observations
 - maintain CI, security, backup and Windows compatibility gates
+- opt-in hourly outbound Windows release adoption after independent five-job GREEN main push
+- owner-reviewed one-time Scheduled Task installation, clean fast-forward, known processes only
+- migration changes HOLD; do not auto-migrate or touch Home Assistant, MQTT, cameras, Ollama
+- backend and local Vite preview restarts with bounded health checks, local metadata-only evidence
+- private-browser acceptance checklist separate from physical Windows sign-off
+
+### Build 061 — Release Recovery Assurance & Verified Backup Gates
+- exercise staged-release recovery on a real Windows machine, including failure injection
+- validate encrypted real-backup restore evidence without touching live data
+- design migration approval and rollback procedure; no silent schema changes
+- examine updater health, start-on-login behavior and explicit operator alerts
+
 
 
 ## Build execution rules
