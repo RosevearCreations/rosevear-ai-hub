@@ -22,6 +22,8 @@ import { HomeAssistantView } from "./HomeAssistantView";
 import { KnowledgeView } from "./KnowledgeView";
 import { WorkshopView } from "./WorkshopView";
 import { LocalDiagnosticsPanel } from "./LocalDiagnosticsPanel";
+import { IntegrationHealthPanel } from "./IntegrationHealthPanel";
+import { RestartAppsPanel } from "./RestartAppsPanel";
 import { SectionHelp } from "./HelpSystem";
 import { MQTTView } from "./MQTTView";
 import { PwaInstallPanel } from "./PwaInstallPanel";
@@ -152,6 +154,7 @@ export function App() {
           <p className="eyebrow">Rosevear AI Hub</p>
           <h1>Backend unavailable</h1>
           <p className="auth-error">{auth.message}</p>
+          <RestartAppsPanel />
           <button className="primary-button" type="button" onClick={() => window.location.reload()}>
             Try again
           </button>
@@ -288,6 +291,8 @@ export function App() {
             {canAdminister && <LocalDiagnosticsPanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <ReleaseAcceptancePanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <ReleaseObservabilityPanel />}
+            {canAdminister && <IntegrationHealthPanel />}
+            {canAdminister && <RestartAppsPanel />}
             <RemoteAccessPanel />
             {canAdminister && <ResourceBudgetPanel />}
           </>
