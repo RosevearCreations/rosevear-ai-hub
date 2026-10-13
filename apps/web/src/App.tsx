@@ -74,6 +74,7 @@ export function App() {
   const [health, setHealth] = useState<HealthState>({ kind: "loading" });
   const [ollama, setOllama] = useState<OllamaState>({ kind: "loading" });
   const [section, setSection] = useState<Section>("Home");
+  const [knowledgeQuestion, setKnowledgeQuestion] = useState("");
   const [hubVersion, setHubVersion] = useState<string | null>(null);
 
   useEffect(() => {
@@ -182,6 +183,7 @@ export function App() {
       await logout();
     } finally {
       setSection("Home");
+      setKnowledgeQuestion("");
       setHealth({ kind: "loading" });
       setOllama({ kind: "loading" });
       setAuth({
@@ -216,7 +218,10 @@ export function App() {
                   className={item === section ? "nav-item active" : "nav-item"}
                   type="button"
                   aria-current={item === section ? "page" : undefined}
-                  onClick={() => setSection(item)}
+                  onClick={() => {
+                    setKnowledgeQuestion("");
+                    setSection(item);
+                  }}
                 >
                   {item}
                 </button>
@@ -238,9 +243,12 @@ export function App() {
       <main id="main-content" className="content" tabIndex={-1}>
         <SectionHelp section={section} />
         {section === "Chat" ? (
-          <ChatView />
+          <ChatView onAskWithCitations={(question) => {
+            setKnowledgeQuestion(question);
+            setSection("Knowledge");
+          }} />
         ) : section === "Knowledge" ? (
-          <KnowledgeView currentUser={user} />
+          <KnowledgeView currentUser={user} initialQuestion={knowledgeQuestion} />
         ) : section === "Workshop" ? (
           <WorkshopView />
         ) : section === "Devices" ? (

@@ -22,7 +22,7 @@ import {
 
 type ChatStatus = "idle" | "streaming" | "cancelled" | "error";
 
-export function ChatView() {
+export function ChatView({ onAskWithCitations }: { onAskWithCitations?: (question: string) => void } = {}) {
   const tts = useLocalTextToSpeech();
   const [models, setModels] = useState<OllamaModel[]>([]);
   const [providers, setProviders] = useState<ProviderStatus[]>([]);
@@ -210,15 +210,23 @@ export function ChatView() {
 
     let conversationId = selectedConversationId;
     if (conversationId === null) {
-      const conversation = await createConversation(
-        cleanPrompt.slice(0, 80),
-        selectedProvider,
-        selectedModel,
-        selectedProfileId,
-      );
-      conversationId = conversation.id;
-      setConversations((current) => [conversation, ...current]);
-      setSelectedConversationId(conversation.id);
+      try {
+        const conversation = await createConversation(
+          cleanPrompt.slice(0, 80),
+          selectedProvider,
+          selectedModel,
+          selectedProfileId,
+        );
+        conversationId = conversation.id;
+        setConversations((current) => [conversation, ...current]);
+        setSelectedConversationId(conversation.id);
+      } catch (caught: unknown) {
+        // Never discard a draft when the first conversation cannot be created.
+        setPrompt(cleanPrompt);
+        setStatus("error");
+        setError(caught instanceof Error ? caught.message : "Could not create a conversation.");
+        return;
+      }
     }
 
     const optimisticUser: ChatMessage = {
@@ -325,7 +333,7 @@ export function ChatView() {
   return (
     <div className="chat-layout">
       <aside className="conversation-pane" aria-label="Conversations">
-        <button type="button" className="primary-button" onClick={newConversation}>
+        <button type="button" className="primary-button" disabled={status === "streaming"} onClick={() => void newConversation()}>
           New chat
         </button>
 
@@ -333,6 +341,7 @@ export function ChatView() {
           {conversations.map((conversation) => (
             <button
               type="button"
+              disabled={status === "streaming"}
               key={conversation.id}
               className={
                 conversation.id === selectedConversationId
@@ -360,7 +369,7 @@ export function ChatView() {
       <section className="chat-panel" aria-label="Local AI chat">
         <header className="chat-header">
           <div>
-            <p className="eyebrow">Build 044</p>
+            <p className="eyebrow">Build 059</p>
             <h1>{activeConversation?.title ?? "Chat"}</h1>
             <small className="profile-summary">
               {activeProfile
@@ -372,7 +381,7 @@ export function ChatView() {
             </small>
           </div>
 
-          <div className="chat-controls">
+          <div className="chat-controls" aria-label="Reply provider and profile">
             <label className="model-picker">
               <span>Profile</span>
               <select
@@ -428,6 +437,12 @@ export function ChatView() {
             </label>
           </div>
         </header>
+
+        <p className="chat-ux-guidance">
+          Choose a profile and local model for the next reply. Switching while a response
+          streams is paused to keep replies in the correct conversation. AI responses are
+          not source evidence; use Knowledge for a question with document citations.
+        </p>
 
         {activeProvider?.available === false ? (
           <div className="empty-state provider-offline" role="status">
@@ -541,6 +556,17 @@ export function ChatView() {
               }
             }}
           />
+          <div className="chat-knowledge-handoff">
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => onAskWithCitations?.(prompt.trim())}
+              disabled={!onAskWithCitations || !prompt.trim() || status === "streaming"}
+            >
+              Check this question in Knowledge
+            </button>
+            <small>Transfers editable text only. Does not send or search automatically.</small>
+          </div>
           <SpeechToTextPanel
             disabled={status === "streaming"}
             onTranscript={setVoiceDraft}
@@ -553,6 +579,7 @@ export function ChatView() {
               setPrompt((current) => [current.trim(), text].filter(Boolean).join(" "))
             }
           />
+          <p className="chat-ux-guidance">Recording starts only after selecting Record locally. Review and edit recognized words; physical actions require a separate exact confirmation.</p>
           <div className="composer-actions">
             {status === "streaming" ? (
               <button type="button" onClick={() => void stopGeneration()}>

@@ -2766,3 +2766,35 @@ h1 {
 @media (max-width: 850px) {
   .business-operations-list { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Build 059 — Chat/Knowledge handoff and constrained responsive layouts */
+.chat-ux-guidance,
+.chat-knowledge-handoff small,
+.knowledge-handoff-note {
+  display: block;
+  max-width: 78ch;
+  color: #454545;
+  line-height: 1.5;
+}
+.chat-ux-guidance { margin: 0.65rem 0; }
+.chat-knowledge-handoff {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+.chat-knowledge-handoff > button { white-space: normal; max-width: 100%; }
+.knowledge-handoff-note {
+  padding: 0.8rem 1rem;
+  border-left: 3px solid #595959;
+  background: #f5f5f5;
+}
+.chat-panel, .chat-controls, .conversation-pane, .message-list { min-width: 0; }
+@media (max-width: 860px) {
+  .chat-controls { grid-template-columns: minmax(0, 1fr); min-width: 0; width: 100%; }
+  .chat-header { flex-wrap: wrap; gap: 0.75rem; }
+  .chat-layout { grid-template-columns: minmax(0, 1fr); }
+  .conversation-list { max-height: 11rem; overflow-y: auto; }
+  .message { max-width: 100%; overflow-wrap: anywhere; }
+}

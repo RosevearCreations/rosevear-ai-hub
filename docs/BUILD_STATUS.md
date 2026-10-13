@@ -59,7 +59,7 @@ This file records completed and active builds. The roadmap remains authoritative
 | 053 | Local Service Diagnostics & Guided Repair | COMPLETE | main via PR #130; Production run 38247217278 GREEN |
 | 054 | Cameras and Event Timeline Workbench | COMPLETE | main via PR #132; Production run 38256907082 GREEN |
 | 055 | Knowledge Projects & Collection Workspace | COMPLETE | main via PR #136; Production run 38268949178 GREEN |\n| 056 | Automations Operations Console | COMPLETE | main via PR #140; hotfix run 38285112776 GREEN |\n| 057 | Workshop Equipment & Safety Readiness | COMPLETE | main; UI follow-up production run 38291329247 GREEN |
-| 058 | Business Connector Operations Workspace | IMPLEMENTED | dev/main verification pending |
+| 058 | Business Connector Operations Workspace | COMPLETE | dev PR #156; main PR #155; production run 38328892889 GREEN 5/5 |\n| 059 | Conversation, Voice and Knowledge UX | IMPLEMENTED | dev/main checks pending |
 
 ## Build 016 acceptance checklist
 
@@ -1437,7 +1437,7 @@ See docs/BUILD_056_AUTOMATION_OPERATIONS.md. Next Build 057 — Workshop Equipme
 - [ ] independent main push Production CI GREEN
 - [ ] real Windows backup/migration & manual operator acceptance
 
-Next: Build 059 — Conversation, Voice and Knowledge UX.
+Next: Build 060 — Guided Release Adoption & Practical Workflow Acceptance.
 
 
 ## Build 057 screenshot acceptance follow-up
@@ -1455,4 +1455,11 @@ See docs/BUILD_057_UI_DIAGNOSTICS.md.
 Read-only configuration and per-resource manual-read evidence for Devil n Dove,
 Rosie Dazzlers and Yard Workers, preserving the two existing exact-confirmation
 narrow writes. See [operator runbook](BUILD_058_BUSINESS_CONNECTOR_OPERATIONS.md).
+
+
+## Build 059 — Conversation, Voice and Knowledge UX
+
+Manual Chat-to-Knowledge question handoff, query-evidence invalidation, safer
+conversation switching and new-chat failures, plain-language privacy and confirmation
+instructions and mobile layout. See [Build 059 operator runbook](BUILD_059_CONVERSATION_VOICE_KNOWLEDGE.md).
 
