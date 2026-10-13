@@ -43,7 +43,8 @@ def parse_utc(value: Any) -> datetime | None:
 
 def _safe_regular(path: Path) -> bool:
     """Refuse symlinked log path or parent; never follow another directory."""
-    return all(not candidate.is_symlink() for candidate in (path, path.parent, path.parent.parent)) and path.is_file()
+    no_links = all(not item.is_symlink() for item in (path, path.parent, path.parent.parent))
+    return no_links and path.is_file()
 
 
 def classify_log(root: Path, now: datetime | None = None) -> dict:
