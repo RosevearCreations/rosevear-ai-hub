@@ -100,7 +100,8 @@ def test_reported_recovery_is_not_machine_verified(tmp_path):
 def test_same_sha_stale_missing_flag_and_nonboolean_are_not_accepted(tmp_path):
     save_evidence(tmp_path, evidence_payload(candidate_sha=A))
     assert operator_evidence(tmp_path, NOW)["status"] == "invalid"
-    save_evidence(tmp_path, evidence_payload(observed_at_utc=(NOW - timedelta(days=31)).isoformat()))
+    stale_time = (NOW - timedelta(days=31)).isoformat()
+    save_evidence(tmp_path, evidence_payload(observed_at_utc=stale_time))
     assert operator_evidence(tmp_path, NOW)["status"] == "stale"
     save_evidence(tmp_path, evidence_payload(operator_attested=False))
     assert operator_evidence(tmp_path, NOW)["status"] == "operator_reported_incomplete"
