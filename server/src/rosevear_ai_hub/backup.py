@@ -39,10 +39,15 @@ class BackupError(Exception):
     """A fail-closed backup, validation, or restore refusal."""
 
 
-def _passphrase(path: Path) -> bytes:
-    if path.is_symlink() or not path.is_file():
-        raise BackupError("Passphrase file missing or is a symbolic link.")
-    data = path.read_bytes().rstrip(b"\r\n")
+def _passphrase(path: Path | bytes) -> bytes:
+    # Current-user DPAPI automation can supply bytes in memory. Existing file
+    # callers retain their interface; neither route prints or logs the secret.
+    if isinstance(path, bytes):
+        data = path
+    else:
+        if path.is_symlink() or not path.is_file():
+            raise BackupError("Passphrase file missing or is a symbolic link.")
+        data = path.read_bytes().rstrip(b"\r\n")
     if len(data) < 20 or len(data) > 4096:
         raise BackupError("Passphrase must contain 20 to 4096 bytes.")
     return data
@@ -255,7 +260,7 @@ def _extract_validated(tar_path: Path, destination: Path) -> dict[str, object]:
     return {"files": len(observed), "bytes": sum(x["size"] for x in observed.values())}
 
 
-def inspect_backup(archive: Path, passphrase_file: Path) -> dict[str, object]:
+def inspect_backup(archive: Path, passphrase_file: Path | bytes) -> dict[str, object]:
     """Authenticate, fully extract in temporary storage, verify hashes and SQLite."""
     with tempfile.TemporaryDirectory(prefix="hub47-verify-") as temp:
         area = Path(temp)
@@ -265,7 +270,9 @@ def inspect_backup(archive: Path, passphrase_file: Path) -> dict[str, object]:
         return _extract_validated(area / "archive.tar.gz", content)
 
 
-def create_backup(root: Path, destination: Path, passphrase_file: Path) -> dict[str, object]:
+def create_backup(
+    root: Path, destination: Path, passphrase_file: Path | bytes
+) -> dict[str, object]:
     """Create encrypted, verified backup from online SQLite plus selected stored files."""
     root = root.resolve(strict=True)
     destination = destination.absolute()
@@ -299,7 +306,7 @@ def create_backup(root: Path, destination: Path, passphrase_file: Path) -> dict[
 
 
 def restore_to_new_root(
-    archive: Path, target_root: Path, passphrase_file: Path
+    archive: Path, target_root: Path, passphrase_file: Path | bytes
 ) -> dict[str, object]:
     """Restore only to an absent target directory (never overwrite live Hub)."""
     target_root = target_root.absolute()

@@ -16,7 +16,7 @@ foreach ($listener in $listeners) {
     if ($listener.LocalAddress -notin @('127.0.0.1','::1')) { throw 'Web listener exposed outside loopback; refusing to control it.' }
 }
 $proc = Get-CimInstance Win32_Process -Filter "ProcessId = $($pids[0])"
-if (!$proc -or !(Test-HubWebProcessIdentity -ActualExecutable ([string]$proc.ExecutablePath) -CommandLine ([string]$proc.CommandLine) -RepoRoot $RepoRoot)) {
+if (!$proc -or !(Test-HubWebProcessIdentity -ActualExecutable ([string]$proc.ExecutablePath) -CommandLine ([string]$proc.CommandLine) -RepoRoot $RepoRoot -LoopbackListenerVerified)) {
     throw 'Port 5173 is not a verified Hub Vite process. Keep the existing client and inspect manually.'
 }
 Write-Host "Verified Hub web Vite PID $($pids[0])."

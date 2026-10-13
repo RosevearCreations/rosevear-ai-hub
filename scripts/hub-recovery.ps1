@@ -5,6 +5,43 @@ param(
 )
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
+$maintenanceHandle = $null
+$ManagedRuntime = $false
+try {
+$ManagedHome = Join-Path $Root 'logs\hub-deployment'
+if ((Test-Path -LiteralPath (Join-Path $ManagedHome 'active.json')) -or
+    (Test-Path -LiteralPath (Join-Path $ManagedHome 'activation.json'))) {
+    # Recovery and activation share an OS-released lock. Tasks remain enabled;
+    # after a controller crash the next recovery pass uses the rollback journal.
+    $controllerPython = Join-Path $Root '.venv\Scripts\python.exe'
+    $mode = 'recover'
+    if ($CheckOnly) { $mode = 'inspect-runtime' }
+    & $controllerPython -B (Join-Path $PSScriptRoot 'hub_release_manager.py') $mode --repo-root $Root
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $ManagedRuntime = $true
+    # Managed recovery covers both Hub services. Camera recovery below remains
+    # the existing task's responsibility outside maintenance; never an updater action.
+    if ($CheckOnly -or $SkipCamera) { exit 0 }
+    # If activation owns the lock, leave the entire existing task pass untouched.
+    $maintenanceHandle = $null
+    try {
+        $maintenanceHandle = [IO.File]::Open((Join-Path $ManagedHome 'maintenance.lock'), 'Open', 'ReadWrite', 'None')
+    } catch [IO.IOException] {
+        if (($_.Exception.HResult -band 0xffff) -in @(32,33)) { exit 0 }
+        throw
+    }
+}
+if (-not $maintenanceHandle) {
+    # Honor the same maintenance lock during the initial supervised bootstrap,
+    # before a managed active pointer exists. No task-disable operation is needed.
+    New-Item -ItemType Directory -Path $ManagedHome -Force | Out-Null
+    try {
+        $maintenanceHandle = [IO.File]::Open((Join-Path $ManagedHome 'maintenance.lock'), 'OpenOrCreate', 'ReadWrite', 'None')
+    } catch [IO.IOException] {
+        if (($_.Exception.HResult -band 0xffff) -in @(32,33)) { exit 0 }
+        throw
+    }
+}
 $LogDirectory = Join-Path $Root "logs"
 New-Item -ItemType Directory -Path $LogDirectory -Force | Out-Null
 $LogFile = Join-Path $LogDirectory "hub-recovery.log"
@@ -45,13 +82,17 @@ if (& $ApiProbe) {
 } elseif (Test-LocalPort 8765) {
     Write-RecoveryLog "ERROR API port occupied but health check failed; refusing duplicate launch."
     exit 2
-} elseif ($CheckOnly) {
+} elseif ($CheckOnly -or $ManagedRuntime) {
     Write-RecoveryLog "API unavailable (check-only)."
     exit 1
 } elseif (-not (Test-Path $Python)) {
     Write-RecoveryLog "ERROR Python virtual environment missing."
     exit 2
 } else {
+    # A stale live DB must not be auto-started under newer checkout source,
+    # including after an interrupted initial supervised migration.
+    & $Python -B (Join-Path $PSScriptRoot 'hub_release_manager.py') inspect-schema --repo-root $Root
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     Write-RecoveryLog "Starting API."
     Start-Process -FilePath $Python -ArgumentList @("-m", "uvicorn", "rosevear_ai_hub.main:app", "--host", "127.0.0.1", "--port", "8765") -WorkingDirectory $Root -WindowStyle Hidden
     if (-not (Wait-Healthy $ApiProbe $StartupTimeoutSeconds)) {
@@ -65,7 +106,7 @@ if (& $WebProbe) {
 } elseif (Test-LocalPort 5173) {
     Write-RecoveryLog "ERROR Web port occupied but HTTP check failed; refusing duplicate launch."
     exit 2
-} elseif ($CheckOnly) {
+} elseif ($CheckOnly -or $ManagedRuntime) {
     Write-RecoveryLog "Web unavailable (check-only)."
     exit 1
 } else {
@@ -103,3 +144,6 @@ if (-not $SkipCamera) {
     }
 }
 Write-RecoveryLog "Recovery pass complete."
+} finally {
+    if ($maintenanceHandle) { $maintenanceHandle.Dispose() }
+}
