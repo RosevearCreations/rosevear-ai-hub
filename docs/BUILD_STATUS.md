@@ -1563,3 +1563,19 @@ See docs/BUILD_064_RELEASE_INCIDENT_TRIAGE.md. Next: Build 065 — Incident Foll
 
 No scheduled-task, credentials, Windows process, backup or device changes are made.
 Next proposed: Build 066 — Guided Integration Recovery & Operator Acceptance.
+
+
+## Build 066 — Guided Integration Recovery & Operator Acceptance
+
+- [x] Fixed, service-specific recovery instructions for Home Assistant, MQTT, Ollama, Frigate and go2rtc
+- [x] Optional bounded, private operator acceptance ledger with three explicit checks per service
+- [x] Reject malformed, stale, duplicate, symlinked and extra-field evidence; never return private strings
+- [x] Display safe guidance and operator reports in owner/admin System view
+- [x] Synthetic backend and frontend coverage, with no automatic service/device writes
+- [ ] dev CI five jobs GREEN
+- [ ] production PR five jobs GREEN
+- [ ] independent main push CI five jobs GREEN
+- [ ] Real Windows machine acceptance and live integration health separately verified
+
+See docs/BUILD_066_INTEGRATION_RECOVERY.md.
+Next: Build 067 — Integration Health Evidence & Safe Remediation Readiness.
