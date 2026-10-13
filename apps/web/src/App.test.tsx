@@ -25,13 +25,14 @@ function providerPayload(available = true) {
   ];
 }
 
-function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?: boolean }) {
+function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?: boolean; withModel?: boolean }) {
   const providerAvailable = options?.providerAvailable ?? true;
   const modelFailure = options?.modelFailure ?? false;
+  const withModel = options?.withModel ?? false;
 
   vi.stubGlobal(
     "fetch",
-    vi.fn().mockImplementation(async (input: RequestInfo | URL) => {
+    vi.fn().mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
 
       if (url.endsWith("/api/v1/auth/status")) {
@@ -333,7 +334,7 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
           ok: true,
           json: async () => ({
             base_url: "http://127.0.0.1:11434",
-            models: [],
+            models: withModel ? [{ name: "workshop-local", size: 1000000 }] : [],
           }),
         };
       }
@@ -368,6 +369,35 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
         return {
           ok: true,
           json: async () => [],
+        };
+      }
+
+      if (url.endsWith("/api/v1/knowledge/search")) {
+        const query = JSON.parse(String(init?.body)).query as string;
+        return {
+          ok: true,
+          json: async () => ({
+            query,
+            method: "keyword",
+            fallback_reason: null,
+            hits: [{
+              chunk_id: 4,
+              document_id: 2,
+              collection_id: 1,
+              filename: "source.md",
+              collection_name: "Inbox",
+              ordinal: 0,
+              text: "Local factual evidence",
+              start_char: 0,
+              end_char: 22,
+              page: null,
+              section: null,
+              location_label: null,
+              evidence_path: "/api/v1/knowledge/documents/2/evidence/4",
+              score: 0.99,
+              method: "keyword",
+            }],
+          }),
         };
       }
 
@@ -579,4 +609,51 @@ describe("App", () => {
       expect(screen.getByRole("button", { name: "Check again" })).toBeInTheDocument();
     });
   });
+  test("transfers only an editable draft from Chat to Knowledge; search remains explicit", async () => {
+    vi.unstubAllGlobals();
+    installFetchMock({ withModel: true });
+    render(<App />);
+    fireEvent.click(await screen.findByRole("button", { name: "Chat" }));
+    const input = await screen.findByLabelText("Message");
+    fireEvent.change(input, { target: { value: "What do our workshop notes say?" } });
+    const handoff = screen.getByRole("button", { name: "Check this question in Knowledge" });
+    expect(handoff).toBeEnabled();
+    fireEvent.click(handoff);
+    expect(await screen.findByText(/Question moved from Chat as editable text/)).toBeInTheDocument();
+    const searchInput = screen.getByRole("searchbox");
+    expect(searchInput).toHaveValue("What do our workshop notes say?");
+    const fetchMock = vi.mocked(globalThis.fetch);
+    expect(fetchMock.mock.calls.some(([path]) => String(path).endsWith("/api/v1/knowledge/search"))).toBe(false);
+    expect(fetchMock.mock.calls.some(([path]) => String(path).endsWith("/api/v1/knowledge/answer"))).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    expect(await screen.findByText("Local factual evidence")).toBeInTheDocument();
+    fireEvent.change(searchInput, { target: { value: "Different question" } });
+    expect(screen.queryByText("Local factual evidence")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Ask with citations" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Chat" }));
+    fireEvent.click(screen.getByRole("button", { name: "Knowledge" }));
+    expect(screen.getByRole("searchbox")).toHaveValue("");
+  });
+
+  test("preserves the Chat draft when the first conversation cannot be created", async () => {
+    vi.unstubAllGlobals();
+    installFetchMock({ withModel: true });
+    render(<App />);
+    fireEvent.click(await screen.findByRole("button", { name: "Chat" }));
+    const input = await screen.findByLabelText("Message");
+    await waitFor(() => expect(input).toBeEnabled());
+    fireEvent.change(input, { target: { value: "Keep this careful draft" } });
+    expect(input).toHaveValue("Keep this careful draft");
+    const send = screen.getByRole("button", { name: "Send" });
+    await waitFor(() => expect(send).toBeEnabled());
+    fireEvent.click(send);
+    await waitFor(() => {
+      const calls = vi.mocked(globalThis.fetch).mock.calls;
+      expect(calls.some(([url, init]) =>
+        String(url).endsWith("/api/v1/chat/conversations") && init?.method === "POST",
+      )).toBe(true);
+      expect(input).toHaveValue("Keep this careful draft");
+    });
+  });
+
 });
