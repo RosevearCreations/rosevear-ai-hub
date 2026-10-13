@@ -120,10 +120,7 @@ def collect(root: Path) -> dict:
     private = root / "logs" / "private-recovery"
     key = private / "backup-key.dpapi"
     backup_provisioned = (
-        private.is_dir()
-        and not private.is_symlink()
-        and key.is_file()
-        and not key.is_symlink()
+        private.is_dir() and not private.is_symlink() and key.is_file() and not key.is_symlink()
     )
     backup_verified = False
     if private.is_dir() and not private.is_symlink():
