@@ -1,6 +1,8 @@
 """Build 066: operator evidence remains private, bounded and non-authoritative."""
 
 import json
+
+import pytest
 from datetime import UTC, datetime, timedelta
 
 from rosevear_ai_hub.integration_recovery import integration_acceptance
@@ -97,6 +99,9 @@ def test_refuses_symlinked_evidence(tmp_path):
     path = _record(tmp_path, [_review()])
     alternate = path.with_name("other.json")
     path.rename(alternate)
-    path.symlink_to(alternate)
+    try:
+        path.symlink_to(alternate)
+    except OSError:
+        pytest.skip("Windows runner does not permit symlink creation")
     result = integration_acceptance(tmp_path, NOW)
     assert result["ledger_state"] == "invalid"
