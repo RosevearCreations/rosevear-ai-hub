@@ -31,7 +31,11 @@ def classify_incidents(cohorts: dict, recovery: dict) -> dict:
             values = day.get("counts", {}) if isinstance(day, dict) else {}
             if not isinstance(values, dict):
                 continue
-            hits = sum(value for key in outcomes if type(value := values.get(key)) is int and value >= 0)
+            hits = 0
+            for key in outcomes:
+                value = values.get(key)
+                if type(value) is int and value >= 0:
+                    hits += value
             count += hits
             affected_days += int(hits > 0)
         buckets.append({
@@ -46,7 +50,9 @@ def classify_incidents(cohorts: dict, recovery: dict) -> dict:
         "scope": "bounded_local_history",
         "observation": "partial" if partial else "sampled",
         "groups": buckets,
-        "recovery_follow_up": "needs_operator_review" if recovery_incomplete else "operator_reported",
+        "recovery_follow_up": (
+            "needs_operator_review" if recovery_incomplete else "operator_reported"
+        ),
         "no_automatic_incident_closure": True,
         "explanation": (
             "Daily counts may include repeats of one incident. A complete operator report "
