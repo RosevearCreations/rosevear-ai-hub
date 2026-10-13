@@ -92,7 +92,7 @@ export interface ReleaseIncidentReviews {
 }
 
 export interface IntegrationRecoveryReport {
-  scope: "private_operator_self_report";
+  scope: "operator_self_report";
   ledger_state: "not_recorded" | "empty" | "invalid" | "operator_reported";
   integrations: Array<{
     integration: "home_assistant" | "mqtt" | "ollama" | "frigate" | "go2rtc";
