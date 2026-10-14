@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.auth import require_authenticated
 from rosevear_ai_hub.config import get_settings
+from rosevear_ai_hub.integration_triage import classify_mqtt
 from rosevear_ai_hub.database import get_session
 from rosevear_ai_hub.integrations.mqtt import (
     MQTTClient,
@@ -44,6 +45,7 @@ class MQTTStatusResponse(BaseModel):
     message_count: int = 0
     last_error: str | None = None
     message: str
+    recovery_reason: str = "unknown"
 
 
 class MQTTSubscribeRequest(BaseModel):
@@ -267,6 +269,11 @@ def mqtt_status(runtime: MQTTRuntimeDependency) -> MQTTStatusResponse:
         message_count=int(snapshot.get("message_count", 0)),
         last_error=snapshot.get("last_error"),
         message=str(message),
+        recovery_reason=classify_mqtt(
+            configured=configured,
+            connected=available,
+            last_error=snapshot.get("last_error"),
+        ),
     )
 
 
