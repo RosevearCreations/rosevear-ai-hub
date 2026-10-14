@@ -314,7 +314,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
         ) : null}
       </section>
 
-      <CameraCompatibilityWorkbench />
+      <CameraCompatibilityWorkbench canAdminister={canAdminister} />
       <CameraStreamAcceptance />
 
       <FrigatePanel canAdminister={canAdminister} />
