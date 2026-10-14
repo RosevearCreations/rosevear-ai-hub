@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from rosevear_ai_hub.camera_discovery_review import create_ticket, consume_ticket
+from rosevear_ai_hub.camera_discovery_review import consume_ticket, create_ticket
 from rosevear_ai_hub.integrations.onvif import DiscoveredONVIFDevice
 
 
