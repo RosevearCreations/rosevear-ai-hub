@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import {
   getAuthStatus,
+  HUB_AUTH_REQUIRED_EVENT,
   getHealth,
   getHubVersion,
   getOllamaStatus,
@@ -75,6 +76,7 @@ type Section =
 
 export function App() {
   const [auth, setAuth] = useState<AuthState>({ kind: "loading" });
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [health, setHealth] = useState<HealthState>({ kind: "loading" });
   const [ollama, setOllama] = useState<OllamaState>({ kind: "loading" });
   const [section, setSection] = useState<Section>("Home");
@@ -93,6 +95,22 @@ export function App() {
         });
       });
     return () => controller.abort();
+  }, []);
+
+  // An authenticated API can reject a stale session after a backend restart,
+  // cookie-origin change, revocation or expiry. Leave the broken application
+  // sections and show a clear sign-in path, without changing server data.
+  useEffect(() => {
+    const onExpired = () => {
+      setSessionExpired(true);
+      setAuth({
+        kind: "ready",
+        status: { bootstrap_required: false, authenticated: false, user: null },
+      });
+      setSection("Home");
+    };
+    window.addEventListener(HUB_AUTH_REQUIRED_EVENT, onExpired);
+    return () => window.removeEventListener(HUB_AUTH_REQUIRED_EVENT, onExpired);
   }, []);
 
   const authenticatedUser =
@@ -165,15 +183,25 @@ export function App() {
 
   if (!auth.status.authenticated || !auth.status.user) {
     return (
-      <AuthView
-        status={auth.status}
-        onAuthenticated={(user) =>
-          setAuth({
-            kind: "ready",
-            status: { bootstrap_required: false, authenticated: true, user },
-          })
-        }
-      />
+      <>
+        {sessionExpired && (
+          <section className="auth-session-notice" role="alert">
+            Your Hub session was not accepted. Sign in again to restore Chat,
+            Devices, Cameras and other protected features. Your saved data
+            has not been changed.
+          </section>
+        )}
+        <AuthView
+          status={auth.status}
+          onAuthenticated={(user) => {
+            setSessionExpired(false);
+            setAuth({
+              kind: "ready",
+              status: { bootstrap_required: false, authenticated: true, user },
+            });
+          }}
+        />
+      </>
     );
   }
 
