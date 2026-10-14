@@ -236,13 +236,29 @@ export type ChatStreamEvent =
 // Local Vite/Tauri development keeps its loopback API. A Tailscale HTTPS page
 // uses its own origin for both app and API; never call a remote device's localhost.
 export function defaultApiBaseForHostname(hostname: string): string {
-  return ["localhost", "127.0.0.1", "tauri.localhost"].includes(hostname)
-    ? "http://127.0.0.1:8765"
-    : "";
+  // Vite proxies /api, /health and /version to the local backend. Browser
+  // cookies therefore use the UI's exact host, not another loopback hostname.
+  // The packaged Tauri webview has its own app origin and needs direct API
+  // access, with an explicitly scoped cookie policy on the backend.
+  return hostname === "tauri.localhost" ? "http://127.0.0.1:8765" : "";
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ??
   defaultApiBaseForHostname(window.location.hostname);
+
+export const HUB_AUTH_REQUIRED_EVENT = "hub-authentication-required";
+
+/** Fail visibly back to sign-in instead of displaying 401 on every dashboard.
+ * Never broadcast for incorrect login credentials or one-time owner bootstrap.
+ */
+function reportAuthFailure(response: Response, path: string): void {
+  if (
+    response.status === 401 &&
+    !["/api/v1/auth/login", "/api/v1/auth/bootstrap"].includes(path)
+  ) {
+    window.dispatchEvent(new Event(HUB_AUTH_REQUIRED_EVENT));
+  }
+}
 
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(API_BASE_URL + path, {
@@ -255,6 +271,7 @@ async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   });
 
   if (!response.ok) {
+    reportAuthFailure(response, path);
     throw new Error("Request failed with status " + response.status);
   }
 
@@ -278,6 +295,7 @@ async function postJson<T>(
   });
 
   if (!response.ok) {
+    reportAuthFailure(response, path);
     throw new Error("Request failed with status " + response.status);
   }
 
@@ -301,6 +319,7 @@ async function authJson<T>(
   });
 
   if (!response.ok) {
+    reportAuthFailure(response, path);
     let detail = "Request failed with status " + response.status;
     try {
       const payload = (await response.json()) as { detail?: string };
@@ -447,6 +466,7 @@ export async function streamChat(
   );
 
   if (!response.ok) {
+    reportAuthFailure(response, "/api/v1/chat/conversations/" + conversationId + "/stream");
     throw new Error("Chat request failed with status " + response.status);
   }
 
@@ -567,6 +587,7 @@ export async function uploadKnowledgeDocument(
   });
 
   if (!response.ok) {
+    reportAuthFailure(response, "/api/v1/knowledge/documents");
     let detail = "Upload failed with status " + response.status;
     try {
       const payload = (await response.json()) as { detail?: string };
@@ -600,6 +621,7 @@ export async function indexKnowledgeDocument(
   );
 
   if (!response.ok) {
+    reportAuthFailure(response, "/api/v1/knowledge/documents/" + documentId + "/index");
     let detail = "Indexing failed with status " + response.status;
     try {
       const payload = (await response.json()) as { detail?: string };
@@ -780,6 +802,7 @@ async function knowledgeMutation<T>(
   });
 
   if (!response.ok) {
+    reportAuthFailure(response, path);
     let detail = `Request failed with status ${response.status}`;
     try {
       const payload = (await response.json()) as { detail?: string };
@@ -1969,7 +1992,10 @@ export async function exportCameraReviewCsv(signal?: AbortSignal): Promise<void>
     API_BASE_URL + "/api/v1/frigate/reviews/export.csv?acknowledgement=PRIVATE_METADATA_ONLY",
     { method: "GET", credentials: "include", signal, headers: { Accept: "text/csv" } },
   );
-  if (!response.ok) throw new Error("CSV export rejected");
+  if (!response.ok) {
+    reportAuthFailure(response, "/api/v1/frigate/reviews/export.csv");
+    throw new Error("CSV export rejected");
+  }
   const blob = await response.blob();
   const url = URL.createObjectURL(blob);
   try {
@@ -2127,6 +2153,7 @@ export async function transcribeLocalWav(audio: Blob, signal?: AbortSignal): Pro
     signal,
   });
   if (!response.ok) {
+    reportAuthFailure(response, "/api/v1/speech/transcribe");
     let detail = "Transcription failed with status " + response.status;
     try {
       const error = (await response.json()) as { detail?: string };
@@ -2160,6 +2187,7 @@ export async function synthesizeLocalSpeech(text: string, signal?: AbortSignal):
     signal,
   });
   if (!response.ok) {
+    reportAuthFailure(response, "/api/v1/tts/synthesize");
     let detail = "Local voice failed with status " + response.status;
     try {
       const payload = (await response.json()) as { detail?: string };
