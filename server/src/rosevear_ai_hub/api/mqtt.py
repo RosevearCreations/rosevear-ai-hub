@@ -43,6 +43,9 @@ class MQTTStatusResponse(BaseModel):
     reconnect_min_seconds: int
     reconnect_max_seconds: int
     message_count: int = 0
+    connect_generation: int = 0
+    last_connected_at: str | None = None
+    last_disconnected_at: str | None = None
     last_error: str | None = None
     message: str
     recovery_reason: str = "unknown"
@@ -267,6 +270,9 @@ def mqtt_status(runtime: MQTTRuntimeDependency) -> MQTTStatusResponse:
         reconnect_min_seconds=runtime.reconnect_min_seconds,
         reconnect_max_seconds=runtime.reconnect_max_seconds,
         message_count=int(snapshot.get("message_count", 0)),
+        connect_generation=int(snapshot.get("connect_generation", 0)),
+        last_connected_at=snapshot.get("last_connected_at"),
+        last_disconnected_at=snapshot.get("last_disconnected_at"),
         last_error=snapshot.get("last_error"),
         message=str(message),
         recovery_reason=classify_mqtt(
