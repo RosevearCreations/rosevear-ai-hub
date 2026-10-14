@@ -13,8 +13,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.audit import record_audit_event
-from rosevear_ai_hub.camera_discovery_review import create_ticket, consume_ticket
 from rosevear_ai_hub.auth import require_roles
+from rosevear_ai_hub.camera_discovery_review import consume_ticket, create_ticket
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.database import get_session
 from rosevear_ai_hub.integrations.go2rtc import (
@@ -648,7 +648,8 @@ def accept_camera_discovery(
     selected = consume_ticket(actor.id, payload.preview_token, payload.endpoint_uuids)
     if selected is None:
         raise HTTPException(
-            status_code=409, detail="Camera preview expired, was used, or selection is invalid. Rescan."
+            status_code=409,
+            detail="Camera preview expired, was used, or selection is invalid. Rescan.",
         )
     now = datetime.now(UTC)
     created: list[Camera] = []
