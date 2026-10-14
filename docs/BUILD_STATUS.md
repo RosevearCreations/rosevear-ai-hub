@@ -1596,3 +1596,20 @@ Next: Build 067 — Integration Health Evidence & Safe Remediation Readiness.
 
 See docs/BUILD_067_INTEGRATION_HEALTH_RESTART.md.
 Next: Build 068 — Supervised Restart Acceptance & Runtime Recovery Evidence.
+
+
+## Build 068 — Supervised Runtime Recovery & Home Assistant / MQTT Evidence
+
+- [x] Privacy-safe, fixed HA/MQTT failure categories from existing status requests
+- [x] Distinguish HA timeout/unauthorized/unreachable and broker rejected credentials
+- [x] Specific Home dashboard and on-demand System operator guidance
+- [x] No new writes, broker publications, service restarts, VM changes or database migration
+- [x] Regression tests for classification and redaction
+- [x] Non-disruptive Windows operator acceptance runbook
+- [ ] dev CI (5/5)
+- [ ] Production PR CI (5/5)
+- [ ] Independent main CI (5/5)
+- [ ] Household Windows HA/MQTT connectivity verified by operator
+
+See docs/BUILD_068_HA_MQTT_RECOVERY.md.
+Next: Build 069 — Integration Recovery Acceptance & Runtime Reconnect Validation.

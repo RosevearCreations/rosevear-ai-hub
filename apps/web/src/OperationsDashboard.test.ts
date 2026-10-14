@@ -53,3 +53,25 @@ describe("Build 064 Home operator guidance", () => {
     expect(JSON.stringify(result)).not.toContain("PRIVATE");
   });
 });
+
+describe("Build 068 read-only HA/MQTT failure guidance", () => {
+  it("distinguishes HA timeout and MQTT rejected credentials from private error messages", () => {
+    const result = summarizeOperations([
+      ok({
+        configured: true, available: false, recovery_reason: "timeout",
+        message: "token=SUPERSECRET", base_url: "http://internal:8123",
+      }),
+      ok({
+        configured: true, available: false,
+        recovery_reason: "broker_rejected_credentials",
+        last_error: "username=private", host: "private-broker",
+      }),
+      bad,
+      bad,
+      bad,
+    ]);
+    expect(result[0].detail).toContain("timed out");
+    expect(result[1].detail).toContain("rejected credentials");
+    expect(JSON.stringify(result)).not.toMatch(/SUPERSECRET|private-broker|username=private|internal:8123/);
+  });
+});

@@ -1168,6 +1168,7 @@ export function rewrapSecrets(
 
 
 export interface HomeAssistantStatus {
+  recovery_reason?: string;
   configured: boolean;
   available: boolean;
   base_url: string | null;
@@ -1331,6 +1332,7 @@ export function controlHomeAssistantEntity(
 
 
 export interface MQTTStatus {
+  recovery_reason?: string;
   configured: boolean;
   available: boolean;
   host: string | null;

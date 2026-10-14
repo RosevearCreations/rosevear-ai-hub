@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.database import get_session
+from rosevear_ai_hub.integration_triage import classify_home_assistant
 from rosevear_ai_hub.integrations.home_assistant import (
     HomeAssistantClient,
     HomeAssistantConfigurationError,
@@ -253,6 +254,7 @@ async def home_assistant_status(
     runtime: HomeAssistantRuntimeDependency,
 ) -> HomeAssistantStatusResponse:
     if runtime.client is None:
+        reason = "invalid_configuration" if runtime.configuration_error else "not_configured"
         return HomeAssistantStatusResponse(
             configured=False,
             available=False,
@@ -260,6 +262,7 @@ async def home_assistant_status(
             url_configured=runtime.url_configured,
             token_configured=runtime.token_configured,
             message=_not_configured_message(runtime),
+            recovery_reason=reason,
         )
     try:
         message = await runtime.client.health()
@@ -271,6 +274,7 @@ async def home_assistant_status(
             url_configured=True,
             token_configured=True,
             message=str(exc),
+            recovery_reason=classify_home_assistant(configured=True, error=exc),
         )
     return HomeAssistantStatusResponse(
         configured=True,
@@ -279,6 +283,7 @@ async def home_assistant_status(
         url_configured=True,
         token_configured=True,
         message=message,
+        recovery_reason="connected",
     )
 
 

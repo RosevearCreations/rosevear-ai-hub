@@ -240,10 +240,19 @@ class MQTTClient:
         reason_code: Any,
         _properties: Any = None,
     ) -> None:
-        success = _reason_value(reason_code) == 0
+        code = _reason_value(reason_code)
+        success = code == 0
+        # MQTT v3 codes 4/5 and v5 codes 0x86/0x87 are credential
+        # rejection; never echo the username, host, certificate or exception.
+        if success:
+            reason = None
+        elif code in {4, 5, 0x86, 0x87}:
+            reason = "MQTT broker rejected credentials."
+        else:
+            reason = "MQTT broker rejected the connection."
         with self._lock:
             self._connected = success
-            self._last_error = None if success else "MQTT broker rejected the connection."
+            self._last_error = reason
             subscriptions = list(self._subscriptions.items())
         if success:
             for topic_filter, qos in subscriptions:
