@@ -4,10 +4,11 @@ import { defaultApiBaseForHostname } from "./api";
 import { remoteConnectionMode } from "./RemoteAccessPanel";
 
 describe("Build 046 Tailscale private same-origin access", () => {
-  it("retains the existing local-only API for Vite and Tauri", () => {
-    for (const host of ["127.0.0.1", "localhost", "tauri.localhost"]) {
-      expect(defaultApiBaseForHostname(host)).toBe("http://127.0.0.1:8765");
+  it("keeps Vite same-origin while Tauri uses its fixed loopback API", () => {
+    for (const host of ["127.0.0.1", "localhost"]) {
+      expect(defaultApiBaseForHostname(host)).toBe("");
     }
+    expect(defaultApiBaseForHostname("tauri.localhost")).toBe("http://127.0.0.1:8765");
   });
 
   it("never directs a remote browser to its own localhost", () => {
