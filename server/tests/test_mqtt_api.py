@@ -22,6 +22,9 @@ class FakeMQTTClient:
             "connected": True,
             "subscriptions": [item[0] for item in self.subscriptions],
             "message_count": 1,
+            "connect_generation": 3,
+            "last_connected_at": "2026-10-14T12:00:00+00:00",
+            "last_disconnected_at": "2026-10-14T11:55:00+00:00",
             "last_error": None,
         }
 
@@ -90,6 +93,9 @@ def test_mqtt_status_messages_subscribe_publish_and_audit(tmp_path) -> None:
     response = client.get("/api/v1/mqtt/status")
     assert response.status_code == 200
     assert response.json()["available"] is True
+    assert response.json()["connect_generation"] == 3
+    assert response.json()["last_connected_at"] == "2026-10-14T12:00:00+00:00"
+    assert response.json()["last_disconnected_at"] == "2026-10-14T11:55:00+00:00"
     assert "secret" not in response.text
 
     response = client.get("/api/v1/mqtt/messages")
