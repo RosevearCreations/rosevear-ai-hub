@@ -29,6 +29,34 @@ describe("Build 067 manual integration evidence", () => {
     expect(screen.queryByRole("button", { name: /restart|publish|reconcile/i })).toBeNull();
   });
 
+  it("shows HA token rejection and MQTT credential rejection without leaking raw diagnostics", async () => {
+    vi.mocked(getHomeAssistantStatus).mockResolvedValue({
+      configured: true, available: false, base_url: "http://private-device.local",
+      url_configured: true, token_configured: true,
+      message: "HA token=SECRET", recovery_reason: "authentication_rejected",
+    });
+    vi.mocked(getMQTTStatus).mockResolvedValue({
+      configured: true, available: false, host: "secret-mqtt.internal", port: 1883,
+      tls: false, username_configured: true, password_configured: true,
+      allowed_topics: ["private/+/#"], subscriptions: [],
+      reconnect_min_seconds: 1, reconnect_max_seconds: 30,
+      message_count: 0, last_error: "SECRET account", message: "SECRET",
+      recovery_reason: "broker_rejected_credentials",
+    });
+    vi.mocked(getOllamaStatus).mockRejectedValue(new Error("secret ollama"));
+    vi.mocked(getFrigateStatus).mockRejectedValue(new Error("secret frigate"));
+    vi.mocked(getGo2RTCStatus).mockRejectedValue(new Error("secret transport"));
+    vi.mocked(getCameraDashboard).mockRejectedValue(new Error("secret camera"));
+    render(<IntegrationHealthPanel />);
+    fireEvent.click(screen.getByRole("button", { name: "Check integration health" }));
+    await waitFor(() => expect(screen.getByText(/No changes made/)).toBeInTheDocument());
+    expect(screen.getByText(/Home Assistant rejected the token/)).toBeInTheDocument();
+    expect(screen.getByText(/MQTT broker rejected credentials/)).toBeInTheDocument();
+    for (const secret of ["SECRET", "secret-mqtt", "private-device.local", "private/+/#"]) {
+      expect(document.body.textContent).not.toContain(secret);
+    }
+  });
+
   it("classifies independently failed requests and distinguishes empty Hub camera registry", async () => {
     vi.mocked(getHomeAssistantStatus).mockResolvedValue({
       configured: true, available: false, base_url: null,
