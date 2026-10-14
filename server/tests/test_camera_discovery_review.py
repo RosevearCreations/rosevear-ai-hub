@@ -34,13 +34,16 @@ def test_ticket_is_owner_bound_one_time_and_exact_selection() -> None:
 
 
 def test_review_drops_nonlocal_and_credential_bearing_endpoints() -> None:
-    key, found = create_ticket(101, [
-        device("public", "8.8.8.8"),
-        device("credentials", service_url="http://admin:secret@192.168.68.55/onvif"),
-        device("mismatch", service_url="http://192.168.68.100/onvif"),
-        device("query", service_url="http://192.168.68.55/onvif?token=secret"),
-        device("local"),
-    ])
+    key, found = create_ticket(
+        101,
+        [
+            device("public", "8.8.8.8"),
+            device("credentials", service_url="http://admin:secret@192.168.68.55/onvif"),
+            device("mismatch", service_url="http://192.168.68.100/onvif"),
+            device("query", service_url="http://192.168.68.55/onvif?token=secret"),
+            device("local"),
+        ],
+    )
     assert [item.endpoint_uuid for item in found] == ["local"]
     assert consume_ticket(101, key, ["public"]) is None
 
