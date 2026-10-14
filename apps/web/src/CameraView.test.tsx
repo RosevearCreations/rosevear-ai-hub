@@ -77,8 +77,9 @@ afterEach(() => {
 });
 
 describe("CameraView", () => {
-  test("shows the dashboard and runs an owner ONVIF scan", async () => {
+  test("previews ONVIF without database writes and explicitly accepts selected disabled cameras", async () => {
     let scans = 0;
+    let accepts = 0;
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url.endsWith("/api/v1/cameras") && (!init?.method || init.method === "GET")) {
@@ -90,11 +91,28 @@ describe("CameraView", () => {
       if (url.endsWith("/api/v1/cameras/dashboard")) {
         return { ok: true, json: async () => dashboard() };
       }
-      if (url.endsWith("/api/v1/cameras/discover")) {
+      if (url.endsWith("/api/v1/cameras/discovery/preview")) {
         scans += 1;
         return {
           ok: true,
-          json: async () => ({ discovered: 1, created: 0, updated: 1, cameras: [] }),
+          json: async () => ({
+            preview_token: "opaque-test-ticket",
+            expires_in_seconds: 300,
+            truncated: false,
+            candidates: [{
+              endpoint_uuid: "new-camera-2", display_name: "Garage",
+              host: "192.168.68.56", port: 80, registered: false,
+            }],
+          }),
+        };
+      }
+      if (url.endsWith("/api/v1/cameras/discovery/accept")) {
+        accepts += 1;
+        expect(init?.method).toBe("POST");
+        expect(JSON.parse(String(init?.body)).endpoint_uuids).toEqual(["new-camera-2"]);
+        return {
+          ok: true,
+          json: async () => ({ created: 1, already_registered: 0, cameras: [] }),
         };
       }
       return { ok: false, status: 404, json: async () => ({}) };
@@ -109,11 +127,21 @@ describe("CameraView", () => {
       expect(screen.getByText("Needs attention")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Scan local network" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review local cameras" }));
 
     await waitFor(() => {
       expect(scans).toBe(1);
-      expect(screen.getByText(/Discovery found 1 ONVIF device/)).toBeInTheDocument();
+      expect(screen.getByText(/Nothing has been registered/)).toBeInTheDocument();
+      expect(screen.getByText(/Garage/)).toBeInTheDocument();
+    });
+    expect(accepts).toBe(0);
+    const button = screen.getByRole("button", { name: /Register 0 selected cameras disabled/ });
+    expect(button).toBeDisabled();
+    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("button", { name: "Register 1 selected camera disabled" }));
+    await waitFor(() => {
+      expect(accepts).toBe(1);
+      expect(screen.getByText(/registered disabled for review/)).toBeInTheDocument();
     });
   });
 
