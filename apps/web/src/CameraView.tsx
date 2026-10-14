@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { FrigatePanel } from "./FrigatePanel";
+import { CameraCompatibilityWorkbench } from "./CameraCompatibilityWorkbench";
 import { CameraStreamAcceptance } from "./CameraStreamAcceptance";
 
 import {
@@ -313,6 +314,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
         ) : null}
       </section>
 
+      <CameraCompatibilityWorkbench />
       <CameraStreamAcceptance />
 
       <FrigatePanel canAdminister={canAdminister} />
