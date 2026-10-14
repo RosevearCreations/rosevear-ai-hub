@@ -54,7 +54,7 @@ export function summarizeOperations(
               ? "Home Assistant timed out. Check the VM and its responsiveness."
               : data.recovery_reason === "unreachable"
                 ? "Hub cannot reach Home Assistant. Check the VM network and service port."
-                : "Saved connection details, but Home Assistant is not responding. Check Devices."
+                : "Saved connection details, but Home Assistant is not responding. Check the HA VM and Devices."
           : data.url_configured === false
             ? "Home Assistant URL is missing. Review Devices setup."
             : data.token_configured === false
@@ -83,7 +83,7 @@ export function summarizeOperations(
               ? "MQTT disconnected and is reconnecting; check the broker/add-on."
               : data.recovery_reason === "starting_or_reconnecting"
                 ? "MQTT connection is starting; check broker/add-on availability."
-                : "Saved MQTT settings, but no active connection. Check broker, port and TLS."
+                : "Saved MQTT settings, but no active connection. Check broker availability, port and TLS."
           : "MQTT broker is not configured. Review MQTT setup.",
     });
   } else signals.push(unavailable("mqtt", "MQTT", "MQTT"));
