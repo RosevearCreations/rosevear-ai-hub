@@ -215,3 +215,37 @@ def test_read_only_account_cannot_change_application_state(tmp_path) -> None:
     )
     assert blocked.status_code == 403
     assert "Read-only" in blocked.json()["detail"]
+
+
+def test_session_cookie_is_strict_for_browser_but_secure_cross_site_for_tauri(tmp_path) -> None:
+    client, _ = build_client(tmp_path)
+    browser = client.post(
+        "/api/v1/auth/bootstrap",
+        json={"username": "owner", "password": "owner-password-123"},
+        headers={"Origin": "http://127.0.0.1:5173"},
+    )
+    assert browser.status_code == 201
+    cookie = browser.headers["set-cookie"].lower()
+    assert "samesite=strict" in cookie
+    assert "httponly" in cookie
+
+    # The native webview has a separate app origin from the loopback API.
+    # The cookie MUST be Secure when SameSite=None, and only that explicitly
+    # accepted origin receives the exception.
+    native = client.post(
+        "/api/v1/auth/login",
+        json={"username": "owner", "password": "owner-password-123"},
+        headers={"Origin": "http://tauri.localhost"},
+    )
+    assert native.status_code == 200
+    cookie = native.headers["set-cookie"].lower()
+    assert "samesite=none" in cookie
+    assert "secure" in cookie
+    assert "httponly" in cookie
+
+    untrusted = client.post(
+        "/api/v1/auth/login",
+        json={"username": "owner", "password": "owner-password-123"},
+        headers={"Origin": "http://evil.example"},
+    )
+    assert "samesite=strict" in untrusted.headers["set-cookie"].lower()
