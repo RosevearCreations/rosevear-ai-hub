@@ -1,69 +1,105 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-type Entry = { id: number; brand: string; model: string; location: string; connection: string };
+type Method = "unverified" | "rtsp" | "onvif" | "manufacturer" | "alexa_only" | "unsupported";
+type Device = { id: string; brand: string; model: string; location: string; method: Method; evidence: string; approved: boolean };
+const KEY = "rosevear.camera.compatibility.v1";
 const brands = ["Blink", "littlelf", "Nooie", "Netvue", "Alarm.com", "SkyBell", "IQ Panel", "Other"];
-const guidance: Record<string, string> = {
-  Blink: "Alexa viewing does not establish a reusable local RTSP stream. Verify model and supported manufacturer integrations.",
-  littlelf: "Alexa viewing is evidence of a supported manufacturer-to-Alexa route, not proof of local RTSP or ONVIF.",
-  Nooie: "Local transport support varies by model; verify manufacturer documentation before enabling any stream.",
-  Netvue: "Verify model-specific ONVIF, RTSP or documented manufacturer integrations.",
-  "Alarm.com": "May require an active authorized account/service; do not attempt credential extraction.",
-  SkyBell: "Typically uses its vendor integration; verify device generation and authorized account access.",
-  "IQ Panel": "Security controller, not a general-purpose RTSP camera; never bypass alarm access controls.",
-  Other: "Document exact manufacturer and model before testing local connectivity.",
-};
-
-export function CameraCompatibilityWorkbench() {
+const methods: { value: Method; label: string }[] = [
+  { value: "unverified", label: "Unverified" }, { value: "rtsp", label: "RTSP (documentation verified)" },
+  { value: "onvif", label: "ONVIF (documentation verified)" },
+  { value: "manufacturer", label: "Manufacturer-authorized integration" },
+  { value: "alexa_only", label: "Alexa viewing only (not a Hub stream)" },
+  { value: "unsupported", label: "No supported Hub connection verified" },
+];
+function load(): Device[] {
+  try {
+    const saved: unknown = JSON.parse(window.localStorage.getItem(KEY) ?? "[]");
+    if (!Array.isArray(saved)) return [];
+    return saved.slice(0, 100).filter((item): item is Device =>
+      !!item && typeof item === "object" && typeof item.id === "string" &&
+      typeof item.brand === "string" && typeof item.model === "string" &&
+      typeof item.location === "string" && typeof item.evidence === "string" &&
+      typeof item.approved === "boolean" && methods.some((m) => m.value === item.method)
+    );
+  } catch { return []; }
+}
+export function CameraCompatibilityWorkbench({ canAdminister }: { canAdminister: boolean }) {
+  const [devices, setDevices] = useState<Device[]>(load);
   const [brand, setBrand] = useState("Blink");
   const [model, setModel] = useState("");
   const [location, setLocation] = useState("");
-  const [entries, setEntries] = useState<Entry[]>([]);
   const [notice, setNotice] = useState("");
-  function add() {
-    if (!model.trim() || model.trim().length > 120 || location.length > 120) {
-      setNotice("Enter a model (1–120 characters); location is optional (maximum 120).");
-      return;
-    }
-    setEntries((old) => [...old, { id: Date.now() + old.length, brand, model: model.trim(), location: location.trim(), connection: "Unverified" }]);
-    setModel(""); setLocation("");
-    setNotice("Added to this browser session only. Nothing was scanned or saved to the Hub database.");
+  useEffect(() => {
+    try { window.localStorage.setItem(KEY, JSON.stringify(devices)); }
+    catch { setNotice("Local storage unavailable. Export inventory before closing the browser."); }
+  }, [devices]);
+  function change(id: string, patch: Partial<Device>) {
+    setDevices((current) => current.map((item) => item.id === id ? { ...item, ...patch, approved: false } : item));
   }
-  function copyInventory() {
-    const data = JSON.stringify(entries.map(({ brand: b, model: m, location: l, connection: c }) => ({ brand: b, model: m, location: l, connection: c })), null, 2);
-    void navigator.clipboard.writeText(data).then(
-      () => setNotice("Inventory copied. Keep device details private."),
-      () => setNotice("Copy unavailable; use a supported secure browser context."),
-    );
+  function add() {
+    if (!model.trim() || devices.length >= 100) { setNotice("Enter an exact model; maximum 100 entries."); return; }
+    setDevices((old) => [...old, { id: crypto.randomUUID(), brand, model: model.trim(), location: location.trim(), method: "unverified", evidence: "", approved: false }]);
+    setModel(""); setLocation(""); setNotice("Saved to this browser's local inventory. No camera connection was attempted.");
+  }
+  function approve(id: string) {
+    setDevices((current) => current.map((item) =>
+      item.id === id && item.method !== "unverified" && item.method !== "unsupported" &&
+      item.evidence.trim().length >= 8 ? { ...item, approved: true } : item));
+    setNotice("Approval records a reviewed plan only; it does not enable a device or create a stream.");
+  }
+  function exportInventory() {
+    const safe = devices.map(({ brand: b, model: m, location: l, method, evidence, approved }) =>
+      ({ brand: b, model: m, location: l, method, evidence, approved }));
+    const blob = new Blob([JSON.stringify(safe, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url; anchor.download = "camera-compatibility-inventory.json"; anchor.click();
+    URL.revokeObjectURL(url);
   }
   return (
-    <section className="panel" aria-label="Multi-brand camera compatibility workbench">
-      <h2>Build 072 — Multi-brand camera compatibility</h2>
-      <p>List existing equipment before trying ONVIF discovery. This is a <strong>browser-session planning worksheet</strong>,
-        not a persistent camera registration or a network scanner. No camera is enabled, contacted or modified.</p>
-      <p>Alexa live-view support alone does not mean a third-party application can access the same video feed.</p>
-      <div className="camera-discovery-choice">
-        <label>Brand <select value={brand} onChange={(e) => setBrand(e.target.value)}>
-          {brands.map((b) => <option key={b} value={b}>{b}</option>)}
-        </select></label>
-        <label>Exact model <input value={model} maxLength={120} onChange={(e) => setModel(e.target.value)} placeholder="Model number from label or app" /></label>
-        <label>Room/location (optional) <input value={location} maxLength={120} onChange={(e) => setLocation(e.target.value)} /></label>
-        <button type="button" onClick={add}>Add to planning worksheet</button>
-      </div>
-      <p><strong>Compatibility note:</strong> {guidance[brand]}</p>
-      {entries.length > 0 ? (
-        <div>
-          <ul>{entries.map((entry) => (
-            <li key={entry.id}>{entry.brand} — {entry.model}{entry.location ? " (" + entry.location + ")" : ""}: {entry.connection}{" "}
-              <button type="button" onClick={() => setEntries((old) => old.filter((v) => v.id !== entry.id))}>Remove</button>
-            </li>
-          ))}</ul>
-          <button type="button" onClick={copyInventory}>Copy inventory as JSON</button>{" "}
-          <button type="button" onClick={() => { setEntries([]); setNotice("Local worksheet cleared."); }}>Clear worksheet</button>
+    <section className="panel" aria-label="Model-specific camera compatibility">
+      <h2>Build 073 — Camera model verification and owner review</h2>
+      <p>This inventory persists <strong>in this browser only</strong>. It is not the Hub's shared database or an active
+        camera registration. An Alexa screen showing live video does not establish RTSP or ONVIF availability.</p>
+      {canAdminister ? (
+        <div className="camera-discovery-choice">
+          <label>Brand <select value={brand} onChange={(e) => setBrand(e.target.value)}>
+            {brands.map((b) => <option key={b}>{b}</option>)}
+          </select></label>
+          <label>Exact model <input value={model} maxLength={120} onChange={(e) => setModel(e.target.value)} /></label>
+          <label>Location (optional) <input value={location} maxLength={120} onChange={(e) => setLocation(e.target.value)} /></label>
+          <button type="button" onClick={add}>Save model</button>
         </div>
-      ) : <p>No models listed yet. Existing registered Hub cameras remain unchanged.</p>}
-      {notice ? <p role="status">{notice}</p> : null}
-      <p>Supported next steps require exact models and manufacturer documentation. Do not intercept Alexa traffic,
-        capture proprietary tokens, expose local camera ports publicly or test unknown devices without approval.</p>
+      ) : <p>Owner or Administrator access is required to edit compatibility records.</p>}
+      {devices.length === 0 ? <p>No camera models recorded yet.</p> : (
+        <ul>{devices.map((item) => (
+          <li key={item.id}>
+            <strong>{item.brand} — {item.model}</strong>{item.location ? " (" + item.location + ")" : ""}
+            <p>{item.approved ? "Reviewed and approved (planning only)" : "Awaiting owner review"}</p>
+            <label>Verified compatibility method <select disabled={!canAdminister} value={item.method}
+              onChange={(e) => change(item.id, { method: e.target.value as Method })}>
+              {methods.map((method) => <option key={method.value} value={method.value}>{method.label}</option>)}
+            </select></label>
+            <label>Evidence (manual/documentation reference, never credentials)
+              <input disabled={!canAdminister} maxLength={400} value={item.evidence}
+                placeholder="Manufacturer model guide or approved service information"
+                onChange={(e) => change(item.id, { evidence: e.target.value })} />
+            </label>
+            {canAdminister ? (
+              <div>
+                <button type="button" disabled={item.approved || item.evidence.trim().length < 8 ||
+                  item.method === "unverified" || item.method === "unsupported"}
+                  onClick={() => approve(item.id)}>Approve connection plan only</button>{" "}
+                <button type="button" onClick={() => setDevices((old) => old.filter((v) => v.id !== item.id))}>Remove</button>
+              </div>
+            ) : null}
+          </li>
+        ))}</ul>
+      )}
+      {devices.length > 0 && <button type="button" onClick={exportInventory}>Export inventory JSON</button>}
+      {notice && <p role="status">{notice}</p>}
+      <p>No scans, token extraction, camera activation, recording, port changes, or go2rtc/Frigate writes occur.
+        Export before clearing browser data. Do not enter passwords or stream URLs as evidence.</p>
     </section>
   );
 }
