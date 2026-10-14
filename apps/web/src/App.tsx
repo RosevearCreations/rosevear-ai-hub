@@ -183,15 +183,10 @@ export function App() {
 
   if (!auth.status.authenticated || !auth.status.user) {
     return (
-      <>
-        {sessionExpired && (
-          <section className="auth-session-notice" role="alert">
-            Your Hub session was not accepted. Sign in again to restore Chat,
-            Devices, Cameras and other protected features. Your saved data
-            has not been changed.
-          </section>
-        )}
-        <AuthView
+      <AuthView
+          sessionNotice={sessionExpired
+            ? "Your Hub session was not accepted. Sign in again to restore protected features. Your saved data has not been changed."
+            : undefined}
           status={auth.status}
           onAuthenticated={(user) => {
             setSessionExpired(false);
@@ -201,7 +196,6 @@ export function App() {
             });
           }}
         />
-      </>
     );
   }
 
