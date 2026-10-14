@@ -466,6 +466,7 @@ export async function streamChat(
   );
 
   if (!response.ok) {
+    reportAuthFailure(response, "/api/v1/chat/conversations/" + conversationId + "/stream");
     throw new Error("Chat request failed with status " + response.status);
   }
 
@@ -586,6 +587,7 @@ export async function uploadKnowledgeDocument(
   });
 
   if (!response.ok) {
+    reportAuthFailure(response, "/api/v1/knowledge/documents");
     let detail = "Upload failed with status " + response.status;
     try {
       const payload = (await response.json()) as { detail?: string };
@@ -619,6 +621,7 @@ export async function indexKnowledgeDocument(
   );
 
   if (!response.ok) {
+    reportAuthFailure(response, "/api/v1/knowledge/documents/" + documentId + "/index");
     let detail = "Indexing failed with status " + response.status;
     try {
       const payload = (await response.json()) as { detail?: string };
@@ -799,6 +802,7 @@ async function knowledgeMutation<T>(
   });
 
   if (!response.ok) {
+    reportAuthFailure(response, path);
     let detail = `Request failed with status ${response.status}`;
     try {
       const payload = (await response.json()) as { detail?: string };
@@ -1988,7 +1992,10 @@ export async function exportCameraReviewCsv(signal?: AbortSignal): Promise<void>
     API_BASE_URL + "/api/v1/frigate/reviews/export.csv?acknowledgement=PRIVATE_METADATA_ONLY",
     { method: "GET", credentials: "include", signal, headers: { Accept: "text/csv" } },
   );
-  if (!response.ok) throw new Error("CSV export rejected");
+  if (!response.ok) {
+    reportAuthFailure(response, "/api/v1/frigate/reviews/export.csv");
+    throw new Error("CSV export rejected");
+  }
   const blob = await response.blob();
   const url = URL.createObjectURL(blob);
   try {
@@ -2146,6 +2153,7 @@ export async function transcribeLocalWav(audio: Blob, signal?: AbortSignal): Pro
     signal,
   });
   if (!response.ok) {
+    reportAuthFailure(response, "/api/v1/speech/transcribe");
     let detail = "Transcription failed with status " + response.status;
     try {
       const error = (await response.json()) as { detail?: string };
@@ -2179,6 +2187,7 @@ export async function synthesizeLocalSpeech(text: string, signal?: AbortSignal):
     signal,
   });
   if (!response.ok) {
+    reportAuthFailure(response, "/api/v1/tts/synthesize");
     let detail = "Local voice failed with status " + response.status;
     try {
       const payload = (await response.json()) as { detail?: string };
