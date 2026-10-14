@@ -1345,6 +1345,9 @@ export interface MQTTStatus {
   reconnect_min_seconds: number;
   reconnect_max_seconds: number;
   message_count: number;
+  connect_generation?: number;
+  last_connected_at?: string | null;
+  last_disconnected_at?: string | null;
   last_error: string | null;
   message: string;
 }
