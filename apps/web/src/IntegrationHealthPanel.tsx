@@ -7,6 +7,7 @@ import {
   getMQTTStatus,
   getOllamaStatus,
 } from "./api";
+import { IntegrationAcceptancePanel } from "./IntegrationAcceptancePanel";
 
 type IntegrationState = "online" | "offline" | "not_configured" | "unavailable";
 type Observation = {
@@ -125,6 +126,7 @@ export function IntegrationHealthPanel() {
           </ul>
         </>
       ) : <p>No status requests made in this session.</p>}
+      <IntegrationAcceptancePanel />
     </section>
   );
 }
