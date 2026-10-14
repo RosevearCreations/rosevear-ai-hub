@@ -244,11 +244,12 @@ class MQTTClient:
         success = code == 0
         # MQTT v3 codes 4/5 and v5 codes 0x86/0x87 are credential
         # rejection; never echo the username, host, certificate or exception.
-        reason = (
-            None if success else
-            "MQTT broker rejected credentials." if code in {4, 5, 0x86, 0x87}
-            else "MQTT broker rejected the connection."
-        )
+        if success:
+            reason = None
+        elif code in {4, 5, 0x86, 0x87}:
+            reason = "MQTT broker rejected credentials."
+        else:
+            reason = "MQTT broker rejected the connection."
         with self._lock:
             self._connected = success
             self._last_error = reason
