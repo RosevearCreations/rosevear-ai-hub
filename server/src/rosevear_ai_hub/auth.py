@@ -157,9 +157,7 @@ def _set_session_cookie(response: Response, token: str, request: Request) -> Non
         value=token,
         max_age=settings.auth_session_hours * 3600,
         httponly=True,
-        secure=(
-            tauri_webview or settings.auth_cookie_secure or request.url.scheme == "https"
-        ),
+        secure=(tauri_webview or settings.auth_cookie_secure or request.url.scheme == "https"),
         samesite="none" if tauri_webview else "strict",
         path="/",
     )
