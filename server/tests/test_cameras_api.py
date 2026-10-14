@@ -107,7 +107,6 @@ def test_household_user_can_view_but_cannot_scan(tmp_path, monkeypatch) -> None:
     assert client.post("/api/v1/cameras/discover").status_code == 403
 
 
-
 def test_discovery_preview_does_not_mutate_and_selected_accept_creates_disabled(
     tmp_path, monkeypatch
 ) -> None:
@@ -116,15 +115,18 @@ def test_discovery_preview_does_not_mutate_and_selected_accept_creates_disabled(
 
     def probe(*, timeout_seconds=2.5):
         scans.append(timeout_seconds)
-        return [discovered_camera(), DiscoveredONVIFDevice(
-            endpoint_uuid="camera-uuid-2",
-            service_url="http://192.168.68.56/onvif/device_service",
-            host="192.168.68.56",
-            port=80,
-            name="Garage",
-            types=("dn:NetworkVideoTransmitter",),
-            scopes=(),
-        )]
+        return [
+            discovered_camera(),
+            DiscoveredONVIFDevice(
+                endpoint_uuid="camera-uuid-2",
+                service_url="http://192.168.68.56/onvif/device_service",
+                host="192.168.68.56",
+                port=80,
+                name="Garage",
+                types=("dn:NetworkVideoTransmitter",),
+                scopes=(),
+            ),
+        ]
 
     monkeypatch.setattr("rosevear_ai_hub.api.cameras.discover_onvif_devices", probe)
     preview = client.post("/api/v1/cameras/discovery/preview")
@@ -200,15 +202,21 @@ def test_household_user_cannot_preview_or_accept_camera_discoveries(tmp_path, mo
     )
     assert response.status_code == 201
     assert client.post("/api/v1/auth/logout").status_code == 200
-    assert client.post(
-        "/api/v1/auth/login",
-        json={"username": "viewer-070", "password": "family-password-123"},
-    ).status_code == 200
+    assert (
+        client.post(
+            "/api/v1/auth/login",
+            json={"username": "viewer-070", "password": "family-password-123"},
+        ).status_code
+        == 200
+    )
     assert client.post("/api/v1/cameras/discovery/preview").status_code == 403
-    assert client.post(
-        "/api/v1/cameras/discovery/accept",
-        json={"preview_token": token, "endpoint_uuids": ["camera-uuid-1"]},
-    ).status_code == 403
+    assert (
+        client.post(
+            "/api/v1/cameras/discovery/accept",
+            json={"preview_token": token, "endpoint_uuids": ["camera-uuid-1"]},
+        ).status_code
+        == 403
+    )
     assert client.get("/api/v1/cameras").json() == []
 
 
