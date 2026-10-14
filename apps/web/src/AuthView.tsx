@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 
 import {
   bootstrapOwner,
+  getAuthStatus,
   login,
   type AuthStatus,
   type AuthUser,
@@ -10,9 +11,11 @@ import {
 export function AuthView({
   status,
   onAuthenticated,
+  sessionNotice,
 }: {
   status: AuthStatus;
   onAuthenticated: (user: AuthUser) => void;
+  sessionNotice?: string;
 }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -31,6 +34,15 @@ export function AuthView({
       const user = bootstrap
         ? await bootstrapOwner(username, password)
         : await login(username, password);
+      // A 200 login response is not sufficient: the WebView/browser must
+      // actually retain the session cookie across requests.
+      const session = await getAuthStatus();
+      if (!session.authenticated || session.user?.id !== user.id) {
+        throw new Error(
+          "Sign-in succeeded but the session cookie was not retained. " +
+          "Check the Hub client origin and cookie settings; no account data changed.",
+        );
+      }
       onAuthenticated(user);
       setPassword("");
     } catch (caught: unknown) {
@@ -87,7 +99,8 @@ export function AuthView({
             {bootstrap ? <small>Use at least 12 characters.</small> : null}
           </label>
 
-          {error ? <p className="auth-error" role="alert">{error}</p> : null}
+          {sessionNotice ? <p className="auth-error" role="alert">{sessionNotice}</p> : null}
+        {error ? <p className="auth-error" role="alert">{error}</p> : null}
 
           <button className="primary-button" type="submit" disabled={busy}>
             {busy ? "Working…" : bootstrap ? "Create owner" : "Sign in"}

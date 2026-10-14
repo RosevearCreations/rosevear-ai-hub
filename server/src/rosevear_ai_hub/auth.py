@@ -144,13 +144,21 @@ def _issue_session(db: Session, user: User) -> str:
 
 def _set_session_cookie(response: Response, token: str, request: Request) -> None:
     settings = get_settings()
+    # The installed Windows Tauri webview is http://tauri.localhost, whereas
+    # its loopback API is http://127.0.0.1:8765. Strict SameSite cookies are
+    # not sent on those cross-site requests, making every protected view 401
+    # after a seemingly successful login. Scope the exception to Tauri's
+    # exact allow-listed origin and require Secure even on local loopback.
+    # Ordinary localhost, LAN HTTPS and tailnet sessions remain Strict.
+    origin = request.headers.get("origin", "")
+    tauri_webview = origin in {"http://tauri.localhost", "tauri://localhost"}
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
         value=token,
         max_age=settings.auth_session_hours * 3600,
         httponly=True,
-        secure=settings.auth_cookie_secure or request.url.scheme == "https",
-        samesite="strict",
+        secure=(tauri_webview or settings.auth_cookie_secure or request.url.scheme == "https"),
+        samesite="none" if tauri_webview else "strict",
         path="/",
     )
 

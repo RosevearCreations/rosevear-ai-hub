@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { App } from "./App";
+import { HUB_AUTH_REQUIRED_EVENT } from "./api";
 
 function providerPayload(available = true) {
   return [
@@ -654,6 +655,17 @@ describe("App", () => {
       )).toBe(true);
       expect(input).toHaveValue("Keep this careful draft");
     });
+  });
+
+
+  test("returns all protected sections to sign-in when the API session is rejected", async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Users" })).toBeInTheDocument());
+    window.dispatchEvent(new Event(HUB_AUTH_REQUIRED_EVENT));
+    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("session was not accepted");
+    expect(screen.queryByRole("button", { name: "Users" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Cameras" })).toBeNull();
   });
 
 });

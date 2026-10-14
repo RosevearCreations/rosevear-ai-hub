@@ -2175,7 +2175,11 @@ h1 {
   z-index: 20;
   display: flex;
   justify-content: flex-end;
-  height: 0;
+  align-items: flex-start;
+  /* Reserve the actual height of the help button. The old zero-height
+     overlay obscured Chat model selection and Camera toolbar actions. */
+  min-height: 2.65rem;
+  margin-bottom: 0.45rem;
 }
 
 .help-trigger {
