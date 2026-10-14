@@ -81,8 +81,9 @@ async function takeSnapshot(signal: AbortSignal): Promise<Observation> {
     haEntities,
     mqtt: !mqtt ? "unverified" : mqtt.available ? "connected" : "disconnected",
     mqttSubscriptions: mqtt?.available ? mqtt.subscriptions.length : null,
-    mqttGeneration: mqtt && Number.isSafeInteger(mqtt.connect_generation) &&
-      (mqtt.connect_generation ?? -1) >= 0 ? mqtt.connect_generation! : null,
+    mqttGeneration: mqtt && typeof mqtt.connect_generation === "number" &&
+      Number.isSafeInteger(mqtt.connect_generation) && mqtt.connect_generation >= 0
+      ? mqtt.connect_generation : null,
     mqttLastConnected: mqtt?.last_connected_at ?? null,
   };
 }
