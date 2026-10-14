@@ -38,6 +38,7 @@ export function summarizeOperations(
     const data = ha.value as {
       configured: boolean; available: boolean;
       url_configured?: boolean; token_configured?: boolean;
+      recovery_reason?: string;
     };
     signals.push({
       key: "ha",
@@ -47,8 +48,13 @@ export function summarizeOperations(
       detail: data.available
         ? "Connected."
         : data.configured
-          ? "Saved connection details, but the Home Assistant API is not responding. " +
-            "Check the HA VM, local port 8123, URL and access token in Devices."
+          ? data.recovery_reason === "authentication_rejected"
+            ? "Home Assistant rejected its token. Review it privately in Secrets."
+            : data.recovery_reason === "timeout"
+              ? "Home Assistant timed out. Check the VM and its responsiveness."
+              : data.recovery_reason === "unreachable"
+                ? "Hub cannot reach Home Assistant. Check the VM network and service port."
+                : "Saved connection details, but Home Assistant is not responding. Check Devices."
           : data.url_configured === false
             ? "Home Assistant URL is missing. Review Devices setup."
             : data.token_configured === false
@@ -61,6 +67,7 @@ export function summarizeOperations(
     const data = mqtt.value as {
       configured: boolean; available: boolean;
       username_configured?: boolean; password_configured?: boolean;
+      recovery_reason?: string;
     };
     signals.push({
       key: "mqtt",
@@ -70,8 +77,13 @@ export function summarizeOperations(
       detail: data.available
         ? "Broker connected."
         : data.configured
-          ? "Saved broker settings, but no active MQTT connection. " +
-            "Check broker availability, port, credentials and TLS in MQTT."
+          ? data.recovery_reason === "broker_rejected_credentials"
+            ? "MQTT broker rejected credentials. Review the account privately in MQTT."
+            : data.recovery_reason === "disconnected_reconnecting"
+              ? "MQTT disconnected and is reconnecting; check the broker/add-on."
+              : data.recovery_reason === "starting_or_reconnecting"
+                ? "MQTT connection is starting; check broker/add-on availability."
+                : "Saved MQTT settings, but no active connection. Check broker, port and TLS."
           : "MQTT broker is not configured. Review MQTT setup.",
     });
   } else signals.push(unavailable("mqtt", "MQTT", "MQTT"));
