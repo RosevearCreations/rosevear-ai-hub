@@ -1630,3 +1630,21 @@ Next: Build 069 — Integration Recovery Acceptance & Runtime Reconnect Validati
 
 See docs/BUILD_069_INTEGRATION_RECONNECT_ACCEPTANCE.md.
 Next queued Build 070 — Camera Inventory Discovery & Safe Registration Acceptance.
+
+
+## Build 070 — Camera Inventory Discovery & Safe Registration Acceptance
+
+- [x] Bounded owner-only ONVIF discovery preview with no registry changes
+- [x] Short-lived one-time owner-bound ticket and exact selected acceptance
+- [x] Validated private/local ONVIF URLs, no credential-bearing candidates
+- [x] Preserve existing cameras/streams; register new cameras disabled
+- [x] Client scan → review → explicitly select → register safe flow
+- [x] Backend/frontend authorization, anti-replay and no-auto-write regression tests
+- [x] Windows operator acceptance and no-disruption documentation
+- [ ] dev five CI checks GREEN
+- [ ] PR five CI checks GREEN
+- [ ] Independent main five CI checks GREEN
+- [ ] Household camera discovery, registrations and streams field-verified
+
+See docs/BUILD_070_CAMERA_ACCEPTANCE.md.
+Next queued Build 071 — Camera Transport Configuration & Verified Stream Acceptance.
