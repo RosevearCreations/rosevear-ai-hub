@@ -1854,6 +1854,46 @@ export function reconcileGo2RTC(signal?: AbortSignal): Promise<Go2RTCReconcileRe
   );
 }
 
+export interface CameraDiscoveryCandidate {
+  endpoint_uuid: string;
+  display_name: string;
+  host: string;
+  port: number;
+  registered: boolean;
+}
+
+export interface CameraPreviewResult {
+  preview_token: string;
+  expires_in_seconds: number;
+  truncated: boolean;
+  candidates: CameraDiscoveryCandidate[];
+}
+
+export interface CameraAcceptanceResult {
+  created: number;
+  already_registered: number;
+  cameras: CameraRecord[];
+}
+
+export function previewCameraDiscovery(signal?: AbortSignal): Promise<CameraPreviewResult> {
+  return authJson<CameraPreviewResult>(
+    "POST", "/api/v1/cameras/discovery/preview", {}, signal,
+  );
+}
+
+export function acceptCameraDiscovery(
+  previewToken: string,
+  endpointUuids: string[],
+  signal?: AbortSignal,
+): Promise<CameraAcceptanceResult> {
+  return authJson<CameraAcceptanceResult>(
+    "POST",
+    "/api/v1/cameras/discovery/accept",
+    { preview_token: previewToken, endpoint_uuids: endpointUuids },
+    signal,
+  );
+}
+
 export function discoverCameras(signal?: AbortSignal): Promise<CameraDiscoveryResult> {
   return authJson<CameraDiscoveryResult>("POST", "/api/v1/cameras/discover", {}, signal);
 }

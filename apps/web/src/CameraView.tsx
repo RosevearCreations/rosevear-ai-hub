@@ -5,7 +5,9 @@ import { FrigatePanel } from "./FrigatePanel";
 import {
   configureCameraStream,
   deleteCameraStream,
-  discoverCameras,
+  previewCameraDiscovery,
+  acceptCameraDiscovery,
+  type CameraPreviewResult,
   getCameraDashboard,
   getCameras,
   getGo2RTCStatus,
@@ -45,6 +47,8 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
   const [sourceUrls, setSourceUrls] = useState<Record<number, string>>({});
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState<CameraPreviewResult | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
   const canAdminister =
     currentUser.role === "owner" || currentUser.role === "administrator";
 
@@ -95,12 +99,32 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
   }
 
   async function scan() {
+    setPreview(null);
+    setSelected([]);
     await run(async () => {
-      const result = await discoverCameras();
+      const result = await previewCameraDiscovery();
+      setPreview(result);
       setMessage(
-        "Discovery found " + result.discovered + " ONVIF device" +
-        (result.discovered === 1 ? "" : "s") + "; " + result.created +
-        " added, " + result.updated + " refreshed.",
+        "Discovery found " + result.candidates.length + " candidate" +
+        (result.candidates.length === 1 ? "" : "s") +
+        ". Nothing has been registered. Review and select cameras below.",
+      );
+    });
+  }
+
+  async function acceptSelected() {
+    if (!preview || selected.length === 0) return;
+    // Consume the preview locally first: double-clicks cannot reuse a token.
+    const ticket = preview.preview_token;
+    const ids = [...selected];
+    setPreview(null);
+    setSelected([]);
+    await run(async () => {
+      const result = await acceptCameraDiscovery(ticket, ids);
+      setMessage(
+        result.created + " camera" + (result.created === 1 ? "" : "s") +
+        " registered disabled for review; " + result.already_registered +
+        " already registered. No live streams were started.",
       );
       await refresh();
     });
@@ -203,12 +227,55 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
                 Sync go2rtc
               </button>
               <button className="primary-button" type="button" onClick={() => void scan()} disabled={busy}>
-                Scan local network
+                {busy ? "Scanning…" : "Review local cameras"}
               </button>
             </>
           ) : null}
         </div>
       </header>
+
+      {canAdminister && preview ? (
+        <section className="panel" aria-label="ONVIF registration review">
+          <h2>Build 070 — Review discovered cameras</h2>
+          <p>Discovery is read-only. Select only devices you recognize, then explicitly register
+            them. New registry entries are disabled; existing devices and streams are unchanged.
+            The approval expires after {preview.expires_in_seconds} seconds.</p>
+          {preview.truncated ? <p>Some discoveries were excluded by the private-network safety
+            policy or bounded review limit. Check existing camera settings separately.</p> : null}
+          {preview.candidates.length === 0 ? (
+            <p>No safe ONVIF candidates responded. This is not proof that physical cameras are offline:
+              ONVIF discovery may be disabled or blocked across network segments.</p>
+          ) : (
+            <div>
+              {preview.candidates.map((candidate) => (
+                <label key={candidate.endpoint_uuid} className="camera-discovery-choice">
+                  <input
+                    type="checkbox"
+                    disabled={busy || candidate.registered}
+                    checked={selected.includes(candidate.endpoint_uuid)}
+                    onChange={(event) => setSelected((current) =>
+                      event.target.checked
+                        ? [...current, candidate.endpoint_uuid]
+                        : current.filter((id) => id !== candidate.endpoint_uuid),
+                    )}
+                  />
+                  <strong>{candidate.display_name}</strong>{" "}
+                  ({candidate.host}:{candidate.port})
+                  {candidate.registered ? " — Already registered" : " — New, will be disabled"}
+                </label>
+              ))}
+            </div>
+          )}
+          <button type="button" disabled={busy || selected.length === 0}
+            onClick={() => void acceptSelected()}>
+            Register {selected.length} selected camera{selected.length === 1 ? "" : "s"} disabled
+          </button>{" "}
+          <button type="button" disabled={busy} onClick={() => {
+            setPreview(null);
+            setSelected([]);
+          }}>Cancel review</button>
+        </section>
+      ) : null}
 
       {dashboard ? (
         <section className="camera-summary" aria-label="Camera health summary">
@@ -256,7 +323,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
       ) : state.cameras.length === 0 ? (
         <section className="panel">
           <h2>No cameras discovered yet</h2>
-          <p>Owner or Administrator can scan the trusted local network for compatible ONVIF cameras.</p>
+          <p>Owner or Administrator can review compatible ONVIF discoveries on the trusted local network; registration requires explicit selection.</p>
         </section>
       ) : (
         <>
