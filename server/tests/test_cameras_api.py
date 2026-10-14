@@ -107,6 +107,111 @@ def test_household_user_can_view_but_cannot_scan(tmp_path, monkeypatch) -> None:
     assert client.post("/api/v1/cameras/discover").status_code == 403
 
 
+
+def test_discovery_preview_does_not_mutate_and_selected_accept_creates_disabled(
+    tmp_path, monkeypatch
+) -> None:
+    client = build_client(tmp_path)
+    scans = []
+
+    def probe(*, timeout_seconds=2.5):
+        scans.append(timeout_seconds)
+        return [discovered_camera(), DiscoveredONVIFDevice(
+            endpoint_uuid="camera-uuid-2",
+            service_url="http://192.168.68.56/onvif/device_service",
+            host="192.168.68.56",
+            port=80,
+            name="Garage",
+            types=("dn:NetworkVideoTransmitter",),
+            scopes=(),
+        )]
+
+    monkeypatch.setattr("rosevear_ai_hub.api.cameras.discover_onvif_devices", probe)
+    preview = client.post("/api/v1/cameras/discovery/preview")
+    assert preview.status_code == 200
+    payload = preview.json()
+    assert scans == [2.5]
+    assert len(payload["candidates"]) == 2
+    assert all(not candidate["registered"] for candidate in payload["candidates"])
+    assert client.get("/api/v1/cameras").json() == []
+
+    rejected = client.post(
+        "/api/v1/cameras/discovery/accept",
+        json={"preview_token": payload["preview_token"], "endpoint_uuids": ["unscanned"]},
+    )
+    assert rejected.status_code == 409
+    assert client.get("/api/v1/cameras").json() == []
+
+    accepted = client.post(
+        "/api/v1/cameras/discovery/accept",
+        json={
+            "preview_token": payload["preview_token"],
+            "endpoint_uuids": ["camera-uuid-1"],
+        },
+    )
+    assert accepted.status_code == 200
+    assert accepted.json()["created"] == 1
+    camera = accepted.json()["cameras"][0]
+    assert camera["enabled"] is False
+    assert camera["stream"] is None
+    assert camera["discovery_source"] == "onvif_operator_accepted"
+    assert camera["display_name"] == "Front Door"
+    assert len(client.get("/api/v1/cameras").json()) == 1
+
+    double_submit = client.post(
+        "/api/v1/cameras/discovery/accept",
+        json={
+            "preview_token": payload["preview_token"],
+            "endpoint_uuids": ["camera-uuid-1"],
+        },
+    )
+    assert double_submit.status_code == 409
+    new_preview = client.post("/api/v1/cameras/discovery/preview").json()
+    existing = next(
+        item for item in new_preview["candidates"] if item["endpoint_uuid"] == "camera-uuid-1"
+    )
+    assert existing["registered"] is True
+    skipped = client.post(
+        "/api/v1/cameras/discovery/accept",
+        json={
+            "preview_token": new_preview["preview_token"],
+            "endpoint_uuids": ["camera-uuid-1"],
+        },
+    )
+    assert skipped.status_code == 200
+    assert skipped.json()["created"] == 0
+    assert skipped.json()["already_registered"] == 1
+
+
+def test_household_user_cannot_preview_or_accept_camera_discoveries(tmp_path, monkeypatch) -> None:
+    client = build_client(tmp_path)
+    monkeypatch.setattr(
+        "rosevear_ai_hub.api.cameras.discover_onvif_devices",
+        lambda **_kwargs: [discovered_camera()],
+    )
+    token = client.post("/api/v1/cameras/discovery/preview").json()["preview_token"]
+    response = client.post(
+        "/api/v1/auth/users",
+        json={
+            "username": "viewer-070",
+            "password": "family-password-123",
+            "role": "household_user",
+        },
+    )
+    assert response.status_code == 201
+    assert client.post("/api/v1/auth/logout").status_code == 200
+    assert client.post(
+        "/api/v1/auth/login",
+        json={"username": "viewer-070", "password": "family-password-123"},
+    ).status_code == 200
+    assert client.post("/api/v1/cameras/discovery/preview").status_code == 403
+    assert client.post(
+        "/api/v1/cameras/discovery/accept",
+        json={"preview_token": token, "endpoint_uuids": ["camera-uuid-1"]},
+    ).status_code == 403
+    assert client.get("/api/v1/cameras").json() == []
+
+
 @pytest.fixture
 def stream_secret_key(monkeypatch):
     monkeypatch.setenv(
