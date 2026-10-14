@@ -262,6 +262,7 @@ class HomeAssistantStatusResponse(BaseModel):
     url_configured: bool
     token_configured: bool
     message: str
+    recovery_reason: str = "unknown"
 
 
 class HomeAssistantEntityResponse(BaseModel):
