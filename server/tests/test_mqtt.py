@@ -133,3 +133,29 @@ def test_reconnect_restores_authorized_subscriptions() -> None:
     client.trigger_connect()
     assert len(client.subscriptions) == initial_count + 1
     assert client.subscriptions[-1] == ("rosevear/sensors/temp", 0)
+
+
+def test_connect_generation_tracks_genuine_callbacks_without_restart_or_publish() -> None:
+    integration, client = build_client()
+    initial = integration.snapshot()
+    assert initial["connect_generation"] == 0
+    assert initial["last_connected_at"] is None
+    assert initial["last_disconnected_at"] is None
+    integration.start()
+    client.trigger_connect()
+    first = integration.snapshot()
+    assert first["connect_generation"] == 1
+    assert first["last_connected_at"] is not None
+    # Duplicate callback while connected is not a new reconnect.
+    client.trigger_connect()
+    assert integration.snapshot()["connect_generation"] == 1
+    client.trigger_disconnect()
+    disconnected = integration.snapshot()
+    assert disconnected["connected"] is False
+    assert disconnected["last_disconnected_at"] is not None
+    client.trigger_connect()
+    recovered = integration.snapshot()
+    assert recovered["connected"] is True
+    assert recovered["connect_generation"] == 2
+    assert recovered["last_connected_at"] is not None
+    assert client.publishes == []
