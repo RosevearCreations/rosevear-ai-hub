@@ -13,6 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.audit import record_audit_event
+from rosevear_ai_hub.camera_discovery_review import create_ticket, consume_ticket
 from rosevear_ai_hub.auth import require_roles
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.database import get_session
@@ -76,6 +77,32 @@ class CameraDiscoveryResponse(BaseModel):
     discovered: int
     created: int
     updated: int
+    cameras: list[CameraResponse]
+
+
+class CameraDiscoveryCandidate(BaseModel):
+    endpoint_uuid: str
+    display_name: str
+    host: str
+    port: int
+    registered: bool
+
+
+class CameraPreviewResponse(BaseModel):
+    preview_token: str
+    expires_in_seconds: int = 300
+    candidates: list[CameraDiscoveryCandidate]
+    truncated: bool
+
+
+class CameraAcceptRequest(BaseModel):
+    preview_token: str = Field(min_length=16, max_length=128)
+    endpoint_uuids: list[str] = Field(min_length=1, max_length=32)
+
+
+class CameraAcceptResponse(BaseModel):
+    created: int
+    already_registered: int
     cameras: list[CameraResponse]
 
 
@@ -578,6 +605,89 @@ def reconcile_go2rtc(
         synchronized=synchronized,
         failed=failed,
         skipped=skipped,
+    )
+
+
+@router.post("/discovery/preview", response_model=CameraPreviewResponse)
+def preview_camera_discovery(
+    actor: CameraAdmin,
+    db: SessionDependency,
+) -> CameraPreviewResponse:
+    """One opt-in, bounded ONVIF multicast probe; no registry mutation."""
+    try:
+        found = discover_onvif_devices(timeout_seconds=2.5)
+    except OSError as exc:
+        raise HTTPException(
+            status_code=503, detail="Local ONVIF discovery is unavailable."
+        ) from exc
+    token, devices = create_ticket(actor.id, found)
+    registered = set(db.scalars(select(Camera.endpoint_uuid)).all())
+    return CameraPreviewResponse(
+        preview_token=token,
+        candidates=[
+            CameraDiscoveryCandidate(
+                endpoint_uuid=device.endpoint_uuid,
+                display_name=device.name or device.host,
+                host=device.host,
+                port=device.port,
+                registered=device.endpoint_uuid in registered,
+            )
+            for device in devices
+        ],
+        truncated=len(found) > len(devices),
+    )
+
+
+@router.post("/discovery/accept", response_model=CameraAcceptResponse)
+def accept_camera_discovery(
+    payload: CameraAcceptRequest,
+    actor: CameraAdmin,
+    db: SessionDependency,
+) -> CameraAcceptResponse:
+    """Explicit owner-approved registration only, initially disabled."""
+    selected = consume_ticket(actor.id, payload.preview_token, payload.endpoint_uuids)
+    if selected is None:
+        raise HTTPException(
+            status_code=409, detail="Camera preview expired, was used, or selection is invalid. Rescan."
+        )
+    now = datetime.now(UTC)
+    created: list[Camera] = []
+    skipped = 0
+    for device in selected:
+        if db.scalar(select(Camera.id).where(Camera.endpoint_uuid == device.endpoint_uuid)):
+            skipped += 1
+            continue
+        camera = Camera(
+            endpoint_uuid=device.endpoint_uuid,
+            display_name=device.name or device.host,
+            host=device.host,
+            port=device.port,
+            service_url=device.service_url,
+            discovery_source="onvif_operator_accepted",
+            onvif_types=list(device.types),
+            scopes=list(device.scopes),
+            enabled=False,
+            last_seen_at=now,
+        )
+        db.add(camera)
+        created.append(camera)
+    record_audit_event(
+        db,
+        actor_user_id=actor.id,
+        event_type="camera.discovery.accepted",
+        object_type="camera_registry",
+        object_id=None,
+        action="register_selected",
+        arguments={"selected_count": len(selected)},
+        result={"created": len(created), "already_registered": skipped},
+    )
+    db.commit()
+    for camera in created:
+        db.refresh(camera)
+    return CameraAcceptResponse(
+        created=len(created),
+        already_registered=skipped,
+        cameras=[_to_response(camera) for camera in created],
     )
 
 
