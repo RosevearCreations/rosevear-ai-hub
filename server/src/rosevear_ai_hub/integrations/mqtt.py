@@ -129,6 +129,9 @@ class MQTTClient:
         self._connected = False
         self._started = False
         self._last_error: str | None = None
+        self._connect_generation = 0
+        self._last_connected_at: str | None = None
+        self._last_disconnected_at: str | None = None
         self._subscriptions: dict[str, int] = {}
         self._messages: deque[MQTTMessageRecord] = deque(maxlen=message_buffer_size)
         self._message_listeners: set[Callable[[MQTTMessageRecord], None]] = set()
@@ -230,6 +233,9 @@ class MQTTClient:
                 "subscriptions": sorted(self._subscriptions),
                 "message_count": len(self._messages),
                 "last_error": self._last_error,
+                "connect_generation": self._connect_generation,
+                "last_connected_at": self._last_connected_at,
+                "last_disconnected_at": self._last_disconnected_at,
             }
 
     def _on_connect(
@@ -251,8 +257,12 @@ class MQTTClient:
         else:
             reason = "MQTT broker rejected the connection."
         with self._lock:
+            was_connected = self._connected
             self._connected = success
             self._last_error = reason
+            if success and not was_connected:
+                self._connect_generation += 1
+                self._last_connected_at = datetime.now(UTC).isoformat()
             subscriptions = list(self._subscriptions.items())
         if success:
             for topic_filter, qos in subscriptions:
@@ -267,6 +277,8 @@ class MQTTClient:
         _properties: Any = None,
     ) -> None:
         with self._lock:
+            if self._connected:
+                self._last_disconnected_at = datetime.now(UTC).isoformat()
             self._connected = False
             if self._started and _reason_value(reason_code) != 0:
                 self._last_error = "MQTT disconnected; automatic reconnect is active."
