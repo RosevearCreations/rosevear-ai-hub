@@ -1613,3 +1613,20 @@ Next: Build 068 — Supervised Restart Acceptance & Runtime Recovery Evidence.
 
 See docs/BUILD_068_HA_MQTT_RECOVERY.md.
 Next: Build 069 — Integration Recovery Acceptance & Runtime Reconnect Validation.
+
+
+## Build 069 — Integration Recovery Acceptance & Runtime Reconnect Validation
+
+- [x] MQTT reconnect generation and timestamps from existing Paho callbacks only
+- [x] Read-only MQTT status response carries bounded reconnect metadata
+- [x] Manual baseline and recheck of HA API/entity count and MQTT broker/subscription count
+- [x] Distinguish steady connected, real observed recovery, counter reset and failure
+- [x] No service restarts, MQTT publishes, automatic subscriptions or polling
+- [x] Regression tests cover secrecy, no automatic requests, and callback transitions
+- [ ] dev workflow all five GREEN
+- [ ] PR workflow all five GREEN
+- [ ] Independent main workflow all five GREEN
+- [ ] Two manually observed samples on the household Windows installation
+
+See docs/BUILD_069_INTEGRATION_RECONNECT_ACCEPTANCE.md.
+Next queued Build 070 — Camera Inventory Discovery & Safe Registration Acceptance.
