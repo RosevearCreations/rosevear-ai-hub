@@ -137,8 +137,13 @@ def test_batch_duplicates_and_secret_values_rejected(db_and_owner) -> None:
     assert repeated.value.status_code == 422
     with pytest.raises(HTTPException) as unsafe:
         preview_import(
-            ImportRequest(entries=[CameraPlanInput(brand="Blink", model="Indoor",
-                evidence="rtsp://user:password@192.168.1.5")]),
+            ImportRequest(
+                entries=[
+                    CameraPlanInput(
+                        brand="Blink", model="Indoor", evidence="rtsp://user:password@192.168.1.5"
+                    )
+                ]
+            ),
             actor,
             db,
         )
