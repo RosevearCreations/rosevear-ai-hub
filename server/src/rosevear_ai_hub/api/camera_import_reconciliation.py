@@ -14,7 +14,9 @@ from rosevear_ai_hub.auth import require_roles
 from rosevear_ai_hub.database import get_session
 from rosevear_ai_hub.models import CameraImportAcceptanceEvidence, User
 
-router = APIRouter(prefix="/api/v1/camera-import-reconciliation", tags=["camera-import-reconciliation"])
+router = APIRouter(
+    prefix="/api/v1/camera-import-reconciliation", tags=["camera-import-reconciliation"]
+)
 Owner = Annotated[User, Depends(require_roles("owner"))]
 DB = Annotated[Session, Depends(get_session)]
 
