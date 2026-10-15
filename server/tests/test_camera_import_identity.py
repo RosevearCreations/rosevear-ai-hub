@@ -1,5 +1,7 @@
 """Build 076 regression checks for identity-bound camera import acceptance."""
 
+import hashlib
+
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -73,9 +75,8 @@ def test_preview_is_bound_to_account_and_consumed_once(owners) -> None:
     with pytest.raises(HTTPException) as replay:
         commit_import(decision(preview, chosen), first, db)
     assert replay.value.status_code == 409
-    receipt = db.get(CameraImportReview, __import__("hashlib").sha256(
-        preview.preview_token.encode("utf-8")
-    ).hexdigest())
+    key = hashlib.sha256(preview.preview_token.encode("utf-8")).hexdigest()
+    receipt = db.get(CameraImportReview, key)
     assert receipt is not None
     assert receipt.consumed_at is not None
     assert receipt.imported_count == 1
@@ -96,7 +97,7 @@ def test_preview_rejects_expiry_or_changed_entries(owners) -> None:
         commit_import(decision(preview, [revised]), first, db)
     assert altered.value.status_code == 409
 
-    key = __import__("hashlib").sha256(preview.preview_token.encode("utf-8")).hexdigest()
+    key = hashlib.sha256(preview.preview_token.encode("utf-8")).hexdigest()
     receipt = db.get(CameraImportReview, key)
     assert receipt is not None
     receipt.expires_at = datetime.now(UTC) - timedelta(seconds=1)
