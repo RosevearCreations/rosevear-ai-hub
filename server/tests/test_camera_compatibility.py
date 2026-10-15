@@ -2,7 +2,7 @@
 
 import pytest
 from fastapi import HTTPException
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.api.camera_compatibility import (
