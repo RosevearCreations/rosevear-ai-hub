@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { CameraInventoryImport } from "./CameraInventoryImport";
 import { CameraRuntimeAcceptance } from "./CameraRuntimeAcceptance";
+import { CameraOwnerReconciliationPanel } from "./CameraOwnerReconciliationPanel";
 import { CameraImportFieldAcceptance } from "./CameraImportFieldAcceptance";
 
 import {
@@ -119,6 +120,7 @@ export function ServerCameraInventory({
       ) : null}
       {message ? <p role="status">{message}</p> : null}
       {canAdminister ? <CameraImportFieldAcceptance /> : null}
+      {isOwner ? <CameraOwnerReconciliationPanel /> : null}
       {isOwner ? <CameraRuntimeAcceptance /> : null}
       <CameraInventoryImport canAdminister={canAdminister} onImported={refresh} />
       <p>Legacy browser-local plans are not imported automatically. Backup and migrate the Hub
