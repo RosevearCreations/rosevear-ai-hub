@@ -51,8 +51,11 @@ GitHub CI, a healthy loopback PWA, or a matching database snapshot as proof of f
 - Current server IPv4: `192.168.68.74`.
 - Caddy installed: true.
 - Built Hub index and web manifest on `127.0.0.1:8765`: HTTP 200.
-- HTTPS port 8443: **no listening result shown**. Status unverified / HOLD.
-- Screenshot does not demonstrate external certificate trust or camera acceptance.
+- Initial diagnosis: stale Caddy bind and Windows firewall local-address filter pointed at `192.168.68.78`; operator corrected both to `192.168.68.74`.
+- After correction: Caddy configuration validated, HTTPS listener reported listening at `192.168.68.74:8443`, and the sign-in page loaded in a browser.
+- Operator confirmed on 2026-10-15: **client PC now connects**. Network reachability is ACCEPTED, subject to future reboot persistence verification.
+- Client certificate trust, authenticated login, camera reconciliation, and backup provenance have not been independently attested; remain HOLD.
+- A previous diagnostic returned `built_pwa_on_api = False` while direct HTTP checks returned 200; rerun the diagnostic after updating the installed version and do not assert automatic reconciliation.
 
 ## Next proposed
 Build 080 — Operator-Gated Reconciliation Closeout and Reboot-Persistent Private Gateway.
