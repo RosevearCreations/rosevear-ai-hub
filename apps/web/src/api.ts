@@ -2412,6 +2412,8 @@ export type CameraImportEntry = Pick<
 
 export interface CameraImportPreview {
   server_snapshot: string;
+  preview_token: string | null;
+  expires_at: string | null;
   rows: Array<{ index: number; status: "ready" | "conflict"; existing_id: number | null }>;
   ready: number;
   conflicts: number;
@@ -2432,10 +2434,26 @@ export function previewCameraInventoryImport(
 export function commitCameraInventoryImport(
   entries: CameraImportEntry[],
   expectedSnapshot: string,
+  previewToken: string,
 ): Promise<CameraImportResult> {
   return authJson("POST", "/api/v1/camera-compatibility/import/commit", {
     entries,
     expected_snapshot: expectedSnapshot,
+    preview_token: previewToken,
     owner_acknowledged: true,
   });
+}
+
+export interface CameraImportFieldReadiness {
+  migration_revision: string | null;
+  schema_ready: boolean;
+  camera_records: number;
+  unapproved_records: number;
+  import_ledger_events: number;
+  review_receipts: number;
+  local_windows_acceptance_required: boolean;
+}
+
+export function getCameraImportFieldReadiness(): Promise<CameraImportFieldReadiness> {
+  return authJson("GET", "/api/v1/camera-compatibility/import/field-readiness");
 }
