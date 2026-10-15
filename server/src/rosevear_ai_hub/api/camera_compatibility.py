@@ -109,7 +109,7 @@ def create_plan(payload: CameraPlanInput, actor: Admin, db: DB) -> CameraPlanOut
         model=safe(payload.model),
         location=payload.location.strip(),
         method=payload.method,
-        evidence=payload.evidence.strip(),
+        evidence=safe(payload.evidence) if payload.evidence.strip() else "",
         revision=1,
     )
     db.add(item)
@@ -131,7 +131,7 @@ def update_plan(
     item.model = safe(payload.model)
     item.location = payload.location.strip()
     item.method = payload.method
-    item.evidence = payload.evidence.strip()
+    item.evidence = safe(payload.evidence) if payload.evidence.strip() else ""
     item.revision += 1
     item.approved_by_user_id = None
     item.approved_at = None
