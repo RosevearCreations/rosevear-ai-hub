@@ -591,6 +591,7 @@ class WorkshopInspection(Base):
 
 class CameraCompatibilityRecord(TimestampMixin, Base):
     """Manual, server-backed compatibility plan; does not activate a camera."""
+
     __tablename__ = "camera_compatibility_records"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     brand: Mapped[str] = mapped_column(String(80), nullable=False)
@@ -606,6 +607,7 @@ class CameraCompatibilityRecord(TimestampMixin, Base):
 
 class CameraCompatibilityLedger(Base):
     """Append-only manual approval evidence for an exact record revision."""
+
     __tablename__ = "camera_compatibility_ledger"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     record_id: Mapped[int] = mapped_column(
