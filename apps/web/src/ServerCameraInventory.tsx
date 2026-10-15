@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { CameraInventoryImport } from "./CameraInventoryImport";
+import { CameraRuntimeAcceptance } from "./CameraRuntimeAcceptance";
 import { CameraImportFieldAcceptance } from "./CameraImportFieldAcceptance";
 
 import {
@@ -12,7 +13,9 @@ import {
   type CameraCompatibilityPlan,
 } from "./api";
 
-export function ServerCameraInventory({ canAdminister }: { canAdminister: boolean }) {
+export function ServerCameraInventory({
+  canAdminister, isOwner,
+}: { canAdminister: boolean; isOwner: boolean }) {
   const [items, setItems] = useState<CameraCompatibilityPlan[]>([]);
   const [brand, setBrand] = useState("Blink");
   const [model, setModel] = useState("");
@@ -116,6 +119,7 @@ export function ServerCameraInventory({ canAdminister }: { canAdminister: boolea
       ) : null}
       {message ? <p role="status">{message}</p> : null}
       {canAdminister ? <CameraImportFieldAcceptance /> : null}
+      {isOwner ? <CameraRuntimeAcceptance /> : null}
       <CameraInventoryImport canAdminister={canAdminister} onImported={refresh} />
       <p>Legacy browser-local plans are not imported automatically. Backup and migrate the Hub
         database using the approved Windows procedure before using this feature.</p>

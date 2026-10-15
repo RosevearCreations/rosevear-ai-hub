@@ -260,7 +260,7 @@ def field_readiness(_actor: Admin, db: DB) -> FieldReadiness:
     reviews = int(db.scalar(select(func.count(CameraImportReview.token_hash))) or 0)
     return FieldReadiness(
         migration_revision=revision,
-        schema_ready=schema_ready and revision == "0021",
+        schema_ready=schema_ready and revision in {"0021", "0022"},
         camera_records=records,
         unapproved_records=unapproved,
         import_ledger_events=imported,
