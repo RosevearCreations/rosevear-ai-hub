@@ -53,6 +53,7 @@ def test_compare_recovery_read_only_and_fail_closed(tmp_path, monkeypatch) -> No
     with pytest.raises(ValueError):
         check.compare_recovery(current, current)
 
+
 def test_same_counts_but_changed_camera_values_is_hold(tmp_path, monkeypatch) -> None:
     current = tmp_path / "same-count-current.db"
     recovered = tmp_path / "same-count-recovered.db"
