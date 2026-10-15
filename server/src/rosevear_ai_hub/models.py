@@ -598,7 +598,9 @@ class CameraCompatibilityRecord(TimestampMixin, Base):
     location: Mapped[str] = mapped_column(String(120), nullable=False, default="")
     method: Mapped[str] = mapped_column(String(32), nullable=False, default="unverified")
     evidence: Mapped[str] = mapped_column(String(400), nullable=False, default="")
-    approved_by_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    approved_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
@@ -606,9 +608,17 @@ class CameraCompatibilityLedger(Base):
     """Append-only manual approval evidence for an exact record revision."""
     __tablename__ = "camera_compatibility_ledger"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    record_id: Mapped[int] = mapped_column(ForeignKey("camera_compatibility_records.id", ondelete="CASCADE"), nullable=False, index=True)
-    actor_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    record_id: Mapped[int] = mapped_column(
+        ForeignKey("camera_compatibility_records.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    actor_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     action: Mapped[str] = mapped_column(String(24), nullable=False)
     revision: Mapped[int] = mapped_column(Integer, nullable=False)
     method: Mapped[str] = mapped_column(String(32), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.current_timestamp(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.current_timestamp(), nullable=False
+    )
