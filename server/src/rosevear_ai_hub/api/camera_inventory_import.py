@@ -243,15 +243,17 @@ def field_readiness(_actor: Admin, db: DB) -> FieldReadiness:
     records = int(db.scalar(select(func.count(CameraCompatibilityRecord.id))) or 0)
     unapproved = int(
         db.scalar(
-            select(func.count(CameraCompatibilityRecord.id))
-            .where(CameraCompatibilityRecord.approved_at.is_(None))
+            select(func.count(CameraCompatibilityRecord.id)).where(
+                CameraCompatibilityRecord.approved_at.is_(None)
+            )
         )
         or 0
     )
     imported = int(
         db.scalar(
-            select(func.count(CameraCompatibilityLedger.id))
-            .where(CameraCompatibilityLedger.action == "imported")
+            select(func.count(CameraCompatibilityLedger.id)).where(
+                CameraCompatibilityLedger.action == "imported"
+            )
         )
         or 0
     )
