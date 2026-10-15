@@ -594,6 +594,9 @@ class CameraCompatibilityRecord(TimestampMixin, Base):
 
     __tablename__ = "camera_compatibility_records"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    identity_fingerprint: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, unique=True
+    )
     brand: Mapped[str] = mapped_column(String(80), nullable=False)
     model: Mapped[str] = mapped_column(String(120), nullable=False)
     location: Mapped[str] = mapped_column(String(120), nullable=False, default="")
