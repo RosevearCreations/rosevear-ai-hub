@@ -114,9 +114,7 @@ def runtime_status(_actor: Owner, db: DB) -> RuntimeAssurance:
 
 
 @router.post("/owner-acceptance", response_model=AcceptanceEvidence, status_code=201)
-def record_owner_acceptance(
-    payload: AcceptanceInput, actor: Owner, db: DB
-) -> AcceptanceEvidence:
+def record_owner_acceptance(payload: AcceptanceInput, actor: Owner, db: DB) -> AcceptanceEvidence:
     current = assurance(db)
     if not current.schema_ready:
         raise HTTPException(status_code=409, detail="Migration 0022 is not installed.")
