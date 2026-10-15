@@ -70,6 +70,7 @@ def test_import_preview_commit_no_auto_approval_and_retry_safe(db_and_owner) -> 
             ImportDecision(
                 entries=entries,
                 expected_snapshot=before.server_snapshot,
+                preview_token=before.preview_token or "",
                 owner_acknowledged=True,
             ),
             actor,
