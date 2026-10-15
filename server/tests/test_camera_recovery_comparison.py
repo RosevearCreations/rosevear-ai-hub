@@ -75,10 +75,7 @@ def test_same_counts_but_changed_camera_values_is_hold(tmp_path, monkeypatch) ->
     other = create_engine(f"sqlite:///{recovered}")
     with other.begin() as connection:
         connection.execute(
-            text(
-                "UPDATE camera_compatibility_records SET model = 'Modified' "
-                "WHERE brand = 'Blink'"
-            )
+            text("UPDATE camera_compatibility_records SET model = 'Modified' WHERE brand = 'Blink'")
         )
     other.dispose()
     result = check.compare_recovery(current, recovered)
