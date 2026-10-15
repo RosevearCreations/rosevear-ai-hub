@@ -12,7 +12,13 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from rosevear_ai_hub.api.camera_compatibility import CameraPlanInput, CameraPlanOutput, entry, output, safe
+from rosevear_ai_hub.api.camera_compatibility import (
+    CameraPlanInput,
+    CameraPlanOutput,
+    entry,
+    output,
+    safe,
+)
 from rosevear_ai_hub.auth import require_roles
 from rosevear_ai_hub.camera_plan_identity import (
     ensure_no_duplicate,
