@@ -72,7 +72,7 @@ def inspect_database(database_path: Path) -> dict[str, object]:
                 else None
             )
         green = (
-            revision == "0021"
+            revision in {"0021", "0022"}
             and tables_ready
             and columns_ready
             and identity_unique
