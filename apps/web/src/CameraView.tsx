@@ -315,7 +315,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
         ) : null}
       </section>
 
-      <ServerCameraInventory canAdminister={canAdminister} />
+      <ServerCameraInventory canAdminister={canAdminister} isOwner={currentUser.role === "owner"} />
       <CameraCompatibilityWorkbench canAdminister={canAdminister} />
       <CameraStreamAcceptance />
 
