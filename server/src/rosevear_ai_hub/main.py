@@ -12,6 +12,7 @@ from rosevear_ai_hub.api.audit import router as audit_router
 from rosevear_ai_hub.api.automations import router as automations_router
 from rosevear_ai_hub.api.business import router as business_router
 from rosevear_ai_hub.api.camera_compatibility import router as camera_compatibility_router
+from rosevear_ai_hub.api.camera_inventory_import import router as camera_inventory_import_router
 from rosevear_ai_hub.api.camera_reviews import router as camera_reviews_router
 from rosevear_ai_hub.api.cameras import router as cameras_router
 from rosevear_ai_hub.api.chat import router as chat_router
@@ -119,6 +120,7 @@ def create_app() -> FastAPI:
     )
     application.include_router(cameras_router)
     application.include_router(camera_compatibility_router)
+    application.include_router(camera_inventory_import_router)
     application.include_router(frigate_router)
     application.include_router(camera_reviews_router)
     application.include_router(workshop_router, dependencies=[Depends(require_authenticated)])
