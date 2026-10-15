@@ -200,7 +200,9 @@ def commit_import(payload: ImportDecision, actor: Admin, db: DB) -> ImportResult
         or receipt.inventory_snapshot != payload.expected_snapshot
         or server_snapshot(db) != receipt.inventory_snapshot
     ):
-        raise HTTPException(status_code=409, detail="Import selection or inventory changed; preview again.")
+        raise HTTPException(
+            status_code=409, detail="Import selection or inventory changed; preview again."
+        )
     created = []
     try:
         for brand, model, location, item in checked:
