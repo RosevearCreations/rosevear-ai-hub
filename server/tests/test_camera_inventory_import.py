@@ -54,6 +54,7 @@ def test_import_preview_commit_no_auto_approval_and_retry_safe(db_and_owner) -> 
         ImportDecision(
             entries=entries,
             expected_snapshot=before.server_snapshot,
+            preview_token=before.preview_token or "",
             owner_acknowledged=True,
         ),
         actor,
@@ -91,6 +92,7 @@ def test_conflicts_not_overwritten_or_imported(db_and_owner) -> None:
             ImportDecision(
                 entries=[duplicate],
                 expected_snapshot=preview.server_snapshot,
+                preview_token=preview.preview_token or "x" * 40,
                 owner_acknowledged=True,
             ),
             actor,
@@ -111,6 +113,7 @@ def test_stale_snapshot_and_missing_ack_are_rejected(db_and_owner) -> None:
             ImportDecision(
                 entries=[planned],
                 expected_snapshot=preview.server_snapshot,
+                preview_token=preview.preview_token or "x" * 40,
                 owner_acknowledged=True,
             ),
             actor,
@@ -122,6 +125,7 @@ def test_stale_snapshot_and_missing_ack_are_rejected(db_and_owner) -> None:
             ImportDecision(
                 entries=[planned],
                 expected_snapshot=preview.server_snapshot,
+                preview_token=preview.preview_token or "x" * 40,
                 owner_acknowledged=False,
             ),
             actor,
