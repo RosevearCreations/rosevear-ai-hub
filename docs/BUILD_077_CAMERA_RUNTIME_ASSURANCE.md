@@ -62,3 +62,48 @@
 
 ## Next proposed
 Build 078 — Camera Owner Acceptance Reconciliation & Isolated Recovery Evidence Review.
+
+
+## Build 077 power-outage regression and reboot startup coverage
+The Windows server was observed after the October 15 power outage with healthy Home
+Assistant/MQTT/Ollama, but Hub API/Vite/go2rtc offline. The recovery task existed;
+`active.json` was absent and `activation.json` reported
+`"phase": "supervised_bootstrap"`. The old recovery code treated **any**
+activation journal as managed enrollment and failed with
+`No managed release is enrolled.`. Manually invoking the verified backend
+launcher and web/go2rtc startup recovered the client without DB modification.
+
+Release change:
+- `hub-recovery-mode.ps1` distinguishes managed enrollment, exact orphan
+  supervised bootstrap, and unknown/malformed journals.
+- Exact **supervised_bootstrap + no active release** routes to the existing
+  legacy recovery path. Before launching the backend, a successful, non-mutating
+  `inspect-schema` must verify checkout and live DB compatibility. The same
+  maintenance lock is respected and rechecked. Journal is never deleted.
+- `activating` and enrolled managed releases still use managed recovery; unknown
+  journal states are HOLD, never automatically bypassed.
+- The backend startup uses the verified version-aware launcher rather than
+  an unobserved Python spawn. Healthy processes are not restarted; occupied
+  ports are not duplicated; HA, MQTT and Ollama are never restarted.
+- The existing five-minute scheduled recovery task remains available.
+- `install-hub-startup-task.ps1 -Install` adds **one separate sign-in trigger**
+  using the same guarded recovery script, with idempotent installation and
+  refusal to overwrite an unfamiliar task. This needs a one-time elevated
+  PowerShell installation on the actual Windows PC after installing the code.
+  A sign-in trigger does **not** start before Windows login. Unattended boot
+  before login would require a dedicated Windows service, not this user task.
+- Windows CI parses all recovery/startup scripts and runs a pure classification
+  regression for supervised bootstrap, activation, malformed and enrolled modes.
+
+Local field acceptance after installing the verified release:
+1. Confirm current Hub API, web and go2rtc stay healthy; do not reboot merely
+   for a test during active usage.
+2. From an elevated **PowerShell** with the updated checkout, run
+   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-hub-startup-task.ps1 -Install`
+   once. It leaves the existing recovery task untouched.
+3. Verify `Rosevear AI Hub Startup` is enabled with an at-logon trigger and
+   `Rosevear AI Hub Recovery` remains Ready/enabled (five-minute recurrence).
+4. A future planned restart/login should restore Hub API on 8765, web on 5173,
+   and go2rtc on 1984 without operator commands. Check HA/MQTT/Ollama separately.
+5. After confirming local DB backup and schema readiness, record owner acceptance
+   with the field checklist. GitHub CI GREEN is not Windows PC acceptance.
