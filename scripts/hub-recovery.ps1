@@ -9,8 +9,17 @@ $maintenanceHandle = $null
 $ManagedRuntime = $false
 try {
 $ManagedHome = Join-Path $Root 'logs\hub-deployment'
-if ((Test-Path -LiteralPath (Join-Path $ManagedHome 'active.json')) -or
-    (Test-Path -LiteralPath (Join-Path $ManagedHome 'activation.json'))) {
+. (Join-Path $PSScriptRoot 'hub-recovery-mode.ps1')
+$RecoveryMode = Get-HubRecoveryMode -ManagedHome $ManagedHome
+if ($RecoveryMode -eq 'Hold') {
+    Write-Error 'HOLD: unknown or unreadable Hub activation journal. Nothing changed.'
+    exit 2
+}
+# After an interrupted supervised_bootstrap there is no active.json. The old
+# code called managed recovery solely because the journal existed, then failed
+# with "No managed release is enrolled." Allow guarded legacy startup ONLY for
+# this exact known phase, while preserving the activation journal for review.
+if ($RecoveryMode -eq 'Managed') {
     # Recovery and activation share an OS-released lock. Tasks remain enabled;
     # after a controller crash the next recovery pass uses the rollback journal.
     $controllerPython = Join-Path $Root '.venv\Scripts\python.exe'
@@ -41,6 +50,12 @@ if (-not $maintenanceHandle) {
         if (($_.Exception.HResult -band 0xffff) -in @(32,33)) { exit 0 }
         throw
     }
+}
+# Recheck after obtaining the maintenance lock so an activation that completed
+# concurrently cannot be overtaken by a legacy startup.
+if ((Get-HubRecoveryMode -ManagedHome $ManagedHome) -ne $RecoveryMode) {
+    Write-Warning 'Release state changed during recovery; retry on next scheduled pass.'
+    exit 0
 }
 $LogDirectory = Join-Path $Root "logs"
 New-Item -ItemType Directory -Path $LogDirectory -Force | Out-Null
@@ -94,7 +109,13 @@ if (& $ApiProbe) {
     & $Python -B (Join-Path $PSScriptRoot 'hub_release_manager.py') inspect-schema --repo-root $Root
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     Write-RecoveryLog "Starting API."
-    Start-Process -FilePath $Python -ArgumentList @("-m", "uvicorn", "rosevear_ai_hub.main:app", "--host", "127.0.0.1", "--port", "8765") -WorkingDirectory $Root -WindowStyle Hidden
+    # Reuse the launcher proven during the October power-outage recovery. It
+    # verifies the running Hub identity/version and refuses duplicate startups.
+    & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'restart-hub-backend.ps1') -Action Start -RepoRoot $Root
+    if ($LASTEXITCODE -ne 0) {
+        Write-RecoveryLog "ERROR verified API launcher failed; no retry or DB writes."
+        exit 2
+    }
     if (-not (Wait-Healthy $ApiProbe $StartupTimeoutSeconds)) {
         Write-RecoveryLog "ERROR API did not become healthy."
         exit 2
