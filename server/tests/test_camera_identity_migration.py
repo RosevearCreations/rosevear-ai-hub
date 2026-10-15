@@ -24,12 +24,16 @@ def test_build_075_identity_migration_is_additive_and_reversible(tmp_path, monke
     columns = {item["name"] for item in inspector.get_columns("camera_compatibility_records")}
     assert "identity_fingerprint" in columns
     with engine.connect() as connection:
-        assert connection.execute(text(
-            "SELECT brand FROM camera_compatibility_records"
-        )).scalar_one() == "Blink"
-        assert connection.execute(text(
-            "SELECT identity_fingerprint FROM camera_compatibility_records"
-        )).scalar_one() is None
+        assert (
+            connection.execute(text("SELECT brand FROM camera_compatibility_records")).scalar_one()
+            == "Blink"
+        )
+        assert (
+            connection.execute(
+                text("SELECT identity_fingerprint FROM camera_compatibility_records")
+            ).scalar_one()
+            is None
+        )
 
     command.downgrade(config, "0019")
     inspector = inspect(engine)
