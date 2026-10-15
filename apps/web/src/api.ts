@@ -2362,3 +2362,44 @@ export function recordWorkshopInspection(
 export function getReleaseObservability(signal?: AbortSignal): Promise<ReleaseObservabilityResponse> {
   return getJson<ReleaseObservabilityResponse>("/api/v1/system/release-observability", signal);
 }
+
+
+export interface CameraCompatibilityPlan {
+  id: number;
+  brand: string;
+  model: string;
+  location: string;
+  method: "unverified" | "rtsp" | "onvif" | "manufacturer" | "alexa_only" | "unsupported";
+  evidence: string;
+  revision: number;
+  approved_by_user_id: number | null;
+  approved_at: string | null;
+}
+
+export interface CameraCompatibilityLedgerEntry {
+  id: number;
+  record_id: number;
+  actor_user_id: number | null;
+  action: string;
+  revision: number;
+  method: string;
+  created_at: string;
+}
+
+export function listServerCameraPlans(): Promise<CameraCompatibilityPlan[]> {
+  return authJson("GET", "/api/v1/camera-compatibility");
+}
+
+export function saveServerCameraPlan(
+  payload: Pick<CameraCompatibilityPlan, "brand" | "model" | "location" | "method" | "evidence">,
+): Promise<CameraCompatibilityPlan> {
+  return authJson("POST", "/api/v1/camera-compatibility", payload);
+}
+
+export function approveServerCameraPlan(id: number): Promise<CameraCompatibilityPlan> {
+  return authJson("POST", "/api/v1/camera-compatibility/" + id + "/approve");
+}
+
+export function getServerCameraPlanLedger(id: number): Promise<CameraCompatibilityLedgerEntry[]> {
+  return authJson("GET", "/api/v1/camera-compatibility/" + id + "/ledger");
+}

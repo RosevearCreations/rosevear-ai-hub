@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FrigatePanel } from "./FrigatePanel";
 import { CameraCompatibilityWorkbench } from "./CameraCompatibilityWorkbench";
 import { CameraStreamAcceptance } from "./CameraStreamAcceptance";
+import { ServerCameraInventory } from "./ServerCameraInventory";
 
 import {
   configureCameraStream,
@@ -314,6 +315,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
         ) : null}
       </section>
 
+      <ServerCameraInventory canAdminister={canAdminister} />
       <CameraCompatibilityWorkbench canAdminister={canAdminister} />
       <CameraStreamAcceptance />
 
