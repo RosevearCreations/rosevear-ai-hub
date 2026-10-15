@@ -24,13 +24,15 @@ def test_0021_migration_preserves_existing_camera_inventory(tmp_path, monkeypatc
     inspector = inspect(engine)
     assert "camera_import_reviews" in inspector.get_table_names()
     with engine.connect() as connection:
-        assert connection.execute(
+        count = connection.execute(
             text("SELECT COUNT(*) FROM camera_compatibility_records")
-        ).scalar_one() == 1
+        ).scalar_one()
+        assert count == 1
     command.downgrade(config, "0020")
     assert "camera_import_reviews" not in inspect(engine).get_table_names()
     with engine.connect() as connection:
-        assert connection.execute(
+        count = connection.execute(
             text("SELECT COUNT(*) FROM camera_compatibility_records")
-        ).scalar_one() == 1
+        ).scalar_one()
+        assert count == 1
     engine.dispose()
