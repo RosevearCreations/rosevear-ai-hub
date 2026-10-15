@@ -14,11 +14,13 @@ def test_build_075_identity_migration_is_additive_and_reversible(tmp_path, monke
 
     engine = create_engine(f"sqlite:///{path}")
     with engine.begin() as connection:
-        connection.execute(text(
-            "INSERT INTO camera_compatibility_records "
-            "(brand, model, location, method, evidence, revision) "
-            "VALUES ('Blink', 'Indoor', 'Hallway', 'unverified', '', 1)"
-        ))
+        connection.execute(
+            text(
+                "INSERT INTO camera_compatibility_records "
+                "(brand, model, location, method, evidence, revision) "
+                "VALUES ('Blink', 'Indoor', 'Hallway', 'unverified', '', 1)"
+            )
+        )
     command.upgrade(config, "0020")
     inspector = inspect(engine)
     columns = {item["name"] for item in inspector.get_columns("camera_compatibility_records")}
