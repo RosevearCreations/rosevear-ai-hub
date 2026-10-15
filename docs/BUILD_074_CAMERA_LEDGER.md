@@ -15,7 +15,7 @@ Planning approvals authorize NO physical device action, streaming, credential co
 
 ## Operations
 The live Windows Hub database must be backed up, reviewed, and migrated under the established controlled installer workflow before using the endpoints. A GitHub merge does not migrate the Windows installation.
-The Build 073 browser-local compatibility worksheet is not automatically migrated or synchronized by this backend foundation. Production UI adoption/import is a subsequent step and must not silently overwrite the server ledger.
+The Cameras page includes a separate server-backed inventory and ledger viewer. The Build 073 browser-local compatibility worksheet remains available but is not automatically imported or synchronized, to avoid silent server ledger overwrites. Review and re-enter approved models explicitly.
 
 ## Validation
 Require Alembic upgrade/downgrade, owner/admin/household/read-only authorization, revision invalidation, replay prevention, audit sanitization and five GitHub CI lanes; verify the independent post-merge main run. Local machine/HA/MQTT/go2rtc remain undisturbed.
