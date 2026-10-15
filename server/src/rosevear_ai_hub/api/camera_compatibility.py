@@ -6,12 +6,14 @@ from datetime import UTC, datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Path
+from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.auth import require_roles
+from rosevear_ai_hub.camera_plan_identity import ensure_no_duplicate
 from rosevear_ai_hub.database import get_session
 from rosevear_ai_hub.models import CameraCompatibilityLedger, CameraCompatibilityRecord, User
 
@@ -104,10 +106,13 @@ def list_plans(_actor: Viewer, db: DB) -> list[CameraPlanOutput]:
 
 @router.post("", response_model=CameraPlanOutput, status_code=201)
 def create_plan(payload: CameraPlanInput, actor: Admin, db: DB) -> CameraPlanOutput:
+    brand, model, location = safe(payload.brand), safe(payload.model), payload.location.strip()
+    signature = ensure_no_duplicate(db, brand, model, location)
     item = CameraCompatibilityRecord(
-        brand=safe(payload.brand),
-        model=safe(payload.model),
-        location=payload.location.strip(),
+        brand=brand,
+        model=model,
+        location=location,
+        identity_fingerprint=signature,
         method=payload.method,
         evidence=safe(payload.evidence) if payload.evidence.strip() else "",
         revision=1,
@@ -115,7 +120,11 @@ def create_plan(payload: CameraPlanInput, actor: Admin, db: DB) -> CameraPlanOut
     db.add(item)
     db.flush()
     entry(db, item, actor, "created")
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Duplicate camera identity.") from exc
     db.refresh(item)
     return output(item)
 
@@ -127,16 +136,23 @@ def update_plan(
     item = db.get(CameraCompatibilityRecord, record_id)
     if item is None:
         raise HTTPException(status_code=404, detail="Camera compatibility record not found.")
-    item.brand = safe(payload.brand)
-    item.model = safe(payload.model)
-    item.location = payload.location.strip()
+    brand, model, location = safe(payload.brand), safe(payload.model), payload.location.strip()
+    signature = ensure_no_duplicate(db, brand, model, location, exclude_id=item.id)
+    item.brand = brand
+    item.model = model
+    item.location = location
+    item.identity_fingerprint = signature
     item.method = payload.method
     item.evidence = safe(payload.evidence) if payload.evidence.strip() else ""
     item.revision += 1
     item.approved_by_user_id = None
     item.approved_at = None
     entry(db, item, actor, "updated")
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Duplicate camera identity.") from exc
     db.refresh(item)
     return output(item)
 
