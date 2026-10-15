@@ -2457,3 +2457,51 @@ export interface CameraImportFieldReadiness {
 export function getCameraImportFieldReadiness(): Promise<CameraImportFieldReadiness> {
   return authJson("GET", "/api/v1/camera-compatibility/import/field-readiness");
 }
+
+export interface CameraRuntimeAcceptanceEvidence {
+  id: number;
+  actor_user_id: number;
+  inventory_snapshot: string;
+  migration_revision: string;
+  camera_count: number;
+  imported_count: number;
+  backup_drill_confirmed: boolean;
+  ha_connected_confirmed: boolean;
+  mqtt_connected_confirmed: boolean;
+  camera_status_confirmed: boolean;
+  decision: "accepted" | "hold";
+  created_at: string;
+}
+
+export interface CameraRuntimeAssurance {
+  schema_ready: boolean;
+  migration_revision: string | null;
+  inventory_snapshot: string;
+  camera_count: number;
+  imported_count: number;
+  latest: CameraRuntimeAcceptanceEvidence | null;
+  latest_snapshot_current: boolean;
+  evidence_is_manual_only: boolean;
+  windows_runtime_verified_automatically: boolean;
+}
+
+export function getCameraRuntimeAssurance(): Promise<CameraRuntimeAssurance> {
+  return authJson("GET", "/api/v1/camera-import-assurance/status");
+}
+
+export function saveCameraRuntimeAcceptance(
+  expectedSnapshot: string,
+  decision: "accepted" | "hold",
+  checks: {
+    backup_drill_confirmed: boolean;
+    ha_connected_confirmed: boolean;
+    mqtt_connected_confirmed: boolean;
+    camera_status_confirmed: boolean;
+  },
+): Promise<CameraRuntimeAcceptanceEvidence> {
+  return authJson("POST", "/api/v1/camera-import-assurance/owner-acceptance", {
+    expected_snapshot: expectedSnapshot,
+    decision,
+    ...checks,
+  });
+}
