@@ -2505,3 +2505,21 @@ export function saveCameraRuntimeAcceptance(
     ...checks,
   });
 }
+
+export interface CameraOwnerReconciliation {
+  status: "HOLD" | "MANUAL_REVIEW_CURRENT";
+  reasons: string[];
+  latest_evidence_id: number | null;
+  latest_decision: string | null;
+  evidence_count: number;
+  current_inventory_count: number;
+  current_import_events: number;
+  snapshot_current: boolean;
+  schema_ready: boolean;
+  runtime_verified_automatically: boolean;
+  isolated_recovery_verified_automatically: boolean;
+}
+
+export function getCameraOwnerReconciliation(): Promise<CameraOwnerReconciliation> {
+  return authJson("GET", "/api/v1/camera-import-reconciliation");
+}
