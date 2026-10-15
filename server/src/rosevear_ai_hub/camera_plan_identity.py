@@ -28,7 +28,9 @@ def find_duplicate(
     # Scan legacy Build 074 rows whose fingerprint was intentionally not backfilled.
     statement = select(CameraCompatibilityRecord).order_by(CameraCompatibilityRecord.id)
     for row in db.scalars(statement):
-        if row.id != exclude_id and normalized_identity(row.brand, row.model, row.location) == target:
+        if row.id != exclude_id and (
+            normalized_identity(row.brand, row.model, row.location) == target
+        ):
             return row
     return None
 
@@ -37,5 +39,7 @@ def ensure_no_duplicate(
     db: Session, brand: str, model: str, location: str, *, exclude_id: int | None = None
 ) -> str:
     if find_duplicate(db, brand, model, location, exclude_id=exclude_id) is not None:
-        raise HTTPException(status_code=409, detail="An equivalent camera model and location already exist.")
+        raise HTTPException(
+            status_code=409, detail="An equivalent camera model and location already exist."
+        )
     return identity_fingerprint(brand, model, location)
