@@ -1,7 +1,6 @@
 """Build 076 regression checks for identity-bound camera import acceptance."""
 
 import hashlib
-
 from datetime import UTC, datetime, timedelta
 
 import pytest
