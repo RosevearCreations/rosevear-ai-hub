@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { CameraInventoryImport } from "./CameraInventoryImport";
+import { CameraImportFieldAcceptance } from "./CameraImportFieldAcceptance";
 
 import {
   approveServerCameraPlan,
@@ -114,6 +115,7 @@ export function ServerCameraInventory({ canAdminister }: { canAdminister: boolea
         </section>
       ) : null}
       {message ? <p role="status">{message}</p> : null}
+      {canAdminister ? <CameraImportFieldAcceptance /> : null}
       <CameraInventoryImport canAdminister={canAdminister} onImported={refresh} />
       <p>Legacy browser-local plans are not imported automatically. Backup and migrate the Hub
         database using the approved Windows procedure before using this feature.</p>
