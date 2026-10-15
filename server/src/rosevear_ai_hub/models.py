@@ -626,3 +626,22 @@ class CameraCompatibilityLedger(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.current_timestamp(), nullable=False
     )
+
+
+class CameraImportReview(Base):
+    """Owner-bound, one-use review receipt; never stores raw tokens or camera secrets."""
+
+    __tablename__ = "camera_import_reviews"
+
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    actor_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    payload_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    inventory_snapshot: Mapped[str] = mapped_column(String(64), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    imported_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.current_timestamp()
+    )
