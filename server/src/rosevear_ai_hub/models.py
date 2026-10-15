@@ -645,3 +645,26 @@ class CameraImportReview(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.current_timestamp()
     )
+
+
+class CameraImportAcceptanceEvidence(Base):
+    """Immutable manual field observations; not automatic device health certification."""
+
+    __tablename__ = "camera_import_acceptance_evidence"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    actor_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    inventory_snapshot: Mapped[str] = mapped_column(String(64), nullable=False)
+    migration_revision: Mapped[str] = mapped_column(String(32), nullable=False)
+    camera_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    imported_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    backup_drill_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    ha_connected_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    mqtt_connected_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    camera_status_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    decision: Mapped[str] = mapped_column(String(16), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.current_timestamp(), nullable=False
+    )
