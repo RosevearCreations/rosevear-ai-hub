@@ -2403,3 +2403,39 @@ export function approveServerCameraPlan(id: number): Promise<CameraCompatibility
 export function getServerCameraPlanLedger(id: number): Promise<CameraCompatibilityLedgerEntry[]> {
   return authJson("GET", "/api/v1/camera-compatibility/" + id + "/ledger");
 }
+
+
+// Build 075: staged owner-reviewed import. Legacy local approvals are never imported.
+export type CameraImportEntry = Pick<
+  CameraCompatibilityPlan, "brand" | "model" | "location" | "method" | "evidence"
+>;
+
+export interface CameraImportPreview {
+  server_snapshot: string;
+  rows: Array<{ index: number; status: "ready" | "conflict"; existing_id: number | null }>;
+  ready: number;
+  conflicts: number;
+}
+
+export interface CameraImportResult {
+  created: CameraCompatibilityPlan[];
+  imported: number;
+  approvals_carried_over: false;
+}
+
+export function previewCameraInventoryImport(
+  entries: CameraImportEntry[],
+): Promise<CameraImportPreview> {
+  return authJson("POST", "/api/v1/camera-compatibility/import/preview", { entries });
+}
+
+export function commitCameraInventoryImport(
+  entries: CameraImportEntry[],
+  expectedSnapshot: string,
+): Promise<CameraImportResult> {
+  return authJson("POST", "/api/v1/camera-compatibility/import/commit", {
+    entries,
+    expected_snapshot: expectedSnapshot,
+    owner_acknowledged: true,
+  });
+}
