@@ -11,9 +11,9 @@ from rosevear_ai_hub import __version__
 from rosevear_ai_hub.api.audit import router as audit_router
 from rosevear_ai_hub.api.automations import router as automations_router
 from rosevear_ai_hub.api.business import router as business_router
+from rosevear_ai_hub.api.camera_compatibility import router as camera_compatibility_router
 from rosevear_ai_hub.api.camera_reviews import router as camera_reviews_router
 from rosevear_ai_hub.api.cameras import router as cameras_router
-from rosevear_ai_hub.api.camera_compatibility import router as camera_compatibility_router
 from rosevear_ai_hub.api.chat import router as chat_router
 from rosevear_ai_hub.api.confirmations import router as confirmations_router
 from rosevear_ai_hub.api.frigate import router as frigate_router
