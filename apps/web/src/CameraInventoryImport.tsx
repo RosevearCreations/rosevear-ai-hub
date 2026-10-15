@@ -85,7 +85,7 @@ export function CameraInventoryImport({
   }
 
   async function commit() {
-    if (!preview || !reviewed || !canAdminister || busy) return;
+    if (!preview || !preview.preview_token || !reviewed || !canAdminister || busy) return;
     const selected = preview.rows
       .filter((row) => row.status === "ready")
       .map((row) => source[row.index]);
@@ -93,7 +93,7 @@ export function CameraInventoryImport({
     setBusy(true);
     setMessage("");
     try {
-      const result = await commitCameraInventoryImport(selected, preview.server_snapshot);
+      const result = await commitCameraInventoryImport(selected, preview.server_snapshot, preview.preview_token);
       setMessage(
         result.imported + " records imported without approval. Legacy worksheet preserved.",
       );
@@ -115,15 +115,17 @@ export function CameraInventoryImport({
   if (!canAdminister) return null;
   return (
     <section aria-label="Import browser camera models">
-      <h3>Build 075 — Review legacy browser inventory</h3>
+      <h3>Build 076 — Identity-bound legacy inventory review</h3>
       <p>Read-only preview first. Nothing is imported automatically, and existing server
-        records are never overwritten. Browser-local approval flags are not transferred.</p>
+        records are never overwritten. Browser-local approval flags are not transferred.
+        Confirmation expires after ten minutes and is bound to the reviewing account.</p>
       <button type="button" disabled={busy} onClick={() => void beginPreview()}>
         Preview browser entries
       </button>
       {preview ? (
         <div>
           <p>{preview.ready} ready; {preview.conflicts} conflicts.</p>
+          <p>Review expires: {preview.expires_at ? new Date(preview.expires_at).toLocaleString() : "N/A"}</p>
           <ul>{preview.rows.map((row) => (
             <li key={row.index}>
               {source[row.index].brand} — {source[row.index].model}:
@@ -131,7 +133,7 @@ export function CameraInventoryImport({
                 "Existing record #" + row.existing_id + " — skipped"}
             </li>
           ))}</ul>
-          {preview.ready > 0 ? (
+          {preview.ready > 0 && preview.preview_token ? (
             <>
               <label><input type="checkbox" checked={reviewed} disabled={busy}
                 onChange={(event) => setReviewed(event.target.checked)} />
