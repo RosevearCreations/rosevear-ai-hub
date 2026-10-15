@@ -142,9 +142,7 @@ def update_plan(
 
 
 @router.post("/{record_id}/approve", response_model=CameraPlanOutput)
-def approve_plan(
-    actor: Admin, db: DB, record_id: int = Path(ge=1)
-) -> CameraPlanOutput:
+def approve_plan(actor: Admin, db: DB, record_id: int = Path(ge=1)) -> CameraPlanOutput:
     item = db.get(CameraCompatibilityRecord, record_id)
     if item is None:
         raise HTTPException(status_code=404, detail="Camera compatibility record not found.")
@@ -163,9 +161,7 @@ def approve_plan(
 
 
 @router.get("/{record_id}/ledger", response_model=list[LedgerOutput])
-def plan_ledger(
-    _actor: Viewer, db: DB, record_id: int = Path(ge=1)
-) -> list[LedgerOutput]:
+def plan_ledger(_actor: Viewer, db: DB, record_id: int = Path(ge=1)) -> list[LedgerOutput]:
     if db.get(CameraCompatibilityRecord, record_id) is None:
         raise HTTPException(status_code=404, detail="Camera compatibility record not found.")
     statement = (
