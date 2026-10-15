@@ -605,6 +605,7 @@ class CameraCompatibilityRecord(TimestampMixin, Base):
     approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
+
 class CameraCompatibilityLedger(Base):
     """Append-only manual approval evidence for an exact record revision."""
 
