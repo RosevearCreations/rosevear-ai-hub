@@ -22,7 +22,9 @@ $ip = $matchesSite.Groups[1].Value
 $address = [System.Net.IPAddress]::Parse($ip)
 $octets = $address.GetAddressBytes()
 $isPrivate = ($octets[0] -eq 10 -or ($octets[0] -eq 172 -and $octets[1] -ge 16 -and $octets[1] -le 31) -or ($octets[0] -eq 192 -and $octets[1] -eq 168))
-if (-not $isPrivate -or $raw -notmatch '(?m)^\s*admin off\s*
+if (-not $isPrivate -or $raw -notmatch '(?m)^\s*admin off\s*$' -or
+    $raw -notmatch '(?m)^\s*@trusted remote_ip\s+(?!0\.0\.0\.0/0|any|\*)' -or
+    $raw -notmatch [regex]::Escape("bind $ip") -or
     $raw -notmatch 'reverse_proxy\s+127\.0\.0\.1:8765' -or
     $raw -notmatch '(?m)^\s*tls internal\s*$') {
     throw 'HOLD: gateway configuration does not meet private LAN safety constraints.'
