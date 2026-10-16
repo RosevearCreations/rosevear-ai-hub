@@ -17,21 +17,27 @@ function Write-GatewayStatus([string]$message) {
     Write-Host $line
 }
 $ready = $false
+$lastReadinessState = 'not-ready'
 for ($i = 1; $i -le $MaxAttempts; $i++) {
     try {
         $health = Invoke-RestMethod -Uri 'http://127.0.0.1:8765/health' -TimeoutSec 4
-        $home = Invoke-WebRequest -Uri 'http://127.0.0.1:8765/' -UseBasicParsing -TimeoutSec 4
+        $homeResponse = Invoke-WebRequest -Uri 'http://127.0.0.1:8765/' -UseBasicParsing -TimeoutSec 4
         $manifest = Invoke-WebRequest -Uri 'http://127.0.0.1:8765/manifest.webmanifest' -UseBasicParsing -TimeoutSec 4
-        if ($health.status -eq 'ok' -and $home.StatusCode -eq 200 -and $manifest.StatusCode -eq 200) {
+        if ($health.status -eq 'ok' -and $homeResponse.StatusCode -eq 200 -and $manifest.StatusCode -eq 200) {
             $ready = $true
             break
         }
+        $lastReadinessState = 'unexpected-response'
     } catch {
-        # Backend may still be starting; bounded wait is safer than restarting it.
+        # Only record exception type, never HTTP response bodies, paths or credentials.
+        $lastReadinessState = 'probe-error-' + $_.Exception.GetType().Name
     }
     if ($i -lt $MaxAttempts) { Start-Sleep -Seconds $DelaySeconds }
 }
-if (-not $ready) { Write-GatewayStatus 'HOLD: built PWA not ready by bounded deadline.'; exit 2 }
+if (-not $ready) {
+    Write-GatewayStatus ('HOLD: built PWA readiness timed out (' + $lastReadinessState + ').')
+    exit 2
+}
 try {
     & $recover
     if (-not $?) { throw 'Gateway recovery command did not succeed.' }

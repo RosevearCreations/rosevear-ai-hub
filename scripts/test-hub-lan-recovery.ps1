@@ -24,6 +24,15 @@ foreach ($required in @('New-ScheduledTaskTrigger -AtLogOn','LogonType Interacti
 foreach ($required in @('MaxAttempts','DelaySeconds','Invoke-RestMethod','recover-lan-https.ps1')) {
     if (-not $runner.Contains($required)) { throw "Bounded startup check missing: $required" }
 }
+# PowerShell variable names are case-insensitive. $HOME is read-only and must
+# never be assigned in gateway startup code, even with spelling "$home".
+if ($runner -match '(?im)^\s*\$home\s*=') {
+    throw 'Reserved PowerShell automatic variable HOME assigned in gateway worker.'
+}
+if (-not $runner.Contains('$homeResponse = Invoke-WebRequest') -or
+    -not $runner.Contains('$homeResponse.StatusCode -eq 200')) {
+    throw 'Gateway worker must evaluate the index response via a non-reserved variable.'
+}
 foreach ($forbidden in @('New-NetFirewallRule','Remove-NetFirewallRule','Stop-Service','Restart-Service','Start-Service')) {
     if ($runner.Contains($forbidden)) { throw "Forbidden startup mutation: $forbidden" }
 }
