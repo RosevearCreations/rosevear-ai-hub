@@ -43,3 +43,18 @@ without starting Caddy. A normal run may start Caddy only after the checks pass.
 On October 15, the user confirmed private HTTPS connectivity from the client PC
 after correcting old IP `192.168.68.78` to `192.168.68.74`.
 This does not yet establish reboot persistence.
+
+## Local Windows operator verification (only after this release is installed)
+
+1. From the repository directory, inspect the task without changing it:
+   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-hub-lan-startup-task.ps1`.
+2. Check existing gateway authorization and runtime without starting Caddy:
+   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\recover-lan-https.ps1 -CheckOnly`.
+3. After reviewing task identity, optionally install from **elevated** PowerShell:
+   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-hub-lan-startup-task.ps1 -Install`.
+4. Verify exactly one named task, then test sign-out/sign-in only at a convenient time.
+   Test the client browser, TLS trust and authenticated sign-in again. Do not force reboot.
+5. To remove only this exact task (not the running gateway or other services):
+   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-hub-lan-startup-task.ps1 -Remove`.
+
+These commands are instructions, not actions automatically performed by GitHub CI.
