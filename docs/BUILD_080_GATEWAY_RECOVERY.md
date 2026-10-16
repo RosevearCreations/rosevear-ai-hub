@@ -11,12 +11,23 @@ it will not change the server IP, firewall, backend/Vite exposure, Windows servi
 Caddy trust store, camera state, or backup data. `-CheckOnly` verifies prerequisites
 without starting Caddy. A normal run may start Caddy only after the checks pass.
 
-## Persistent startup design (not yet enabled)
-Implement and verify a separate user-logon scheduled-task installer with an exact-action
-identity check, opt-in install/remove, secure process ownership verification, bounded
-retry after backend readiness and no risk to the existing recovery tasks. Do not
-alter the existing working `hub-recovery.ps1` or its operator stash.
-Require local operator validation before installation.
+## Persistent startup design — implemented, not installed
+
+- `scripts/install-hub-lan-startup-task.ps1` registers an exact-identity, opt-in
+  Windows scheduled task with `-Install` and removes only that matching task with
+  `-Remove`. No argument means status inspection only. Requires elevated PowerShell.
+- `scripts/start-hub-lan-gateway.ps1` waits a bounded time for API, index and
+  PWA manifest readiness, then invokes `recover-lan-https.ps1` without altering
+  Hub backend, Home Assistant, MQTT, Ollama, go2rtc or camera services.
+- `scripts/recover-lan-https.ps1` only starts previously authorized Caddy with
+  current saved LAN address and matching private firewall rule. If the IP changes,
+  firewall broadens, certificate/process ownership is wrong, or backend is unavailable,
+  recovery stops with HOLD instead of guessing a fix.
+- **Important:** This is an *at-user-logon* task, not a pre-login Windows service.
+  Reserve the server LAN address in the router's DHCP settings for reliable access.
+- The operator must review `-CheckOnly` first, then explicitly install the task,
+  and verify sign-out/sign-in recovery and client certificate trust locally.
+  Do not force an unattended reboot as part of GitHub CI.
 
 ## Required acceptance before GREEN
 - CI/PowerShell syntax and fake-environment tests for missing/changed IP, disabled
