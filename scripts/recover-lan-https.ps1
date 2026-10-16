@@ -19,7 +19,11 @@ $raw = Get-Content -LiteralPath $config -Raw
 $matchesSite = [regex]::Match($raw, '(?m)^https://(\d{1,3}(?:\.\d{1,3}){3}):'+$Port+'\s*\{')
 if (-not $matchesSite.Success) { throw 'HOLD: expected private HTTPS site not found.' }
 $ip = $matchesSite.Groups[1].Value
-$address = [System.Net.IPAddress]::Parse($ip)
+$address = $null
+if (-not [System.Net.IPAddress]::TryParse($ip, [ref]$address) -or
+    $address.AddressFamily -ne [System.Net.Sockets.AddressFamily]::InterNetwork) {
+    throw 'HOLD: gateway IPv4 is invalid.'
+}
 $octets = $address.GetAddressBytes()
 $isPrivate = ($octets[0] -eq 10 -or ($octets[0] -eq 172 -and $octets[1] -ge 16 -and $octets[1] -le 31) -or ($octets[0] -eq 192 -and $octets[1] -eq 168))
 if (-not $isPrivate -or $raw -notmatch '(?m)^\s*admin off\s*$' -or
