@@ -180,6 +180,9 @@ jobs:
           foreach ($forbidden in @('New-NetFirewallRule', 'Set-NetFirewallAddressFilter', 'Remove-NetFirewallRule', 'Start-Process', 'Stop-Process', 'Register-ScheduledTask', 'Unregister-ScheduledTask')) {
             if ($source.Contains($forbidden)) { throw "Build 079 inspector must be read only: $forbidden" }
           }
+      - name: Validate Build 080 private LAN recovery guards
+        shell: pwsh
+        run: ./scripts/test-hub-lan-recovery.ps1
       - name: Check Rust shell
         run: npm run desktop:check
       - name: Build Windows desktop executable
