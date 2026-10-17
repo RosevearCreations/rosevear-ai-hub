@@ -10,6 +10,7 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 Import-Module (Join-Path $PSScriptRoot 'HubGatewayEvidence.psm1') -Force
+. (Join-Path $PSScriptRoot 'HubTaskIdentityEvidence.ps1')
 $root = Split-Path -Parent $PSScriptRoot
 $gatewayExecutable = Join-Path $root 'tools\caddy\caddy.exe'
 $caddyConfiguration = Join-Path $root 'data\lan-access\Caddyfile'
@@ -30,15 +31,29 @@ if (-not $private) { throw 'Refusing a public address.' }
 $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
 $taskExists = [bool]$task
 $taskOwned = $false
+$taskIdentityReason = 'TASK_ABSENT'
 $taskLogon = $false
 $taskRunSucceeded = $false
 if ($task) {
     $actions = @($task.Actions)
-    $identity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
-    $taskOwned = ($actions.Count -eq 1 -and
-        [IO.Path]::GetFileName([string]$actions[0].Execute) -ieq 'powershell.exe' -and
-        [string]$actions[0].Arguments -ceq $taskArgs -and
-        [string]$task.Principal.UserId -ieq $identity)
+    $operatorSid = [string][Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+    $principalSid = ''
+    try {
+        $principalName = [string]$task.Principal.UserId
+        if ($principalName -match '^S-\d+-\d+(-\d+)+$') {
+            $principalSid = ([Security.Principal.SecurityIdentifier]::new($principalName)).Value
+        } elseif (-not [string]::IsNullOrWhiteSpace($principalName)) {
+            $principalSid = ([Security.Principal.NTAccount]::new($principalName)).Translate(
+                [Security.Principal.SecurityIdentifier]).Value
+        }
+    } catch {
+        # Fail closed if Windows cannot resolve the task principal.
+    }
+    $actionExecutable = if ($actions.Count -eq 1) { [string]$actions[0].Execute } else { '' }
+    $actionArguments = if ($actions.Count -eq 1) { [string]$actions[0].Arguments } else { '' }
+    $identityVerdict = Get-HubTaskIdentityVerdict -TaskExists $true -ActionCount $actions.Count -Executable $actionExecutable -Arguments $actionArguments -ExpectedArguments $taskArgs -CurrentSid $operatorSid -PrincipalSid $principalSid
+    $taskOwned = $identityVerdict.task_owned
+    $taskIdentityReason = $identityVerdict.identity_reason
     $taskLogon = @($task.Triggers | Where-Object {
         $_.CimClass.CimClassName -eq 'MSFT_TaskLogonTrigger' -and $_.Enabled -eq $true
     }).Count -gt 0
@@ -101,6 +116,7 @@ $evidence = @{
 }
 $verdict = Get-HubGatewayEvidenceVerdict -Evidence $evidence
 Write-Host 'Read-only gateway checks (separate manual reboot gate):'
+Write-Host ('Task identity status: ' + $taskIdentityReason)
 [pscustomobject]$evidence | Format-List
 $verdict | Format-List
 if ($verdict.runtime_posture -eq 'HOLD') { exit 2 }
