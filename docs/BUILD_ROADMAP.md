@@ -415,6 +415,20 @@ This is the canonical implementation sequence. Build numbers are never reused.
 
 
 
+## Phase 12 — Private Gateway Operational Acceptance
+
+### Build 081 — Private Gateway Acceptance Evidence & Deferred Reboot Readiness
+- fix misleading PWA inspection caused by case-insensitive reserved PowerShell HOME
+- add an owner-run, read-only snapshot of backend, gateway listener/process, scoped firewall and Windows sign-in task
+- distinguish locally observed readiness from client-side HTTPS and remote login acceptance
+- explicitly retain DEFERRED state for the Windows server reboot test; no automatic reboot or task writes
+- parser, read-only security and conservative-policy Windows CI tests
+- no new service, API exposure, SQL migration, paid dependency or router changes
+
+### Build 082 — Scope to be confirmed
+- select practical work from the project roadmap independently of the deferred reboot acceptance
+- no retroactive claiming of host reboot recovery or camera/backup operator acceptance
+
 ## Build execution rules
 
 Each build must:
