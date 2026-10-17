@@ -426,3 +426,16 @@ Each build must:
 6. verify migrations where applicable
 7. record rollback path
 8. pass CI before promotion
+
+
+### Build 081 — Deferred Reboot Acceptance & Private Gateway Continuity Diagnostics
+- operator-requested continuation without a Windows server reboot
+- read-only cross-check of private Caddy gateway, tightly scoped firewall and
+  exact logon scheduled-task identity
+- fail-closed, synthetic Windows regression tests that never certify an unseen reboot
+- client certificate trust, camera owner evidence and backup provenance remain
+  separately accepted, not inferred from server diagnostics
+- no machine restart, firewall mutation, credential exposure or paid dependencies
+- defer supervised server restart/VM integration acceptance until operator is available
+- see [Build 081 operator runbook](BUILD_081_DEFERRED_REBOOT_ACCEPTANCE.md)
+
