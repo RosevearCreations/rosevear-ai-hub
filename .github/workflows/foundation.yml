@@ -183,6 +183,9 @@ jobs:
       - name: Validate Build 080 private LAN recovery guards
         shell: pwsh
         run: ./scripts/test-hub-lan-recovery.ps1
+      - name: Verify Build 081 gateway acceptance policy
+        shell: pwsh
+        run: ./scripts/test-hub-gateway-081.ps1
       - name: Check Rust shell
         run: npm run desktop:check
       - name: Build Windows desktop executable
