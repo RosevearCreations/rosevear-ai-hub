@@ -439,3 +439,15 @@ Each build must:
 - defer supervised server restart/VM integration acceptance until operator is available
 - see [Build 081 operator runbook](BUILD_081_DEFERRED_REBOOT_ACCEPTANCE.md)
 
+
+
+### Build 082 — Gateway Task Identity Reconciliation & Diagnostic Accuracy
+- diagnose the Build 081 TaskOwned FALSE while preserving the working gateway
+- same-SID and exact task action evidence with bounded, privacy-safe mismatch categories
+- fix the legacy LAN inspector reserved PowerShell HOME variable collision
+- read-only synthetic Windows CI and operator acceptance; no task rewrite or restart
+- keep remote HTTPS and Windows server reboot acceptance separate; reboot remains deferred
+- see docs/BUILD_082_GATEWAY_TASK_IDENTITY.md
+
+### Build 083 — Scope to be confirmed
+- renew practical home/workshop/business functionality after Build 082 CI promotion
