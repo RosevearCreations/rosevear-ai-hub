@@ -1661,3 +1661,17 @@ Next queued Build 071 — Camera Transport Configuration & Verified Stream Accep
 
 Reboot acceptance stays pending even when all code CI and read-only runtime checks pass.
 See docs/BUILD_081_DEFERRED_REBOOT_ACCEPTANCE.md.
+
+
+## Build 082 — Gateway Task Identity Reconciliation & Diagnostic Accuracy
+- [x] Fail-closed identity reason codes without leaking Windows principal or paths
+- [x] Same-SID account identity check, exact task action and arguments remain required
+- [x] Resolve reserved PowerShell HOME variable bug in old LAN read-only inspector
+- [x] Windows CI synthetic identity failures, PowerShell parsing and no-mutation tests
+- [x] Operator runbook with no-reboot diagnostics and rollback
+- [ ] Development PR and independent dev push 5/5 GREEN
+- [ ] Production PR and independent main push 5/5 GREEN
+- [ ] Actual Windows server TaskOwned reconciliation (operator-run)
+- [ ] Supervised Windows server reboot acceptance (owner-deferred)
+
+See docs/BUILD_082_GATEWAY_TASK_IDENTITY.md. Next proposed: Build 083 — scope to be confirmed.
