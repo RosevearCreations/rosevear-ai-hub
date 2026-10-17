@@ -183,6 +183,9 @@ jobs:
       - name: Validate Build 080 private LAN recovery guards
         shell: pwsh
         run: ./scripts/test-hub-lan-recovery.ps1
+      - name: Build 081 read-only deferred reboot evidence regression
+        shell: pwsh
+        run: ./scripts/test-hub-reboot-readiness.ps1
       - name: Check Rust shell
         run: npm run desktop:check
       - name: Build Windows desktop executable
