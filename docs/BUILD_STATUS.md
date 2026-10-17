@@ -1648,3 +1648,16 @@ Next queued Build 070 — Camera Inventory Discovery & Safe Registration Accepta
 
 See docs/BUILD_070_CAMERA_ACCEPTANCE.md.
 Next queued Build 071 — Camera Transport Configuration & Verified Stream Acceptance.
+
+
+## Build 081 — Deferred Reboot Acceptance & Private Gateway Continuity Diagnostics
+- [x] Pure fail-closed evidence evaluator and privacy-safe read-only PowerShell diagnostic
+- [x] Windows syntax/security and synthetic pass/fail evidence test cases
+- [x] Operator runbook; no reboot required for development
+- [ ] Dev PR and independent dev push five-lane CI GREEN
+- [ ] Main PR and independent main push five-lane CI GREEN
+- [ ] Actual Windows server acceptance using exact promoted commit
+- [ ] Deferred supervised reboot acceptance (operator explicitly unavailable now)
+
+Reboot acceptance stays pending even when all code CI and read-only runtime checks pass.
+See docs/BUILD_081_DEFERRED_REBOOT_ACCEPTANCE.md.
