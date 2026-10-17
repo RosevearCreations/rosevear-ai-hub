@@ -33,9 +33,9 @@ try {
 } catch {}
 if ($apiHealthy) {
     try {
-        $home = Invoke-WebRequest -Uri 'http://127.0.0.1:8765/' -UseBasicParsing -TimeoutSec 4
+        $indexResponse = Invoke-WebRequest -Uri 'http://127.0.0.1:8765/' -UseBasicParsing -TimeoutSec 4
         $manifest = Invoke-WebRequest -Uri 'http://127.0.0.1:8765/manifest.webmanifest' -UseBasicParsing -TimeoutSec 4
-        $pwaReady = ($home.StatusCode -eq 200 -and $manifest.StatusCode -eq 200)
+        $pwaReady = ($indexResponse.StatusCode -eq 200 -and $manifest.StatusCode -eq 200)
     } catch {}
 }
 $rule = Get-NetFirewallRule -DisplayName 'Rosevear AI Hub LAN HTTPS' -ErrorAction SilentlyContinue

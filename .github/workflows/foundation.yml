@@ -186,6 +186,9 @@ jobs:
       - name: Build 081 read-only deferred reboot evidence regression
         shell: pwsh
         run: ./scripts/test-hub-reboot-readiness.ps1
+      - name: Validate Build 082 identity diagnostics
+        shell: pwsh
+        run: ./scripts/test-hub-gateway-082.ps1
       - name: Check Rust shell
         run: npm run desktop:check
       - name: Build Windows desktop executable
