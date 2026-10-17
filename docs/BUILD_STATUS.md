@@ -1648,3 +1648,17 @@ Next queued Build 070 — Camera Inventory Discovery & Safe Registration Accepta
 
 See docs/BUILD_070_CAMERA_ACCEPTANCE.md.
 Next queued Build 071 — Camera Transport Configuration & Verified Stream Acceptance.
+
+
+## Build 081 — Private Gateway Acceptance Evidence & Deferred Reboot Readiness
+
+- [x] Fix legacy read-only LAN inspector reserved PowerShell HOME assignment
+- [x] New non-mutating private gateway, scoped firewall, process and startup task report
+- [x] Conservative pure policy with explicit remote TLS recheck and deferred server reboot
+- [x] Windows parser, no-mutation, false-ready and task-result regression tests
+- [x] Documentation includes no-reboot acceptance procedure and no schema changes
+- [ ] Dev PR five-job CI GREEN and independent dev push GREEN
+- [ ] Main PR five-job CI GREEN and independent main push GREEN
+- [ ] Actual Windows server restart persistence verified (explicitly deferred by owner)
+
+See docs/BUILD_081_GATEWAY_ACCEPTANCE.md. Build 082 scope will be selected from renewed practical-operations roadmap.
