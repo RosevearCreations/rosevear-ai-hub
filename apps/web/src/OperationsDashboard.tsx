@@ -337,6 +337,7 @@ export function OperationsDashboard({
   const [loading, setLoading] = useState(false);
   const [reviewed, setReviewed] = useState<SnapshotReview>({});
   const [handoffVisible, setHandoffVisible] = useState(false);
+  const [handoffAccepted, setHandoffAccepted] = useState<OperationsContext | null>(null);
 
   const refresh = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
@@ -354,6 +355,7 @@ export function OperationsDashboard({
     latestSnapshotRef.current = next;
     // A new measurement invalidates all prior acknowledgement and any visible handoff text.
     setHandoffVisible(false);
+    setHandoffAccepted(null);
     setReviewed({});
     setSnapshot(next);
     setLoading(false);
@@ -392,7 +394,7 @@ export function OperationsDashboard({
             key={item}
             aria-pressed={context === item}
             className={context === item ? "context-selected" : ""}
-            onClick={() => { setContext(item); setHandoffVisible(false); }}
+            onClick={() => { setContext(item); setHandoffVisible(false); setHandoffAccepted(null); }}
           >{item}</button>
         ))}
       </fieldset>
@@ -456,6 +458,30 @@ export function OperationsDashboard({
               value={createOperationsHandoff(context, snapshot, previousSnapshot, reviewed)}
             />
           </>
+        )}
+        {snapshot && (
+          <div className="operations-handoff-acceptance" aria-label="Manual handoff acceptance">
+            <h4>Handoff acceptance checklist</h4>
+            <p>Before marking this handoff reviewed, check its context, snapshot time,
+              reported states, and outstanding follow-ups. Review is not resolution,
+              safety certification, live Windows acceptance or permission to control devices.</p>
+            <ul>
+              <li>Confirm the selected {context} context and snapshot timestamp.</li>
+              <li>Review current unverified and needs-review status cards.</li>
+              <li>Check outstanding follow-ups in their original sections before acting.</li>
+              <li>Share the private report only with an intended recipient, if needed.</li>
+            </ul>
+            <button type="button" disabled={loading || !handoffVisible}
+              aria-pressed={handoffAccepted === context}
+              onClick={() => setHandoffAccepted((value) => value === context ? null : context)}>
+              {handoffAccepted === context
+                ? "Reopen handoff review"
+                : "Mark handoff reviewed (not resolved)"}
+            </button>
+            <p role="status">{handoffAccepted === context
+              ? "Handoff reviewed for this snapshot only — follow-ups remain open until independently verified."
+              : "Handoff not yet reviewed for this snapshot."}</p>
+          </div>
         )}
       </section>
       <section className="panel operations-daily-actions" aria-label="Daily operations action queue">
