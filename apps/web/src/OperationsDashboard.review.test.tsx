@@ -87,3 +87,34 @@ describe("Build 085 dashboard manual comparison", () => {
     expect(container.textContent).not.toMatch(/HIDDEN_TOKEN|HIDDEN_MQTT_PASSWORD/);
   });
 });
+
+describe("Build 086 private report UI", () => {
+  it("shows report only on demand, updates review acknowledgement, isolates context and hides on refresh", async () => {
+    const navigate = vi.fn();
+    render(<OperationsDashboard role="owner" onNavigate={navigate} />);
+    const show = () => screen.getByRole("button", { name: "Show private handoff report" });
+    await waitFor(() => expect(show().hasAttribute("disabled")).toBe(false));
+    expect(screen.queryByRole("textbox", { name: "Copyable operations handoff report" })).toBeNull();
+    fireEvent.click(show());
+    const report = () => screen.getByRole("textbox", { name: "Copyable operations handoff report" }) as HTMLTextAreaElement;
+    expect(report().readOnly).toBe(true);
+    expect(report().value).toContain("Compared with: unavailable");
+    expect(report().value).toContain("Review Home Assistant connection");
+    expect(report().value).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+    fireEvent.click(screen.getByRole("button", {
+      name: "Mark Review Home Assistant connection reviewed for this snapshot",
+    }));
+    expect(report().value).toContain("Reviewed for this snapshot, NOT resolved");
+    fireEvent.click(screen.getByRole("button", { name: "Workshop" }));
+    expect(screen.queryByRole("textbox", { name: "Copyable operations handoff report" })).toBeNull();
+    fireEvent.click(show());
+    expect(report().value).not.toContain("Review Home Assistant connection");
+    expect(report().value).toContain("MQTT");
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(show().hasAttribute("disabled")).toBe(false));
+    expect(screen.queryByRole("textbox", { name: "Copyable operations handoff report" })).toBeNull();
+    fireEvent.click(show());
+    expect(report().value).toContain("Compared with:");
+    expect(report().value).not.toContain("Compared with: unavailable");
+  });
+});
