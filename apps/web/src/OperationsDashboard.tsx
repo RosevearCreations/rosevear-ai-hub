@@ -240,6 +240,56 @@ export function compareOperationsSnapshots(
     || keys.indexOf(a.key) - keys.indexOf(b.key));
 }
 
+// Build 086: deliberate, read-only, allowlisted operations handoff text.
+// No raw provider payloads, errors, credentials, IP addresses or account information.
+export function createOperationsHandoff(
+  context: OperationsContext,
+  current: Snapshot,
+  previous: Snapshot | null,
+  reviewed: SnapshotReview,
+): string {
+  const keys = visibleKeys[context];
+  const statuses = keys.map((key) => {
+    const signal = current.signals.find((item) =>
+      item.key === key && snapshotStateAllowed.includes(item.status));
+    const safeStatus: ReadinessState = signal?.status ?? "unknown";
+    return `- ${dailyActionCopy[key].title}: ${labels[safeStatus]}`;
+  });
+  const actions = prioritizeDailyActions(current.signals, context);
+  const followUps = actions.length
+    ? actions.map((action) =>
+      `- ${action.title}: ${reviewed[action.key as keyof SnapshotReview] ? "Reviewed for this snapshot, NOT resolved" : "Awaiting manual review"} (${action.priority === "review" ? "needs review" : action.priority === "verify" ? "unverified" : "optional setup"})`)
+    : ["- No follow-ups suggested by this snapshot; not a safety finding."];
+  const changes = previous
+    ? compareOperationsSnapshots(previous.signals, current.signals, context)
+    : [];
+  const changeLines = !previous
+    ? ["- No earlier snapshot available for comparison."]
+    : changes.length
+      ? changes.map((change) =>
+        `- ${change.title}: ${labels[change.previous]} -> ${labels[change.current]} (${change.type === "improved" ? "reported ready; confirm separately" : change.type === "verification_lost" ? "verification lost" : change.type === "needs_review" ? "needs manual review" : "configuration changed"})`)
+      : ["- No reported status changes; physical health is not certified."];
+  return [
+    `Rosevear AI Hub — ${context} operations handoff (MANUAL SNAPSHOT)`,
+    `Current sample: ${current.sampledAt.toISOString()}`,
+    previous ? `Compared with: ${previous.sampledAt.toISOString()}` : "Compared with: unavailable",
+    "",
+    "Reported service states:",
+    ...statuses,
+    "",
+    "Top manual follow-ups (reviewed is not resolved):",
+    ...followUps,
+    "",
+    "Reported changes:",
+    ...changeLines,
+    "",
+    "Operator verification: required before any real-world action.",
+    "Server reboot persistence: deferred; not proven by this report.",
+    "No device, camera, MQTT or business action executed.",
+    "This text is a private review aid, not a repair or safety certificate.",
+  ].join("\n");
+}
+
 // Build 084: review is operator acknowledgement of a single snapshot, NOT repair.
 // Keep only finite recognized action keys; never persist, publish or call services.
 export type SnapshotReview = Partial<Record<"ha" | "mqtt" | "camera" | "knowledge" | "business", true>>;
@@ -286,6 +336,7 @@ export function OperationsDashboard({
   const latestSnapshotRef = useRef<Snapshot | null>(null);
   const [loading, setLoading] = useState(false);
   const [reviewed, setReviewed] = useState<SnapshotReview>({});
+  const [handoffVisible, setHandoffVisible] = useState(false);
 
   const refresh = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
@@ -301,7 +352,8 @@ export function OperationsDashboard({
     const next = { signals: summarizeOperations(results), sampledAt: new Date() };
     setPreviousSnapshot(latestSnapshotRef.current);
     latestSnapshotRef.current = next;
-    // A new measurement invalidates all prior acknowledgement, including other contexts.
+    // A new measurement invalidates all prior acknowledgement and any visible handoff text.
+    setHandoffVisible(false);
     setReviewed({});
     setSnapshot(next);
     setLoading(false);
@@ -340,7 +392,7 @@ export function OperationsDashboard({
             key={item}
             aria-pressed={context === item}
             className={context === item ? "context-selected" : ""}
-            onClick={() => setContext(item)}
+            onClick={() => { setContext(item); setHandoffVisible(false); }}
           >{item}</button>
         ))}
       </fieldset>
@@ -380,6 +432,30 @@ export function OperationsDashboard({
           <small>Previous: {previousSnapshot.sampledAt.toLocaleString()}
             {" "}· Current: {snapshot.sampledAt.toLocaleString()}.
             Comparing reports, not confirming a repair or automatic recovery.</small>
+        )}
+      </section>
+      <section className="panel operations-handoff" aria-label="Private operations handoff summary">
+        <h3>Manual operations handoff — {context}</h3>
+        <p>Prepare a copyable, private snapshot summary using only approved service
+          names and status categories. Nothing is saved, sent or automatically copied.
+          Review does not mean resolved, and a reported Ready does not prove safety.</p>
+        <button
+          type="button"
+          disabled={!snapshot || loading}
+          aria-expanded={handoffVisible}
+          onClick={() => setHandoffVisible((visible) => !visible)}
+        >{handoffVisible ? "Hide private handoff report" : "Show private handoff report"}</button>
+        {snapshot && handoffVisible && (
+          <>
+            <p>Select the text below to copy deliberately. Treat it as a private
+              operating note; verify any conditions in their original sections.</p>
+            <textarea
+              aria-label="Copyable operations handoff report"
+              readOnly
+              rows={16}
+              value={createOperationsHandoff(context, snapshot, previousSnapshot, reviewed)}
+            />
+          </>
         )}
       </section>
       <section className="panel operations-daily-actions" aria-label="Daily operations action queue">
