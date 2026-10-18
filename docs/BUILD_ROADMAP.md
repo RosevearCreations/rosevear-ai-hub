@@ -490,5 +490,13 @@ Each build must:
 - frontend and React interaction tests; no backend, device, Windows task, service, API, migration, or reboot mutation
 - see docs/BUILD_087_HANDOFF_ACCEPTANCE.md
 
-### Build 088 — Scope to be confirmed
-- select next practical Home/Workshop/Business feature after code promotion and operator feedback
+### Build 088 — Manual Follow-Up Verification Planner
+- display context-scoped verification steps derived only from existing manual snapshot follow-ups
+- direct owners to the established section, never claim verified, resolved, safe or repaired
+- preserve independent verification requirement even after acknowledgement; reset on refresh
+- no new API, storage, polling, device actions, Windows reboot, schema changes or service writes
+- React interaction/privacy regression coverage and operator acceptance runbook
+- see docs/BUILD_088_VERIFICATION_PLANNER.md
+
+### Build 089 — Scope to be confirmed
+- select next practical operator feature following verified Build 088 release

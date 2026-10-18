@@ -140,3 +140,24 @@ describe("Build 087 manual handoff acceptance", () => {
     expect(screen.getByText("Handoff not yet reviewed for this snapshot.")).toBeTruthy();
   });
 });
+
+describe("Build 088 verification planner", () => {
+  it("keeps independently required verification visible after review and scopes by context", async () => {
+    const navigate = vi.fn();
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={navigate} />);
+    await screen.findByRole("button", { name: "Verify in Devices" });
+    expect(container.textContent).toContain("Awaiting manual review and independent verification.");
+    fireEvent.click(screen.getByRole("button", {
+      name: "Mark Review Home Assistant connection reviewed for this snapshot",
+    }));
+    expect(container.textContent).toContain("independent verification still required.");
+    fireEvent.click(screen.getByRole("button", { name: "Verify in Devices" }));
+    expect(navigate).toHaveBeenCalledWith("Devices");
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    expect(screen.queryByRole("button", { name: "Verify in Devices" })).toBeNull();
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+    fireEvent.click(screen.getByRole("button", { name: "Home" }));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(container.textContent).toContain("Awaiting manual review and independent verification."));
+  });
+});
