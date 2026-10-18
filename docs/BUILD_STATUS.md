@@ -1691,3 +1691,18 @@ See docs/BUILD_082_GATEWAY_TASK_IDENTITY.md. Next proposed: Build 083 — scope 
 
 See docs/BUILD_083_DAILY_ACTION_QUEUE.md.
 Next proposed: Build 084 — scope to be confirmed.
+
+
+## Build 084 — Manual Follow-Up Review & Snapshot Revalidation
+- [x] Session-only acknowledgement and reopening per known status key
+- [x] Review counts distinguish manually inspected from verified or repaired
+- [x] Successful refresh clears all acknowledgements across contexts
+- [x] No backend, device, camera, MQTT, business, task scheduler or database writes
+- [x] React interaction test: mark, reopen, context switch, refresh and privacy redaction
+- [x] Operator runbook, rollback, safety boundary, and separate reboot gate
+- [ ] Development PR and independent dev push CI 5/5 GREEN
+- [ ] Main PR and independent main push CI 5/5 GREEN
+- [ ] Actual operator browser acceptance on current Hub PWA (separate from CI)
+- [ ] Supervised server reboot recovery (owner-deferred from Build 081)
+
+See docs/BUILD_084_FOLLOW_UP_REVIEW.md. Next proposed Build 085 (scope to be confirmed).

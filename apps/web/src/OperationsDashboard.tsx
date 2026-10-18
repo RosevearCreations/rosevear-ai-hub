@@ -186,6 +186,14 @@ export function prioritizeDailyActions(
     || contextKeys.indexOf(a.key) - contextKeys.indexOf(b.key)).slice(0, 3);
 }
 
+// Build 084: review is operator acknowledgement of a single snapshot, NOT repair.
+// Keep only finite recognized action keys; never persist, publish or call services.
+export type SnapshotReview = Partial<Record<"ha" | "mqtt" | "camera" | "knowledge" | "business", true>>;
+export function countSnapshotReviews(actions: DailyAction[], reviewed: SnapshotReview) {
+  const acknowledged = actions.filter((action) => reviewed[action.key as keyof SnapshotReview] === true).length;
+  return { acknowledged, outstanding: actions.length - acknowledged };
+}
+
 const labels: Record<ReadinessState, string> = {
   ready: "Ready",
   attention: "Needs review",
@@ -221,6 +229,7 @@ export function OperationsDashboard({
   const [context, setContext] = useState<OperationsContext>("Home");
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [loading, setLoading] = useState(false);
+  const [reviewed, setReviewed] = useState<SnapshotReview>({});
 
   const refresh = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
@@ -232,6 +241,8 @@ export function OperationsDashboard({
       getBusinessConnectors(signal),
     ]);
     if (signal.aborted) return;
+    // A new measurement invalidates all prior acknowledgement, including other contexts.
+    setReviewed({});
     setSnapshot({ signals: summarizeOperations(results), sampledAt: new Date() });
     setLoading(false);
   }, []);
@@ -246,6 +257,7 @@ export function OperationsDashboard({
   const needsReview = visible.filter((item) => item.status === "attention").length;
   const notVerified = visible.filter((item) => item.status === "unknown").length;
   const dailyActions = snapshot ? prioritizeDailyActions(snapshot.signals, context) : [];
+  const reviewCounts = countSnapshotReviews(dailyActions, reviewed);
   return (
     <section className="operations-dashboard" aria-label="Unified operations dashboard">
       <div className="operations-toolbar">
@@ -285,8 +297,16 @@ export function OperationsDashboard({
         <p>
           Suggested from the last manual snapshot. Needs review comes first;
           unverified is not healthy, and optional setup is not a fault.
-          No action is executed from this list.
+          No action is executed from this list. Review marks last only for this
+          page session and reset when the status snapshot is refreshed.
         </p>
+        {snapshot && dailyActions.length > 0 && (
+          <p role="status">
+            {reviewCounts.outstanding} follow-up(s) not yet reviewed ·
+            {" "}{reviewCounts.acknowledged} reviewed for this snapshot.
+            Reviewing does not mean resolved, safe, or verified.
+          </p>
+        )}
         {!snapshot ? <p>Check local services before choosing a follow-up.</p>
           : dailyActions.length === 0
             ? <p>No follow-ups suggested from this snapshot. This does not certify equipment safety or reboot recovery.</p>
@@ -297,8 +317,34 @@ export function OperationsDashboard({
                     <strong>{action.title}</strong>
                     <p>{action.priority === "review" ? "Needs review"
                       : action.priority === "verify" ? "Unverified" : "Optional setup"}: {action.reason}</p>
+                    <p>
+                      <strong>{reviewed[action.key as keyof SnapshotReview]
+                        ? "Reviewed for this snapshot — issue may remain"
+                        : "Awaiting manual review"}</strong>
+                    </p>
                     <button type="button" onClick={() => onNavigate(action.section)}>
                       Open {action.section} for manual review
+                    </button>
+                    {" "}
+                    <button
+                      type="button"
+                      disabled={loading}
+                      aria-label={reviewed[action.key as keyof SnapshotReview]
+                        ? `Reopen review of ${action.title}`
+                        : `Mark ${action.title} reviewed for this snapshot`}
+                      aria-pressed={reviewed[action.key as keyof SnapshotReview] === true}
+                      onClick={() => setReviewed((previous) => {
+                        const updated = { ...previous };
+                        if (updated[action.key as keyof SnapshotReview]) {
+                          delete updated[action.key as keyof SnapshotReview];
+                        } else {
+                          updated[action.key as keyof SnapshotReview] = true;
+                        }
+                        return updated;
+                      })}
+                    >
+                      {reviewed[action.key as keyof SnapshotReview]
+                        ? "Reopen review" : "Mark reviewed (not resolved)"}
                     </button>
                   </li>
                 ))}
