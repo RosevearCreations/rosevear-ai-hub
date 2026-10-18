@@ -457,5 +457,14 @@ Each build must:
 - no new APIs, migrations, external calls, service restarts, task writes or paid services
 - see docs/BUILD_083_DAILY_ACTION_QUEUE.md
 
-### Build 084 — Scope to be confirmed
-- select further practical Home/Workshop/Business capabilities from operator priorities
+### Build 084 — Manual Follow-Up Review & Snapshot Revalidation
+- let owners/operators acknowledge specific context-aware action queue entries for the current snapshot only
+- reviewed does not mean repaired, safe, verified, or automatically executed
+- keep actions visible; support manual reopen and outstanding/reviewed counts
+- reset all review marks after a successful overview refresh; no persistence or server writes
+- protect against status-data leakage and context confusion with React interaction tests
+- no Windows server reboot, new backend route, migration, device write or business write
+- see docs/BUILD_084_FOLLOW_UP_REVIEW.md
+
+### Build 085 — Scope to be confirmed
+- continue practical Home/Workshop/Business improvements from operator priorities
