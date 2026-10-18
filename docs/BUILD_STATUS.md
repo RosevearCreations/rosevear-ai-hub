@@ -1706,3 +1706,18 @@ Next proposed: Build 084 — scope to be confirmed.
 - [ ] Supervised server reboot recovery (owner-deferred from Build 081)
 
 See docs/BUILD_084_FOLLOW_UP_REVIEW.md. Next proposed Build 085 (scope to be confirmed).
+
+
+## Build 085 — Snapshot Change Detection & Reverification Guidance
+- [x] Two manual status snapshot comparison, session-only and without new backend endpoints
+- [x] Separate newly reported attention, lost verification, other changes and ready reports
+- [x] Static privacy-safe guidance, known navigation targets and per-context filtering
+- [x] No safety, repaired-device, server reboot, camera or client HTTPS acceptance inferred
+- [x] Unit and React interaction regression tests for ranking, privacy and refresh behavior
+- [x] Operator runbook, rollback and no-migration security scope
+- [ ] Development PR and independent dev push CI 5/5 GREEN
+- [ ] Production PR and independent main push CI 5/5 GREEN
+- [ ] Live Windows PWA assets/adoption and browser acceptance (separate)
+- [ ] Supervised server reboot recovery (owner-deferred)
+
+See docs/BUILD_085_SNAPSHOT_CHANGE_REVIEW.md. Next proposed: Build 086 — scope to be confirmed.
