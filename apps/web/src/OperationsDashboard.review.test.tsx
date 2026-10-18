@@ -118,3 +118,25 @@ describe("Build 086 private report UI", () => {
     expect(report().value).not.toContain("Compared with: unavailable");
   });
 });
+
+describe("Build 087 manual handoff acceptance", () => {
+  it("requires deliberate visibility, allows reopening, and resets on context change and refresh", async () => {
+    render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    const acceptance = () => screen.getByRole("button", { name: "Mark handoff reviewed (not resolved)" });
+    await waitFor(() => expect(screen.getByRole("button", { name: "Show private handoff report" }).hasAttribute("disabled")).toBe(false));
+    expect(acceptance().hasAttribute("disabled")).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Show private handoff report" }));
+    fireEvent.click(acceptance());
+    expect(screen.getByText(/Handoff reviewed for this snapshot only/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Reopen handoff review" }));
+    expect(screen.getByText("Handoff not yet reviewed for this snapshot.")).toBeTruthy();
+    fireEvent.click(acceptance());
+    fireEvent.click(screen.getByRole("button", { name: "Workshop" }));
+    expect(screen.getByText("Handoff not yet reviewed for this snapshot.")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Show private handoff report" }));
+    fireEvent.click(acceptance());
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Show private handoff report" }).hasAttribute("disabled")).toBe(false));
+    expect(screen.getByText("Handoff not yet reviewed for this snapshot.")).toBeTruthy();
+  });
+});
