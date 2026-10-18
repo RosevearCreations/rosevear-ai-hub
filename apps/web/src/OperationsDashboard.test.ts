@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareOperationsSnapshots, prioritizeDailyActions, summarizeOperations } from "./OperationsDashboard";
+import { compareOperationsSnapshots, createOperationsHandoff, prioritizeDailyActions, summarizeOperations } from "./OperationsDashboard";
 
 const ok = (value: unknown): PromiseFulfilledResult<unknown> => ({
   status: "fulfilled",
@@ -178,5 +178,62 @@ describe("Build 085 bounded manual snapshot change detection", () => {
     expect(changes.map((item) => [item.key, item.type])).toEqual([["ha", "verification_lost"]]);
     expect(JSON.stringify(changes)).not.toMatch(/SECRET|unsafe|http:/);
     expect(compareOperationsSnapshots(previous, previous, "Home")).toEqual([]);
+  });
+});
+
+describe("Build 086 privacy-safe manual handoff", () => {
+  const previous = {
+    sampledAt: new Date("2026-10-17T12:00:00.000Z"),
+    signals: summarizeOperations([
+      ok({ configured: true, available: true }),
+      ok({ configured: true, available: true }),
+      ok({ total: 0, healthy: 0, attention: 0 }),
+      ok({ document_count: 0, needs_indexing_count: 0 }),
+      ok({ connectors: [] }),
+    ]),
+  };
+  const current = {
+    sampledAt: new Date("2026-10-17T13:00:00.000Z"),
+    signals: summarizeOperations([
+      ok({ configured: true, available: false, token: "SECRET_HA_KEY", base_url: "http://lan-private:8123", last_error: "password=SECRET_HA" }),
+      bad,
+      ok({ total: 0, healthy: 0, attention: 0 }),
+      ok({ document_count: 0, needs_indexing_count: 0 }),
+      ok({ connectors: [] }),
+    ]),
+  };
+  it("produces bounded static statuses, previous sample changes and acknowledgement caveats", () => {
+    const home = createOperationsHandoff("Home", current, previous, { ha: true });
+    expect(home).toContain("2026-10-17T13:00:00.000Z");
+    expect(home).toContain("2026-10-17T12:00:00.000Z");
+    expect(home).toContain("Reviewed for this snapshot, NOT resolved");
+    expect(home).toContain("verification lost");
+    expect(home).toContain("deferred; not proven");
+    expect(home).not.toMatch(/SECRET|lan-private|password=|base_url|http:\/\//);
+  });
+  it("keeps each context scoped and works with no baseline", () => {
+    const workshop = createOperationsHandoff("Workshop", current, null, {});
+    expect(workshop).toContain("Compared with: unavailable");
+    expect(workshop).toContain("No earlier snapshot available");
+    expect(workshop).toContain("Review the camera registry");
+    expect(workshop).not.toContain("Review Home Assistant connection");
+    expect(workshop).not.toMatch(/SECRET|lan-private|http:/);
+    const business = createOperationsHandoff("Business", current, previous, {});
+    expect(business).toContain("Review business connectors");
+    expect(business).not.toContain("Review Home Assistant connection");
+    expect(business).not.toMatch(/SECRET|lan-private|http:/);
+  });
+  it("does not let hostile detail/title/section appear in output", () => {
+    const altered = {
+      ...current,
+      signals: [
+        { ...current.signals[0], title: "SECRET_USER", detail: "token=SECRET", section: "https://unsafe" },
+        { key: "fake", title: "SECRET_FAKE", detail: "SECRET", section: "Private", status: "attention" as const },
+        ...current.signals.slice(1),
+      ],
+    };
+    const result = createOperationsHandoff("Home", altered, previous, {});
+    expect(result).toContain("Review Home Assistant connection");
+    expect(result).not.toMatch(/SECRET|unsafe|https?:\/\//);
   });
 });

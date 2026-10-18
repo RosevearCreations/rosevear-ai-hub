@@ -1721,3 +1721,18 @@ See docs/BUILD_084_FOLLOW_UP_REVIEW.md. Next proposed Build 085 (scope to be con
 - [ ] Supervised server reboot recovery (owner-deferred)
 
 See docs/BUILD_085_SNAPSHOT_CHANGE_REVIEW.md. Next proposed: Build 086 — scope to be confirmed.
+
+
+## Build 086 — Privacy-Safe Manual Operations Handoff
+- [x] Frontend-only, deliberate show/hide of fixed-category context handoff summary
+- [x] Include current/previous sample time, safe reported service states, manual follow-ups and change categories
+- [x] Preserve reviewed-not-resolved, verification and deferred-server-reboot safety boundaries
+- [x] No raw backend errors, URLs, provider identities, IPs, tokens, passwords, customer data or unknown keys
+- [x] Unit and React UI tests for privacy, no-baseline, context switching, refresh reset and manual disclosure
+- [x] Operator runbook, no-migration rollback and live PWA adoption check
+- [ ] Development PR and independent dev push all five CI lanes GREEN
+- [ ] Production PR and independent main push all five CI lanes GREEN
+- [ ] Browser acceptance of the current built Windows PWA (separate owner action)
+- [ ] Actual supervised Windows server reboot (owner-deferred)
+
+See docs/BUILD_086_PRIVATE_OPERATIONS_HANDOFF.md. Next proposed Build 087 — scope to be confirmed.

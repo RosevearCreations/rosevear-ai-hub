@@ -474,5 +474,13 @@ Each build must:
 - no background polling, persistence, new endpoint, database writes or server reboot
 - see docs/BUILD_085_SNAPSHOT_CHANGE_REVIEW.md
 
-### Build 086 — Scope to be confirmed
-- select the next practical Home/Workshop/Business capability from owner priorities
+### Build 086 — Privacy-Safe Manual Operations Handoff
+- prepare a deliberately shown, copyable, read-only Home/Workshop/Business manual status handoff
+- use only fixed known service titles, approved readiness states, top follow-ups and prior snapshot change categories
+- reflect transient reviewed-not-resolved acknowledgements, never a machine repair or safety claim
+- hide the report on context change or manual overview refresh; retain no record or automatic sharing
+- no new endpoint, browser storage, cloud export, device command, database change or server reboot
+- see docs/BUILD_086_PRIVATE_OPERATIONS_HANDOFF.md
+
+### Build 087 — Scope to be confirmed
+- select next practical Hub Home/Workshop/Business capability based on operator priorities
