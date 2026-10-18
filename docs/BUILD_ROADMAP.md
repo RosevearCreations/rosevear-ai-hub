@@ -449,5 +449,13 @@ Each build must:
 - keep remote HTTPS and Windows server reboot acceptance separate; reboot remains deferred
 - see docs/BUILD_082_GATEWAY_TASK_IDENTITY.md
 
-### Build 083 — Scope to be confirmed
-- renew practical home/workshop/business functionality after Build 082 CI promotion
+### Build 083 — Context-Aware Daily Operations Action Queue
+- home/workshop/business manual follow-ups derived from existing local-readiness snapshots
+- prioritise configured attention over failed verification and optional onboarding
+- bounded, privacy-safe text and exact known-section navigation only
+- manual refresh; never infer device-operation authority or Windows reboot success
+- no new APIs, migrations, external calls, service restarts, task writes or paid services
+- see docs/BUILD_083_DAILY_ACTION_QUEUE.md
+
+### Build 084 — Scope to be confirmed
+- select further practical Home/Workshop/Business capabilities from operator priorities
