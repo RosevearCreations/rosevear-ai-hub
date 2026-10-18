@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { prioritizeDailyActions, summarizeOperations } from "./OperationsDashboard";
+import { compareOperationsSnapshots, prioritizeDailyActions, summarizeOperations } from "./OperationsDashboard";
 
 const ok = (value: unknown): PromiseFulfilledResult<unknown> => ({
   status: "fulfilled",
@@ -123,5 +123,60 @@ describe("Build 083 context-aware daily action queue", () => {
     expect(home[0].section).toBe("Devices");
     expect(home.every((action) => action.key !== "unexpected")).toBe(true);
     expect(JSON.stringify(home)).not.toMatch(/SECRET|Malicious|unsafe/);
+  });
+});
+
+describe("Build 085 bounded manual snapshot change detection", () => {
+  it("puts new attention before lost verification before improvement, scoped by context", () => {
+    const prior = summarizeOperations([
+      ok({ configured: true, available: true }),
+      ok({ configured: true, available: true }),
+      ok({ total: 0, healthy: 0, attention: 0 }),
+      ok({ document_count: 0, needs_indexing_count: 0 }),
+      ok({ connectors: [] }),
+    ]);
+    const current = summarizeOperations([
+      ok({ configured: true, available: false, last_error: "token=PRIVATE", url: "http://private.local" }),
+      bad,
+      ok({ total: 0, healthy: 0, attention: 0 }),
+      ok({ document_count: 0, needs_indexing_count: 0 }),
+      ok({ connectors: [] }),
+    ]);
+    const home = compareOperationsSnapshots(prior, current, "Home");
+    expect(home.map((item) => [item.key, item.type, item.previous, item.current])).toEqual([
+      ["ha", "needs_review", "ready", "attention"],
+      ["mqtt", "verification_lost", "ready", "unknown"],
+    ]);
+    expect(compareOperationsSnapshots(prior, current, "Workshop").map((item) => item.key)).toEqual(["mqtt"]);
+    expect(compareOperationsSnapshots(prior, current, "Business").map((item) => item.key)).toEqual(["mqtt"]);
+    expect(JSON.stringify(home)).not.toMatch(/PRIVATE|private.local|http:\/\//);
+  });
+  it("does not claim physical recovery when a service reports ready", () => {
+    const previous = summarizeOperations([
+      ok({ configured: true, available: false }), bad, bad, bad, bad,
+    ]);
+    const current = summarizeOperations([
+      ok({ configured: true, available: true }), bad, bad, bad, bad,
+    ]);
+    const home = compareOperationsSnapshots(previous, current, "Home");
+    expect(home).toHaveLength(1);
+    expect(home[0].type).toBe("improved");
+    expect(home[0].guidance).toContain("not safety certification");
+  });
+  it("ignores unrecognized, duplicate, and unchanged reports rather than guessing", () => {
+    const previous = summarizeOperations([
+      ok({ configured: true, available: true }),
+      ok({ configured: true, available: true }), bad, bad, bad,
+    ]);
+    const next = [
+      { ...previous[0], status: "unknown" as const, detail: "SECRET" },
+      { ...previous[0], status: "attention" as const },
+      { key: "injected", title: "SECRET", section: "http://unsafe", status: "attention" as const, detail: "SECRET" },
+      ...previous.slice(1),
+    ];
+    const changes = compareOperationsSnapshots(previous, next, "Home");
+    expect(changes.map((item) => [item.key, item.type])).toEqual([["ha", "verification_lost"]]);
+    expect(JSON.stringify(changes)).not.toMatch(/SECRET|unsafe|http:/);
+    expect(compareOperationsSnapshots(previous, previous, "Home")).toEqual([]);
   });
 });
