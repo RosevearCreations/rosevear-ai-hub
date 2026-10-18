@@ -482,5 +482,13 @@ Each build must:
 - no new endpoint, browser storage, cloud export, device command, database change or server reboot
 - see docs/BUILD_086_PRIVATE_OPERATIONS_HANDOFF.md
 
-### Build 087 — Scope to be confirmed
-- select next practical Hub Home/Workshop/Business capability based on operator priorities
+### Build 087 — Manual Operations Handoff Acceptance & Follow-Up Tracking
+- opt-in, session-only handoff review checklist and explicit reviewed-not-resolved acknowledgement
+- require deliberate report reveal before acknowledgement; allow manually reopening review
+- reset acceptance on context change or overview refresh; no persistence or external sharing
+- existing manual follow-up review remains separate and unverified until independently checked
+- frontend and React interaction tests; no backend, device, Windows task, service, API, migration, or reboot mutation
+- see docs/BUILD_087_HANDOFF_ACCEPTANCE.md
+
+### Build 088 — Scope to be confirmed
+- select next practical Home/Workshop/Business feature after code promotion and operator feedback
