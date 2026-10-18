@@ -1675,3 +1675,19 @@ See docs/BUILD_081_DEFERRED_REBOOT_ACCEPTANCE.md.
 - [ ] Supervised Windows server reboot acceptance (owner-deferred)
 
 See docs/BUILD_082_GATEWAY_TASK_IDENTITY.md. Next proposed: Build 083 — scope to be confirmed.
+
+
+## Build 083 — Context-Aware Daily Operations Action Queue
+- [x] Manual Home/Workshop/Business advisory queue using existing read-only status snapshots
+- [x] Prioritise configured failures, unverified reads, and optional setup without false-ready
+- [x] Fixed known navigation targets and text; no private provider messages or credentials echoed
+- [x] No device/business write, persistence, polling, migration or new service
+- [x] Vitest action order, scoped queue, all-ready and privacy regression cases
+- [x] Runbook with owner browser acceptance and deferred server reboot boundary
+- [ ] Development PR CI 5/5 and independent dev push 5/5
+- [ ] Production PR CI 5/5 and independent main push 5/5
+- [ ] Owner browser review on current Windows deployment
+- [ ] Supervised Windows server reboot (still deferred independently)
+
+See docs/BUILD_083_DAILY_ACTION_QUEUE.md.
+Next proposed: Build 084 — scope to be confirmed.
