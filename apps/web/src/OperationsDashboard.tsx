@@ -142,6 +142,50 @@ const visibleKeys: Record<OperationsContext, string[]> = {
   Business: ["business", "knowledge", "mqtt"],
 };
 
+// Build 083: finite, advisory worklist from an explicitly refreshed snapshot.
+// Never interpolate raw backend responses, error strings, hostnames or credentials.
+export type DailyAction = {
+  key: string;
+  title: string;
+  section: string;
+  priority: "review" | "verify" | "setup";
+  reason: string;
+};
+
+const dailyActionCopy: Record<string, { title: string; section: string }> = {
+  ha: { title: "Review Home Assistant connection", section: "Devices" },
+  mqtt: { title: "Check the MQTT broker", section: "MQTT" },
+  camera: { title: "Review the camera registry", section: "Cameras" },
+  knowledge: { title: "Review knowledge collections", section: "Knowledge" },
+  business: { title: "Review business connectors", section: "Business" },
+};
+
+const actionPriority: Record<DailyAction["priority"], number> = {
+  review: 0,
+  verify: 1,
+  setup: 2,
+};
+
+export function prioritizeDailyActions(
+  signals: Signal[],
+  context: OperationsContext,
+): DailyAction[] {
+  const contextKeys = visibleKeys[context];
+  return signals.flatMap((signal): DailyAction[] => {
+    const item = dailyActionCopy[signal.key];
+    if (!item || !contextKeys.includes(signal.key) || signal.status === "ready") return [];
+    const priority: DailyAction["priority"] = signal.status === "attention"
+      ? "review" : signal.status === "unknown" ? "verify" : "setup";
+    const reason = priority === "review"
+      ? "A configured service reports that it needs attention. Review manually."
+      : priority === "verify"
+        ? "Current status could not be verified. Do not assume this service is healthy."
+        : "Optional setup is incomplete; there is no implied service failure.";
+    return [{ key: signal.key, title: item.title, section: item.section, priority, reason }];
+  }).sort((a, b) => actionPriority[a.priority] - actionPriority[b.priority]
+    || contextKeys.indexOf(a.key) - contextKeys.indexOf(b.key)).slice(0, 3);
+}
+
 const labels: Record<ReadinessState, string> = {
   ready: "Ready",
   attention: "Needs review",
@@ -200,6 +244,8 @@ export function OperationsDashboard({
 
   const visible = snapshot?.signals.filter((item) => visibleKeys[context].includes(item.key)) ?? [];
   const needsReview = visible.filter((item) => item.status === "attention").length;
+  const notVerified = visible.filter((item) => item.status === "unknown").length;
+  const dailyActions = snapshot ? prioritizeDailyActions(snapshot.signals, context) : [];
   return (
     <section className="operations-dashboard" aria-label="Unified operations dashboard">
       <div className="operations-toolbar">
@@ -226,7 +272,7 @@ export function OperationsDashboard({
       </fieldset>
       <p className="operations-summary" role="status">
         {loading && !snapshot ? "Checking local services…" : snapshot
-          ? `${context}: ${needsReview} service(s) need review · ${visible.length} status cards.`
+          ? `${context}: ${needsReview} need review · ${notVerified} unverified · ${visible.length} status cards.`
           : "Status not yet available."}
       </p>
       {snapshot && (
@@ -234,6 +280,35 @@ export function OperationsDashboard({
           Last checked: {snapshot.sampledAt.toLocaleString()} · Values are snapshots, not live monitoring.
         </small>
       )}
+      <section className="panel operations-daily-actions" aria-label="Daily operations action queue">
+        <h3>Today's manual follow-ups — {context}</h3>
+        <p>
+          Suggested from the last manual snapshot. Needs review comes first;
+          unverified is not healthy, and optional setup is not a fault.
+          No action is executed from this list.
+        </p>
+        {!snapshot ? <p>Check local services before choosing a follow-up.</p>
+          : dailyActions.length === 0
+            ? <p>No follow-ups suggested from this snapshot. This does not certify equipment safety or reboot recovery.</p>
+            : (
+              <ol>
+                {dailyActions.map((action) => (
+                  <li key={action.key}>
+                    <strong>{action.title}</strong>
+                    <p>{action.priority === "review" ? "Needs review"
+                      : action.priority === "verify" ? "Unverified" : "Optional setup"}: {action.reason}</p>
+                    <button type="button" onClick={() => onNavigate(action.section)}>
+                      Open {action.section} for manual review
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            )}
+        {snapshot && (
+          <small>Snapshot at {snapshot.sampledAt.toLocaleString()}.
+            Confirm live status in the destination section before acting.</small>
+        )}
+      </section>
       <div className="operations-status-grid">
         {visible.map((item) => (
           <article className="panel" key={item.key}>
