@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   getBusinessConnectors,
@@ -186,6 +186,60 @@ export function prioritizeDailyActions(
     || contextKeys.indexOf(a.key) - contextKeys.indexOf(b.key)).slice(0, 3);
 }
 
+// Build 085: finite, context-scoped comparison of two manual snapshots.
+// Only known service keys and states are compared. Never copy provider details.
+export type SnapshotChange = {
+  key: string;
+  title: string;
+  previous: ReadinessState;
+  current: ReadinessState;
+  type: "needs_review" | "verification_lost" | "improved" | "changed";
+  guidance: string;
+};
+
+const snapshotStateAllowed: ReadinessState[] = ["ready", "attention", "optional", "unknown"];
+const snapshotChangePriority: Record<SnapshotChange["type"], number> = {
+  needs_review: 0,
+  verification_lost: 1,
+  changed: 2,
+  improved: 3,
+};
+
+export function compareOperationsSnapshots(
+  previous: Signal[],
+  current: Signal[],
+  context: OperationsContext,
+): SnapshotChange[] {
+  const keys = visibleKeys[context];
+  const prior = new Map(previous.filter((signal) =>
+    keys.includes(signal.key) && snapshotStateAllowed.includes(signal.status))
+    .map((signal) => [signal.key, signal.status]));
+  const seen = new Set<string>();
+  return current.flatMap((signal): SnapshotChange[] => {
+    if (!keys.includes(signal.key) || !dailyActionCopy[signal.key] ||
+      !snapshotStateAllowed.includes(signal.status) || seen.has(signal.key)) return [];
+    seen.add(signal.key);
+    const before = prior.get(signal.key);
+    if (!before || before === signal.status) return [];
+    const type: SnapshotChange["type"] = signal.status === "attention"
+      ? "needs_review" : signal.status === "unknown"
+        ? "verification_lost" : signal.status === "ready"
+          ? "improved" : "changed";
+    const guidance = type === "needs_review"
+      ? "Now reports attention. Open its section and check current evidence."
+      : type === "verification_lost"
+        ? "Verification is no longer available. Do not assume the service is healthy."
+        : type === "improved"
+          ? "Now reports ready. Confirm operation separately; this is not safety certification."
+          : "Reported configuration state changed. Confirm manually.";
+    return [{
+      key: signal.key, title: dailyActionCopy[signal.key].title,
+      previous: before, current: signal.status, type, guidance,
+    }];
+  }).sort((a, b) => snapshotChangePriority[a.type] - snapshotChangePriority[b.type]
+    || keys.indexOf(a.key) - keys.indexOf(b.key));
+}
+
 // Build 084: review is operator acknowledgement of a single snapshot, NOT repair.
 // Keep only finite recognized action keys; never persist, publish or call services.
 export type SnapshotReview = Partial<Record<"ha" | "mqtt" | "camera" | "knowledge" | "business", true>>;
@@ -228,6 +282,8 @@ export function OperationsDashboard({
 }) {
   const [context, setContext] = useState<OperationsContext>("Home");
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [previousSnapshot, setPreviousSnapshot] = useState<Snapshot | null>(null);
+  const latestSnapshotRef = useRef<Snapshot | null>(null);
   const [loading, setLoading] = useState(false);
   const [reviewed, setReviewed] = useState<SnapshotReview>({});
 
@@ -241,9 +297,13 @@ export function OperationsDashboard({
       getBusinessConnectors(signal),
     ]);
     if (signal.aborted) return;
+    // Compare manual samples in memory only; never retain or export provider payloads.
+    const next = { signals: summarizeOperations(results), sampledAt: new Date() };
+    setPreviousSnapshot(latestSnapshotRef.current);
+    latestSnapshotRef.current = next;
     // A new measurement invalidates all prior acknowledgement, including other contexts.
     setReviewed({});
-    setSnapshot({ signals: summarizeOperations(results), sampledAt: new Date() });
+    setSnapshot(next);
     setLoading(false);
   }, []);
 
@@ -258,6 +318,8 @@ export function OperationsDashboard({
   const notVerified = visible.filter((item) => item.status === "unknown").length;
   const dailyActions = snapshot ? prioritizeDailyActions(snapshot.signals, context) : [];
   const reviewCounts = countSnapshotReviews(dailyActions, reviewed);
+  const snapshotChanges = snapshot && previousSnapshot
+    ? compareOperationsSnapshots(previousSnapshot.signals, snapshot.signals, context) : [];
   return (
     <section className="operations-dashboard" aria-label="Unified operations dashboard">
       <div className="operations-toolbar">
@@ -292,6 +354,34 @@ export function OperationsDashboard({
           Last checked: {snapshot.sampledAt.toLocaleString()} · Values are snapshots, not live monitoring.
         </small>
       )}
+      <section className="panel operations-snapshot-changes" aria-label="Changes since previous overview check">
+        <h3>What changed since the last check? — {context}</h3>
+        {!snapshot ? <p>Checking current local service status…</p>
+          : !previousSnapshot
+            ? <p>No comparison yet. Refresh overview to compare two manual snapshots.</p>
+            : snapshotChanges.length === 0
+              ? <p>No reported state changes for this context between these two checks.
+                This does not verify health or physical safety.</p>
+              : (
+                <ol>
+                  {snapshotChanges.map((change) => (
+                    <li key={change.key}>
+                      <strong>{change.title}</strong>
+                      <p>{labels[change.previous]} → {labels[change.current]}.
+                        {" "}{change.guidance}</p>
+                      <button type="button" onClick={() => onNavigate(dailyActionCopy[change.key].section)}>
+                        Open {dailyActionCopy[change.key].section} to verify
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              )}
+        {previousSnapshot && snapshot && (
+          <small>Previous: {previousSnapshot.sampledAt.toLocaleString()}
+            {" "}· Current: {snapshot.sampledAt.toLocaleString()}.
+            Comparing reports, not confirming a repair or automatic recovery.</small>
+        )}
+      </section>
       <section className="panel operations-daily-actions" aria-label="Daily operations action queue">
         <h3>Today's manual follow-ups — {context}</h3>
         <p>
