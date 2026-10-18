@@ -62,3 +62,28 @@ describe("Build 084 follow-up acknowledgement", () => {
     expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
   });
 });
+
+describe("Build 085 dashboard manual comparison", () => {
+  it("shows changes only after a second manual sample and does not leak provider details", async () => {
+    const navigate = vi.fn();
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={navigate} />);
+    await screen.findByText("No comparison yet. Refresh overview to compare two manual snapshots.");
+    vi.mocked(api.getHomeAssistantStatus).mockResolvedValueOnce({
+      configured: true, available: true, token: "HIDDEN_TOKEN",
+    } as never);
+    vi.mocked(api.getMQTTStatus).mockRejectedValueOnce(
+      new Error("password=HIDDEN_MQTT_PASSWORD"));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await screen.findByText(/Verification is no longer available/);
+    expect(container.textContent).toContain("Now reports ready");
+    expect(container.textContent).toContain("not safety certification");
+    fireEvent.click(screen.getByRole("button", { name: "Workshop" }));
+    expect(container.textContent).toContain("Verification is no longer available");
+    expect(container.textContent).not.toContain("Now reports ready");
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    expect(container.textContent).toContain("Verification is no longer available");
+    fireEvent.click(screen.getByRole("button", { name: "Open MQTT to verify" }));
+    expect(navigate).toHaveBeenCalledWith("MQTT");
+    expect(container.textContent).not.toMatch(/HIDDEN_TOKEN|HIDDEN_MQTT_PASSWORD/);
+  });
+});
