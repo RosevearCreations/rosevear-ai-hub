@@ -466,5 +466,13 @@ Each build must:
 - no Windows server reboot, new backend route, migration, device write or business write
 - see docs/BUILD_084_FOLLOW_UP_REVIEW.md
 
-### Build 085 — Scope to be confirmed
-- continue practical Home/Workshop/Business improvements from operator priorities
+### Build 085 — Snapshot Change Detection & Reverification Guidance
+- compare the two latest manually collected read-only operations snapshots in the open browser session
+- surface attention, lost verification and reported readiness changes separately, by Home/Workshop/Business context
+- keep static safe copy, fixed known navigation targets and no raw provider details
+- never infer repair, physical safety, reboot recovery, or automatic restoration from a status transition
+- no background polling, persistence, new endpoint, database writes or server reboot
+- see docs/BUILD_085_SNAPSHOT_CHANGE_REVIEW.md
+
+### Build 086 — Scope to be confirmed
+- select the next practical Home/Workshop/Business capability from owner priorities
