@@ -547,6 +547,31 @@ export function OperationsDashboard({
             Confirm live status in the destination section before acting.</small>
         )}
       </section>
+      <section className="panel operations-verification-plan" aria-label="Manual verification plan">
+        <h3>Next manual verification — {context}</h3>
+        <p>Plan only: reviewing a follow-up does not verify it, repair a service,
+          approve an operation or close an incident. Open the original section to verify.</p>
+        {!snapshot ? <p>Collect a status snapshot to prepare a verification plan.</p>
+          : dailyActions.length === 0
+            ? <p>No follow-ups suggested for this snapshot; this is not a safety clearance.</p>
+            : (
+              <ol>
+                {dailyActions.map((action) => (
+                  <li key={action.key}>
+                    <strong>{action.title}</strong>
+                    <p>{reviewed[action.key as keyof SnapshotReview]
+                      ? "Previously reviewed for this snapshot; independent verification still required."
+                      : "Awaiting manual review and independent verification."}</p>
+                    <button type="button" onClick={() => onNavigate(action.section)}>
+                      Verify in {action.section}
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            )}
+        {snapshot && <small>Planning reflects only the current manually collected snapshot.
+          Do not use this as proof of Windows reboot, device safety, or restored connectivity.</small>}
+      </section>
       <div className="operations-status-grid">
         {visible.map((item) => (
           <article className="panel" key={item.key}>
