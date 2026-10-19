@@ -199,3 +199,18 @@ describe("Build 090 context review summary", () => {
     expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
   });
 });
+
+describe("Build 091 priority triage", () => {
+  it("summarizes existing priority categories and routes to known sections without provider data", async () => {
+    const navigate = vi.fn();
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={navigate} />);
+    await screen.findByRole("button", { name: "Triage in Devices" });
+    expect(container.textContent).toContain("2 needs attention");
+    expect(container.textContent).toContain("1 optional setup");
+    fireEvent.click(screen.getByRole("button", { name: "Triage in Devices" }));
+    expect(navigate).toHaveBeenCalledWith("Devices");
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    expect(screen.queryByRole("button", { name: "Triage in Devices" })).toBeNull();
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+});
