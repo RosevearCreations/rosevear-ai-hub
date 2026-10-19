@@ -338,6 +338,7 @@ export function OperationsDashboard({
   const [reviewed, setReviewed] = useState<SnapshotReview>({});
   const [handoffVisible, setHandoffVisible] = useState(false);
   const [handoffAccepted, setHandoffAccepted] = useState<OperationsContext | null>(null);
+  const [verificationFilter, setVerificationFilter] = useState<"all" | "unreviewed">("all");
 
   const refresh = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
@@ -356,6 +357,7 @@ export function OperationsDashboard({
     // A new measurement invalidates all prior acknowledgement and any visible handoff text.
     setHandoffVisible(false);
     setHandoffAccepted(null);
+    setVerificationFilter("all");
     setReviewed({});
     setSnapshot(next);
     setLoading(false);
@@ -394,7 +396,7 @@ export function OperationsDashboard({
             key={item}
             aria-pressed={context === item}
             className={context === item ? "context-selected" : ""}
-            onClick={() => { setContext(item); setHandoffVisible(false); setHandoffAccepted(null); }}
+            onClick={() => { setContext(item); setHandoffVisible(false); setHandoffAccepted(null); setVerificationFilter("all"); }}
           >{item}</button>
         ))}
       </fieldset>
@@ -551,12 +553,24 @@ export function OperationsDashboard({
         <h3>Next manual verification — {context}</h3>
         <p>Plan only: reviewing a follow-up does not verify it, repair a service,
           approve an operation or close an incident. Open the original section to verify.</p>
+        {snapshot && dailyActions.length > 0 && (
+          <div className="operations-verification-filter" role="group" aria-label="Verification queue filter">
+            <button type="button" aria-pressed={verificationFilter === "all"}
+              onClick={() => setVerificationFilter("all")}>All follow-ups</button>
+            <button type="button" aria-pressed={verificationFilter === "unreviewed"}
+              onClick={() => setVerificationFilter("unreviewed")}>Not yet reviewed</button>
+            <p role="status">{dailyActions.filter((action) =>
+              !reviewed[action.key as keyof SnapshotReview]).length} not yet reviewed;
+              all follow-ups still require independent verification.</p>
+          </div>
+        )}
         {!snapshot ? <p>Collect a status snapshot to prepare a verification plan.</p>
           : dailyActions.length === 0
             ? <p>No follow-ups suggested for this snapshot; this is not a safety clearance.</p>
             : (
               <ol>
-                {dailyActions.map((action) => (
+                {dailyActions.filter((action) => verificationFilter === "all"
+                  || !reviewed[action.key as keyof SnapshotReview]).map((action) => (
                   <li key={action.key}>
                     <strong>{action.title}</strong>
                     <p>{reviewed[action.key as keyof SnapshotReview]
@@ -569,6 +583,9 @@ export function OperationsDashboard({
                 ))}
               </ol>
             )}
+        {snapshot && dailyActions.length > 0 && verificationFilter === "unreviewed"
+          && dailyActions.every((action) => reviewed[action.key as keyof SnapshotReview])
+          && <p>All suggested follow-ups reviewed for this snapshot; independent verification remains required.</p>}
         {snapshot && <small>Planning reflects only the current manually collected snapshot.
           Do not use this as proof of Windows reboot, device safety, or restored connectivity.</small>}
       </section>
