@@ -559,6 +559,41 @@ export function OperationsDashboard({
         {snapshot && <small>This summary is local to the browser session and does not
           certify repairs, safety, reboot success or service availability.</small>}
       </section>
+      <section className="panel operations-triage-summary" aria-label="Operations priority triage">
+        <h3>Priority triage — {context}</h3>
+        {!snapshot ? <p>Collect a manual snapshot before reviewing priorities.</p>
+          : (
+            <>
+              <p role="status">{
+                dailyActions.filter((action) => action.priority === "review").length
+              } needs attention · {
+                dailyActions.filter((action) => action.priority === "verify").length
+              } unverified · {
+                dailyActions.filter((action) => action.priority !== "review" && action.priority !== "verify").length
+              } optional setup.</p>
+              {dailyActions.length === 0
+                ? <p>No follow-ups suggested; this does not certify service or physical safety.</p>
+                : (
+                  <ol>
+                    {dailyActions.slice(0, 3).map((action) => (
+                      <li key={action.key}>
+                        <strong>{action.title}</strong> — {
+                          action.priority === "review" ? "Needs attention"
+                            : action.priority === "verify" ? "Unverified" : "Optional setup"
+                        }. Review is not independent verification.
+                        {" "}
+                        <button type="button" onClick={() => onNavigate(action.section)}>
+                          Triage in {action.section}
+                        </button>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+            </>
+          )}
+        {snapshot && <small>Read-only prioritization from this snapshot, not a device command,
+          confirmed repair, safety certification or live monitoring.</small>}
+      </section>
       <section className="panel operations-verification-plan" aria-label="Manual verification plan">
         <h3>Next manual verification — {context}</h3>
         <p>Plan only: reviewing a follow-up does not verify it, repair a service,
