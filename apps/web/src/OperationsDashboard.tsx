@@ -573,6 +573,11 @@ export function OperationsDashboard({
               } unverified · {
                 dailyActions.filter((action) => action.priority !== "review" && action.priority !== "verify").length
               } optional setup.</p>
+              {dailyActions.length > 3 && <p role="status">Showing at most three priorities
+                from {dailyActions.filter((action) => !triageUnreviewedOnly
+                  || !reviewed[action.key as keyof SnapshotReview]).length} currently visible
+                triage follow-ups. The complete list remains in Today's manual follow-ups
+                and the independent verification plan below.</p>}
               {dailyActions.length > 0 && (
                 <button type="button" aria-pressed={triageUnreviewedOnly}
                   onClick={() => setTriageUnreviewedOnly((value) => !value)}>
