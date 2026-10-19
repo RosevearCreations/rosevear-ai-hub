@@ -512,5 +512,12 @@ Each build must:
 - include React privacy tests and operator runbook; no API, device action, migration, task or reboot changes
 - see docs/BUILD_090_CONTEXT_REVIEW_SUMMARY.md
 
-### Build 091 — Scope to be confirmed
-- select next practical owner feature after Build 090 promotion
+### Build 091 — Contextual Priority Triage Summary
+- summarize current context manual follow-ups by needs-attention, unverified and optional setup classifications
+- show up to three ordered, safe known-section triage links; never perform a repair or imply service safety
+- use only existing sanitized snapshot/action data, without polling, persistence, exports or new APIs
+- add React interaction/privacy coverage and an operator runbook; no Windows services, tasks, devices or migrations touched
+- see docs/BUILD_091_PRIORITY_TRIAGE.md
+
+### Build 092 — Scope to be confirmed
+- choose next practical Home, Workshop & Business operator feature
