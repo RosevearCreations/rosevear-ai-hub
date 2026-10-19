@@ -250,3 +250,19 @@ describe("Build 093 triage coverage and full queue visibility", () => {
     expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
   });
 });
+
+describe("Build 094 triage review progress", () => {
+  it("counts reviewed and pending triage without removing independent verification", async () => {
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    await screen.findByRole("button", { name: "Triage in Devices" });
+    expect(screen.getByRole("region", { name: "Operations priority triage" }).textContent).toContain("0 reviewed for this snapshot; 3 awaiting manual review.");
+    fireEvent.click(screen.getByRole("button", {
+      name: "Mark Review Home Assistant connection reviewed for this snapshot",
+    }));
+    expect(screen.getByRole("region", { name: "Operations priority triage" }).textContent).toContain("1 reviewed for this snapshot; 2 awaiting manual review.");
+    expect(screen.getByRole("region", { name: "Manual verification plan" }).textContent).toContain("independent verification still required");
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(screen.getByRole("region", { name: "Operations priority triage" }).textContent).toContain("0 reviewed for this snapshot;"));
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+});
