@@ -498,5 +498,12 @@ Each build must:
 - React interaction/privacy regression coverage and operator acceptance runbook
 - see docs/BUILD_088_VERIFICATION_PLANNER.md
 
-### Build 089 — Scope to be confirmed
-- select next practical operator feature following verified Build 088 release
+### Build 089 — Verification Queue Review Filter & Pending Counts
+- toggle between all manual follow-ups and not-yet-reviewed entries for the active Home/Workshop/Business context
+- show pending review counts without treating review as independent verification or repair
+- reset the temporary filter on context switch or manual refresh, with no storage, device action or new API
+- React privacy and interaction tests, operator acceptance and rollback instructions
+- see docs/BUILD_089_VERIFICATION_QUEUE.md
+
+### Build 090 — Scope to be confirmed
+- select next practical operator feature after Build 089 release
