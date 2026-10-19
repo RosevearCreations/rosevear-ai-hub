@@ -549,6 +549,16 @@ export function OperationsDashboard({
             Confirm live status in the destination section before acting.</small>
         )}
       </section>
+      <section className="panel operations-context-queue-summary" aria-label="Context review summary">
+        <h3>Current context review summary — {context}</h3>
+        {!snapshot ? <p>Collect a manual snapshot before reviewing the context summary.</p>
+          : <p role="status">{reviewCounts.outstanding} not yet reviewed,
+            {" "}{reviewCounts.acknowledged} reviewed for this snapshot,
+            {" "}{needsReview} reporting attention and {notVerified} unverified.
+            All service conditions require independent verification in their source sections.</p>}
+        {snapshot && <small>This summary is local to the browser session and does not
+          certify repairs, safety, reboot success or service availability.</small>}
+      </section>
       <section className="panel operations-verification-plan" aria-label="Manual verification plan">
         <h3>Next manual verification — {context}</h3>
         <p>Plan only: reviewing a follow-up does not verify it, repair a service,
