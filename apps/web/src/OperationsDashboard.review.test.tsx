@@ -308,3 +308,80 @@ describe("Build 095 contextual first safe checks", () => {
     expect(container.textContent).not.toContain("PRIVATE_NEW_SECRET");
   });
 });
+
+describe("Build 096 manual safe-check checklist progress", () => {
+  it("keeps individual review steps separate from follow-up acknowledgement and resets on refresh", async () => {
+    const navigate = vi.fn();
+    const { container } = render(<OperationsDashboard role="read_only" onNavigate={navigate} />);
+    const plan = await screen.findByRole("region", { name: "Manual verification plan" });
+    const first = screen.getByRole("checkbox", {
+      name: "Review safe check 1 for Review Home Assistant connection",
+    });
+    const second = screen.getByRole("checkbox", {
+      name: "Review safe check 2 for Review Home Assistant connection",
+    });
+    expect(first.getAttribute("checked")).toBeNull();
+    expect(plan.textContent).toContain("0 of 6 safe-check instructions reviewed");
+
+    fireEvent.click(first);
+    expect((first as HTMLInputElement).checked).toBe(true);
+    expect(plan.textContent).toContain("1 of 6 safe-check instructions reviewed");
+    fireEvent.click(second);
+    expect(plan.textContent).toContain("2 of 6 safe-check instructions reviewed");
+    expect(plan.textContent).toContain("cannot certify a repair or equipment safety");
+    expect(plan.textContent).toContain("Awaiting manual review and independent verification.");
+    fireEvent.click(screen.getByRole("button", { name: "Verify in Devices" }));
+    expect(navigate).toHaveBeenCalledWith("Devices");
+
+    fireEvent.click(screen.getByRole("button", {
+      name: "Mark Review Home Assistant connection reviewed for this snapshot",
+    }));
+    expect((first as HTMLInputElement).checked).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Not yet reviewed" }));
+    expect(screen.queryByRole("checkbox", {
+      name: "Review safe check 1 for Review Home Assistant connection",
+    })).toBeNull();
+    expect(plan.textContent).toContain("2 of 6 safe-check instructions reviewed");
+    fireEvent.click(screen.getByRole("button", { name: "All follow-ups" }));
+    expect((screen.getByRole("checkbox", {
+      name: "Review safe check 1 for Review Home Assistant connection",
+    }) as HTMLInputElement).checked).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(plan.textContent).toContain("0 of 6 safe-check instructions reviewed"));
+    expect((screen.getByRole("checkbox", {
+      name: "Review safe check 1 for Review Home Assistant connection",
+    }) as HTMLInputElement).checked).toBe(false);
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+
+  it("isolates check progress by context and does not call integrations when a checkbox changes", async () => {
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    await screen.findByRole("checkbox", { name: "Review safe check 1 for Review Home Assistant connection" });
+    const callCount = vi.mocked(api.getHomeAssistantStatus).mock.calls.length;
+    fireEvent.click(screen.getByRole("checkbox", {
+      name: "Review safe check 1 for Review Home Assistant connection",
+    }));
+    expect(vi.mocked(api.getHomeAssistantStatus).mock.calls.length).toBe(callCount);
+
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    const plan = screen.getByRole("region", { name: "Manual verification plan" });
+    expect(plan.textContent).toContain("0 of 6 safe-check instructions reviewed");
+    expect(screen.queryByRole("checkbox", {
+      name: "Review safe check 1 for Review Home Assistant connection",
+    })).toBeNull();
+    expect(screen.getByRole("checkbox", {
+      name: "Review safe check 1 for Review business connectors",
+    })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Workshop" }));
+    expect(plan.textContent).toContain("0 of 6 safe-check instructions reviewed");
+    expect(screen.getByRole("checkbox", {
+      name: "Review safe check 1 for Review knowledge collections",
+    })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Home" }));
+    expect((screen.getByRole("checkbox", {
+      name: "Review safe check 1 for Review Home Assistant connection",
+    }) as HTMLInputElement).checked).toBe(false);
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+});

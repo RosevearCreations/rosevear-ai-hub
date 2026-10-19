@@ -268,6 +268,25 @@ export function getSafeTriageChecks(key: string, priority: DailyAction["priority
   return safeFirstChecks[key as keyof typeof safeFirstChecks][priority];
 }
 
+// Build 096: session-only review of static first-check instructions.
+// A checked instruction is not an independent verification, repair or safety clearance.
+export type ManualCheckProgress = Partial<Record<"ha" | "mqtt" | "camera" | "knowledge" | "business", number>>;
+export function countManualCheckProgress(actions: DailyAction[], progress: ManualCheckProgress) {
+  let reviewedInstructions = 0;
+  let totalInstructions = 0;
+  for (const action of actions) {
+    const instructions = getSafeTriageChecks(action.key, action.priority);
+    const raw = Object.prototype.hasOwnProperty.call(progress, action.key)
+      ? progress[action.key as keyof ManualCheckProgress] : undefined;
+    const flags = typeof raw === "number" && Number.isSafeInteger(raw) && raw >= 0 ? raw : 0;
+    for (let index = 0; index < instructions.length; index += 1) {
+      totalInstructions += 1;
+      if ((flags & (1 << index)) !== 0) reviewedInstructions += 1;
+    }
+  }
+  return { reviewedInstructions, totalInstructions };
+}
+
 // Build 085: finite, context-scoped comparison of two manual snapshots.
 // Only known service keys and states are compared. Never copy provider details.
 export type SnapshotChange = {
@@ -422,6 +441,7 @@ export function OperationsDashboard({
   const [handoffAccepted, setHandoffAccepted] = useState<OperationsContext | null>(null);
   const [verificationFilter, setVerificationFilter] = useState<"all" | "unreviewed">("all");
   const [triageUnreviewedOnly, setTriageUnreviewedOnly] = useState(false);
+  const [manualChecks, setManualChecks] = useState<ManualCheckProgress>({});
 
   const refresh = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
@@ -443,6 +463,7 @@ export function OperationsDashboard({
     setVerificationFilter("all");
     setTriageUnreviewedOnly(false);
     setReviewed({});
+    setManualChecks({});
     setSnapshot(next);
     setLoading(false);
   }, []);
@@ -458,6 +479,7 @@ export function OperationsDashboard({
   const notVerified = visible.filter((item) => item.status === "unknown").length;
   const dailyActions = snapshot ? prioritizeDailyActions(snapshot.signals, context) : [];
   const reviewCounts = countSnapshotReviews(dailyActions, reviewed);
+  const manualCheckCounts = countManualCheckProgress(dailyActions, manualChecks);
   const snapshotChanges = snapshot && previousSnapshot
     ? compareOperationsSnapshots(previousSnapshot.signals, snapshot.signals, context) : [];
   return (
@@ -480,7 +502,7 @@ export function OperationsDashboard({
             key={item}
             aria-pressed={context === item}
             className={context === item ? "context-selected" : ""}
-            onClick={() => { setContext(item); setHandoffVisible(false); setHandoffAccepted(null); setVerificationFilter("all"); setTriageUnreviewedOnly(false); }}
+            onClick={() => { setContext(item); setHandoffVisible(false); setHandoffAccepted(null); setVerificationFilter("all"); setTriageUnreviewedOnly(false); setManualChecks({}); }}
           >{item}</button>
         ))}
       </fieldset>
@@ -710,6 +732,13 @@ export function OperationsDashboard({
         <p>Plan only: reviewing a follow-up does not verify it, repair a service,
           approve an operation or close an incident. Open the original section to verify.</p>
         {snapshot && dailyActions.length > 0 && (
+          <p className="operations-manual-check-progress" role="status">
+            {manualCheckCounts.reviewedInstructions} of {manualCheckCounts.totalInstructions}
+            {" "}safe-check instructions reviewed for this snapshot.
+            This does not establish a successful check, independent verification or safety.
+          </p>
+        )}
+        {snapshot && dailyActions.length > 0 && (
           <div className="operations-verification-filter" role="group" aria-label="Verification queue filter">
             <button type="button" aria-pressed={verificationFilter === "all"}
               onClick={() => setVerificationFilter("all")}>All follow-ups</button>
@@ -732,6 +761,26 @@ export function OperationsDashboard({
                     <p>{reviewed[action.key as keyof SnapshotReview]
                       ? "Previously reviewed for this snapshot; independent verification still required."
                       : "Awaiting manual review and independent verification."}</p>
+                    <fieldset className="operations-manual-checklist">
+                      <legend>Review first-safe-check instructions — no actions are executed</legend>
+                      {getSafeTriageChecks(action.key, action.priority).map((step, index) => (
+                        <label key={step}>
+                          <input
+                            type="checkbox"
+                            disabled={loading}
+                            aria-label={`Review safe check ${index + 1} for ${action.title}`}
+                            checked={Boolean((manualChecks[action.key as keyof ManualCheckProgress] ?? 0) & (1 << index))}
+                            onChange={() => setManualChecks((previous) => ({
+                              ...previous,
+                              [action.key]: (previous[action.key as keyof ManualCheckProgress] ?? 0) ^ (1 << index),
+                            }))}
+                          />
+                          <span>{step}</span>
+                        </label>
+                      ))}
+                    </fieldset>
+                    <p>Instruction review is only a temporary operator note. Recheck the live source
+                      independently before acting; this checklist cannot certify a repair or equipment safety.</p>
                     <button type="button" onClick={() => onNavigate(action.section)}>
                       Verify in {action.section}
                     </button>
