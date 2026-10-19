@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareOperationsSnapshots, createOperationsHandoff, getSafeTriageChecks, prioritizeDailyActions, summarizeOperations } from "./OperationsDashboard";
+import { compareOperationsSnapshots, countManualCheckProgress, createOperationsHandoff, getSafeTriageChecks, prioritizeDailyActions, summarizeOperations } from "./OperationsDashboard";
 
 const ok = (value: unknown): PromiseFulfilledResult<unknown> => ({
   status: "fulfilled",
@@ -263,5 +263,39 @@ describe("Build 095 safe first-check playbooks", () => {
     expect(getSafeTriageChecks("PRIVATE_TOKEN", "review")).toEqual([]);
     expect(getSafeTriageChecks("ha", "PRIVATE_TOKEN" as never)).toEqual([]);
     expect(getSafeTriageChecks("__proto__", "review")).toEqual([]);
+  });
+});
+
+describe("Build 096 manual instruction progress", () => {
+  it("only counts acknowledged finite safe-check steps for the active queue", () => {
+    const actions = [
+      { key: "ha", title: "Private title", section: "Unsafe", priority: "review" as const, reason: "PRIVATE" },
+      { key: "mqtt", title: "Private title", section: "Unsafe", priority: "verify" as const, reason: "PRIVATE" },
+    ];
+    expect(countManualCheckProgress(actions, {})).toEqual({
+      reviewedInstructions: 0, totalInstructions: 4,
+    });
+    expect(countManualCheckProgress(actions, { ha: 1, mqtt: 3 })).toEqual({
+      reviewedInstructions: 3, totalInstructions: 4,
+    });
+    expect(countManualCheckProgress(actions.slice(0, 1), { ha: 3, mqtt: 3 })).toEqual({
+      reviewedInstructions: 2, totalInstructions: 2,
+    });
+  });
+
+  it("does not count unknown service keys or invalid review flags", () => {
+    const actions = [
+      { key: "invalid", title: "SECRET", section: "http://private", priority: "review" as const, reason: "PRIVATE" },
+      { key: "camera", title: "Camera", section: "Cameras", priority: "setup" as const, reason: "Optional" },
+    ];
+    expect(countManualCheckProgress(actions, { camera: Number.NaN })).toEqual({
+      reviewedInstructions: 0, totalInstructions: 2,
+    });
+    expect(countManualCheckProgress(actions, { camera: -1 })).toEqual({
+      reviewedInstructions: 0, totalInstructions: 2,
+    });
+    expect(countManualCheckProgress([], { ha: 3, mqtt: 3 })).toEqual({
+      reviewedInstructions: 0, totalInstructions: 0,
+    });
   });
 });
