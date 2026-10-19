@@ -339,6 +339,7 @@ export function OperationsDashboard({
   const [handoffVisible, setHandoffVisible] = useState(false);
   const [handoffAccepted, setHandoffAccepted] = useState<OperationsContext | null>(null);
   const [verificationFilter, setVerificationFilter] = useState<"all" | "unreviewed">("all");
+  const [triageUnreviewedOnly, setTriageUnreviewedOnly] = useState(false);
 
   const refresh = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
@@ -358,6 +359,7 @@ export function OperationsDashboard({
     setHandoffVisible(false);
     setHandoffAccepted(null);
     setVerificationFilter("all");
+    setTriageUnreviewedOnly(false);
     setReviewed({});
     setSnapshot(next);
     setLoading(false);
@@ -396,7 +398,7 @@ export function OperationsDashboard({
             key={item}
             aria-pressed={context === item}
             className={context === item ? "context-selected" : ""}
-            onClick={() => { setContext(item); setHandoffVisible(false); setHandoffAccepted(null); setVerificationFilter("all"); }}
+            onClick={() => { setContext(item); setHandoffVisible(false); setHandoffAccepted(null); setVerificationFilter("all"); setTriageUnreviewedOnly(false); }}
           >{item}</button>
         ))}
       </fieldset>
@@ -571,11 +573,18 @@ export function OperationsDashboard({
               } unverified · {
                 dailyActions.filter((action) => action.priority !== "review" && action.priority !== "verify").length
               } optional setup.</p>
+              {dailyActions.length > 0 && (
+                <button type="button" aria-pressed={triageUnreviewedOnly}
+                  onClick={() => setTriageUnreviewedOnly((value) => !value)}>
+                  {triageUnreviewedOnly ? "Show all triage priorities" : "Show unreviewed triage only"}
+                </button>
+              )}
               {dailyActions.length === 0
                 ? <p>No follow-ups suggested; this does not certify service or physical safety.</p>
                 : (
                   <ol>
-                    {dailyActions.slice(0, 3).map((action) => (
+                    {dailyActions.filter((action) => !triageUnreviewedOnly
+                      || !reviewed[action.key as keyof SnapshotReview]).slice(0, 3).map((action) => (
                       <li key={action.key}>
                         <strong>{action.title}</strong> — {
                           action.priority === "review" ? "Needs attention"
@@ -589,6 +598,9 @@ export function OperationsDashboard({
                     ))}
                   </ol>
                 )}
+              {triageUnreviewedOnly && dailyActions.length > 0
+                && dailyActions.every((action) => reviewed[action.key as keyof SnapshotReview])
+                && <p>All priorities reviewed for this snapshot; independent verification still required.</p>}
             </>
           )}
         {snapshot && <small>Read-only prioritization from this snapshot, not a device command,
