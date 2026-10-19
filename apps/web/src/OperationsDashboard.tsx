@@ -287,7 +287,29 @@ export function countManualCheckProgress(actions: DailyAction[], progress: Manua
   return { reviewedInstructions, totalInstructions };
 }
 
-// Build 085: finite, context-scoped comparison of two manual snapshots.
+// Build 097: bounded review-only outstanding worklist. No provider content, network access,
+ // device commands or persisted state; action acknowledgement remains separate.
+export function countOutstandingSafeChecks(
+  action: DailyAction,
+  progress: ManualCheckProgress,
+) {
+  const checks = getSafeTriageChecks(action.key, action.priority);
+  const value = Object.prototype.hasOwnProperty.call(progress, action.key)
+    ? progress[action.key as keyof ManualCheckProgress] : undefined;
+  const bits = typeof value === "number" && Number.isSafeInteger(value) && value >= 0
+    ? value : 0;
+  const reviewed = checks.filter((_, index) => (bits & (1 << index)) !== 0).length;
+  return { reviewed, remaining: checks.length - reviewed, total: checks.length };
+}
+
+export function filterOutstandingSafeChecks(
+  actions: DailyAction[],
+  progress: ManualCheckProgress,
+): DailyAction[] {
+  return actions.filter((action) => countOutstandingSafeChecks(action, progress).remaining > 0);
+}
+
+ // Build 085: finite, context-scoped comparison of two manual snapshots.
 // Only known service keys and states are compared. Never copy provider details.
 export type SnapshotChange = {
   key: string;
@@ -442,6 +464,7 @@ export function OperationsDashboard({
   const [verificationFilter, setVerificationFilter] = useState<"all" | "unreviewed">("all");
   const [triageUnreviewedOnly, setTriageUnreviewedOnly] = useState(false);
   const [manualChecks, setManualChecks] = useState<ManualCheckProgress>({});
+  const [outstandingChecksOnly, setOutstandingChecksOnly] = useState(false);
 
   const refresh = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
@@ -464,6 +487,7 @@ export function OperationsDashboard({
     setTriageUnreviewedOnly(false);
     setReviewed({});
     setManualChecks({});
+    setOutstandingChecksOnly(false);
     setSnapshot(next);
     setLoading(false);
   }, []);
@@ -480,6 +504,7 @@ export function OperationsDashboard({
   const dailyActions = snapshot ? prioritizeDailyActions(snapshot.signals, context) : [];
   const reviewCounts = countSnapshotReviews(dailyActions, reviewed);
   const manualCheckCounts = countManualCheckProgress(dailyActions, manualChecks);
+  const incompleteActions = filterOutstandingSafeChecks(dailyActions, manualChecks);
   const snapshotChanges = snapshot && previousSnapshot
     ? compareOperationsSnapshots(previousSnapshot.signals, snapshot.signals, context) : [];
   return (
@@ -502,7 +527,7 @@ export function OperationsDashboard({
             key={item}
             aria-pressed={context === item}
             className={context === item ? "context-selected" : ""}
-            onClick={() => { setContext(item); setHandoffVisible(false); setHandoffAccepted(null); setVerificationFilter("all"); setTriageUnreviewedOnly(false); setManualChecks({}); }}
+            onClick={() => { setContext(item); setHandoffVisible(false); setHandoffAccepted(null); setVerificationFilter("all"); setTriageUnreviewedOnly(false); setManualChecks({}); setOutstandingChecksOnly(false); }}
           >{item}</button>
         ))}
       </fieldset>
@@ -739,6 +764,19 @@ export function OperationsDashboard({
           </p>
         )}
         {snapshot && dailyActions.length > 0 && (
+          <div className="operations-safe-workbench" aria-label="Outstanding safe checks">
+            <p role="status">{incompleteActions.length} follow-up(s) have instructions
+              not yet reviewed for this snapshot. A fully reviewed checklist is not
+              evidence of successful verification or safe equipment.</p>
+            <button type="button" aria-pressed={outstandingChecksOnly}
+              onClick={() => setOutstandingChecksOnly((current) => !current)}>
+              {outstandingChecksOnly ? "Show all safe-check instructions" : "Show outstanding safe-check instructions only"}
+            </button>
+            <small>This filter is separate from follow-up acknowledgement and cannot
+              certify a fix. Show all to reopen any reviewed instruction.</small>
+          </div>
+        )}
+        {snapshot && dailyActions.length > 0 && (
           <div className="operations-verification-filter" role="group" aria-label="Verification queue filter">
             <button type="button" aria-pressed={verificationFilter === "all"}
               onClick={() => setVerificationFilter("all")}>All follow-ups</button>
@@ -754,17 +792,25 @@ export function OperationsDashboard({
             ? <p>No follow-ups suggested for this snapshot; this is not a safety clearance.</p>
             : (
               <ol>
-                {dailyActions.filter((action) => verificationFilter === "all"
-                  || !reviewed[action.key as keyof SnapshotReview]).map((action) => (
+                {dailyActions.filter((action) => (verificationFilter === "all"
+                  || !reviewed[action.key as keyof SnapshotReview])
+                  && (!outstandingChecksOnly || countOutstandingSafeChecks(action, manualChecks).remaining > 0)).map((action) => (
                   <li key={action.key}>
                     <strong>{action.title}</strong>
+                    <p className="operations-action-check-progress">
+                      {countOutstandingSafeChecks(action, manualChecks).reviewed} of
+                      {" "}{countOutstandingSafeChecks(action, manualChecks).total}
+                      {" "}instructions reviewed for this follow-up; review is not verification.
+                    </p>
                     <p>{reviewed[action.key as keyof SnapshotReview]
                       ? "Previously reviewed for this snapshot; independent verification still required."
                       : "Awaiting manual review and independent verification."}</p>
                     <fieldset className="operations-manual-checklist">
                       <legend>Review first-safe-check instructions — no actions are executed</legend>
                       {getSafeTriageChecks(action.key, action.priority).map((step, index) => (
-                        <label key={step}>
+                        !outstandingChecksOnly
+                        || !((manualChecks[action.key as keyof ManualCheckProgress] ?? 0) & (1 << index))
+                        ? <label key={step}>
                           <input
                             type="checkbox"
                             disabled={loading}
@@ -776,7 +822,7 @@ export function OperationsDashboard({
                             }))}
                           />
                           <span>{step}</span>
-                        </label>
+                        </label> : null
                       ))}
                     </fieldset>
                     <p>Instruction review is only a temporary operator note. Recheck the live source
@@ -788,6 +834,10 @@ export function OperationsDashboard({
                 ))}
               </ol>
             )}
+        {snapshot && dailyActions.length > 0 && outstandingChecksOnly
+          && incompleteActions.length === 0
+          && <p role="status">No outstanding instruction reviews for this snapshot.
+            Independent verification remains required; select Show all to reopen instructions.</p>}
         {snapshot && dailyActions.length > 0 && verificationFilter === "unreviewed"
           && dailyActions.every((action) => reviewed[action.key as keyof SnapshotReview])
           && <p>All suggested follow-ups reviewed for this snapshot; independent verification remains required.</p>}

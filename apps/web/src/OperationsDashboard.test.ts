@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareOperationsSnapshots, countManualCheckProgress, createOperationsHandoff, getSafeTriageChecks, prioritizeDailyActions, summarizeOperations } from "./OperationsDashboard";
+import { compareOperationsSnapshots, countManualCheckProgress, countOutstandingSafeChecks, createOperationsHandoff, filterOutstandingSafeChecks, getSafeTriageChecks, prioritizeDailyActions, summarizeOperations } from "./OperationsDashboard";
 
 const ok = (value: unknown): PromiseFulfilledResult<unknown> => ({
   status: "fulfilled",
@@ -297,5 +297,27 @@ describe("Build 096 manual instruction progress", () => {
     expect(countManualCheckProgress([], { ha: 3, mqtt: 3 })).toEqual({
       reviewedInstructions: 0, totalInstructions: 0,
     });
+  });
+});
+
+describe("Build 097 outstanding safe-check workbench", () => {
+  const actions = [
+    { key: "ha", title: "PRIVATE", section: "PRIVATE", priority: "review" as const, reason: "SECRET" },
+    { key: "mqtt", title: "PRIVATE", section: "PRIVATE", priority: "verify" as const, reason: "SECRET" },
+  ];
+  it("reports reviewed and remaining steps per action, never verification success", () => {
+    expect(countOutstandingSafeChecks(actions[0], {})).toEqual({ reviewed: 0, remaining: 2, total: 2 });
+    expect(countOutstandingSafeChecks(actions[0], { ha: 1 })).toEqual({ reviewed: 1, remaining: 1, total: 2 });
+    expect(countOutstandingSafeChecks(actions[0], { ha: 3 })).toEqual({ reviewed: 2, remaining: 0, total: 2 });
+    expect(filterOutstandingSafeChecks(actions, { ha: 3 }).map(a => a.key)).toEqual(["mqtt"]);
+    expect(filterOutstandingSafeChecks(actions, { ha: 3, mqtt: 3 })).toHaveLength(0);
+    expect(filterOutstandingSafeChecks(actions, { ha: 1 })).toHaveLength(2);
+  });
+  it("fails closed for injected keys and invalid flags; never exposes untrusted titles", () => {
+    const unknown = { key: "__proto__", title: "SECRET", section: "https://private", priority: "review" as const, reason: "PRIVATE" };
+    expect(countOutstandingSafeChecks(unknown, {})).toEqual({ reviewed: 0, remaining: 0, total: 0 });
+    expect(filterOutstandingSafeChecks([unknown, ...actions], { ha: NaN, mqtt: -1 }).map(a => a.key))
+      .toEqual(["ha", "mqtt"]);
+    expect(JSON.stringify(countOutstandingSafeChecks(actions[0], {}))).not.toMatch(/SECRET|PRIVATE/);
   });
 });
