@@ -266,3 +266,45 @@ describe("Build 094 triage review progress", () => {
     expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
   });
 });
+
+describe("Build 095 contextual first safe checks", () => {
+  it("shows only service-specific manual checks for the current context and filter", async () => {
+    const navigate = vi.fn();
+    const { container } = render(<OperationsDashboard role="read_only" onNavigate={navigate} />);
+    const triage = await screen.findByRole("region", { name: "Operations priority triage" });
+    expect(triage.textContent).toContain("Open Devices and inspect the reported Home Assistant connection state");
+    expect(triage.textContent).toContain("Check the broker or Home Assistant MQTT add-on directly");
+    expect(triage.textContent).not.toContain("identify connectors reporting a degraded state");
+
+    fireEvent.click(screen.getByRole("button", {
+      name: "Mark Review Home Assistant connection reviewed for this snapshot",
+    }));
+    fireEvent.click(screen.getByRole("button", { name: "Show unreviewed triage only" }));
+    expect(triage.textContent).not.toContain("Open Devices and inspect the reported Home Assistant connection state");
+    expect(screen.getByRole("region", { name: "Manual verification plan" }).textContent)
+      .toContain("Review Home Assistant connection");
+
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    expect(triage.textContent).toContain("Open Business and review the available read-only connector setup");
+    expect(triage.textContent).not.toContain("Home Assistant connection state");
+    fireEvent.click(screen.getByRole("button", { name: "Triage in Business" }));
+    expect(navigate).toHaveBeenCalledWith("Business");
+
+    fireEvent.click(screen.getByRole("button", { name: "Workshop" }));
+    expect(triage.textContent).toContain("Open Knowledge and review the first local collection workflow");
+    expect(triage.textContent).not.toContain("identify connectors reporting a degraded state");
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+
+  it("changes to verification-only guidance on an unknown service after manual refresh", async () => {
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    await screen.findByRole("button", { name: "Triage in Devices" });
+    vi.mocked(api.getHomeAssistantStatus).mockRejectedValueOnce(new Error("password=PRIVATE_NEW_SECRET"));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    const triage = screen.getByRole("region", { name: "Operations priority triage" });
+    await waitFor(() => expect(triage.textContent)
+      .toContain("Treat the VM and connection as unverified until confirmed separately"));
+    expect(triage.textContent).not.toContain("Open Devices and inspect the reported Home Assistant connection state");
+    expect(container.textContent).not.toContain("PRIVATE_NEW_SECRET");
+  });
+});

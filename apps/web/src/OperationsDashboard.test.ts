@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareOperationsSnapshots, createOperationsHandoff, prioritizeDailyActions, summarizeOperations } from "./OperationsDashboard";
+import { compareOperationsSnapshots, createOperationsHandoff, getSafeTriageChecks, prioritizeDailyActions, summarizeOperations } from "./OperationsDashboard";
 
 const ok = (value: unknown): PromiseFulfilledResult<unknown> => ({
   status: "fulfilled",
@@ -235,5 +235,33 @@ describe("Build 086 privacy-safe manual handoff", () => {
     const result = createOperationsHandoff("Home", altered, previous, {});
     expect(result).toContain("Review Home Assistant connection");
     expect(result).not.toMatch(/SECRET|unsafe|https?:\/\//);
+  });
+});
+
+describe("Build 095 safe first-check playbooks", () => {
+  it("provides separate finite manual guidance for attention, unknown and optional states", () => {
+    const attention = getSafeTriageChecks("ha", "review");
+    const unknown = getSafeTriageChecks("ha", "verify");
+    const setup = getSafeTriageChecks("ha", "setup");
+    expect(attention).toHaveLength(2);
+    expect(attention[0]).toContain("Devices");
+    expect(unknown[1]).toContain("unverified");
+    expect(setup[1]).toContain("authorized operator");
+    expect(attention).not.toEqual(unknown);
+    expect(unknown).not.toEqual(setup);
+  });
+
+  it("covers each known integration without exposing injected fields or accepting unknown keys", () => {
+    for (const key of ["ha", "mqtt", "camera", "knowledge", "business"]) {
+      for (const priority of ["review", "verify", "setup"] as const) {
+        const steps = getSafeTriageChecks(key, priority);
+        expect(steps).toHaveLength(2);
+        expect(steps.every((item) => item.length > 20)).toBe(true);
+        expect(steps.join(" ")).not.toMatch(/PRIVATE|https?:\/\//);
+      }
+    }
+    expect(getSafeTriageChecks("PRIVATE_TOKEN", "review")).toEqual([]);
+    expect(getSafeTriageChecks("ha", "PRIVATE_TOKEN" as never)).toEqual([]);
+    expect(getSafeTriageChecks("__proto__", "review")).toEqual([]);
   });
 });
