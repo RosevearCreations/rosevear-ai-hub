@@ -505,5 +505,12 @@ Each build must:
 - React privacy and interaction tests, operator acceptance and rollback instructions
 - see docs/BUILD_089_VERIFICATION_QUEUE.md
 
-### Build 090 — Scope to be confirmed
-- select next practical operator feature after Build 089 release
+### Build 090 — Context Review Summary & Independent Verification Boundary
+- present a current Home/Workshop/Business summary of outstanding/reviewed manual follow-ups and reported attention/unknown statuses
+- derive from the existing finite sanitized snapshot; do not imply repair, physical safety or independent verification
+- reset counts with the existing snapshot refresh; no persistent state or provider data export
+- include React privacy tests and operator runbook; no API, device action, migration, task or reboot changes
+- see docs/BUILD_090_CONTEXT_REVIEW_SUMMARY.md
+
+### Build 091 — Scope to be confirmed
+- select next practical owner feature after Build 090 promotion
