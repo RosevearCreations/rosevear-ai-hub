@@ -161,3 +161,25 @@ describe("Build 088 verification planner", () => {
     await waitFor(() => expect(container.textContent).toContain("Awaiting manual review and independent verification."));
   });
 });
+
+describe("Build 089 verification queue view", () => {
+  it("filters reviewed follow-ups without claiming verification and resets on context and refresh", async () => {
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    await screen.findByRole("button", { name: "Verify in Devices" });
+    fireEvent.click(screen.getByRole("button", { name: "Not yet reviewed" }));
+    expect(screen.getByRole("button", { name: "Not yet reviewed" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", {
+      name: "Mark Review Home Assistant connection reviewed for this snapshot",
+    }));
+    expect(screen.queryByRole("button", { name: "Verify in Devices" })).toBeNull();
+    expect(container.textContent).toContain("independent verification");
+    fireEvent.click(screen.getByRole("button", { name: "All follow-ups" }));
+    expect(screen.getByRole("button", { name: "Verify in Devices" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Workshop" }));
+    expect(screen.getByRole("button", { name: "All follow-ups" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "Not yet reviewed" }));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "All follow-ups" }).getAttribute("aria-pressed")).toBe("true"));
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+});
