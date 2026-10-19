@@ -519,5 +519,12 @@ Each build must:
 - add React interaction/privacy coverage and an operator runbook; no Windows services, tasks, devices or migrations touched
 - see docs/BUILD_091_PRIORITY_TRIAGE.md
 
-### Build 092 — Scope to be confirmed
-- choose next practical Home, Workshop & Business operator feature
+### Build 092 — Triage Visibility Filter & Review Continuity
+- opt-in all / not-yet-reviewed view for existing read-only top-priority triage
+- leave manual verification plan intact and never infer review means repair, safety, or independent verification
+- clear temporary filter on context switch and overview refresh; no data persistence or additional APIs
+- React interaction/privacy regression and operator rollback runbook
+- see docs/BUILD_092_TRIAGE_FILTER.md
+
+### Build 093 — Scope to be confirmed
+- choose next practical Home, Workshop & Business capability
