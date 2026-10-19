@@ -187,11 +187,11 @@ describe("Build 089 verification queue view", () => {
 describe("Build 090 context review summary", () => {
   it("counts pending reviews and never mistakes them for independently verified conditions", async () => {
     const { container } = render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
-    await screen.findByText(/2 not yet reviewed,\s*0 reviewed for this snapshot/);
+    await screen.findByText(/3 not yet reviewed,\s*0 reviewed for this snapshot/);
     fireEvent.click(screen.getByRole("button", {
       name: "Mark Review Home Assistant connection reviewed for this snapshot",
     }));
-    expect(screen.getByText(/1 not yet reviewed,\s*1 reviewed for this snapshot/)).toBeTruthy();
+    expect(screen.getByText(/2 not yet reviewed,\s*1 reviewed for this snapshot/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Workshop" }));
     expect(screen.getByText(/Current context review summary — Workshop/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
