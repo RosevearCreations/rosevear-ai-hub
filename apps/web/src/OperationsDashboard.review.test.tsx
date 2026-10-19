@@ -214,3 +214,24 @@ describe("Build 091 priority triage", () => {
     expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
   });
 });
+
+describe("Build 092 triage review visibility", () => {
+  it("filters only the triage display and restores it on context switch or refresh", async () => {
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    await screen.findByRole("button", { name: "Triage in Devices" });
+    fireEvent.click(screen.getByRole("button", {
+      name: "Mark Review Home Assistant connection reviewed for this snapshot",
+    }));
+    fireEvent.click(screen.getByRole("button", { name: "Show unreviewed triage only" }));
+    expect(screen.queryByRole("button", { name: "Triage in Devices" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Verify in Devices" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Show all triage priorities" }));
+    expect(screen.getByRole("button", { name: "Triage in Devices" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Workshop" }));
+    expect(screen.getByRole("button", { name: "Show unreviewed triage only" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Show unreviewed triage only" }));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Show unreviewed triage only" })).toBeTruthy());
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+});
