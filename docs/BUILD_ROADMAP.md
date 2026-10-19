@@ -533,5 +533,12 @@ Each build must:
 - add React regression test, operator acceptance and rollback runbook; no backend/device/Windows changes
 - see docs/BUILD_093_TRIAGE_COVERAGE.md
 
-### Build 094 — Scope to be confirmed
-- select next practical Home, Workshop & Business feature
+### Build 094 — Triage Review Progress & Verification Boundary
+- show reviewed/pending counts in current sanitized Home, Workshop, Business priority triage
+- emphasize that review acknowledgement never verifies or resolves the underlying condition
+- counts reset with manual snapshot review invalidation; no persistence or new server/device calls
+- React regression and operator acceptance runbook; no Windows, backend or migration changes
+- see docs/BUILD_094_TRIAGE_REVIEW_PROGRESS.md
+
+### Build 095 — Scope to be confirmed
+- choose next practical operator feature
