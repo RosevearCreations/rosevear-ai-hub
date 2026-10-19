@@ -235,3 +235,18 @@ describe("Build 092 triage review visibility", () => {
     expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
   });
 });
+
+describe("Build 093 triage coverage and full queue visibility", () => {
+  it("preserves access to all follow-ups when triage shows only the top three", async () => {
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    await screen.findByRole("button", { name: "Triage in Devices" });
+    expect(container.textContent).toContain("Read-only prioritization");
+    const allQueue = screen.getByRole("region", { name: "Daily operations action queue" });
+    const verification = screen.getByRole("region", { name: "Manual verification plan" });
+    expect(allQueue.textContent).toContain("Review Home Assistant connection");
+    expect(verification.textContent).toContain("Review Home Assistant connection");
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    expect(screen.queryByRole("button", { name: "Triage in Devices" })).toBeNull();
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+});
