@@ -195,7 +195,7 @@ describe("Build 090 context review summary", () => {
     fireEvent.click(screen.getByRole("button", { name: "Workshop" }));
     expect(screen.getByText(/Current context review summary — Workshop/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
-    await waitFor(() => expect(screen.getByText(/0 reviewed for this snapshot/)).toBeTruthy());
+    await waitFor(() => expect(screen.getAllByText(/0 reviewed for this snapshot/).length).toBeGreaterThan(0));
     expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
   });
 });
