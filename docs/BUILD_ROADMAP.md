@@ -526,5 +526,12 @@ Each build must:
 - React interaction/privacy regression and operator rollback runbook
 - see docs/BUILD_092_TRIAGE_FILTER.md
 
-### Build 093 — Scope to be confirmed
-- choose next practical Home, Workshop & Business capability
+### Build 093 — Bounded Triage Coverage Transparency
+- explicitly disclose that the read-only priority triage shows at most three items and link the operator conceptually to full action and verification queues
+- report current filtered triage count only when truncation is possible; never treat a reviewed follow-up as verified or repaired
+- retain existing safe session-only behavior, context switching and privacy protections
+- add React regression test, operator acceptance and rollback runbook; no backend/device/Windows changes
+- see docs/BUILD_093_TRIAGE_COVERAGE.md
+
+### Build 094 — Scope to be confirmed
+- select next practical Home, Workshop & Business feature
