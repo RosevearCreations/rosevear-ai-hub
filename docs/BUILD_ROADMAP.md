@@ -540,5 +540,12 @@ Each build must:
 - React regression and operator acceptance runbook; no Windows, backend or migration changes
 - see docs/BUILD_094_TRIAGE_REVIEW_PROGRESS.md
 
-### Build 095 — Scope to be confirmed
-- choose next practical operator feature
+### Build 095 — Contextual First-Safe-Check Playbooks
+- add two finite, operator-only first checks to each known Home/Workshop/Business priority triage entry
+- distinguish configured attention, unverified service, and optional setup without echoing provider payloads
+- preserve current context, review filter and independent verification workflow; no auto-repair or false safety claim
+- React helper and interaction/privacy regression coverage; no new API, persistence, Windows action, migration, device or business write
+- see docs/BUILD_095_SAFE_FIRST_CHECKS.md
+
+### Build 096 — Scope to be confirmed from Home, Workshop & Business operational acceptance
+- choose the next practical operator feature after Build 095 code and Windows acceptance
