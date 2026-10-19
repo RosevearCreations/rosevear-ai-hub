@@ -547,5 +547,13 @@ Each build must:
 - React helper and interaction/privacy regression coverage; no new API, persistence, Windows action, migration, device or business write
 - see docs/BUILD_095_SAFE_FIRST_CHECKS.md
 
-### Build 096 — Scope to be confirmed from Home, Workshop & Business operational acceptance
-- choose the next practical operator feature after Build 095 code and Windows acceptance
+### Build 096 — Manual Verification Checklist Progress
+- present the two existing Build 095 static first-safe-check instructions in the independent verification plan with separate operator review checkboxes
+- count instructions reviewed for the active Home/Workshop/Business manual snapshot, without claiming independently verified/healthy/safe equipment
+- keep checklist progress session-only; clear it on working-context changes or manual refresh, not when filtering the queue
+- no persistence, integration calls from checkbox clicks, backend, migrations, reboot, Windows changes, device or business writes
+- React unit and interaction privacy/regression tests, plus runbook and rollback guidance
+- see docs/BUILD_096_MANUAL_CHECKLIST_PROGRESS.md
+
+### Build 097 — Scope to be confirmed from Home, Workshop & Business operational acceptance
+- choose the next practical operator feature after code and local Windows acceptance
