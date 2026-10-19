@@ -186,6 +186,88 @@ export function prioritizeDailyActions(
     || contextKeys.indexOf(a.key) - contextKeys.indexOf(b.key)).slice(0, 3);
 }
 
+// Build 095: allowlisted manual first checks for known status categories only.
+// This table never receives or displays raw integration payloads or credentials.
+const safeFirstChecks: Record<"ha" | "mqtt" | "camera" | "knowledge" | "business",
+  Record<DailyAction["priority"], readonly [string, string]>> = {
+  ha: {
+    review: [
+      "Open Devices and inspect the reported Home Assistant connection state.",
+      "Check whether the Home Assistant VM responds in its own interface before changing protected settings.",
+    ],
+    verify: [
+      "Open Devices and inspect the local connection status again.",
+      "Treat the VM and connection as unverified until confirmed separately in Home Assistant.",
+    ],
+    setup: [
+      "Read the Devices setup guidance for the local Home Assistant endpoint.",
+      "Only an authorized operator should configure the token in protected settings.",
+    ],
+  },
+  mqtt: {
+    review: [
+      "Open MQTT and review the broker connection indicator.",
+      "Check the broker or Home Assistant MQTT add-on directly; do not publish a test message from this dashboard.",
+    ],
+    verify: [
+      "Open MQTT and inspect whether the broker status can be read.",
+      "Confirm broker health separately before relying on any automation.",
+    ],
+    setup: [
+      "Review MQTT broker address, transport and topic guidance in the MQTT section.",
+      "Set credentials only through protected configuration; no broker messages are sent here.",
+    ],
+  },
+  camera: {
+    review: [
+      "Open Cameras and inspect the affected registry and stream-health entries.",
+      "Compare with the camera's own live view before attempting a supervised repair.",
+    ],
+    verify: [
+      "Open Cameras and inspect the latest registry and stream information.",
+      "Treat every unknown camera state as unverified until checked at the source.",
+    ],
+    setup: [
+      "Open Cameras and review the local inventory or optional ONVIF discovery.",
+      "Confirm camera ownership and access before enrolling a new stream.",
+    ],
+  },
+  knowledge: {
+    review: [
+      "Open Knowledge and inspect collections marked for indexing.",
+      "Review the source documents and indexing queue before starting any operation.",
+    ],
+    verify: [
+      "Open Knowledge and inspect whether collection status can be read.",
+      "Verify source availability independently; a missing status does not mean documents are safe or indexed.",
+    ],
+    setup: [
+      "Open Knowledge and review the first local collection workflow.",
+      "Confirm document sensitivity and owner approval before uploading any files.",
+    ],
+  },
+  business: {
+    review: [
+      "Open Business and identify connectors reporting a degraded state.",
+      "Compare read-only freshness with the original business systems before changing credentials.",
+    ],
+    verify: [
+      "Open Business and inspect each connector's reported read-only status.",
+      "Validate against the source business system; absence of evidence is not a healthy connection.",
+    ],
+    setup: [
+      "Open Business and review the available read-only connector setup.",
+      "Enable only the intended business integration with owner approval and protected credentials.",
+    ],
+  },
+};
+
+export function getSafeTriageChecks(key: string, priority: DailyAction["priority"]): readonly string[] {
+  if (!Object.prototype.hasOwnProperty.call(safeFirstChecks, key)
+    || !Object.prototype.hasOwnProperty.call(actionPriority, priority)) return [];
+  return safeFirstChecks[key as keyof typeof safeFirstChecks][priority];
+}
+
 // Build 085: finite, context-scoped comparison of two manual snapshots.
 // Only known service keys and states are compared. Never copy provider details.
 export type SnapshotChange = {
@@ -600,7 +682,14 @@ export function OperationsDashboard({
                           action.priority === "review" ? "Needs attention"
                             : action.priority === "verify" ? "Unverified" : "Optional setup"
                         }. Review is not independent verification.
-                        {" "}
+                        <div className="operations-triage-checks">
+                          <strong>First safe checks (manual only):</strong>
+                          <ol>
+                            {getSafeTriageChecks(action.key, action.priority).map((step) => (
+                              <li key={step}>{step}</li>
+                            ))}
+                          </ol>
+                        </div>
                         <button type="button" onClick={() => onNavigate(action.section)}>
                           Triage in {action.section}
                         </button>
