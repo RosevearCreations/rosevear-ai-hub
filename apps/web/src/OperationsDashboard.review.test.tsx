@@ -385,3 +385,43 @@ describe("Build 096 manual safe-check checklist progress", () => {
     expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
   });
 });
+
+describe("Build 097 outstanding safe-check workbench", () => {
+  it("shows context-specific progress, hides only reviewed instructions and restores all on demand", async () => {
+    const { container } = render(<OperationsDashboard role="read_only" onNavigate={vi.fn()} />);
+    const plan = await screen.findByRole("region", { name: "Manual verification plan" });
+    await screen.findByRole("checkbox", { name: "Review safe check 1 for Review Home Assistant connection" });
+    expect(plan.textContent).toContain("3 follow-up(s) have instructions");
+    expect(plan.textContent).toContain("0 of 2 instructions reviewed for this follow-up");
+    fireEvent.click(screen.getByRole("checkbox", { name: "Review safe check 1 for Review Home Assistant connection" }));
+    expect(plan.textContent).toContain("1 of 2 instructions reviewed for this follow-up");
+    fireEvent.click(screen.getByRole("button", { name: "Show outstanding safe-check instructions only" }));
+    expect(screen.queryByRole("checkbox", { name: "Review safe check 1 for Review Home Assistant connection" })).toBeNull();
+    expect(screen.getByRole("checkbox", { name: "Review safe check 2 for Review Home Assistant connection" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Review safe check 2 for Review Home Assistant connection" }));
+    expect(plan.textContent).toContain("2 follow-up(s) have instructions");
+    expect(screen.queryByRole("checkbox", { name: "Review safe check 2 for Review Home Assistant connection" })).toBeNull();
+    expect(screen.getByRole("checkbox", { name: "Review safe check 1 for Check the MQTT broker" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Show all safe-check instructions" }));
+    expect((screen.getByRole("checkbox", { name: "Review safe check 1 for Review Home Assistant connection" }) as HTMLInputElement).checked).toBe(true);
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+
+  it("retains independent follow-up review and resets outstanding filter on context switch and refresh", async () => {
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    const plan = await screen.findByRole("region", { name: "Manual verification plan" });
+    await screen.findByRole("checkbox", { name: "Review safe check 1 for Review Home Assistant connection" });
+    fireEvent.click(screen.getByRole("button", { name: "Show outstanding safe-check instructions only" }));
+    fireEvent.click(screen.getByRole("button", { name: "Not yet reviewed" }));
+    expect(screen.getByRole("button", { name: "Not yet reviewed" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    expect(plan.textContent).toContain("3 follow-up(s) have instructions");
+    expect(screen.getByRole("button", { name: "Show outstanding safe-check instructions only" })).toBeTruthy();
+    expect(screen.getByRole("checkbox", { name: "Review safe check 1 for Review business connectors" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Show outstanding safe-check instructions only" }));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Show outstanding safe-check instructions only" })).toBeTruthy());
+    expect(plan.textContent).toContain("0 of 6 safe-check instructions reviewed");
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+});

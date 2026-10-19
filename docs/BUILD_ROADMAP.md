@@ -555,5 +555,13 @@ Each build must:
 - React unit and interaction privacy/regression tests, plus runbook and rollback guidance
 - see docs/BUILD_096_MANUAL_CHECKLIST_PROGRESS.md
 
-### Build 097 — Scope to be confirmed from Home, Workshop & Business operational acceptance
-- choose the next practical operator feature after code and local Windows acceptance
+### Build 097 — Outstanding Safe-Check Workbench
+- show per-follow-up safe-check instruction review counts for the active Home, Workshop or Business snapshot
+- add an opt-in filter showing only unreviewed instructions and follow-ups that still have pending instruction reviews
+- preserve the independent follow-up acknowledgement filter; all review marks and the filter reset on snapshot or context change
+- keep complete guidance accessible with Show all and never equate checklist review with service verification, safety or repair
+- no new APIs, devices, broker messages, Windows tasks, schema migrations, persistence or backend writes
+- see docs/BUILD_097_OUTSTANDING_SAFE_CHECKS.md
+
+### Build 098 — Scope to be confirmed from Home, Workshop & Business priorities
+- choose the next operator feature after verification of Build 097 and local acceptance
