@@ -573,6 +573,11 @@ export function OperationsDashboard({
               } unverified · {
                 dailyActions.filter((action) => action.priority !== "review" && action.priority !== "verify").length
               } optional setup.</p>
+              {dailyActions.length > 0 && <p role="status">{
+                dailyActions.filter((action) => reviewed[action.key as keyof SnapshotReview]).length
+              } reviewed for this snapshot; {
+                dailyActions.filter((action) => !reviewed[action.key as keyof SnapshotReview]).length
+              } awaiting manual review. All still require independent verification.</p>}
               {dailyActions.length > 3 && <p role="status">Showing at most three priorities
                 from {dailyActions.filter((action) => !triageUnreviewedOnly
                   || !reviewed[action.key as keyof SnapshotReview]).length} currently visible
