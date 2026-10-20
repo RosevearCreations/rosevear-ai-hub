@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareOperationsSnapshots, countManualCheckProgress, countOutstandingSafeChecks, createOperationsHandoff, filterOutstandingSafeChecks, getSafeTriageChecks, prioritizeDailyActions, summarizeOperations } from "./OperationsDashboard";
+import { compareOperationsSnapshots, countManualCheckProgress, countOutstandingSafeChecks, createOperationsHandoff, filterOutstandingSafeChecks, getSafeTriageChecks, prioritizeDailyActions, summarizeHandoffOpenItems, summarizeOperations } from "./OperationsDashboard";
 
 const ok = (value: unknown): PromiseFulfilledResult<unknown> => ({
   status: "fulfilled",
@@ -355,5 +355,66 @@ describe("Build 098 sanitized instruction-review handoff", () => {
     expect(empty).toContain("Manual safe-check progress: 0/0 instructions reviewed");
     expect(empty).toContain("No suggested instruction reviews");
     expect(empty).not.toMatch(/PRIVATE_HA_TOKEN|PRIVATE_URL/);
+  });
+});
+
+describe("Build 099 bounded handoff open-items digest", () => {
+  const list = [
+    { key: "ha", title: "PRIVATE TITLE", section: "http://private", priority: "review" as const, reason: "PRIVATE" },
+    { key: "mqtt", title: "SECRET", section: "SECRET", priority: "verify" as const, reason: "SECRET" },
+  ];
+  it("counts follow-up and instruction review debt independently without claiming service verification", () => {
+    expect(summarizeHandoffOpenItems(list, {}, {})).toEqual({
+      pendingFollowUps: 2, totalFollowUps: 2,
+      pendingInstructions: 4, totalInstructions: 4,
+      allReviewMarksRecorded: false,
+    });
+    expect(summarizeHandoffOpenItems(list, { ha: true }, { ha: 1, mqtt: 3 })).toEqual({
+      pendingFollowUps: 1, totalFollowUps: 2,
+      pendingInstructions: 1, totalInstructions: 4,
+      allReviewMarksRecorded: false,
+    });
+    expect(summarizeHandoffOpenItems(list, { ha: true, mqtt: true }, { ha: 3, mqtt: 3 })).toEqual({
+      pendingFollowUps: 0, totalFollowUps: 2,
+      pendingInstructions: 0, totalInstructions: 4,
+      allReviewMarksRecorded: true,
+    });
+  });
+  it("excludes invented keys, ignores invalid flags and never treats an empty queue as safe", () => {
+    const invalid = { key: "__proto__", title: "PRIVATE", section: "PRIVATE", priority: "review" as const, reason: "SECRET" };
+    expect(summarizeHandoffOpenItems([invalid], {}, {})).toEqual({
+      pendingFollowUps: 0, totalFollowUps: 0,
+      pendingInstructions: 0, totalInstructions: 0, allReviewMarksRecorded: false,
+    });
+    const output = summarizeHandoffOpenItems([invalid, ...list], { ha: true }, { ha: NaN, mqtt: -1 });
+    expect(output.pendingFollowUps).toBe(1);
+    expect(output.pendingInstructions).toBe(4);
+    expect(JSON.stringify(output)).not.toMatch(/PRIVATE|SECRET|http/);
+  });
+  it("adds sanitized open-item counts to the context-limited private handoff", () => {
+    const current = {
+      sampledAt: new Date("2026-10-20T18:00:00Z"),
+      signals: summarizeOperations([
+        ok({ configured: true, available: false, token: "PRIVATE_TOKEN" }),
+        bad,
+        ok({ total: 0, healthy: 0, attention: 0 }),
+        ok({ document_count: 0, needs_indexing_count: 0 }),
+        ok({ connectors: [] }),
+      ]),
+    };
+    const report = createOperationsHandoff("Home", current, null, { ha: true }, { ha: 3 });
+    expect(report).toContain("Open manual reviews: 2/3 follow-up acknowledgements pending; 4/6 safe-check instruction reviews pending.");
+    expect(report).toContain("independent verification STILL required");
+    expect(report).not.toMatch(/PRIVATE_TOKEN|private path/);
+    const finished = createOperationsHandoff("Home", current, null,
+      { ha: true, mqtt: true, camera: true }, { ha: 3, mqtt: 3, camera: 3 });
+    expect(finished).toContain("All available review marks recorded for this snapshot; independent verification STILL required.");
+    const optional = {
+      sampledAt: current.sampledAt,
+      signals: current.signals.map(signal => ({ ...signal, status: "ready" as const })),
+    };
+    const empty = createOperationsHandoff("Business", optional, null, {}, {});
+    expect(empty).toContain("Open manual reviews: 0/0 follow-up acknowledgements pending; 0/0 safe-check instruction reviews pending.");
+    expect(empty).not.toContain("All available review marks recorded");
   });
 });

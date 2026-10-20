@@ -461,3 +461,39 @@ describe("Build 098 private handoff instruction parity", () => {
     expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
   });
 });
+
+describe("Build 099 manual handoff open-items digest", () => {
+  it("recomputes pending instruction and follow-up review counts independently", async () => {
+    const { container } = render(<OperationsDashboard role="read_only" onNavigate={vi.fn()} />);
+    const handoffArea = await screen.findByLabelText("Manual handoff acceptance");
+    expect(handoffArea.textContent).toContain("3 of 3 follow-up acknowledgements pending");
+    expect(handoffArea.textContent).toContain("6 of 6 safe-check instruction reviews pending");
+    fireEvent.click(screen.getByRole("checkbox", { name: "Review safe check 1 for Review Home Assistant connection" }));
+    expect(handoffArea.textContent).toContain("5 of 6 safe-check instruction reviews pending");
+    fireEvent.click(screen.getByRole("button", { name: "Mark Review Home Assistant connection reviewed for this snapshot" }));
+    expect(handoffArea.textContent).toContain("2 of 3 follow-up acknowledgements pending");
+    fireEvent.click(screen.getByRole("button", { name: "Show private handoff report" }));
+    const text = screen.getByRole("textbox", { name: "Copyable operations handoff report" }) as HTMLTextAreaElement;
+    expect(text.value).toContain("Open manual reviews: 2/3 follow-up acknowledgements pending; 5/6 safe-check instruction reviews pending.");
+    expect(text.value).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    expect(handoffArea.textContent).toContain("3 of 3 follow-up acknowledgements pending");
+    expect(handoffArea.textContent).toContain("6 of 6 safe-check instruction reviews pending");
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+  it("continues to require independent verification even after all review flags are set", async () => {
+    render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    const handoffArea = await screen.findByLabelText("Manual handoff acceptance");
+    for (const title of ["Review Home Assistant connection", "Check the MQTT broker", "Review the camera registry"]) {
+      fireEvent.click(screen.getByRole("checkbox", { name: "Review safe check 1 for " + title }));
+      fireEvent.click(screen.getByRole("checkbox", { name: "Review safe check 2 for " + title }));
+      fireEvent.click(screen.getByRole("button", { name: "Mark " + title + " reviewed for this snapshot" }));
+    }
+    expect(handoffArea.textContent).toContain("0 of 3 follow-up acknowledgements pending");
+    expect(handoffArea.textContent).toContain("0 of 6 safe-check instruction reviews pending");
+    expect(handoffArea.textContent).toContain("independent verification is still required");
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(handoffArea.textContent).toContain("3 of 3 follow-up acknowledgements pending"));
+    expect(handoffArea.textContent).toContain("6 of 6 safe-check instruction reviews pending");
+  });
+});
