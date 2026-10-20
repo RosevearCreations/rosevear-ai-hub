@@ -2855,3 +2855,12 @@ h1 {
 .operations-safe-workbench button { white-space: normal; text-align: left; }
 .operations-safe-workbench small { max-width: 78ch; }
 .operations-action-check-progress { font-weight: 600; }
+
+/* Build 100: finite, operator-only links to existing manual review sections. */
+.operations-handoff-gap-navigation { display: grid; gap: 0.45rem; margin: 0.8rem 0; min-width: 0; }
+.operations-handoff-gap-navigation h5,
+.operations-handoff-gap-navigation p { margin: 0; }
+.operations-handoff-gap-navigation ul { margin: 0; padding-left: 1.5rem; }
+.operations-handoff-gap-navigation li { margin: 0 0 0.6rem; overflow-wrap: anywhere; }
+.operations-handoff-gap-navigation li span { display: block; margin: 0.25rem 0; }
+.operations-handoff-gap-navigation button { white-space: normal; text-align: left; max-width: 100%; }
