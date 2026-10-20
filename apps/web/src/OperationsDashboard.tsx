@@ -363,6 +363,26 @@ export function compareOperationsSnapshots(
     || keys.indexOf(a.key) - keys.indexOf(b.key));
 }
 
+// Build 099: counts for manual handoff review only, with no assertion about safety.
+export function summarizeHandoffOpenItems(
+  actions: DailyAction[],
+  reviewed: SnapshotReview,
+  manualChecks: ManualCheckProgress,
+) {
+  const known = actions.filter((action) => getSafeTriageChecks(action.key, action.priority).length > 0);
+  const followUps = countSnapshotReviews(known, reviewed);
+  const instructions = countManualCheckProgress(known, manualChecks);
+  return {
+    pendingFollowUps: followUps.outstanding,
+    totalFollowUps: known.length,
+    pendingInstructions: instructions.totalInstructions - instructions.reviewedInstructions,
+    totalInstructions: instructions.totalInstructions,
+    // Even when true, independent source verification remains mandatory.
+    allReviewMarksRecorded: known.length > 0 && followUps.outstanding === 0
+      && instructions.reviewedInstructions === instructions.totalInstructions,
+  };
+}
+
 // Build 086: deliberate, read-only, allowlisted operations handoff text.
 // No raw provider payloads, errors, credentials, IP addresses or account information.
 export function createOperationsHandoff(
@@ -386,6 +406,7 @@ export function createOperationsHandoff(
     : ["- No follow-ups suggested by this snapshot; not a safety finding."];
   // Build 098: only approved static steps and finite review flags enter handoff.
   const checkTotals = countManualCheckProgress(actions, manualChecks);
+  const openItems = summarizeHandoffOpenItems(actions, reviewed, manualChecks);
   const manualLines = actions.length ? actions.flatMap((action) => {
     const counts = countOutstandingSafeChecks(action, manualChecks);
     const raw = manualChecks[action.key as keyof ManualCheckProgress];
@@ -426,6 +447,13 @@ export function createOperationsHandoff(
       + " instructions reviewed; NONE independently verified by this handoff.",
     ...manualLines,
     "",
+    "Open manual reviews: " + openItems.pendingFollowUps + "/"
+      + openItems.totalFollowUps + " follow-up acknowledgements pending; "
+      + openItems.pendingInstructions + "/" + openItems.totalInstructions
+      + " safe-check instruction reviews pending.",
+    openItems.allReviewMarksRecorded
+      ? "All available review marks recorded for this snapshot; independent verification STILL required."
+      : "Manual review marks remain outstanding or no follow-ups were suggested; independent verification STILL required.",
     "Operator verification: required before any real-world action.",
     "Server reboot persistence: deferred; not proven by this report.",
     "No device, camera, MQTT or business action executed.",
@@ -524,6 +552,7 @@ export function OperationsDashboard({
   const dailyActions = snapshot ? prioritizeDailyActions(snapshot.signals, context) : [];
   const reviewCounts = countSnapshotReviews(dailyActions, reviewed);
   const manualCheckCounts = countManualCheckProgress(dailyActions, manualChecks);
+  const handoffOpenItems = summarizeHandoffOpenItems(dailyActions, reviewed, manualChecks);
   const incompleteActions = filterOutstandingSafeChecks(dailyActions, manualChecks);
   const snapshotChanges = snapshot && previousSnapshot
     ? compareOperationsSnapshots(previousSnapshot.signals, snapshot.signals, context) : [];
@@ -619,6 +648,15 @@ export function OperationsDashboard({
             <p>Before marking this handoff reviewed, check its context, snapshot time,
               reported states, and outstanding follow-ups. Review is not resolution,
               safety certification, live Windows acceptance or permission to control devices.</p>
+            <p className="operations-handoff-open-items" role="status">
+              Open manual reviews: {handoffOpenItems.pendingFollowUps} of
+              {" "}{handoffOpenItems.totalFollowUps} follow-up acknowledgements pending;
+              {" "}{handoffOpenItems.pendingInstructions} of {handoffOpenItems.totalInstructions}
+              {" "}safe-check instruction reviews pending.
+              {" "}{handoffOpenItems.allReviewMarksRecorded
+                ? "All review marks recorded; independent verification is still required."
+                : "Pending review marks do not represent verified repairs or safe equipment."}
+            </p>
             <ul>
               <li>Confirm the selected {context} context and snapshot timestamp.</li>
               <li>Review current unverified and needs-review status cards.</li>

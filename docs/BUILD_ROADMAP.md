@@ -571,5 +571,13 @@ Each build must:
 - add unit, React privacy regression tests and manual operator acceptance/rollback instructions
 - see docs/BUILD_098_SAFE_CHECK_HANDOFF.md
 
-### Build 099 — Scope to be confirmed from Home, Workshop & Business priorities
-- select the next practical operator feature after Build 098 code and local acceptance
+### Build 099 — Outstanding Handoff Review Digest
+- add finite current-context counters for pending follow-up acknowledgements and pending first-safe-check instruction reviews
+- render the digest in the handoff acceptance panel and the private read-only handoff report, with warnings if work remains or no follow-ups are suggested
+- always distinguish complete review marks from independent verification, device safety, service repairs and incident closure
+- no new API, persistent records, OS service, device command, business write or automatic sharing
+- unit and React privacy/context/refresh regression coverage and manual review instructions
+- see docs/BUILD_099_HANDOFF_OPEN_ITEMS.md
+
+### Build 100 — Scope to be confirmed from Home, Workshop & Business priorities
+- select next practical operator feature after Build 099 code and local acceptance
