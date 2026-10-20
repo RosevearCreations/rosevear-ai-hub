@@ -702,7 +702,9 @@ export function OperationsDashboard({
                         {" · "}{gap.instructionsPending} of {gap.instructionsTotal}
                         {" "}instruction reviews pending
                       </span>
-                      <button type="button" onClick={() => onNavigate(gap.section)}>
+                      <button type="button"
+                        aria-label={`Open ${gap.section} to review outstanding ${gap.title}`}
+                        onClick={() => onNavigate(gap.section)}>
                         Open {gap.section} for manual review
                       </button>
                     </li>
