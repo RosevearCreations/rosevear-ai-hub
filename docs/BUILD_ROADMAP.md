@@ -586,5 +586,13 @@ Each build must:
 - unit and React tests for completion, navigation, privacy, context isolation and refresh
 - see docs/BUILD_100_REVIEW_GAP_NAVIGATOR.md
 
-### Build 101 — Scope to be confirmed from Home, Workshop & Business priorities
-- select next practical operator feature after Build 100 code and local acceptance
+### Build 101 — Manual Review Priority Filter
+- add an opt-in, session-only filter for the Build 100 handoff review navigator: show all outstanding routes or only reported attention/unverified services
+- clearly distinguish optional setup from a service failure; keep all pending routes in the private manually copied handoff report regardless of screen filter
+- automatically reset the filter when the selected Home, Workshop or Business context changes or when a new manual snapshot is collected
+- no API, persistence, automatic communication, device action, business write, Windows task or repair certification
+- unit and React tests for optional-only situations, missing verification, context isolation, refresh and privacy
+- see docs/BUILD_101_REVIEW_PRIORITY_FILTER.md
+
+### Build 102 — Scope to be confirmed from Home, Workshop & Business priorities
+- select the next useful operational feature after Build 101 promotion and local acceptance

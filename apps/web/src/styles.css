@@ -2864,3 +2864,9 @@ h1 {
 .operations-handoff-gap-navigation li { margin: 0 0 0.6rem; overflow-wrap: anywhere; }
 .operations-handoff-gap-navigation li span { display: block; margin: 0.25rem 0; }
 .operations-handoff-gap-navigation button { white-space: normal; text-align: left; max-width: 100%; }
+
+/* Build 101: review-only priority controls, not incident resolution. */
+.operations-handoff-priority-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.operations-handoff-priority-filter button { max-width: 100%; white-space: normal; }
+.operations-handoff-priority-filter button[aria-pressed="true"] { font-weight: 700; text-decoration: underline; }
+.operations-handoff-priority-filter p { flex-basis: 100%; margin: 0; }
