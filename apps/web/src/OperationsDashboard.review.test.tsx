@@ -534,3 +534,41 @@ describe("Build 100 operator review gap navigator", () => {
     expect(routes.textContent).toContain("Check the MQTT broker");
   });
 });
+
+describe("Build 101 on-screen review priority filter", () => {
+  it("filters optional setup while retaining pending route in the full private handoff", async () => {
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    const nav = await screen.findByLabelText("Outstanding manual review routes");
+    const filter = screen.getByRole("group", { name: "Manual review route priority filter" });
+    expect(filter.textContent).toContain("2 of 3 outstanding routes");
+    expect(nav.textContent).toContain("Review the camera registry");
+    fireEvent.click(screen.getByRole("button", { name: "Needs review or unverified only" }));
+    expect(screen.getByRole("button", { name: "Needs review or unverified only" }).getAttribute("aria-pressed")).toBe("true");
+    expect(nav.textContent).not.toContain("Review the camera registry");
+    expect(nav.textContent).toContain("Review Home Assistant connection");
+    fireEvent.click(screen.getByRole("button", { name: "Show private handoff report" }));
+    const report = screen.getByRole("textbox", { name: "Copyable operations handoff report" }) as HTMLTextAreaElement;
+    expect(report.value).toContain("Review the camera registry in Cameras:");
+    expect(report.value).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+    fireEvent.click(screen.getByRole("button", { name: "All outstanding routes" }));
+    expect(nav.textContent).toContain("Review the camera registry");
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+  it("shows a truthful optional-only empty filter, and resets after context change and refresh", async () => {
+    render(<OperationsDashboard role="read_only" onNavigate={vi.fn()} />);
+    const nav = await screen.findByLabelText("Outstanding manual review routes");
+    for (const title of ["Review Home Assistant connection", "Check the MQTT broker"]) {
+      for (const n of [1, 2]) fireEvent.click(screen.getByRole("checkbox", { name: "Review safe check " + n + " for " + title }));
+      fireEvent.click(screen.getByRole("button", { name: "Mark " + title + " reviewed for this snapshot" }));
+    }
+    fireEvent.click(screen.getByRole("button", { name: "Needs review or unverified only" }));
+    expect(nav.textContent).toContain("No attention or unverified routes match this filter");
+    expect(nav.textContent).toContain("Optional setup review is still outstanding");
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    expect(screen.getByRole("button", { name: "All outstanding routes" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "Needs review or unverified only" }));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "All outstanding routes" }).getAttribute("aria-pressed")).toBe("true"));
+    expect(nav.textContent).toContain("Review business connectors");
+  });
+});

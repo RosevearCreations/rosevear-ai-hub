@@ -400,10 +400,21 @@ export function listHandoffReviewGaps(
     const safe = dailyActionCopy[action.key];
     return [{
       key: action.key, title: safe.title, section: safe.section,
+      priority: action.priority,
       acknowledgementPending, instructionsPending: counts.remaining,
       instructionsTotal: counts.total,
     }];
   });
+}
+
+// Build 101: review-first filter for the on-screen navigator only.
+// The private copyable report continues to list every outstanding manual review route.
+export function filterHandoffReviewGaps(
+  gaps: ReturnType<typeof listHandoffReviewGaps>,
+  attentionAndUnverifiedOnly: boolean,
+) {
+  return gaps.filter((gap) => !attentionAndUnverifiedOnly
+    || gap.priority === "review" || gap.priority === "verify");
 }
 
 // Build 086: deliberate, read-only, allowlisted operations handoff text.
@@ -543,6 +554,7 @@ export function OperationsDashboard({
   const [triageUnreviewedOnly, setTriageUnreviewedOnly] = useState(false);
   const [manualChecks, setManualChecks] = useState<ManualCheckProgress>({});
   const [outstandingChecksOnly, setOutstandingChecksOnly] = useState(false);
+  const [priorityReviewGapsOnly, setPriorityReviewGapsOnly] = useState(false);
 
   const refresh = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
@@ -566,6 +578,7 @@ export function OperationsDashboard({
     setReviewed({});
     setManualChecks({});
     setOutstandingChecksOnly(false);
+    setPriorityReviewGapsOnly(false);
     setSnapshot(next);
     setLoading(false);
   }, []);
@@ -584,6 +597,8 @@ export function OperationsDashboard({
   const manualCheckCounts = countManualCheckProgress(dailyActions, manualChecks);
   const handoffOpenItems = summarizeHandoffOpenItems(dailyActions, reviewed, manualChecks);
   const handoffReviewGaps = listHandoffReviewGaps(dailyActions, reviewed, manualChecks);
+  const priorityReviewGapList = filterHandoffReviewGaps(handoffReviewGaps, priorityReviewGapsOnly);
+  const highPriorityGapCount = filterHandoffReviewGaps(handoffReviewGaps, true).length;
   const incompleteActions = filterOutstandingSafeChecks(dailyActions, manualChecks);
   const snapshotChanges = snapshot && previousSnapshot
     ? compareOperationsSnapshots(previousSnapshot.signals, snapshot.signals, context) : [];
@@ -607,7 +622,7 @@ export function OperationsDashboard({
             key={item}
             aria-pressed={context === item}
             className={context === item ? "context-selected" : ""}
-            onClick={() => { setContext(item); setHandoffVisible(false); setHandoffAccepted(null); setVerificationFilter("all"); setTriageUnreviewedOnly(false); setManualChecks({}); setOutstandingChecksOnly(false); }}
+            onClick={() => { setContext(item); setHandoffVisible(false); setHandoffAccepted(null); setVerificationFilter("all"); setTriageUnreviewedOnly(false); setManualChecks({}); setOutstandingChecksOnly(false); setPriorityReviewGapsOnly(false); }}
           >{item}</button>
         ))}
       </fieldset>
@@ -690,9 +705,25 @@ export function OperationsDashboard({
             </p>
             <div className="operations-handoff-gap-navigation" aria-label="Outstanding manual review routes">
               <h5>Outstanding manual reviews — {context}</h5>
-              {handoffReviewGaps.length > 0 ? (
+              {handoffReviewGaps.length > 0 && (
+                <div className="operations-handoff-priority-filter" role="group"
+                  aria-label="Manual review route priority filter">
+                  <button type="button" aria-pressed={!priorityReviewGapsOnly}
+                    onClick={() => setPriorityReviewGapsOnly(false)}>
+                    All outstanding routes
+                  </button>
+                  <button type="button" aria-pressed={priorityReviewGapsOnly}
+                    onClick={() => setPriorityReviewGapsOnly(true)}>
+                    Needs review or unverified only
+                  </button>
+                  <p role="status">{highPriorityGapCount} of {handoffReviewGaps.length}
+                    {" "}outstanding routes report attention or unverified status.
+                    Optional setup is not an incident.</p>
+                </div>
+              )}
+              {priorityReviewGapList.length > 0 ? (
                 <ul>
-                  {handoffReviewGaps.map((gap) => (
+                  {priorityReviewGapList.map((gap) => (
                     <li key={gap.key}>
                       <strong>{gap.title}</strong>
                       <span>
@@ -710,8 +741,13 @@ export function OperationsDashboard({
                     </li>
                   ))}
                 </ul>
-              ) : <p>No outstanding review routes for this snapshot. Independently verify all original services; zero review marks is not a safety finding.</p>}
-              <small>These links only open existing sections. They do not verify equipment, repair anything or transmit a report.</small>
+              ) : handoffReviewGaps.length > 0
+                ? <p role="status">No attention or unverified routes match this filter.
+                    Optional setup review is still outstanding; select All outstanding routes to restore it.
+                    Independent verification remains necessary.</p>
+                : <p>No outstanding review routes for this snapshot. Independently verify all original services; zero review marks is not a safety finding.</p>}
+              <small>Screen filter only: the private report retains all outstanding routes.
+                These links only open existing sections; they do not verify equipment or transmit a report.</small>
             </div>
             <ul>
               <li>Confirm the selected {context} context and snapshot timestamp.</li>
