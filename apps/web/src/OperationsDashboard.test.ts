@@ -321,3 +321,39 @@ describe("Build 097 outstanding safe-check workbench", () => {
     expect(JSON.stringify(countOutstandingSafeChecks(actions[0], {}))).not.toMatch(/SECRET|PRIVATE/);
   });
 });
+
+describe("Build 098 sanitized instruction-review handoff", () => {
+  const snapshot = {
+    sampledAt: new Date("2026-10-19T19:00:00Z"),
+    signals: summarizeOperations([
+      ok({ configured: true, available: false, token: "PRIVATE_HA_TOKEN", base_url: "http://PRIVATE_URL" }),
+      bad,
+      ok({ total: 0, healthy: 0, attention: 0 }),
+      ok({ document_count: 0, needs_indexing_count: 0 }),
+      ok({ connectors: [] }),
+    ]),
+  };
+  it("lists only current-context allowlisted reviewed and pending instructions", () => {
+    const report = createOperationsHandoff("Home", snapshot, null, {}, { ha: 1, mqtt: 3, business: 3 });
+    expect(report).toContain("Manual safe-check progress: 3/6 instructions reviewed");
+    expect(report).toContain("Review Home Assistant connection: 1/2 instructions reviewed (NOT verified)");
+    expect(report).toContain("Reviewed instruction 1: Open Devices");
+    expect(report).toContain("Pending instruction 2:");
+    expect(report).toContain("Check the MQTT broker: 2/2 instructions reviewed");
+    expect(report).not.toContain("Review business connectors:");
+    expect(report).not.toMatch(/PRIVATE_HA_TOKEN|PRIVATE_URL|private path/);
+  });
+  it("treats invalid bits as pending and no suggested actions as no verification", () => {
+    const report = createOperationsHandoff("Workshop", snapshot, null, {}, { mqtt: NaN, camera: -1 });
+    expect(report).toContain("Manual safe-check progress: 0/6 instructions reviewed");
+    expect(report).not.toContain("Review Home Assistant connection");
+    const ready = {
+      sampledAt: snapshot.sampledAt,
+      signals: snapshot.signals.map(signal => ({ ...signal, status: "ready" as const })),
+    };
+    const empty = createOperationsHandoff("Business", ready, null, {}, { business: 3 });
+    expect(empty).toContain("Manual safe-check progress: 0/0 instructions reviewed");
+    expect(empty).toContain("No suggested instruction reviews");
+    expect(empty).not.toMatch(/PRIVATE_HA_TOKEN|PRIVATE_URL/);
+  });
+});

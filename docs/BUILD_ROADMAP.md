@@ -563,5 +563,13 @@ Each build must:
 - no new APIs, devices, broker messages, Windows tasks, schema migrations, persistence or backend writes
 - see docs/BUILD_097_OUTSTANDING_SAFE_CHECKS.md
 
-### Build 098 — Scope to be confirmed from Home, Workshop & Business priorities
-- choose the next operator feature after verification of Build 097 and local acceptance
+### Build 098 — Sanitized Safe-Check Handoff Progress
+- include allowlisted first-safe-check instruction review counts and pending/reviewed guidance in the current private operations handoff report
+- make instruction review distinct from actual verification, service resolution or equipment safety; no raw provider data
+- invalidate previously accepted handoff review on changes to the instruction checklist or follow-up acknowledgement
+- no automatic copy, send, persistence, new endpoint, Windows change, migrations or device/business actions
+- add unit, React privacy regression tests and manual operator acceptance/rollback instructions
+- see docs/BUILD_098_SAFE_CHECK_HANDOFF.md
+
+### Build 099 — Scope to be confirmed from Home, Workshop & Business priorities
+- select the next practical operator feature after Build 098 code and local acceptance
