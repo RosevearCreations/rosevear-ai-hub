@@ -579,5 +579,12 @@ Each build must:
 - unit and React privacy/context/refresh regression coverage and manual review instructions
 - see docs/BUILD_099_HANDOFF_OPEN_ITEMS.md
 
-### Build 100 — Scope to be confirmed from Home, Workshop & Business priorities
-- select next practical operator feature after Build 099 code and local acceptance
+### Build 100 — Operator Review Gap Navigator
+- show only pending follow-up acknowledgement or instruction-review gaps in the current Home, Workshop or Business snapshot
+- navigate exclusively to existing allowlisted service sections and append privacy-safe pending routes to the manual handoff report
+- never imply verification, repair, safety or incident closure; no backend, migrations, Windows tasks, device or business writes
+- unit and React tests for completion, navigation, privacy, context isolation and refresh
+- see docs/BUILD_100_REVIEW_GAP_NAVIGATOR.md
+
+### Build 101 — Scope to be confirmed from Home, Workshop & Business priorities
+- select next practical operator feature after Build 100 code and local acceptance
