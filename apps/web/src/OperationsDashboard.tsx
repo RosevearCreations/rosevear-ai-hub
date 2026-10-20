@@ -383,6 +383,29 @@ export function summarizeHandoffOpenItems(
   };
 }
 
+// Build 100: finite, privacy-safe navigation only; never a device command or a repair.
+export function listHandoffReviewGaps(
+  actions: DailyAction[], reviewed: SnapshotReview, manualChecks: ManualCheckProgress,
+) {
+  const seen = new Set<string>();
+  return actions.flatMap((action) => {
+    if (!Object.prototype.hasOwnProperty.call(dailyActionCopy, action.key)
+      || seen.has(action.key)) return [];
+    const checks = getSafeTriageChecks(action.key, action.priority);
+    if (!checks.length) return [];
+    seen.add(action.key);
+    const counts = countOutstandingSafeChecks(action, manualChecks);
+    const acknowledgementPending = reviewed[action.key as keyof SnapshotReview] !== true;
+    if (!acknowledgementPending && counts.remaining === 0) return [];
+    const safe = dailyActionCopy[action.key];
+    return [{
+      key: action.key, title: safe.title, section: safe.section,
+      acknowledgementPending, instructionsPending: counts.remaining,
+      instructionsTotal: counts.total,
+    }];
+  });
+}
+
 // Build 086: deliberate, read-only, allowlisted operations handoff text.
 // No raw provider payloads, errors, credentials, IP addresses or account information.
 export function createOperationsHandoff(
@@ -407,6 +430,7 @@ export function createOperationsHandoff(
   // Build 098: only approved static steps and finite review flags enter handoff.
   const checkTotals = countManualCheckProgress(actions, manualChecks);
   const openItems = summarizeHandoffOpenItems(actions, reviewed, manualChecks);
+  const reviewGaps = listHandoffReviewGaps(actions, reviewed, manualChecks);
   const manualLines = actions.length ? actions.flatMap((action) => {
     const counts = countOutstandingSafeChecks(action, manualChecks);
     const raw = manualChecks[action.key as keyof ManualCheckProgress];
@@ -454,6 +478,12 @@ export function createOperationsHandoff(
     openItems.allReviewMarksRecorded
       ? "All available review marks recorded for this snapshot; independent verification STILL required."
       : "Manual review marks remain outstanding or no follow-ups were suggested; independent verification STILL required.",
+    "Outstanding manual review routes (not repairs or verification):",
+    ...(reviewGaps.length ? reviewGaps.map((gap) =>
+      "- " + gap.title + " in " + gap.section + ": "
+      + (gap.acknowledgementPending ? "follow-up acknowledgement pending; " : "follow-up reviewed; ")
+      + gap.instructionsPending + "/" + gap.instructionsTotal + " instruction reviews pending."
+    ) : ["- No outstanding review routes in this snapshot; independently verify original services."]),
     "Operator verification: required before any real-world action.",
     "Server reboot persistence: deferred; not proven by this report.",
     "No device, camera, MQTT or business action executed.",
@@ -553,6 +583,7 @@ export function OperationsDashboard({
   const reviewCounts = countSnapshotReviews(dailyActions, reviewed);
   const manualCheckCounts = countManualCheckProgress(dailyActions, manualChecks);
   const handoffOpenItems = summarizeHandoffOpenItems(dailyActions, reviewed, manualChecks);
+  const handoffReviewGaps = listHandoffReviewGaps(dailyActions, reviewed, manualChecks);
   const incompleteActions = filterOutstandingSafeChecks(dailyActions, manualChecks);
   const snapshotChanges = snapshot && previousSnapshot
     ? compareOperationsSnapshots(previousSnapshot.signals, snapshot.signals, context) : [];
@@ -657,6 +688,31 @@ export function OperationsDashboard({
                 ? "All review marks recorded; independent verification is still required."
                 : "Pending review marks do not represent verified repairs or safe equipment."}
             </p>
+            <div className="operations-handoff-gap-navigation" aria-label="Outstanding manual review routes">
+              <h5>Outstanding manual reviews — {context}</h5>
+              {handoffReviewGaps.length > 0 ? (
+                <ul>
+                  {handoffReviewGaps.map((gap) => (
+                    <li key={gap.key}>
+                      <strong>{gap.title}</strong>
+                      <span>
+                        {gap.acknowledgementPending
+                          ? "Follow-up acknowledgement pending"
+                          : "Follow-up reviewed (not resolved)"}
+                        {" · "}{gap.instructionsPending} of {gap.instructionsTotal}
+                        {" "}instruction reviews pending
+                      </span>
+                      <button type="button"
+                        aria-label={`Open ${gap.section} to review outstanding ${gap.title}`}
+                        onClick={() => onNavigate(gap.section)}>
+                        Open {gap.section} for manual review
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p>No outstanding review routes for this snapshot. Independently verify all original services; zero review marks is not a safety finding.</p>}
+              <small>These links only open existing sections. They do not verify equipment, repair anything or transmit a report.</small>
+            </div>
             <ul>
               <li>Confirm the selected {context} context and snapshot timestamp.</li>
               <li>Review current unverified and needs-review status cards.</li>

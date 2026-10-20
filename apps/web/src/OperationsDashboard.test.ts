@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareOperationsSnapshots, countManualCheckProgress, countOutstandingSafeChecks, createOperationsHandoff, filterOutstandingSafeChecks, getSafeTriageChecks, prioritizeDailyActions, summarizeHandoffOpenItems, summarizeOperations } from "./OperationsDashboard";
+import { compareOperationsSnapshots, countManualCheckProgress, countOutstandingSafeChecks, createOperationsHandoff, filterOutstandingSafeChecks, getSafeTriageChecks, listHandoffReviewGaps, prioritizeDailyActions, summarizeHandoffOpenItems, summarizeOperations } from "./OperationsDashboard";
 
 const ok = (value: unknown): PromiseFulfilledResult<unknown> => ({
   status: "fulfilled",
@@ -416,5 +416,29 @@ describe("Build 099 bounded handoff open-items digest", () => {
     const empty = createOperationsHandoff("Business", optional, null, {}, {});
     expect(empty).toContain("Open manual reviews: 0/0 follow-up acknowledgements pending; 0/0 safe-check instruction reviews pending.");
     expect(empty).not.toContain("All available review marks recorded");
+  });
+});
+
+describe("Build 100 bounded manual review routes", () => {
+  const actions = [
+    { key: "ha", title: "PRIVATE TOKEN", section: "http://private", priority: "review" as const, reason: "PRIVATE" },
+    { key: "mqtt", title: "PRIVATE PATH", section: "Private", priority: "verify" as const, reason: "SECRET" },
+  ];
+  it("shows only outstanding known routes and finite review counts", () => {
+    expect(listHandoffReviewGaps(actions, {}, {})).toEqual([
+      { key: "ha", title: "Review Home Assistant connection", section: "Devices", acknowledgementPending: true, instructionsPending: 2, instructionsTotal: 2 },
+      { key: "mqtt", title: "Check the MQTT broker", section: "MQTT", acknowledgementPending: true, instructionsPending: 2, instructionsTotal: 2 },
+    ]);
+    expect(listHandoffReviewGaps(actions, { ha: true }, { ha: 1 })[0].instructionsPending).toBe(1);
+    expect(listHandoffReviewGaps(actions, { ha: true }, { ha: 3 }).map(x => x.key)).toEqual(["mqtt"]);
+    expect(listHandoffReviewGaps(actions, { ha: true, mqtt: true }, { ha: 3, mqtt: 3 })).toEqual([]);
+  });
+  it("deduplicates and fails closed for invented keys, invalid flags, and untrusted content", () => {
+    const invalid = { key: "__proto__", title: "PRIVATE", section: "https://private", priority: "review" as const, reason: "PRIVATE" };
+    const result = listHandoffReviewGaps([invalid, actions[0], actions[0], actions[1]], {}, { ha: NaN, mqtt: -1 });
+    expect(result).toHaveLength(2);
+    expect(result[0].instructionsPending).toBe(2);
+    expect(JSON.stringify(result)).not.toMatch(/PRIVATE|SECRET|http/i);
+    expect(listHandoffReviewGaps([invalid], {}, {})).toEqual([]);
   });
 });
