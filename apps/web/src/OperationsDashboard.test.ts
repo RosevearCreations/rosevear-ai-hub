@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareOperationsSnapshots, countManualCheckProgress, countOutstandingSafeChecks, createOperationsHandoff, filterOutstandingSafeChecks, getSafeTriageChecks, listHandoffReviewGaps, prioritizeDailyActions, summarizeHandoffOpenItems, summarizeOperations } from "./OperationsDashboard";
+import { compareOperationsSnapshots, countManualCheckProgress, countOutstandingSafeChecks, createOperationsHandoff, filterHandoffReviewGaps, filterOutstandingSafeChecks, getSafeTriageChecks, listHandoffReviewGaps, prioritizeDailyActions, summarizeHandoffOpenItems, summarizeOperations } from "./OperationsDashboard";
 
 const ok = (value: unknown): PromiseFulfilledResult<unknown> => ({
   status: "fulfilled",
@@ -426,8 +426,8 @@ describe("Build 100 bounded manual review routes", () => {
   ];
   it("shows only outstanding known routes and finite review counts", () => {
     expect(listHandoffReviewGaps(actions, {}, {})).toEqual([
-      { key: "ha", title: "Review Home Assistant connection", section: "Devices", acknowledgementPending: true, instructionsPending: 2, instructionsTotal: 2 },
-      { key: "mqtt", title: "Check the MQTT broker", section: "MQTT", acknowledgementPending: true, instructionsPending: 2, instructionsTotal: 2 },
+      { key: "ha", title: "Review Home Assistant connection", section: "Devices", priority: "review", acknowledgementPending: true, instructionsPending: 2, instructionsTotal: 2 },
+      { key: "mqtt", title: "Check the MQTT broker", section: "MQTT", priority: "verify", acknowledgementPending: true, instructionsPending: 2, instructionsTotal: 2 },
     ]);
     expect(listHandoffReviewGaps(actions, { ha: true }, { ha: 1 })[0].instructionsPending).toBe(1);
     expect(listHandoffReviewGaps(actions, { ha: true }, { ha: 3 }).map(x => x.key)).toEqual(["mqtt"]);
@@ -440,5 +440,28 @@ describe("Build 100 bounded manual review routes", () => {
     expect(result[0].instructionsPending).toBe(2);
     expect(JSON.stringify(result)).not.toMatch(/PRIVATE|SECRET|http/i);
     expect(listHandoffReviewGaps([invalid], {}, {})).toEqual([]);
+  });
+});
+
+describe("Build 101 manual route priority filter", () => {
+  const actions = [
+    { key: "ha", title: "PRIVATE", section: "PRIVATE", priority: "review" as const, reason: "PRIVATE" },
+    { key: "mqtt", title: "PRIVATE", section: "PRIVATE", priority: "verify" as const, reason: "PRIVATE" },
+    { key: "camera", title: "PRIVATE", section: "PRIVATE", priority: "setup" as const, reason: "PRIVATE" },
+  ];
+  it("keeps all pending routes in All mode but narrows by explicit status when requested", () => {
+    const gaps = listHandoffReviewGaps(actions, {}, {});
+    expect(gaps.map(g => g.priority)).toEqual(["review", "verify", "setup"]);
+    expect(filterHandoffReviewGaps(gaps, false).map(g => g.key)).toEqual(["ha", "mqtt", "camera"]);
+    expect(filterHandoffReviewGaps(gaps, true).map(g => g.key)).toEqual(["ha", "mqtt"]);
+    expect(filterHandoffReviewGaps(gaps, true).every(g => g.priority !== "setup")).toBe(true);
+    expect(JSON.stringify(filterHandoffReviewGaps(gaps, false))).not.toMatch(/PRIVATE|http/);
+  });
+  it("does not turn optional-only review debt into a healthy or safe system", () => {
+    const gaps = listHandoffReviewGaps(actions, { ha: true, mqtt: true }, { ha: 3, mqtt: 3 });
+    expect(gaps.map(g => g.key)).toEqual(["camera"]);
+    expect(filterHandoffReviewGaps(gaps, true)).toEqual([]);
+    expect(filterHandoffReviewGaps(gaps, false)).toHaveLength(1);
+    expect(filterHandoffReviewGaps([], true)).toEqual([]);
   });
 });
