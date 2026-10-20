@@ -497,3 +497,40 @@ describe("Build 099 manual handoff open-items digest", () => {
     expect(handoffArea.textContent).toContain("6 of 6 safe-check instruction reviews pending");
   });
 });
+
+describe("Build 100 operator review gap navigator", () => {
+  it("navigates to allowlisted sections and removes only fully reviewed follow-ups", async () => {
+    const navigate = vi.fn();
+    const { container } = render(<OperationsDashboard role="read_only" onNavigate={navigate} />);
+    const routes = await screen.findByLabelText("Outstanding manual review routes");
+    expect(routes.textContent).toContain("Review Home Assistant connection");
+    expect(routes.textContent).toContain("Check the MQTT broker");
+    fireEvent.click(screen.getAllByRole("button", { name: "Open Devices for manual review" })[0]);
+    expect(navigate).toHaveBeenCalledWith("Devices");
+    for (const n of [1, 2]) fireEvent.click(screen.getByRole("checkbox", { name: "Review safe check " + n + " for Review Home Assistant connection" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mark Review Home Assistant connection reviewed for this snapshot" }));
+    expect(routes.textContent).not.toContain("Review Home Assistant connection");
+    expect(routes.textContent).toContain("Check the MQTT broker");
+    fireEvent.click(screen.getByRole("button", { name: "Show private handoff report" }));
+    const report = screen.getByRole("textbox", { name: "Copyable operations handoff report" }) as HTMLTextAreaElement;
+    expect(report.value).toContain("Outstanding manual review routes");
+    expect(report.value).not.toContain("Review Home Assistant connection in Devices:");
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    expect(routes.textContent).toContain("Review business connectors");
+    expect(routes.textContent).not.toContain("Review Home Assistant connection");
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+  it("retains independent safety warning after all review marks and resets on refresh", async () => {
+    render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    const routes = await screen.findByLabelText("Outstanding manual review routes");
+    for (const title of ["Review Home Assistant connection", "Check the MQTT broker", "Review the camera registry"]) {
+      for (const n of [1, 2]) fireEvent.click(screen.getByRole("checkbox", { name: "Review safe check " + n + " for " + title }));
+      fireEvent.click(screen.getByRole("button", { name: "Mark " + title + " reviewed for this snapshot" }));
+    }
+    expect(routes.textContent).toContain("No outstanding review routes");
+    expect(routes.textContent).toContain("Independently verify");
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(routes.textContent).toContain("Review Home Assistant connection"));
+    expect(routes.textContent).toContain("Check the MQTT broker");
+  });
+});
