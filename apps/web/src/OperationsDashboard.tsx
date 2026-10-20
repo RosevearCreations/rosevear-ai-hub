@@ -370,6 +370,7 @@ export function createOperationsHandoff(
   current: Snapshot,
   previous: Snapshot | null,
   reviewed: SnapshotReview,
+  manualChecks: ManualCheckProgress = {},
 ): string {
   const keys = visibleKeys[context];
   const statuses = keys.map((key) => {
@@ -383,6 +384,20 @@ export function createOperationsHandoff(
     ? actions.map((action) =>
       `- ${action.title}: ${reviewed[action.key as keyof SnapshotReview] ? "Reviewed for this snapshot, NOT resolved" : "Awaiting manual review"} (${action.priority === "review" ? "needs review" : action.priority === "verify" ? "unverified" : "optional setup"})`)
     : ["- No follow-ups suggested by this snapshot; not a safety finding."];
+  // Build 098: only approved static steps and finite review flags enter handoff.
+  const checkTotals = countManualCheckProgress(actions, manualChecks);
+  const manualLines = actions.length ? actions.flatMap((action) => {
+    const counts = countOutstandingSafeChecks(action, manualChecks);
+    const raw = manualChecks[action.key as keyof ManualCheckProgress];
+    const bits = typeof raw === "number" && Number.isSafeInteger(raw) && raw >= 0 ? raw : 0;
+    return [
+      "- " + dailyActionCopy[action.key].title + ": " + counts.reviewed
+        + "/" + counts.total + " instructions reviewed (NOT verified)",
+      ...getSafeTriageChecks(action.key, action.priority).map((step, i) =>
+        "  - " + ((bits & (1 << i)) !== 0 ? "Reviewed" : "Pending")
+          + " instruction " + (i + 1) + ": " + step),
+    ];
+  }) : ["- No suggested instruction reviews for this snapshot; no safety finding implied."];
   const changes = previous
     ? compareOperationsSnapshots(previous.signals, current.signals, context)
     : [];
@@ -405,6 +420,11 @@ export function createOperationsHandoff(
     "",
     "Reported changes:",
     ...changeLines,
+    "",
+    "Manual safe-check progress: " + checkTotals.reviewedInstructions + "/"
+      + checkTotals.totalInstructions
+      + " instructions reviewed; NONE independently verified by this handoff.",
+    ...manualLines,
     "",
     "Operator verification: required before any real-world action.",
     "Server reboot persistence: deferred; not proven by this report.",
@@ -572,7 +592,8 @@ export function OperationsDashboard({
       <section className="panel operations-handoff" aria-label="Private operations handoff summary">
         <h3>Manual operations handoff — {context}</h3>
         <p>Prepare a copyable, private snapshot summary using only approved service
-          names and status categories. Nothing is saved, sent or automatically copied.
+          names, status categories and static instruction review progress.
+          Nothing is saved, sent or automatically copied.
           Review does not mean resolved, and a reported Ready does not prove safety.</p>
         <button
           type="button"
@@ -588,7 +609,7 @@ export function OperationsDashboard({
               aria-label="Copyable operations handoff report"
               readOnly
               rows={16}
-              value={createOperationsHandoff(context, snapshot, previousSnapshot, reviewed)}
+              value={createOperationsHandoff(context, snapshot, previousSnapshot, reviewed, manualChecks)}
             />
           </>
         )}
@@ -658,15 +679,18 @@ export function OperationsDashboard({
                         ? `Reopen review of ${action.title}`
                         : `Mark ${action.title} reviewed for this snapshot`}
                       aria-pressed={reviewed[action.key as keyof SnapshotReview] === true}
-                      onClick={() => setReviewed((previous) => {
-                        const updated = { ...previous };
-                        if (updated[action.key as keyof SnapshotReview]) {
-                          delete updated[action.key as keyof SnapshotReview];
-                        } else {
-                          updated[action.key as keyof SnapshotReview] = true;
-                        }
-                        return updated;
-                      })}
+                      onClick={() => {
+                        setHandoffAccepted(null);
+                        setReviewed((previous) => {
+                          const updated = { ...previous };
+                          if (updated[action.key as keyof SnapshotReview]) {
+                            delete updated[action.key as keyof SnapshotReview];
+                          } else {
+                            updated[action.key as keyof SnapshotReview] = true;
+                          }
+                          return updated;
+                        });
+                      }}
                     >
                       {reviewed[action.key as keyof SnapshotReview]
                         ? "Reopen review" : "Mark reviewed (not resolved)"}
@@ -816,10 +840,13 @@ export function OperationsDashboard({
                             disabled={loading}
                             aria-label={`Review safe check ${index + 1} for ${action.title}`}
                             checked={Boolean((manualChecks[action.key as keyof ManualCheckProgress] ?? 0) & (1 << index))}
-                            onChange={() => setManualChecks((previous) => ({
-                              ...previous,
-                              [action.key]: (previous[action.key as keyof ManualCheckProgress] ?? 0) ^ (1 << index),
-                            }))}
+                            onChange={() => {
+                              setHandoffAccepted(null);
+                              setManualChecks((previous) => ({
+                                ...previous,
+                                [action.key]: (previous[action.key as keyof ManualCheckProgress] ?? 0) ^ (1 << index),
+                              }));
+                            }}
                           />
                           <span>{step}</span>
                         </label> : null
