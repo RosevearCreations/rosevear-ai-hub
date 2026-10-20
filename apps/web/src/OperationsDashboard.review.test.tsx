@@ -505,7 +505,7 @@ describe("Build 100 operator review gap navigator", () => {
     const routes = await screen.findByLabelText("Outstanding manual review routes");
     expect(routes.textContent).toContain("Review Home Assistant connection");
     expect(routes.textContent).toContain("Check the MQTT broker");
-    fireEvent.click(screen.getAllByRole("button", { name: "Open Devices for manual review" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Open Devices to review outstanding Review Home Assistant connection" }));
     expect(navigate).toHaveBeenCalledWith("Devices");
     for (const n of [1, 2]) fireEvent.click(screen.getByRole("checkbox", { name: "Review safe check " + n + " for Review Home Assistant connection" }));
     fireEvent.click(screen.getByRole("button", { name: "Mark Review Home Assistant connection reviewed for this snapshot" }));
