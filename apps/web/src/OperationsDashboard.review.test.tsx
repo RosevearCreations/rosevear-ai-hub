@@ -425,3 +425,39 @@ describe("Build 097 outstanding safe-check workbench", () => {
     expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
   });
 });
+
+describe("Build 098 private handoff instruction parity", () => {
+  it("reflects review edits without revealing secrets and invalidates handoff acceptance", async () => {
+    const { container } = render(<OperationsDashboard role="read_only" onNavigate={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Show private handoff report" }));
+    const report = screen.getByRole("textbox", { name: "Copyable operations handoff report" }) as HTMLTextAreaElement;
+    expect(report.value).toContain("Manual safe-check progress: 0/6 instructions reviewed");
+    fireEvent.click(screen.getByRole("button", { name: "Mark handoff reviewed (not resolved)" }));
+    expect(container.textContent).toContain("Handoff reviewed for this snapshot only");
+    fireEvent.click(screen.getByRole("checkbox", { name: "Review safe check 1 for Review Home Assistant connection" }));
+    expect(report.value).toContain("Manual safe-check progress: 1/6 instructions reviewed");
+    expect(report.value).toContain("Reviewed instruction 1: Open Devices");
+    expect(container.textContent).toContain("Handoff not yet reviewed for this snapshot.");
+    fireEvent.click(screen.getByRole("button", { name: "Mark handoff reviewed (not resolved)" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mark Review Home Assistant connection reviewed for this snapshot" }));
+    expect(container.textContent).toContain("Handoff not yet reviewed for this snapshot.");
+    expect(report.value).toContain("Reviewed for this snapshot, NOT resolved");
+    expect(report.value).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+  it("keeps report context bounded and invalidates it on manual refresh", async () => {
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Show private handoff report" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Review safe check 1 for Review Home Assistant connection" }));
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    fireEvent.click(screen.getByRole("button", { name: "Show private handoff report" }));
+    const report = screen.getByRole("textbox", { name: "Copyable operations handoff report" }) as HTMLTextAreaElement;
+    expect(report.value).toContain("Business operations handoff");
+    expect(report.value).not.toContain("Review Home Assistant connection:");
+    expect(report.value).toContain("Manual safe-check progress: 0/6 instructions reviewed");
+    fireEvent.click(screen.getByRole("checkbox", { name: "Review safe check 1 for Review business connectors" }));
+    expect(report.value).toContain("1/6 instructions reviewed");
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(screen.queryByRole("textbox", { name: "Copyable operations handoff report" })).toBeNull());
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+});
