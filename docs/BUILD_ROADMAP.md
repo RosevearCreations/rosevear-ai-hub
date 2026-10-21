@@ -594,5 +594,13 @@ Each build must:
 - unit and React tests for optional-only situations, missing verification, context isolation, refresh and privacy
 - see docs/BUILD_101_REVIEW_PRIORITY_FILTER.md
 
-### Build 102 — Scope to be confirmed from Home, Workshop & Business priorities
-- select the next useful operational feature after Build 101 promotion and local acceptance
+### Build 102 — Next Manual Review Route
+- suggest the next outstanding, allowlisted handoff review route for the selected Home, Workshop or Business snapshot
+- guide the operator through outstanding first-safe-check instruction reviews before the remaining follow-up acknowledgement
+- respect the optional-setup priority filter without hiding any pending routes in the private handoff report
+- reset naturally when operator reviews change, context changes or a new manual snapshot is collected
+- no backend, migrations, persistence, Windows changes, automatic communication or device/business writes
+- React navigation, privacy, refresh and context-isolation tests; see docs/BUILD_102_NEXT_MANUAL_REVIEW_ROUTE.md
+
+### Build 103 — Scope to be confirmed from Home, Workshop & Business priorities
+- select the next useful operational feature after Build 102 promotion and local acceptance
