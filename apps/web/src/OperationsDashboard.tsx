@@ -565,6 +565,25 @@ export function OperationsDashboard({
   const [outstandingChecksOnly, setOutstandingChecksOnly] = useState(false);
   const [priorityReviewGapsOnly, setPriorityReviewGapsOnly] = useState(false);
 
+  // Build 103: the focused checklist and full workbench share one session-only
+  // review state. Neither control runs a check or verifies a service.
+  const toggleInstructionReview = (key: keyof ManualCheckProgress, index: number) => {
+    setHandoffAccepted(null);
+    setManualChecks((previous) => ({
+      ...previous,
+      [key]: (previous[key] ?? 0) ^ (1 << index),
+    }));
+  };
+  const toggleFollowUpReview = (key: keyof SnapshotReview) => {
+    setHandoffAccepted(null);
+    setReviewed((previous) => {
+      const updated = { ...previous };
+      if (updated[key]) delete updated[key];
+      else updated[key] = true;
+      return updated;
+    });
+  };
+
   const refresh = useCallback(async (signal: AbortSignal) => {
     setLoading(true);
     const results = await Promise.allSettled([
@@ -736,9 +755,30 @@ export function OperationsDashboard({
                   aria-label="Next manual review route">
                   <strong>Suggested next manual review: {nextReviewRoute.title}</strong>
                   <p>{nextReviewRoute.instructionsPending > 0
-                    ? `${nextReviewRoute.instructionsPending} first-safe-check instruction review(s) remain. Read and mark them separately in the existing operations checklist.`
+                    ? `${nextReviewRoute.instructionsPending} first-safe-check instruction review(s) remain. Review the static guidance below or in the full operations checklist.`
                     : "Instructions marked reviewed; the follow-up acknowledgement is still pending."}
                     {" "}This suggestion is not a live verification, repair or safety clearance.</p>
+                  <fieldset className="operations-manual-checklist operations-focused-manual-checklist">
+                    <legend>Focused instruction review — no checks or commands run</legend>
+                    {getSafeTriageChecks(nextReviewRoute.key, nextReviewRoute.priority).map((step, index) => (
+                      <label key={step}>
+                        <input type="checkbox" disabled={loading}
+                          aria-label={`Review focused guidance step ${index + 1} for ${nextReviewRoute.title}`}
+                          checked={Boolean((manualChecks[nextReviewRoute.key as keyof ManualCheckProgress] ?? 0) & (1 << index))}
+                          onChange={() => toggleInstructionReview(nextReviewRoute.key as keyof ManualCheckProgress, index)}
+                        />
+                        <span>{step}</span>
+                      </label>
+                    ))}
+                  </fieldset>
+                  {nextReviewRoute.acknowledgementPending
+                    ? <button type="button" disabled={loading}
+                        aria-label={`Mark focused ${nextReviewRoute.title} reviewed for this snapshot`}
+                        onClick={() => toggleFollowUpReview(nextReviewRoute.key as keyof SnapshotReview)}>
+                        Mark follow-up reviewed (not resolved)
+                      </button>
+                    : <p>Follow-up acknowledgement recorded for this snapshot, not independently verified.
+                        Reopen it in Today's manual follow-ups if needed.</p>}
                   <button type="button"
                     aria-label={`Open next manual review in ${nextReviewRoute.section}`}
                     onClick={() => onNavigate(nextReviewRoute.section)}>
@@ -834,18 +874,7 @@ export function OperationsDashboard({
                         ? `Reopen review of ${action.title}`
                         : `Mark ${action.title} reviewed for this snapshot`}
                       aria-pressed={reviewed[action.key as keyof SnapshotReview] === true}
-                      onClick={() => {
-                        setHandoffAccepted(null);
-                        setReviewed((previous) => {
-                          const updated = { ...previous };
-                          if (updated[action.key as keyof SnapshotReview]) {
-                            delete updated[action.key as keyof SnapshotReview];
-                          } else {
-                            updated[action.key as keyof SnapshotReview] = true;
-                          }
-                          return updated;
-                        });
-                      }}
+                      onClick={() => toggleFollowUpReview(action.key as keyof SnapshotReview)}
                     >
                       {reviewed[action.key as keyof SnapshotReview]
                         ? "Reopen review" : "Mark reviewed (not resolved)"}
@@ -995,13 +1024,7 @@ export function OperationsDashboard({
                             disabled={loading}
                             aria-label={`Review safe check ${index + 1} for ${action.title}`}
                             checked={Boolean((manualChecks[action.key as keyof ManualCheckProgress] ?? 0) & (1 << index))}
-                            onChange={() => {
-                              setHandoffAccepted(null);
-                              setManualChecks((previous) => ({
-                                ...previous,
-                                [action.key]: (previous[action.key as keyof ManualCheckProgress] ?? 0) ^ (1 << index),
-                              }));
-                            }}
+                            onChange={() => toggleInstructionReview(action.key as keyof ManualCheckProgress, index)}
                           />
                           <span>{step}</span>
                         </label> : null
