@@ -602,5 +602,14 @@ Each build must:
 - no backend, migrations, persistence, Windows changes, automatic communication or device/business writes
 - React navigation, privacy, refresh and context-isolation tests; see docs/BUILD_102_NEXT_MANUAL_REVIEW_ROUTE.md
 
-### Build 103 — Scope to be confirmed from Home, Workshop & Business priorities
-- select the next useful operational feature after Build 102 promotion and local acceptance
+### Build 103 — Focused Manual Review Checklist
+- show the current suggested route's two allowlisted first-safe-check guidance steps directly in the Build 102 focus card
+- let the operator mark instructions read and follow-up acknowledgement separately, reusing exactly the existing session-only review state
+- keep the full verification workbench, private handoff report, outstanding counters and focus navigation in sync
+- invalidate a previously accepted handoff on review changes; reset review marks on context switch and manual refresh
+- keep optional setup excluded only by the selected screen filter; no hidden route loss from the private report
+- no new backend, data writes, persistence, Windows services or automated device/business actions
+- see docs/BUILD_103_FOCUSED_MANUAL_REVIEW_CHECKLIST.md
+
+### Build 104 — Scope to be confirmed from Home, Workshop & Business priorities
+- choose the next safe operational improvement after Build 103 release and local operator acceptance
