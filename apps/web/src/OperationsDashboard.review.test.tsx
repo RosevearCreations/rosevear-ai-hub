@@ -629,3 +629,65 @@ describe("Build 102 next manual review route", () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 });
+
+describe("Build 103 focused manual review checklist", () => {
+  it("shares instruction and follow-up marks with the full workbench and private handoff", async () => {
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={vi.fn()} />);
+    const focus = await screen.findByRole("region", { name: "Next manual review route" });
+    const focusedFirst = screen.getByRole("checkbox", {
+      name: "Review focused guidance step 1 for Review Home Assistant connection",
+    }) as HTMLInputElement;
+    const fullFirst = screen.getByRole("checkbox", {
+      name: "Review safe check 1 for Review Home Assistant connection",
+    }) as HTMLInputElement;
+    expect(focusedFirst.checked).toBe(false);
+    expect(focus.textContent).toContain("Check whether the Home Assistant VM responds");
+    fireEvent.click(screen.getByRole("button", { name: "Show private handoff report" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mark handoff reviewed (not resolved)" }));
+    fireEvent.click(focusedFirst);
+    expect(fullFirst.checked).toBe(true);
+    expect(container.textContent).toContain("Handoff not yet reviewed for this snapshot");
+    const report = screen.getByRole("textbox", { name: "Copyable operations handoff report" }) as HTMLTextAreaElement;
+    expect(report.value).toContain("Reviewed instruction 1: Open Devices");
+    fireEvent.click(fullFirst);
+    expect(focusedFirst.checked).toBe(false);
+    fireEvent.click(focusedFirst);
+    fireEvent.click(screen.getByRole("checkbox", {
+      name: "Review focused guidance step 2 for Review Home Assistant connection",
+    }));
+    expect(focus.textContent).toContain("follow-up acknowledgement is still pending");
+    fireEvent.click(screen.getByRole("button", {
+      name: "Mark focused Review Home Assistant connection reviewed for this snapshot",
+    }));
+    expect(focus.textContent).toContain("Check the MQTT broker");
+    expect(report.value).not.toContain("Review Home Assistant connection in Devices:");
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+
+  it("keeps controls context-scoped, honors the filter and clears review marks on refresh", async () => {
+    render(<OperationsDashboard role="read_only" onNavigate={vi.fn()} />);
+    await screen.findByRole("region", { name: "Next manual review route" });
+    const homeFirst = screen.getByRole("checkbox", {
+      name: "Review focused guidance step 1 for Review Home Assistant connection",
+    }) as HTMLInputElement;
+    fireEvent.click(homeFirst);
+    expect(homeFirst.checked).toBe(true);
+    expect(api.getHomeAssistantStatus).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    expect(screen.queryByRole("checkbox", {
+      name: "Review focused guidance step 1 for Review Home Assistant connection",
+    })).toBeNull();
+    expect(screen.getByRole("checkbox", {
+      name: "Review focused guidance step 1 for Check the MQTT broker",
+    })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Home" }));
+    expect((screen.getByRole("checkbox", {
+      name: "Review focused guidance step 1 for Review Home Assistant connection",
+    }) as HTMLInputElement).checked).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Refresh overview" })).toBeEnabled());
+    expect((screen.getByRole("checkbox", {
+      name: "Review focused guidance step 1 for Review Home Assistant connection",
+    }) as HTMLInputElement).checked).toBe(false);
+  });
+});
