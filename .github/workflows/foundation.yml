@@ -189,6 +189,9 @@ jobs:
       - name: Validate Build 082 identity diagnostics
         shell: pwsh
         run: ./scripts/test-hub-gateway-082.ps1
+      - name: Build 104 supervised restart task readiness regression
+        shell: pwsh
+        run: ./scripts/test-hub-startup-readiness.ps1
       - name: Check Rust shell
         run: npm run desktop:check
       - name: Build Windows desktop executable

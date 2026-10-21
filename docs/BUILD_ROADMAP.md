@@ -611,5 +611,13 @@ Each build must:
 - no new backend, data writes, persistence, Windows services or automated device/business actions
 - see docs/BUILD_103_FOCUSED_MANUAL_REVIEW_CHECKLIST.md
 
-### Build 104 — Scope to be confirmed from Home, Workshop & Business priorities
-- choose the next safe operational improvement after Build 103 release and local operator acceptance
+### Build 104 — Supervised Windows Restart Readiness & Task Identity Evidence
+- provide a read-only PowerShell inspection of the existing Hub sign-in and five-minute recovery tasks
+- fail closed if either task is absent, disabled, unowned, has an unexpected action, or has the wrong trigger
+- distinguish source/CI readiness from an actual supervised server reboot and all separately hosted services
+- publish before/after restart instructions for Home Assistant VM, MQTT, Ollama, HTTPS gateway and cameras without altering their startup configuration
+- add pure evidence classification tests and a Windows CI gate; no reboot, task installs, services, credentials or database changes
+- see docs/BUILD_104_SUPERVISED_RESTART_READINESS.md
+
+### Build 105 — Scope to be confirmed from observed restart results and Home, Workshop & Business priorities
+- follow up on actual Windows post-reboot acceptance and any observed startup gaps; no speculative task changes
