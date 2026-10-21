@@ -417,6 +417,15 @@ export function filterHandoffReviewGaps(
     || gap.priority === "review" || gap.priority === "verify");
 }
 
+// Build 102: select one finite, current-snapshot review route from the visible
+// navigator. This is navigation advice, never evidence that a check was done.
+export function nextManualReviewRoute(
+  gaps: ReturnType<typeof listHandoffReviewGaps>,
+  attentionAndUnverifiedOnly: boolean,
+) {
+  return filterHandoffReviewGaps(gaps, attentionAndUnverifiedOnly)[0] ?? null;
+}
+
 // Build 086: deliberate, read-only, allowlisted operations handoff text.
 // No raw provider payloads, errors, credentials, IP addresses or account information.
 export function createOperationsHandoff(
@@ -599,6 +608,7 @@ export function OperationsDashboard({
   const handoffReviewGaps = listHandoffReviewGaps(dailyActions, reviewed, manualChecks);
   const priorityReviewGapList = filterHandoffReviewGaps(handoffReviewGaps, priorityReviewGapsOnly);
   const highPriorityGapCount = filterHandoffReviewGaps(handoffReviewGaps, true).length;
+  const nextReviewRoute = nextManualReviewRoute(handoffReviewGaps, priorityReviewGapsOnly);
   const incompleteActions = filterOutstandingSafeChecks(dailyActions, manualChecks);
   const snapshotChanges = snapshot && previousSnapshot
     ? compareOperationsSnapshots(previousSnapshot.signals, snapshot.signals, context) : [];
@@ -719,6 +729,21 @@ export function OperationsDashboard({
                   <p role="status">{highPriorityGapCount} of {handoffReviewGaps.length}
                     {" "}outstanding routes report attention or unverified status.
                     Optional setup is not an incident.</p>
+                </div>
+              )}
+              {nextReviewRoute && (
+                <div className="operations-handoff-next-review" role="region"
+                  aria-label="Next manual review route">
+                  <strong>Suggested next manual review: {nextReviewRoute.title}</strong>
+                  <p>{nextReviewRoute.instructionsPending > 0
+                    ? `${nextReviewRoute.instructionsPending} first-safe-check instruction review(s) remain. Read and mark them separately in the existing operations checklist.`
+                    : "Instructions marked reviewed; the follow-up acknowledgement is still pending."}
+                    {" "}This suggestion is not a live verification, repair or safety clearance.</p>
+                  <button type="button"
+                    aria-label={`Open next manual review in ${nextReviewRoute.section}`}
+                    onClick={() => onNavigate(nextReviewRoute.section)}>
+                    Open {nextReviewRoute.section} for next manual review
+                  </button>
                 </div>
               )}
               {priorityReviewGapList.length > 0 ? (
