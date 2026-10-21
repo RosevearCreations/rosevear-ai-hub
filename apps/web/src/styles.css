@@ -2875,3 +2875,7 @@ h1 {
 .operations-handoff-next-review { border: 1px solid var(--border, #777); border-radius: 0.5rem; padding: 0.75rem; display: grid; gap: 0.4rem; min-width: 0; }
 .operations-handoff-next-review p { margin: 0; }
 .operations-handoff-next-review button { justify-self: start; }
+
+/* Build 103: same in-memory review marks as the full verification workbench. */
+.operations-focused-manual-checklist { margin: 0.25rem 0; max-width: 100%; }
+.operations-focused-manual-checklist label { overflow-wrap: anywhere; }
