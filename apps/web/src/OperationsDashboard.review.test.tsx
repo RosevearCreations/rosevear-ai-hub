@@ -572,3 +572,60 @@ describe("Build 101 on-screen review priority filter", () => {
     expect(nav.textContent).toContain("Review business connectors");
   });
 });
+
+describe("Build 102 next manual review route", () => {
+  it("guides only to a pending allowlisted section and advances after both kinds of review", async () => {
+    const navigate = vi.fn();
+    const { container } = render(<OperationsDashboard role="owner" onNavigate={navigate} />);
+    const next = await screen.findByRole("region", { name: "Next manual review route" });
+    expect(next.textContent).toContain("Review Home Assistant connection");
+    expect(next.textContent).toContain("2 first-safe-check instruction review(s) remain");
+    fireEvent.click(screen.getByRole("button", { name: "Open next manual review in Devices" }));
+    expect(navigate).toHaveBeenCalledWith("Devices");
+    for (const n of [1, 2]) {
+      fireEvent.click(screen.getByRole("checkbox", {
+        name: `Review safe check ${n} for Review Home Assistant connection`,
+      }));
+    }
+    expect(next.textContent).toContain("follow-up acknowledgement is still pending");
+    fireEvent.click(screen.getByRole("button", {
+      name: "Mark Review Home Assistant connection reviewed for this snapshot",
+    }));
+    expect(next.textContent).toContain("Check the MQTT broker");
+    expect(screen.getByRole("button", { name: "Open next manual review in MQTT" })).toBeEnabled();
+    expect(container.textContent).not.toMatch(/PRIVATE_HA_SECRET|PRIVATE_MQTT_SECRET/);
+  });
+
+  it("respects the screen filter, context switch and refreshed snapshot without hiding report routes", async () => {
+    const navigate = vi.fn();
+    render(<OperationsDashboard role="read_only" onNavigate={navigate} />);
+    const next = await screen.findByRole("region", { name: "Next manual review route" });
+    for (const title of ["Review Home Assistant connection", "Check the MQTT broker"]) {
+      for (const n of [1, 2]) {
+        fireEvent.click(screen.getByRole("checkbox", { name: `Review safe check ${n} for ${title}` }));
+      }
+      fireEvent.click(screen.getByRole("button", { name: `Mark ${title} reviewed for this snapshot` }));
+    }
+    expect(next.textContent).toContain("Review the camera registry");
+    fireEvent.click(screen.getByRole("button", { name: "Needs review or unverified only" }));
+    expect(screen.queryByRole("region", { name: "Next manual review route" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Show private handoff report" }));
+    const report = screen.getByRole("textbox", { name: "Copyable operations handoff report" }) as HTMLTextAreaElement;
+    expect(report.value).toContain("Review the camera registry in Cameras:");
+    fireEvent.click(screen.getByRole("button", { name: "All outstanding routes" }));
+    expect(screen.getByRole("region", { name: "Next manual review route" }).textContent)
+      .toContain("Review the camera registry");
+    fireEvent.click(screen.getByRole("button", { name: "Business" }));
+    expect(screen.getByRole("region", { name: "Next manual review route" }).textContent)
+      .toContain("Check the MQTT broker");
+    expect(screen.getByRole("region", { name: "Next manual review route" }).textContent)
+      .not.toContain("Review Home Assistant connection");
+    fireEvent.click(screen.getByRole("button", { name: "Refresh overview" }));
+    await waitFor(() => expect(screen.getByRole("region", { name: "Next manual review route" }).textContent)
+      .toContain("Check the MQTT broker"));
+    fireEvent.click(screen.getByRole("button", { name: "Home" }));
+    expect(screen.getByRole("region", { name: "Next manual review route" }).textContent)
+      .toContain("Review Home Assistant connection");
+    expect(navigate).not.toHaveBeenCalled();
+  });
+});

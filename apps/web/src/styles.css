@@ -2870,3 +2870,8 @@ h1 {
 .operations-handoff-priority-filter button { max-width: 100%; white-space: normal; }
 .operations-handoff-priority-filter button[aria-pressed="true"] { font-weight: 700; text-decoration: underline; }
 .operations-handoff-priority-filter p { flex-basis: 100%; margin: 0; }
+
+/* Build 102: an operator-only next route; no task or equipment is triggered. */
+.operations-handoff-next-review { border: 1px solid var(--border, #777); border-radius: 0.5rem; padding: 0.75rem; display: grid; gap: 0.4rem; min-width: 0; }
+.operations-handoff-next-review p { margin: 0; }
+.operations-handoff-next-review button { justify-self: start; }
