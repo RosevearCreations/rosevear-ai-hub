@@ -619,8 +619,11 @@ Each build must:
 - add pure evidence classification tests and a Windows CI gate; no reboot, task installs, services, credentials or database changes
 - see docs/BUILD_104_SUPERVISED_RESTART_READINESS.md
 
-### Build 105 — Scope to be confirmed from observed restart results and Home, Workshop & Business priorities
-- follow up on actual Windows post-reboot acceptance and any observed startup gaps; no speculative task changes
+### Build 105 — Reboot Recovery Dependency Ordering & Database Readiness
+- hold on unsupported live SQLite schema revision instead of automatically applying migrations
+- read-only preflight plus guarded retry of the existing HTTPS gateway task after API and PWA readiness
+- preserve supervised backup/migration workflow, known task identity and safe recovery logs
+- see docs/BUILD_105_REBOOT_RECOVERY_DEPENDENCY_ORDERING.md
 
 ### Build 106 — Home Assistant VM & MQTT Post-Reboot Dependency Acceptance
 - safely inspect the *existing* VirtualBox Home Assistant VM firmware/running state and only approved private HA/MQTT TCP endpoints
@@ -630,7 +633,16 @@ Each build must:
 - add Windows PowerShell pure evidence regression and owner runbook
 - see docs/BUILD_106_HA_MQTT_POST_REBOOT_ACCEPTANCE.md
 
-### Build 107 — Device Inventory Provenance & Camera Registry Recovery Planning (queued)
-- compare Home Assistant live devices/entities and Hub independent camera records without assuming every discovered integration is already enrolled
-- guide owner through backup provenance, one-integration-to-many-device reconciliation and safe missing/duplicate analysis
-- retain manual camera stream playback and isolated backup comparison as distinct evidence gates; never mass import or restore a live database
+### Build 107 — Device Inventory & Camera Recovery
+- add a read-only recovery inventory to Devices which independently probes Home Assistant, Hub camera registry and go2rtc health
+- download a bounded, identity-only JSON snapshot and compare it to a manually chosen earlier snapshot after a reboot
+- distinguish unavailable API/registry (unknown count), actual empty registry, missing prior identity and newly discovered identity
+- explain Home Assistant integration-level enrollment and existing bulk-reviewed ONVIF preview/acceptance without re-adding every item manually
+- preserve separate camera streaming/playback and encrypted isolated backup gates; never automatically discover, control, import, migrate or restore devices
+- unit and React tests for sanitization, import validation, missing/new counts, privacy, failed probes and zero mutation
+- see docs/BUILD_107_DEVICE_CAMERA_RECOVERY.md
+
+### Build 108 — Supervised Device & Camera Field Reconciliation (queued)
+- use actual owner-exported before/after snapshots to classify absent Home Assistant integrations and camera identities
+- reconcile known cameras with operator-reviewed discovery receipts, then verify authorized live stream playback per selected camera
+- keep database restoration, integration enrollment and any physical controls explicit, backed up and supervised

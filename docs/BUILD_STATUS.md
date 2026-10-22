@@ -1745,7 +1745,7 @@ See docs/BUILD_086_PRIVATE_OPERATIONS_HANDOFF.md. Next proposed Build 087 — sc
 - [x] Dependency-order a guarded retry of the existing, owner-verified gateway task after API/built PWA readiness
 - [x] Preserve client access, firewall, TLS, task ownership, migration and unrelated service safety boundaries
 - [x] Add Windows pure-decision regression cases and operator release/runbook
-- [ ] Independent dev push and main push CI fully GREEN
+- [x] Independent dev push and main push CI fully GREEN (main run 39722718267, 5/5)
 - [ ] Operator installs updated source on the actual Windows test server and completes a *new* supervised reboot acceptance
 
 See docs/BUILD_105_REBOOT_RECOVERY_DEPENDENCY_ORDERING.md. Next proposed: Build 106 — Home Assistant VM & MQTT Post-Reboot Dependency Acceptance.
@@ -1755,9 +1755,23 @@ See docs/BUILD_105_REBOOT_RECOVERY_DEPENDENCY_ORDERING.md. Next proposed: Build 
 - [x] Separate configured versus discovered Home Assistant devices and independent camera inventory
 - [x] Add read-only Windows VirtualBox/HA/MQTT dependency inspector with fixed private classifications
 - [x] Pure six-prerequisite verdict, no-host-mutation Windows regression and operator runbook
-- [ ] Independent `dev` pull-request and post-merge push five CI jobs GREEN
-- [ ] Independent `main` pull-request and post-merge push five CI jobs GREEN
+- [x] Independent `dev` pull-request and post-merge push five CI jobs GREEN (PR #277)
+- [x] Independent `main` pull-request and post-merge push five CI jobs GREEN (PR #170, main run 39722718267)
 - [ ] Owner runs Build 106 on installed Windows checkout and confirms actual VM boot and authenticated integrations
 - [ ] Device/camera inventory reconciliation and live authorized camera playback accepted independently
 
-See docs/BUILD_106_HA_MQTT_POST_REBOOT_ACCEPTANCE.md. Next queued: Build 107 — Device Inventory Provenance & Camera Registry Recovery Planning.
+See docs/BUILD_106_HA_MQTT_POST_REBOOT_ACCEPTANCE.md. Next queued: Build 107 — Device Inventory & Camera Recovery.
+
+## Build 107 — Device Inventory & Camera Recovery
+- [x] Independent, read-only Home Assistant browser, Hub camera registry and camera transport evidence in Devices
+- [x] Failed or incomplete reads report UNKNOWN, never a misleading zero-camera/device conclusion
+- [x] Operator-only identity snapshot download/import and stable-ID missing/new comparison
+- [x] No tokens, URLs, stream credentials, Home Assistant attributes or camera hosts in snapshots
+- [x] Clear integration discovery and bulk-reviewed ONVIF recovery paths; no automatic changes
+- [x] Pure snapshot validation and React error/zero/mutation regression tests
+- [ ] Independent `dev` PR and post-merge push CI GREEN
+- [ ] Independent `main` PR and post-merge push CI GREEN
+- [ ] Owner captures/imports actual private baseline and reviews recovered devices and cameras on installed Windows server
+- [ ] Independent authorized camera playback and HA integration acceptance on physical equipment
+
+See docs/BUILD_107_DEVICE_CAMERA_RECOVERY.md. Next proposed: Build 108 — Supervised Device & Camera Field Reconciliation.
