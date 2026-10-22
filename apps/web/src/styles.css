@@ -2929,3 +2929,9 @@ h1 {
 .recovery-review-item code { overflow-wrap: anywhere; }
 .recovery-review-item select { max-width: 100%; min-width: min(100%, 15rem); }
 .recovery-playback-mark { display: flex; align-items: center; gap: .5rem; }
+
+/* Build 109 — bounded local receipt comparison, explicit owner acceptance and remaining holds. */
+.recovery-receipt-upload { display: grid; gap: .4rem; max-width: 29rem; margin-block: .75rem; }
+.recovery-receipt-upload input { max-width: 100%; }
+.recovery-field-review details { margin-block: .75rem; }
+.recovery-field-review details > summary { cursor: pointer; margin-bottom: .65rem; }
