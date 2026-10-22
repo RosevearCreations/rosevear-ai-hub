@@ -2879,3 +2879,32 @@ h1 {
 /* Build 103: same in-memory review marks as the full verification workbench. */
 .operations-focused-manual-checklist { margin: 0.25rem 0; max-width: 100%; }
 .operations-focused-manual-checklist label { overflow-wrap: anywhere; }
+/* Build 107 — responsive, read-only device and camera recovery comparison. */
+.recovery-inventory { margin-bottom: 1.25rem; }
+.recovery-inventory .ha-section-heading { align-items: flex-start; gap: 1rem; }
+.recovery-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 1rem;
+  margin-block: 1rem;
+}
+.recovery-evidence-grid > div,
+.recovery-difference {
+  min-width: 0;
+  border: 1px solid var(--border, #8886);
+  border-radius: .75rem;
+  padding: 1rem;
+}
+.recovery-evidence-grid code,
+.recovery-comparison code { overflow-wrap: anywhere; }
+.recovery-evidence-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.recovery-evidence-actions label { display: grid; gap: .35rem; }
+.recovery-evidence-actions input { max-width: 100%; }
+.recovery-comparison { margin-top: 1.25rem; }
+.recovery-comparison details { margin-block: .5rem; }
+.recovery-comparison li { margin-block: .35rem; overflow-wrap: anywhere; }
