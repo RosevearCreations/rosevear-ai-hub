@@ -1796,9 +1796,25 @@ See docs/BUILD_108_SUPERVISED_DEVICE_CAMERA_FIELD_RECONCILIATION.md. Next queued
 - [x] Session-only owner acceptance marks invalidated on registry snapshot changes; no network writes
 - [x] Private receipt export distinguishes reappeared identity, retired exception, unverified stream and unresolved holds
 - [x] Pure logic and React regression tests plus operator runbook
-- [ ] Independent `dev` feature PR and post-merge push CI GREEN
-- [ ] Independent `main` promotion PR and post-merge push CI GREEN
+- [x] Independent `dev` feature PR and post-merge push CI GREEN (PR #282, dev run 39796632408)
+- [x] Independent `main` promotion PR and post-merge push CI GREEN (PR #283, main run 39798822217, protected `main` `bfd559eb73ed766b60773dc2bf6602fa2ecd552b`)
 - [ ] Actual owner-exported Build 108 receipt imported and verified against later Windows HA/camera evidence
 - [ ] Physical device function and camera playback accepted independently by owner on actual equipment
 
 See docs/BUILD_109_DEVICE_CAMERA_RECOVERY_RECEIPT_OWNER_ACCEPTANCE.md. Next queued: Build 110 — Integration-Level Missing Device Evidence & Camera Recovery Follow-Up Queue.
+
+## Build 110 — Integration-Level Missing Device Evidence & Camera Recovery Follow-Up Queue
+- [x] Strict allowlisted Build 109 private owner receipt import, duplicate/contradiction/timestamp/summary validation
+- [x] Exact-ID missing HA and camera reconciliation against a strictly later, five-minute-fresh inventory reading
+- [x] Owner-only batch grouping of unresolved HA cases by named integration with explicit unknown defaults
+- [x] Previously accepted HA retirement remains a supervised exception and reappearance is reopened for review
+- [x] Camera discovery/registration, private stream health and current moving-video reviews remain distinct holds
+- [x] Session-only owner function and playback observations invalidate after inventory refresh; no network writes
+- [x] Private identity-only unresolved follow-up queue export with no URLs or credentials
+- [x] Pure logic, React unit/integration tests and Windows operator runbook
+- [ ] Independent `dev` feature PR and push CI GREEN
+- [ ] Independent `main` promotion PR and push CI GREEN
+- [ ] Owner imports actual Build 109 packet and reviews HA integration/device cases against Windows field evidence
+- [ ] Owner supervises real camera registration, safe stream configuration and moving live-video acceptance
+
+See docs/BUILD_110_INTEGRATION_DEVICE_CAMERA_FOLLOW_UP_QUEUE.md. Next queued: Build 111 — Owner-Supervised Integration Follow-Up Closure & Camera Playback Recheck Ledger.
