@@ -2908,3 +2908,24 @@ h1 {
 .recovery-comparison { margin-top: 1.25rem; }
 .recovery-comparison details { margin-block: .5rem; }
 .recovery-comparison li { margin-block: .35rem; overflow-wrap: anywhere; }
+
+/* Build 108 — supervised owner field decisions and per-camera playback evidence. */
+.recovery-field-review { margin-block: 1.5rem; min-width: 0; }
+.recovery-field-review > p { max-width: 75ch; }
+.recovery-review-list { display: grid; gap: .65rem; max-height: 38rem; overflow-y: auto; }
+.recovery-review-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem;
+  min-width: 0;
+  border: 1px solid var(--border, #8886);
+  border-radius: .6rem;
+  padding: .85rem;
+}
+.recovery-review-item > span:first-child { display: grid; gap: .3rem; min-width: min(100%, 15rem); flex: 1; }
+.recovery-review-item small { overflow-wrap: anywhere; }
+.recovery-review-item code { overflow-wrap: anywhere; }
+.recovery-review-item select { max-width: 100%; min-width: min(100%, 15rem); }
+.recovery-playback-mark { display: flex; align-items: center; gap: .5rem; }

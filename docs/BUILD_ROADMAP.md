@@ -642,7 +642,16 @@ Each build must:
 - unit and React tests for sanitization, import validation, missing/new counts, privacy, failed probes and zero mutation
 - see docs/BUILD_107_DEVICE_CAMERA_RECOVERY.md
 
-### Build 108 — Supervised Device & Camera Field Reconciliation (queued)
+### Build 108 — Supervised Device & Camera Field Reconciliation
 - use actual owner-exported before/after snapshots to classify absent Home Assistant integrations and camera identities
 - reconcile known cameras with operator-reviewed discovery receipts, then verify authorized live stream playback per selected camera
 - keep database restoration, integration enrollment and any physical controls explicit, backed up and supervised
+- owner-disposition per missing device/entity/camera identity, with private, identity-only review receipt download
+- individual live-playback acknowledgement held unless locally safe go2rtc transport and fresh healthy per-camera stream evidence exist
+- reset operator decisions on refreshing evidence, and distinguish unverified real-world playback from code CI success
+- see docs/BUILD_108_SUPERVISED_DEVICE_CAMERA_FIELD_RECONCILIATION.md
+
+### Build 109 — Device & Camera Recovery Receipt Reconciliation & Owner Acceptance (queued)
+- reconcile owner-exported field-review receipts with later snapshots and physical HA/camera observations
+- preserve unresolved integration, identity changes and camera playback as explicit holds
+- require independent owner verification before any repair or physical-device acceptance claim
