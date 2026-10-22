@@ -661,7 +661,18 @@ Each build must:
 - private owner-acceptance receipt export with all unresolved holds, resets on new inventory readings
 - see docs/BUILD_109_DEVICE_CAMERA_RECOVERY_RECEIPT_OWNER_ACCEPTANCE.md
 
-### Build 110 — Integration-Level Missing Device Evidence & Camera Recovery Follow-Up Queue (queued)
+### Build 110 — Integration-Level Missing Device Evidence & Camera Recovery Follow-Up Queue
 - classify unresolved HA integration/device identity cases with imported private field evidence
 - group camera registration, streaming and playback follow-ups without storing RTSP credentials in receipts
 - preserve explicit owner supervision and no automatic device control or database restoration
+- strict Build 109 owner-acceptance receipt import with allowlisted identity and camera evidence, summary and timestamp validation
+- exact-ID, fresh later inventory reconciliation; owner-accepted retirement held as an exception until an identity reappears
+- batch-assign missing HA identities to explicitly owner-supplied integration group labels; unknown integration stays visible
+- distinct registration, stream readiness and moving-live-video stages with session-only owner recheck marks
+- export all unresolved follow-ups as a private identity-only worklist with next supervised steps, never stream secrets
+- see docs/BUILD_110_INTEGRATION_DEVICE_CAMERA_FOLLOW_UP_QUEUE.md
+
+### Build 111 — Owner-Supervised Integration Follow-Up Closure & Camera Playback Recheck Ledger (queued)
+- reimport prior Build 110 worklists and compare strictly later HA and camera evidence by exact identity
+- keep owner-reviewed close/reopen decisions and unresolved camera playback as independent private evidence
+- preserve safe human-only controls, no automatic integration onboarding, camera registration or device actions

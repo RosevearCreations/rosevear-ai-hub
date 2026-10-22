@@ -2935,3 +2935,8 @@ h1 {
 .recovery-receipt-upload input { max-width: 100%; }
 .recovery-field-review details { margin-block: .75rem; }
 .recovery-field-review details > summary { cursor: pointer; margin-bottom: .65rem; }
+
+/* Build 110 — long private registry identifiers and bulk follow-up grouping stay readable. */
+.recovery-follow-up-item > span { display: grid; gap: .3rem; min-width: min(100%, 15rem); flex: 1; }
+.recovery-follow-up-item > .recovery-playback-mark { flex: 0 1 18rem; min-width: 0; }
+.recovery-field-review .recovery-evidence-actions input[type="text"] { width: min(100%, 23rem); }
