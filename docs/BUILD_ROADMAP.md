@@ -651,7 +651,17 @@ Each build must:
 - reset operator decisions on refreshing evidence, and distinguish unverified real-world playback from code CI success
 - see docs/BUILD_108_SUPERVISED_DEVICE_CAMERA_FIELD_RECONCILIATION.md
 
-### Build 109 — Device & Camera Recovery Receipt Reconciliation & Owner Acceptance (queued)
+### Build 109 — Device & Camera Recovery Receipt Reconciliation & Owner Acceptance
 - reconcile owner-exported field-review receipts with later snapshots and physical HA/camera observations
 - preserve unresolved integration, identity changes and camera playback as explicit holds
 - require independent owner verification before any repair or physical-device acceptance claim
+- strict private Build 108 receipt import: bounded schema, time/identity validation and secret stripping
+- exact-ID recovery classification and owner-reviewed retirement exceptions, no automatic renamed device matching
+- per-camera fresh moving-video owner review; prior observations do not carry forward
+- private owner-acceptance receipt export with all unresolved holds, resets on new inventory readings
+- see docs/BUILD_109_DEVICE_CAMERA_RECOVERY_RECEIPT_OWNER_ACCEPTANCE.md
+
+### Build 110 — Integration-Level Missing Device Evidence & Camera Recovery Follow-Up Queue (queued)
+- classify unresolved HA integration/device identity cases with imported private field evidence
+- group camera registration, streaming and playback follow-ups without storing RTSP credentials in receipts
+- preserve explicit owner supervision and no automatic device control or database restoration

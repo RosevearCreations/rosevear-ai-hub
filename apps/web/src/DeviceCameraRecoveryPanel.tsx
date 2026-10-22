@@ -25,6 +25,7 @@ import {
   missingFieldIdentities,
   type OwnerDisposition,
 } from "./deviceFieldReconciliation";
+import { DeviceCameraReceiptPanel } from "./DeviceCameraReceiptPanel";
 
 type EvidenceResult<T> = { kind: "available"; value: T } | { kind: "unknown"; reason: string };
 type RecoveryState =
@@ -323,6 +324,7 @@ export function DeviceCameraRecoveryPanel() {
           <p className="connection-guidance">No database restoration, integration enrollment, camera registration, stream configuration or physical control is performed by this review. Any missing backup or unverified stream remains a separate owner-supervised acceptance task.</p>
         </>
       )}
+      <DeviceCameraReceiptPanel current={current} playback={playback} />
     </section>
   );
 }
