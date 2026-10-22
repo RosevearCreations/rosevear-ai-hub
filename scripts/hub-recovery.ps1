@@ -107,7 +107,10 @@ if (& $ApiProbe) {
     # A stale live DB must not be auto-started under newer checkout source,
     # including after an interrupted initial supervised migration.
     & $Python -B (Join-Path $PSScriptRoot 'hub_release_manager.py') inspect-schema --repo-root $Root
-    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    if ($LASTEXITCODE -ne 0) {
+        Write-RecoveryLog 'HOLD: live database revision does not match installed code. No automatic migration or API startup; follow supervised backup-and-migration runbook.'
+        exit 2
+    }
     Write-RecoveryLog "Starting API."
     # Reuse the launcher proven during the October power-outage recovery. It
     # verifies the running Hub identity/version and refuses duplicate startups.
@@ -162,6 +165,19 @@ if (-not $SkipCamera) {
         }
     } else {
         Write-RecoveryLog "WARNING go2rtc executable missing; install the official Windows binary under tools/go2rtc."
+    }
+}
+# The logon-only gateway may have timed out before this recovery pass brought
+# the API and built PWA online. Hand off to the *existing, verified* gateway
+# task on a subsequent five-minute recovery pass; never create a new task,
+# change firewall/certificates or mark the core recovery failed for a gateway HOLD.
+if (-not $CheckOnly) {
+    try {
+        . (Join-Path $PSScriptRoot 'hub-gateway-handoff.ps1')
+        $gatewayResult = Invoke-HubGatewayHandoff -RepositoryRoot $Root
+        Write-RecoveryLog "Gateway handoff: $gatewayResult."
+    } catch {
+        Write-RecoveryLog 'WARNING Gateway handoff could not be inspected; manual LAN gateway review needed.'
     }
 }
 Write-RecoveryLog "Recovery pass complete."

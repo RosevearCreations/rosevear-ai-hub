@@ -1736,3 +1736,16 @@ See docs/BUILD_085_SNAPSHOT_CHANGE_REVIEW.md. Next proposed: Build 086 — scope
 - [ ] Actual supervised Windows server reboot (owner-deferred)
 
 See docs/BUILD_086_PRIVATE_OPERATIONS_HANDOFF.md. Next proposed Build 087 — scope to be confirmed.
+
+
+## Build 105 — Reboot Recovery Dependency Ordering & Database Readiness
+- [x] Document the actual October 21 supervised Windows reboot and database-schema HOLD
+- [x] Add pre-reboot read-only schema compatibility inspector (never auto-migrate)
+- [x] Log bounded, non-secret schema-mismatch HOLD before the recovery task exits
+- [x] Dependency-order a guarded retry of the existing, owner-verified gateway task after API/built PWA readiness
+- [x] Preserve client access, firewall, TLS, task ownership, migration and unrelated service safety boundaries
+- [x] Add Windows pure-decision regression cases and operator release/runbook
+- [ ] Independent dev push and main push CI fully GREEN
+- [ ] Operator installs updated source on the actual Windows test server and completes a *new* supervised reboot acceptance
+
+See docs/BUILD_105_REBOOT_RECOVERY_DEPENDENCY_ORDERING.md. Next proposed: Build 106 — Home Assistant VM & MQTT Post-Reboot Dependency Acceptance.

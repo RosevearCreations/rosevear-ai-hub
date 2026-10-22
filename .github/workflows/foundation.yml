@@ -192,6 +192,9 @@ jobs:
       - name: Build 104 supervised restart task readiness regression
         shell: pwsh
         run: ./scripts/test-hub-startup-readiness.ps1
+      - name: Build 105 schema hold and dependency-ordered gateway recovery regression
+        shell: pwsh
+        run: ./scripts/test-hub-build-105.ps1
       - name: Check Rust shell
         run: npm run desktop:check
       - name: Build Windows desktop executable
