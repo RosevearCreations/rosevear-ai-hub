@@ -26,6 +26,7 @@ import {
   type OwnerDisposition,
 } from "./deviceFieldReconciliation";
 import { DeviceCameraReceiptPanel } from "./DeviceCameraReceiptPanel";
+import { DeviceCameraFollowUpPanel } from "./DeviceCameraFollowUpPanel";
 
 type EvidenceResult<T> = { kind: "available"; value: T } | { kind: "unknown"; reason: string };
 type RecoveryState =
@@ -325,6 +326,7 @@ export function DeviceCameraRecoveryPanel() {
         </>
       )}
       <DeviceCameraReceiptPanel current={current} playback={playback} />
+      <DeviceCameraFollowUpPanel current={current} playback={playback} />
     </section>
   );
 }
