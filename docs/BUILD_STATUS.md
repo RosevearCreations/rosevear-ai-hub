@@ -1736,3 +1736,28 @@ See docs/BUILD_085_SNAPSHOT_CHANGE_REVIEW.md. Next proposed: Build 086 — scope
 - [ ] Actual supervised Windows server reboot (owner-deferred)
 
 See docs/BUILD_086_PRIVATE_OPERATIONS_HANDOFF.md. Next proposed Build 087 — scope to be confirmed.
+
+
+## Build 105 — Reboot Recovery Dependency Ordering & Database Readiness
+- [x] Document the actual October 21 supervised Windows reboot and database-schema HOLD
+- [x] Add pre-reboot read-only schema compatibility inspector (never auto-migrate)
+- [x] Log bounded, non-secret schema-mismatch HOLD before the recovery task exits
+- [x] Dependency-order a guarded retry of the existing, owner-verified gateway task after API/built PWA readiness
+- [x] Preserve client access, firewall, TLS, task ownership, migration and unrelated service safety boundaries
+- [x] Add Windows pure-decision regression cases and operator release/runbook
+- [ ] Independent dev push and main push CI fully GREEN
+- [ ] Operator installs updated source on the actual Windows test server and completes a *new* supervised reboot acceptance
+
+See docs/BUILD_105_REBOOT_RECOVERY_DEPENDENCY_ORDERING.md. Next proposed: Build 106 — Home Assistant VM & MQTT Post-Reboot Dependency Acceptance.
+
+## Build 106 — Home Assistant VM & MQTT Post-Reboot Dependency Acceptance
+- [x] Record observed EFI/VM, HA port 80, Mosquitto port 1883 and recovered authenticated Hub statuses
+- [x] Separate configured versus discovered Home Assistant devices and independent camera inventory
+- [x] Add read-only Windows VirtualBox/HA/MQTT dependency inspector with fixed private classifications
+- [x] Pure six-prerequisite verdict, no-host-mutation Windows regression and operator runbook
+- [ ] Independent `dev` pull-request and post-merge push five CI jobs GREEN
+- [ ] Independent `main` pull-request and post-merge push five CI jobs GREEN
+- [ ] Owner runs Build 106 on installed Windows checkout and confirms actual VM boot and authenticated integrations
+- [ ] Device/camera inventory reconciliation and live authorized camera playback accepted independently
+
+See docs/BUILD_106_HA_MQTT_POST_REBOOT_ACCEPTANCE.md. Next queued: Build 107 — Device Inventory Provenance & Camera Registry Recovery Planning.

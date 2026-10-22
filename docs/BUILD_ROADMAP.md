@@ -621,3 +621,16 @@ Each build must:
 
 ### Build 105 — Scope to be confirmed from observed restart results and Home, Workshop & Business priorities
 - follow up on actual Windows post-reboot acceptance and any observed startup gaps; no speculative task changes
+
+### Build 106 — Home Assistant VM & MQTT Post-Reboot Dependency Acceptance
+- safely inspect the *existing* VirtualBox Home Assistant VM firmware/running state and only approved private HA/MQTT TCP endpoints
+- fail closed with fixed reason codes; distinguish prerequisites from authenticated integrations and manual device/camera acceptance
+- document the observed 11 system devices, subsequently added Samsung TV, missing household inventory and independent camera registry
+- preserve owner-controlled VM startup, backups, TLS, credentials, HA discovery and camera imports; no automatic repairs
+- add Windows PowerShell pure evidence regression and owner runbook
+- see docs/BUILD_106_HA_MQTT_POST_REBOOT_ACCEPTANCE.md
+
+### Build 107 — Device Inventory Provenance & Camera Registry Recovery Planning (queued)
+- compare Home Assistant live devices/entities and Hub independent camera records without assuming every discovered integration is already enrolled
+- guide owner through backup provenance, one-integration-to-many-device reconciliation and safe missing/duplicate analysis
+- retain manual camera stream playback and isolated backup comparison as distinct evidence gates; never mass import or restore a live database
