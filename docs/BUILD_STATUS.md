@@ -1749,3 +1749,15 @@ See docs/BUILD_086_PRIVATE_OPERATIONS_HANDOFF.md. Next proposed Build 087 — sc
 - [ ] Operator installs updated source on the actual Windows test server and completes a *new* supervised reboot acceptance
 
 See docs/BUILD_105_REBOOT_RECOVERY_DEPENDENCY_ORDERING.md. Next proposed: Build 106 — Home Assistant VM & MQTT Post-Reboot Dependency Acceptance.
+
+## Build 106 — Home Assistant VM & MQTT Post-Reboot Dependency Acceptance
+- [x] Record observed EFI/VM, HA port 80, Mosquitto port 1883 and recovered authenticated Hub statuses
+- [x] Separate configured versus discovered Home Assistant devices and independent camera inventory
+- [x] Add read-only Windows VirtualBox/HA/MQTT dependency inspector with fixed private classifications
+- [x] Pure six-prerequisite verdict, no-host-mutation Windows regression and operator runbook
+- [ ] Independent `dev` pull-request and post-merge push five CI jobs GREEN
+- [ ] Independent `main` pull-request and post-merge push five CI jobs GREEN
+- [ ] Owner runs Build 106 on installed Windows checkout and confirms actual VM boot and authenticated integrations
+- [ ] Device/camera inventory reconciliation and live authorized camera playback accepted independently
+
+See docs/BUILD_106_HA_MQTT_POST_REBOOT_ACCEPTANCE.md. Next queued: Build 107 — Device Inventory Provenance & Camera Registry Recovery Planning.
