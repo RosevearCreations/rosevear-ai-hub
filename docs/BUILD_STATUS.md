@@ -1769,9 +1769,22 @@ See docs/BUILD_106_HA_MQTT_POST_REBOOT_ACCEPTANCE.md. Next queued: Build 107 —
 - [x] No tokens, URLs, stream credentials, Home Assistant attributes or camera hosts in snapshots
 - [x] Clear integration discovery and bulk-reviewed ONVIF recovery paths; no automatic changes
 - [x] Pure snapshot validation and React error/zero/mutation regression tests
-- [ ] Independent `dev` PR and post-merge push CI GREEN
-- [ ] Independent `main` PR and post-merge push CI GREEN
+- [x] Independent `dev` PR and post-merge push CI GREEN (PR #278, dev run 39781149367)
+- [x] Independent `main` PR and post-merge push CI GREEN (PR #279, main run 39781822923)
 - [ ] Owner captures/imports actual private baseline and reviews recovered devices and cameras on installed Windows server
 - [ ] Independent authorized camera playback and HA integration acceptance on physical equipment
 
 See docs/BUILD_107_DEVICE_CAMERA_RECOVERY.md. Next proposed: Build 108 — Supervised Device & Camera Field Reconciliation.
+
+## Build 108 — Supervised Device & Camera Field Reconciliation
+- [x] Independent missing HA device, HA entity and Hub camera identity owner dispositions; no automatic enrollment or deletion
+- [x] Fresh safe go2rtc/stream gate before explicit per-camera moving-video operator acknowledgement
+- [x] Session-only review and playback marks reset whenever evidence refreshes or baseline changes
+- [x] Private field-review JSON handoff with identity/provenance, action classifications and playback observations, no hosts or secrets
+- [x] Pure logic and React regression tests include failed reads and no automatic write actions
+- [ ] Independent `dev` pull request and post-merge push CI GREEN
+- [ ] Independent `main` pull request and post-merge push CI GREEN
+- [ ] Owner imports actual pre-incident baseline and reconciles missing household devices on Windows VM
+- [ ] Owner verifies each selected actual live camera feed, recording field acceptance separately from CI
+
+See docs/BUILD_108_SUPERVISED_DEVICE_CAMERA_FIELD_RECONCILIATION.md. Next queued: Build 109 — Device & Camera Recovery Receipt Reconciliation & Owner Acceptance.

@@ -24,6 +24,7 @@ describe("Build 107 read-only device and camera recovery panel", () => {
       });
       if (url.endsWith("/api/v1/cameras")) return response([]);
       if (url.endsWith("/api/v1/cameras/dashboard")) return response({ transport_online: true, configured: 0, healthy: 0 });
+      if (url.endsWith("/api/v1/cameras/go2rtc/status")) return response({ online: true, local_api_only: true, local_rtsp_only: true });
       throw new Error(`Unexpected read: ${url}`);
     }));
 
@@ -47,7 +48,7 @@ describe("Build 107 read-only device and camera recovery panel", () => {
     await waitFor(() => expect(screen.getByText(/Loaded previous inventory/)).toBeInTheDocument());
     expect(screen.getByText("Home Assistant devices").parentElement?.textContent).toContain("1 missing");
     expect(screen.getByText("Hub camera registrations").parentElement?.textContent).toContain("1 missing");
-    expect(methods).toHaveLength(4);
+    expect(methods).toHaveLength(5);
     expect(methods.every((request) => request.startsWith("GET "))).toBe(true);
   });
 
@@ -58,6 +59,7 @@ describe("Build 107 read-only device and camera recovery panel", () => {
       if (url.endsWith("/api/v1/home-assistant/browser")) throw new Error("token=PRIVATE");
       if (url.endsWith("/api/v1/cameras")) throw new Error("private camera address");
       if (url.endsWith("/api/v1/cameras/dashboard")) return response({ transport_online: true, configured: 0, healthy: 0 });
+      if (url.endsWith("/api/v1/cameras/go2rtc/status")) return response({ online: true, local_api_only: true, local_rtsp_only: true });
       throw new Error("Unexpected request");
     }));
     render(<DeviceCameraRecoveryPanel />);
@@ -66,5 +68,61 @@ describe("Build 107 read-only device and camera recovery panel", () => {
     expect(screen.getByRole("button", { name: "Download current inventory" })).toBeDisabled();
     expect(document.body.textContent).not.toContain("PRIVATE");
     expect(document.body.textContent).not.toContain("private camera address");
+  });
+
+  it("records manual dispositions and permits playback acknowledgement only with fresh safe stream evidence", async () => {
+    const methods: string[] = [];
+    const now = new Date().toISOString();
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      methods.push(`${init?.method ?? "GET"} ${url}`);
+      if (url.endsWith("/api/v1/home-assistant/status")) return response({ available: true });
+      if (url.endsWith("/api/v1/home-assistant/browser")) return response({ devices: [], entities: [] });
+      if (url.endsWith("/api/v1/cameras")) return response([{
+        id: 1, endpoint_uuid: "onvif-garage", display_name: "Garage", enabled: true,
+        stream: { enabled: true }, host: "192.168.68.11",
+      }]);
+      if (url.endsWith("/api/v1/cameras/dashboard")) return response({
+        generated_at: now, stale_after_seconds: 300, transport_online: true,
+        configured: 1, healthy: 1, cameras: [{
+          camera_id: 1, configured: true, health: "healthy", last_probe_status: "online",
+          last_probe_at: now, viewer_url: "http://local-viewer",
+        }],
+      });
+      if (url.endsWith("/api/v1/cameras/go2rtc/status")) return response({
+        online: true, local_api_only: true, local_rtsp_only: true,
+      });
+      throw new Error("Unexpected request");
+    }));
+    render(<DeviceCameraRecoveryPanel />);
+    await screen.findByText("1 saved cameras");
+    const baseline = {
+      schema: RECOVERY_SNAPSHOT_SCHEMA,
+      captured_at: "2026-10-20T12:00:00Z",
+      home_assistant: {
+        devices: [{ id: "old-thermostat", name: "Thermostat" }], entities: [],
+      },
+      cameras: [{ id: "onvif-front", name: "Front Door" }],
+    };
+    const file = new File([JSON.stringify(baseline)], "baseline.json", { type: "application/json" });
+    Object.defineProperty(file, "text", { value: async () => JSON.stringify(baseline) });
+    fireEvent.change(screen.getByLabelText("Choose previous device camera inventory JSON"), {
+      target: { files: [file] },
+    });
+    await screen.findByText(/Loaded previous inventory/);
+    expect(screen.getByText(/2 missing identities still need owner classification/)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Thermostat recovery disposition"), {
+      target: { value: "review_integration" },
+    });
+    expect(screen.getByText(/1 missing identities still need owner classification/)).toBeInTheDocument();
+    const playback = screen.getByRole("checkbox", { name: "Viewed moving live video: Garage" });
+    expect(playback).toBeEnabled();
+    fireEvent.click(playback);
+    expect(playback).toBeChecked();
+    expect(screen.getByText(/1 of 1 registered cameras have a session-only/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Recheck inventory" }));
+    await waitFor(() => expect(screen.getByRole("checkbox", { name: "Viewed moving live video: Garage" })).not.toBeChecked());
+    expect(screen.getByText(/2 missing identities still need owner classification/)).toBeInTheDocument();
+    expect(methods.every((request) => request.startsWith("GET "))).toBe(true);
   });
 });
