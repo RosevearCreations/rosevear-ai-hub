@@ -1782,9 +1782,23 @@ See docs/BUILD_107_DEVICE_CAMERA_RECOVERY.md. Next proposed: Build 108 — Super
 - [x] Session-only review and playback marks reset whenever evidence refreshes or baseline changes
 - [x] Private field-review JSON handoff with identity/provenance, action classifications and playback observations, no hosts or secrets
 - [x] Pure logic and React regression tests include failed reads and no automatic write actions
-- [ ] Independent `dev` pull request and post-merge push CI GREEN
-- [ ] Independent `main` pull request and post-merge push CI GREEN
+- [x] Independent `dev` pull request and post-merge push CI GREEN (PR #280, dev run 39789112114)
+- [x] Independent `main` pull request and post-merge push CI GREEN (PR #281, main run 39790001617)
 - [ ] Owner imports actual pre-incident baseline and reconciles missing household devices on Windows VM
 - [ ] Owner verifies each selected actual live camera feed, recording field acceptance separately from CI
 
 See docs/BUILD_108_SUPERVISED_DEVICE_CAMERA_FIELD_RECONCILIATION.md. Next queued: Build 109 — Device & Camera Recovery Receipt Reconciliation & Owner Acceptance.
+
+## Build 109 — Device & Camera Recovery Receipt Reconciliation & Owner Acceptance
+- [x] Strict, allowlisted Build 108 review receipt parser rejects malformed, oversized, contradictory and duplicate evidence
+- [x] Follow-up only against a later exact-ID snapshot, preserving renamed/retired/absent ambiguity
+- [x] No inherited live playback acceptance; gated fresh stream evidence and owner-observed moving-video marks
+- [x] Session-only owner acceptance marks invalidated on registry snapshot changes; no network writes
+- [x] Private receipt export distinguishes reappeared identity, retired exception, unverified stream and unresolved holds
+- [x] Pure logic and React regression tests plus operator runbook
+- [ ] Independent `dev` feature PR and post-merge push CI GREEN
+- [ ] Independent `main` promotion PR and post-merge push CI GREEN
+- [ ] Actual owner-exported Build 108 receipt imported and verified against later Windows HA/camera evidence
+- [ ] Physical device function and camera playback accepted independently by owner on actual equipment
+
+See docs/BUILD_109_DEVICE_CAMERA_RECOVERY_RECEIPT_OWNER_ACCEPTANCE.md. Next queued: Build 110 — Integration-Level Missing Device Evidence & Camera Recovery Follow-Up Queue.
