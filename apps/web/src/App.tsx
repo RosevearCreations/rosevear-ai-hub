@@ -24,6 +24,7 @@ import { KnowledgeView } from "./KnowledgeView";
 import { WorkshopView } from "./WorkshopView";
 import { LocalDiagnosticsPanel } from "./LocalDiagnosticsPanel";
 import { PostRebootAcceptancePanel } from "./PostRebootAcceptancePanel";
+import { FieldRecoverySummaryPanel } from "./FieldRecoverySummaryPanel";
 import { IntegrationHealthPanel } from "./IntegrationHealthPanel";
 import { RestartAppsPanel } from "./RestartAppsPanel";
 import { SectionHelp } from "./HelpSystem";
@@ -314,6 +315,7 @@ export function App() {
             </header>
             {canAdminister && <LocalDiagnosticsPanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <PostRebootAcceptancePanel onNavigate={(target) => setSection(target as Section)} />}
+            {canAdminister && <FieldRecoverySummaryPanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <ReleaseAcceptancePanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <ReleaseObservabilityPanel />}
             {canAdminister && <InstalledHubAdoptionPanel />}
