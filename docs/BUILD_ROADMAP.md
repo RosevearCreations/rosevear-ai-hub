@@ -689,10 +689,14 @@ Each build must:
 - export private chronological evidence summary and suggested supervised next steps without stream URLs or secrets
 - see docs/BUILD_112_SUPERVISED_DRIFT_EVIDENCE_CHAIN_HANDOFF.md
 
-### Build 113 — Installed Windows Hub Version & Field Evidence Adoption (queued)
+### Build 113 — Installed Windows Hub Version & Field Evidence Adoption
 - verify the installed server/PWA version against protected main release receipts without modifying services
 - distinguish source CI, downloaded desktop artifacts and actual owner-installed Windows runtime
 - expose uninstalled or stale frontend/assets as field-adoption holds rather than fabricated production health
+- stamp frontend builds with a source SHA and tracked-checkout clean flag; compare against owner-entered main Actions evidence and local updater pointer
+- import only Build 112 summary counts and lineage, require separate operator checks and export a metadata-only private FIELD ADOPTION HOLD receipt
+- preserve an explicit unverified process/device state even when all owner-entered version markers match
+- see docs/BUILD_113_INSTALLED_WINDOWS_VERSION_FIELD_ADOPTION.md
 
 ### Build 114 — Home Assistant Integration Discovery & Missing Device Diagnosis (queued)
 - group current missing identities by owner-confirmed HA integrations and safe read-only diagnostics

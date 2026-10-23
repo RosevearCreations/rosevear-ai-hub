@@ -1842,9 +1842,23 @@ See docs/BUILD_111_OWNER_SUPERVISED_FOLLOW_UP_CLOSURE_LEDGER.md. Next proposed: 
 - [x] Session-only handoff acknowledgment distinct from HA function and live camera playback verification
 - [x] Identity-only, manually downloaded private handoff with supervised next steps and no secrets or remote writes
 - [x] Pure unit/React regression tests, owner runbook, web type-check and production bundle
-- [ ] Independent `dev` feature PR and post-merge push CI GREEN
-- [ ] Independent `main` promotion PR and post-merge push CI GREEN
+- [x] Independent `dev` feature PR and post-merge push CI GREEN (PR #288, dev run 39891921827)
+- [x] Independent `main` promotion PR and post-merge push CI GREEN (PR #289, main run 39892570091, protected `main` `ce051f6ce11f43df21853d0835106c0c28defc16`)
 - [ ] Owner imports actual Build 110/111 private receipts on installed Windows Hub and reviews the follow-up chain
 - [ ] Owner separately verifies real HA functions and moving camera video before physical recovery acceptance
 
 See docs/BUILD_112_SUPERVISED_DRIFT_EVIDENCE_CHAIN_HANDOFF.md. Next queued: Build 113 — Installed Windows Hub Version & Field Evidence Adoption.
+
+## Build 113 — Installed Windows Hub Version & Field Evidence Adoption
+- [x] Build-time web SHA and tracked checkout cleanliness, with explicit unknown/dirty cases
+- [x] Owner-only System workbench with manually supplied protected-main commit and workflow references
+- [x] Read-only, on-demand existing local release pointer and running backend package version comparison
+- [x] Distinguish CI/package success, updater adoption pointer, loaded frontend and unverifiable running process
+- [x] Optional Build 112 handoff import retaining only bounded unresolved HA/camera counts and source timestamps
+- [x] Session-only owner Windows/PWA checks, private metadata-only FIELD ADOPTION HOLD receipt, no automatic action
+- [ ] Web TypeScript, tests, production bundle and independent repository CI GREEN
+- [ ] Independent `dev` feature PR and post-merge push CI GREEN
+- [ ] Independent `main` promotion PR and post-merge push CI GREEN
+- [ ] Owner checks actual installed Windows API, browser/PWA version, HA devices and moving camera video
+
+See docs/BUILD_113_INSTALLED_WINDOWS_VERSION_FIELD_ADOPTION.md. Next queued: Build 114 — Home Assistant Integration Discovery & Missing Device Diagnosis.

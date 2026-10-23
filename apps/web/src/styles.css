@@ -2813,6 +2813,18 @@ h1 {
 .release-check button, .release-actions button { white-space: normal; max-width: 100%; }
 .release-acceptance .operations-contexts, .release-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
 .release-acceptance code { overflow-wrap: anywhere; }
+
+.installed-hub-adoption { overflow-wrap: anywhere; }
+.installed-adoption-fields { display: grid; gap: .75rem; margin: .85rem 0; max-width: 100%; }
+.installed-adoption-fields label:not(.installed-adoption-check) { display: grid; gap: .35rem; }
+.installed-adoption-fields input:not([type="checkbox"]) { width: 100%; min-width: 0; max-width: 100%; }
+.installed-adoption-check { display: flex; gap: .6rem; align-items: flex-start; }
+.installed-adoption-check input { flex: 0 0 auto; }
+.installed-adoption-summary { display: grid; grid-template-columns: minmax(0, 12rem) minmax(0, 1fr); gap: .5rem 1rem; margin: 1rem 0; }
+.installed-adoption-summary dt { font-weight: 700; }
+.installed-adoption-summary dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.installed-adoption-summary code { white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 620px) { .installed-adoption-summary { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 840px) { .release-check-list { grid-template-columns: minmax(0, 1fr); } }
 
 /* Build 096: accessible review-only safe-check instructions in the verification plan. */
