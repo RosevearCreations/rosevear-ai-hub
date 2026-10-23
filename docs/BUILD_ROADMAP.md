@@ -680,7 +680,41 @@ Each build must:
 - enforce healthy private stream and direct owner-observed moving video for each camera
 - see docs/BUILD_111_OWNER_SUPERVISED_FOLLOW_UP_CLOSURE_LEDGER.md
 
-### Build 112 — Supervised Field Recheck Drift & Evidence Chain Handoff (proposed)
+### Build 112 — Supervised Field Recheck Drift & Evidence Chain Handoff
 - compare successive Build 111 closure ledger entries for reopened, still-held and owner-rechecked identities without rewriting history
 - produce a private owner handoff listing unresolved HA integrations and camera/video holds, with source timestamps and no secrets
 - keep independent physical acceptance and explicit human controls; no device action, camera enrollment or database restoration
+- import only matching private Build 110 worklists and validated Build 111 ledgers; first review is a baseline, not a comparison
+- distinguish session-only review of a written handoff from actual physical device/camera acceptance
+- export private chronological evidence summary and suggested supervised next steps without stream URLs or secrets
+- see docs/BUILD_112_SUPERVISED_DRIFT_EVIDENCE_CHAIN_HANDOFF.md
+
+### Build 113 — Installed Windows Hub Version & Field Evidence Adoption (queued)
+- verify the installed server/PWA version against protected main release receipts without modifying services
+- distinguish source CI, downloaded desktop artifacts and actual owner-installed Windows runtime
+- expose uninstalled or stale frontend/assets as field-adoption holds rather than fabricated production health
+
+### Build 114 — Home Assistant Integration Discovery & Missing Device Diagnosis (queued)
+- group current missing identities by owner-confirmed HA integrations and safe read-only diagnostics
+- guide batch-assisted integration recovery while preventing automatic onboarding, credentials disclosure and blind entity creation
+- require fresh registry and real physical device-function tests before owner acceptance
+
+### Build 115 — Operator-Reviewed Camera Discovery & Bulk Restore Candidates (queued)
+- compare existing camera registry and ONVIF discovery receipts by stable identity and bounded model evidence
+- present owner-selected multi-camera registration candidates with conflict/duplicate safety gates
+- never add, replace or switch live feeds without explicit operator approval and reversible record evidence
+
+### Build 116 — Private Camera Stream Health & Playback Acceptance (queued)
+- reconcile camera registration, private go2rtc listener safety and fresh per-camera probe evidence
+- guide supervised RTSP source checks without leaking endpoint URLs or passwords
+- require live moving video, not a healthy API flag, before per-camera field acceptance
+
+### Build 117 — Post-Reboot Home, Workshop & Camera Acceptance Runbook (queued)
+- verify existing Windows startup task, Home Assistant VM, MQTT, Ollama, HTTPS and camera dependencies in their real order
+- compare before/after authenticated inventory and startup availability after owner-supervised reboot
+- preserve manual control of restarts, credentials, backups and any integration repair
+
+### Build 118 — Device & Camera Field Recovery Acceptance Summary (queued)
+- consolidate authenticated Home Assistant device outcomes and per-camera playback owner receipts
+- keep unresolved and reopened identities visible with explicit next-action ownership
+- separate source CI GREEN from installed Windows runtime and actual household equipment acceptance

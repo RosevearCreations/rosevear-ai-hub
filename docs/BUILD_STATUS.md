@@ -1827,9 +1827,24 @@ See docs/BUILD_110_INTEGRATION_DEVICE_CAMERA_FOLLOW_UP_QUEUE.md. Next queued: Bu
 - [x] Session-only owner marks invalidate on new inventory readings; imported old closures cannot certify new readings
 - [x] Read-only UI, no secrets/URLs, automated device calls, camera registration, persistent database or Windows task changes
 - [x] Pure and React regression tests, type-check, web build and owner runbook
-- [ ] Independent `dev` feature PR and post-merge push CI GREEN
-- [ ] Independent `main` promotion PR and post-merge push CI GREEN
+- [x] Independent `dev` feature PR and post-merge push CI GREEN (PR #286, dev run 39881315349)
+- [x] Independent `main` promotion PR and post-merge push CI GREEN (PR #287, main run 39882265832, protected `main` `8760d3a530d2a0ebdc98f83bf8df639e31d90d1d`)
 - [ ] Owner imports actual Build 110 worklist on Windows Hub and reviews physical HA device/integration cases
 - [ ] Owner separately watches live moving video and confirms camera acceptance on actual equipment
 
 See docs/BUILD_111_OWNER_SUPERVISED_FOLLOW_UP_CLOSURE_LEDGER.md. Next proposed: Build 112 — Supervised Field Recheck Drift & Evidence Chain Handoff.
+
+## Build 112 — Supervised Field Recheck Drift & Evidence Chain Handoff
+- [x] Strict, private Build 110 worklist plus Build 111 closure ledger import with exact provenance
+- [x] Compare last two owner reviews, keeping first review as baseline without false drift claims
+- [x] Per-identity reopened, still-open, newly-closed, rechecked-closed and stage-change classifications
+- [x] Separate HA and camera unresolved holds; preserve historical owner evidence chain with chronological timestamps
+- [x] Session-only handoff acknowledgment distinct from HA function and live camera playback verification
+- [x] Identity-only, manually downloaded private handoff with supervised next steps and no secrets or remote writes
+- [x] Pure unit/React regression tests, owner runbook, web type-check and production bundle
+- [ ] Independent `dev` feature PR and post-merge push CI GREEN
+- [ ] Independent `main` promotion PR and post-merge push CI GREEN
+- [ ] Owner imports actual Build 110/111 private receipts on installed Windows Hub and reviews the follow-up chain
+- [ ] Owner separately verifies real HA functions and moving camera video before physical recovery acceptance
+
+See docs/BUILD_112_SUPERVISED_DRIFT_EVIDENCE_CHAIN_HANDOFF.md. Next queued: Build 113 — Installed Windows Hub Version & Field Evidence Adoption.
