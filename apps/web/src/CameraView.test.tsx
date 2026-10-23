@@ -33,6 +33,7 @@ function camera(overrides: Partial<CameraRecord> = {}): CameraRecord {
 }
 
 function dashboard(cameraId = 1, health = "unconfigured", viewerUrl: string | null = null) {
+  const freshProbe = new Date().toISOString();
   return {
     generated_at: "2026-10-09T10:01:00Z",
     stale_after_seconds: 300,
@@ -50,7 +51,7 @@ function dashboard(cameraId = 1, health = "unconfigured", viewerUrl: string | nu
       configured: Boolean(viewerUrl),
       health,
       last_seen_at: "2026-10-09T10:00:00Z",
-      last_probe_at: health === "healthy" ? "2026-10-09T10:01:00Z" : null,
+      last_probe_at: health === "healthy" ? freshProbe : null,
       last_probe_status: health === "healthy" ? "online" : null,
       last_error: null,
       source_host: viewerUrl ? "192.168.68.55" : null,
@@ -145,7 +146,7 @@ describe("CameraView", () => {
     });
   });
 
-  test("renders a local live tile for a healthy configured stream", async () => {
+  test("only starts a private live tile after an explicit click", async () => {
     const configuredCamera = camera({
       stream: {
         id: 1,
@@ -183,9 +184,14 @@ describe("CameraView", () => {
 
     render(<CameraView currentUser={owner} />);
 
+    await screen.findByRole("button", { name: "Start private preview" });
+    expect(screen.queryByTitle("Front Door live view")).not.toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole("button", { name: "Start private preview" }).at(-1)!);
     const frame = await screen.findByTitle("Front Door live view");
     expect(frame).toHaveAttribute("src", viewerUrl);
     expect(screen.getAllByText("Healthy").length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: "Stop preview" }));
+    expect(screen.queryByTitle("Front Door live view")).not.toBeInTheDocument();
   });
 
   test("owner can run fleet health checks", async () => {
