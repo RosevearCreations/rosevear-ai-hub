@@ -4,6 +4,7 @@ import { FrigatePanel } from "./FrigatePanel";
 import { CameraCompatibilityWorkbench } from "./CameraCompatibilityWorkbench";
 import { CameraStreamAcceptance } from "./CameraStreamAcceptance";
 import { ServerCameraInventory } from "./ServerCameraInventory";
+import { CameraBulkRestorePanel } from "./CameraBulkRestorePanel";
 
 import {
   configureCameraStream,
@@ -316,6 +317,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
       </section>
 
       <ServerCameraInventory canAdminister={canAdminister} isOwner={currentUser.role === "owner"} />
+      {canAdminister ? <CameraBulkRestorePanel /> : null}
       <CameraCompatibilityWorkbench canAdminister={canAdminister} />
       <CameraStreamAcceptance />
 

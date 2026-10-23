@@ -708,10 +708,15 @@ Each build must:
 - export identity-only private diagnostic receipt with all unresolved holds; retain separate independent Windows/HA field-acceptance gate
 - see docs/BUILD_114_HOME_ASSISTANT_INTEGRATION_DISCOVERY.md
 
-### Build 115 — Operator-Reviewed Camera Discovery & Bulk Restore Candidates (queued)
+### Build 115 — Operator-Reviewed Camera Discovery & Bulk Restore Candidates
 - compare existing camera registry and ONVIF discovery receipts by stable identity and bounded model evidence
 - present owner-selected multi-camera registration candidates with conflict/duplicate safety gates
 - never add, replace or switch live feeds without explicit operator approval and reversible record evidence
+- import allowlisted prior Build 107/110 camera identities locally; exact UUID + prior-name matches only become supervised bulk candidates
+- explicitly take one bounded ONVIF preview and live camera-registry reading; compare registered, endpoint drift, network collisions, repeated names, unmatched IDs and renamed identities
+- require physical hardware/model confirmation, fresh registry preflight and one-time owner-bound authorization before batch registering disabled entries
+- return a private identity-only registration receipt; retain camera stream/playback physical acceptance holds
+- see docs/BUILD_115_CAMERA_DISCOVERY_BULK_RESTORE.md
 
 ### Build 116 — Private Camera Stream Health & Playback Acceptance (queued)
 - reconcile camera registration, private go2rtc listener safety and fresh per-camera probe evidence
@@ -727,3 +732,24 @@ Each build must:
 - consolidate authenticated Home Assistant device outcomes and per-camera playback owner receipts
 - keep unresolved and reopened identities visible with explicit next-action ownership
 - separate source CI GREEN from installed Windows runtime and actual household equipment acceptance
+
+### Build 119 — Local Household Password Vault Security Architecture (queued; requested 2026-10-23)
+- scope a distinct household personal password manager accessible from the authenticated Hub client; do **not** reuse Knowledge, integration Secrets, chat memory or AI tools for plaintext passwords
+- security review covering Windows server compromise, stolen client, shared household accounts, backup theft, recovery, LAN and limited Tailscale access, and phishing
+- select mature, independently reviewed cryptographic primitives/libraries and investigate a mature self-hosted password-manager integration versus custom vault implementation before approving a build direction
+- define client-side encryption, unique per-user vault separation, vault lock/unlock and audit without secret values; no production storage until security review is complete
+
+### Build 120 — Encrypted Local Vault, Client Lock & Secret-Isolation Boundary (queued; gated on Build 119)
+- implement or integrate reviewed, authenticated encrypted local-only vault storage with client-side unlock; keep master password, derived vault key and plaintext item values out of Hub server logs, SQL query results, AI prompts, Knowledge search and exports
+- protect clipboard exposure, autofill/injection surfaces, browser persistence, unlock idle timeout, session revocation, secure item editing and least-privilege owner/household separation
+- enforce safe, separately encrypted backup and tested restore with no silent cloud synchronization
+
+### Build 121 — Hardware-Key/Passkey MFA, Step-Up & Emergency Recovery (queued; gated on Build 120)
+- add a phishing-resistant WebAuthn/passkey or supported hardware authenticator second factor, with backup authenticator, device registration/revocation, reauthentication for vault unlock or recovery
+- require a verified private HTTPS origin (Caddy) on LAN and carefully restricted remote Tailscale access; do not expose vault endpoints via public router forwarding
+- document safe offline recovery codes and owner-held encrypted recovery materials; MFA must not be bypassable by ordinary Hub role escalation
+
+### Build 122 — Password Vault Security Verification & Windows Owner Acceptance (queued; gated on Build 121)
+- test threat-model controls, encryption/rotation, lost device/session, invalid 2FA, offline backup restoration, and secret leakage through logs, browser caches, AI and Knowledge
+- verify family Hub-client access, dual private LAN/Tailscale paths, session timeout, clipboard redaction, accessibility and Windows restart survival
+- classify GitHub CI evidence separately from actual server installation and owner-supervised field security acceptance

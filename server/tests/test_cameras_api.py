@@ -185,6 +185,79 @@ def test_discovery_preview_does_not_mutate_and_selected_accept_creates_disabled(
     assert skipped.json()["already_registered"] == 1
 
 
+def test_bulk_accept_rejects_endpoint_conflicts_without_partial_registration(
+    tmp_path, monkeypatch
+) -> None:
+    client = build_client(tmp_path)
+    first = discovered_camera()
+    second = DiscoveredONVIFDevice(
+        endpoint_uuid="camera-uuid-different",
+        service_url=first.service_url,
+        host=first.host,
+        port=first.port,
+        name="Another identity",
+        types=(),
+        scopes=(),
+    )
+    monkeypatch.setattr(
+        "rosevear_ai_hub.api.cameras.discover_onvif_devices", lambda **_: [first, second]
+    )
+    preview = client.post("/api/v1/cameras/discovery/preview").json()
+    conflict = client.post(
+        "/api/v1/cameras/discovery/accept",
+        json={
+            "preview_token": preview["preview_token"],
+            "endpoint_uuids": ["camera-uuid-1", "camera-uuid-different"],
+        },
+    )
+    assert conflict.status_code == 409
+    assert client.get("/api/v1/cameras").json() == []
+
+    monkeypatch.setattr("rosevear_ai_hub.api.cameras.discover_onvif_devices", lambda **_: [first])
+    preview2 = client.post("/api/v1/cameras/discovery/preview").json()
+    assert (
+        client.post(
+            "/api/v1/cameras/discovery/accept",
+            json={
+                "preview_token": preview2["preview_token"],
+                "endpoint_uuids": ["camera-uuid-1"],
+            },
+        ).status_code
+        == 200
+    )
+    monkeypatch.setattr("rosevear_ai_hub.api.cameras.discover_onvif_devices", lambda **_: [second])
+    preview3 = client.post("/api/v1/cameras/discovery/preview").json()
+    assert (
+        client.post(
+            "/api/v1/cameras/discovery/accept",
+            json={
+                "preview_token": preview3["preview_token"],
+                "endpoint_uuids": ["camera-uuid-different"],
+            },
+        ).status_code
+        == 409
+    )
+    assert len(client.get("/api/v1/cameras").json()) == 1
+
+
+def test_discovery_hardware_hint_is_bounded_and_not_a_url(tmp_path, monkeypatch) -> None:
+    client = build_client(tmp_path)
+    source = discovered_camera()
+    camera = DiscoveredONVIFDevice(
+        **{
+            **source.__dict__,
+            "scopes": (
+                "onvif://www.onvif.org/hardware/CameraModel%20A",
+                "onvif://www.onvif.org/hardware/http%3A%2F%2Fexample.com%2Ftoken",
+            ),
+        }
+    )
+    monkeypatch.setattr("rosevear_ai_hub.api.cameras.discover_onvif_devices", lambda **_: [camera])
+    response = client.post("/api/v1/cameras/discovery/preview")
+    assert response.status_code == 200
+    assert response.json()["candidates"][0]["model_hint"] == "CameraModel A"
+
+
 def test_household_user_cannot_preview_or_accept_camera_discoveries(tmp_path, monkeypatch) -> None:
     client = build_client(tmp_path)
     monkeypatch.setattr(

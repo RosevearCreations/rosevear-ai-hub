@@ -1872,8 +1872,23 @@ See docs/BUILD_113_INSTALLED_WINDOWS_VERSION_FIELD_ADOPTION.md. Next queued: Bui
 - [x] Private minimal HA diagnostic receipt preserving outstanding holds and an unconditional field-acceptance boundary
 - [x] Pure logic and React tests, safety/privacy documentation, no additional HA commands or persistent schema changes
 - [x] Web TypeScript, 208/208 tests and production bundle verified
-- [ ] Independent `dev` feature PR and post-merge push CI GREEN
-- [ ] Independent `main` promotion PR and post-merge push CI GREEN
+- [x] Independent `dev` feature PR and post-merge push CI GREEN (PR #292, dev run 39964780748)
+- [x] Independent `main` promotion PR and post-merge push CI GREEN (PR #293, main run 39965918181; SHA `857e3eda70e61ba1f8ffe6ee9e4b1cdcdd4eb94f`)
 - [ ] Owner checks actual Home Assistant integrations, physical devices and separate field acceptance on installed Windows Hub
 
 See docs/BUILD_114_HOME_ASSISTANT_INTEGRATION_DISCOVERY.md. Next queued: Build 115 — Operator-Reviewed Camera Discovery & Bulk Restore Candidates.
+
+## Build 115 — Operator-Reviewed Camera Discovery & Bulk Restore Candidates
+- [x] Accept only strict prior Build 107 inventory or Build 110 follow-up camera identities in browser-session memory; reject oversized, duplicate or URL/secret-bearing identity fields
+- [x] Explicit fresh ONVIF preview and authenticated current registry comparison by stable endpoint UUID, bounded model hint and prior name evidence
+- [x] Fail closed for network endpoint collisions, ambiguous names, renamed exact IDs, existing registration, drift and unrecognized discoveries
+- [x] Per-camera or bulk operator selection plus explicit physical hardware/model attestation; no automatic camera enrollment
+- [x] Fresh registry preflight, one-use server ticket, server-side endpoint collision rejection and disabled-only creation; no stream or go2rtc mutation
+- [x] Private registration receipt with exact IDs and disabled status; unconditional physical/private-stream/moving-video HOLD
+- [x] Document operator runbook and reserve security-gated local household password vault Builds 119–122
+- [x] Web TypeScript + 215/215 tests, production bundle; 11/11 camera API and 3/3 ticket tests; Python lint
+- [ ] Independent feature PR and post-merge `dev` CI GREEN
+- [ ] Independent promotion PR and post-merge `main` CI GREEN
+- [ ] Owner checks actual installed Windows Hub, camera physical models, private streams and moving video
+
+See docs/BUILD_115_CAMERA_DISCOVERY_BULK_RESTORE.md. Next queued: Build 116 — Private Camera Stream Health & Playback Acceptance.
