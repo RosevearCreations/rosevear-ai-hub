@@ -34,6 +34,7 @@ import { NotificationsView } from "./NotificationsView";
 import { OperationsDashboard } from "./OperationsDashboard";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
+import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
 import { UsersView } from "./UsersView";
@@ -313,6 +314,7 @@ export function App() {
             {canAdminister && <LocalDiagnosticsPanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <ReleaseAcceptancePanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <ReleaseObservabilityPanel />}
+            {canAdminister && <InstalledHubAdoptionPanel />}
             {canAdminister && <IntegrationHealthPanel />}
             {canAdminister && <RestartAppsPanel />}
             <RemoteAccessPanel />
