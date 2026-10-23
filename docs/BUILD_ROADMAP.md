@@ -737,10 +737,16 @@ Each build must:
 - add circled-i help, accessible status display, responsive service and evidence cards; no automation or durable acceptance assertions
 - see docs/BUILD_117_POST_REBOOT_ACCEPTANCE_RUNBOOK.md
 
-### Build 118 — Device & Camera Field Recovery Acceptance Summary (queued)
+### Build 118 — Device & Camera Field Recovery Acceptance Summary
 - consolidate authenticated Home Assistant device outcomes and per-camera playback owner receipts
 - keep unresolved and reopened identities visible with explicit next-action ownership
 - separate source CI GREEN from installed Windows runtime and actual household equipment acceptance
+- add owner-only System workbench for validated Build 110 worklist and matching Build 111 chronological closure ledger
+- acquire six authenticated GET-only integration/device/camera status readings only on explicit request; reject absent, stale and malformed evidence
+- reconcile exact HA device/entity IDs, registered cameras and bounded private encrypted stream health while requiring real device function and supervised moving video
+- filter all/open/reopened identities, assign role-based next actions, and reset any owner observation on new capture
+- generate sanitized private identity-only summary preserving historical/newly reopened holds and unconditional independent installed-Windows field HOLD
+- see docs/BUILD_118_DEVICE_CAMERA_FIELD_RECOVERY_SUMMARY.md
 
 ### Build 119 — Local Household Password Vault Security Architecture (queued; requested 2026-10-23)
 - scope a distinct household personal password manager accessible from the authenticated Hub client; do **not** reuse Knowledge, integration Secrets, chat memory or AI tools for plaintext passwords

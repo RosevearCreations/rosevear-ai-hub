@@ -2747,6 +2747,50 @@ h1 {
   }
 }
 
+/* Build 118 — private device and camera recovery field summary */
+.field-summary {
+  display: grid;
+  gap: 1rem;
+  border: 1px solid #abbfce;
+  background: linear-gradient(145deg, #fff 0%, #f4f8fa 55%, #e8f1f5 100%);
+  box-shadow: 0 7px 24px rgb(25 57 76 / 0.08);
+}
+
+.field-summary-header {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.field-summary-header > div { flex: 1 1 25rem; }
+.field-summary-header h2, .field-summary-header p { margin: 0 0 0.45rem; }
+.field-summary-uploads { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.85rem; }
+.field-summary-uploads label { display: grid; gap: 0.55rem; font-weight: 650; }
+.field-summary-uploads input { min-width: 0; max-width: 100%; font-weight: 400; }
+.field-summary-actions { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+.field-summary-evidence { padding: 0.8rem 1rem; border-radius: 0.65rem; background: #e7eef5; color: #203b54; }
+.field-summary-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 0.8rem; }
+.field-summary-metrics article { display: grid; gap: 0.25rem; padding: 0.9rem; border: 1px solid #b6c9d8; border-radius: 0.8rem; background: #fff; }
+.field-summary-metrics strong { font-size: 1.6rem; color: #173d5c; }
+.field-summary-metrics span { color: #34495e; font-size: 0.9rem; }
+.field-summary-filters { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.field-summary-filters select, .field-summary-row-controls select { border: 1px solid #627e95; border-radius: 0.5rem; padding: 0.55rem; background: #fff; color: #172d42; }
+.field-summary-list { display: grid; gap: 0.75rem; }
+.field-summary-row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(190px, 0.8fr); gap: 1rem; padding: 1rem; border: 1px solid #c0ccd7; border-radius: 0.8rem; background: #fff; }
+.field-summary-row.is-reopened { border-left: 4px solid #b96720; }
+.field-summary-row > div:first-child, .field-summary-row-controls { display: grid; align-content: start; gap: 0.4rem; min-width: 0; }
+.field-summary-row small { display: block; overflow-wrap: anywhere; color: #35495c; }
+.field-summary-row p { margin: 0.4rem 0 0; }
+.field-summary-row-controls label { display: grid; gap: 0.5rem; font-weight: 650; }
+.field-summary-row-controls label:has(input) { display: flex; align-items: start; font-weight: 500; }
+.field-summary-row-controls input { margin-top: 0.2rem; flex: 0 0 auto; width: 1.1rem; height: 1.1rem; }
+
+@media (max-width: 680px) {
+  .field-summary-row { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* Build 034 — Frigate adapter */
 .frigate-panel {
   display: grid;
