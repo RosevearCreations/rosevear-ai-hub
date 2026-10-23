@@ -3286,3 +3286,33 @@ h1 {
 .recovery-follow-up-item > span { display: grid; gap: .3rem; min-width: min(100%, 15rem); flex: 1; }
 .recovery-follow-up-item > .recovery-playback-mark { flex: 0 1 18rem; min-width: 0; }
 .recovery-field-review .recovery-evidence-actions input[type="text"] { width: min(100%, 23rem); }
+
+/* Build 119 — security-gated local vault architecture; no credential-entry controls. */
+.vault-architecture { min-width: 0; display: grid; gap: 1.1rem; }
+.vault-architecture > .page-header { align-items: flex-start; }
+.vault-architecture h2 { margin: 0 0 .45rem; font-size: 1.2rem; }
+.vault-gate-badge { border: 1px solid #a43d26; color: #8f2c18; background: #fff0e9; border-radius: 2rem; padding: .55rem .9rem; font-weight: 800; font-size: .78rem; white-space: nowrap; }
+.vault-gate-warning { border: 2px solid #ae402b; border-radius: 1rem; padding: 1rem 1.15rem; background: #fff6f2; color: #592719; }
+.vault-gate-warning p { margin-bottom: 0; max-width: 77ch; }
+.vault-security-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1rem; }
+.vault-security-card { min-width: 0; border: 1px solid #bdc9d7; background: linear-gradient(145deg, #f8fafc 0%, #eaf1fa 100%); padding: 1.15rem; border-radius: 1rem; }
+.vault-security-card p { line-height: 1.5; }
+.vault-security-card small { display: block; margin-top: .6rem; color: #475569; }
+.vault-gates-heading { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.vault-gates-heading p { margin: 0 0 .6rem; }
+.vault-gates-heading > strong { color: #872b16; }
+.vault-gates-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .45rem; }
+.vault-gates-list li { display: flex; gap: .75rem; align-items: flex-start; border-top: 1px solid #cbd5e1; padding: .7rem 0; }
+.vault-gates-list li > div { flex: 1; min-width: 0; }
+.vault-gates-list li p { margin: .2rem 0 0; color: #475569; }
+.vault-gate-dot { flex: 0 0 .65rem; height: .65rem; background: #bf5c34; border-radius: 50%; margin-top: .45rem; }
+.vault-gate-pending { color: #8f2c18; font-size: .8rem; font-weight: 800; }
+.vault-threats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: .75rem; }
+.vault-threats article { border: 1px solid #cbd5e1; border-radius: .8rem; padding: .85rem; }
+.vault-threats p { margin: .4rem 0 0; line-height: 1.45; }
+.vault-architecture-note { border-left: 4px solid #9d4d32; background: #fff6f2; color: #592719; padding: .9rem 1rem; border-radius: .25rem; line-height: 1.55; }
+@media (max-width: 720px) {
+  .vault-architecture > .page-header { display: grid; gap: .75rem; }
+  .vault-gates-list li { flex-wrap: wrap; }
+  .vault-gate-pending { margin-left: 1.4rem; }
+}

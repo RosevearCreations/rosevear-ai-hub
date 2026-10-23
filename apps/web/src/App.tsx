@@ -25,6 +25,7 @@ import { WorkshopView } from "./WorkshopView";
 import { LocalDiagnosticsPanel } from "./LocalDiagnosticsPanel";
 import { PostRebootAcceptancePanel } from "./PostRebootAcceptancePanel";
 import { FieldRecoverySummaryPanel } from "./FieldRecoverySummaryPanel";
+import { VaultArchitectureView } from "./VaultArchitectureView";
 import { IntegrationHealthPanel } from "./IntegrationHealthPanel";
 import { RestartAppsPanel } from "./RestartAppsPanel";
 import { SectionHelp } from "./HelpSystem";
@@ -60,6 +61,7 @@ const baseSections = [
   "Home",
   "Chat",
   "Knowledge",
+  "Vault",
   "Devices",
   "Cameras",
   "Business",
@@ -279,6 +281,8 @@ export function App() {
           }} />
         ) : section === "Knowledge" ? (
           <KnowledgeView currentUser={user} initialQuestion={knowledgeQuestion} />
+        ) : section === "Vault" ? (
+          <VaultArchitectureView />
         ) : section === "Workshop" ? (
           <WorkshopView />
         ) : section === "Devices" ? (
