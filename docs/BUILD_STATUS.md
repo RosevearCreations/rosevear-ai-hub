@@ -1915,8 +1915,22 @@ See docs/BUILD_116_PRIVATE_CAMERA_STREAM_PLAYBACK_ACCEPTANCE.md. Next queued: Bu
 - [x] Six human-affirmed field checks, separate from source CI and actual installed Windows acceptance; reset confirmations when evidence changes
 - [x] Responsive System review cards, circled-i runbook help, main contextual System help and manual review navigation
 - [x] Frontend TypeScript, 229/229 unit tests and production bundle verified
-- [ ] Independent feature PR and post-merge `dev` CI GREEN
-- [ ] Independent promotion PR and post-merge `main` CI GREEN
+- [x] Independent feature PR and post-merge `dev` CI GREEN (PR #298, `dev` run 40016023266)
+- [x] Independent promotion PR and post-merge `main` CI GREEN (PR #299, `main` run 40017342364; SHA `e9d2e9f3497774ee116a711a131404443a9cd8ee`)
 - [ ] Owner installs main on Windows and separately verifies actual task, EFI VM, local model, authenticated private clients and moving camera video following manual restart
 
 See docs/BUILD_117_POST_REBOOT_ACCEPTANCE_RUNBOOK.md. Next queued: Build 118 — Device & Camera Field Recovery Acceptance Summary.
+
+## Build 118 — Device & Camera Field Recovery Acceptance Summary
+- [x] Owner-only System handoff combining validated Build 110 recovery worklist, matching Build 111 closure history and deliberate fresh authenticated HA/MQTT/camera read
+- [x] Exact HA entity/device and camera UUID comparison; fail-closed on unavailable sources, missing IDs, offline integrations and stale/unsafe private camera probes
+- [x] Highlight historical reopening and new regression of previously owner-attested closed identities; show registered cameras absent from old recovery worklist
+- [x] Role-assigned next actions and optional owner-observed physical device/moving-video checkboxes, with all marks invalidated on any new reading
+- [x] Private identity-only owner summary that always records independent installed-Windows/physical acceptance HOLD; no secrets, stream URLs, server writes or background polls
+- [x] Responsive accessible cards/filters, circled-i operating instructions and expanded System contextual help
+- [x] Frontend TypeScript, 237/237 tests and production bundle verified
+- [ ] Independent feature PR and post-merge `dev` CI GREEN
+- [ ] Independent promotion PR and post-merge `main` CI GREEN
+- [ ] Owner installs approved `main` on Windows and independently witnesses service startup, authenticated private clients, physical HA function and real moving camera feeds
+
+See docs/BUILD_118_DEVICE_CAMERA_FIELD_RECOVERY_SUMMARY.md. Next queued: Build 119 — Local Household Password Vault Security Architecture.
