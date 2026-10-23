@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import ipaddress
+import re
 from datetime import UTC, datetime
 from typing import Annotated
-from urllib.parse import quote, urlparse
+from urllib.parse import quote, unquote, urlparse
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
@@ -86,6 +87,7 @@ class CameraDiscoveryCandidate(BaseModel):
     host: str
     port: int
     registered: bool
+    model_hint: str | None = None
 
 
 class CameraPreviewResponse(BaseModel):
@@ -191,6 +193,18 @@ class CameraHealthRefreshResponse(BaseModel):
 
 def _scope(camera_id: int) -> str:
     return f"camera.stream.{camera_id}"
+
+
+def _discovery_model_hint(device: DiscoveredONVIFDevice) -> str | None:
+    """Extract only a short printable ONVIF hardware label, never arbitrary scopes/URLs."""
+    prefix = "onvif://www.onvif.org/hardware/"
+    for scope in device.scopes[:64]:
+        if not scope.startswith(prefix):
+            continue
+        label = unquote(scope[len(prefix) :]).strip()
+        if re.fullmatch(r"[A-Za-z0-9 _.,()+-]{1,80}", label):
+            return label
+    return None
 
 
 def _relay_url(stream_name: str) -> str:
@@ -631,6 +645,7 @@ def preview_camera_discovery(
                 host=device.host,
                 port=device.port,
                 registered=device.endpoint_uuid in registered,
+                model_hint=_discovery_model_hint(device),
             )
             for device in devices
         ],
@@ -651,6 +666,30 @@ def accept_camera_discovery(
             status_code=409,
             detail="Camera preview expired, was used, or selection is invalid. Rescan.",
         )
+    # Even a legitimate discovery ticket may race a changed registry or contain
+    # multiple claimed UUIDs at one endpoint. Reject the entire selection before
+    # creating any row; never replace an existing camera/stream by network address.
+    current = db.scalars(select(Camera)).all()
+    protected_endpoints: dict[tuple[str, int], set[str]] = {}
+    for item in current:
+        protected_endpoints.setdefault((item.host.lower(), item.port), set()).add(
+            item.endpoint_uuid
+        )
+    selected_endpoints: dict[tuple[str, int], str] = {}
+    for device in selected:
+        key = (device.host.lower(), device.port)
+        existing_uuids = protected_endpoints.get(key, set())
+        if existing_uuids and existing_uuids != {device.endpoint_uuid}:
+            raise HTTPException(
+                status_code=409,
+                detail="Camera endpoint identity conflict. Rescan and review manually.",
+            )
+        prior = selected_endpoints.get(key)
+        if prior is not None and prior != device.endpoint_uuid:
+            raise HTTPException(
+                status_code=409, detail="Multiple discovered identities share a camera endpoint."
+            )
+        selected_endpoints[key] = device.endpoint_uuid
     now = datetime.now(UTC)
     created: list[Camera] = []
     skipped = 0

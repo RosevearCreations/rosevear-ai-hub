@@ -1860,6 +1860,7 @@ export interface CameraDiscoveryCandidate {
   host: string;
   port: number;
   registered: boolean;
+  model_hint?: string | null;
 }
 
 export interface CameraPreviewResult {
