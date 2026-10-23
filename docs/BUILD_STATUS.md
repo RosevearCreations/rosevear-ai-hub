@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 28179)
-Total output lines: 1959
-
 # Build Status
 
 This file records completed and active builds. The roadmap remains authoritative for planned scope.
@@ -834,7 +831,592 @@ Build 033 stops before recording, Frigate analytics, PTZ, talkback, and remote/p
 
 Build 033 feature promotion is complete. The exact GREEN dev tree
 `d23df1c133afb0171501abe56bae75d1faccc5f7` passed dev run 37983356417 and was promoted
-through PR #53 to main merge `9eb8fa52953ff813e026574da46f958ae49a54f6`. Main …8179 tokens truncated…bs GREEN
+through PR #53 to main merge `9eb8fa52953ff813e026574da46f958ae49a54f6`. Main Production run
+37984006237 passed all four lanes. The protected-main release-evidence closeout is followed by
+synchronization back to dev so both branches carry the final release record.
+
+## Build 034 acceptance checklist
+
+- [x] loopback-only Frigate HTTP adapter
+- [x] strict FRIGATE_BASE_URL validation
+- [x] Frigate service/version status
+- [x] normalized configured-camera capability inventory
+- [x] bounded recent event retrieval
+- [x] event payload normalization
+- [x] maximum event response cap of 100
+- [x] authenticated Frigate status/camera/event API
+- [x] no Frigate write endpoints
+- [x] read_only / household users can view Frigate metadata
+- [x] browser never connects directly to Frigate
+- [x] Frigate panel integrated into Cameras
+- [x] Frigate camera capability display
+- [x] recent object-event display
+- [x] Frigate offline state isolated from camera dashboard
+- [x] backend adapter tests
+- [x] backend API/role tests
+- [x] Frigate web panel tests
+- [x] contextual help updated
+- [x] integration/security/architecture/operations/build documentation
+- [x] backend/desktop version 0.0.34
+- [x] no database migration required
+- [x] no new Hub secret required in supported loopback mode
+- [x] final Build 034 dev CI green — run 37989129587
+- [x] promoted to main — PR #56 / merge 37d7e2d6d0d85b2c719e8c76ca7ba12ae377ff7a
+- [x] final Build 034 main Production CI green — run 37989801553
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
+
+## Operator setup
+
+Frigate is optional. The supported Build 034 mode uses
+`FRIGATE_BASE_URL=http://127.0.0.1:5000` and requires that Frigate's internal API remain
+loopback-only. No Frigate installation is required for the Hub itself to start or for existing
+ONVIF/go2rtc camera functionality to keep working.
+
+Build 034 is read-only. Camera Event Automations begin in Build 035.
+
+Build 034 feature promotion is complete. The exact GREEN dev tree
+`0f94819a757c5b55d2e597528786028e61cff7f7` passed dev run 37989129587 and was promoted
+through PR #56 to main merge `37d7e2d6d0d85b2c719e8c76ca7ba12ae377ff7a`. Main Production run
+37989801553 passed all four lanes. The protected-main release-evidence closeout is followed by
+synchronization back to dev so both branches carry the final release record.
+
+## Build 035 acceptance checklist
+
+- [x] frigate_event Rule Schema trigger
+- [x] exact label filter
+- [x] optional camera, sub-label, zone, score, clip, snapshot filters
+- [x] false-positive events ignored by default
+- [x] Frigate polling dormant when no enabled camera-event rule exists
+- [x] bounded FRIGATE_EVENT_POLL_SECONDS setting
+- [x] first-use historical event baseline suppression
+- [x] bounded persistent seen-event checkpoint
+- [x] automatic per-rule Frigate event-ID deduplication
+- [x] chronological unseen-event queueing
+- [x] Frigate events reuse Home Assistant state conditions
+- [x] Frigate events reuse existing deterministic Level-1 action executors
+- [x] Level-2/Level-3 autonomous actions remain prohibited
+- [x] existing safe-control allow list and hazard checks remain enforced
+- [x] no automatic replay after failed/interrupted physical actions
+- [x] runtime reports Frigate rule count, online state, seen-event count, last poll
+- [x] AI rule authoring receives Frigate context when available
+- [x] automation UI exposes Frigate runtime state
+- [x] backend trigger validation tests
+- [x] Event Engine execution/dedup/filter tests
+- [x] Frigate runtime baseline/restart tests
+- [x] web runtime display tests
+- [x] architecture/security/integration/operations/build documentation
+- [x] backend/desktop version 0.0.35
+- [x] no database migration required
+- [x] no new Hub secret or paid dependency
+- [x] final Build 035 dev CI green — run 37994790023
+- [x] promoted to main — PR #59 / merge 9a0aa3edb478cf831bbe2572e0da9c135f36f67b
+- [x] final Build 035 main Production CI green — run 37995199684
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
+
+## Operator setup
+
+Build 035 adds no migration or secret. Frigate remains optional. Camera-event polling starts only
+when at least one enabled frigate_event rule exists. The first successful poll establishes a
+non-executing baseline of current Frigate history; later unseen events may enter the deterministic
+Event Engine.
+
+Safe default: `FRIGATE_EVENT_POLL_SECONDS=2` with an accepted range of 1–60 seconds.
+
+Build 035 feature promotion is complete. The exact GREEN dev tree
+`f154326fcf51b739c6cc7040cdcdf79ff785fce0` passed dev run 37994790023 and was promoted
+through PR #59 to main merge `9a0aa3edb478cf831bbe2572e0da9c135f36f67b`. Main Production run
+37995199684 passed all four lanes. The protected-main release-evidence closeout is followed by
+synchronization back to dev so both branches carry the final release record.
+
+## Next build
+
+**Build 036 — Connector Framework**
+
+
+
+## Build 036 acceptance checklist
+
+- [x] common business connector descriptor contract
+- [x] normalized connector capabilities and safe status model
+- [x] normalized configuration/unavailable/not-found/write-blocked errors
+- [x] deterministic connector registry with duplicate-key protection
+- [x] read-only-by-default policy
+- [x] business writes blocked by the base framework
+- [x] write confirmation requirement represented in connector metadata
+- [x] Devil n Dove planned read connector registration
+- [x] Rosie Dazzlers planned read connector registration
+- [x] Yard Workers planned read connector registration
+- [x] authenticated business connector list/detail API
+- [x] Business navigation section and connector overview UI
+- [x] contextual circled-i Business help
+- [x] backend framework/API tests
+- [x] web connector overview tests
+- [x] backend/desktop version 0.0.36
+- [x] no database migration required
+- [x] no new secret, OAuth application, cloud account, paid dependency, or external request
+- [x] final Build 036 dev CI green — run 37999279494
+- [x] promoted to main — PR #63 / merge f428d5d1125e4d0aeb446106083dc1bb3404b6d5
+- [x] final Build 036 main Production CI green — run 38000148371
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
+
+## Build 036 operator setup
+
+No manual setup is required. Build 036 deliberately does not ask for Devil n Dove, Rosie Dazzlers,
+or Yard Workers credentials. The three registrations describe the future read surfaces only.
+
+
+Build 036 feature promotion is complete. The exact GREEN dev tree
+`c5e27db629afc134b35c8dad53d905787d5793fa` passed dev run 37999279494 and the protected
+main PR gate run 37999782415. It was promoted through PR #63 to main merge
+`f428d5d1125e4d0aeb446106083dc1bb3404b6d5`. Main Production run 38000148371 passed all
+four lanes. This protected-main release-evidence closeout is followed by synchronization back to dev
+so both branches carry the final release record.
+
+## Next build
+
+**Build 037 — Devil n Dove Read Connector**
+
+
+## Build 037 acceptance checklist
+
+- [x] concrete Devil n Dove implementation of the Build 036 connector contract
+- [x] GET-only server-side Devil n Dove client
+- [x] remote HTTPS enforcement with loopback-only HTTP exception
+- [x] existing Devil n Dove bearer-compatible admin session authentication reused
+- [x] Devil n Dove credential added to Build 020 secret definitions
+- [x] environment-backed `DEVILNDOVE_ADMIN_TOKEN` supported
+- [x] configurable `DEVILNDOVE_BASE_URL` and bounded timeout
+- [x] lightweight Product picker used for catalogue reads
+- [x] catalogue reads capped at 50 records
+- [x] order reads capped at 100 records
+- [x] Inventory-owned read contract used for inventory
+- [x] inventory reads capped at 100 records and tools excluded
+- [x] no arbitrary upstream path or method passthrough
+- [x] normalized bounded upstream fields
+- [x] connector status does not spend live D1 read quota
+- [x] sanitized configuration, authentication, network, and provider errors
+- [x] authenticated Hub read endpoint for connector resources
+- [x] Business UI live read controls and bounded preview
+- [x] contextual circled-i Business help updated
+- [x] backend adapter, framework, and API tests
+- [x] web read-preview tests
+- [x] backend and desktop version 0.0.37
+- [x] no database migration required
+- [x] no new paid dependency or Devil n Dove repository change
+- [x] business writes remain blocked
+- [x] final Build 037 dev CI green — run 38018166942
+- [x] promoted to main — PR #66 / merge e32ba9730b81c835a1ee6d461863e508715e30f2
+- [x] protected-main promotion gate green — run 38018435266
+- [x] final Build 037 main Production CI green — run 38018791124
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
+
+## Build 037 operator setup
+
+Build 037 can deploy while unconfigured. Live reads require a currently valid Devil n Dove admin
+session credential stored as **Secrets → Devil n Dove admin token** or
+`DEVILNDOVE_ADMIN_TOKEN`. The credential is bearer-equivalent, can expire or be revoked, and never
+enters browser state. The default origin is `https://devilndove.com`; no Devil n Dove application
+change is required.
+
+
+Build 037 feature promotion is complete. The exact GREEN dev tree
+`62f866052ca23de1449be1cd57830b748e66e4f8` passed dev run 38018166942 and protected-main
+promotion gate run 38018435266. It was promoted through PR #66 to main merge
+`e32ba9730b81c835a1ee6d461863e508715e30f2`. Main Production run 38018791124 passed all
+four lanes; the backend reported 158 passed tests with 9 warnings. This protected-main
+release-evidence closeout is followed by synchronization back to dev so both branches carry the
+final release record.
+
+## Build 038 acceptance checklist
+
+- [x] concrete Rosie Dazzlers implementation of the Build 036 connector contract
+- [x] remote HTTPS enforcement with loopback-only HTTP exception
+- [x] existing opaque Rosie Dazzlers `rd_staff_session` authentication reused
+- [x] Rosie Dazzlers credential added to Build 020 secret definitions
+- [x] environment-backed `ROSIEDAZZLERS_STAFF_SESSION_TOKEN` supported
+- [x] configurable `ROSIEDAZZLERS_BASE_URL` and bounded timeout
+- [x] exact four-endpoint read allow list; no arbitrary path or method passthrough
+- [x] booking reads capped at 100 through existing read-only bookings search contract
+- [x] customer reads capped at 100 through existing read-only customer list contract
+- [x] job reads capped at 80 through existing detailer workspace contract
+- [x] inventory reads capped at 100 through existing inventory list contract
+- [x] normalized/privacy-minimized upstream records
+- [x] connector status does not contact Rosie Dazzlers
+- [x] authenticated Hub read endpoint reused for Rosie Dazzlers resources
+- [x] Business UI live read controls and bounded preview
+- [x] contextual circled-i Business help updated
+- [x] backend adapter/framework/API tests
+- [x] web read-preview tests
+- [x] backend and desktop version 0.0.38
+- [x] no database migration required
+- [x] no new paid dependency or Rosie Dazzlers repository change
+- [x] business writes remain blocked
+- [x] final Build 038 dev CI green — run 38054235678
+- [x] promoted to main — PR #69 / merge d562ca796fa05a88853977b46fa22553dba3c573
+- [x] protected-main promotion gate green — run 38054594711
+- [x] final Build 038 main Production CI green — run 38055745019
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
+
+## Build 038 operator setup
+
+Build 038 can deploy while unconfigured. Live reads require a current Rosie Dazzlers staff session
+token stored as **Secrets → Rosie Dazzlers staff session token** or
+`ROSIEDAZZLERS_STAFF_SESSION_TOKEN`. The token is the value of the Rosie Dazzlers
+`rd_staff_session` cookie, can expire or be revoked, and never enters browser state. The default
+origin is `https://rosiedazzlers.ca`; no Rosie Dazzlers application change is required.
+
+Build 038 feature promotion is complete. The exact GREEN dev tree
+`c91aac71776723e6628a8378b696f584a2215316` passed dev run 38054235678 and protected-main
+promotion gate run 38054594711. It was promoted through PR #69 to main merge
+`d562ca796fa05a88853977b46fa22553dba3c573`. Main Production run 38055745019 passed all
+four lanes; the backend reported 164 passed tests with 9 warnings and the Windows executable
+artifact was uploaded successfully. This protected-main release-evidence closeout is followed by
+synchronization back to dev so both branches carry the final release record.
+
+## Build 039 acceptance checklist
+
+- [x] concrete Yard Workers implementation of the Build 036 connector contract
+- [x] verified against Yard Workers source commit 8514825087326bdfe8b5de0e0c96d937ac7c10ee
+- [x] existing protected Shared Core read endpoint reused without Yard Workers source changes
+- [x] remote HTTPS enforcement with loopback-only HTTP exception
+- [x] signed-in Supabase access token and paired API key remain backend-only
+- [x] Yard Workers credentials added to Build 020 secret definitions
+- [x] environment-backed YARDWORKERS_ACCESS_TOKEN and YARDWORKERS_ANON_KEY supported
+- [x] configurable YARDWORKERS_BASE_URL and bounded timeout
+- [x] exact POST /functions/v1/core-data-read contract; no arbitrary path or method passthrough
+- [x] fixed Jobs module view authority for all Build 039 reads
+- [x] Clients, Jobs, Crew, and Equipment resources capped at 100 returned records
+- [x] upstream read_only=true confirmation required
+- [x] normalized/privacy-minimized records; client-site street addresses omitted
+- [x] connector status performs no network request
+- [x] authenticated Hub read endpoint reused
+- [x] Business UI live read controls and bounded preview
+- [x] contextual circled-i Business help updated
+- [x] backend adapter/framework/API tests
+- [x] web read-preview tests
+- [x] backend and desktop version 0.0.39
+- [x] no database migration required
+- [x] no new paid dependency or Yard Workers repository change
+- [x] business writes remain blocked
+- [x] final Build 039 dev CI green — run 38060792723
+- [x] promoted to main — PR #72 / merge 2633b96598ba10cd833a3b384996b05c46e6c165
+- [x] protected-main promotion gate green — run 38061206759
+- [x] final Build 039 main Production CI green — run 38061484574
+- [x] release-evidence closeout complete through protected-main closeout
+- [x] dev synchronized with final main closeout target after closeout promotion
+
+## Build 039 operator setup
+
+Build 039 can deploy while unconfigured. Live reads require both a current signed-in Yard Workers
+Supabase access token and the project anon/publishable API key, preferably stored as **Secrets →
+Yard Workers access token** and **Secrets → Yard Workers API key**. The access-token user must be
+active and have Jobs module view permission. Environment fallbacks are YARDWORKERS_ACCESS_TOKEN and
+YARDWORKERS_ANON_KEY. The default Supabase project origin is
+`https://jmqvkgiqlimdhcofwkxr.supabase.co`; no Yard Workers application change is required.
+
+Build 039 feature promotion is complete. The exact GREEN dev tree
+`b2e69035fe9459629b2c219e15700acd7e67af4d` passed dev run 38060792723 and protected-main
+promotion gate run 38061206759. It was promoted through PR #72 to main merge
+`2633b96598ba10cd833a3b384996b05c46e6c165`. Main Production run 38061484574 passed all
+four lanes; the backend reported 173 passed tests with 9 warnings and the Windows executable
+artifact was uploaded successfully. This protected-main release-evidence closeout is followed by
+synchronization back to dev so both branches carry the final release record.
+
+## Build 040 acceptance checklist
+
+- [x] implementation begins from synchronized Build 039 closeout SHA 5b601ac1ed304b02a6a2fe590477c5e652a0447a
+- [x] current source mutation contracts reviewed in all three connected business repositories
+- [x] Devil n Dove exact review-only story-draft operation selected
+- [x] Devil n Dove publish/approval/status mutation is not exposed
+- [x] Yard Workers exact private internal job-comment operation selected
+- [x] Yard Workers client visibility, special-instruction, and job-instruction mutation forced off
+- [x] Rosie Dazzlers remains read-only because current save APIs are broader than Build 040 safety scope
+- [x] two Level-2 confirmation-required tool definitions registered
+- [x] exact canonical argument schemas with bounded text and positive record IDs
+- [x] Owner/Admin confirmed-write execution endpoint
+- [x] confirmation consumed before external mutation to prevent replay
+- [x] failed/uncertain provider outcomes are never automatically retried
+- [x] success, blocked, failed, and uncertain writes generate Hub audit evidence
+- [x] Business UI separates prepare, approve, and execute steps
+- [x] contextual circled-i Business help updated
+- [x] adapter, connector, confirmation/replay, and web flow tests added
+- [x] backend and desktop version 0.0.40
+- [x] no Hub or source-system database migration
+- [x] no new package or paid service dependency
+- [x] no source-system repository change required
+- [ ] final Build 040 dev CI green
+- [ ] promoted to main
+- [ ] protected-main promotion gate green
+- [ ] final Build 040 main Production CI green
+- [ ] release-evidence closeout complete
+- [ ] dev synchronized with final main closeout target
+
+## Build 040 operator policy
+
+Build 040 does not enable general business editing. Devil n Dove can only receive a new
+Draft / Needs-review product story record. Yard Workers can only receive a private internal update
+comment. Rosie Dazzlers has no write operation. Each write requires a fresh exact Level-2
+confirmation. The confirmation is consumed before contacting the source system; after a timeout or
+failure, inspect the source system before preparing another confirmation.
+
+## Next build
+
+**Build 044 — Voice Commands and Confirmations**
+
+
+## Build 041 — Automatic Service Recovery, Camera Streaming Repair & Startup Cleanup
+
+- [x] Recovery runner and companion scheduler installer merged to `main` (#81, #87)
+- [x] Verified recovery runner was installed on Windows server at `eecab70ecbbb9163258a196ca520d283f82635d1`
+- [x] Backend tests plus web checks passed on Windows test server after update
+- [x] PR #87 CI run 38094872846 passed docs/backend/web/Windows desktop lanes
+- [x] Five-minute recovery task `Rosevear AI Hub Recovery` executes with result 0, leaving original logon startup task intact
+- [x] Controlled go2rtc restart: PID 8636 → 18484
+- [x] Controlled web Vite restart: PID 24508 → 10160; HTTP 200
+- [x] Controlled backend API restart: PID 24000 → 28668; `API recovered.`; health `ok`
+- [x] The API, web and go2rtc healthy-state and recovery logs validated
+- [ ] Separate post-merge Production CI push run not independently verified through connected GitHub workflow interface
+- [ ] Camera feeds are not configured: go2rtc streams endpoint previously returned `{}`; end-to-end video not verified
+
+Core Windows service-recovery acceptance is GREEN. Do not interpret that as successful capture/playback from Bell, SkyBell, NOOIE, Littlelf, Blink, or other cloud-managed cameras. Camera feed onboarding remains separate and model-specific. Production release status is conditional on the outstanding CI evidence. See `docs/BUILD_041_AUTOMATIC_RECOVERY.md`.
+
+
+## Build 042 — Local Speech-to-Text
+
+- [x] Implemented authenticated local STT status and transcription endpoints
+- [x] Explicit optional local whisper.cpp binary + GGML model paths, no automatic downloads
+- [x] 20-second browser microphone recorder and editable Chat transcript (no auto-send)
+- [x] WAV PCM16 mono/16 kHz validation, size/time bounds, safe local subprocess and temp-file cleanup
+- [x] Backend and browser WAV unit tests added
+- [x] Contextual circled-i Chat help and local setup/rollback documentation
+- [x] No database migration, no paid provider, no Windows startup changes
+- [ ] Full dev CI and PR/main promotion acceptance
+- [ ] Local Windows microphone and real Whisper model acceptance (requires optional installed engine/model)
+- [ ] Post-merge main Production CI evidence and release closeout
+
+Build 043 remains Local Text-to-Speech. Build 044 remains Voice Commands and Confirmations.
+
+
+## Build 043 — Local Text-to-Speech
+
+- [x] Authenticated local Windows SAPI TTS status and synthesis endpoints
+- [x] Bounded text, temporary input/output cleanup, sanitized errors and validated PCM WAV
+- [x] Explicit Speak/Speak excerpt/Stop voice on completed assistant messages
+- [x] Single active browser player with cancellation and object URL cleanup
+- [x] Contextual circled-i Chat help; no automated voice, cloud voice or paid provider
+- [x] Backend and web regression tests; no database migration or startup task edits
+- [ ] Dev/main CI and protected promotion evidence
+- [ ] Windows server version 0.0.43 and authenticated browser session verification
+- [ ] Physical Windows SAPI voice playback and Stop acceptance
+- [ ] Post-merge main Production CI evidence
+
+See `docs/BUILD_043_LOCAL_TTS.md` for setup, privacy, rollback and operational acceptance. Build 044 is the next planned milestone.
+
+
+## Build 044 — Voice Commands and Confirmations
+
+- [x] Authenticated read-only server preview reusing deterministic Home-language safety resolution
+- [x] Separate transcript/command field with explicit review and confirm, never automatic chat/device action
+- [x] Exact allow-listed low-risk light/switch/scene actions reuse audited Home Assistant control API
+- [x] Prohibit unsafe, bulk, ambiguous, unsupported or non-allowlisted voice commands
+- [x] Backend and web regression coverage including permissions and stale preview
+- [x] No database migration, cloud service, paid service or startup-task changes
+- [ ] Final dev/main CI promotion GREEN
+- [ ] Test-server backend verified v0.0.44 and browser reauthenticated
+- [ ] Real local voice/confirm/device action end-to-end tested and audited
+- [ ] Separate main push Production CI confirmed
+
+See `docs/BUILD_044_VOICE_COMMANDS.md`. Build 045 — Installable PWA remains next.
+
+
+## Build 045 — Installable PWA
+
+- [x] Added standalone scoped manifest, 192px/512px PNG icons and browser metadata
+- [x] Implemented service worker with tightly bounded public asset cache and secure offline screen
+- [x] Excludes all API/authentication, signed-in pages, chat, device actions, cameras, uploads and remote endpoints from caching
+- [x] Added opt-in install prompt, online/offline feedback, desktop/mobile installation instructions and circled-i help
+- [x] Added Vitest coverage for manifest, install prompt, worker request boundary and offline privacy
+- [x] Maintained existing Windows logon/recovery tasks and backend ports without migration or paid service
+- [ ] Dev/main CI fully green and promotion
+- [ ] Windows PWA installation and offline fallback operator acceptance
+- [ ] Separate push-triggered main Production CI verified
+
+See `docs/BUILD_045_INSTALLABLE_PWA.md` for security, smoke tests and rollback. Next is Build 046 — Private Remote Access via Tailscale.
+
+
+## Build 046 — Private Remote Access via Tailscale
+
+- [x] Added opt-in private HTTPS Tailscale Serve plan with loopback-only FastAPI target
+- [x] Serve production PWA and API from the same local backend origin
+- [x] Remote browsers use relative /api; local Vite/Tauri retain existing loopback API
+- [x] HTTPS logins set Secure/HttpOnly/SameSite session cookies; Hub role checks remain
+- [x] Windows preflight/enable script refuses insecure listener, missing build and existing Serve/Funnel configs
+- [x] System/private-access UI and circled-i help, no remote login claims or private information displayed
+- [x] Unit tests for HTTPS cookie and remote/local routing; no paid service, migration or public exposure
+- [ ] Dev and main CI verified and promoted
+- [ ] Main push Production CI verified GREEN
+- [ ] Operator installs/joins Tailscale, restricts ACL grants, authorizes background Serve and checks client HTTPS/PWA login
+- [ ] Confirm off-tailnet client cannot access and streaming limitations are understood
+
+See `docs/BUILD_046_TAILSCALE_PRIVATE_ACCESS.md`. Next Build 047 — Backup and Restore.
+
+
+## Build 047 — Encrypted Backup and Restore
+
+- [x] SQLite online backup snapshot with integrity validation
+- [x] authenticated encrypted archive using scrypt and AES-256-GCM
+- [x] knowledge originals and local go2rtc configuration included
+- [x] manifest SHA-256 hashes and safe-path validation
+- [x] verify and restore into new directory, never overwrite live data
+- [x] local CLI only; no network endpoint, migration or cloud service
+- [x] operator recovery and master-key escrow documented
+- [x] dev CI GREEN on verified Build 047 tree
+- [x] protected main promotion via PR #115
+- [x] push-triggered main Production CI GREEN — workflow run 38155340556
+- [x] production commit recorded — `b6c5a7adde6d831f8df4e057dbe886f07c2446f4`
+- [ ] on-server offline recovery drill (operator acceptance; intentionally separate from code release)
+
+
+### Build 047 release closeout
+
+Code release is **GREEN and COMPLETE**. The verified `dev` candidate and PR #115 `main` merge had the same Git tree (`ab12137e10f6f3c4a15003690b8fc8feeaf25f03`). The on-server recovery drill remains a deliberate operator acceptance task and does not reopen the code release. Next queued build: **Build 048 — Performance and Resource-Budget Review**.
+
+## Build 048 — Performance and Resource-Budget Review
+
+- [x] read-only resource collector: API resident memory, CPU seconds, host RAM and workspace-volume free disk
+- [x] owner/administrator-only resource endpoint, Cache-Control no-store, generic errors and data minimization
+- [x] advisory warning boundaries, no automatic cleanup/termination/polling/telemetry
+- [x] manual Refresh panel on System, version supplied by running API instead of stale Home Build 036
+- [x] backend threshold and role tests, web GiB formatter test and Windows review guide
+- [ ] development CI all lanes GREEN
+- [ ] production PR checks GREEN
+- [ ] post-merge main Production workflow GREEN
+- [ ] on-Windows idle/normal-workload measurements recorded (separate operator acceptance)
+
+See docs/BUILD_048_PERFORMANCE_RESOURCE_BUDGET.md. No database migrations.
+
+## Build 049 — Threat Model and Security Review
+
+- [x] prioritized threat register covering local network, remote clients, sessions, backups and device controls
+- [x] disable public interactive API documentation and HTTP schema
+- [x] revoke active target-account sessions with password rotation
+- [x] private API no-store + browser anti-framing, no-referrer, nosniff response headers
+- [x] deterministic backend regression tests and Windows/local acceptance guide
+- [x] explicit residual-risk checklist for ACLs, Caddy certificates, network and backup security
+- [ ] development backend/web/Windows/docs CI GREEN
+- [ ] production pull-request CI GREEN
+- [ ] post-merge production main CI GREEN
+- [ ] operator negative remote-access tests and Windows acceptance (not established by CI)
+
+See docs/BUILD_049_THREAT_MODEL_SECURITY_REVIEW.md. No migrations.
+
+## Build 050 — Disaster Recovery Drill
+
+- [x] synthetic encrypted archive round-trip, file contents and SQLite schema/record checks
+- [x] read-only operator-archive rehearsal to an isolated temporary directory
+- [x] no-clobber JSON evidence with archive hash, file/byte counts and SQLite integrity
+- [x] wrong-passphrase and tamper refusal; cleanup and live-source-preservation tests
+- [x] dedicated Windows recovery tests and synthetic command-line smoke gate
+- [x] operator-runbook for backups, separate master key, offline escrow, gaps and RPO/RTO
+- [ ] development CI all checks GREEN
+- [ ] production PR CI all checks GREEN
+- [ ] post-merge main production CI GREEN
+- [ ] local Windows operator synthetic + real household archive rehearsals (separate acceptance)
+
+See docs/BUILD_050_DISASTER_RECOVERY_DRILL.md. No migrations or service restarts.
+
+## Build 051 — Production Readiness and Roadmap Renewal
+
+- [x] read-only loopback-only API health/version/private-route security preflight
+- [x] no redirects, environment proxy or operator-supplied host
+- [x] exclusive-create metadata-only JSON; never return credentials or API bodies
+- [x] fail-closed Windows check for nonloopback Hub API listeners
+- [x] negative tests for version drift, unsafe public route, redirect, network failures
+- [x] operator production acceptance matrix separates GitHub CI and home LAN/Tailscale/recovery evidence
+- [x] roadmap renewed to Build 052–060 with practical multi-project application scope
+- [ ] development five-check CI GREEN
+- [ ] production PR five-check CI GREEN
+- [ ] separate post-merge main Production GREEN
+- [ ] live Windows operator preflight, network certificate/ACL and real archive acceptance (manual)
+
+See docs/BUILD_051_PRODUCTION_READINESS.md. No migrations or service changes.
+
+## Build 052 — Unified Operations Dashboard & Guided Onboarding
+
+- [x] read-only user-selectable Home / Workshop / Business contexts
+- [x] safe service status summaries, optional/unconfigured and inaccessible state distinctions
+- [x] manual Refresh only, no background polling, writes or privileged action bypass
+- [x] guided setup steps and accessible buttons opening existing pages
+- [x] source/permission caution and regression tests; version 0.0.52
+- [ ] development five CI jobs GREEN
+- [ ] production candidate five CI jobs GREEN
+- [ ] independent post-merge main production GREEN
+- [ ] operator local Windows/TEMPLAR acceptance (separate)
+
+See docs/BUILD_052_OPERATIONS_DASHBOARD.md. Next Build 053 — Local Service Diagnostics & Guided Repair.
+
+
+## Build 053 — Local Service Diagnostics & Guided Repair
+
+- [x] Five existing read-only local status checks, no new API or database schema
+- [x] Owner/admin-only guided Windows checks and stable recovery-log pointer
+- [x] No raw sensitive errors/hosts/credentials in summaries, unavailable != offline
+- [x] No automatic process repair, MQTT publish, device commands or restarts
+- [x] Pure classifier regression tests; version 0.0.53
+- [ ] Five dev CI jobs GREEN
+- [ ] Five production PR CI jobs GREEN
+- [ ] Independent post-merge main Production CI GREEN
+- [ ] Windows device, browser, camera and VM acceptance (operator owned)
+
+See docs/BUILD_053_LOCAL_SERVICE_DIAGNOSTICS.md. Next Build 054 — Cameras and Event Timeline Workbench.
+
+
+## Build 054 — Cameras and Event Timeline Workbench
+
+- [x] Camera/object/review filtering and newest/oldest timeline sorting
+- [x] Owner/admin SQLite review notes with 0017 additive migration
+- [x] Cached local metadata view when Frigate is offline
+- [x] Explicit private metadata-only CSV acknowledgement; 100 rows and spreadsheet formula protection
+- [x] No RTSP credentials, clips, snapshots, Frigate writes or automatic cleanup
+- [x] UI/backend tests, migration review, Windows generic updater
+- [ ] dev CI five jobs GREEN
+- [ ] production PR five jobs GREEN
+- [ ] separate post-merge main Production CI GREEN
+- [ ] Windows physical server backup/migration and viewer acceptance (manual)
+
+See docs/BUILD_054_CAMERA_TIMELINE.md. Next Build 055 — Knowledge Projects & Collection Workspace.
+
+
+## Build 055 — Knowledge Projects & Collection Workspace
+
+- [x] Per-project source summaries and explicit search/evidence context
+- [x] Local owner/admin source review, bounded notes and audit without note text
+- [x] Duplicate-aware multi-project source routing remains manual
+- [x] Up to three explicit sequential local indexing jobs per confirmation
+- [x] No schema migration, automatic uploads, publications or background tasks
+- [x] Generic updater PSScriptRoot-empty fix and local operator guide
+- [ ] Five dev CI jobs GREEN
+- [ ] Five production PR CI jobs GREEN
+- [ ] Independent post-merge main Production CI GREEN
+- [ ] Windows Hub operator acceptance (separate)
+
+See docs/BUILD_055_KNOWLEDGE_PROJECTS.md. Next Build 056 — Automations Operations Console.
+
+
+## Build 056 — Automations Operations Console
+
+- [x] Rule trigger source/readiness, queue, evidence and retry-prevention statuses
+- [x] Exact confirmation required for owner-controlled pause/enable; no replay
+- [x] Ollama outage no longer blocks existing operations/status/history
+- [x] Backend maintenance with verified port/process ownership, explicit stop/start and version checks
+- [x] Persistent maintenance logs and Windows .cmd console capture
+- [x] Windows PowerShell parser gates and operator runbook
+- [ ] dev CI five jobs GREEN
 - [ ] production PR CI five jobs GREEN
 - [ ] independent post-merge main CI GREEN
 - [ ] Real Windows backup, migration and service acceptance (operator controlled)
