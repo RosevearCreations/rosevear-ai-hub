@@ -672,7 +672,15 @@ Each build must:
 - export all unresolved follow-ups as a private identity-only worklist with next supervised steps, never stream secrets
 - see docs/BUILD_110_INTEGRATION_DEVICE_CAMERA_FOLLOW_UP_QUEUE.md
 
-### Build 111 — Owner-Supervised Integration Follow-Up Closure & Camera Playback Recheck Ledger (queued)
+### Build 111 — Owner-Supervised Integration Follow-Up Closure & Camera Playback Recheck Ledger
 - reimport prior Build 110 worklists and compare strictly later HA and camera evidence by exact identity
 - keep owner-reviewed close/reopen decisions and unresolved camera playback as independent private evidence
 - preserve safe human-only controls, no automatic integration onboarding, camera registration or device actions
+- append bounded private owner closure ledgers with hold, closure and reopened counts; old acknowledgments do not automatically carry forward
+- enforce healthy private stream and direct owner-observed moving video for each camera
+- see docs/BUILD_111_OWNER_SUPERVISED_FOLLOW_UP_CLOSURE_LEDGER.md
+
+### Build 112 — Supervised Field Recheck Drift & Evidence Chain Handoff (proposed)
+- compare successive Build 111 closure ledger entries for reopened, still-held and owner-rechecked identities without rewriting history
+- produce a private owner handoff listing unresolved HA integrations and camera/video holds, with source timestamps and no secrets
+- keep independent physical acceptance and explicit human controls; no device action, camera enrollment or database restoration

@@ -1812,9 +1812,24 @@ See docs/BUILD_109_DEVICE_CAMERA_RECOVERY_RECEIPT_OWNER_ACCEPTANCE.md. Next queu
 - [x] Session-only owner function and playback observations invalidate after inventory refresh; no network writes
 - [x] Private identity-only unresolved follow-up queue export with no URLs or credentials
 - [x] Pure logic, React unit/integration tests and Windows operator runbook
-- [ ] Independent `dev` feature PR and push CI GREEN
-- [ ] Independent `main` promotion PR and push CI GREEN
+- [x] Independent `dev` feature PR and push CI GREEN (PR #284, dev run 39836838491)
+- [x] Independent `main` promotion PR and push CI GREEN (PR #285, main run 39837924187, protected `main` `aad5446200bfd2e8b26aace5c6804f593343b7b0`)
 - [ ] Owner imports actual Build 109 packet and reviews HA integration/device cases against Windows field evidence
 - [ ] Owner supervises real camera registration, safe stream configuration and moving live-video acceptance
 
 See docs/BUILD_110_INTEGRATION_DEVICE_CAMERA_FOLLOW_UP_QUEUE.md. Next queued: Build 111 — Owner-Supervised Integration Follow-Up Closure & Camera Playback Recheck Ledger.
+
+## Build 111 — Owner-Supervised Integration Follow-Up Closure & Camera Playback Recheck Ledger
+- [x] Strict Build 110 private queue importer with exact identities, stage/source, time, counts, size and group checks
+- [x] Fresh and strictly later Home Assistant/camera snapshot against worklist and preceding owner ledger review
+- [x] Explicit owner function check, intentional retirement and observed moving-video closure actions; unhealthy/absent cameras always held
+- [x] Private append-only bounded closure-ledger import/export with reopened identity decisions and prior history
+- [x] Session-only owner marks invalidate on new inventory readings; imported old closures cannot certify new readings
+- [x] Read-only UI, no secrets/URLs, automated device calls, camera registration, persistent database or Windows task changes
+- [x] Pure and React regression tests, type-check, web build and owner runbook
+- [ ] Independent `dev` feature PR and post-merge push CI GREEN
+- [ ] Independent `main` promotion PR and post-merge push CI GREEN
+- [ ] Owner imports actual Build 110 worklist on Windows Hub and reviews physical HA device/integration cases
+- [ ] Owner separately watches live moving video and confirms camera acceptance on actual equipment
+
+See docs/BUILD_111_OWNER_SUPERVISED_FOLLOW_UP_CLOSURE_LEDGER.md. Next proposed: Build 112 — Supervised Field Recheck Drift & Evidence Chain Handoff.
