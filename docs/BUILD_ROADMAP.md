@@ -748,11 +748,15 @@ Each build must:
 - generate sanitized private identity-only summary preserving historical/newly reopened holds and unconditional independent installed-Windows field HOLD
 - see docs/BUILD_118_DEVICE_CAMERA_FIELD_RECOVERY_SUMMARY.md
 
-### Build 119 — Local Household Password Vault Security Architecture (queued; requested 2026-10-23)
+### Build 119 — Local Household Password Vault Security Architecture (implemented; release verification pending)
 - scope a distinct household personal password manager accessible from the authenticated Hub client; do **not** reuse Knowledge, integration Secrets, chat memory or AI tools for plaintext passwords
 - security review covering Windows server compromise, stolen client, shared household accounts, backup theft, recovery, LAN and limited Tailscale access, and phishing
 - select mature, independently reviewed cryptographic primitives/libraries and investigate a mature self-hosted password-manager integration versus custom vault implementation before approving a build direction
 - define client-side encryption, unique per-user vault separation, vault lock/unlock and audit without secret values; no production storage until security review is complete
+- expose a read-only, fail-closed Vault architecture page and contextual help to all signed-in Hub clients; every live credential interaction, MFA assertion and vault API remains disabled
+- recommend evaluating official Bitwarden Lite before any custom cryptography, conditional on household licensing/sharing, Windows resources and a separate private HTTPS origin; no provider is installed or approved yet
+- record ten mandatory review gates, threat model, owner approval conditions and unconditional `PASSWORD_VAULT_HOLD` on installed-Windows security acceptance
+- see docs/BUILD_119_LOCAL_VAULT_SECURITY_ARCHITECTURE.md
 
 ### Build 120 — Encrypted Local Vault, Client Lock & Secret-Isolation Boundary (queued; gated on Build 119)
 - implement or integrate reviewed, authenticated encrypted local-only vault storage with client-side unlock; keep master password, derived vault key and plaintext item values out of Hub server logs, SQL query results, AI prompts, Knowledge search and exports

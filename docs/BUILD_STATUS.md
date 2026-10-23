@@ -1929,8 +1929,21 @@ See docs/BUILD_117_POST_REBOOT_ACCEPTANCE_RUNBOOK.md. Next queued: Build 118 —
 - [x] Private identity-only owner summary that always records independent installed-Windows/physical acceptance HOLD; no secrets, stream URLs, server writes or background polls
 - [x] Responsive accessible cards/filters, circled-i operating instructions and expanded System contextual help
 - [x] Frontend TypeScript, 237/237 tests and production bundle verified
-- [ ] Independent feature PR and post-merge `dev` CI GREEN
-- [ ] Independent promotion PR and post-merge `main` CI GREEN
+- [x] Independent feature PR and post-merge `dev` CI GREEN (PR #300, `dev` run 40034355508)
+- [x] Independent promotion PR and post-merge `main` CI GREEN (PR #301, `main` run 40035323793; SHA `fe2129857e004587d3ca4f5456790ce4cd35b541`)
 - [ ] Owner installs approved `main` on Windows and independently witnesses service startup, authenticated private clients, physical HA function and real moving camera feeds
 
 See docs/BUILD_118_DEVICE_CAMERA_FIELD_RECOVERY_SUMMARY.md. Next queued: Build 119 — Local Household Password Vault Security Architecture.
+
+## Build 119 — Security-Gated Local Household Password Vault Architecture
+- [x] Dedicated authenticated Hub Vault architecture page, accessible as a read-only future-feature design without password-input fields, sessions, vault API or server installation
+- [x] Ten required provider/identity/encryption/private-network/MFA/recovery/leakage/Windows gates defined as permanently pending until later approved builds
+- [x] Fail-closed architecture assessment where forged complete review evidence **cannot** unlock credential intake or claim active 2FA
+- [x] Threat model, self-hosted provider options, official-source links, review checkpoints and explicit Knowledge/Secrets/AI separation documented
+- [x] Contextual circled-i help and responsive status cards covering the household workflows and a clear SECURITY HOLD
+- [x] Web TypeScript, 242/242 tests (56 files, stable 2-worker run) and production bundle verified; pre-existing Vite chunk-size advisory
+- [ ] Independent feature PR and post-merge `dev` CI GREEN
+- [ ] Independent promotion PR and post-merge `main` CI GREEN
+- [ ] Owner selects and approves reviewed provider and deployment architecture before any real password acceptance; future Builds 120–122 retain separate installed-Windows security HOLD
+
+See docs/BUILD_119_LOCAL_VAULT_SECURITY_ARCHITECTURE.md. Next queued: Build 120 — Encrypted Local Vault, Client Lock & Secret-Isolation Boundary.

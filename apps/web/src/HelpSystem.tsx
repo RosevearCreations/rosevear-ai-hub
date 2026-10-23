@@ -62,6 +62,25 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Generation failure: keep the conversation; provider recovery does not erase history.",
     ],
   },
+  Vault: {
+    purpose: "Build 119 designs a separate local household password manager; this is a security-gated, non-operational preview.",
+    tasks: [
+      "Review the mandatory architecture security gates and the private HTTPS access plan before choosing a provider.",
+      "The future vault will use a separately installed, reviewed password-manager client with personal accounts, independent unlock and two-step authentication.",
+      "Keep Knowledge for recipes, car servicing instructions and owners manuals. Keep integration Secrets for tokens used by the Hub only.",
+      "Only after Builds 120–122 pass security and Windows acceptance will an operator make the vault available to store credentials.",
+    ],
+    safety: [
+      "Do not enter passwords, master keys, recovery codes or two-factor seeds into this Hub preview, Knowledge, Chat, AI tools or Support screenshots.",
+      "Build 119 does not install a server, enable two-factor login, activate sharing or accept secrets. All live credential operations are blocked by design.",
+      "No public port forwarding, Tailscale Funnel, Hub proxy of decrypted entries or reuse of the Hub SECRET_ENCRYPTION_KEY for personal vaults.",
+    ],
+    troubleshooting: [
+      "If Vault shows SECURITY HOLD, that is expected: architecture work is not an activated password service.",
+      "If the Hub login works, that still does not grant access to anyone's personal password records.",
+      "Do not try to repair this preview by placing passwords in Secrets or Knowledge. Wait for reviewed provider and two-factor acceptance.",
+    ],
+  },
   Workshop: {
     purpose: "Build 057: private multi-project workstations, equipment and manual safety readiness evidence.",
     tasks: [
