@@ -1887,8 +1887,22 @@ See docs/BUILD_114_HOME_ASSISTANT_INTEGRATION_DISCOVERY.md. Next queued: Build 1
 - [x] Private registration receipt with exact IDs and disabled status; unconditional physical/private-stream/moving-video HOLD
 - [x] Document operator runbook and reserve security-gated local household password vault Builds 119–122
 - [x] Web TypeScript + 215/215 tests, production bundle; 11/11 camera API and 3/3 ticket tests; Python lint
-- [ ] Independent feature PR and post-merge `dev` CI GREEN
-- [ ] Independent promotion PR and post-merge `main` CI GREEN
+- [x] Independent feature PR and post-merge `dev` CI GREEN (Build 115 PR #294; `dev` run 39982681356)
+- [x] Independent promotion PR and post-merge `main` CI GREEN (Build 115 PR #295; `main` run 39984110728; SHA `fd62e8381f301366eb1c6873e5cc7795a1668ed7`)
 - [ ] Owner checks actual installed Windows Hub, camera physical models, private streams and moving video
 
 See docs/BUILD_115_CAMERA_DISCOVERY_BULK_RESTORE.md. Next queued: Build 116 — Private Camera Stream Health & Playback Acceptance.
+
+## Build 116 — Private Camera Stream Health & Playback Acceptance
+- [x] Cross-check camera registry, encrypted RTSP binding, current exact camera health, fresh per-camera probe and loopback-only go2rtc status
+- [x] Restrict local viewer URLs to exact registered go2rtc stream on loopback, and to browser use on the Windows Hub itself
+- [x] Stop automatic playback; camera tiles and the acceptance workbench require deliberate Start/Stop actions
+- [x] Owner/Admin four-step review: exact camera selection, private probe, personally observed moving video, second probe; reset on camera selection or identity drift
+- [x] Preserve privacy: no RTSP credential/URL, clip, screenshot, or acceptance record persisted/exported; no camera/network/HA/MQTT configuration changes
+- [x] Update Camera and Device contextual help, add accessible circled-i workbench guidance and polish responsive camera cards/status contrast
+- [x] Frontend TypeScript, 221/221 unit tests and production bundle verified
+- [ ] Independent feature PR and post-merge `dev` CI GREEN
+- [ ] Independent promotion PR and post-merge `main` CI GREEN
+- [ ] Owner observes real moving video and validates exact devices on the actual installed Windows Hub; separate field acceptance still required
+
+See docs/BUILD_116_PRIVATE_CAMERA_STREAM_PLAYBACK_ACCEPTANCE.md. Next queued: Build 117 — Post-Reboot Home, Workshop & Camera Acceptance Runbook.
