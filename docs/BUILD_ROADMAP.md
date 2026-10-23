@@ -718,10 +718,14 @@ Each build must:
 - return a private identity-only registration receipt; retain camera stream/playback physical acceptance holds
 - see docs/BUILD_115_CAMERA_DISCOVERY_BULK_RESTORE.md
 
-### Build 116 — Private Camera Stream Health & Playback Acceptance (queued)
+### Build 116 — Private Camera Stream Health & Playback Acceptance
 - reconcile camera registration, private go2rtc listener safety and fresh per-camera probe evidence
 - guide supervised RTSP source checks without leaking endpoint URLs or passwords
 - require live moving video, not a healthy API flag, before per-camera field acceptance
+- implement explicit single-camera session acceptance with a fresh exact stream probe, owner-observed moving video and repeat probe; no durable field receipt or automatic enablement
+- restrict private go2rtc viewer launch to a browser running on the Windows Hub itself, validate loopback-only ports and exact stream identity; no automatic iframe playback
+- refresh contextual Cameras/Devices help, add a circled information guide per playback workbench, and refine accessible responsive camera cards and status styling
+- see docs/BUILD_116_PRIVATE_CAMERA_STREAM_PLAYBACK_ACCEPTANCE.md
 
 ### Build 117 — Post-Reboot Home, Workshop & Camera Acceptance Runbook (queued)
 - verify existing Windows startup task, Home Assistant VM, MQTT, Ollama, HTTPS and camera dependencies in their real order

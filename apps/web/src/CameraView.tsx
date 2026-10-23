@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 
 import { FrigatePanel } from "./FrigatePanel";
 import { CameraCompatibilityWorkbench } from "./CameraCompatibilityWorkbench";
-import { CameraStreamAcceptance } from "./CameraStreamAcceptance";
 import { ServerCameraInventory } from "./ServerCameraInventory";
 import { CameraBulkRestorePanel } from "./CameraBulkRestorePanel";
+import { CameraPlaybackWorkbench } from "./CameraPlaybackWorkbench";
+import { assessPrivatePlayback } from "./cameraPlaybackReview";
 
 import {
   configureCameraStream,
@@ -53,6 +54,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<CameraPreviewResult | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
+  const [visiblePreviewIds, setVisiblePreviewIds] = useState<number[]>([]);
   const canAdminister =
     currentUser.role === "owner" || currentUser.role === "administrator";
 
@@ -212,10 +214,10 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
     <section className="camera-view">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 054</p>
+          <p className="eyebrow">Cameras · Build 116</p>
           <h1>Camera dashboard</h1>
           <p className="lede">
-            Local live views, transport health, freshness, and camera configuration without exposing camera credentials.
+            Review registered cameras, private playback and current stream health. Preview video only when we choose to start it.
           </p>
         </div>
         <div className="camera-toolbar">
@@ -316,11 +318,14 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
         ) : null}
       </section>
 
+      {state.kind === "ready" ? (
+        <CameraPlaybackWorkbench cameras={state.cameras} dashboard={dashboard} transport={transport}
+          canAdminister={canAdminister} onRefresh={refresh} />
+      ) : null}
+
       <ServerCameraInventory canAdminister={canAdminister} isOwner={currentUser.role === "owner"} />
       {canAdminister ? <CameraBulkRestorePanel /> : null}
       <CameraCompatibilityWorkbench canAdminister={canAdminister} />
-      <CameraStreamAcceptance />
-
       <FrigatePanel canAdminister={canAdminister} />
 
       {message ? <p className="runtime-status" role="status">{message}</p> : null}
@@ -339,11 +344,10 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
           <section className="camera-live-grid" aria-label="Live camera dashboard">
             {state.cameras.map((camera) => {
               const health = dashboardByCamera.get(camera.id);
-              const canShowLive =
-                Boolean(health?.viewer_url) &&
-                Boolean(transport?.online) &&
-                Boolean(transport?.local_api_only) &&
-                Boolean(transport?.local_rtsp_only);
+              const privatePlayback = assessPrivatePlayback(
+                camera, health, transport, window.location.hostname, dashboard?.stale_after_seconds ?? 300,
+              );
+              const previewOpen = visiblePreviewIds.includes(camera.id) && privatePlayback.ready;
               return (
                 <article className="camera-live-card" key={"live-" + camera.id}>
                   <header>
@@ -355,10 +359,10 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
                       {healthLabel(health?.health ?? "untested")}
                     </span>
                   </header>
-                  {canShowLive && health?.viewer_url ? (
+                  {previewOpen && privatePlayback.viewerUrl ? (
                     <iframe
                       className="camera-live-frame"
-                      src={health.viewer_url}
+                      src={privatePlayback.viewerUrl}
                       title={camera.display_name + " live view"}
                       loading="lazy"
                       sandbox="allow-scripts allow-same-origin"
@@ -368,14 +372,21 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
                     <div className="camera-live-placeholder">
                       <strong>Live view unavailable</strong>
                       <small>
-                        {!camera.stream
-                          ? "Configure an RTSP source for this camera."
-                          : !transport?.online
-                            ? "Start the local go2rtc transport."
-                            : "Run a health check and verify loopback-only transport."}
+                        {privatePlayback.ready
+                          ? "Preview is stopped. Start it only when ready to view."
+                          : privatePlayback.reason}
                       </small>
                     </div>
                   )}
+                  <div className="camera-live-controls">
+                    <button type="button" disabled={!privatePlayback.ready}
+                      onClick={() => setVisiblePreviewIds((current) => previewOpen
+                        ? current.filter((id) => id !== camera.id)
+                        : [...current, camera.id])}>
+                      {previewOpen ? "Stop preview" : "Start private preview"}
+                    </button>
+                    <small>Owner review required before field acceptance</small>
+                  </div>
                   <footer>
                     <span>Last camera discovery: {new Date(camera.last_seen_at).toLocaleString()}</span>
                     <span>
