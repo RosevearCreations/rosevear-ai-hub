@@ -14,6 +14,7 @@ import {
   type HomeAssistantStatus,
 } from "./api";
 import { DeviceCameraRecoveryPanel } from "./DeviceCameraRecoveryPanel";
+import { HomeAssistantDiscoveryPanel } from "./HomeAssistantDiscoveryPanel";
 
 type LoadState =
   | { kind: "loading" }
@@ -178,6 +179,7 @@ export function HomeAssistantView({ currentUser }: { currentUser: AuthUser }) {
       {actionMessage ? <p className="runtime-status" role="status">{actionMessage}</p> : null}
 
       <DeviceCameraRecoveryPanel />
+      {currentUser.role === "owner" && <HomeAssistantDiscoveryPanel />}
 
       {loadState.kind === "loading" ? (
         <section className="panel" role="status">Checking Home Assistant…</section>

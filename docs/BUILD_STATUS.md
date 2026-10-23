@@ -1856,9 +1856,24 @@ See docs/BUILD_112_SUPERVISED_DRIFT_EVIDENCE_CHAIN_HANDOFF.md. Next queued: Buil
 - [x] Distinguish CI/package success, updater adoption pointer, loaded frontend and unverifiable running process
 - [x] Optional Build 112 handoff import retaining only bounded unresolved HA/camera counts and source timestamps
 - [x] Session-only owner Windows/PWA checks, private metadata-only FIELD ADOPTION HOLD receipt, no automatic action
-- [ ] Web TypeScript, tests, production bundle and independent repository CI GREEN
-- [ ] Independent `dev` feature PR and post-merge push CI GREEN
-- [ ] Independent `main` promotion PR and post-merge push CI GREEN
+- [x] Web TypeScript, 201/201 tests, production bundle and independent repository CI GREEN
+- [x] Independent `dev` feature PR and post-merge push CI GREEN (PR #290, dev run 39904124230)
+- [x] Independent `main` promotion PR and post-merge push CI GREEN (PR #291, main run 39904714823; SHA `8d7fcca68f3732b3cc8cdbe90581c60ae59b1b84`)
 - [ ] Owner checks actual installed Windows API, browser/PWA version, HA devices and moving camera video
 
 See docs/BUILD_113_INSTALLED_WINDOWS_VERSION_FIELD_ADOPTION.md. Next queued: Build 114 — Home Assistant Integration Discovery & Missing Device Diagnosis.
+
+## Build 114 — Home Assistant Integration Discovery & Missing Device Diagnosis
+- [x] Owner-only read-only HA discovery workbench with explicit refresh of the existing authenticated registry browser
+- [x] Strict Build 107 inventory or Build 110 follow-up import; cameras excluded; owner-supplied integration labels remain unverified hints
+- [x] Exact identity diagnostic classification, live entity platform hints, separate missing/unavailable/reported states
+- [x] Batch owner-confirmed HA grouping and integration-level owner observations without automatically repairing or enrolling devices
+- [x] Fresh later HA reading and real owner physical function review required before a session-only identity acknowledgment; marks reset on refresh
+- [x] Private minimal HA diagnostic receipt preserving outstanding holds and an unconditional field-acceptance boundary
+- [x] Pure logic and React tests, safety/privacy documentation, no additional HA commands or persistent schema changes
+- [x] Web TypeScript, 208/208 tests and production bundle verified
+- [ ] Independent `dev` feature PR and post-merge push CI GREEN
+- [ ] Independent `main` promotion PR and post-merge push CI GREEN
+- [ ] Owner checks actual Home Assistant integrations, physical devices and separate field acceptance on installed Windows Hub
+
+See docs/BUILD_114_HOME_ASSISTANT_INTEGRATION_DISCOVERY.md. Next queued: Build 115 — Operator-Reviewed Camera Discovery & Bulk Restore Candidates.

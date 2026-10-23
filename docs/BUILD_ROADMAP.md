@@ -698,10 +698,15 @@ Each build must:
 - preserve an explicit unverified process/device state even when all owner-entered version markers match
 - see docs/BUILD_113_INSTALLED_WINDOWS_VERSION_FIELD_ADOPTION.md
 
-### Build 114 — Home Assistant Integration Discovery & Missing Device Diagnosis (queued)
+### Build 114 — Home Assistant Integration Discovery & Missing Device Diagnosis
 - group current missing identities by owner-confirmed HA integrations and safe read-only diagnostics
 - guide batch-assisted integration recovery while preventing automatic onboarding, credentials disclosure and blind entity creation
 - require fresh registry and real physical device-function tests before owner acceptance
+- implement an owner-only HA workbench accepting validated Build 107 inventory or Build 110 follow-up JSON and an explicit current authenticated registry GET
+- distinguish absent, unavailable and reported exact IDs, showing live entity-platform hints without asserting absent integration configuration
+- support batch owner-confirmed grouping, per-integration HA UI findings and per-identity fresh physical function observations; reset observations on refresh
+- export identity-only private diagnostic receipt with all unresolved holds; retain separate independent Windows/HA field-acceptance gate
+- see docs/BUILD_114_HOME_ASSISTANT_INTEGRATION_DISCOVERY.md
 
 ### Build 115 — Operator-Reviewed Camera Discovery & Bulk Restore Candidates (queued)
 - compare existing camera registry and ONVIF discovery receipts by stable identity and bounded model evidence
