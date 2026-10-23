@@ -208,8 +208,13 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   System: {
-    purpose: "Shows owner/admin service diagnostics, server health, resource budgets, and the private LAN/Tailscale access procedure.",
+    purpose: "Shows owner/admin service diagnostics, post-reboot field runbook, installed version evidence, resource budgets and private LAN/Tailscale access.",
     tasks: [
+      "Build 117 Post-reboot acceptance is manual: inspect backups, the existing Windows startup task and original Home Assistant VM first. No Runbook button reboots or repairs a service.",
+      "Capture a before-reboot snapshot, show its private JSON and save it securely. After an owner-supervised Windows reboot, import that baseline and take a separate after snapshot.",
+      "Compare exact Home Assistant entity IDs, separate Hub camera IDs, service status and Hub version. Matching counts alone cannot prove equipment recovered.",
+      "Check all manual field observations only when personally confirmed: Task Scheduler history, VM EFI/boot, authenticated HA/MQTT, local Ollama, private HTTPS client and actual moving camera video.",
+      "PowerShell read-only inspectors: scripts/inspect-hub-reboot-readiness.ps1, scripts/inspect-hub-startup-readiness.ps1, and scripts/inspect-hub-ha-mqtt-readiness.ps1. Run only from the installed Windows checkout after verifying their contents.",
       "Use Local service diagnostics as Owner/Admin to inspect Hub, Ollama, Home Assistant, MQTT and go2rtc; expand guided checks and manually inspect Windows logs without automatic repairs.",
       "Open the resource budget panel as Owner/Admin, select Refresh to sample memory and disk once; no background polling is performed.",
       "Compare observed values to the documented guidelines; warnings do not shut down Ollama, MQTT, cameras or automations.",
@@ -219,12 +224,18 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Use the private https://*.ts.net URL printed by tailscale serve status. Log into the Hub as normal on each device.",
     ],
     safety: [
+      "Post-reboot snapshots stay in this browser session unless an operator copies the private identity-only JSON; never share it in a public issue or include credentials and camera endpoint URLs.",
+      "Build 117 cannot prove the PC actually rebooted; the owner must review the Windows scheduled task and after-start logs separately. Session reviewed is not an installed acceptance receipt.",
+      "Do not create duplicate VirtualBox machines, Mosquitto brokers, Ollama servers, scheduled tasks, Caddy/HTTPS endpoints or go2rtc listeners to make a green check appear.",
       "Never use Tailscale Funnel, router port forwarding, public DNS proxies or wildcard API origins for the Hub.",
       "Tailnet membership alone does not replace Hub password/role checks. Restrict access with Tailscale grants or ACLs.",
       "Keep Hub API and go2rtc/Ollama listeners bound to 127.0.0.1; private HTTPS is terminated by Tailscale Serve.",
       "A remote PWA still cannot queue offline actions, view cached private data or bypass confirmations.",
     ],
     troubleshooting: [
+      "Missing device after restart: investigate existing Home Assistant integration and device-registry provenance before adding anything; a disappeared camera registry is independent from Home Assistant discoveries.",
+      "Baseline import rejected: use only the exact Build 117 JSON schema copied from the local review. Unexpected URLs, keys or credentials are rejected.",
+      "Service status ready but camera video missing: keep physical field acceptance on hold and use the separate Build 116 supervised moving-video check on the Windows Hub itself.",
       "If a diagnostic is Not verified, confirm Hub account permissions and inspect the relevant local service logs; do not assume an outage or disclose raw errors.",
       "If the remote app loads but APIs fail, check Build 046 is deployed: frontend calls same-origin /api instead of the remote device's localhost.",
       "If Tailscale Serve is unavailable, complete the Tailscale device login and HTTPS approval first. No public exposure is necessary.",
