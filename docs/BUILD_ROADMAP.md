@@ -758,7 +758,10 @@ Each build must:
 - record ten mandatory review gates, threat model, owner approval conditions and unconditional `PASSWORD_VAULT_HOLD` on installed-Windows security acceptance
 - see docs/BUILD_119_LOCAL_VAULT_SECURITY_ARCHITECTURE.md
 
-### Build 120 — Encrypted Local Vault, Client Lock & Secret-Isolation Boundary (queued; gated on Build 119)
+### Build 120 — Encrypted Local Vault, Client Lock & Secret-Isolation Boundary (security-preparation subset implemented; live vault on HOLD)
+- owner selected the preparation-only path: add a deterministic, fail-closed readiness contract and dedicated Hub review cards for provider approval, storage isolation, private origin, separate client lock, leak prevention and encrypted recovery
+- no provider approval, deployment, actual encryption service, password form, client unlock, secret persistence, URL shortcut, vault endpoints or MFA assertion; all are explicitly disabled regardless of forged review flags
+- see docs/BUILD_120_VAULT_PREPARATION.md; installation portion is gated on explicit provider/hosting approval and independent security review
 - implement or integrate reviewed, authenticated encrypted local-only vault storage with client-side unlock; keep master password, derived vault key and plaintext item values out of Hub server logs, SQL query results, AI prompts, Knowledge search and exports
 - protect clipboard exposure, autofill/injection surfaces, browser persistence, unlock idle timeout, session revocation, secure item editing and least-privilege owner/household separation
 - enforce safe, separately encrypted backup and tested restore with no silent cloud synchronization
