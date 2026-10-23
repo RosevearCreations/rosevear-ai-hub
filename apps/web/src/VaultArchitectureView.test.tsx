@@ -13,6 +13,9 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByText("Do not enter real passwords yet.")).toBeInTheDocument();
     expect(screen.getByText(/Two-factor protection is a requirement, not active yet/)).toBeInTheDocument();
     expect(screen.getByText(/0 \/ 10 verified/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Isolation and client-lock readiness" })).toBeInTheDocument();
+    expect(screen.getByText("PREPARATION ONLY")).toBeInTheDocument();
+    expect(screen.getByText(/Provider: not approved; service: not installed; client unlock: disabled/)).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(screen.queryByRole("form")).not.toBeInTheDocument();
