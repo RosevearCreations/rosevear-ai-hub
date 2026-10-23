@@ -1947,3 +1947,13 @@ See docs/BUILD_118_DEVICE_CAMERA_FIELD_RECOVERY_SUMMARY.md. Next queued: Build 1
 - [ ] Owner selects and approves reviewed provider and deployment architecture before any real password acceptance; future Builds 120–122 retain separate installed-Windows security HOLD
 
 See docs/BUILD_119_LOCAL_VAULT_SECURITY_ARCHITECTURE.md. Next queued: Build 120 — Encrypted Local Vault, Client Lock & Secret-Isolation Boundary.
+
+## Build 120 — Vault Security Preparation Only
+- [x] Owner chose documentation and fail-closed preparation without real credential storage or provider installation
+- [x] Six independently reviewable areas: provider, encrypted storage isolation, private HTTPS origin, separate client lock, leakage prevention and offline recovery
+- [x] Authenticated Vault page displays preparation cards and circled-i operator guidance without forms, activation controls, endpoints or browser persistence
+- [x] Deterministic readiness assessment never enables credentials, unlock or MFA—even with forged completed review flags
+- [ ] Owner approves provider/license/hosting and separate installed-Windows security review before any live encryption vault work
+- [ ] Independent Build 120 source checks, dev PR/push and main PR/push GREEN
+
+See docs/BUILD_120_VAULT_PREPARATION.md. Next queued: Build 121 — Hardware-Key/Passkey MFA, Step-Up & Emergency Recovery (also blocked until provider approval and live foundation).

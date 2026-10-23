@@ -1,14 +1,16 @@
 import { assessVaultSecurityArchitecture, vaultControls, vaultThreats } from "./vaultSecurityArchitecture";
+import { assessVaultPreparation, vaultPreparationStages } from "./vaultPreparation";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
   const gate = assessVaultSecurityArchitecture();
+  const preparation = assessVaultPreparation();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 119 · household security design</p>
+          <p className="eyebrow">Build 120 · safe installation preparation</p>
           <h1>Private password vault</h1>
           <p className="lede">A separate locally hosted keeper is planned for each household member, opened from the Hub client through a dedicated private HTTPS address after security acceptance.</p>
         </div>
@@ -19,6 +21,28 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the architecture and safety review—not a working vault. Credential entry, password retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <section className="panel" aria-label="Vault isolation and client lock preparation">
+        <div className="vault-gates-heading">
+          <div><h2>Isolation and client-lock readiness</h2><p>Planning only. These checks cannot enable a vault, even when marked reviewed.</p></div>
+          <span className="vault-gate-badge">{preparation.phase.replace("_", " ")}</span>
+        </div>
+        <details className="camera-acceptance-help">
+          <summary><span aria-hidden="true">i</span> Before we install a password keeper</summary>
+          <p>Choose and approve a supported provider, hosting resources and license first. Verify the private HTTPS address and independent lock, backup and recovery in an isolated test environment. Never paste a password, master key, recovery code or authenticator seed into Hub, Knowledge, chat or support tickets.</p>
+        </details>
+        <div className="vault-security-grid">
+          {vaultPreparationStages.map((stage, index) => (
+            <article className="vault-security-card" key={stage.id}>
+              <p className="eyebrow">Preparation {index + 1} / {vaultPreparationStages.length}</p>
+              <h2>{stage.title}</h2>
+              <p>{stage.detail}</p>
+              <small>Not verified · no live service enabled</small>
+            </article>
+          ))}
+        </div>
+        <p className="vault-architecture-note">Build 120 preparation: <strong>{preparation.production_security_acceptance}</strong>. Provider: not approved; service: not installed; client unlock: disabled. This screen contains no credential entry, activation control or vault network endpoint.</p>
+      </section>
 
       <details className="camera-acceptance-help" open>
         <summary><span aria-hidden="true">i</span> How our vault will work</summary>
@@ -75,7 +99,7 @@ export function VaultArchitectureView() {
         </div>
       </section>
 
-      <p className="vault-architecture-note">Build 119 result: <strong>{gate.production_security_acceptance}</strong> for real passwords. Builds 120 (isolated encrypted vault), 121 (two-factor and recovery), and 122 (security tests and Windows acceptance) must pass before any live password storage is permitted. Hub Secrets remains for integration tokens only; Knowledge and AI never get vault access.</p>
+      <p className="vault-architecture-note">Security design result: <strong>{gate.production_security_acceptance}</strong> for real passwords. Build 120 is limited to preparation; a separately approved encrypted-vault installation, Build 121 two-factor and recovery, and Build 122 security tests and Windows acceptance must pass before any live password storage is permitted. Hub Secrets remains for integration tokens only; Knowledge and AI never get vault access.</p>
     </section>
   );
 }
