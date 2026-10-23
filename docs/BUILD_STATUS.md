@@ -1901,8 +1901,22 @@ See docs/BUILD_115_CAMERA_DISCOVERY_BULK_RESTORE.md. Next queued: Build 116 — 
 - [x] Preserve privacy: no RTSP credential/URL, clip, screenshot, or acceptance record persisted/exported; no camera/network/HA/MQTT configuration changes
 - [x] Update Camera and Device contextual help, add accessible circled-i workbench guidance and polish responsive camera cards/status contrast
 - [x] Frontend TypeScript, 221/221 unit tests and production bundle verified
-- [ ] Independent feature PR and post-merge `dev` CI GREEN
-- [ ] Independent promotion PR and post-merge `main` CI GREEN
+- [x] Independent feature PR and post-merge `dev` CI GREEN (Build 116 PR #296, `dev` run 40003774623)
+- [x] Independent promotion PR and post-merge `main` CI GREEN (Build 116 PR #297, `main` run 40005178018; SHA `f6b082d44b559c4feeba55bd596dc1c431ba3f2e`)
 - [ ] Owner observes real moving video and validates exact devices on the actual installed Windows Hub; separate field acceptance still required
 
 See docs/BUILD_116_PRIVATE_CAMERA_STREAM_PLAYBACK_ACCEPTANCE.md. Next queued: Build 117 — Post-Reboot Home, Workshop & Camera Acceptance Runbook.
+
+## Build 117 — Post-Reboot Home, Workshop & Camera Acceptance Runbook
+- [x] Explicit authenticated status snapshots from eight existing read-only Hub APIs; no network request on screen load, mutation, reboot or device action
+- [x] Before/reboot/after dependency order for original EFI Home Assistant VM, authenticated HA/MQTT, Ollama model, Hub/private HTTPS and supervised camera streams
+- [x] Private identity-only baseline JSON export/import with bounded allowlisted schema, no URLs, secrets, raw errors or persistent browser storage
+- [x] Compare actual HA entity IDs and registered camera endpoint UUIDs rather than counts; hold on absent/broken evidence, changed version or missing devices
+- [x] Six human-affirmed field checks, separate from source CI and actual installed Windows acceptance; reset confirmations when evidence changes
+- [x] Responsive System review cards, circled-i runbook help, main contextual System help and manual review navigation
+- [x] Frontend TypeScript, 229/229 unit tests and production bundle verified
+- [ ] Independent feature PR and post-merge `dev` CI GREEN
+- [ ] Independent promotion PR and post-merge `main` CI GREEN
+- [ ] Owner installs main on Windows and separately verifies actual task, EFI VM, local model, authenticated private clients and moving camera video following manual restart
+
+See docs/BUILD_117_POST_REBOOT_ACCEPTANCE_RUNBOOK.md. Next queued: Build 118 — Device & Camera Field Recovery Acceptance Summary.

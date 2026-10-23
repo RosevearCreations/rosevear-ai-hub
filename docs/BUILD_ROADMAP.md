@@ -727,10 +727,15 @@ Each build must:
 - refresh contextual Cameras/Devices help, add a circled information guide per playback workbench, and refine accessible responsive camera cards and status styling
 - see docs/BUILD_116_PRIVATE_CAMERA_STREAM_PLAYBACK_ACCEPTANCE.md
 
-### Build 117 — Post-Reboot Home, Workshop & Camera Acceptance Runbook (queued)
+### Build 117 — Post-Reboot Home, Workshop & Camera Acceptance Runbook
 - verify existing Windows startup task, Home Assistant VM, MQTT, Ollama, HTTPS and camera dependencies in their real order
 - compare before/after authenticated inventory and startup availability after owner-supervised reboot
 - preserve manual control of restarts, credentials, backups and any integration repair
+- implement an owner-only **System** review with explicit on-demand read-only status capture and private validated baseline import
+- compare exact HA entity IDs and registered camera UUIDs; hold if identities change, services fail, installation version drifts or there is no positive baseline camera evidence
+- gate transient review on six separate manually observed Windows, VM, authenticated integrations, installed model, private HTTPS and moving-video checks
+- add circled-i help, accessible status display, responsive service and evidence cards; no automation or durable acceptance assertions
+- see docs/BUILD_117_POST_REBOOT_ACCEPTANCE_RUNBOOK.md
 
 ### Build 118 — Device & Camera Field Recovery Acceptance Summary (queued)
 - consolidate authenticated Home Assistant device outcomes and per-camera playback owner receipts

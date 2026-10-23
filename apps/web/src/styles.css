@@ -2625,6 +2625,128 @@ h1 {
 }
 
 
+/* Build 117 — supervised post-reboot acceptance */
+.reboot-review {
+  display: grid;
+  gap: 1rem;
+  border: 1px solid #b4c3d2;
+  background: linear-gradient(145deg, #fff 0%, #f4f7fb 70%, #eaf0f8 100%);
+  box-shadow: 0 8px 28px rgb(27 48 77 / 0.08);
+}
+
+.reboot-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.reboot-review-header > div {
+  flex: 1 1 24rem;
+}
+
+.reboot-review-header h2,
+.reboot-review-header p {
+  margin: 0 0 0.45rem;
+}
+
+.reboot-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.reboot-review-import,
+.reboot-review-import label {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.reboot-review-import label {
+  font-weight: 700;
+}
+
+.reboot-review-import textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 0.7rem;
+  border: 1px solid #71829a;
+  border-radius: 0.6rem;
+  font: 0.88rem/1.4 ui-monospace, Consolas, monospace;
+  background: #fff;
+  color: #171717;
+}
+
+.reboot-review-snapshots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.reboot-review-snapshots article {
+  padding: 1rem;
+  border: 1px solid #bbc9d8;
+  border-radius: 0.8rem;
+  background: #fff;
+}
+
+.reboot-review-snapshots h3 {
+  margin: 0 0 0.6rem;
+}
+
+.reboot-review-snapshots p {
+  margin: 0.25rem 0;
+}
+
+.reboot-review-service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.7rem;
+}
+
+.reboot-review-service-grid > div {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.75rem;
+  border: 1px solid #b5c2d4;
+  border-radius: 0.65rem;
+  background: #fff;
+}
+
+.reboot-review-service-grid span {
+  color: #38475d;
+  font-size: 0.88rem;
+}
+
+.reboot-review-checks {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.reboot-review-checks label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.8rem;
+  border: 1px solid #bfcede;
+  border-radius: 0.7rem;
+  background: #fff;
+}
+
+.reboot-review-checks input {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+  margin-top: 0.2rem;
+}
+
+@media (max-width: 720px) {
+  .reboot-review-snapshots {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* Build 034 — Frigate adapter */
 .frigate-panel {
   display: grid;
