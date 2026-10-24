@@ -816,3 +816,11 @@ Each build must:
 - describe owner, household and service authorization negative cases, no Hub-cookie inheritance, no administrator bypass, no ability to turn on live storage from a review screen
 - keep actual separate authentication, WebAuthn, passphrase/key handling, ciphertext persistence, uploads and Windows installation gated on independent design review and owner Windows acceptance
 - see docs/BUILD_127_VAULT_SERVICE_IDENTITY_BOUNDARY.md; next Build 128 may prepare document pipeline with similarly isolated synthetic fixtures after its own security decisions
+
+### Build 128 — Disposable Document Pipeline & Integrity Preparation (test-only; real files on HOLD)
+- expand the browser-native Web Crypto synthetic test harness to invented, bounded byte chunks only, never a real File, Blob, upload or document storage operation
+- bind each chunk to dummy owner/document/revision and a fresh envelope identifier, full declared length, chunk count and ordered chunk index, with a unique random 96-bit IV and 128-bit AES-GCM tag
+- exercise missing, appended, duplicated, reordered, truncated and corrupted chunks, wrong owner/key/context, and mixing of separate envelopes; explicitly show a complete old envelope still replays successfully
+- display six review stages and negative examples in read-only Hub cards with circled-i help; no document picker, active preview, upload, download, persistence or Windows listener
+- require independent file admission/active-content review, version ledger, key management, backups, Windows ACL/field acceptance and separate owner sign-off before any real documents
+- see docs/BUILD_128_SYNTHETIC_DOCUMENT_PIPELINE.md; proposed Build 129 may scope recovery and version-ledger design while keeping live vault on HOLD

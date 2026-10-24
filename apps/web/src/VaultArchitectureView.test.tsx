@@ -23,6 +23,10 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByRole("heading", { name: "Threat model & encryption library review" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Disposable-data encryption & tamper tests" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Independent vault service & family identity boundary" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Private document pipeline & integrity preparation" })).toBeInTheDocument();
+    expect(screen.getByText("DOCUMENTS OFF · HOLD")).toBeInTheDocument();
+    expect(screen.getByText(/An entire valid old encrypted document can still be replayed/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "No active document preview" })).toBeInTheDocument();
     expect(screen.getByText("SERVICE OFF · HOLD")).toBeInTheDocument();
     expect(screen.getByText(/Our tests simulate forged sessions and factor approvals/)).toBeInTheDocument();
     expect(screen.getByText(/Current contract:/)).toBeInTheDocument();
