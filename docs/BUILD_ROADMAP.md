@@ -802,3 +802,10 @@ Each build must:
 - document seven unresolved design decisions for client security, key derivation, key envelope, private document pipeline, MFA/recovery, Windows isolation and independent assessment
 - keep real credentials, private document upload, keys, services and MFA disabled; CI GREEN only validates source, not the installed first-party vault
 - see docs/BUILD_125_VAULT_THREAT_CRYPTO_REVIEW.md; next Build 126 requires a separately reviewed library-selection decision and remains disposable-data-only
+
+### Build 126 — Disposable-Data Encryption & Tamper Test Harness (synthetic test-only)
+- owner approved browser built-in W3C Web Crypto AES-256-GCM for synthetic fixtures only; no other production cryptographic library, KDF, document stream or MFA selection is approved
+- exercise ephemeral, non-exportable 256-bit test keys, fresh random 96-bit IVs, 128-bit authentication tags and associated-data binding for invented owner/item/version fields
+- reject damaged ciphertext/tag, truncation, wrong key/IV and changed identity/version; explicitly prove that exact replay still decrypts and requires a future server-side anti-rollback policy
+- test code remains only in Vitest files and is not imported into shipped Hub assets; browser-device field test, independent security review and live owner approval remain on HOLD
+- see docs/BUILD_126_SYNTHETIC_CRYPTO_TAMPER.md; next Build 127 is isolated private-service/identity boundary preparation, not live vault activation

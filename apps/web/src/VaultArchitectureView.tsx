@@ -5,6 +5,7 @@ import { assessVaultSecurityVerification, vaultVerificationChecks } from "./vaul
 import { assessVaultProviderDecision } from "./vaultProviderDecision";
 import { assessLocalVaultBlueprint, localVaultRecordKinds, localVaultSecurityGates, localVaultThreats } from "./localVaultBlueprint";
 import { assessVaultThreatCryptoReview, vaultCryptoCandidates, vaultDesignDecisions, vaultThreatScenarios, vaultTrustBoundaries } from "./vaultThreatCryptoReview";
+import { assessVaultSyntheticHarness, vaultSyntheticCases } from "./vaultSyntheticHarnessPolicy";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
@@ -15,12 +16,13 @@ export function VaultArchitectureView() {
   const provider = assessVaultProviderDecision();
   const local = assessLocalVaultBlueprint();
   const threatReview = assessVaultThreatCryptoReview();
+  const synthetic = assessVaultSyntheticHarness();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 125 · first-party vault security review</p>
+          <p className="eyebrow">Build 126 · synthetic-only encryption test review</p>
           <h1>Private password and document vault</h1>
           <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
@@ -31,6 +33,32 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <section className="panel" aria-label="Build 126 disposable cryptography acceptance">
+        <div className="vault-gates-heading">
+          <div>
+            <h2>Disposable-data encryption &amp; tamper tests</h2>
+            <p>We approved the browser's built-in Web Crypto AES-256-GCM for isolated synthetic test fixtures only. No cryptographic package, vault service, persistent key, password input or document upload was introduced.</p>
+          </div>
+          <span className="vault-gate-badge">LIVE VAULT {synthetic.production_security_acceptance}</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> What the test results do—and do not—prove</summary>
+          <ol>
+            <li>Automated tests use temporary non-exportable AES-GCM keys, new random IVs and invented values. Test-only code is not imported into the customer-facing Hub application.</li>
+            <li>Tests exercise corrupted ciphertext, wrong authentication metadata, invalid keys and truncation. Identical encrypted records can still be replayed: AES-GCM does not provide a rollback ledger.</li>
+            <li>Passing source tests does not establish safe passphrase derivation, real browser security, per-person authorization, document-stream encryption, MFA, recovery, or successful Windows field testing.</li>
+            <li>All real passwords, private files and recovery information remain prohibited until separately reviewed and approved.</li>
+          </ol>
+        </details>
+        <div className="vault-security-grid">
+          {vaultSyntheticCases.map(item => <article className="vault-security-card" key={item.id}>
+            <p className="eyebrow">Synthetic test case</p><h2>{item.title}</h2><p>{item.expected}</p>
+            <small>Source-test evidence only · no field security certification</small>
+          </article>)}
+        </div>
+        <p className="vault-architecture-note">Approved test primitive: <strong>{synthetic.owner_approved_test_primitive}</strong>. This approval is limited to disposable, in-memory fixtures; production cryptography, vault access, actual account authentication and storage remain <strong>{synthetic.production_security_acceptance}</strong>.</p>
+      </section>
 
       <section className="panel" aria-label="First-party vault threat model and cryptography review">
         <div className="vault-gates-heading">
@@ -46,7 +74,7 @@ export function VaultArchitectureView() {
             <li>We are building our own vault software, but will rely on well-studied encryption and authentication standards. No vendor gets our stored passwords or documents.</li>
             <li>All library choices below are <strong>candidates</strong>, not installed software or an independent security certification.</li>
             <li>Every attack must have a denial test, including stolen-server backups, forged sharing grants, damaged files, wrong-origin MFA and untrusted PDF previews.</li>
-            <li>Before working with even disposable encryption data, settle the seven design decisions and review dependency provenance. Real secrets remain forbidden until independent security review and physical Windows acceptance.</li>
+            <li>The owner has now approved a narrow Web Crypto AES-GCM synthetic-only test. The seven broader vault design decisions, real library/dependency approvals and field acceptance remain unresolved.</li>
           </ol>
         </details>
 
