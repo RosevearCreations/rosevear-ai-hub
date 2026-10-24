@@ -824,3 +824,11 @@ Each build must:
 - display six review stages and negative examples in read-only Hub cards with circled-i help; no document picker, active preview, upload, download, persistence or Windows listener
 - require independent file admission/active-content review, version ledger, key management, backups, Windows ACL/field acceptance and separate owner sign-off before any real documents
 - see docs/BUILD_128_SYNTHETIC_DOCUMENT_PIPELINE.md; proposed Build 129 may scope recovery and version-ledger design while keeping live vault on HOLD
+
+### Build 129 — Document Recovery & Anti-Rollback Ledger Design (review-only)
+- model synthetic snapshot revisions, envelope identities, hypothetical independent checkpoints and restore decisions without a database, file operation, cryptographic key, service or backup
+- test stale/replayed valid ciphertext versions, same-version forks, unwitnessed future revisions, missing trusted witness, incomplete restore, owner/document mismatch and concurrent compare-and-swap proposals
+- deliberately demonstrate the failure case where both encrypted data **and its supposed checkpoint** are rolled back together: the simulated ledger accepts old data, proving a genuinely independent protected witness is required
+- document six safety gates for version witness, atomic commit, offline encrypted recovery, independent identity, negative cases and owner-supervised Windows disaster testing
+- ship only review data, negative test fixtures, on-screen HOLD/RECOVERY OFF and circled-i help; no real vault read/write, MFA, upload, backup, restore or Windows service
+- see docs/BUILD_129_DOCUMENT_RECOVERY_LEDGER.md; proposed Build 130 follows with independent Windows security and owner-acceptance protocol, not live activation
