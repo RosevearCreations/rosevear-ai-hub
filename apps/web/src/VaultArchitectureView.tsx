@@ -6,6 +6,7 @@ import { assessVaultProviderDecision } from "./vaultProviderDecision";
 import { assessLocalVaultBlueprint, localVaultRecordKinds, localVaultSecurityGates, localVaultThreats } from "./localVaultBlueprint";
 import { assessVaultThreatCryptoReview, vaultCryptoCandidates, vaultDesignDecisions, vaultThreatScenarios, vaultTrustBoundaries } from "./vaultThreatCryptoReview";
 import { assessVaultSyntheticHarness, vaultSyntheticCases } from "./vaultSyntheticHarnessPolicy";
+import { assessVaultServiceBoundary, vaultServiceBoundaries, vaultServiceDenialCases } from "./vaultServiceBoundary";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
@@ -17,12 +18,13 @@ export function VaultArchitectureView() {
   const local = assessLocalVaultBlueprint();
   const threatReview = assessVaultThreatCryptoReview();
   const synthetic = assessVaultSyntheticHarness();
+  const servicePreview = assessVaultServiceBoundary();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 126 · synthetic-only encryption test review</p>
+          <p className="eyebrow">Build 127 · isolated service security preparation</p>
           <h1>Private password and document vault</h1>
           <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
@@ -33,6 +35,40 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <section className="panel" aria-label="Build 127 isolated vault service and identity review">
+        <div className="vault-gates-heading">
+          <div>
+            <h2>Independent vault service &amp; family identity boundary</h2>
+            <p>A separate HTTPS origin, Windows process, per-person identity and client-held keys are required before we can build a real password keeper. These are security contracts only; no vault server was started.</p>
+          </div>
+          <span className="vault-gate-badge">SERVICE OFF · {servicePreview.production_security_acceptance}</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> Why a Hub administrator cannot unlock the vault</summary>
+          <ol>
+            <li>The Hub login cookie and administrator role will never count as independent vault login, MFA or recovery authority.</li>
+            <li>Every real vault endpoint must later verify its own identity, origin, authorization and separately held encryption keys before any secret data is admitted.</li>
+            <li>Our tests simulate forged sessions and factor approvals; they cannot authorize a service that does not exist. All seven operation types remain denied to every actor.</li>
+            <li>An independent reviewer and a supervised Windows-only pilot are required before configuring the private hostname or installing a vault process.</li>
+          </ol>
+        </details>
+        <h3>Five isolated-service boundaries</h3>
+        <div className="vault-security-grid">
+          {vaultServiceBoundaries.map(item => <article className="vault-security-card" key={item.id}>
+            <p className="eyebrow">Proposed boundary · not deployed</p><h2>{item.title}</h2><p>{item.requirement}</p>
+          </article>)}
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> Identity and service denial cases</summary>
+          <div className="vault-threats">
+            {vaultServiceDenialCases.map(item => <article key={item.id}>
+              <strong>{item.title}</strong><p>{item.expected}</p>
+            </article>)}
+          </div>
+        </details>
+        <p className="vault-architecture-note">Current contract: <strong>{servicePreview.denial_reason}</strong>. No origin, separate identity provider, Windows vault process, request handler, live MFA, credential field, storage or upload is enabled.</p>
+      </section>
 
       <section className="panel" aria-label="Build 126 disposable cryptography acceptance">
         <div className="vault-gates-heading">

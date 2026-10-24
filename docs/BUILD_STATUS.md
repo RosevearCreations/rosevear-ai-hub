@@ -2022,3 +2022,14 @@ See docs/BUILD_125_VAULT_THREAT_CRYPTO_REVIEW.md. Next proposed Build 126 — Di
 - [ ] Production credential/document/MFA/security activation remains HOLD
 
 See docs/BUILD_126_SYNTHETIC_CRYPTO_TAMPER.md. Next queued Build 127 — Isolated Vault Service & Identity Boundary Preview (fail-closed, no live vault deployment).
+
+## Build 127 — Isolated Vault Service & Identity Boundary Preview
+- [x] Document five independent boundaries: dedicated HTTPS vault origin, per-person identity, isolated Windows process, ciphertext-only storage and offline recovery
+- [x] Pure deny-all request policy for five caller types × seven vault actions, with forged session/origin/MFA/owner approval unable to grant access
+- [x] Six negative acceptance scenarios: stolen Hub cookie, wrong origin, unauthorized member, revoked/replayed session, MFA bypass and absent service
+- [x] Read-only security cards, circled-i help and visible SERVICE OFF / HOLD status
+- [x] No live endpoints, private origin, credentials, MFA enrollment, document upload, encryption keys or storage introduced
+- [ ] PR/dev/main CI evidence and physical Windows security acceptance are separate pending checks
+- [ ] Independent review of actual service, identity and key-management design before any deployment or real data
+
+See docs/BUILD_127_VAULT_SERVICE_IDENTITY_BOUNDARY.md. Next proposed Build 128 — Disposable Document Pipeline & Integrity Preparation (future explicit security review required).
