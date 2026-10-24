@@ -8,6 +8,7 @@ import { assessVaultThreatCryptoReview, vaultCryptoCandidates, vaultDesignDecisi
 import { assessVaultSyntheticHarness, vaultSyntheticCases } from "./vaultSyntheticHarnessPolicy";
 import { assessVaultServiceBoundary, vaultServiceBoundaries, vaultServiceDenialCases } from "./vaultServiceBoundary";
 import { assessVaultDocumentPreparation, vaultDocumentDenialCases, vaultDocumentReviewStages } from "./vaultDocumentPreparation";
+import { assessVaultRecoveryLedger, vaultRecoveryDenialCases, vaultRecoveryReviewStages } from "./vaultRecoveryLedgerReview";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
@@ -21,12 +22,13 @@ export function VaultArchitectureView() {
   const synthetic = assessVaultSyntheticHarness();
   const servicePreview = assessVaultServiceBoundary();
   const documents = assessVaultDocumentPreparation();
+  const recovery = assessVaultRecoveryLedger();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 128 · synthetic document integrity preparation</p>
+          <p className="eyebrow">Build 129 · recovery and anti-rollback security review</p>
           <h1>Private password and document vault</h1>
           <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
@@ -37,6 +39,38 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <section className="panel" aria-label="Build 129 recovery and anti-rollback ledger review">
+        <div className="vault-gates-heading">
+          <div>
+            <h2>Document recovery &amp; anti-rollback ledger design</h2>
+            <p>Test-only version comparisons illustrate what a future independent trusted checkpoint must protect. No version witness, encrypted backup, restore endpoint or live document store has been installed.</p>
+          </div>
+          <span className="vault-gate-badge">RECOVERY OFF · {recovery.production_security_acceptance}</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> Why authenticated encryption cannot stop an older backup</summary>
+          <ol>
+            <li>A complete old document and its AES-GCM tags can still decrypt successfully. Integrity proves that encrypted data has not been modified, not that it is the newest version.</li>
+            <li>The synthetic ledger tests compare invented revision and envelope identifiers to a hypothetical witness. That witness is only an in-memory test object, with no real trusted authority.</li>
+            <li>If malware rolls back both the document and its locally stored ledger, the simulation demonstrates that the old document can appear valid. Independent, owner-verified version evidence is essential.</li>
+            <li>Before real use, we must approve independent cryptography and app review, a crash-safe commit and recovery protocol, vault-only MFA and an owner-witnessed Windows restore trial. This screen cannot restore files.</li>
+          </ol>
+        </details>
+        <h3>Six recovery design gates</h3>
+        <div className="vault-security-grid">
+          {vaultRecoveryReviewStages.map(item => <article className="vault-security-card" key={item.id}>
+            <p className="eyebrow">Unapproved design gate</p><h2>{item.title}</h2><p>{item.requirement}</p>
+          </article>)}
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> Restore and version-conflict denial scenarios</summary>
+          <div className="vault-threats">
+            {vaultRecoveryDenialCases.map(item => <article key={item.id}><strong>{item.title}</strong><p>{item.expected}</p></article>)}
+          </div>
+        </details>
+        <p className="vault-architecture-note">Recovery contract: <strong>{recovery.phase}</strong>. The test has no separately secured witness, durable transaction, backup or Windows field acceptance. Document intake, offline restore and every live vault operation remain <strong>DISABLED / HOLD</strong>.</p>
+      </section>
 
       <section className="panel" aria-label="Build 128 disposable document pipeline and integrity review">
         <div className="vault-gates-heading">
