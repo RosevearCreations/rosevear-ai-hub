@@ -1998,3 +1998,14 @@ See docs/BUILD_123_VAULT_PROVIDER_DECISION.md. Live vault and credential entry r
 - [ ] Owner-supervised disposable-data pilot and actual Windows field acceptance before any real secrets or documents
 
 See docs/BUILD_124_FIRST_PARTY_LOCAL_VAULT.md. Next proposed Build 125 — First-Party Vault Threat Model & Cryptographic Library Review. GitHub CI GREEN and physical Windows security acceptance are separate gates.
+
+## Build 125 — First-Party Vault Threat Model & Cryptographic Library Review
+- [x] Four explicit trusted boundaries and eight STRIDE/operational attack paths with expected negative acceptance evidence
+- [x] Library shortlist and trade-offs for Web Crypto AES-GCM, Argon2id, libsodium authenticated file streams and WebAuthn; no library installed or version/security review falsely approved
+- [x] Seven owner/technical decisions before isolated disposable-data implementation, including external assessment and local Windows acceptance
+- [x] Authenticated Vault review cards, contextual circled-i guidance, threat denial tests and clear CRYPTO UNAPPROVED status with no password, document or key inputs
+- [x] Deterministic assessment always denies live storage, uploads, MFA and installation even if review checklist status is forged as complete
+- [ ] Approve actual audited library versions and first-party cryptographic design before Build 126 synthetic proof-of-concept
+- [ ] Perform independent security review, signed Windows owner tests and explicit live-use approval before lifting credential/document storage HOLD
+
+See docs/BUILD_125_VAULT_THREAT_CRYPTO_REVIEW.md. Next proposed Build 126 — Disposable-Data Encryption & Tamper Test Harness; installed and live vault security remain on HOLD.
