@@ -774,7 +774,11 @@ Each build must:
 - require a verified private HTTPS origin (Caddy) on LAN and carefully restricted remote Tailscale access; do not expose vault endpoints via public router forwarding
 - document safe offline recovery codes and owner-held encrypted recovery materials; MFA must not be bypassable by ordinary Hub role escalation
 
-### Build 122 — Password Vault Security Verification & Windows Owner Acceptance (queued; gated on Build 121)
+### Build 122 — Password Vault Security Verification & Windows Owner Acceptance (review/runbook subset implemented; actual field verification on HOLD)
+- add fail-closed test/acceptance model and authenticated Vault field-test cards for provider isolation, cryptography, private HTTPS, real MFA, client lock, backup/restore, leaks and Windows reboot
+- make untrusted review flags informative only; provider approval, actual Windows installation, field proof, real MFA, secret entry and production security acceptance remain disabled regardless of forged checklist success
+- document disposable-account test drills, separate source-CI/field acceptance boundaries and sanitized evidence handling in docs/BUILD_122_VAULT_SECURITY_WINDOWS_ACCEPTANCE.md
+- no live vault package, origin, keys, credential forms, browser storage, backend routes, scheduled jobs or actual Windows-device verification is introduced
 - test threat-model controls, encryption/rotation, lost device/session, invalid 2FA, offline backup restoration, and secret leakage through logs, browser caches, AI and Knowledge
 - verify family Hub-client access, dual private LAN/Tailscale paths, session timeout, clipboard redaction, accessibility and Windows restart survival
 - classify GitHub CI evidence separately from actual server installation and owner-supervised field security acceptance

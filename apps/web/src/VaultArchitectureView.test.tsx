@@ -17,6 +17,9 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByText("PREPARATION ONLY")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Passkeys, step-up and emergency recovery" })).toBeInTheDocument();
     expect(screen.getByText("HOLD · MFA OFF")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Windows vault security verification" })).toBeInTheDocument();
+    expect(screen.getByText("FIELD ACCEPTANCE HOLD")).toBeInTheDocument();
+    expect(screen.getByText(/field evidence unavailable, real MFA disabled and password intake blocked/)).toBeInTheDocument();
     expect(screen.getByText(/authenticator enrollment, step-up and recovery code issuance disabled/)).toBeInTheDocument();
     expect(screen.getByText(/Provider: not approved; service: not installed; client unlock: disabled/)).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
