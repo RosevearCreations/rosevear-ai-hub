@@ -2009,3 +2009,16 @@ See docs/BUILD_124_FIRST_PARTY_LOCAL_VAULT.md. Next proposed Build 125 — First
 - [ ] Perform independent security review, signed Windows owner tests and explicit live-use approval before lifting credential/document storage HOLD
 
 See docs/BUILD_125_VAULT_THREAT_CRYPTO_REVIEW.md. Next proposed Build 126 — Disposable-Data Encryption & Tamper Test Harness; installed and live vault security remain on HOLD.
+
+## Build 126 — Disposable-Data Encryption & Tamper Test Harness
+- [x] Owner approved the browser's built-in Web Crypto AES-256-GCM **only for synthetic, isolated in-memory tests**
+- [x] Separate production cryptographic design, key derivation, MFA, streaming documents and independent review remain unapproved
+- [x] No vault service, endpoint, password entry, document upload, key persistence, browser local storage or third-party crypto dependency
+- [x] Test-only ephemeral non-exportable 256-bit keys, 96-bit random IVs, 128-bit GCM tags, authenticated fixture context
+- [x] Denial tests for altered ciphertext, tags, IV, owner/item/version, wrong key and truncation
+- [x] Explicit regression proof that exact replay **does not** fail under AES-GCM; anti-rollback design is still required
+- [x] Read-only Hub cards and circled-i explanation of synthetic evidence versus live security approval
+- [ ] PR/dev/main checks and physical browser/Windows validation to be recorded independently
+- [ ] Production credential/document/MFA/security activation remains HOLD
+
+See docs/BUILD_126_SYNTHETIC_CRYPTO_TAMPER.md. Next queued Build 127 — Isolated Vault Service & Identity Boundary Preview (fail-closed, no live vault deployment).
