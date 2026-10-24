@@ -766,7 +766,10 @@ Each build must:
 - protect clipboard exposure, autofill/injection surfaces, browser persistence, unlock idle timeout, session revocation, secure item editing and least-privilege owner/household separation
 - enforce safe, separately encrypted backup and tested restore with no silent cloud synchronization
 
-### Build 121 — Hardware-Key/Passkey MFA, Step-Up & Emergency Recovery (queued; gated on Build 120)
+### Build 121 — Hardware-Key/Passkey MFA, Step-Up & Emergency Recovery (security policy subset implemented; actual MFA and recovery gated)
+- document and display the eight mandatory independent-provider MFA, private-origin, identity, primary/backup factor, step-up, emergency recovery and denial-case reviews
+- fail-closed non-interactive readiness assessment rejects forged review completion; no WebAuthn ceremony, factor registration, recovery code, secret entry, vault endpoint or new data persistence
+- see docs/BUILD_121_MFA_RECOVERY_READINESS.md; actual factor enrollment and emergency recovery are gated on owner-approved provider and isolated live foundation
 - add a phishing-resistant WebAuthn/passkey or supported hardware authenticator second factor, with backup authenticator, device registration/revocation, reauthentication for vault unlock or recovery
 - require a verified private HTTPS origin (Caddy) on LAN and carefully restricted remote Tailscale access; do not expose vault endpoints via public router forwarding
 - document safe offline recovery codes and owner-held encrypted recovery materials; MFA must not be bypassable by ordinary Hub role escalation

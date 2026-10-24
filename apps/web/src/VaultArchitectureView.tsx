@@ -1,16 +1,18 @@
 import { assessVaultSecurityArchitecture, vaultControls, vaultThreats } from "./vaultSecurityArchitecture";
 import { assessVaultPreparation, vaultPreparationStages } from "./vaultPreparation";
+import { assessVaultMfaReadiness, vaultMfaDenialCases, vaultMfaReviewGates } from "./vaultMfaReadiness";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
   const gate = assessVaultSecurityArchitecture();
   const preparation = assessVaultPreparation();
+  const mfa = assessVaultMfaReadiness();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 120 · safe installation preparation</p>
+          <p className="eyebrow">Build 121 · MFA and emergency recovery review</p>
           <h1>Private password vault</h1>
           <p className="lede">A separate locally hosted keeper is planned for each household member, opened from the Hub client through a dedicated private HTTPS address after security acceptance.</p>
         </div>
@@ -42,6 +44,35 @@ export function VaultArchitectureView() {
           ))}
         </div>
         <p className="vault-architecture-note">Build 120 preparation: <strong>{preparation.production_security_acceptance}</strong>. Provider: not approved; service: not installed; client unlock: disabled. This screen contains no credential entry, activation control or vault network endpoint.</p>
+      </section>
+
+      <section className="panel" aria-label="Hardware key and emergency recovery readiness">
+        <div className="vault-gates-heading">
+          <div><h2>Passkeys, step-up and emergency recovery</h2><p>Eight required reviews for a future independent password manager. No authenticator can be enrolled from the Hub.</p></div>
+          <span className="vault-gate-badge">{mfa.production_security_acceptance} · MFA OFF</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> What two-factor protection will require</summary>
+          <ol>
+            <li>Approve the actual password manager and its supported security-key/passkey methods; Hub login is not an unlock factor.</li>
+            <li>Every household member must enroll a primary key and independently available backup with the password manager itself, over its verified HTTPS origin.</li>
+            <li>Review step-up prompts, session revocation and a separately verified lost-device recovery procedure before entering real passwords.</li>
+            <li>Never type or upload recovery codes, authenticator seeds, passphrases or private keys into Hub, Knowledge, AI chat or this review screen.</li>
+          </ol>
+        </details>
+        <div className="vault-security-grid">
+          {vaultMfaReviewGates.map((item, index) => (
+            <article className="vault-security-card" key={item.id}>
+              <p className="eyebrow">Security review {index + 1} / {vaultMfaReviewGates.length}</p>
+              <h2>{item.title}</h2><p>{item.detail}</p><small>Not verified · security hold</small>
+            </article>
+          ))}
+        </div>
+        <h3>Cases that must never bypass verification</h3>
+        <div className="vault-threats">
+          {vaultMfaDenialCases.map(item => <article key={item.situation}><strong>{item.situation}</strong><p>{item.requirement}</p></article>)}
+        </div>
+        <p className="vault-architecture-note">Build 121 policy review: <strong>{mfa.production_security_acceptance}</strong>. Provider not approved; vault access denied; authenticator enrollment, step-up and recovery code issuance disabled. These cards never assert working two-factor security.</p>
       </section>
 
       <details className="camera-acceptance-help" open>
