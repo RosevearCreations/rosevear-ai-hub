@@ -1967,3 +1967,14 @@ See docs/BUILD_120_VAULT_PREPARATION.md. Next queued: Build 121 — Hardware-Key
 - [ ] Owner/provider security review, separately verified Windows installation, actual FIDO2 enrollment, backup and recovery required before vault activation
 
 See docs/BUILD_121_MFA_RECOVERY_READINESS.md. Next queued: Build 122 — Password Vault Security Verification & Windows Owner Acceptance (review-only until approved live foundation).
+
+## Build 122 — Password Vault Security Verification & Windows Owner Acceptance
+- [x] Safe read-only security-acceptance plan following owner-selected prep-only vault boundary
+- [x] Eight field test categories: provider, client encryption, trusted HTTPS, actual MFA abuse tests, lock/revocation, encrypted backup restore, leakage, Windows reboot
+- [x] Authenticated Vault review cards, accessible circled-i guidance and visible independent field security HOLD
+- [x] Deterministic fail-closed policy model: no provider, install, independent field evidence, vault intake or MFA enforcement, even if every review flag is forged
+- [x] Disposable-account and private sanitized owner evidence runbook without credential collection, browser storage or Windows service mutations
+- [ ] Independently verify local TypeScript/tests/bundle, feature PR, dev push, promotion PR and main push GREEN
+- [ ] Actual provider selection/approval, installed Windows vault testing and owner witnessed physical acceptance remain HOLD
+
+See docs/BUILD_122_VAULT_SECURITY_WINDOWS_ACCEPTANCE.md. Next milestone requires explicit selection and security approval of the independent vault provider; do not enable live password intake by advancing build numbers.
