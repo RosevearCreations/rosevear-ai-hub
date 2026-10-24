@@ -21,6 +21,10 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByText("FIELD ACCEPTANCE HOLD")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Our own local vault: direction selected" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Threat model & encryption library review" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Disposable-data encryption & tamper tests" })).toBeInTheDocument();
+    expect(screen.getByText("LIVE VAULT HOLD")).toBeInTheDocument();
+    expect(screen.getByText(/Identical encrypted records can still be replayed/)).toBeInTheDocument();
+    expect(screen.getByText(/WEB_CRYPTO_AES_256_GCM/)).toBeInTheDocument();
     expect(screen.getByText("CRYPTO UNAPPROVED · HOLD")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Browser Web Crypto AES-GCM" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Argon2id via independently reviewed library" })).toBeInTheDocument();
