@@ -4,6 +4,7 @@ import { assessVaultMfaReadiness, vaultMfaDenialCases, vaultMfaReviewGates } fro
 import { assessVaultSecurityVerification, vaultVerificationChecks } from "./vaultSecurityVerification";
 import { assessVaultProviderDecision } from "./vaultProviderDecision";
 import { assessLocalVaultBlueprint, localVaultRecordKinds, localVaultSecurityGates, localVaultThreats } from "./localVaultBlueprint";
+import { assessVaultThreatCryptoReview, vaultCryptoCandidates, vaultDesignDecisions, vaultThreatScenarios, vaultTrustBoundaries } from "./vaultThreatCryptoReview";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
@@ -13,12 +14,13 @@ export function VaultArchitectureView() {
   const verification = assessVaultSecurityVerification();
   const provider = assessVaultProviderDecision();
   const local = assessLocalVaultBlueprint();
+  const threatReview = assessVaultThreatCryptoReview();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 124 · first-party local vault blueprint</p>
+          <p className="eyebrow">Build 125 · first-party vault security review</p>
           <h1>Private password and document vault</h1>
           <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
@@ -29,6 +31,68 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <section className="panel" aria-label="First-party vault threat model and cryptography review">
+        <div className="vault-gates-heading">
+          <div>
+            <h2>Threat model &amp; encryption library review</h2>
+            <p>Map how our own local vault could be attacked, then independently review the standard libraries and test evidence before choosing a cryptographic implementation.</p>
+          </div>
+          <span className="vault-gate-badge">CRYPTO UNAPPROVED · {threatReview.production_security_acceptance}</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> Why this review matters</summary>
+          <ol>
+            <li>We are building our own vault software, but will rely on well-studied encryption and authentication standards. No vendor gets our stored passwords or documents.</li>
+            <li>All library choices below are <strong>candidates</strong>, not installed software or an independent security certification.</li>
+            <li>Every attack must have a denial test, including stolen-server backups, forged sharing grants, damaged files, wrong-origin MFA and untrusted PDF previews.</li>
+            <li>Before working with even disposable encryption data, settle the seven design decisions and review dependency provenance. Real secrets remain forbidden until independent security review and physical Windows acceptance.</li>
+          </ol>
+        </details>
+
+        <h3>Four boundaries we must keep separate</h3>
+        <div className="vault-security-grid">
+          {vaultTrustBoundaries.map(item => (
+            <article className="vault-security-card" key={item.id}>
+              <p className="eyebrow">Trust boundary</p><h2>{item.title}</h2><p>{item.detail}</p><small>Planned separation · unverified</small>
+            </article>
+          ))}
+        </div>
+
+        <h3>Candidate standards and libraries</h3>
+        <div className="vault-security-grid">
+          {vaultCryptoCandidates.map(item => (
+            <article className="vault-security-card" key={item.id}>
+              <p className="eyebrow">Review candidate · not approved</p><h2>{item.title}</h2><p>{item.role}</p>
+              <small>Primary reference: {item.source}</small><p>{item.risk}</p>
+            </article>
+          ))}
+        </div>
+
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> Attack and denial-test checklist</summary>
+          <div className="vault-threats">
+            {vaultThreatScenarios.map(item => (
+              <article key={item.id}>
+                <p className="eyebrow">{item.category}</p><strong>{item.attack}</strong>
+                <p><strong>Required defence:</strong> {item.protection}</p>
+                <p><strong>Must fail:</strong> {item.negativeTest}</p>
+              </article>
+            ))}
+          </div>
+        </details>
+
+        <h3>Seven design decisions still on HOLD</h3>
+        <div className="vault-security-grid">
+          {vaultDesignDecisions.map((item, index) => (
+            <article className="vault-security-card" key={item.id}>
+              <p className="eyebrow">Decision {index + 1} / {vaultDesignDecisions.length}</p>
+              <h2>{item.question}</h2><p>{item.evidence}</p><small>Not independently reviewed · no activation</small>
+            </article>
+          ))}
+        </div>
+        <p className="vault-architecture-note">Build 125 review status: <strong>{threatReview.production_security_acceptance}</strong>. No library is approved, no encryption runtime installed, and no credential intake, document upload, vault API, MFA enrollment or recovery service is enabled—even when a checklist is marked complete.</p>
+      </section>
 
       <section className="panel" aria-label="First-party local vault implementation blueprint">
         <div className="vault-gates-heading">

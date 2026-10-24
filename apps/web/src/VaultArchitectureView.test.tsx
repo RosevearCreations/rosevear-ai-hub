@@ -20,6 +20,11 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByRole("heading", { name: "Windows vault security verification" })).toBeInTheDocument();
     expect(screen.getByText("FIELD ACCEPTANCE HOLD")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Our own local vault: direction selected" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Threat model & encryption library review" })).toBeInTheDocument();
+    expect(screen.getByText("CRYPTO UNAPPROVED · HOLD")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Browser Web Crypto AES-GCM" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Argon2id via independently reviewed library" })).toBeInTheDocument();
+    expect(screen.getByText(/No library is approved, no encryption runtime installed/)).toBeInTheDocument();
     expect(screen.getByText("SECURITY REVIEW REQUIRED")).toBeInTheDocument();
     expect(screen.getByText(/password storage, document upload and MFA are all still disabled/)).toBeInTheDocument();
     expect(screen.getByText(/field evidence unavailable, real MFA disabled and password intake blocked/)).toBeInTheDocument();
@@ -39,5 +44,7 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByText(/Hub Secrets remains for integration tokens only/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Private documents" })).toBeInTheDocument();
     expect(screen.getByText(/No third-party vault hosting or commercial password-manager service is planned/)).toBeInTheDocument();
+    expect(screen.getByText(/Phished or stolen Hub session impersonates a household member/)).toBeInTheDocument();
+    expect(screen.getByText(/Server theft, unlocked browser, memory dump/)).toBeInTheDocument();
   });
 });

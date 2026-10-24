@@ -795,3 +795,10 @@ Each build must:
 - add eight security review gates covering audited cryptographic libraries, identity/MFA, encrypted documents, Windows isolation, trusted private HTTPS, offline recovery and independent owner acceptance
 - keep all runtime vault access, password entry, document upload, MFA and Windows installation on unconditional HOLD; do not invent cryptography or treat local hosting as invulnerable
 - see docs/BUILD_124_FIRST_PARTY_LOCAL_VAULT.md; proposed follow-ups Builds 125–130 cover threat model, synthetic test harness, isolated MFA service, documents, recovery and independent Windows acceptance
+
+### Build 125 — First-Party Vault Threat Model & Cryptographic Library Review (review-only)
+- document client/service/store/recovery trust boundaries, eight STRIDE plus operational threat scenarios and explicit tests for impersonation, tampering, secret leakage, privileges, malicious files, disaster and supply-chain failure
+- shortlist W3C Web Crypto AES-GCM, RFC 9106 Argon2id, libsodium secretstream and W3C WebAuthn without choosing unreviewed binding versions or enabling encryption services
+- document seven unresolved design decisions for client security, key derivation, key envelope, private document pipeline, MFA/recovery, Windows isolation and independent assessment
+- keep real credentials, private document upload, keys, services and MFA disabled; CI GREEN only validates source, not the installed first-party vault
+- see docs/BUILD_125_VAULT_THREAT_CRYPTO_REVIEW.md; next Build 126 requires a separately reviewed library-selection decision and remains disposable-data-only
