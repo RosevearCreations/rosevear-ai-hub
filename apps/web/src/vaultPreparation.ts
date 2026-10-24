@@ -2,7 +2,7 @@
 export const VAULT_PREPARATION_SCHEMA = "rosevear-vault-preparation/v1" as const;
 
 export const vaultPreparationStages = [
-  { id: "provider", title: "Approve an independent keeper", detail: "Review official licensing, individual accounts, supported Windows hosting, maintenance, update process and client cryptography before selecting any package." },
+  { id: "provider", title: "Approve our own security design", detail: "Review first-party code boundaries, vetted crypto dependencies, individual household accounts, Windows hosting, maintenance and updates before installation." },
   { id: "storage", title: "Isolate encrypted data", detail: "Design a dedicated service identity, private volume, minimal file permissions, independent database and no Hub database tables, integrations or AI access." },
   { id: "origin", title: "Restrict the private origin", detail: "Reserve dedicated HTTPS hostname, Caddy routing and scoped LAN/Tailscale firewall rules. Never expose router ports or reuse Hub cookies." },
   { id: "lock", title: "Review the client lock contract", detail: "Require separate vault sign-in and unlock, a short idle lock, lock on sign-out and device revocation; never infer vault unlock from Hub login." },

@@ -788,3 +788,10 @@ Each build must:
 - display three candidate approaches for investigation without asserting current licensing or choosing a provider; make required owner decision and independent security review prominent
 - keep all live credential intake, provider installation, private origin, MFA, secret persistence and field acceptance on unconditional HOLD regardless of forged checklist reviews
 - see docs/BUILD_123_VAULT_PROVIDER_DECISION.md; no live password-manager installation may proceed until a separate explicit owner provider/hosting choice
+
+### Build 124 — First-Party Local Password & Document Vault Blueprint (read-only)
+- owner explicitly selected a self-developed, Windows-hosted vault instead of a third-party password-vault service; Build 123 provider comparison is superseded
+- plan personal passwords, secure notes and private encrypted documents with explicit household sharing, not Hub Secrets, Knowledge or AI indexing
+- add eight security review gates covering audited cryptographic libraries, identity/MFA, encrypted documents, Windows isolation, trusted private HTTPS, offline recovery and independent owner acceptance
+- keep all runtime vault access, password entry, document upload, MFA and Windows installation on unconditional HOLD; do not invent cryptography or treat local hosting as invulnerable
+- see docs/BUILD_124_FIRST_PARTY_LOCAL_VAULT.md; proposed follow-ups Builds 125–130 cover threat model, synthetic test harness, isolated MFA service, documents, recovery and independent Windows acceptance

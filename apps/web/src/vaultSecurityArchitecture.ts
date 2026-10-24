@@ -2,10 +2,10 @@
 export const VAULT_ARCHITECTURE_VERSION = "rosevear-vault-security-architecture/v1" as const;
 
 export const vaultControls = [
-  { id: "reviewed_provider", title: "Reviewed vault provider", detail: "Approve a maintained self-hosted password manager and its licensing for our actual household use." },
+  { id: "reviewed_provider", title: "Reviewed security implementation", detail: "Independently review our first-party locally hosted vault code, dependencies, cryptographic design and maintenance responsibilities before any real records." },
   { id: "isolation", title: "Separate encrypted storage", detail: "Use a dedicated vault database and account boundary, never Hub Secrets, Knowledge, Chat or AI tools." },
-  { id: "individual_identity", title: "Individual household accounts", detail: "Each person has a private vault; shared entries require explicit owner permission and an acceptable provider licence." },
-  { id: "client_side_crypto", title: "Client-managed cryptography", detail: "Passwords and vault keys are encrypted/decrypted in the reviewed vault client, not by Hub endpoints or Ollama." },
+  { id: "individual_identity", title: "Individual household accounts", detail: "Each person has a private vault and keys; sharing requires explicit recipient grants and isolated account authorization." },
+  { id: "client_side_crypto", title: "Client-managed cryptography", detail: "Passwords, private documents and vault keys are encrypted/decrypted in the independently reviewed client, not by Hub endpoints or Ollama." },
   { id: "private_https", title: "Private trusted HTTPS", detail: "Use a verified dedicated origin on the trusted LAN or restricted Tailscale; no router forwarding or public exposure." },
   { id: "mfa", title: "Two-factor enrollment", detail: "Require independent FIDO2/WebAuthn authenticators, backup factor and tested lost-device recovery before use." },
   { id: "client_lock", title: "Lock, session and device revocation", detail: "Enforce idle lock, logout, client-device revocation and no Hub cookie or server-side unlock sharing." },
