@@ -2044,3 +2044,16 @@ See docs/BUILD_127_VAULT_SERVICE_IDENTITY_BOUNDARY.md. Next proposed Build 128 �
 - [ ] CI verification and promotions dev/main must be observed separately; passing source tests never authorize production documents or passwords
 
 See docs/BUILD_128_SYNTHETIC_DOCUMENT_PIPELINE.md. Next proposed Build 129 — Document Recovery & Anti-Rollback Ledger Design (review-only).
+
+## Build 129 — Document Recovery & Anti-Rollback Ledger Design
+- [x] Hypothetical test-only in-memory revision/manifest witness; no database, service, secure anchor, key or file read/write
+- [x] Negative recovery tests for older but intact snapshots, same-revision forks, claimed future versions, incomplete snapshots, other owners/documents and absent witness
+- [x] Synthetic compare-and-swap scenarios deny stale concurrent writers, gaps, downgrade and reused envelope identifiers
+- [x] Crash-window demonstrations deny unwitnessed future snapshot and missing data after a proposed advance; no durable atomic transaction is claimed
+- [x] Explicit counterexample demonstrates co-rollback of the document and the local witness **cannot be detected** without a genuine independently protected anchor
+- [x] Read-only six-gate review, six denial cases, circled-i help and unconditional RECOVERY OFF / HOLD in Vault interface
+- [ ] Independent monotonic witness, atomic commit and real key/backup designs require independent security approval and review
+- [ ] Real credentials, documents, vault service, MFA, Windows installation, restore and owner field acceptance remain disabled
+- [ ] CI/dev/main promotion evidence must be separately observed; source GREEN cannot certify physical Windows security
+
+See docs/BUILD_129_DOCUMENT_RECOVERY_LEDGER.md. Next proposed Build 130 — Independent Windows Vault Security & Owner Acceptance Protocol (review-only).
