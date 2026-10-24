@@ -809,3 +809,10 @@ Each build must:
 - reject damaged ciphertext/tag, truncation, wrong key/IV and changed identity/version; explicitly prove that exact replay still decrypts and requires a future server-side anti-rollback policy
 - test code remains only in Vitest files and is not imported into shipped Hub assets; browser-device field test, independent security review and live owner approval remain on HOLD
 - see docs/BUILD_126_SYNTHETIC_CRYPTO_TAMPER.md; next Build 127 is isolated private-service/identity boundary preparation, not live vault activation
+
+### Build 127 — Isolated Vault Service & Identity Boundary Preview (fail-closed)
+- enumerate private origin, separate family identity, Windows process/ACL, ciphertext-only service and offline recovery boundaries without creating public/private endpoints or services
+- model denial of seven hypothetical operations for every Hub actor, even when independent session, origin, MFA and owner review flags are forged complete
+- describe owner, household and service authorization negative cases, no Hub-cookie inheritance, no administrator bypass, no ability to turn on live storage from a review screen
+- keep actual separate authentication, WebAuthn, passphrase/key handling, ciphertext persistence, uploads and Windows installation gated on independent design review and owner Windows acceptance
+- see docs/BUILD_127_VAULT_SERVICE_IDENTITY_BOUNDARY.md; next Build 128 may prepare document pipeline with similarly isolated synthetic fixtures after its own security decisions
