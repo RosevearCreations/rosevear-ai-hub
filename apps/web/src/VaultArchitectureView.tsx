@@ -1,18 +1,20 @@
 import { assessVaultSecurityArchitecture, vaultControls, vaultThreats } from "./vaultSecurityArchitecture";
 import { assessVaultPreparation, vaultPreparationStages } from "./vaultPreparation";
 import { assessVaultMfaReadiness, vaultMfaDenialCases, vaultMfaReviewGates } from "./vaultMfaReadiness";
+import { assessVaultSecurityVerification, vaultVerificationChecks } from "./vaultSecurityVerification";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
   const gate = assessVaultSecurityArchitecture();
   const preparation = assessVaultPreparation();
   const mfa = assessVaultMfaReadiness();
+  const verification = assessVaultSecurityVerification();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 121 · MFA and emergency recovery review</p>
+          <p className="eyebrow">Build 122 · Windows security acceptance planning</p>
           <h1>Private password vault</h1>
           <p className="lede">A separate locally hosted keeper is planned for each household member, opened from the Hub client through a dedicated private HTTPS address after security acceptance.</p>
         </div>
@@ -23,6 +25,31 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the architecture and safety review—not a working vault. Credential entry, password retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <section className="panel" aria-label="Vault security verification and Windows owner acceptance">
+        <div className="vault-gates-heading">
+          <div><h2>Windows vault security verification</h2><p>Eight independent on-device checks for future owner acceptance. GitHub build success is not installed-vault security approval.</p></div>
+          <span className="vault-gate-badge">FIELD ACCEPTANCE {verification.production_security_acceptance}</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> How to safely verify our future Windows vault</summary>
+          <ol>
+            <li>Do not begin until we approve the password manager, its license and an isolated Windows installation with private HTTPS.</li>
+            <li>Use disposable test accounts and credentials only in the independent keeper, never inside Hub, Knowledge, chat or screenshots.</li>
+            <li>Witness rejected invalid MFA, client idle lock, revoked sessions, isolated encrypted backup/restore and safe Windows reboot on our actual server.</li>
+            <li>Keep results in a private sanitized owner record. A missing, failing or unobserved test keeps the security hold.</li>
+          </ol>
+        </details>
+        <div className="vault-security-grid">
+          {vaultVerificationChecks.map((check, index) => (
+            <article className="vault-security-card" key={check.id}>
+              <p className="eyebrow">Field test {index + 1} / {vaultVerificationChecks.length}</p>
+              <h2>{check.title}</h2><p>{check.detail}</p><small>Not performed · owner security hold</small>
+            </article>
+          ))}
+        </div>
+        <p className="vault-architecture-note">Build 122 source review: <strong>{verification.production_security_acceptance}</strong> for the installed Windows vault. Provider unapproved, field evidence unavailable, real MFA disabled and password intake blocked. These checks do not collect credentials or claim that the physical server was tested.</p>
+      </section>
 
       <section className="panel" aria-label="Vault isolation and client lock preparation">
         <div className="vault-gates-heading">
