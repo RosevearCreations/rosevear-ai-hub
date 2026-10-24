@@ -15,6 +15,9 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByText(/0 \/ 10 verified/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Isolation and client-lock readiness" })).toBeInTheDocument();
     expect(screen.getByText("PREPARATION ONLY")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Passkeys, step-up and emergency recovery" })).toBeInTheDocument();
+    expect(screen.getByText("HOLD · MFA OFF")).toBeInTheDocument();
+    expect(screen.getByText(/authenticator enrollment, step-up and recovery code issuance disabled/)).toBeInTheDocument();
     expect(screen.getByText(/Provider: not approved; service: not installed; client unlock: disabled/)).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();

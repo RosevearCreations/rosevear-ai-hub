@@ -1957,3 +1957,13 @@ See docs/BUILD_119_LOCAL_VAULT_SECURITY_ARCHITECTURE.md. Next queued: Build 120 
 - [ ] Independent Build 120 source checks, dev PR/push and main PR/push GREEN
 
 See docs/BUILD_120_VAULT_PREPARATION.md. Next queued: Build 121 — Hardware-Key/Passkey MFA, Step-Up & Emergency Recovery (also blocked until provider approval and live foundation).
+
+## Build 121 — Passkey/MFA & Emergency Recovery Readiness Only
+- [x] Owner authorization limited to security-gated release; no independently selected password-manager provider or live vault foundation
+- [x] Eight review gates for provider, origin, personal accounts, WebAuthn/passkey, backup authenticator, step-up, emergency recovery and negative cases
+- [x] Read-only Vault readiness cards and circled-i walkthrough with explicit security HOLD and MFA OFF
+- [x] Fail-closed policy model that keeps access DENY, enrollment, recovery-code issuance and step-up DISABLED regardless of spoofed review flags
+- [ ] Run TypeScript, web tests and bundle, then independently verify feature/dev/main GitHub gates
+- [ ] Owner/provider security review, separately verified Windows installation, actual FIDO2 enrollment, backup and recovery required before vault activation
+
+See docs/BUILD_121_MFA_RECOVERY_READINESS.md. Next queued: Build 122 — Password Vault Security Verification & Windows Owner Acceptance (review-only until approved live foundation).
