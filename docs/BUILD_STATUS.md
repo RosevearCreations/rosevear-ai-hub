@@ -1988,3 +1988,13 @@ See docs/BUILD_122_VAULT_SECURITY_WINDOWS_ACCEPTANCE.md. Next milestone requires
 - [ ] Owner selects/approves a provider and security architecture, then independently authorizes an isolated deployment and Windows field verification
 
 See docs/BUILD_123_VAULT_PROVIDER_DECISION.md. Live vault and credential entry remain on HOLD until explicit owner approval and successful supervised testing.
+
+## Build 124 — First-Party Local Password & Document Vault Blueprint
+- [x] Owner chose our own locally developed and Windows-hosted vault; no third-party password-manager service or external document storage
+- [x] Planned personal login entries, private notes and encrypted documents with sharing/identity separation from Hub, Knowledge, AI and integration Secrets
+- [x] Read-only owner design and circled-i help with eight independent security gates, four explicit attack risks and no secret/form/upload controls
+- [x] Fail-closed status: forged checklist completion cannot enable live credential intake, document upload, encrypted store, vault API, MFA or Windows deployment
+- [ ] Confirm cryptographic library choices, independent security review and detailed Windows isolation plan before implementing a real vault
+- [ ] Owner-supervised disposable-data pilot and actual Windows field acceptance before any real secrets or documents
+
+See docs/BUILD_124_FIRST_PARTY_LOCAL_VAULT.md. Next proposed Build 125 — First-Party Vault Threat Model & Cryptographic Library Review. GitHub CI GREEN and physical Windows security acceptance are separate gates.

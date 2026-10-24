@@ -2,7 +2,8 @@ import { assessVaultSecurityArchitecture, vaultControls, vaultThreats } from "./
 import { assessVaultPreparation, vaultPreparationStages } from "./vaultPreparation";
 import { assessVaultMfaReadiness, vaultMfaDenialCases, vaultMfaReviewGates } from "./vaultMfaReadiness";
 import { assessVaultSecurityVerification, vaultVerificationChecks } from "./vaultSecurityVerification";
-import { assessVaultProviderDecision, vaultProviderCriteria, vaultProviderOptions } from "./vaultProviderDecision";
+import { assessVaultProviderDecision } from "./vaultProviderDecision";
+import { assessLocalVaultBlueprint, localVaultRecordKinds, localVaultSecurityGates, localVaultThreats } from "./localVaultBlueprint";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
@@ -11,62 +12,68 @@ export function VaultArchitectureView() {
   const mfa = assessVaultMfaReadiness();
   const verification = assessVaultSecurityVerification();
   const provider = assessVaultProviderDecision();
+  const local = assessLocalVaultBlueprint();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 123 · owner provider-decision packet</p>
-          <h1>Private password vault</h1>
-          <p className="lede">A separate locally hosted keeper is planned for each household member, opened from the Hub client through a dedicated private HTTPS address after security acceptance.</p>
+          <p className="eyebrow">Build 124 · first-party local vault blueprint</p>
+          <h1>Private password and document vault</h1>
+          <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
         <span className="vault-gate-badge">SECURITY HOLD</span>
       </header>
 
       <div className="vault-gate-warning" role="status">
         <strong>Do not enter real passwords yet.</strong>
-        <p>This is the architecture and safety review—not a working vault. Credential entry, password retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
+        <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
 
-      <section className="panel" aria-label="Password keeper provider decision packet">
+      <section className="panel" aria-label="First-party local vault implementation blueprint">
         <div className="vault-gates-heading">
-          <div><h2>Choose our independent password keeper</h2><p>Compare real provider terms before installation. None of the options below has been selected or approved.</p></div>
-          <span className="vault-gate-badge">OWNER DECISION REQUIRED</span>
+          <div><h2>Our own local vault: direction selected</h2><p>No third-party vault hosting or commercial password-manager service is planned. Security review and physical deployment approval are still required.</p></div>
+          <span className="vault-gate-badge">SECURITY REVIEW REQUIRED</span>
         </div>
         <details className="camera-acceptance-help" open>
-          <summary><span aria-hidden="true">i</span> How we choose safely</summary>
+          <summary><span aria-hidden="true">i</span> What a first-party vault means</summary>
           <ol>
-            <li>Review current official licensing, supported family sharing, Windows resources and security documentation for each option.</li>
-            <li>Approve one maintained provider and an isolated private HTTPS deployment plan in a separate owner decision; no changes are made by this page.</li>
-            <li>Only after that decision, schedule a disposable-account pilot, backup/recovery tests and owner-supervised Windows acceptance.</li>
-            <li>Keep real passwords in our existing trusted manager until the pilot passes. Never paste credentials or recovery codes into Hub or AI chat.</li>
+            <li>We own the vault application and encrypted files. Local hosting reduces reliance on external operators but does not make an unreviewed program hack-proof.</li>
+            <li>Build on established, reviewed encryption and authentication standards; never invent custom encryption algorithms or expose our master keys to Hub services.</li>
+            <li>Give each person a private vault; require explicit sharing, locked clients, MFA and encrypted offline document backups.</li>
+            <li>Only after independent security review, approve an isolated disposable-account pilot and witnessed Windows acceptance. Never paste secrets or recovery codes into Hub, AI chat or GitHub.</li>
           </ol>
         </details>
+        <h3>Information the future vault may hold</h3>
         <div className="vault-security-grid">
-          {vaultProviderOptions.map(option => <article className="vault-security-card" key={option.title}>
-            <p className="eyebrow">Candidate approach</p><h2>{option.title}</h2><p>{option.note}</p><small>Unselected · verify current terms</small>
+          {localVaultRecordKinds.map(kind => <article className="vault-security-card" key={kind.id}>
+            <p className="eyebrow">Planned record type</p><h2>{kind.title}</h2><p>{kind.scope}</p><small>Design only · no live storage</small>
           </article>)}
         </div>
-        <h3>Evidence to review before approval</h3>
+        <h3>Eight safety gates before testing with real data</h3>
         <div className="vault-security-grid">
-          {vaultProviderCriteria.map((item, index) => <article className="vault-security-card" key={item.id}>
-            <p className="eyebrow">Decision gate {index + 1} / {vaultProviderCriteria.length}</p>
-            <h2>{item.title}</h2><p>{item.ownerQuestion}</p><small>Evidence: {item.evidence}</small>
+          {localVaultSecurityGates.map((item, index) => <article className="vault-security-card" key={item.id}>
+            <p className="eyebrow">Security gate {index + 1} / {localVaultSecurityGates.length}</p>
+            <h2>{item.title}</h2><p>{item.detail}</p><small>Not independently verified</small>
           </article>)}
         </div>
-        <p className="vault-architecture-note">Build 123 decision status: <strong>{provider.production_security_acceptance}</strong>. No provider selected, no installation authorized, and no password storage enabled—even if every paperwork review is marked complete.</p>
+        <h3>Threats we still need to prevent</h3>
+        <div className="vault-threats">
+          {localVaultThreats.map(item => <article key={item.threat}><strong>{item.threat}</strong><p>{item.mitigation}</p></article>)}
+        </div>
+        <p className="vault-architecture-note">Build 124 source design: <strong>{local.production_security_acceptance}</strong>. Owner direction: our own local code. Security approval, independent review, service installation, password storage, document upload and MFA are all still disabled—even if a checklist is marked complete. The Build 123 vendor-comparison packet is superseded; its old status remains <strong>{provider.production_security_acceptance}</strong>.</p>
       </section>
 
       <section className="panel" aria-label="Vault security verification and Windows owner acceptance">
         <div className="vault-gates-heading">
-          <div><h2>Windows vault security verification</h2><p>Eight independent on-device checks for future owner acceptance. GitHub build success is not installed-vault security approval.</p></div>
+          <div><h2>Windows vault security verification</h2><p>Eight independent on-device checks must be adapted to our own app. GitHub build success is not installed-vault security approval.</p></div>
           <span className="vault-gate-badge">FIELD ACCEPTANCE {verification.production_security_acceptance}</span>
         </div>
         <details className="camera-acceptance-help" open>
           <summary><span aria-hidden="true">i</span> How to safely verify our future Windows vault</summary>
           <ol>
-            <li>Do not begin until we approve the password manager, its license and an isolated Windows installation with private HTTPS.</li>
-            <li>Use disposable test accounts and credentials only in the independent keeper, never inside Hub, Knowledge, chat or screenshots.</li>
+            <li>Do not begin until our design receives an independent security review and we explicitly approve an isolated Windows installation with private HTTPS.</li>
+            <li>Use disposable test accounts and credentials only in the isolated vault test client, never inside Hub, Knowledge, chat or screenshots.</li>
             <li>Witness rejected invalid MFA, client idle lock, revoked sessions, isolated encrypted backup/restore and safe Windows reboot on our actual server.</li>
             <li>Keep results in a private sanitized owner record. A missing, failing or unobserved test keeps the security hold.</li>
           </ol>
@@ -79,7 +86,7 @@ export function VaultArchitectureView() {
             </article>
           ))}
         </div>
-        <p className="vault-architecture-note">Build 122 source review: <strong>{verification.production_security_acceptance}</strong> for the installed Windows vault. Provider unapproved, field evidence unavailable, real MFA disabled and password intake blocked. These checks do not collect credentials or claim that the physical server was tested.</p>
+        <p className="vault-architecture-note">Build 122 source review: <strong>{verification.production_security_acceptance}</strong> for the installed Windows vault. Our own implementation is unreviewed, field evidence unavailable, real MFA disabled and password intake blocked. These checks do not collect credentials or claim that the physical server was tested.</p>
       </section>
 
       <section className="panel" aria-label="Vault isolation and client lock preparation">
@@ -88,8 +95,8 @@ export function VaultArchitectureView() {
           <span className="vault-gate-badge">{preparation.phase.replace("_", " ")}</span>
         </div>
         <details className="camera-acceptance-help">
-          <summary><span aria-hidden="true">i</span> Before we install a password keeper</summary>
-          <p>Choose and approve a supported provider, hosting resources and license first. Verify the private HTTPS address and independent lock, backup and recovery in an isolated test environment. Never paste a password, master key, recovery code or authenticator seed into Hub, Knowledge, chat or support tickets.</p>
+          <summary><span aria-hidden="true">i</span> Before we install our local vault</summary>
+          <p>Independently review our own code, vetted cryptographic libraries, Windows hosting isolation and actual data model first. Verify private HTTPS, lock, encrypted document backup and recovery in an isolated test environment. Never paste a password, master key, recovery code or authenticator seed into Hub, Knowledge, chat or support tickets.</p>
         </details>
         <div className="vault-security-grid">
           {vaultPreparationStages.map((stage, index) => (
@@ -101,19 +108,19 @@ export function VaultArchitectureView() {
             </article>
           ))}
         </div>
-        <p className="vault-architecture-note">Build 120 preparation: <strong>{preparation.production_security_acceptance}</strong>. Provider: not approved; service: not installed; client unlock: disabled. This screen contains no credential entry, activation control or vault network endpoint.</p>
+        <p className="vault-architecture-note">Build 120 preparation: <strong>{preparation.production_security_acceptance}</strong>. Our design: not security-approved; service: not installed; client unlock: disabled. This screen contains no credential entry, activation control or vault network endpoint.</p>
       </section>
 
       <section className="panel" aria-label="Hardware key and emergency recovery readiness">
         <div className="vault-gates-heading">
-          <div><h2>Passkeys, step-up and emergency recovery</h2><p>Eight required reviews for a future independent password manager. No authenticator can be enrolled from the Hub.</p></div>
+          <div><h2>Passkeys, step-up and emergency recovery</h2><p>Eight required reviews for our future isolated vault application. No authenticator can be enrolled from the Hub.</p></div>
           <span className="vault-gate-badge">{mfa.production_security_acceptance} · MFA OFF</span>
         </div>
         <details className="camera-acceptance-help" open>
           <summary><span aria-hidden="true">i</span> What two-factor protection will require</summary>
           <ol>
-            <li>Approve the actual password manager and its supported security-key/passkey methods; Hub login is not an unlock factor.</li>
-            <li>Every household member must enroll a primary key and independently available backup with the password manager itself, over its verified HTTPS origin.</li>
+            <li>Independently review the future vault authenticator design; Hub login is not an unlock factor.</li>
+            <li>Every household member must enroll a primary key and independently available backup directly in the isolated vault app, over its verified HTTPS origin.</li>
             <li>Review step-up prompts, session revocation and a separately verified lost-device recovery procedure before entering real passwords.</li>
             <li>Never type or upload recovery codes, authenticator seeds, passphrases or private keys into Hub, Knowledge, AI chat or this review screen.</li>
           </ol>
@@ -130,17 +137,17 @@ export function VaultArchitectureView() {
         <div className="vault-threats">
           {vaultMfaDenialCases.map(item => <article key={item.situation}><strong>{item.situation}</strong><p>{item.requirement}</p></article>)}
         </div>
-        <p className="vault-architecture-note">Build 121 policy review: <strong>{mfa.production_security_acceptance}</strong>. Provider not approved; vault access denied; authenticator enrollment, step-up and recovery code issuance disabled. These cards never assert working two-factor security.</p>
+        <p className="vault-architecture-note">Build 121 policy review: <strong>{mfa.production_security_acceptance}</strong>. Our implementation not security-approved; vault access denied; authenticator enrollment, step-up and recovery code issuance disabled. These cards never assert working two-factor security.</p>
       </section>
 
       <details className="camera-acceptance-help" open>
         <summary><span aria-hidden="true">i</span> How our vault will work</summary>
         <ol>
           <li>Sign into our Hub as usual and choose <strong>Vault</strong>. Hub authentication alone will not unlock passwords.</li>
-          <li>After a separate reviewed vault server is installed, open its dedicated private HTTPS client. The Hub must never collect the master password or proxy a decrypted vault.</li>
+          <li>After our separately reviewed local vault service is installed, open its dedicated private HTTPS client. The Hub must never collect the master password or proxy decrypted entries or files.</li>
           <li>Each household member unlocks their own vault with their own credentials and a second factor at login. Explicitly shared items remain separate from personal items.</li>
-          <li>Keep recipes, car maintenance procedures and digital owners manuals in <strong>Knowledge</strong>, never passwords or recovery codes.</li>
-          <li>Until Builds 120–122 are reviewed, continue using an existing trustworthy password manager and do not upload passwords here.</li>
+          <li>Keep public recipes, car maintenance procedures and ordinary owners manuals in <strong>Knowledge</strong>; keep private documents in the encrypted vault once approved, never in AI indexes.</li>
+          <li>Until our design passes independent review and field acceptance, keep using our current trusted storage and do not upload passwords or private documents here.</li>
         </ol>
       </details>
 
@@ -148,13 +155,13 @@ export function VaultArchitectureView() {
         <article className="vault-security-card">
           <p className="eyebrow">Data location</p>
           <h2>Our Windows server</h2>
-          <p>Candidate: a maintained Bitwarden self-hosted service in a separately isolated runtime, with encrypted private vault records and no Hub database copies.</p>
-          <small>Not selected or installed yet. Licensing, resource demands and secure HTTPS must be checked first.</small>
+          <p>Our own isolated vault service, built with reviewed security libraries, encrypted personal records and documents, and no Hub database copies.</p>
+          <small>Not installed. Hardware capacity, isolation and safe private HTTPS must be checked first.</small>
         </article>
         <article className="vault-security-card">
           <p className="eyebrow">Access</p>
           <h2>Hub shortcut, separate unlock</h2>
-          <p>The future Hub shortcut may open the trusted vault web app, but the vault will keep its own login, session, lock timer and individual encryption keys.</p>
+          <p>The future Hub shortcut may open our dedicated private vault web app, but it will keep its own login, session, lock timer and individual encryption keys.</p>
           <small>No password fields or vault API are present in Build 119.</small>
         </article>
         <article className="vault-security-card">
@@ -188,7 +195,7 @@ export function VaultArchitectureView() {
         </div>
       </section>
 
-      <p className="vault-architecture-note">Security design result: <strong>{gate.production_security_acceptance}</strong> for real passwords. Build 120 is limited to preparation; a separately approved encrypted-vault installation, Build 121 two-factor and recovery, and Build 122 security tests and Windows acceptance must pass before any live password storage is permitted. Hub Secrets remains for integration tokens only; Knowledge and AI never get vault access.</p>
+      <p className="vault-architecture-note">Security design result: <strong>{gate.production_security_acceptance}</strong> for real passwords and private documents. Build 124 selects our first-party local development direction only; independent security review, isolated encryption implementation, real MFA, negative tests and owner-observed Windows acceptance are mandatory before any live storage. Hub Secrets remains for integration tokens only; Knowledge and AI never get vault access.</p>
     </section>
   );
 }
