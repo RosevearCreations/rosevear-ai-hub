@@ -782,3 +782,9 @@ Each build must:
 - test threat-model controls, encryption/rotation, lost device/session, invalid 2FA, offline backup restoration, and secret leakage through logs, browser caches, AI and Knowledge
 - verify family Hub-client access, dual private LAN/Tailscale paths, session timeout, clipboard redaction, accessibility and Windows restart survival
 - classify GitHub CI evidence separately from actual server installation and owner-supervised field security acceptance
+
+### Build 123 — Provider Decision Packet & Deployment Approval Boundary (owner review only)
+- gather eight vendor-neutral approval criteria covering current license, maintained official software, encryption, identity separation, MFA, network isolation, encrypted backup and reversible pilot
+- display three candidate approaches for investigation without asserting current licensing or choosing a provider; make required owner decision and independent security review prominent
+- keep all live credential intake, provider installation, private origin, MFA, secret persistence and field acceptance on unconditional HOLD regardless of forged checklist reviews
+- see docs/BUILD_123_VAULT_PROVIDER_DECISION.md; no live password-manager installation may proceed until a separate explicit owner provider/hosting choice

@@ -2,6 +2,7 @@ import { assessVaultSecurityArchitecture, vaultControls, vaultThreats } from "./
 import { assessVaultPreparation, vaultPreparationStages } from "./vaultPreparation";
 import { assessVaultMfaReadiness, vaultMfaDenialCases, vaultMfaReviewGates } from "./vaultMfaReadiness";
 import { assessVaultSecurityVerification, vaultVerificationChecks } from "./vaultSecurityVerification";
+import { assessVaultProviderDecision, vaultProviderCriteria, vaultProviderOptions } from "./vaultProviderDecision";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
@@ -9,12 +10,13 @@ export function VaultArchitectureView() {
   const preparation = assessVaultPreparation();
   const mfa = assessVaultMfaReadiness();
   const verification = assessVaultSecurityVerification();
+  const provider = assessVaultProviderDecision();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 122 · Windows security acceptance planning</p>
+          <p className="eyebrow">Build 123 · owner provider-decision packet</p>
           <h1>Private password vault</h1>
           <p className="lede">A separate locally hosted keeper is planned for each household member, opened from the Hub client through a dedicated private HTTPS address after security acceptance.</p>
         </div>
@@ -25,6 +27,35 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the architecture and safety review—not a working vault. Credential entry, password retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <section className="panel" aria-label="Password keeper provider decision packet">
+        <div className="vault-gates-heading">
+          <div><h2>Choose our independent password keeper</h2><p>Compare real provider terms before installation. None of the options below has been selected or approved.</p></div>
+          <span className="vault-gate-badge">OWNER DECISION REQUIRED</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> How we choose safely</summary>
+          <ol>
+            <li>Review current official licensing, supported family sharing, Windows resources and security documentation for each option.</li>
+            <li>Approve one maintained provider and an isolated private HTTPS deployment plan in a separate owner decision; no changes are made by this page.</li>
+            <li>Only after that decision, schedule a disposable-account pilot, backup/recovery tests and owner-supervised Windows acceptance.</li>
+            <li>Keep real passwords in our existing trusted manager until the pilot passes. Never paste credentials or recovery codes into Hub or AI chat.</li>
+          </ol>
+        </details>
+        <div className="vault-security-grid">
+          {vaultProviderOptions.map(option => <article className="vault-security-card" key={option.title}>
+            <p className="eyebrow">Candidate approach</p><h2>{option.title}</h2><p>{option.note}</p><small>Unselected · verify current terms</small>
+          </article>)}
+        </div>
+        <h3>Evidence to review before approval</h3>
+        <div className="vault-security-grid">
+          {vaultProviderCriteria.map((item, index) => <article className="vault-security-card" key={item.id}>
+            <p className="eyebrow">Decision gate {index + 1} / {vaultProviderCriteria.length}</p>
+            <h2>{item.title}</h2><p>{item.ownerQuestion}</p><small>Evidence: {item.evidence}</small>
+          </article>)}
+        </div>
+        <p className="vault-architecture-note">Build 123 decision status: <strong>{provider.production_security_acceptance}</strong>. No provider selected, no installation authorized, and no password storage enabled—even if every paperwork review is marked complete.</p>
+      </section>
 
       <section className="panel" aria-label="Vault security verification and Windows owner acceptance">
         <div className="vault-gates-heading">
