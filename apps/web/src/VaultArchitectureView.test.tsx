@@ -19,6 +19,9 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByText("HOLD · MFA OFF")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Windows vault security verification" })).toBeInTheDocument();
     expect(screen.getByText("FIELD ACCEPTANCE HOLD")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Choose our independent password keeper" })).toBeInTheDocument();
+    expect(screen.getByText("OWNER DECISION REQUIRED")).toBeInTheDocument();
+    expect(screen.getByText(/No provider selected, no installation authorized, and no password storage enabled/)).toBeInTheDocument();
     expect(screen.getByText(/field evidence unavailable, real MFA disabled and password intake blocked/)).toBeInTheDocument();
     expect(screen.getByText(/authenticator enrollment, step-up and recovery code issuance disabled/)).toBeInTheDocument();
     expect(screen.getByText(/Provider: not approved; service: not installed; client unlock: disabled/)).toBeInTheDocument();

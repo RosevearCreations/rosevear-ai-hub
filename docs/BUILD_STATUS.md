@@ -1978,3 +1978,13 @@ See docs/BUILD_121_MFA_RECOVERY_READINESS.md. Next queued: Build 122 — Passwor
 - [ ] Actual provider selection/approval, installed Windows vault testing and owner witnessed physical acceptance remain HOLD
 
 See docs/BUILD_122_VAULT_SECURITY_WINDOWS_ACCEPTANCE.md. Next milestone requires explicit selection and security approval of the independent vault provider; do not enable live password intake by advancing build numbers.
+
+## Build 123 — Provider Decision & Deployment Approval Packet
+- [x] Read-only owner decision workbench, accessible through signed-in Vault page with circled-i contextual help
+- [x] Evidence criteria for current provider terms, software updates, encryption, household accounts, MFA, private HTTPS, recovery and safe pilot
+- [x] Three unselected approach descriptions; no assumed provider suitability or unverified licensing claim
+- [x] Pure fail-closed decision assessment: forged review flags and failures cannot select a provider, authorize installation or enable any vault secret
+- [ ] Independent local and GitHub PR/dev/main source checks GREEN
+- [ ] Owner selects/approves a provider and security architecture, then independently authorizes an isolated deployment and Windows field verification
+
+See docs/BUILD_123_VAULT_PROVIDER_DECISION.md. Live vault and credential entry remain on HOLD until explicit owner approval and successful supervised testing.
