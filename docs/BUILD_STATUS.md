@@ -2033,3 +2033,14 @@ See docs/BUILD_126_SYNTHETIC_CRYPTO_TAMPER.md. Next queued Build 127 — Isolate
 - [ ] Independent review of actual service, identity and key-management design before any deployment or real data
 
 See docs/BUILD_127_VAULT_SERVICE_IDENTITY_BOUNDARY.md. Next proposed Build 128 — Disposable Document Pipeline & Integrity Preparation (future explicit security review required).
+
+## Build 128 — Disposable Document Pipeline & Integrity Preparation
+- [x] Extend approved W3C Web Crypto AES-256-GCM tests to **invented memory-only document bytes** (maximum 4096 bytes); reject simulated external document inputs and empty/oversized fixtures
+- [x] Encrypt bounded independent chunks with non-exportable ephemeral keys, fresh random IVs and context binding to dummy owner/document/revision, envelope ID, declared byte length, chunk count and index
+- [x] Denial tests for tampered ciphertext/tag/IV, wrong key/identity, mixed encrypted envelopes, missing/extra/reordered/duplicated chunks and truncated data
+- [x] Demonstrate that a complete old document envelope still decrypts; production must have a separately reviewed anti-rollback/version ledger
+- [x] Read-only six-stage file safety and isolation guidance, five negative cases and circled-i help; no file UI, backend endpoints, persistent keys or real files
+- [ ] Independent code/security audit, MIME/active-content policy, actual browser and supervised Windows security acceptance remain HOLD
+- [ ] CI verification and promotions dev/main must be observed separately; passing source tests never authorize production documents or passwords
+
+See docs/BUILD_128_SYNTHETIC_DOCUMENT_PIPELINE.md. Next proposed Build 129 — Document Recovery & Anti-Rollback Ledger Design (review-only).

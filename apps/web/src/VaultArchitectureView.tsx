@@ -7,6 +7,7 @@ import { assessLocalVaultBlueprint, localVaultRecordKinds, localVaultSecurityGat
 import { assessVaultThreatCryptoReview, vaultCryptoCandidates, vaultDesignDecisions, vaultThreatScenarios, vaultTrustBoundaries } from "./vaultThreatCryptoReview";
 import { assessVaultSyntheticHarness, vaultSyntheticCases } from "./vaultSyntheticHarnessPolicy";
 import { assessVaultServiceBoundary, vaultServiceBoundaries, vaultServiceDenialCases } from "./vaultServiceBoundary";
+import { assessVaultDocumentPreparation, vaultDocumentDenialCases, vaultDocumentReviewStages } from "./vaultDocumentPreparation";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
@@ -19,12 +20,13 @@ export function VaultArchitectureView() {
   const threatReview = assessVaultThreatCryptoReview();
   const synthetic = assessVaultSyntheticHarness();
   const servicePreview = assessVaultServiceBoundary();
+  const documents = assessVaultDocumentPreparation();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 127 · isolated service security preparation</p>
+          <p className="eyebrow">Build 128 · synthetic document integrity preparation</p>
           <h1>Private password and document vault</h1>
           <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
@@ -35,6 +37,38 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <section className="panel" aria-label="Build 128 disposable document pipeline and integrity review">
+        <div className="vault-gates-heading">
+          <div>
+            <h2>Private document pipeline &amp; integrity preparation</h2>
+            <p>Encrypted chunk tests use invented bytes only. No household document is accepted, uploaded, previewed, downloaded or stored. Future file safety and Windows acceptance remain separate reviews.</p>
+          </div>
+          <span className="vault-gate-badge">DOCUMENTS OFF · {documents.production_security_acceptance}</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> What a passing document test means</summary>
+          <ol>
+            <li>Test-only Web Crypto uses temporary, non-exportable AES-256-GCM keys and invented in-memory bytes. The cryptographic chunk code is not shipped into our Hub app.</li>
+            <li>Chunks are bound to dummy owner, document, revision, fresh envelope ID, declared length, chunk count and position. Tampered, missing or mixed chunks fail the test harness.</li>
+            <li>An entire valid old encrypted document can still be replayed: a future independently reviewed service must enforce monotonic versions and reliable recovery.</li>
+            <li>Real PDFs, images and documents need separate type validation, active-content defences, upload limits and Windows field review. Do not use this page to enter or import private files.</li>
+          </ol>
+        </details>
+        <h3>Six document handling boundaries</h3>
+        <div className="vault-security-grid">
+          {vaultDocumentReviewStages.map(item => <article className="vault-security-card" key={item.id}>
+            <p className="eyebrow">Review required · not deployed</p><h2>{item.title}</h2><p>{item.requirement}</p>
+          </article>)}
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> Document integrity denial and replay cases</summary>
+          <div className="vault-threats">
+            {vaultDocumentDenialCases.map(item => <article key={item.id}><strong>{item.title}</strong><p>{item.expected}</p></article>)}
+          </div>
+        </details>
+        <p className="vault-architecture-note">Document contract: <strong>{documents.phase}</strong>. File pickers, upload APIs, preview/download, permanent encrypted storage, vault sessions, MFA and installed Windows document services all remain <strong>DISABLED / HOLD</strong>.</p>
+      </section>
 
       <section className="panel" aria-label="Build 127 isolated vault service and identity review">
         <div className="vault-gates-heading">
