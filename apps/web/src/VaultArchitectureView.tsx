@@ -13,6 +13,7 @@ import { assessVaultWindowsAcceptance, vaultWindowsAcceptanceDenials, vaultWindo
 import { assessVaultSecurityFindingsReview, vaultRemediationDenials, vaultRemediationReviewStages } from "./vaultSecurityFindingsReview";
 import { assessVaultAssessorHandoff, vaultAssessorHandoffDenials, vaultAssessorHandoffScopes } from "./vaultAssessorHandoff";
 import { assessVaultChangeImpactReview, vaultChangeImpactDenials, vaultChangeImpactKinds } from "./vaultChangeImpactReview";
+import { assessVaultReadinessDashboard, vaultReadinessMilestones, vaultReviewNavigation } from "./vaultReadinessDashboard";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
@@ -31,12 +32,13 @@ export function VaultArchitectureView() {
   const findingsReview = assessVaultSecurityFindingsReview();
   const handoff = assessVaultAssessorHandoff();
   const changeReview = assessVaultChangeImpactReview();
+  const readiness = assessVaultReadinessDashboard();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 133 · vault change-impact reassessment &amp; mandatory retest mapping</p>
+          <p className="eyebrow">Build 134 · vault security readiness command center &amp; review navigation</p>
           <h1>Private password and document vault</h1>
           <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
@@ -48,7 +50,44 @@ export function VaultArchitectureView() {
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
 
-      <section className="panel" aria-label="Build 133 vault change-impact reassessment and retest mapping">
+      <section className="panel" id="vault-readiness" tabIndex={-1} aria-label="Build 134 vault security readiness command center">
+        <div className="vault-gates-heading">
+          <div>
+            <h2>Vault security readiness command center</h2>
+            <p>One place to see what is still blocking real password and document storage, and jump directly to the detailed review. All sections below are read-only plans; none of the security milestones is independently verified.</p>
+          </div>
+          <span className="vault-gate-badge">{readiness.independently_verified_milestones} / {readiness.required_milestones} VERIFIED · {readiness.production_security_acceptance}</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> Using the vault readiness summary safely</summary>
+          <ol>
+            <li>Start with the six unverified milestones. Their status is fixed to the real known state, not calculated from a simulated checklist, a Hub administrator role or GitHub Actions GREEN.</li>
+            <li>Select a review link to move to the relevant section on this page. These links never install services, collect secrets or change security permissions.</li>
+            <li>The next real prerequisite is a specific reviewable first-party vault implementation with separately approved cryptography and service design, followed by an independent assessment.</li>
+            <li>Only separately authorized disposable-data Windows testing and owner-witnessed acceptance could eventually reconsider live use. Do not enter real passwords or private files here.</li>
+          </ol>
+        </details>
+        <h3>Six outstanding security milestones</h3>
+        <div className="vault-security-grid">
+          {vaultReadinessMilestones.map(item => <article className="vault-security-card" key={item.id}>
+            <p className="eyebrow">Unverified · {item.state}</p>
+            <h2>{item.title}</h2><p>{item.detail}</p>
+            <a className="vault-review-link" href={`#${item.target}`}>Open related review: {item.title}</a>
+          </article>)}
+        </div>
+        <nav className="vault-review-navigation" aria-label="Vault security review sections">
+          <h3>Jump to a review section</h3>
+          <div className="vault-review-links">
+            {vaultReviewNavigation.map(item => <a key={item.id} href={`#${item.id}`}>
+              <span className="vault-review-group">{item.group}</span>
+              <strong>{item.label}</strong>
+            </a>)}
+          </div>
+        </nav>
+        <p className="vault-architecture-note">Build 134 state: <strong>{readiness.phase}</strong>. Independent review: <strong>{readiness.independent_security_review}</strong>. GitHub source checks, accessible navigation or completed synthetic fixtures never enable a Windows vault, MFA, backup/restore, passwords or documents: <strong>REMAINS DISABLED / HOLD</strong>.</p>
+      </section>
+
+      <section className="panel" id="vault-change-impact" tabIndex={-1} aria-label="Build 133 vault change-impact reassessment and retest mapping">
         <div className="vault-gates-heading">
           <div>
             <h2>Vault change-impact reassessment &amp; mandatory retest mapping</h2>
@@ -82,7 +121,7 @@ export function VaultArchitectureView() {
         <p className="vault-architecture-note">Build 133 state: <strong>{changeReview.phase}</strong>. No actual change was independently assessed, no real retest was performed and no Windows vault has been installed. A passing invented change-map is <strong>NOT REVIEW / SECURITY HOLD</strong>.</p>
       </section>
 
-      <section className="panel" aria-label="Build 132 independent vault assessor handoff and evidence readiness">
+      <section className="panel" id="vault-assessor" tabIndex={-1} aria-label="Build 132 independent vault assessor handoff and evidence readiness">
         <div className="vault-gates-heading">
           <div>
             <h2>Independent assessor handoff &amp; evidence readiness</h2>
@@ -116,7 +155,7 @@ export function VaultArchitectureView() {
         <p className="vault-architecture-note">Build 132 state: <strong>{handoff.phase}</strong>. Real review, source-to-Windows artifact verification, Windows pilot approval, password/document intake, MFA, backups and recovery all remain <strong>NOT VERIFIED / HOLD</strong>. Completing a fictional scope packet never lifts this gate.</p>
       </section>
 
-      <section className="panel" aria-label="Build 131 independent vault security findings and remediation triage">
+      <section className="panel" id="vault-findings" tabIndex={-1} aria-label="Build 131 independent vault security findings and remediation triage">
         <div className="vault-gates-heading">
           <div>
             <h2>Independent vault findings &amp; remediation triage</h2>
@@ -149,7 +188,7 @@ export function VaultArchitectureView() {
         <p className="vault-architecture-note">Build 131 state: <strong>{findingsReview.phase}</strong>. No independent auditor has been engaged, no real findings or sign-offs have been collected, and no Windows pilot was approved. Synthetic issue triage is not a security certificate: <strong>VAULT OFF / HOLD</strong>.</p>
       </section>
 
-      <section className="panel" aria-label="Build 130 independent Windows vault security and owner acceptance protocol">
+      <section className="panel" id="vault-windows" tabIndex={-1} aria-label="Build 130 independent Windows vault security and owner acceptance protocol">
         <div className="vault-gates-heading">
           <div>
             <h2>Independent Windows vault security &amp; owner acceptance protocol</h2>
@@ -182,7 +221,7 @@ export function VaultArchitectureView() {
         <p className="vault-architecture-note">Build 130 contract: <strong>{windowsAcceptance.phase}</strong>. Independent audit, signed owner observation, reviewed executable, vault-only MFA, real document intake, trusted backup/restore and Windows installation remain <strong>NOT VERIFIED / HOLD</strong>. Even a complete synthetic checklist never lifts this gate.</p>
       </section>
 
-      <section className="panel" aria-label="Build 129 recovery and anti-rollback ledger review">
+      <section className="panel" id="vault-recovery" tabIndex={-1} aria-label="Build 129 recovery and anti-rollback ledger review">
         <div className="vault-gates-heading">
           <div>
             <h2>Document recovery &amp; anti-rollback ledger design</h2>
@@ -214,7 +253,7 @@ export function VaultArchitectureView() {
         <p className="vault-architecture-note">Recovery contract: <strong>{recovery.phase}</strong>. The test has no separately secured witness, durable transaction, backup or Windows field acceptance. Document intake, offline restore and every live vault operation remain <strong>DISABLED / HOLD</strong>.</p>
       </section>
 
-      <section className="panel" aria-label="Build 128 disposable document pipeline and integrity review">
+      <section className="panel" id="vault-documents" tabIndex={-1} aria-label="Build 128 disposable document pipeline and integrity review">
         <div className="vault-gates-heading">
           <div>
             <h2>Private document pipeline &amp; integrity preparation</h2>
@@ -246,7 +285,7 @@ export function VaultArchitectureView() {
         <p className="vault-architecture-note">Document contract: <strong>{documents.phase}</strong>. File pickers, upload APIs, preview/download, permanent encrypted storage, vault sessions, MFA and installed Windows document services all remain <strong>DISABLED / HOLD</strong>.</p>
       </section>
 
-      <section className="panel" aria-label="Build 127 isolated vault service and identity review">
+      <section className="panel" id="vault-service" tabIndex={-1} aria-label="Build 127 isolated vault service and identity review">
         <div className="vault-gates-heading">
           <div>
             <h2>Independent vault service &amp; family identity boundary</h2>
@@ -306,7 +345,7 @@ export function VaultArchitectureView() {
         <p className="vault-architecture-note">Approved test primitive: <strong>{synthetic.owner_approved_test_primitive}</strong>. This approval is limited to disposable, in-memory fixtures; production cryptography, vault access, actual account authentication and storage remain <strong>{synthetic.production_security_acceptance}</strong>.</p>
       </section>
 
-      <section className="panel" aria-label="First-party vault threat model and cryptography review">
+      <section className="panel" id="vault-crypto-review" tabIndex={-1} aria-label="First-party vault threat model and cryptography review">
         <div className="vault-gates-heading">
           <div>
             <h2>Threat model &amp; encryption library review</h2>
@@ -368,7 +407,7 @@ export function VaultArchitectureView() {
         <p className="vault-architecture-note">Build 125 review status: <strong>{threatReview.production_security_acceptance}</strong>. No library is approved, no encryption runtime installed, and no credential intake, document upload, vault API, MFA enrollment or recovery service is enabled—even when a checklist is marked complete.</p>
       </section>
 
-      <section className="panel" aria-label="First-party local vault implementation blueprint">
+      <section className="panel" id="vault-blueprint" tabIndex={-1} aria-label="First-party local vault implementation blueprint">
         <div className="vault-gates-heading">
           <div><h2>Our own local vault: direction selected</h2><p>No third-party vault hosting or commercial password-manager service is planned. Security review and physical deployment approval are still required.</p></div>
           <span className="vault-gate-badge">SECURITY REVIEW REQUIRED</span>
@@ -427,7 +466,7 @@ export function VaultArchitectureView() {
         <p className="vault-architecture-note">Build 122 source review: <strong>{verification.production_security_acceptance}</strong> for the installed Windows vault. Our own implementation is unreviewed, field evidence unavailable, real MFA disabled and password intake blocked. These checks do not collect credentials or claim that the physical server was tested.</p>
       </section>
 
-      <section className="panel" aria-label="Vault isolation and client lock preparation">
+      <section className="panel" id="vault-lock" tabIndex={-1} aria-label="Vault isolation and client lock preparation">
         <div className="vault-gates-heading">
           <div><h2>Isolation and client-lock readiness</h2><p>Planning only. These checks cannot enable a vault, even when marked reviewed.</p></div>
           <span className="vault-gate-badge">{preparation.phase.replace("_", " ")}</span>
@@ -449,7 +488,7 @@ export function VaultArchitectureView() {
         <p className="vault-architecture-note">Build 120 preparation: <strong>{preparation.production_security_acceptance}</strong>. Our design: not security-approved; service: not installed; client unlock: disabled. This screen contains no credential entry, activation control or vault network endpoint.</p>
       </section>
 
-      <section className="panel" aria-label="Hardware key and emergency recovery readiness">
+      <section className="panel" id="vault-mfa" tabIndex={-1} aria-label="Hardware key and emergency recovery readiness">
         <div className="vault-gates-heading">
           <div><h2>Passkeys, step-up and emergency recovery</h2><p>Eight required reviews for our future isolated vault application. No authenticator can be enrolled from the Hub.</p></div>
           <span className="vault-gate-badge">{mfa.production_security_acceptance} · MFA OFF</span>
