@@ -892,9 +892,9 @@ Each build must:
 
 ## Phase 12 — Practical Home, Device, Camera and Workshop Operations (queued)
 
-Builds 138–139 are implemented in source; 140–147 remain queued. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
+Builds 138–139 reached `main` source GREEN; Build 140 is implemented and awaiting promotion, while 141–147 remain queued. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
 
-### Build 138 — Home Operations V2: Rooms, Health & Quick Navigation (IMPLEMENTED · source promotion pending)
+### Build 138 — Home Operations V2: Rooms, Health & Quick Navigation (PROMOTED · source GREEN)
 - replace generic status-only landing cards with a functional room/context command center for Home, Cameras, Workshop and Services, with direct routes to the matching operational views
 - compose bounded live/explicitly refreshed integration summaries from existing authorized Home Assistant, MQTT, camera, Ollama and Hub health APIs; label each source's last observation and unavailable/unconfigured state rather than inventing health
 - add room/category filters, responsive cards, mobile-accessible navigation, keyboard focus and contextual circled-i help; preserve current operator roles and safe refresh handling
@@ -902,7 +902,7 @@ Builds 138–139 are implemented in source; 140–147 remain queued. Deliver one
 
 Implementation and verification details: `docs/BUILD_138_HOME_OPERATIONS_V2.md`. Source promotion and independent Windows field acceptance remain distinct.
 
-### Build 139 — Device 360 Registry, Identity Matching & Room Assignment (IMPLEMENTED · source promotion pending)
+### Build 139 — Device 360 Registry, Identity Matching & Room Assignment (PROMOTED · source GREEN)
 - unify inventory presentation across existing Home Assistant entity/device IDs, approved MQTT mappings and camera registry references, keeping provider identity and integration provenance distinguishable
 - owner-review proposed duplicate candidates, rename/room metadata and unknown/unsupported devices without silently joining different physical devices or re-pairing them
 - provide searchable, filterable device detail with source-linked last-seen data, capabilities, safe action eligibility and missing-device recovery link
@@ -910,11 +910,13 @@ Implementation and verification details: `docs/BUILD_138_HOME_OPERATIONS_V2.md`.
 
 Implementation and verification: `docs/BUILD_139_DEVICE_360_REGISTRY.md`. Provider identities and owner-reviewed annotations remain separate. The household Windows installation is not automatically updated by the source release.
 
-### Build 140 — Guided Device Discovery Inbox & Owner-Safe Adoption (QUEUED · priority 3)
+### Build 140 — Guided Device Discovery Inbox & Owner-Safe Adoption (IMPLEMENTED · source promotion pending)
 - create an explicit operator-started discovery inbox for Home Assistant, supported MQTT mappings and existing camera candidate previews, with source, confidence and duplicate warnings
 - review one candidate at a time before adoption; separate discoverable, observed, approved, unsupported and rejected states; no default auto-enrollment or credential scraping
 - include a manual legacy/X10 compatibility note and safe Home Assistant bridge path where supported, without pretending direct X10-to-Meross control is implemented
 - **Acceptance:** scanning is opt-in, rejection or timeout changes no existing device, replay/duplicate adoption is blocked, and camera/HA permissions are never bypassed
+
+Implementation, tests and Windows field-acceptance boundary: `docs/BUILD_140_GUIDED_DEVICE_DISCOVERY.md`. Source delivery does not enroll Home Assistant devices, connect MQTT topics or certify real camera operation.
 
 ### Build 141 — Camera Wall V2: Room Groups, Health & Private Views (QUEUED · priority 4)
 - give approved cameras responsive room/site groups, readable health badges, available still previews and operator-selected larger playback panels
@@ -958,4 +960,4 @@ Implementation and verification: `docs/BUILD_139_DEVICE_360_REGISTRY.md`. Provid
 - audit existing Help content for outdated claims (especially Vault: our selected first-party plan is **not** a third-party password-manager installation) and align advice with implemented features only
 - **Acceptance:** keyboard/screen-reader and narrow-screen tests pass, cross-view links work, and help never offers nonexistent capabilities or encourages dangerous Windows/vault workarounds
 
-**Queue policy:** 10 planned builds (138–147), none started. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+**Queue policy:** 138–140 implemented in source; seven planned builds (141–147) remain. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.

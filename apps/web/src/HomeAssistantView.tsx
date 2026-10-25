@@ -14,6 +14,7 @@ import {
   type HomeAssistantStatus,
 } from "./api";
 import { DeviceCameraRecoveryPanel } from "./DeviceCameraRecoveryPanel";
+import { DeviceDiscoveryInbox } from "./DeviceDiscoveryInbox";
 import { DeviceRegistry360 } from "./DeviceRegistry360";
 import { HomeAssistantDiscoveryPanel } from "./HomeAssistantDiscoveryPanel";
 
@@ -179,6 +180,7 @@ export function HomeAssistantView({ currentUser }: { currentUser: AuthUser }) {
 
       {actionMessage ? <p className="runtime-status" role="status">{actionMessage}</p> : null}
 
+      <DeviceDiscoveryInbox role={currentUser.role} />
       <DeviceRegistry360 role={currentUser.role} browser={browser} policy={policy}
         onRefreshInventory={() => refresh()} />
       <DeviceCameraRecoveryPanel />
