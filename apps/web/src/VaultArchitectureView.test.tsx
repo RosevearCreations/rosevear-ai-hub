@@ -89,7 +89,7 @@ describe("Build 119 Hub client architecture screen", () => {
   it("provides keyboard-accessible local review links with real matching sections and no data submission", () => {
     render(<VaultArchitectureView />);
     const nav = screen.getByRole("navigation", { name: "Vault security review sections" });
-    const anchors = Array.from(nav.querySelectorAll("a"));
+    const anchors = Array.from(nav.querySelectorAll(".vault-review-entry a"));
     expect(anchors).toHaveLength(11);
     for (const anchor of anchors) {
       const href = anchor.getAttribute("href");
@@ -107,14 +107,14 @@ describe("Build 119 Hub client architecture screen", () => {
     render(<VaultArchitectureView />);
     const nav = screen.getByRole("navigation", { name: "Vault security review sections" });
     fireEvent.change(screen.getByRole("searchbox", { name: "Find by topic" }), { target: { value: "hardware" } });
-    expect(nav.querySelectorAll("a")).toHaveLength(1);
-    expect(nav.querySelector("a")?.getAttribute("href")).toBe("#vault-mfa");
+    expect(nav.querySelectorAll(".vault-review-entry a")).toHaveLength(1);
+    expect(nav.querySelector(".vault-review-entry a")?.getAttribute("href")).toBe("#vault-mfa");
     expect(screen.getByText("1 of 11 review sections shown.")).toBeInTheDocument();
     fireEvent.change(screen.getByRole("combobox", { name: "Review category" }), { target: { value: "Data protection" } });
-    expect(nav.querySelectorAll("a")).toHaveLength(0);
+    expect(nav.querySelectorAll(".vault-review-entry a")).toHaveLength(0);
     expect(screen.getByText("No review headings match. This finder never searches real vault data.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Show all review sections" }));
-    expect(nav.querySelectorAll("a")).toHaveLength(11);
+    expect(nav.querySelectorAll(".vault-review-entry a")).toHaveLength(11);
     expect(screen.getByRole("searchbox", { name: "Find by topic" })).toHaveValue("");
     expect(screen.getByRole("combobox", { name: "Review category" })).toHaveValue("All sections");
     expect(fetchSpy).not.toHaveBeenCalled();
@@ -140,12 +140,12 @@ describe("Build 119 Hub client architecture screen", () => {
     const nav = screen.getByRole("navigation", { name: "Vault security review sections" });
     const route = screen.getByRole("combobox", { name: "Suggested review route" });
     fireEvent.change(route, { target: { value: "design" } });
-    expect(Array.from(nav.querySelectorAll("a")).map(link => link.getAttribute("href"))).toEqual([
+    expect(Array.from(nav.querySelectorAll(".vault-review-entry a")).map(link => link.getAttribute("href"))).toEqual([
       "#vault-blueprint", "#vault-crypto-review", "#vault-service", "#vault-lock", "#vault-mfa", "#vault-documents",
     ]);
     expect(screen.getByText(/This is a reading plan only; every vault security milestone remains on HOLD/)).toBeInTheDocument();
     fireEvent.change(route, { target: { value: "audit" } });
-    expect(Array.from(nav.querySelectorAll("a")).map(link => link.getAttribute("href"))).toEqual([
+    expect(Array.from(nav.querySelectorAll(".vault-review-entry a")).map(link => link.getAttribute("href"))).toEqual([
       "#vault-assessor", "#vault-findings", "#vault-change-impact",
     ]);
     expect(screen.getByText("0 / 6 VERIFIED · HOLD")).toBeInTheDocument();
@@ -161,11 +161,11 @@ describe("Build 119 Hub client architecture screen", () => {
     fireEvent.click(pin);
     expect(screen.getByRole("button", { name: "Unpin MFA & recovery readiness" })).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByRole("checkbox", { name: "Show pinned sections only (1)" }));
-    expect(Array.from(nav.querySelectorAll("a")).map(link => link.getAttribute("href"))).toEqual(["#vault-mfa"]);
+    expect(Array.from(nav.querySelectorAll(".vault-review-entry a")).map(link => link.getAttribute("href"))).toEqual(["#vault-mfa"]);
     fireEvent.change(screen.getByRole("combobox", { name: "Suggested review route" }), { target: { value: "audit" } });
-    expect(nav.querySelectorAll("a")).toHaveLength(0);
+    expect(nav.querySelectorAll(".vault-review-entry a")).toHaveLength(0);
     fireEvent.click(screen.getByRole("button", { name: "Show all review sections" }));
-    expect(nav.querySelectorAll("a")).toHaveLength(11);
+    expect(nav.querySelectorAll(".vault-review-entry a")).toHaveLength(11);
     expect(screen.getByRole("checkbox", { name: "Show pinned sections only (1)" })).not.toBeChecked();
     fireEvent.click(screen.getByRole("button", { name: "Clear session pins" }));
     expect(screen.getByRole("button", { name: "Pin MFA & recovery readiness" })).toHaveAttribute("aria-pressed", "false");
@@ -173,5 +173,52 @@ describe("Build 119 Hub client architecture screen", () => {
     render(<VaultArchitectureView />);
     expect(screen.getByRole("checkbox", { name: "Show pinned sections only (0)" })).not.toBeChecked();
     expect(screen.getByRole("button", { name: "Pin MFA & recovery readiness" })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("tracks reading progress within the route, offers next unread, and resets with no persistence", () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    const { unmount } = render(<VaultArchitectureView />);
+    const nav = screen.getByRole("navigation", { name: "Vault security review sections" });
+    expect(screen.getByRole("region", { name: "Temporary reading progress" })).toHaveTextContent("0 / 11 headings marked read in this route");
+    expect(screen.getByRole("link", { name: "Continue to next unread section" })).toHaveAttribute("href", "#vault-change-impact");
+    fireEvent.change(screen.getByRole("combobox", { name: "Suggested review route" }), { target: { value: "design" } });
+    expect(screen.getByRole("region", { name: "Temporary reading progress" })).toHaveTextContent("0 / 6 headings marked read in this route");
+    expect(screen.getByRole("link", { name: "Continue to next unread section" })).toHaveAttribute("href", "#vault-blueprint");
+    const mark = screen.getByRole("button", { name: "Mark First-party blueprint read for this visit" });
+    expect(mark).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(mark);
+    expect(screen.getByRole("button", { name: "Mark First-party blueprint unread" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("region", { name: "Temporary reading progress" })).toHaveTextContent("1 / 6 headings marked read in this route");
+    expect(screen.getByRole("link", { name: "Continue to next unread section" })).toHaveAttribute("href", "#vault-crypto-review");
+    fireEvent.click(screen.getByRole("checkbox", { name: "Show unread headings only (10)" }));
+    expect(nav.querySelectorAll(".vault-review-entry a")).toHaveLength(5);
+    expect(screen.queryByRole("button", { name: "Mark First-party blueprint unread" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Reset reading markers" }));
+    expect(nav.querySelectorAll(".vault-review-entry a")).toHaveLength(6);
+    expect(screen.getByRole("checkbox", { name: "Show unread headings only (11)" })).not.toBeChecked();
+    expect(screen.getByText("0 / 6 VERIFIED · HOLD")).toBeInTheDocument();
+    expect(fetchSpy).not.toHaveBeenCalled();
+    unmount();
+    render(<VaultArchitectureView />);
+    expect(screen.getByRole("region", { name: "Temporary reading progress" })).toHaveTextContent("0 / 11 headings marked read in this route");
+    expect(screen.getByRole("button", { name: "Mark First-party blueprint read for this visit" })).toHaveAttribute("aria-pressed", "false");
+    fetchSpy.mockRestore();
+  });
+
+  it("keeps 11/11 reading separate from audit and safely handles all-read filter with reset", () => {
+    render(<VaultArchitectureView />);
+    const nav = screen.getByRole("navigation", { name: "Vault security review sections" });
+    for (const button of screen.getAllByRole("button", { name: / read for this visit$/ })) fireEvent.click(button);
+    expect(screen.getByRole("region", { name: "Temporary reading progress" })).toHaveTextContent("11 / 11 headings marked read in this route");
+    expect(screen.getByText(/All headings in this route marked read for this visit—no security review was completed/)).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Continue to next unread section" })).not.toBeInTheDocument();
+    expect(screen.getByText("0 / 6 VERIFIED · HOLD")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Show unread headings only (0)" }));
+    expect(nav.querySelectorAll(".vault-review-entry a")).toHaveLength(0);
+    fireEvent.click(screen.getByRole("button", { name: "Show all review sections" }));
+    expect(nav.querySelectorAll(".vault-review-entry a")).toHaveLength(11);
+    expect(screen.getByRole("checkbox", { name: "Show unread headings only (0)" })).not.toBeChecked();
+    fireEvent.click(screen.getByRole("button", { name: "Mark First-party blueprint unread" }));
+    expect(screen.getByRole("link", { name: "Continue to next unread section" })).toHaveAttribute("href", "#vault-blueprint");
   });
 });

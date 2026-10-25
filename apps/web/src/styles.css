@@ -3324,13 +3324,19 @@ h1 {
 .vault-review-route label { color: #382c47; font-weight: 750; }
 .vault-review-route select { padding: .65rem; min-width: 0; width: 100%; background: #fff; color: #262033; border: 1px solid #80728c; border-radius: .55rem; font: inherit; }
 .vault-review-route p { margin: .2rem 0 0; line-height: 1.5; }
+.vault-reading-progress { margin: .7rem 0; padding: .75rem .9rem; border: 1px solid #9e8aaf; border-radius: .7rem; background: #eee8f3; color: #382c47; }
+.vault-reading-progress p { margin: .2rem 0 .55rem; line-height: 1.5; }
+.vault-reading-progress-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem 1rem; }
+.vault-reading-progress-actions .vault-review-link { margin-top: 0; }
+.vault-reading-progress-actions button { padding: .55rem .8rem; background: #563c75; color: #fff; border: 0; border-radius: .55rem; font: inherit; font-weight: 700; cursor: pointer; }
+.vault-reading-progress-actions button:focus-visible { outline: 3px solid #694a88; outline-offset: 3px; }
 .vault-review-pin-options { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; margin: .6rem 0; }
 .vault-review-pin-options label { display: inline-flex; align-items: center; gap: .5rem; font-weight: 700; }
 .vault-review-pin-options input { width: 1.1rem; height: 1.1rem; accent-color: #563c75; }
 .vault-review-privacy-note { margin: .3rem 0 .7rem; font-size: .84rem; color: #475569; }
-.vault-review-entry { display: grid; grid-template-rows: minmax(0, 1fr) auto; border: 1px solid #b7a9be; border-radius: .75rem; background: #f6f2f8; overflow: hidden; }
-.vault-review-entry a { border: 0; border-radius: 0; }
-.vault-review-entry button { justify-self: start; margin: .25rem .85rem .75rem; }
+.vault-review-entry { display: flex; flex-direction: column; align-items: flex-start; border: 1px solid #b7a9be; border-radius: .75rem; background: #f6f2f8; overflow: hidden; }
+.vault-review-entry a { width: 100%; border: 0; border-radius: 0; }
+.vault-review-entry button { margin: .25rem .85rem .5rem; }
 .vault-review-finder label { color: #382c47; font-weight: 700; }
 .vault-review-finder input, .vault-review-finder select { grid-row: 2; min-width: 0; width: 100%; padding: .65rem; border: 1px solid #80728c; border-radius: .55rem; background: #fff; color: #262033; font: inherit; }
 .vault-review-finder input:focus-visible, .vault-review-finder select:focus-visible, .vault-review-route select:focus-visible, .vault-review-entry button:focus-visible, .vault-review-pin-options button:focus-visible, .vault-review-empty button:focus-visible, .vault-print-controls button:focus-visible { outline: 3px solid #694a88; outline-offset: 3px; }
