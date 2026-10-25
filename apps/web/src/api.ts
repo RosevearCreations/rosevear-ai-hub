@@ -1265,6 +1265,48 @@ export function getHomeAssistantBrowser(
   return getJson<HomeAssistantBrowserResponse>("/api/v1/home-assistant/browser", signal);
 }
 
+// Build 139: local review metadata; never a device merge or upstream configuration API.
+export type DeviceRegistrySource = "ha_device" | "ha_entity" | "camera" | "mqtt";
+export type DeviceRegistryIdentity = { source: DeviceRegistrySource; source_id: string };
+export type DeviceRegistryAnnotation = DeviceRegistryIdentity & {
+  alias: string;
+  room_label: string;
+  disposition: "reviewed" | "needs_investigation" | "unsupported";
+  revision: number;
+  reviewed_at: string;
+};
+export type DeviceRegistryMatchReview = {
+  left: DeviceRegistryIdentity;
+  right: DeviceRegistryIdentity;
+  decision: "possible_match" | "distinct" | "investigate";
+  revision: number;
+  reviewed_at: string;
+};
+export type DeviceRegistryReviews = {
+  annotations: DeviceRegistryAnnotation[];
+  matches: DeviceRegistryMatchReview[];
+};
+
+export function getDeviceRegistryReviews(signal?: AbortSignal): Promise<DeviceRegistryReviews> {
+  return authJson<DeviceRegistryReviews>("GET", "/api/v1/device-registry/reviews", undefined, signal);
+}
+
+export function reviewDeviceRegistryAnnotation(
+  payload: DeviceRegistryIdentity & {
+    alias: string; room_label: string;
+    disposition: DeviceRegistryAnnotation["disposition"]; expected_revision: number;
+  },
+): Promise<DeviceRegistryAnnotation> {
+  return authJson<DeviceRegistryAnnotation>("PUT", "/api/v1/device-registry/annotation", payload);
+}
+
+export function reviewDeviceRegistryMatch(payload: {
+  left: DeviceRegistryIdentity; right: DeviceRegistryIdentity;
+  decision: DeviceRegistryMatchReview["decision"]; expected_revision: number;
+}): Promise<DeviceRegistryMatchReview> {
+  return authJson<DeviceRegistryMatchReview>("PUT", "/api/v1/device-registry/match-review", payload);
+}
+
 
 export interface HomeAssistantControlCandidate {
   entity_id: string;

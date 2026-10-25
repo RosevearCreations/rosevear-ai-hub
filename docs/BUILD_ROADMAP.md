@@ -892,7 +892,7 @@ Each build must:
 
 ## Phase 12 — Practical Home, Device, Camera and Workshop Operations (queued)
 
-Builds 138–147 are **planned, not implemented or deployed**. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
+Builds 138–139 are implemented in source; 140–147 remain queued. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
 
 ### Build 138 — Home Operations V2: Rooms, Health & Quick Navigation (IMPLEMENTED · source promotion pending)
 - replace generic status-only landing cards with a functional room/context command center for Home, Cameras, Workshop and Services, with direct routes to the matching operational views
@@ -902,11 +902,13 @@ Builds 138–147 are **planned, not implemented or deployed**. Deliver one build
 
 Implementation and verification details: `docs/BUILD_138_HOME_OPERATIONS_V2.md`. Source promotion and independent Windows field acceptance remain distinct.
 
-### Build 139 — Device 360 Registry, Identity Matching & Room Assignment (QUEUED · priority 2)
+### Build 139 — Device 360 Registry, Identity Matching & Room Assignment (IMPLEMENTED · source promotion pending)
 - unify inventory presentation across existing Home Assistant entity/device IDs, approved MQTT mappings and camera registry references, keeping provider identity and integration provenance distinguishable
 - owner-review proposed duplicate candidates, rename/room metadata and unknown/unsupported devices without silently joining different physical devices or re-pairing them
 - provide searchable, filterable device detail with source-linked last-seen data, capabilities, safe action eligibility and missing-device recovery link
 - **Acceptance:** identity collisions, inaccessible devices and changed provider IDs are handled without destructive merge; unauthorized users cannot edit metadata and existing camera/HA records remain intact
+
+Implementation and verification: `docs/BUILD_139_DEVICE_360_REGISTRY.md`. Provider identities and owner-reviewed annotations remain separate. The household Windows installation is not automatically updated by the source release.
 
 ### Build 140 — Guided Device Discovery Inbox & Owner-Safe Adoption (QUEUED · priority 3)
 - create an explicit operator-started discovery inbox for Home Assistant, supported MQTT mappings and existing camera candidate previews, with source, confidence and duplicate warnings

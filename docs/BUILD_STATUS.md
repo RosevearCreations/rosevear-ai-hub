@@ -2157,8 +2157,8 @@ See `docs/BUILD_138_HOME_OPERATIONS_V2.md`. Vault remains **SECURITY HOLD / 0 of
 ## Next Functional Build Queue — 139–147
 
 - [x] Build 137 merged to `dev` via PR #338 and `main` via PR #339; independent main push workflow `40199282467` completed GREEN (five successful jobs; commit `a0cedcd9aa7509366a64812b7e911d3c7cd62ea2`)
-- [x] **138** — Home Operations V2: Rooms, Health & Quick Navigation (implemented; release verification pending)
-- [ ] **139** — Device 360 Registry, Identity Matching & Room Assignment
+- [x] **138** — Home Operations V2: Rooms, Health & Quick Navigation (source implemented and promoted; Windows field acceptance separate)
+- [x] **139** — Device 360 Registry, Identity Matching & Room Assignment (implemented; source promotion pending)
 - [ ] **140** — Guided Device Discovery Inbox & Owner-Safe Adoption
 - [ ] **141** — Camera Wall V2: Room Groups, Health & Private Views
 - [ ] **142** — Camera Events & Evidence Playback Workbench V2
@@ -2168,6 +2168,17 @@ See `docs/BUILD_138_HOME_OPERATIONS_V2.md`. Vault remains **SECURITY HOLD / 0 of
 - [ ] **146** — Windows Service Startup & Recovery Operations Console
 - [ ] **147** — Responsive Command Shell, Theme Polish & Contextual Help Refresh
 
-**Queue count: 9 remaining planned / Build 138 implemented (source promotion pending).** Builds 139–147 remain queued and unimplemented. No Build 138 changes are installed on the Windows server by this source release. All actions with real device, camera, Windows runtime or workshop safety impact require existing permissions and appropriate separate owner field acceptance. Actual first-party password/document Vault remains **HOLD** pending independent review and owner authorization.
+**Queue count: 8 remaining planned / Build 139 implemented (source promotion pending).** Builds 140–147 remain queued and unimplemented. Source releases do not automatically install changes on the Windows server. All actions with real device, camera, Windows runtime or workshop safety impact require existing permissions and appropriate separate owner field acceptance. Actual first-party password/document Vault remains **HOLD** pending independent review and owner authorization.
 
 Implementation order, acceptance conditions and the fail-closed rollout boundary are recorded in `docs/BUILD_ROADMAP.md` under **Phase 12 — Practical Home, Device, Camera and Workshop Operations**.
+
+## Build 139 — Device 360 Registry, Identity Matching & Room Assignment
+
+- [x] Additive independent registry annotation/match review schema with reversible migration and no provider registry mutations
+- [x] Source-linked Home Assistant, camera and reviewed MQTT identities with room/source provenance, last observed state and eligibility display
+- [x] Owner/Admin versioned local alias/room/classification reviews; reviewed cross-provider name candidates remain separate and never auto-merge
+- [x] Search, room/source/state filtering, recovery link, responsive Device 360 detail, circled-i help and safe read-only roles
+- [x] No passive MQTT subscription or publish, no camera stream auto-load, no Home Assistant device action, no Windows/vault change
+- [ ] Complete feature PR, separate `dev` push, promotion PR and final `main` push five-job CI checks; Windows field sign-off remains operator-only
+
+See `docs/BUILD_139_DEVICE_360_REGISTRY.md`. Source GREEN cannot certify physical identity or safe-to-operate state; the first-party vault remains **SECURITY HOLD / 0 of 6 VERIFIED**.
