@@ -2311,6 +2311,38 @@ h1 {
   min-height: 0;
 }
 
+/* Build 141 — no wall stream is loaded without a deliberate per-camera click. */
+.camera-mode-switch { display: grid; gap: .8rem; }
+.camera-mode-switch > div { display: flex; gap: .5rem; flex-wrap: wrap; }
+.camera-mode-switch > div button[aria-pressed="true"] { border-color: #1e518c; background: #e4eefc; font-weight: 700; }
+.camera-mode-switch > p { margin: 0; color: #44546c; }
+.camera-wall-v2 { display: grid; gap: 1rem; padding: 1rem; border: 1px solid #a7b7c9; border-radius: .9rem; background: #f9fbff; min-width: 0; }
+.camera-wall-heading { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: 1rem; }
+.camera-wall-heading h2, .camera-wall-heading p, .camera-wall-group h3 { margin: .25rem 0; }
+.camera-wall-heading .camera-acceptance-help { max-width: 26rem; }
+.camera-wall-controls { display: flex; align-items: end; flex-wrap: wrap; gap: .9rem; }
+.camera-wall-controls label { display: grid; gap: .3rem; font-weight: 600; }
+.camera-wall-controls .camera-wall-check { display: flex; align-items: center; gap: .4rem; }
+.camera-wall-controls select { max-width: 100%; min-height: 2.7rem; border: 1px solid #8b98aa; border-radius: .4rem; background: white; padding: .4rem; }
+.camera-wall-controls button { min-height: 2.7rem; }
+.camera-wall-caution { padding: .55rem .75rem; background: #fff2d8; border-left: 3px solid #976700; }
+.camera-wall-group { display: grid; gap: .6rem; min-width: 0; }
+.camera-wall-group h3 small { font-size: .8em; font-weight: normal; }
+.camera-wall-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16.5rem), 1fr)); gap: .8rem; }
+.camera-wall-grid.is-compact { grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); }
+.camera-wall-card { display: grid; align-content: start; gap: .55rem; min-width: 0; padding: .8rem; border: 1px solid #b6c2d1; border-radius: .7rem; background: #fff; }
+.camera-wall-card-title { display: flex; align-items: start; justify-content: space-between; flex-wrap: wrap; gap: .5rem; }
+.camera-wall-card p { margin: 0; overflow-wrap: anywhere; }
+.camera-wall-still { display: grid; place-items: center; min-height: 6.5rem; padding: .8rem; background: #232c38; border-radius: .45rem; color: #e5e9f2; text-align: center; font-size: .9rem; }
+.camera-wall-grid.is-compact .camera-wall-still { min-height: 3.5rem; }
+.camera-wall-card .camera-wall-observed { font-size: .82rem; color: #46576c; }
+.camera-wall-card-actions { display: flex; flex-wrap: wrap; gap: .4rem; }
+.camera-wall-card-actions button { flex: 1; min-width: 6.6rem; }
+.camera-wall-focus { display: grid; gap: .6rem; border-top: 1px solid #b6c2d1; padding-top: 1rem; }
+.camera-wall-focus > div { display: flex; gap: .7rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.camera-wall-focus h3, .camera-wall-focus p { margin: 0; }
+.camera-wall-focus iframe { width: 100%; max-width: 70rem; aspect-ratio: 16 / 9; border: 0; border-radius: .6rem; background: #171717; }
+
 .camera-live-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

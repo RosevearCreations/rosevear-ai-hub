@@ -724,3 +724,16 @@ class DeviceDiscoveryReview(TimestampMixin, Base):
     reviewed_by_user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
     )
+
+
+class CameraWallPreference(TimestampMixin, Base):
+    """Account-private camera wall layout, never playback sources or credentials."""
+
+    __tablename__ = "camera_wall_preferences"
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    favorite_camera_ids: Mapped[list[int]] = mapped_column(JSON, nullable=False, default=list)
+    compact: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)

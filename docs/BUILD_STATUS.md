@@ -2159,8 +2159,8 @@ See `docs/BUILD_138_HOME_OPERATIONS_V2.md`. Vault remains **SECURITY HOLD / 0 of
 - [x] Build 137 merged to `dev` via PR #338 and `main` via PR #339; independent main push workflow `40199282467` completed GREEN (five successful jobs; commit `a0cedcd9aa7509366a64812b7e911d3c7cd62ea2`)
 - [x] **138** — Home Operations V2: Rooms, Health & Quick Navigation (source implemented and promoted; Windows field acceptance separate)
 - [x] **139** — Device 360 Registry, Identity Matching & Room Assignment (implemented; source promotion pending)
-- [ ] **140** — Guided Device Discovery Inbox & Owner-Safe Adoption
-- [ ] **141** — Camera Wall V2: Room Groups, Health & Private Views
+- [x] **140** — Guided Device Discovery Inbox & Owner-Safe Adoption (source promoted; Windows field acceptance remains separate)
+- [x] **141** — Camera Wall V2: Room Groups, Health & Private Views (source implementation; promotion acceptance tracked in Build 141 notes)
 - [ ] **142** — Camera Events & Evidence Playback Workbench V2
 - [ ] **143** — MQTT Topic Explorer, Device Mapping & Publish Preview
 - [ ] **144** — Home Assistant Scenes & Safe Action Drafts

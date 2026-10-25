@@ -138,7 +138,7 @@ describe("CameraView", () => {
     expect(accepts).toBe(0);
     const button = screen.getByRole("button", { name: /Register 0 selected cameras disabled/ });
     expect(button).toBeDisabled();
-    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("checkbox", { name: /Garage/ }));
     fireEvent.click(screen.getByRole("button", { name: "Register 1 selected camera disabled" }));
     await waitFor(() => {
       expect(accepts).toBe(1);

@@ -18,6 +18,7 @@ from rosevear_ai_hub.api.camera_import_reconciliation import (
 )
 from rosevear_ai_hub.api.camera_inventory_import import router as camera_inventory_import_router
 from rosevear_ai_hub.api.camera_reviews import router as camera_reviews_router
+from rosevear_ai_hub.api.camera_wall import router as camera_wall_router
 from rosevear_ai_hub.api.cameras import router as cameras_router
 from rosevear_ai_hub.api.chat import router as chat_router
 from rosevear_ai_hub.api.confirmations import router as confirmations_router
@@ -125,6 +126,7 @@ def create_app() -> FastAPI:
         dependencies=[Depends(require_roles("owner", "administrator"))],
     )
     application.include_router(cameras_router)
+    application.include_router(camera_wall_router)
     application.include_router(camera_compatibility_router)
     application.include_router(camera_inventory_import_router)
     application.include_router(camera_import_assurance_router)
