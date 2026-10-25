@@ -706,3 +706,21 @@ class DeviceRegistryMatchReview(TimestampMixin, Base):
         ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
     )
     reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class DeviceDiscoveryReview(TimestampMixin, Base):
+    """Operator decision about one exact discovery reference; never a provider adoption."""
+
+    __tablename__ = "device_discovery_reviews"
+    __table_args__ = (UniqueConstraint("source", "source_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source: Mapped[str] = mapped_column(String(24), nullable=False)
+    source_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    decision: Mapped[str] = mapped_column(String(32), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    reviewed_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )

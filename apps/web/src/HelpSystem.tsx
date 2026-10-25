@@ -126,8 +126,12 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   Devices: {
-    purpose: "Browses source-aware Device 360 identities, Home Assistant entities, missing device recovery and the explicit safe-control allow list.",
+    purpose: "Guided opt-in discovery inbox, source-aware Device 360 identities, Home Assistant entities, missing device recovery and the explicit safe-control allow list.",
     tasks: [
+      "Build 140: Owner/Admin start the Guided Discovery Inbox source read intentionally; opening Devices never scans or enrolls hardware. Review source availability, confidence, exact provider IDs, duplicate warnings and five-minute freshness before a one-at-a-time decision.",
+      "A discovery decision is only a versioned local review. Home Assistant enrollment remains in its supported HA integration; MQTT references are notes rather than subscriptions. Reject, investigate and unsupported decisions never change connected devices.",
+      "ONVIF discovery requires a separate explicit scan. Review an exact unregistered UUID, save follow-up approval, then independently confirm one camera registration. Only a still-valid, single-use ticket may register it, disabled-first; verify in Cameras before enabling anything.",
+      "X10 legacy motion sensors and Meross devices do not pair directly here. If an independently supported X10 bridge works with Home Assistant, configure it separately and re-read the source inventory; this inbox does not claim a bridge exists.",
       "In Device 360, search by exact source identity, label or room; filter Home Assistant devices, entities, camera records and manually reviewed MQTT topics. Counts are source identities, not necessarily unique pieces of hardware.",
       "Inspect a source's last reported observation, room origin, capabilities and current safe-control eligibility. Unavailable or stale provider readings do not prove a device is removed or safe.",
       "Owner/Admin may annotate a display name and local Hub room, classify unsupported identities and record possible or distinct cross-source matches. No rename, merge, adoption, room change in Home Assistant or pairing happens at the provider.",
@@ -139,6 +143,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Use the bounded control buttons only for the exact approved entity.",
     ],
     safety: [
+      "Source readings expire after five minutes; stale or unavailable sources are a HOLD, not permission to adopt. Duplicate UUIDs and conflicting camera endpoints prohibit registration.",
       "Device 360 source IDs are preserved. A proposed duplicate never silently merges or reassigns two physical devices; a provider ID change is held separately until owner review.",
       "Discovery and diagnostic reviews do not automatically enroll devices, repair Home Assistant, change integrations, or issue physical commands.",
       "Safety-sensitive or hazardous targets remain prohibited even if their names resemble ordinary devices.",

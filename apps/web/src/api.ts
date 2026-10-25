@@ -1307,6 +1307,32 @@ export function reviewDeviceRegistryMatch(payload: {
   return authJson<DeviceRegistryMatchReview>("PUT", "/api/v1/device-registry/match-review", payload);
 }
 
+// Build 140: operator discovery decisions are local reviews, not HA/MQTT adoption.
+export type DeviceDiscoverySource = "ha_device" | "ha_entity" | "camera_candidate" | "mqtt";
+export type DeviceDiscoveryDecision = "approved_for_followup" | "rejected" | "unsupported" | "investigate";
+export type DeviceDiscoveryReview = {
+  source: DeviceDiscoverySource;
+  source_id: string;
+  decision: DeviceDiscoveryDecision;
+  revision: number;
+  observed_at: string;
+  reviewed_at: string;
+};
+
+export function getDeviceDiscoveryReviews(signal?: AbortSignal): Promise<DeviceDiscoveryReview[]> {
+  return authJson<DeviceDiscoveryReview[]>("GET", "/api/v1/device-discovery/reviews", undefined, signal);
+}
+
+export function saveDeviceDiscoveryReview(payload: {
+  source: DeviceDiscoverySource;
+  source_id: string;
+  decision: DeviceDiscoveryDecision;
+  expected_revision: number;
+  observed_at: string;
+}): Promise<DeviceDiscoveryReview> {
+  return authJson<DeviceDiscoveryReview>("PUT", "/api/v1/device-discovery/review", payload);
+}
+
 
 export interface HomeAssistantControlCandidate {
   entity_id: string;
