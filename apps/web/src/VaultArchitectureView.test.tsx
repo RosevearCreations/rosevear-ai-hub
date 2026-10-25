@@ -26,6 +26,10 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByRole("heading", { name: "Document recovery & anti-rollback ledger design" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Independent Windows vault security & owner acceptance protocol" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Independent vault findings & remediation triage" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Independent assessor handoff & evidence readiness" })).toBeInTheDocument();
+    expect(screen.getByText("ASSESSOR NOT ENGAGED · HOLD")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Immutable source-to-Windows artifact map" })).toBeInTheDocument();
+    expect(screen.getByText(/Completing a fictional scope packet never lifts this gate/)).toBeInTheDocument();
     expect(screen.getByText("AUDIT NOT PERFORMED · HOLD")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Independent retest and regression evidence" })).toBeInTheDocument();
     expect(screen.getByText(/Synthetic issue triage is not a security certificate/)).toBeInTheDocument();

@@ -2080,3 +2080,14 @@ See docs/BUILD_130_WINDOWS_VAULT_ACCEPTANCE_PROTOCOL.md. Actual passwords, docum
 - [ ] Verify PR, dev, main workflows independently from physical Windows acceptance
 
 See docs/BUILD_131_VAULT_SECURITY_FINDINGS_TRIAGE.md. Source tests can be GREEN while the actual first-party vault remains **NOT INSTALLED / SECURITY HOLD**.
+
+## Build 132 — Independent Vault Assessor Handoff & Evidence Readiness
+- [x] Eight required assessor handoff scopes include source-to-executable identity, independent cryptography, household identity/MFA, private Windows boundaries, rollback-resistant recovery and negative retest mapping
+- [x] Strict synthetic-only handoff fixture validates eight unique review control IDs and fixed simulated provenance; missing, duplicate, unknown, waived, forged or sensitive fields fail closed
+- [x] Fictional handoff completeness never substitutes for an external review, reviewed Windows artifact or owner pilot approval
+- [x] Read-only signed-in Vault card, contextual circled-i help, six denial examples and regression tests; no real passwords, documents, network service or installed software
+- [ ] Commission a genuinely independent assessor only after actual first-party security implementation and its exact dependency/artifact set exist
+- [ ] Owner-supervised disposable Windows pilot, witnessed negative security tests and separate explicit field authorization remain unperformed
+- [ ] Verify Build 132 feature, dev, promotion and main CI independently; source GREEN is not a production vault security approval
+
+See docs/BUILD_132_ASSESSOR_HANDOFF_READINESS.md. Live credentials, files, MFA, vault restore and Windows installation remain **HOLD**.

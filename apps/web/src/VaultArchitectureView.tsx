@@ -11,6 +11,7 @@ import { assessVaultDocumentPreparation, vaultDocumentDenialCases, vaultDocument
 import { assessVaultRecoveryLedger, vaultRecoveryDenialCases, vaultRecoveryReviewStages } from "./vaultRecoveryLedgerReview";
 import { assessVaultWindowsAcceptance, vaultWindowsAcceptanceDenials, vaultWindowsAcceptanceGates } from "./vaultWindowsAcceptanceProtocol";
 import { assessVaultSecurityFindingsReview, vaultRemediationDenials, vaultRemediationReviewStages } from "./vaultSecurityFindingsReview";
+import { assessVaultAssessorHandoff, vaultAssessorHandoffDenials, vaultAssessorHandoffScopes } from "./vaultAssessorHandoff";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
@@ -27,12 +28,13 @@ export function VaultArchitectureView() {
   const recovery = assessVaultRecoveryLedger();
   const windowsAcceptance = assessVaultWindowsAcceptance();
   const findingsReview = assessVaultSecurityFindingsReview();
+  const handoff = assessVaultAssessorHandoff();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 131 · independent vault security findings &amp; remediation triage</p>
+          <p className="eyebrow">Build 132 · independent vault assessor handoff &amp; evidence readiness</p>
           <h1>Private password and document vault</h1>
           <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
@@ -43,6 +45,40 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <section className="panel" aria-label="Build 132 independent vault assessor handoff and evidence readiness">
+        <div className="vault-gates-heading">
+          <div>
+            <h2>Independent assessor handoff &amp; evidence readiness</h2>
+            <p>Our first-party vault needs an independent review of exact code, cryptographic dependencies, an installed Windows artifact and negative tests. This is a read-only handoff checklist; no external reviewer is engaged and no production evidence is accepted here.</p>
+          </div>
+          <span className="vault-gate-badge">ASSESSOR NOT ENGAGED · {handoff.production_security_acceptance}</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> What the future independent reviewer will need</summary>
+          <ol>
+            <li>First arrange a genuinely independent assessor and confirm scope. The current repository has design and synthetic tests only, not an installed first-party password/document service.</li>
+            <li>Once the actual implementation exists, pin the reviewed commit, dependencies, reproducible Windows executable and configuration together; any drift needs new independent reconciliation.</li>
+            <li>Use the eight scopes below to plan safe, minimized evidence in an owner-controlled private location. Never place a password, private document, passkey secret, recovery seed or personal identifying detail in Hub or GitHub.</li>
+            <li>Unresolved high-severity issues require a real fix and independent retest. Reviewer conclusions cannot substitute for our separate consent to a disposable-data Windows pilot and witnessed field acceptance.</li>
+          </ol>
+        </details>
+        <h3>Eight required assessor handoff scopes</h3>
+        <div className="vault-security-grid">
+          {vaultAssessorHandoffScopes.map((item, index) => <article className="vault-security-card" key={item.id}>
+            <p className="eyebrow">Review scope {index + 1} / {vaultAssessorHandoffScopes.length} · not verified</p>
+            <h2>{item.title}</h2><p>{item.requirement}</p>
+            <small>Future responsibility: {item.responsibility}</small>
+          </article>)}
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> Handoff and evidence mistakes that keep the vault blocked</summary>
+          <div className="vault-threats">
+            {vaultAssessorHandoffDenials.map(item => <article key={item.id}><strong>{item.title}</strong><p>{item.expected}</p></article>)}
+          </div>
+        </details>
+        <p className="vault-architecture-note">Build 132 state: <strong>{handoff.phase}</strong>. Real review, source-to-Windows artifact verification, Windows pilot approval, password/document intake, MFA, backups and recovery all remain <strong>NOT VERIFIED / HOLD</strong>. Completing a fictional scope packet never lifts this gate.</p>
+      </section>
 
       <section className="panel" aria-label="Build 131 independent vault security findings and remediation triage">
         <div className="vault-gates-heading">
