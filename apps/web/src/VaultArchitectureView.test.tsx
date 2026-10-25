@@ -133,4 +133,45 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
     fetchSpy.mockRestore();
   });
+
+  it("offers three ordered review paths without granting any approval or changing local anchor targets", () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    render(<VaultArchitectureView />);
+    const nav = screen.getByRole("navigation", { name: "Vault security review sections" });
+    const route = screen.getByRole("combobox", { name: "Suggested review route" });
+    fireEvent.change(route, { target: { value: "design" } });
+    expect(Array.from(nav.querySelectorAll("a")).map(link => link.getAttribute("href"))).toEqual([
+      "#vault-blueprint", "#vault-crypto-review", "#vault-service", "#vault-lock", "#vault-mfa", "#vault-documents",
+    ]);
+    expect(screen.getByText(/This is a reading plan only; every vault security milestone remains on HOLD/)).toBeInTheDocument();
+    fireEvent.change(route, { target: { value: "audit" } });
+    expect(Array.from(nav.querySelectorAll("a")).map(link => link.getAttribute("href"))).toEqual([
+      "#vault-assessor", "#vault-findings", "#vault-change-impact",
+    ]);
+    expect(screen.getByText("0 / 6 VERIFIED · HOLD")).toBeInTheDocument();
+    expect(fetchSpy).not.toHaveBeenCalled();
+    fetchSpy.mockRestore();
+  });
+
+  it("pins review headings only until this page unmounts, with accessible pinned-only and clear actions", () => {
+    const { unmount } = render(<VaultArchitectureView />);
+    const nav = screen.getByRole("navigation", { name: "Vault security review sections" });
+    const pin = screen.getByRole("button", { name: "Pin MFA & recovery readiness" });
+    expect(pin).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(pin);
+    expect(screen.getByRole("button", { name: "Unpin MFA & recovery readiness" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("checkbox", { name: "Show pinned sections only (1)" }));
+    expect(Array.from(nav.querySelectorAll("a")).map(link => link.getAttribute("href"))).toEqual(["#vault-mfa"]);
+    fireEvent.change(screen.getByRole("combobox", { name: "Suggested review route" }), { target: { value: "audit" } });
+    expect(nav.querySelectorAll("a")).toHaveLength(0);
+    fireEvent.click(screen.getByRole("button", { name: "Show all review sections" }));
+    expect(nav.querySelectorAll("a")).toHaveLength(11);
+    expect(screen.getByRole("checkbox", { name: "Show pinned sections only (1)" })).not.toBeChecked();
+    fireEvent.click(screen.getByRole("button", { name: "Clear session pins" }));
+    expect(screen.getByRole("button", { name: "Pin MFA & recovery readiness" })).toHaveAttribute("aria-pressed", "false");
+    unmount();
+    render(<VaultArchitectureView />);
+    expect(screen.getByRole("checkbox", { name: "Show pinned sections only (0)" })).not.toBeChecked();
+    expect(screen.getByRole("button", { name: "Pin MFA & recovery readiness" })).toHaveAttribute("aria-pressed", "false");
+  });
 });

@@ -3320,12 +3320,23 @@ h1 {
 .vault-review-group { color: #62546d; font-size: .74rem; font-weight: 600; }
 .vault-review-link { display: inline-block; margin-top: .45rem; color: #563c75; font-weight: 700; text-decoration: underline; text-underline-offset: .2rem; }
 .vault-review-finder { display: grid; grid-template-columns: minmax(8rem, 1fr) minmax(8rem, 1fr); gap: .4rem .9rem; margin: .75rem 0; max-width: 45rem; }
+.vault-review-route { max-width: 45rem; display: grid; gap: .35rem; margin: .85rem 0; padding: .8rem; border: 1px solid #b7a9be; border-radius: .7rem; background: #f6f2f8; }
+.vault-review-route label { color: #382c47; font-weight: 750; }
+.vault-review-route select { padding: .65rem; min-width: 0; width: 100%; background: #fff; color: #262033; border: 1px solid #80728c; border-radius: .55rem; font: inherit; }
+.vault-review-route p { margin: .2rem 0 0; line-height: 1.5; }
+.vault-review-pin-options { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; margin: .6rem 0; }
+.vault-review-pin-options label { display: inline-flex; align-items: center; gap: .5rem; font-weight: 700; }
+.vault-review-pin-options input { width: 1.1rem; height: 1.1rem; accent-color: #563c75; }
+.vault-review-privacy-note { margin: .3rem 0 .7rem; font-size: .84rem; color: #475569; }
+.vault-review-entry { display: grid; grid-template-rows: minmax(0, 1fr) auto; border: 1px solid #b7a9be; border-radius: .75rem; background: #f6f2f8; overflow: hidden; }
+.vault-review-entry a { border: 0; border-radius: 0; }
+.vault-review-entry button { justify-self: start; margin: .25rem .85rem .75rem; }
 .vault-review-finder label { color: #382c47; font-weight: 700; }
 .vault-review-finder input, .vault-review-finder select { grid-row: 2; min-width: 0; width: 100%; padding: .65rem; border: 1px solid #80728c; border-radius: .55rem; background: #fff; color: #262033; font: inherit; }
-.vault-review-finder input:focus-visible, .vault-review-finder select:focus-visible, .vault-review-empty button:focus-visible, .vault-print-controls button:focus-visible { outline: 3px solid #694a88; outline-offset: 3px; }
+.vault-review-finder input:focus-visible, .vault-review-finder select:focus-visible, .vault-review-route select:focus-visible, .vault-review-entry button:focus-visible, .vault-review-pin-options button:focus-visible, .vault-review-empty button:focus-visible, .vault-print-controls button:focus-visible { outline: 3px solid #694a88; outline-offset: 3px; }
 .vault-review-links a > span:last-child { font-size: .84rem; line-height: 1.4; }
 .vault-review-empty { padding: 1rem; background: #f6f2f8; border: 1px solid #b7a9be; border-radius: .7rem; }
-.vault-review-empty button, .vault-print-controls button { padding: .6rem .9rem; background: #563c75; color: #fff; border: 0; border-radius: .55rem; font: inherit; font-weight: 700; cursor: pointer; }
+.vault-review-entry button, .vault-review-pin-options button, .vault-review-empty button, .vault-print-controls button { padding: .6rem .9rem; background: #563c75; color: #fff; border: 0; border-radius: .55rem; font: inherit; font-weight: 700; cursor: pointer; }
 .vault-print-controls { margin: 1rem 0; }
 .vault-print-controls p { color: #475569; font-size: .85rem; margin: .45rem 0 0; }
 @media (max-width: 720px) {

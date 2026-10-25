@@ -875,3 +875,10 @@ Each build must:
 - provide one-click native browser print preview of the six real unverified security milestones and safety warning, excluding unrelated app navigation and the technical review body
 - retain unconditional 0/6 verified, independent review missing, no Windows pilot, and all live password, document, MFA and backup operations HOLD
 - cover filtering, print, accessibility, privacy and fixed denial invariants in Vitest; see docs/BUILD_135_VAULT_REVIEW_FINDER_PRINT.md
+
+### Build 136 — Vault Guided Review Routes & Session Pinboard (read-only)
+- organize eleven existing vault security sections into three clear advisory reading routes: design/separation, independent assessment, and recovery/Windows planning
+- preserve Build 135 local search and category filtering while following route-defined on-page link order
+- allow accessible per-section temporary pin/unpin and pinned-only view; clear pins on deliberate action or page unmount, never save them or treat them as approvals
+- keep six actual unverified milestones and all production vault controls on HARD SECURITY HOLD, independent of route and pins
+- add pure route coverage/denial tests and browser UI tests for route/filter/pin/reset; see docs/BUILD_136_VAULT_GUIDED_ROUTES_PINBOARD.md
