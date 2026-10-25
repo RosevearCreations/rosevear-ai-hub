@@ -1883,6 +1883,24 @@ export interface CameraDashboard {
   cameras: CameraHealthItem[];
 }
 
+export interface CameraWallPreferences {
+  favorite_camera_ids: number[];
+  compact: boolean;
+  revision: number;
+}
+
+export function getCameraWallPreferences(signal?: AbortSignal): Promise<CameraWallPreferences> {
+  return authJson<CameraWallPreferences>("GET", "/api/v1/camera-wall/preferences", undefined, signal);
+}
+
+export function saveCameraWallPreferences(value: CameraWallPreferences): Promise<CameraWallPreferences> {
+  return authJson<CameraWallPreferences>("PUT", "/api/v1/camera-wall/preferences", {
+    favorite_camera_ids: value.favorite_camera_ids,
+    compact: value.compact,
+    expected_revision: value.revision,
+  });
+}
+
 export interface CameraHealthRefreshResult {
   checked: number;
   healthy: number;

@@ -892,7 +892,7 @@ Each build must:
 
 ## Phase 12 — Practical Home, Device, Camera and Workshop Operations (queued)
 
-Builds 138–139 reached `main` source GREEN; Build 140 is implemented and awaiting promotion, while 141–147 remain queued. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
+Builds 138–140 reached `main` source GREEN; Build 141 is implemented for reviewed promotion, while 142–147 remain queued. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
 
 ### Build 138 — Home Operations V2: Rooms, Health & Quick Navigation (PROMOTED · source GREEN)
 - replace generic status-only landing cards with a functional room/context command center for Home, Cameras, Workshop and Services, with direct routes to the matching operational views
@@ -910,7 +910,7 @@ Implementation and verification details: `docs/BUILD_138_HOME_OPERATIONS_V2.md`.
 
 Implementation and verification: `docs/BUILD_139_DEVICE_360_REGISTRY.md`. Provider identities and owner-reviewed annotations remain separate. The household Windows installation is not automatically updated by the source release.
 
-### Build 140 — Guided Device Discovery Inbox & Owner-Safe Adoption (IMPLEMENTED · source promotion pending)
+### Build 140 — Guided Device Discovery Inbox & Owner-Safe Adoption (PROMOTED · source GREEN)
 - create an explicit operator-started discovery inbox for Home Assistant, supported MQTT mappings and existing camera candidate previews, with source, confidence and duplicate warnings
 - review one candidate at a time before adoption; separate discoverable, observed, approved, unsupported and rejected states; no default auto-enrollment or credential scraping
 - include a manual legacy/X10 compatibility note and safe Home Assistant bridge path where supported, without pretending direct X10-to-Meross control is implemented
@@ -918,11 +918,13 @@ Implementation and verification: `docs/BUILD_139_DEVICE_360_REGISTRY.md`. Provid
 
 Implementation, tests and Windows field-acceptance boundary: `docs/BUILD_140_GUIDED_DEVICE_DISCOVERY.md`. Source delivery does not enroll Home Assistant devices, connect MQTT topics or certify real camera operation.
 
-### Build 141 — Camera Wall V2: Room Groups, Health & Private Views (QUEUED · priority 4)
+### Build 141 — Camera Wall V2: Room Groups, Health & Private Views (IMPLEMENTED · source promotion pending)
 - give approved cameras responsive room/site groups, readable health badges, available still previews and operator-selected larger playback panels
 - never auto-load every RTSP stream; respect go2rtc/Frigate health, disabled-camera state, private URLs, role boundaries and bandwidth/concurrency limits
 - allow private user view preferences only after review of current app storage/auth patterns; provide clear empty/offline/cert-error guidance and circled-i help
 - **Acceptance:** multiple cameras render safely on narrow screens, unavailable streams do not block the grid, and no secrets or private RTSP URLs appear in client error output
+
+Implementation and migration notes: `docs/BUILD_141_CAMERA_WALL_V2.md`. No authenticated snapshot endpoint or explicitly verified Frigate-to-registry mapping exists, so the wall shows an honest no-still placeholder until a future separately reviewed source is available; no unauthorized image or RTSP request is invented.
 
 ### Build 142 — Camera Events & Evidence Playback Workbench V2 (QUEUED · priority 5)
 - merge existing camera event/Frigate metadata into a reviewed timeline with source, time zone, camera, event category, deduplication and bounded date filters
