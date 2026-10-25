@@ -2057,3 +2057,14 @@ See docs/BUILD_128_SYNTHETIC_DOCUMENT_PIPELINE.md. Next proposed Build 129 — D
 - [ ] CI/dev/main promotion evidence must be separately observed; source GREEN cannot certify physical Windows security
 
 See docs/BUILD_129_DOCUMENT_RECOVERY_LEDGER.md. Next proposed Build 130 — Independent Windows Vault Security & Owner Acceptance Protocol (review-only).
+
+## Build 130 — Independent Windows Vault Security & Owner Acceptance Protocol
+- [x] Eight independent audit/Windows acceptance gates and six explicit denial scenarios in a static fail-closed policy module
+- [x] Synthetic-only evidence classifier validates exact gate IDs, bounded observations and simulated provenance; missing, duplicate, forged, extra or personal fields fail closed
+- [x] Full synthetic checklist **never** confers live Windows/security acceptance; claim-based assessments always return production HOLD, intake disabled and vault operations DENY
+- [x] Vault review panel, circled-i help, protocol runbook and source tests with no forms, endpoints, Windows process, credential or file collection
+- [ ] Independent reviewed cryptographic/key/identity/backup implementation and independently protected anti-rollback witness
+- [ ] Separately approved and witnessed disposable Windows installation, full negative trials, external assessor clearance and owner field acceptance
+- [ ] CI/dev/main checks and source release evidence to be observed separately from actual Windows field acceptance
+
+See docs/BUILD_130_WINDOWS_VAULT_ACCEPTANCE_PROTOCOL.md. Actual passwords, documents, MFA enrollment, offline restore, Windows installation and production security acceptance remain **HOLD**.
