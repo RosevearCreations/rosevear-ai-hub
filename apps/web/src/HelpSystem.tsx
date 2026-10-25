@@ -9,8 +9,12 @@ interface HelpTopic {
 
 const HELP_TOPICS: Record<string, HelpTopic> = {
   Home: {
-    purpose: "Build 052: a read-only contextual operations overview, with guided setup and local AI shortcuts.",
+    purpose: "Build 138: Home Operations V2 is a read-only command center for observed room inventory, local services and safe navigation.",
     tasks: [
+      "Use Home, Cameras, Workshop and Services routes to see quick links into existing authenticated screens. Workshop administration links appear only for authorized operator roles.",
+      "Filter the Home Assistant room inventory by room. Device/entity counts reflect the latest successful directory read, not per-device availability or safety.",
+      "Review Hub, Home Assistant, MQTT, Cameras and Ollama observations with their sample time; a stale or unverified result needs checking in its source screen.",
+      "Open the circled-i Help disclosure inside Home operations to review the safety and freshness labels.",
       "Choose Home, Workshop, or Business to filter status cards for that working context.",
       "Use Refresh overview to request fresh read-only service states, then open each section for details.",
       "A Not configured or Not verified card is not a device failure. Frigate is optional.",
@@ -20,6 +24,8 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Build 045: use the sidebar Install the Hub panel on localhost or HTTPS. A browser may also offer Install app in its menu.",
     ],
     safety: [
+      "Quick links only navigate. Home Operations does not issue device commands, switch scenes, run automations, load camera streams or display tokens and private host connection details.",
+      "A Hub endpoint returning OK does not prove Windows startup, Home Assistant equipment safety or other integration health.",
       "Home is an overview; physical changes still pass through the permission and tool layers.",
       "Offline PWA mode never caches logged-in pages, conversation text, camera streams, private state, or queued device actions.",
       "An offline provider does not disable local dashboards, saved history, or deterministic automations.",

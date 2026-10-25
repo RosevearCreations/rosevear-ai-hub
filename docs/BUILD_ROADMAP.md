@@ -894,11 +894,13 @@ Each build must:
 
 Builds 138–147 are **planned, not implemented or deployed**. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
 
-### Build 138 — Home Operations V2: Rooms, Health & Quick Navigation (QUEUED · priority 1)
+### Build 138 — Home Operations V2: Rooms, Health & Quick Navigation (IMPLEMENTED · source promotion pending)
 - replace generic status-only landing cards with a functional room/context command center for Home, Cameras, Workshop and Services, with direct routes to the matching operational views
 - compose bounded live/explicitly refreshed integration summaries from existing authorized Home Assistant, MQTT, camera, Ollama and Hub health APIs; label each source's last observation and unavailable/unconfigured state rather than inventing health
 - add room/category filters, responsive cards, mobile-accessible navigation, keyboard focus and contextual circled-i help; preserve current operator roles and safe refresh handling
 - **Acceptance:** stale/offline/partial fixtures render honestly, quick links resolve to real screens, and no room card can issue a physical command or reveal private connection details
+
+Implementation and verification details: `docs/BUILD_138_HOME_OPERATIONS_V2.md`. Source promotion and independent Windows field acceptance remain distinct.
 
 ### Build 139 — Device 360 Registry, Identity Matching & Room Assignment (QUEUED · priority 2)
 - unify inventory presentation across existing Home Assistant entity/device IDs, approved MQTT mappings and camera registry references, keeping provider identity and integration provenance distinguishable

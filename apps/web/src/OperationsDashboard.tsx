@@ -3,11 +3,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getBusinessConnectors,
   getCameraDashboard,
+  getHealth,
+  getHomeAssistantBrowser,
   getHomeAssistantStatus,
   getKnowledgeAdminStatus,
   getMQTTStatus,
+  getOllamaStatus,
   type AuthRole,
 } from "./api";
+import { buildHomeOperationsSnapshot, HomeOperationsHub, type HomeOperationsSnapshot } from "./HomeOperationsHub";
 
 export type OperationsContext = "Home" | "Workshop" | "Business";
 export type ReadinessState = "ready" | "attention" | "optional" | "unknown";
@@ -553,8 +557,10 @@ export function OperationsDashboard({
 }) {
   const [context, setContext] = useState<OperationsContext>("Home");
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [homeSnapshot, setHomeSnapshot] = useState<HomeOperationsSnapshot | null>(null);
   const [previousSnapshot, setPreviousSnapshot] = useState<Snapshot | null>(null);
   const latestSnapshotRef = useRef<Snapshot | null>(null);
+  const refreshControllerRef = useRef<AbortController | null>(null);
   const [loading, setLoading] = useState(false);
   const [reviewed, setReviewed] = useState<SnapshotReview>({});
   const [handoffVisible, setHandoffVisible] = useState(false);
@@ -592,10 +598,15 @@ export function OperationsDashboard({
       getCameraDashboard(signal),
       getKnowledgeAdminStatus(signal),
       getBusinessConnectors(signal),
+      getHealth(signal),
+      getOllamaStatus(signal),
+      getHomeAssistantBrowser(signal),
     ]);
     if (signal.aborted) return;
     // Compare manual samples in memory only; never retain or export provider payloads.
-    const next = { signals: summarizeOperations(results), sampledAt: new Date() };
+    const sampledAt = new Date();
+    const next = { signals: summarizeOperations(results), sampledAt };
+    setHomeSnapshot(buildHomeOperationsSnapshot(results, sampledAt));
     setPreviousSnapshot(latestSnapshotRef.current);
     latestSnapshotRef.current = next;
     // A new measurement invalidates all prior acknowledgement and any visible handoff text.
@@ -613,8 +624,12 @@ export function OperationsDashboard({
 
   useEffect(() => {
     const controller = new AbortController();
+    refreshControllerRef.current = controller;
     void refresh(controller.signal);
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      refreshControllerRef.current?.abort();
+    };
   }, [refresh]);
 
   const visible = snapshot?.signals.filter((item) => visibleKeys[context].includes(item.key)) ?? [];
@@ -639,10 +654,13 @@ export function OperationsDashboard({
           <p>Read-only status and guided setup for our local Hub.</p>
         </div>
         <button type="button" disabled={loading} onClick={() => {
+          refreshControllerRef.current?.abort();
           const controller = new AbortController();
+          refreshControllerRef.current = controller;
           void refresh(controller.signal);
         }}>{loading ? "Checking…" : "Refresh overview"}</button>
       </div>
+      <HomeOperationsHub snapshot={homeSnapshot} loading={loading} role={role} onNavigate={onNavigate} />
       <fieldset className="operations-contexts">
         <legend>Working context</legend>
         {(["Home", "Workshop", "Business"] as const).map((item) => (

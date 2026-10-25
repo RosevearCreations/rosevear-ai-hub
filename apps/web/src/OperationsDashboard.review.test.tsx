@@ -10,6 +10,9 @@ vi.mock("./api", () => ({
   getCameraDashboard: vi.fn(),
   getKnowledgeAdminStatus: vi.fn(),
   getBusinessConnectors: vi.fn(),
+  getHealth: vi.fn(),
+  getOllamaStatus: vi.fn(),
+  getHomeAssistantBrowser: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -29,6 +32,9 @@ beforeEach(() => {
   vi.mocked(api.getBusinessConnectors).mockResolvedValue({
     connectors: [],
   } as never);
+  vi.mocked(api.getHealth).mockResolvedValue({ status: "ok", service: "Rosevear AI Hub" } as never);
+  vi.mocked(api.getOllamaStatus).mockResolvedValue({ available: true, base_url: "PRIVATE_OLLAMA_SECRET" } as never);
+  vi.mocked(api.getHomeAssistantBrowser).mockResolvedValue({ areas: [], devices: [], entities: [], token: "PRIVATE_BROWSER_SECRET" } as never);
 });
 afterEach(() => {
   cleanup();

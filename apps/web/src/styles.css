@@ -2916,6 +2916,39 @@ h1 {
 .operations-guide li p { margin: .35rem 0; }
 @media (max-width: 600px) { .operations-toolbar { display: grid; } }
 
+/* Build 138 — Home Operations V2; observation-only, responsive and keyboard navigable. */
+.home-operations-hub { display: grid; gap: 1rem; padding: clamp(.85rem,2.3vw,1.5rem); border: 1px solid #a6b7bb; border-radius: 1rem; background: linear-gradient(155deg,#f3f8f9 0%,#fff 53%,#f7f4eb 100%); color: #192c33; }
+.home-operations-hub h3,.home-operations-hub h4,.home-operations-hub h5,.home-operations-hub p { margin: 0; }
+.home-ops-heading { display: flex; justify-content: space-between; gap: 1rem; align-items: start; flex-wrap: wrap; }
+.home-ops-heading h3 { font-size: clamp(1.4rem,2.6vw,1.85rem); }
+.home-ops-heading p { max-width: 57rem; line-height: 1.45; }
+.home-ops-eyebrow { color: #315f66; font-size: .82rem; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
+.home-ops-help { max-width: 27rem; padding: .55rem .7rem; border: 1px solid #91a7ad; border-radius: .6rem; background: #fff; }
+.home-ops-help summary { cursor: pointer; font-weight: 700; }
+.home-ops-help p { padding-top: .6rem; font-size: .9rem; }
+.home-ops-contexts { display: flex; flex-wrap: wrap; gap: .5rem; }
+.home-ops-contexts button { border: 1px solid #759099; background: #fff; color: #19333c; border-radius: 2rem; padding: .55rem .9rem; min-height: 2.65rem; }
+.home-ops-contexts button[aria-pressed="true"] { background: #173b47; color: #fff; border-color: #173b47; font-weight: 750; }
+.home-ops-observation { padding: .65rem .8rem; border-left: 4px solid #396c77; border-radius: .25rem; background: #e5eff0; font-weight: 650; line-height: 1.4; }
+.home-ops-health { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,12rem),1fr)); gap: .7rem; }
+.home-ops-health-card { display: grid; align-content: start; gap: .5rem; min-width: 0; padding: .9rem; border-radius: .75rem; border: 1px solid #b7c5c8; background: #fff; box-shadow: 0 2px 9px #1638450c; }
+.home-ops-health-card h4 { font-size: 1rem; }
+.home-ops-health-card p { line-height: 1.4; }
+.home-ops-health-card small,.home-ops-room-grid small,.home-ops-footnote { color: #4e6268; line-height: 1.4; }
+.home-ops-health-card button { margin-top: auto; }
+.home-ops-routes,.home-ops-rooms { display: grid; gap: .75rem; border-top: 1px solid #c0cecf; padding-top: .9rem; }
+.home-ops-route-grid,.home-ops-room-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,14rem),1fr)); gap: .7rem; }
+.home-ops-route-grid button { display: grid; align-content: start; gap: .35rem; padding: .85rem; text-align: left; color: #1f343b; background: #fff; border: 1px solid #9eafb3; border-radius: .7rem; min-height: 5.5rem; }
+.home-ops-route-grid button strong { font-size: 1.05rem; }
+.home-ops-route-grid button span { line-height: 1.35; }
+.home-ops-room-toolbar { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; }
+.home-ops-room-toolbar label { display: grid; gap: .3rem; font-weight: 650; }
+.home-ops-room-toolbar select { min-height: 2.65rem; background: #fff; color: #192c33; border: 1px solid #81989e; border-radius: .45rem; padding: .45rem; max-width: min(100%,22rem); }
+.home-ops-room-grid article { display: grid; align-content: start; gap: .5rem; min-width: 0; padding: .85rem; border: 1px solid #b9c7c8; border-radius: .7rem; background: #fff; }
+.home-ops-room-grid article button { margin-top: auto; }
+.home-operations-hub :is(button,select,summary):focus-visible { outline: 3px solid #06658b; outline-offset: 3px; }
+@media (max-width: 600px) { .home-ops-heading { display: grid; } .home-ops-contexts button { flex: 1 1 40%; } .home-ops-room-toolbar label,.home-ops-room-toolbar select { width: 100%; } }
+
 
 /* Build 053 — private, operator-driven diagnostics */
 .local-diagnostics { display: grid; gap: .8rem; margin-bottom: 1.25rem; }
