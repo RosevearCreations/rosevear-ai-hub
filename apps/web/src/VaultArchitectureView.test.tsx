@@ -1,8 +1,8 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { VaultArchitectureView } from "./VaultArchitectureView";
 
-afterEach(() => cleanup());
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("Build 119 Hub client architecture screen", () => {
   it("makes security hold and absent 2FA explicit without a password-entry surface", () => {
@@ -66,8 +66,10 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByText(/field evidence unavailable, real MFA disabled and password intake blocked/)).toBeInTheDocument();
     expect(screen.getByText(/authenticator enrollment, step-up and recovery code issuance disabled/)).toBeInTheDocument();
     expect(screen.getByText(/Our design: not security-approved; service: not installed; client unlock: disabled/)).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: "Find by topic" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Print safety and readiness summary" })).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByRole("password")).not.toBeInTheDocument();
     expect(screen.queryByRole("form")).not.toBeInTheDocument();
     expect(fetchSpy).not.toHaveBeenCalled();
     fetchSpy.mockRestore();
@@ -96,8 +98,39 @@ describe("Build 119 Hub client architecture screen", () => {
       expect(target).not.toBeNull();
       expect(target).toHaveAttribute("tabindex", "-1");
     }
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(screen.queryByRole("form")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("filters fixed local review links, supports a safe zero-results reset, and never fetches", () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    render(<VaultArchitectureView />);
+    const nav = screen.getByRole("navigation", { name: "Vault security review sections" });
+    fireEvent.change(screen.getByRole("searchbox", { name: "Find by topic" }), { target: { value: "hardware" } });
+    expect(nav.querySelectorAll("a")).toHaveLength(1);
+    expect(nav.querySelector("a")?.getAttribute("href")).toBe("#vault-mfa");
+    expect(screen.getByText("1 of 11 review sections shown.")).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("combobox", { name: "Review category" }), { target: { value: "Data protection" } });
+    expect(nav.querySelectorAll("a")).toHaveLength(0);
+    expect(screen.getByText("No review headings match. This finder never searches real vault data.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Show all review sections" }));
+    expect(nav.querySelectorAll("a")).toHaveLength(11);
+    expect(screen.getByRole("searchbox", { name: "Find by topic" })).toHaveValue("");
+    expect(screen.getByRole("combobox", { name: "Review category" })).toHaveValue("All sections");
+    expect(fetchSpy).not.toHaveBeenCalled();
+    fetchSpy.mockRestore();
+  });
+
+  it("opens native print preview without submitting data, storing a report or changing HOLD", () => {
+    const print = vi.fn();
+    vi.stubGlobal("print", print);
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    render(<VaultArchitectureView />);
+    fireEvent.click(screen.getByRole("button", { name: "Print safety and readiness summary" }));
+    expect(print).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("0 / 6 VERIFIED · HOLD")).toBeInTheDocument();
+    expect(screen.queryByRole("form")).not.toBeInTheDocument();
+    expect(fetchSpy).not.toHaveBeenCalled();
+    fetchSpy.mockRestore();
   });
 });

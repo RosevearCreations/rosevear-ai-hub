@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assessVaultReadinessDashboard, vaultReadinessMilestones, vaultReviewNavigation } from "./vaultReadinessDashboard";
+import { assessVaultReadinessDashboard, findVaultReviewSections, vaultReadinessMilestones, vaultReviewNavigation } from "./vaultReadinessDashboard";
 
 describe("Build 134 accessible vault security readiness and navigation boundaries", () => {
   it("reports all six milestones unverified; forged owner or auditor flags confer no authority", () => {
@@ -36,5 +36,21 @@ describe("Build 134 accessible vault security readiness and navigation boundarie
     for (const item of vaultReadinessMilestones) {
       expect(vaultReviewNavigation.some(link => link.id === item.target)).toBe(true);
     }
+  });
+});
+
+describe("Build 135 read-only vault review finder", () => {
+  it("searches fixed headings and descriptions without accepting any external navigation targets", () => {
+    expect(findVaultReviewSections("  hardware factors ").map(x => x.id)).toEqual(["vault-mfa"]);
+    expect(findVaultReviewSections("Windows").map(x => x.id)).toEqual(["vault-windows", "vault-service"]);
+    expect(findVaultReviewSections("javascript:alert(1)")).toEqual([]);
+    expect(findVaultReviewSections("" )).toEqual(vaultReviewNavigation);
+  });
+
+  it("filters by known category and retains the canonical fixed order", () => {
+    expect(findVaultReviewSections("", "Data protection").map(x => x.id)).toEqual(["vault-recovery", "vault-documents"]);
+    expect(findVaultReviewSections("recovery", "Architecture").map(x => x.id)).toEqual(["vault-mfa"]);
+    expect(findVaultReviewSections("recovery", "Independent review")).toEqual([]);
+    expect(findVaultReviewSections("A".repeat(10_000))).toEqual([]);
   });
 });
