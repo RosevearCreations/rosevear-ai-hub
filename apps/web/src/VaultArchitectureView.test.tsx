@@ -28,6 +28,10 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByRole("heading", { name: "Independent vault findings & remediation triage" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Independent assessor handoff & evidence readiness" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Vault change-impact reassessment & mandatory retest mapping" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Vault security readiness command center" })).toBeInTheDocument();
+    expect(screen.getByText("0 / 6 VERIFIED · HOLD")).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Vault security review sections" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Genuine independent assessor review" })).toBeInTheDocument();
     expect(screen.getByText("INDEPENDENT RETEST REQUIRED · HOLD")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Changed source or rebuilt executable" })).toBeInTheDocument();
     expect(screen.getByText(/A passing invented change-map is/)).toBeInTheDocument();
@@ -78,5 +82,22 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByText(/No third-party vault hosting or commercial password-manager service is planned/)).toBeInTheDocument();
     expect(screen.getByText(/Phished or stolen Hub session impersonates a household member/)).toBeInTheDocument();
     expect(screen.getByText(/Server theft, unlocked browser, memory dump/)).toBeInTheDocument();
+  });
+
+  it("provides keyboard-accessible local review links with real matching sections and no data submission", () => {
+    render(<VaultArchitectureView />);
+    const nav = screen.getByRole("navigation", { name: "Vault security review sections" });
+    const anchors = Array.from(nav.querySelectorAll("a"));
+    expect(anchors).toHaveLength(11);
+    for (const anchor of anchors) {
+      const href = anchor.getAttribute("href");
+      expect(href).toMatch(/^#vault-[a-z-]+$/);
+      const target = document.getElementById(href!.slice(1));
+      expect(target).not.toBeNull();
+      expect(target).toHaveAttribute("tabindex", "-1");
+    }
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("form")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });
