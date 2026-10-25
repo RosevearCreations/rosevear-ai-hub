@@ -3447,6 +3447,18 @@ h1 {
 .device-registry-feedback { background: #e5f2ec; color: #174631; padding: .8rem; border-radius: .6rem; }
 .device-registry-360 button:disabled { opacity: .6; cursor: not-allowed; }
 .device-registry-360 :is(button, input, select, summary, a):focus-visible { outline: 3px solid #26527d; outline-offset: 3px; }
+/* Build 140 — owner-started source review, never a passive device scanner. */
+.discovery-inbox { display: grid; gap: 1rem; min-width: 0; }
+.discovery-inbox-actions { display: flex; gap: .6rem; flex-wrap: wrap; align-items: flex-start; }
+.discovery-inbox-actions button { min-width: min(100%, 12rem); }
+.discovery-inbox-warning { padding: .8rem 1rem; border: 2px solid #9c532f; border-radius: .7rem; background: #fff1e5; color: #5d2b15; }
+.discovery-inbox-warning ul { margin-bottom: 0; padding-left: 1.2rem; }
+.discovery-inbox-ack { display: flex !important; flex-direction: row; align-items: flex-start; gap: .55rem; line-height: 1.45; }
+.discovery-inbox-ack input { flex: 0 0 1.15rem; width: 1.15rem; height: 1.15rem; accent-color: #26527d; margin-top: .15rem; }
+.discovery-legacy-note { background: #eef5f7; border: 1px solid #a1b9c8; padding: .75rem 1rem; border-radius: .65rem; }
+.discovery-legacy-note summary { cursor: pointer; font-weight: 750; }
+.discovery-inbox :is(button, input, select, summary, a):focus-visible { outline: 3px solid #26527d; outline-offset: 3px; }
+.discovery-inbox button:disabled { opacity: .6; cursor: not-allowed; }
 @media (max-width: 740px) {
   .device-registry-layout { grid-template-columns: minmax(0, 1fr); }
   .device-registry-results { max-height: 20rem; }

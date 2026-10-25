@@ -148,7 +148,7 @@ export function DeviceRegistry360({ role, browser, policy, onRefreshInventory }:
     } finally { setBusy(false); }
   }
 
-  return <section className="panel device-registry-360" aria-label="Device 360 source-aware registry">
+  return <section id="device-registry-360" className="panel device-registry-360" aria-label="Device 360 source-aware registry">
     <header className="device-registry-heading">
       <div>
         <p className="eyebrow">Build 139 · Source-aware inventory and reviewed metadata</p>
