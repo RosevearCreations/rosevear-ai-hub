@@ -3311,6 +3311,14 @@ h1 {
 .vault-threats article { border: 1px solid #cbd5e1; border-radius: .8rem; padding: .85rem; }
 .vault-threats p { margin: .4rem 0 0; line-height: 1.45; }
 .vault-architecture-note { border-left: 4px solid #9d4d32; background: #fff6f2; color: #592719; padding: .9rem 1rem; border-radius: .25rem; line-height: 1.55; }
+.vault-architecture [id^="vault-"] { scroll-margin-top: 5rem; }
+.vault-review-navigation { margin-top: 1.1rem; }
+.vault-review-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr)); gap: .6rem; }
+.vault-review-links a { display: grid; gap: .3rem; padding: .75rem .85rem; border: 1px solid #b7a9be; border-radius: .75rem; color: #382c47; background: #f6f2f8; text-decoration: none; }
+.vault-review-links a:hover, .vault-review-links a:focus-visible { background: #ece4f2; border-color: #73548b; text-decoration: underline; }
+.vault-review-links a:focus-visible, .vault-review-link:focus-visible { outline: 3px solid #694a88; outline-offset: 3px; }
+.vault-review-group { color: #62546d; font-size: .74rem; font-weight: 600; }
+.vault-review-link { display: inline-block; margin-top: .45rem; color: #563c75; font-weight: 700; text-decoration: underline; text-underline-offset: .2rem; }
 @media (max-width: 720px) {
   .vault-architecture > .page-header { display: grid; gap: .75rem; }
   .vault-gates-list li { flex-wrap: wrap; }
