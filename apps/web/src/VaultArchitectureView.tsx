@@ -9,6 +9,7 @@ import { assessVaultSyntheticHarness, vaultSyntheticCases } from "./vaultSynthet
 import { assessVaultServiceBoundary, vaultServiceBoundaries, vaultServiceDenialCases } from "./vaultServiceBoundary";
 import { assessVaultDocumentPreparation, vaultDocumentDenialCases, vaultDocumentReviewStages } from "./vaultDocumentPreparation";
 import { assessVaultRecoveryLedger, vaultRecoveryDenialCases, vaultRecoveryReviewStages } from "./vaultRecoveryLedgerReview";
+import { assessVaultWindowsAcceptance, vaultWindowsAcceptanceDenials, vaultWindowsAcceptanceGates } from "./vaultWindowsAcceptanceProtocol";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
@@ -23,12 +24,13 @@ export function VaultArchitectureView() {
   const servicePreview = assessVaultServiceBoundary();
   const documents = assessVaultDocumentPreparation();
   const recovery = assessVaultRecoveryLedger();
+  const windowsAcceptance = assessVaultWindowsAcceptance();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 129 · recovery and anti-rollback security review</p>
+          <p className="eyebrow">Build 130 · independent Windows vault security &amp; owner acceptance protocol</p>
           <h1>Private password and document vault</h1>
           <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
@@ -39,6 +41,39 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <section className="panel" aria-label="Build 130 independent Windows vault security and owner acceptance protocol">
+        <div className="vault-gates-heading">
+          <div>
+            <h2>Independent Windows vault security &amp; owner acceptance protocol</h2>
+            <p>This is our future test plan for an independent reviewer and an owner-supervised Windows trial. Source CI results, simulated evidence and a Hub admin account cannot authorize live vault installation or use.</p>
+          </div>
+          <span className="vault-gate-badge">WINDOWS ACCEPTANCE · {windowsAcceptance.windows_owner_acceptance}</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> How we will decide whether our Windows vault is safe to trial</summary>
+          <ol>
+            <li>First, an independent reviewer must examine the exact source, vetted cryptographic dependencies, threat model and private-service design, recording open findings without any passwords.</li>
+            <li>Only with separate owner approval can we install a disposable-account pilot on our own Windows server. An observed installation and its commit, executable, process identity, ACLs and private HTTPS settings must match the reviewed release.</li>
+            <li>We must witness failed access cases, vault-only MFA, stolen-session denial, document safety, backup/version rollback, power loss and recovery. Any missed or failed step keeps the live-vault HOLD.</li>
+            <li>Records must use sanitized control IDs and outcomes only. No master passwords, recovery codes, real documents, filenames, authenticator seeds, keys or personal account details belong in this Hub review page.</li>
+          </ol>
+        </details>
+        <h3>Eight independent security and field-acceptance gates</h3>
+        <div className="vault-security-grid">
+          {vaultWindowsAcceptanceGates.map((item, index) => <article className="vault-security-card" key={item.id}>
+            <p className="eyebrow">Required review {index + 1} / {vaultWindowsAcceptanceGates.length} · not observed</p>
+            <h2>{item.title}</h2><p>{item.requirement}</p><small>No signed Windows evidence collected</small>
+          </article>)}
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> Failure and forged-acceptance scenarios</summary>
+          <div className="vault-threats">
+            {vaultWindowsAcceptanceDenials.map(item => <article key={item.id}><strong>{item.title}</strong><p>{item.expected}</p></article>)}
+          </div>
+        </details>
+        <p className="vault-architecture-note">Build 130 contract: <strong>{windowsAcceptance.phase}</strong>. Independent audit, signed owner observation, reviewed executable, vault-only MFA, real document intake, trusted backup/restore and Windows installation remain <strong>NOT VERIFIED / HOLD</strong>. Even a complete synthetic checklist never lifts this gate.</p>
+      </section>
 
       <section className="panel" aria-label="Build 129 recovery and anti-rollback ledger review">
         <div className="vault-gates-heading">

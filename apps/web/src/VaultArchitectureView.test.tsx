@@ -24,6 +24,10 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByRole("heading", { name: "Disposable-data encryption & tamper tests" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Independent vault service & family identity boundary" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Document recovery & anti-rollback ledger design" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Independent Windows vault security & owner acceptance protocol" })).toBeInTheDocument();
+    expect(screen.getByText("WINDOWS ACCEPTANCE · HOLD")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Verified Windows build provenance" })).toBeInTheDocument();
+    expect(screen.getByText(/Even a complete synthetic checklist never lifts this gate/)).toBeInTheDocument();
     expect(screen.getByText("RECOVERY OFF · HOLD")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Independent monotonic checkpoint" })).toBeInTheDocument();
     expect(screen.getByText(/If malware rolls back both the document and its locally stored ledger/)).toBeInTheDocument();

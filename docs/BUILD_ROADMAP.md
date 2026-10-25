@@ -832,3 +832,11 @@ Each build must:
 - document six safety gates for version witness, atomic commit, offline encrypted recovery, independent identity, negative cases and owner-supervised Windows disaster testing
 - ship only review data, negative test fixtures, on-screen HOLD/RECOVERY OFF and circled-i help; no real vault read/write, MFA, upload, backup, restore or Windows service
 - see docs/BUILD_129_DOCUMENT_RECOVERY_LEDGER.md; proposed Build 130 follows with independent Windows security and owner-acceptance protocol, not live activation
+
+### Build 130 — Independent Windows Vault Security & Owner Acceptance Protocol (review-only)
+- define eight independent review and field gates for pinned source/executable provenance, Windows service ACL, private HTTPS/Tailscale, separate household identity/MFA, client leakage controls, document recovery and owner-witnessed disaster drills
+- distinguish GitHub source CI, external cryptographic/security audit, separately authorized installed Windows disposable pilot and actual owner field disposition; all independent audit and physical Windows evidence remain absent
+- model a strict bounded synthetic-only evidence checklist that rejects duplicate/unknown/missing control IDs, forged approvals, altered provenance, added sensitive fields and incomplete observations without ever converting synthetic PASS into authorization
+- show review gates, denial scenarios and circled-i help in the signed-in Vault page, with unconditional field/production HOLD and no forms, secret intake, network endpoint or Windows installation
+- document independent reviewer handoff, release pinning, evidence minimization, mandatory fail conditions and distinct explicit owner authorization before any future pilot
+- see docs/BUILD_130_WINDOWS_VAULT_ACCEPTANCE_PROTOCOL.md; no real vault activation or Windows field acceptance may be claimed from source GREEN
