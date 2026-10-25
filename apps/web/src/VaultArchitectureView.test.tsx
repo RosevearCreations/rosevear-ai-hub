@@ -27,6 +27,10 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByRole("heading", { name: "Independent Windows vault security & owner acceptance protocol" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Independent vault findings & remediation triage" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Independent assessor handoff & evidence readiness" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Vault change-impact reassessment & mandatory retest mapping" })).toBeInTheDocument();
+    expect(screen.getByText("INDEPENDENT RETEST REQUIRED · HOLD")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Changed source or rebuilt executable" })).toBeInTheDocument();
+    expect(screen.getByText(/A passing invented change-map is/)).toBeInTheDocument();
     expect(screen.getByText("ASSESSOR NOT ENGAGED · HOLD")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Immutable source-to-Windows artifact map" })).toBeInTheDocument();
     expect(screen.getByText(/Completing a fictional scope packet never lifts this gate/)).toBeInTheDocument();
