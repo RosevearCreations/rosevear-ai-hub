@@ -2123,3 +2123,13 @@ See docs/BUILD_134_VAULT_READINESS_NAVIGATION.md. The local Windows server, MFA,
 - [ ] Verify feature PR, dev push, promotion PR and final main push CI GREEN independently of physical Windows security acceptance
 
 See docs/BUILD_135_VAULT_REVIEW_FINDER_PRINT.md. Build 135 adds only operator navigation and browser printing—not an operational password/document vault.
+
+## Build 136 — Vault Guided Review Routes & Session Pinboard
+- [x] Three advisory route selectors covering all eleven exact security-review section links once, with predictable in-page reading order
+- [x] Compatible route, category and topic filtering with an honest visible-result count and no-results reset
+- [x] Accessible Pin/Unpin controls, pinned-only view, and deliberate clear; pins disappear on page unmount and are not stored or sent anywhere
+- [x] Browser print summary and all six real, unverified vault security milestones remain unchanged; no new vault entry points or network operations
+- [ ] Genuine independent cryptographic/service review, separately protected rollback witness, external security remediation retest and an owner-witnessed Windows pilot remain unperformed
+- [ ] Verify Build 136 feature PR, dev push, promotion PR and independent main push CI; passing these never establishes installed-Windows security acceptance
+
+See docs/BUILD_136_VAULT_GUIDED_ROUTES_PINBOARD.md. This is an operator reading aid only: live household password/document storage and MFA remain **SECURITY HOLD / OFF**.

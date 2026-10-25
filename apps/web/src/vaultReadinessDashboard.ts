@@ -28,10 +28,30 @@ export const vaultReviewNavigation = [
 export const vaultReviewGroups = ["All sections", "Independent review", "Data protection", "Architecture"] as const;
 export type VaultReviewGroup = typeof vaultReviewGroups[number];
 
+/** Review reading routes are suggestions, never attestations or implementation permissions. */
+export const vaultReviewRoutes = [
+  { id: "all", label: "All review sections", description: "Browse every planned security review area.", sections: [] },
+  { id: "design", label: "1 · Design and separation", description: "Start with the proposed first-party vault, cryptography, private identity and isolated document handling.", sections: ["vault-blueprint", "vault-crypto-review", "vault-service", "vault-lock", "vault-mfa", "vault-documents"] },
+  { id: "audit", label: "2 · Independent assessment", description: "Prepare the external assessor handoff, fix actual findings, then map any changes to mandatory retests.", sections: ["vault-assessor", "vault-findings", "vault-change-impact"] },
+  { id: "field", label: "3 · Recovery and Windows pilot planning", description: "Understand rollback-resistant recovery and the still-unapproved Windows pilot acceptance protocol.", sections: ["vault-recovery", "vault-windows"] },
+] as const;
+export type VaultReviewRoute = typeof vaultReviewRoutes[number]["id"];
+
 /** Local, bounded navigation only: never queries a server or searches vault data. */
-export function findVaultReviewSections(query: string, group: VaultReviewGroup = "All sections") {
+export function findVaultReviewSections(
+  query: string,
+  group: VaultReviewGroup = "All sections",
+  route: VaultReviewRoute = "all",
+  pinnedOnly = false,
+  pinnedIds: readonly string[] = [],
+) {
   const needle = query.slice(0, 80).trim().toLocaleLowerCase();
-  return vaultReviewNavigation.filter(item =>
+  const plan = vaultReviewRoutes.find(item => item.id === route) ?? vaultReviewRoutes[0];
+  const candidates: readonly (typeof vaultReviewNavigation)[number][] = plan.id === "all"
+    ? vaultReviewNavigation
+    : plan.sections.map(id => vaultReviewNavigation.find(item => item.id === id)).filter(item => item !== undefined);
+  return candidates.filter(item =>
+    (!pinnedOnly || pinnedIds.includes(item.id)) &&
     (group === "All sections" || item.group === group) &&
     (!needle || `${item.label} ${item.group} ${item.summary}`.toLocaleLowerCase().includes(needle))
   );
