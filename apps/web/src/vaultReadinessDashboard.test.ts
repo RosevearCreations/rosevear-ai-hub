@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assessVaultReadinessDashboard, findVaultReviewSections, vaultReadinessMilestones, vaultReviewNavigation, vaultReviewRoutes } from "./vaultReadinessDashboard";
+import { assessVaultReadinessDashboard, findVaultReviewSections, summarizeVaultReadingProgress, vaultReadinessMilestones, vaultReviewNavigation, vaultReviewRoutes } from "./vaultReadinessDashboard";
 
 describe("Build 134 accessible vault security readiness and navigation boundaries", () => {
   it("reports all six milestones unverified; forged owner or auditor flags confer no authority", () => {
@@ -76,5 +76,35 @@ describe("Build 136 guided routes and temporary section pins", () => {
     expect(findVaultReviewSections("", "All sections", "all", true, ["vault-mfa", "https://evil.test", "vault-windows"]).map(x => x.id)).toEqual(["vault-windows", "vault-mfa"]);
     expect(findVaultReviewSections("", "All sections", "audit", true, ["vault-mfa"])).toEqual([]);
     expect(findVaultReviewSections("", "Architecture", "design", true, ["vault-mfa"]).map(x => x.id)).toEqual(["vault-mfa"]);
+  });
+});
+
+describe("Build 137 ephemeral reading progress and continue route", () => {
+  it("counts only canonical fixed headings and selects the next unread in route order", () => {
+    expect(summarizeVaultReadingProgress("design", [])).toMatchObject({ total: 6, read: 0, remaining: 6, nextId: "vault-blueprint" });
+    expect(summarizeVaultReadingProgress("design", ["vault-blueprint", "vault-blueprint", "bogus", "vault-documents"])).toMatchObject({
+      total: 6, read: 2, remaining: 4, nextId: "vault-crypto-review", phase: "SESSION_READING_ONLY", securityApproval: "HOLD",
+    });
+    expect(summarizeVaultReadingProgress("audit", ["vault-blueprint", "vault-assessor"])).toMatchObject({ total: 3, read: 1, nextId: "vault-findings" });
+    expect(summarizeVaultReadingProgress("field", ["vault-recovery", "vault-windows"])).toMatchObject({ total: 2, read: 2, remaining: 0, nextId: null });
+  });
+
+  it("limits unread-only finding to the fixed headings while respecting pins, query and route", () => {
+    expect(findVaultReviewSections("", "All sections", "design", false, [], true, ["vault-blueprint", "bogus"]).map(item => item.id))
+      .toEqual(["vault-crypto-review", "vault-service", "vault-lock", "vault-mfa", "vault-documents"]);
+    expect(findVaultReviewSections("", "Architecture", "design", true, ["vault-blueprint", "vault-crypto-review", "vault-mfa"], true, ["vault-blueprint"]).map(item => item.id))
+      .toEqual(["vault-crypto-review", "vault-mfa"]);
+    expect(findVaultReviewSections("MFA", "All sections", "audit", false, [], true, [])).toEqual([]);
+  });
+
+  it("read indicators cannot change readiness even if all headings are marked", () => {
+    const allIds = vaultReviewNavigation.map(item => item.id);
+    expect(summarizeVaultReadingProgress("all", allIds)).toMatchObject({ read: 11, nextId: null, securityApproval: "HOLD" });
+    const gate = assessVaultReadinessDashboard({ allHeadingsRead: true, readingIds: allIds, reviewed: true, approve: true });
+    expect(gate.independently_verified_milestones).toBe(0);
+    expect(gate.credential_intake).toBe("DISABLED");
+    expect(gate.document_intake).toBe("DISABLED");
+    expect(gate.windows_vault_installed).toBe(false);
+    expect(gate.production_security_acceptance).toBe("HOLD");
   });
 });

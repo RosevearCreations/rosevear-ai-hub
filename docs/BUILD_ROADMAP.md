@@ -882,3 +882,10 @@ Each build must:
 - allow accessible per-section temporary pin/unpin and pinned-only view; clear pins on deliberate action or page unmount, never save them or treat them as approvals
 - keep six actual unverified milestones and all production vault controls on HARD SECURITY HOLD, independent of route and pins
 - add pure route coverage/denial tests and browser UI tests for route/filter/pin/reset; see docs/BUILD_136_VAULT_GUIDED_ROUTES_PINBOARD.md
+
+### Build 137 — Vault Reading Progress & Continue-Where-You-Left-Off (session-only)
+- permit temporary Mark read/unread on each of the eleven fixed review headings without accepting notes, private data or approval records
+- show per-route and all-section reading counts and the next unread anchor in canonical guided route order
+- combine unread-only view with route, topic, category and existing pin filters; reset explicitly and clear state on page refresh/unmount
+- keep browser print summary free of session activity and all six real independently verified security milestones at 0 / 6 with unconditional Vault SECURITY HOLD
+- cover all-read, invalid IDs, next navigation, marker reset and zero-result UI tests; see docs/BUILD_137_VAULT_READING_PROGRESS.md
