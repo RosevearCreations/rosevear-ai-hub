@@ -37,6 +37,21 @@ export const vaultReviewRoutes = [
 ] as const;
 export type VaultReviewRoute = typeof vaultReviewRoutes[number]["id"];
 
+/** Reading-only, ephemeral progress; this is never audit evidence or a security gate. */
+export function summarizeVaultReadingProgress(route: VaultReviewRoute = "all", readIds: readonly string[] = []) {
+  const plan = vaultReviewRoutes.find(item => item.id === route) ?? vaultReviewRoutes[0];
+  const ids: readonly string[] = plan.id === "all" ? vaultReviewNavigation.map(item => item.id) : plan.sections;
+  const remainingIds = ids.filter(id => !readIds.includes(id));
+  return {
+    total: ids.length,
+    read: ids.length - remainingIds.length,
+    remaining: remainingIds.length,
+    nextId: remainingIds[0] ?? null,
+    phase: "SESSION_READING_ONLY" as const,
+    securityApproval: "HOLD" as const,
+  };
+}
+
 /** Local, bounded navigation only: never queries a server or searches vault data. */
 export function findVaultReviewSections(
   query: string,
@@ -44,6 +59,8 @@ export function findVaultReviewSections(
   route: VaultReviewRoute = "all",
   pinnedOnly = false,
   pinnedIds: readonly string[] = [],
+  unreadOnly = false,
+  readIds: readonly string[] = [],
 ) {
   const needle = query.slice(0, 80).trim().toLocaleLowerCase();
   const plan = vaultReviewRoutes.find(item => item.id === route) ?? vaultReviewRoutes[0];
@@ -52,6 +69,7 @@ export function findVaultReviewSections(
     : plan.sections.map(id => vaultReviewNavigation.find(item => item.id === id)).filter(item => item !== undefined);
   return candidates.filter(item =>
     (!pinnedOnly || pinnedIds.includes(item.id)) &&
+    (!unreadOnly || !readIds.includes(item.id)) &&
     (group === "All sections" || item.group === group) &&
     (!needle || `${item.label} ${item.group} ${item.summary}`.toLocaleLowerCase().includes(needle))
   );

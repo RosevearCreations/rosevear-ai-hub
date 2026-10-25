@@ -2133,3 +2133,13 @@ See docs/BUILD_135_VAULT_REVIEW_FINDER_PRINT.md. Build 135 adds only operator na
 - [ ] Verify Build 136 feature PR, dev push, promotion PR and independent main push CI; passing these never establishes installed-Windows security acceptance
 
 See docs/BUILD_136_VAULT_GUIDED_ROUTES_PINBOARD.md. This is an operator reading aid only: live household password/document storage and MFA remain **SECURITY HOLD / OFF**.
+
+## Build 137 — Vault Reading Progress & Continue-Where-You-Left-Off
+- [x] Per-heading read/unread state, per-route/overall counters and next unread review anchor use fixed existing security-review destinations
+- [x] Unread-only filter, route/topic/category/pin composition, manual reset and automatic reset on leaving the page
+- [x] Every reading state—including 11 / 11—remains a temporary reading aid, never an external audit, approval, evidence ledger or Windows pilot authorization
+- [x] No browser storage, network request, backend, password, document, MFA, restore or Windows runtime changes
+- [ ] Real first-party vault cryptography and service remain unimplemented/unreviewed; independent assessment, owner-approved disposable Windows pilot and separately protected rollback witness remain outstanding
+- [ ] Verify feature PR, independent dev CI, promotion PR and final main push CI separately from physical Windows acceptance
+
+See docs/BUILD_137_VAULT_READING_PROGRESS.md. Source GREEN can only certify this UI; the real vault remains **0 / 6 VERIFIED · SECURITY HOLD**.
