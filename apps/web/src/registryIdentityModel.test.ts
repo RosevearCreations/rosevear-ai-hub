@@ -4,7 +4,7 @@ import type {
   CameraDashboard, CameraRecord, DeviceRegistryReviews,
   HomeAssistantBrowserResponse, HomeAssistantControlPolicy,
 } from "./api";
-import { compileRegistry, suggestRegistryMatches } from "./deviceRegistry360";
+import { compileRegistry, suggestRegistryMatches } from "./registryIdentityModel";
 
 const browser: HomeAssistantBrowserResponse = {
   area_count: 1, device_count: 1, domain_count: 1, entity_count: 2,

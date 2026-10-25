@@ -8,7 +8,7 @@ import {
   type DeviceRegistrySource, type HomeAssistantBrowserResponse,
   type HomeAssistantControlPolicy,
 } from "./api";
-import { compileRegistry, registryKey, suggestRegistryMatches } from "./deviceRegistry360";
+import { compileRegistry, registryKey, suggestRegistryMatches } from "./registryIdentityModel";
 
 const emptyReviews: DeviceRegistryReviews = { annotations: [], matches: [] };
 const sourceNames: Record<DeviceRegistrySource, string> = {
