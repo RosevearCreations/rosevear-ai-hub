@@ -854,3 +854,10 @@ Each build must:
 - make even a synthetically complete handoff report `SYNTHETIC_HANDOFF_PREPARED_NOT_REVIEWED` with unconditional live-vault SECURITY HOLD, no reviewer signoff and no Windows field acceptance
 - show signed-in read-only Vault guidance with eight review cards, six denial cases and circled-i help; no input form, upload, report storage, Windows process, MFA enrollment or network service
 - document what a future independent reviewer must actually examine and what remains unimplemented; see docs/BUILD_132_ASSESSOR_HANDOFF_READINESS.md
+
+### Build 133 — Vault Change-Impact Reassessment & Mandatory Retest Mapping (review-only)
+- define six concrete vault change classes: source rebuild, cryptographic dependency/key changes, household identity/MFA, Windows process/ACL, private HTTPS/Tailscale and document/recovery/rollback witness changes
+- map each simulated change to the affected Build 132 independent-assessor evidence scopes in stable canonical order; combined changes union the re-review requirements without duplicating controls
+- implement a strict synthetic-only change-packet classifier that rejects empty/duplicate/unknown changes, real source or executable identities, forged external approvals, waivers and extra secret-bearing details
+- require independent reassessment for every valid invented change map and leave vault installation, real passwords/documents, MFA, backup/restore and Windows owner pilot permanently HOLD at this stage
+- include six denial scenarios, read-only signed-in Vault guidance and circled-i help; see docs/BUILD_133_VAULT_CHANGE_IMPACT_REVIEW.md
