@@ -12,6 +12,7 @@ import { assessVaultRecoveryLedger, vaultRecoveryDenialCases, vaultRecoveryRevie
 import { assessVaultWindowsAcceptance, vaultWindowsAcceptanceDenials, vaultWindowsAcceptanceGates } from "./vaultWindowsAcceptanceProtocol";
 import { assessVaultSecurityFindingsReview, vaultRemediationDenials, vaultRemediationReviewStages } from "./vaultSecurityFindingsReview";
 import { assessVaultAssessorHandoff, vaultAssessorHandoffDenials, vaultAssessorHandoffScopes } from "./vaultAssessorHandoff";
+import { assessVaultChangeImpactReview, vaultChangeImpactDenials, vaultChangeImpactKinds } from "./vaultChangeImpactReview";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
@@ -29,12 +30,13 @@ export function VaultArchitectureView() {
   const windowsAcceptance = assessVaultWindowsAcceptance();
   const findingsReview = assessVaultSecurityFindingsReview();
   const handoff = assessVaultAssessorHandoff();
+  const changeReview = assessVaultChangeImpactReview();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 132 · independent vault assessor handoff &amp; evidence readiness</p>
+          <p className="eyebrow">Build 133 · vault change-impact reassessment &amp; mandatory retest mapping</p>
           <h1>Private password and document vault</h1>
           <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
@@ -45,6 +47,40 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <section className="panel" aria-label="Build 133 vault change-impact reassessment and retest mapping">
+        <div className="vault-gates-heading">
+          <div>
+            <h2>Vault change-impact reassessment &amp; mandatory retest mapping</h2>
+            <p>When future vault code, identity, Windows settings, private access or recovery design changes, the independent assessor must revisit affected security controls. This screen maps anticipated review work; it does not inspect a real release or certify a completed retest.</p>
+          </div>
+          <span className="vault-gate-badge">INDEPENDENT RETEST REQUIRED · {changeReview.production_security_acceptance}</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> How a changed vault artifact would reopen independent review</summary>
+          <ol>
+            <li>Any new source build, dependency version, Windows executable or security configuration must be reconciled against the exact scope of the earlier independent assessment.</li>
+            <li>Six common change classes below identify which of Build 132&apos;s eight assessor evidence areas need another review and which denial tests must be repeated.</li>
+            <li>Our synthetic change-map tests accept invented labels only, and reject forged reviewer clearance, production source IDs, waivers and any password or private document material.</li>
+            <li>Only a genuine independent retest followed by separate owner approval and witnessed disposable Windows field testing could eventually permit further consideration. Everything live remains disabled today.</li>
+          </ol>
+        </details>
+        <h3>Six change classes that reopen a review</h3>
+        <div className="vault-security-grid">
+          {vaultChangeImpactKinds.map((item, index) => <article className="vault-security-card" key={item.id}>
+            <p className="eyebrow">Security change {index + 1} / {vaultChangeImpactKinds.length} · not evaluated on a real system</p>
+            <h2>{item.title}</h2><p>{item.consequence}</p>
+            <small>Requires reassessment of {item.scopes.length} independent evidence scopes</small>
+          </article>)}
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> Why a previous approval or synthetic pass cannot be reused</summary>
+          <div className="vault-threats">
+            {vaultChangeImpactDenials.map(item => <article key={item.id}><strong>{item.title}</strong><p>{item.expected}</p></article>)}
+          </div>
+        </details>
+        <p className="vault-architecture-note">Build 133 state: <strong>{changeReview.phase}</strong>. No actual change was independently assessed, no real retest was performed and no Windows vault has been installed. A passing invented change-map is <strong>NOT REVIEW / SECURITY HOLD</strong>.</p>
+      </section>
 
       <section className="panel" aria-label="Build 132 independent vault assessor handoff and evidence readiness">
         <div className="vault-gates-heading">
