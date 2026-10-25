@@ -192,7 +192,7 @@ export function DeviceCameraRecoveryPanel() {
   }
 
   return (
-    <section className="panel recovery-inventory" aria-label="Build 108 supervised device and camera reconciliation">
+    <section id="device-recovery-workbench" className="panel recovery-inventory" aria-label="Build 108 supervised device and camera reconciliation">
       <div className="ha-section-heading">
         <div>
           <p className="eyebrow">Builds 107–108 · Read-only evidence and supervised review</p>
