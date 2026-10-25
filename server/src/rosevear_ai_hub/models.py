@@ -668,3 +668,41 @@ class CameraImportAcceptanceEvidence(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.current_timestamp(), nullable=False
     )
+
+
+class DeviceRegistryAnnotation(TimestampMixin, Base):
+    """Reviewed labels only; never alters upstream HA, MQTT or camera identities."""
+
+    __tablename__ = "device_registry_annotations"
+    __table_args__ = (UniqueConstraint("source", "source_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source: Mapped[str] = mapped_column(String(24), nullable=False)
+    source_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    alias: Mapped[str] = mapped_column(String(100), nullable=False, default="")
+    room_label: Mapped[str] = mapped_column(String(100), nullable=False, default="")
+    disposition: Mapped[str] = mapped_column(String(32), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    reviewed_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class DeviceRegistryMatchReview(TimestampMixin, Base):
+    """Proposed relationship review, not a linkage or consolidation operation."""
+
+    __tablename__ = "device_registry_match_reviews"
+    __table_args__ = (UniqueConstraint("left_source", "left_id", "right_source", "right_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    left_source: Mapped[str] = mapped_column(String(24), nullable=False)
+    left_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    right_source: Mapped[str] = mapped_column(String(24), nullable=False)
+    right_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    decision: Mapped[str] = mapped_column(String(32), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    reviewed_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

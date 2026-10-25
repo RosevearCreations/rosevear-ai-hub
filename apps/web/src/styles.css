@@ -3398,3 +3398,57 @@ h1 {
   .vault-security-card, .vault-gate-warning { break-inside: avoid; background: #fff; }
   .vault-architecture .vault-gate-badge { color: #111; border-color: #111; background: #fff; }
 }
+
+/* Build 139 — Device 360 keeps provider identities visually distinct and editable notes separate. */
+.device-registry-360 { min-width: 0; display: grid; gap: 1rem; }
+.device-registry-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.device-registry-heading > div { flex: 1; min-width: min(100%, 17rem); }
+.device-registry-heading h2 { margin: .25rem 0 .5rem; }
+.device-registry-heading p { max-width: 78ch; line-height: 1.5; }
+.device-registry-help { padding: .85rem 1rem; border: 1px solid #9f94b4; border-radius: .8rem; background: #f6f2fa; color: #302b40; }
+.device-registry-help summary { cursor: pointer; font-weight: 750; }
+.device-registry-help p { max-width: 78ch; line-height: 1.5; }
+.device-registry-time { padding: .7rem .85rem; border-radius: .65rem; background: #e9f2f5; color: #17394b; line-height: 1.5; }
+.device-registry-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: .7rem; }
+.device-registry-stats > div { display: grid; gap: .3rem; padding: .85rem; border: 1px solid #a4b6be; border-radius: .8rem; background: linear-gradient(135deg, #f9fbfc, #eaf1f3); }
+.device-registry-stats strong { font-size: 1.55rem; color: #153c4d; font-variant-numeric: tabular-nums; }
+.device-registry-stats span { font-size: .88rem; color: #374f5b; }
+.device-registry-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); align-items: end; gap: .7rem; }
+.device-registry-filters label, .device-registry-editor label, .device-registry-mqtt > label { display: grid; gap: .35rem; font-weight: 650; }
+.device-registry-filters input, .device-registry-filters select,
+.device-registry-editor input, .device-registry-editor select, .device-registry-mqtt input[type="text"] {
+  width: 100%; min-width: 0; max-width: 100%; padding: .7rem; border: 1px solid #7f9099; border-radius: .55rem; background: #fff; color: #1a2c35;
+}
+.device-registry-layout { display: grid; grid-template-columns: minmax(15rem, 1fr) minmax(0, 1.35fr); gap: 1rem; align-items: start; min-width: 0; }
+.device-registry-results { display: grid; align-content: start; gap: .5rem; max-height: 34rem; overflow-y: auto; padding: .2rem; }
+.device-registry-results > button { display: grid; gap: .3rem; text-align: left; padding: .85rem; min-width: 0; border: 1px solid #a7b6c0; border-radius: .75rem; color: #23343f; background: #f5f9fb; cursor: pointer; }
+.device-registry-results > button:hover { background: #e6f0f5; }
+.device-registry-results > button.device-registry-selected { border: 2px solid #285579; background: #e3edf5; }
+.device-registry-results button span, .device-registry-results button strong { overflow-wrap: anywhere; }
+.device-registry-results button span { font-size: .86rem; }
+.device-registry-detail { border: 1px solid #9baeb9; border-radius: .85rem; background: #f8fafb; padding: 1rem; min-width: 0; }
+.device-registry-detail h3 { margin-top: 0; overflow-wrap: anywhere; }
+.device-registry-detail dl { display: grid; gap: .4rem; }
+.device-registry-detail dl > div { display: grid; grid-template-columns: minmax(7rem, 40%) minmax(0, 1fr); border-bottom: 1px solid #d2dce0; gap: .6rem; padding: .45rem 0; }
+.device-registry-detail dt { font-weight: 750; }
+.device-registry-detail dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.device-registry-detail code { white-space: normal; overflow-wrap: anywhere; }
+.device-registry-editor { border-top: 2px solid #c3d1dc; margin-top: 1rem; padding-top: 1rem; display: grid; gap: .75rem; }
+.device-registry-editor h4 { margin: 0; }
+.device-registry-editor small { line-height: 1.5; }
+.device-registry-matches, .device-registry-mqtt { padding: 1rem; border: 1px solid #a7b7c0; border-radius: .85rem; background: #f7f9fb; min-width: 0; }
+.device-registry-matches h3, .device-registry-mqtt h3 { margin: 0 0 .55rem; }
+.device-registry-matches ul { padding-left: 1.25rem; display: grid; gap: .75rem; }
+.device-registry-matches li { line-height: 1.5; overflow-wrap: anywhere; }
+.device-registry-match-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .45rem; }
+.device-registry-mqtt { display: grid; gap: .7rem; }
+.device-registry-ack { display: flex !important; flex-direction: row; gap: .6rem; align-items: flex-start; font-weight: 600; }
+.device-registry-ack input { width: 1.2rem; height: 1.2rem; flex: 0 0 1.2rem; accent-color: #285579; }
+.device-registry-feedback { background: #e5f2ec; color: #174631; padding: .8rem; border-radius: .6rem; }
+.device-registry-360 button:disabled { opacity: .6; cursor: not-allowed; }
+.device-registry-360 :is(button, input, select, summary, a):focus-visible { outline: 3px solid #26527d; outline-offset: 3px; }
+@media (max-width: 740px) {
+  .device-registry-layout { grid-template-columns: minmax(0, 1fr); }
+  .device-registry-results { max-height: 20rem; }
+  .device-registry-detail dl > div { grid-template-columns: minmax(0, 1fr); gap: .2rem; }
+}

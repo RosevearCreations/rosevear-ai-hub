@@ -126,8 +126,12 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   Devices: {
-    purpose: "Browses Home Assistant entities, reviews missing integration identities and manages the explicit safe-control allow list.",
+    purpose: "Browses source-aware Device 360 identities, Home Assistant entities, missing device recovery and the explicit safe-control allow list.",
     tasks: [
+      "In Device 360, search by exact source identity, label or room; filter Home Assistant devices, entities, camera records and manually reviewed MQTT topics. Counts are source identities, not necessarily unique pieces of hardware.",
+      "Inspect a source's last reported observation, room origin, capabilities and current safe-control eligibility. Unavailable or stale provider readings do not prove a device is removed or safe.",
+      "Owner/Admin may annotate a display name and local Hub room, classify unsupported identities and record possible or distinct cross-source matches. No rename, merge, adoption, room change in Home Assistant or pairing happens at the provider.",
+      "Owner/Admin can record an exact, non-secret MQTT topic after acknowledging it is only a local reference, never a broker subscription or publish. Existing camera and MQTT permissions remain unchanged.",
       "Refresh entity inventory and filter by area, device, domain, or state.",
       "For Build 114 missing-device diagnosis, compare prior saved inventory against one fresh authenticated HA read. Group only confirmed missing identities by integration; missing entities are not necessarily broken integrations.",
       "When adding recognized devices, compare exact IDs and areas before enabling any controls. Save field notes; require a fresh registry read and a real device function check before acceptance.",
@@ -135,6 +139,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Use the bounded control buttons only for the exact approved entity.",
     ],
     safety: [
+      "Device 360 source IDs are preserved. A proposed duplicate never silently merges or reassigns two physical devices; a provider ID change is held separately until owner review.",
       "Discovery and diagnostic reviews do not automatically enroll devices, repair Home Assistant, change integrations, or issue physical commands.",
       "Safety-sensitive or hazardous targets remain prohibited even if their names resemble ordinary devices.",
       "Home Assistant must be available for writes; the Hub does not queue uncertain physical changes.",
