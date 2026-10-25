@@ -25,6 +25,10 @@ describe("Build 119 Hub client architecture screen", () => {
     expect(screen.getByRole("heading", { name: "Independent vault service & family identity boundary" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Document recovery & anti-rollback ledger design" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Independent Windows vault security & owner acceptance protocol" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Independent vault findings & remediation triage" })).toBeInTheDocument();
+    expect(screen.getByText("AUDIT NOT PERFORMED · HOLD")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Independent retest and regression evidence" })).toBeInTheDocument();
+    expect(screen.getByText(/Synthetic issue triage is not a security certificate/)).toBeInTheDocument();
     expect(screen.getByText("WINDOWS ACCEPTANCE · HOLD")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Verified Windows build provenance" })).toBeInTheDocument();
     expect(screen.getByText(/Even a complete synthetic checklist never lifts this gate/)).toBeInTheDocument();

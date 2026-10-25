@@ -840,3 +840,10 @@ Each build must:
 - show review gates, denial scenarios and circled-i help in the signed-in Vault page, with unconditional field/production HOLD and no forms, secret intake, network endpoint or Windows installation
 - document independent reviewer handoff, release pinning, evidence minimization, mandatory fail conditions and distinct explicit owner authorization before any future pilot
 - see docs/BUILD_130_WINDOWS_VAULT_ACCEPTANCE_PROTOCOL.md; no real vault activation or Windows field acceptance may be claimed from source GREEN
+
+### Build 131 — Independent Vault Security Findings & Remediation Triage (review-only)
+- define six independent audit-to-remediation stages spanning assessor scope, minimized evidence, severity, owner-assigned fixes, independent retests and a separate Windows pilot authorization boundary
+- build pure synthetic-only risk triage for at most twelve opaque DEMO findings with explicit review gate, severity, disposition and invented provenance, rejecting duplicates, unknown states, forged approvals, drift or extra secret-bearing fields
+- classify unresolved critical/high as synthetic blockers, other outstanding findings as synthetic retest-pending, and even empty/perfect fictional findings as "not an audit"; all outcomes preserve live vault SECURITY HOLD
+- display signed-in Vault guidance, six denial scenarios and circled-i help; no issue entry, report upload, secret intake, persistence, audit authority, service install or real field acceptance
+- document external reviewer handoff and first-party security boundaries under docs/BUILD_131_VAULT_SECURITY_FINDINGS_TRIAGE.md; no live password/document vault until a separately authorized implementation and independently observed Windows pilot
