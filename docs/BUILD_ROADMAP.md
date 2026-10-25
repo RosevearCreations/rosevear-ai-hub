@@ -847,3 +847,10 @@ Each build must:
 - classify unresolved critical/high as synthetic blockers, other outstanding findings as synthetic retest-pending, and even empty/perfect fictional findings as "not an audit"; all outcomes preserve live vault SECURITY HOLD
 - display signed-in Vault guidance, six denial scenarios and circled-i help; no issue entry, report upload, secret intake, persistence, audit authority, service install or real field acceptance
 - document external reviewer handoff and first-party security boundaries under docs/BUILD_131_VAULT_SECURITY_FINDINGS_TRIAGE.md; no live password/document vault until a separately authorized implementation and independently observed Windows pilot
+
+### Build 132 — Independent Vault Assessor Handoff & Evidence Readiness (review-only)
+- define eight explicit evidence scopes: independent assessor contract, pinned source-to-Windows artifact, dependency/cryptography inventory, household identity and keys, private Windows/network isolation, document recovery, negative/retest cases and separate owner approval
+- implement a strict, complete eight-scope synthetic packet classifier that rejects omitted/duplicate/unknown controls, forged independent reviews, actual source IDs, real-world provenance, waiver claims and extra potentially sensitive fields
+- make even a synthetically complete handoff report `SYNTHETIC_HANDOFF_PREPARED_NOT_REVIEWED` with unconditional live-vault SECURITY HOLD, no reviewer signoff and no Windows field acceptance
+- show signed-in read-only Vault guidance with eight review cards, six denial cases and circled-i help; no input form, upload, report storage, Windows process, MFA enrollment or network service
+- document what a future independent reviewer must actually examine and what remains unimplemented; see docs/BUILD_132_ASSESSOR_HANDOFF_READINESS.md
