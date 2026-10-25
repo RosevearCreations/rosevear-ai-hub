@@ -2068,3 +2068,15 @@ See docs/BUILD_129_DOCUMENT_RECOVERY_LEDGER.md. Next proposed Build 130 — Inde
 - [ ] CI/dev/main checks and source release evidence to be observed separately from actual Windows field acceptance
 
 See docs/BUILD_130_WINDOWS_VAULT_ACCEPTANCE_PROTOCOL.md. Actual passwords, documents, MFA enrollment, offline restore, Windows installation and production security acceptance remain **HOLD**.
+
+## Build 131 — Independent Vault Security Findings & Remediation Triage
+- [x] Six distinct audit, evidence, severity, remediation, retest and owner handoff stages plus six negative/waiver cases
+- [x] Strict in-memory synthetic finding packet (up to 12 invented opaque IDs) rejects duplicate, unknown, forged, stale, waiver and extra sensitive fields
+- [x] Pure severity triage marks unresolved critical/high issues as blockers and lower findings as retest-pending; zero/all-passing fictional issues never imply an actual audit
+- [x] Review-only Vault cards and circled-i guidance; no upload, issue intake, secret persistence, Windows process, MFA or recovery operation
+- [x] Fixed fail-closed gate denies reviewer sign-off, field acceptance and all live vault operations regardless of forged untrusted claims
+- [ ] Independent first-party implementation/security assessment, exact library review, anti-rollback witness and independent remediation retest
+- [ ] Separate owner-approved disposable Windows pilot, witnessed negative cases and signed field acceptance before any real passwords or documents
+- [ ] Verify PR, dev, main workflows independently from physical Windows acceptance
+
+See docs/BUILD_131_VAULT_SECURITY_FINDINGS_TRIAGE.md. Source tests can be GREEN while the actual first-party vault remains **NOT INSTALLED / SECURITY HOLD**.
