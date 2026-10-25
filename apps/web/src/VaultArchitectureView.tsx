@@ -13,13 +13,18 @@ import { assessVaultWindowsAcceptance, vaultWindowsAcceptanceDenials, vaultWindo
 import { assessVaultSecurityFindingsReview, vaultRemediationDenials, vaultRemediationReviewStages } from "./vaultSecurityFindingsReview";
 import { assessVaultAssessorHandoff, vaultAssessorHandoffDenials, vaultAssessorHandoffScopes } from "./vaultAssessorHandoff";
 import { assessVaultChangeImpactReview, vaultChangeImpactDenials, vaultChangeImpactKinds } from "./vaultChangeImpactReview";
-import { assessVaultReadinessDashboard, findVaultReviewSections, vaultReadinessMilestones, vaultReviewGroups, type VaultReviewGroup } from "./vaultReadinessDashboard";
+import { assessVaultReadinessDashboard, findVaultReviewSections, vaultReadinessMilestones, vaultReviewGroups, vaultReviewRoutes, type VaultReviewGroup, type VaultReviewRoute } from "./vaultReadinessDashboard";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
   const [reviewQuery, setReviewQuery] = useState("");
   const [reviewGroup, setReviewGroup] = useState<VaultReviewGroup>("All sections");
-  const reviewMatches = findVaultReviewSections(reviewQuery, reviewGroup);
+  const [reviewRoute, setReviewRoute] = useState<VaultReviewRoute>("all");
+  const [pinnedIds, setPinnedIds] = useState<readonly string[]>([]);
+  const [pinnedOnly, setPinnedOnly] = useState(false);
+  const routeDetails = vaultReviewRoutes.find(route => route.id === reviewRoute) ?? vaultReviewRoutes[0];
+  const reviewMatches = findVaultReviewSections(reviewQuery, reviewGroup, reviewRoute, pinnedOnly, pinnedIds);
+  const togglePin = (id: string) => setPinnedIds(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
   const gate = assessVaultSecurityArchitecture();
   const preparation = assessVaultPreparation();
   const mfa = assessVaultMfaReadiness();
@@ -41,7 +46,7 @@ export function VaultArchitectureView() {
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 135 · vault review finder &amp; print-safe readiness summary</p>
+          <p className="eyebrow">Build 136 · guided vault review routes &amp; session pinboard</p>
           <h1>Private password and document vault</h1>
           <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
@@ -53,7 +58,7 @@ export function VaultArchitectureView() {
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
 
-      <section className="panel" id="vault-readiness" tabIndex={-1} aria-label="Build 135 vault security readiness command center">
+      <section className="panel" id="vault-readiness" tabIndex={-1} aria-label="Build 136 vault security readiness command center">
         <div className="vault-gates-heading">
           <div>
             <h2>Vault security readiness command center</h2>
@@ -69,6 +74,7 @@ export function VaultArchitectureView() {
             <li>The next real prerequisite is a specific reviewable first-party vault implementation with separately approved cryptography and service design, followed by an independent assessment.</li>
             <li>Only separately authorized disposable-data Windows testing and owner-witnessed acceptance could eventually reconsider live use. Do not enter real passwords or private files here.</li>
             <li>Search and filter only the eleven public review headings, not accounts, credentials, documents or the Hub server. Print creates an ordinary browser print preview containing only this safety summary, with no upload or saved report.</li>
+            <li>The three suggested reading routes provide an order for reviewing design, assessment and Windows planning; they do not represent approvals. Pins only rearrange what we view until the page reloads, and they never mark a review as done.</li>
           </ol>
         </details>
         <h3>Six outstanding security milestones</h3>
@@ -81,7 +87,14 @@ export function VaultArchitectureView() {
         </div>
         <nav className="vault-review-navigation" aria-label="Vault security review sections">
           <h3>Find a review section</h3>
-          <p>Search the review topics or choose a category; the links only move within this page.</p>
+          <p>Choose a guided reading route, search, or pin sections for this visit. These controls only change the visible on-page links.</p>
+          <div className="vault-review-route">
+            <label htmlFor="vault-review-route">Suggested review route</label>
+            <select id="vault-review-route" value={reviewRoute} aria-describedby="vault-review-route-description" onChange={event => setReviewRoute(event.target.value as VaultReviewRoute)}>
+              {vaultReviewRoutes.map(route => <option key={route.id} value={route.id}>{route.label}</option>)}
+            </select>
+            <p id="vault-review-route-description">{routeDetails.description} This is a reading plan only; every vault security milestone remains on HOLD.</p>
+          </div>
           <div className="vault-review-finder">
             <label htmlFor="vault-review-query">Find by topic</label>
             <input id="vault-review-query" type="search" maxLength={80} autoComplete="off" value={reviewQuery} onChange={event => setReviewQuery(event.target.value)} placeholder="e.g. recovery, Windows, MFA" />
@@ -90,24 +103,34 @@ export function VaultArchitectureView() {
               {vaultReviewGroups.map(group => <option key={group} value={group}>{group}</option>)}
             </select>
           </div>
+          <div className="vault-review-pin-options">
+            <label><input type="checkbox" checked={pinnedOnly} onChange={event => setPinnedOnly(event.target.checked)} /> Show pinned sections only ({pinnedIds.length})</label>
+            {pinnedIds.length > 0 && <button type="button" onClick={() => { setPinnedIds([]); setPinnedOnly(false); }}>Clear session pins</button>}
+          </div>
+          <p className="vault-review-privacy-note">Pins are temporary for this page visit. Nothing is saved to the browser, server or a household account; a pin is not review completion.</p>
           <p role="status" aria-live="polite">{reviewMatches.length} of 11 review sections shown.</p>
           <div className="vault-review-links">
-            {reviewMatches.map(item => <a key={item.id} href={`#${item.id}`}>
-              <span className="vault-review-group">{item.group}</span>
-              <strong>{item.label}</strong>
-              <span>{item.summary}</span>
-            </a>)}
+            {reviewMatches.map(item => <div className="vault-review-entry" key={item.id}>
+              <a href={`#${item.id}`}>
+                <span className="vault-review-group">{item.group}</span>
+                <strong>{item.label}</strong>
+                <span>{item.summary}</span>
+              </a>
+              <button type="button" aria-pressed={pinnedIds.includes(item.id)} onClick={() => togglePin(item.id)}>
+                {pinnedIds.includes(item.id) ? `Unpin ${item.label}` : `Pin ${item.label}`}
+              </button>
+            </div>)}
           </div>
           {reviewMatches.length === 0 && <div className="vault-review-empty">
             <p>No review headings match. This finder never searches real vault data.</p>
-            <button type="button" onClick={() => { setReviewQuery(""); setReviewGroup("All sections"); }}>Show all review sections</button>
+            <button type="button" onClick={() => { setReviewQuery(""); setReviewGroup("All sections"); setReviewRoute("all"); setPinnedOnly(false); }}>Show all review sections</button>
           </div>}
         </nav>
         <div className="vault-print-controls">
           <button type="button" onClick={() => window.print()}>Print safety and readiness summary</button>
           <p>Browser print preview only. No private data is included, generated, saved or submitted by this page.</p>
         </div>
-        <p className="vault-architecture-note">Build 135 state: <strong>{readiness.phase}</strong>. Independent review: <strong>{readiness.independent_security_review}</strong>. GitHub source checks, review filters or completed synthetic fixtures never enable a Windows vault, MFA, backup/restore, passwords or documents: <strong>REMAINS DISABLED / HOLD</strong>.</p>
+        <p className="vault-architecture-note">Build 136 state: <strong>{readiness.phase}</strong>. Independent review: <strong>{readiness.independent_security_review}</strong>. Guided routes, temporary pins, GitHub source checks or completed synthetic fixtures never enable a Windows vault, MFA, backup/restore, passwords or documents: <strong>REMAINS DISABLED / HOLD</strong>.</p>
       </section>
 
       <section className="panel" id="vault-change-impact" tabIndex={-1} aria-label="Build 133 vault change-impact reassessment and retest mapping">
