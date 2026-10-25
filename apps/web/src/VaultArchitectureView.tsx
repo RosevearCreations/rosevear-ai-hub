@@ -10,6 +10,7 @@ import { assessVaultServiceBoundary, vaultServiceBoundaries, vaultServiceDenialC
 import { assessVaultDocumentPreparation, vaultDocumentDenialCases, vaultDocumentReviewStages } from "./vaultDocumentPreparation";
 import { assessVaultRecoveryLedger, vaultRecoveryDenialCases, vaultRecoveryReviewStages } from "./vaultRecoveryLedgerReview";
 import { assessVaultWindowsAcceptance, vaultWindowsAcceptanceDenials, vaultWindowsAcceptanceGates } from "./vaultWindowsAcceptanceProtocol";
+import { assessVaultSecurityFindingsReview, vaultRemediationDenials, vaultRemediationReviewStages } from "./vaultSecurityFindingsReview";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
@@ -25,12 +26,13 @@ export function VaultArchitectureView() {
   const documents = assessVaultDocumentPreparation();
   const recovery = assessVaultRecoveryLedger();
   const windowsAcceptance = assessVaultWindowsAcceptance();
+  const findingsReview = assessVaultSecurityFindingsReview();
 
   return (
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 130 · independent Windows vault security &amp; owner acceptance protocol</p>
+          <p className="eyebrow">Build 131 · independent vault security findings &amp; remediation triage</p>
           <h1>Private password and document vault</h1>
           <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
@@ -41,6 +43,39 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <section className="panel" aria-label="Build 131 independent vault security findings and remediation triage">
+        <div className="vault-gates-heading">
+          <div>
+            <h2>Independent vault findings &amp; remediation triage</h2>
+            <p>Prepare for an outside review of our first-party vault code, release artifacts and future Windows installation. This page shows the rules for fixing and retesting findings, but it cannot collect or approve a reviewer report.</p>
+          </div>
+          <span className="vault-gate-badge">AUDIT NOT PERFORMED · {findingsReview.production_security_acceptance}</span>
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> How we will handle independent security findings</summary>
+          <ol>
+            <li>We first select a reviewer independent of our implementation and agree which exact source, Windows build, identity boundary, cryptography and recovery workflow will be examined.</li>
+            <li>Only sanitized finding IDs, severity and next actions belong in a future owner summary. Private technical evidence must stay in a separately protected review location; real passwords and documents must never be entered here.</li>
+            <li>An open or merely proposed fix—especially a critical/high secret, identity, network or rollback issue—requires a changed release and an independent retest. A checked box cannot waive it.</li>
+            <li>Even if every invented test finding passes, the external audit and owner-supervised Windows field acceptance have not happened. Real vault access, MFA, backups and files stay disabled.</li>
+          </ol>
+        </details>
+        <h3>Six review, fix and retest stages</h3>
+        <div className="vault-security-grid">
+          {vaultRemediationReviewStages.map((item, index) => <article className="vault-security-card" key={item.id}>
+            <p className="eyebrow">Required security review {index + 1} / {vaultRemediationReviewStages.length}</p>
+            <h2>{item.title}</h2><p>{item.requirement}</p><small>Independent evidence not collected</small>
+          </article>)}
+        </div>
+        <details className="camera-acceptance-help" open>
+          <summary><span aria-hidden="true">i</span> Blockers and invalid remediation claims</summary>
+          <div className="vault-threats">
+            {vaultRemediationDenials.map(item => <article key={item.id}><strong>{item.title}</strong><p>{item.expected}</p></article>)}
+          </div>
+        </details>
+        <p className="vault-architecture-note">Build 131 state: <strong>{findingsReview.phase}</strong>. No independent auditor has been engaged, no real findings or sign-offs have been collected, and no Windows pilot was approved. Synthetic issue triage is not a security certificate: <strong>VAULT OFF / HOLD</strong>.</p>
+      </section>
 
       <section className="panel" aria-label="Build 130 independent Windows vault security and owner acceptance protocol">
         <div className="vault-gates-heading">
