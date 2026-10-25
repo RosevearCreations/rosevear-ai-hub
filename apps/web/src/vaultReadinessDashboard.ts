@@ -12,18 +12,30 @@ export const vaultReadinessMilestones = [
 
 /** In-page destinations; never external, secret-handling, or state-changing links. */
 export const vaultReviewNavigation = [
-  { id: "vault-change-impact", label: "Change impact & retests", group: "Independent review" },
-  { id: "vault-assessor", label: "External assessor handoff", group: "Independent review" },
-  { id: "vault-findings", label: "Findings & remediation", group: "Independent review" },
-  { id: "vault-windows", label: "Windows field acceptance", group: "Independent review" },
-  { id: "vault-recovery", label: "Recovery & rollback", group: "Data protection" },
-  { id: "vault-documents", label: "Document pipeline", group: "Data protection" },
-  { id: "vault-service", label: "Service & household identity", group: "Architecture" },
-  { id: "vault-crypto-review", label: "Cryptography review", group: "Architecture" },
-  { id: "vault-blueprint", label: "First-party blueprint", group: "Architecture" },
-  { id: "vault-lock", label: "Client lock & isolation", group: "Architecture" },
-  { id: "vault-mfa", label: "MFA & recovery readiness", group: "Architecture" },
+  { id: "vault-change-impact", label: "Change impact & retests", group: "Independent review", summary: "What code or configuration changes require another independent assessment." },
+  { id: "vault-assessor", label: "External assessor handoff", group: "Independent review", summary: "Evidence the independent security reviewer needs to examine." },
+  { id: "vault-findings", label: "Findings & remediation", group: "Independent review", summary: "Security findings, severity, repair and independently witnessed retesting." },
+  { id: "vault-windows", label: "Windows field acceptance", group: "Independent review", summary: "Owner-approved disposable pilot and physical Windows security checks." },
+  { id: "vault-recovery", label: "Recovery & rollback", group: "Data protection", summary: "Encrypted backups, version witnesses, restore and anti-rollback design." },
+  { id: "vault-documents", label: "Document pipeline", group: "Data protection", summary: "Synthetic encrypted file chunks and document integrity safeguards." },
+  { id: "vault-service", label: "Service & household identity", group: "Architecture", summary: "Private HTTPS origin, separate Windows service and household accounts." },
+  { id: "vault-crypto-review", label: "Cryptography review", group: "Architecture", summary: "Key derivation, Web Crypto AES-GCM, libraries and external security approval." },
+  { id: "vault-blueprint", label: "First-party blueprint", group: "Architecture", summary: "Self-built local vault design for passwords, notes and private documents." },
+  { id: "vault-lock", label: "Client lock & isolation", group: "Architecture", summary: "Separate client unlock and prevention of secrets entering Hub data." },
+  { id: "vault-mfa", label: "MFA & recovery readiness", group: "Architecture", summary: "Passkeys, hardware factors, separate step-up and emergency recovery." },
 ] as const;
+
+export const vaultReviewGroups = ["All sections", "Independent review", "Data protection", "Architecture"] as const;
+export type VaultReviewGroup = typeof vaultReviewGroups[number];
+
+/** Local, bounded navigation only: never queries a server or searches vault data. */
+export function findVaultReviewSections(query: string, group: VaultReviewGroup = "All sections") {
+  const needle = query.slice(0, 80).trim().toLocaleLowerCase();
+  return vaultReviewNavigation.filter(item =>
+    (group === "All sections" || item.group === group) &&
+    (!needle || `${item.label} ${item.group} ${item.summary}`.toLocaleLowerCase().includes(needle))
+  );
+}
 
 /** Untrusted 'all complete' flags or Hub role cannot change actual readiness. */
 export function assessVaultReadinessDashboard(_claims?: Record<string, unknown>) {
