@@ -13,10 +13,13 @@ import { assessVaultWindowsAcceptance, vaultWindowsAcceptanceDenials, vaultWindo
 import { assessVaultSecurityFindingsReview, vaultRemediationDenials, vaultRemediationReviewStages } from "./vaultSecurityFindingsReview";
 import { assessVaultAssessorHandoff, vaultAssessorHandoffDenials, vaultAssessorHandoffScopes } from "./vaultAssessorHandoff";
 import { assessVaultChangeImpactReview, vaultChangeImpactDenials, vaultChangeImpactKinds } from "./vaultChangeImpactReview";
-import { assessVaultReadinessDashboard, vaultReadinessMilestones, vaultReviewNavigation } from "./vaultReadinessDashboard";
+import { assessVaultReadinessDashboard, findVaultReviewSections, vaultReadinessMilestones, vaultReviewGroups, type VaultReviewGroup } from "./vaultReadinessDashboard";
 
 /** Honest, non-interactive Build 119 design gateway; never requests or stores credentials. */
 export function VaultArchitectureView() {
+  const [reviewQuery, setReviewQuery] = useState("");
+  const [reviewGroup, setReviewGroup] = useState<VaultReviewGroup>("All sections");
+  const reviewMatches = findVaultReviewSections(reviewQuery, reviewGroup);
   const gate = assessVaultSecurityArchitecture();
   const preparation = assessVaultPreparation();
   const mfa = assessVaultMfaReadiness();
@@ -38,7 +41,7 @@ export function VaultArchitectureView() {
     <section className="vault-architecture" aria-label="Local password vault security architecture">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 134 · vault security readiness command center &amp; review navigation</p>
+          <p className="eyebrow">Build 135 · vault review finder &amp; print-safe readiness summary</p>
           <h1>Private password and document vault</h1>
           <p className="lede">We will build and own the software and keep our encrypted data on our Windows server. The future vault will remain separate from the Hub, with a private HTTPS origin and individual household accounts.</p>
         </div>
@@ -50,7 +53,7 @@ export function VaultArchitectureView() {
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
 
-      <section className="panel" id="vault-readiness" tabIndex={-1} aria-label="Build 134 vault security readiness command center">
+      <section className="panel" id="vault-readiness" tabIndex={-1} aria-label="Build 135 vault security readiness command center">
         <div className="vault-gates-heading">
           <div>
             <h2>Vault security readiness command center</h2>
@@ -65,6 +68,7 @@ export function VaultArchitectureView() {
             <li>Select a review link to move to the relevant section on this page. These links never install services, collect secrets or change security permissions.</li>
             <li>The next real prerequisite is a specific reviewable first-party vault implementation with separately approved cryptography and service design, followed by an independent assessment.</li>
             <li>Only separately authorized disposable-data Windows testing and owner-witnessed acceptance could eventually reconsider live use. Do not enter real passwords or private files here.</li>
+            <li>Search and filter only the eleven public review headings, not accounts, credentials, documents or the Hub server. Print creates an ordinary browser print preview containing only this safety summary, with no upload or saved report.</li>
           </ol>
         </details>
         <h3>Six outstanding security milestones</h3>
@@ -76,15 +80,34 @@ export function VaultArchitectureView() {
           </article>)}
         </div>
         <nav className="vault-review-navigation" aria-label="Vault security review sections">
-          <h3>Jump to a review section</h3>
+          <h3>Find a review section</h3>
+          <p>Search the review topics or choose a category; the links only move within this page.</p>
+          <div className="vault-review-finder">
+            <label htmlFor="vault-review-query">Find by topic</label>
+            <input id="vault-review-query" type="search" maxLength={80} autoComplete="off" value={reviewQuery} onChange={event => setReviewQuery(event.target.value)} placeholder="e.g. recovery, Windows, MFA" />
+            <label htmlFor="vault-review-group">Review category</label>
+            <select id="vault-review-group" value={reviewGroup} onChange={event => setReviewGroup(event.target.value as VaultReviewGroup)}>
+              {vaultReviewGroups.map(group => <option key={group} value={group}>{group}</option>)}
+            </select>
+          </div>
+          <p role="status" aria-live="polite">{reviewMatches.length} of 11 review sections shown.</p>
           <div className="vault-review-links">
-            {vaultReviewNavigation.map(item => <a key={item.id} href={`#${item.id}`}>
+            {reviewMatches.map(item => <a key={item.id} href={`#${item.id}`}>
               <span className="vault-review-group">{item.group}</span>
               <strong>{item.label}</strong>
+              <span>{item.summary}</span>
             </a>)}
           </div>
+          {reviewMatches.length === 0 && <div className="vault-review-empty">
+            <p>No review headings match. This finder never searches real vault data.</p>
+            <button type="button" onClick={() => { setReviewQuery(""); setReviewGroup("All sections"); }}>Show all review sections</button>
+          </div>}
         </nav>
-        <p className="vault-architecture-note">Build 134 state: <strong>{readiness.phase}</strong>. Independent review: <strong>{readiness.independent_security_review}</strong>. GitHub source checks, accessible navigation or completed synthetic fixtures never enable a Windows vault, MFA, backup/restore, passwords or documents: <strong>REMAINS DISABLED / HOLD</strong>.</p>
+        <div className="vault-print-controls">
+          <button type="button" onClick={() => window.print()}>Print safety and readiness summary</button>
+          <p>Browser print preview only. No private data is included, generated, saved or submitted by this page.</p>
+        </div>
+        <p className="vault-architecture-note">Build 135 state: <strong>{readiness.phase}</strong>. Independent review: <strong>{readiness.independent_security_review}</strong>. GitHub source checks, review filters or completed synthetic fixtures never enable a Windows vault, MFA, backup/restore, passwords or documents: <strong>REMAINS DISABLED / HOLD</strong>.</p>
       </section>
 
       <section className="panel" id="vault-change-impact" tabIndex={-1} aria-label="Build 133 vault change-impact reassessment and retest mapping">
@@ -576,3 +599,4 @@ export function VaultArchitectureView() {
     </section>
   );
 }
+import { useState } from "react";

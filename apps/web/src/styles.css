@@ -3319,8 +3319,32 @@ h1 {
 .vault-review-links a:focus-visible, .vault-review-link:focus-visible { outline: 3px solid #694a88; outline-offset: 3px; }
 .vault-review-group { color: #62546d; font-size: .74rem; font-weight: 600; }
 .vault-review-link { display: inline-block; margin-top: .45rem; color: #563c75; font-weight: 700; text-decoration: underline; text-underline-offset: .2rem; }
+.vault-review-finder { display: grid; grid-template-columns: minmax(8rem, 1fr) minmax(8rem, 1fr); gap: .4rem .9rem; margin: .75rem 0; max-width: 45rem; }
+.vault-review-finder label { color: #382c47; font-weight: 700; }
+.vault-review-finder input, .vault-review-finder select { grid-row: 2; min-width: 0; width: 100%; padding: .65rem; border: 1px solid #80728c; border-radius: .55rem; background: #fff; color: #262033; font: inherit; }
+.vault-review-finder input:focus-visible, .vault-review-finder select:focus-visible, .vault-review-empty button:focus-visible, .vault-print-controls button:focus-visible { outline: 3px solid #694a88; outline-offset: 3px; }
+.vault-review-links a > span:last-child { font-size: .84rem; line-height: 1.4; }
+.vault-review-empty { padding: 1rem; background: #f6f2f8; border: 1px solid #b7a9be; border-radius: .7rem; }
+.vault-review-empty button, .vault-print-controls button { padding: .6rem .9rem; background: #563c75; color: #fff; border: 0; border-radius: .55rem; font: inherit; font-weight: 700; cursor: pointer; }
+.vault-print-controls { margin: 1rem 0; }
+.vault-print-controls p { color: #475569; font-size: .85rem; margin: .45rem 0 0; }
 @media (max-width: 720px) {
   .vault-architecture > .page-header { display: grid; gap: .75rem; }
   .vault-gates-list li { flex-wrap: wrap; }
   .vault-gate-pending { margin-left: 1.4rem; }
+  .vault-review-finder { grid-template-columns: minmax(0, 1fr); }
+  .vault-review-finder input, .vault-review-finder select { grid-row: auto; }
+}
+@media print {
+  .app-shell:has(.vault-architecture) { display: block; }
+  .app-shell:has(.vault-architecture) .sidebar,
+  .app-shell:has(.vault-architecture) .skip-link,
+  .app-shell:has(.vault-architecture) .content > :not(.vault-architecture),
+  .vault-architecture > section.panel:not(#vault-readiness),
+  .vault-review-navigation, .vault-print-controls, .vault-architecture .camera-acceptance-help { display: none !important; }
+  .app-shell:has(.vault-architecture) .content { display: block; max-width: none; margin: 0; padding: 0; }
+  .vault-architecture, #vault-readiness { display: block; color: #111; }
+  .vault-security-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vault-security-card, .vault-gate-warning { break-inside: avoid; background: #fff; }
+  .vault-architecture .vault-gate-badge { color: #111; border-color: #111; background: #fff; }
 }

@@ -868,3 +868,10 @@ Each build must:
 - preserve existing security material in place, with responsive navigation cards, visible keyboard focus, scroll offset and circled-i help; no active service controls or credential fields
 - guard against forged owner/auditor/completion claims by hard-coding all six security milestones unverified and all password/document/MFA/recovery/Windows installation authority to DENY/HOLD
 - add UI and policy regression tests, owner help and scope documentation under docs/BUILD_134_VAULT_READINESS_NAVIGATION.md; source CI GREEN remains separate from Windows field validation
+
+### Build 135 — Vault Review Finder & Print-Safe Readiness Summary (read-only)
+- help operators locate existing Vault security review headings using a bounded, transient topic filter and an explicit category selector; all destinations remain on-page, static and keyboard-accessible
+- show searchable short descriptions, live result count and a no-results reset without any backend query, stored preferences or vault-data access
+- provide one-click native browser print preview of the six real unverified security milestones and safety warning, excluding unrelated app navigation and the technical review body
+- retain unconditional 0/6 verified, independent review missing, no Windows pilot, and all live password, document, MFA and backup operations HOLD
+- cover filtering, print, accessibility, privacy and fixed denial invariants in Vitest; see docs/BUILD_135_VAULT_REVIEW_FINDER_PRINT.md
