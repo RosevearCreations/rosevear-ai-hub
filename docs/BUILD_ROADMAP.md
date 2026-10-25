@@ -889,3 +889,69 @@ Each build must:
 - combine unread-only view with route, topic, category and existing pin filters; reset explicitly and clear state on page refresh/unmount
 - keep browser print summary free of session activity and all six real independently verified security milestones at 0 / 6 with unconditional Vault SECURITY HOLD
 - cover all-read, invalid IDs, next navigation, marker reset and zero-result UI tests; see docs/BUILD_137_VAULT_READING_PROGRESS.md
+
+## Phase 12 — Practical Home, Device, Camera and Workshop Operations (queued)
+
+Builds 138–147 are **planned, not implemented or deployed**. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
+
+### Build 138 — Home Operations V2: Rooms, Health & Quick Navigation (QUEUED · priority 1)
+- replace generic status-only landing cards with a functional room/context command center for Home, Cameras, Workshop and Services, with direct routes to the matching operational views
+- compose bounded live/explicitly refreshed integration summaries from existing authorized Home Assistant, MQTT, camera, Ollama and Hub health APIs; label each source's last observation and unavailable/unconfigured state rather than inventing health
+- add room/category filters, responsive cards, mobile-accessible navigation, keyboard focus and contextual circled-i help; preserve current operator roles and safe refresh handling
+- **Acceptance:** stale/offline/partial fixtures render honestly, quick links resolve to real screens, and no room card can issue a physical command or reveal private connection details
+
+### Build 139 — Device 360 Registry, Identity Matching & Room Assignment (QUEUED · priority 2)
+- unify inventory presentation across existing Home Assistant entity/device IDs, approved MQTT mappings and camera registry references, keeping provider identity and integration provenance distinguishable
+- owner-review proposed duplicate candidates, rename/room metadata and unknown/unsupported devices without silently joining different physical devices or re-pairing them
+- provide searchable, filterable device detail with source-linked last-seen data, capabilities, safe action eligibility and missing-device recovery link
+- **Acceptance:** identity collisions, inaccessible devices and changed provider IDs are handled without destructive merge; unauthorized users cannot edit metadata and existing camera/HA records remain intact
+
+### Build 140 — Guided Device Discovery Inbox & Owner-Safe Adoption (QUEUED · priority 3)
+- create an explicit operator-started discovery inbox for Home Assistant, supported MQTT mappings and existing camera candidate previews, with source, confidence and duplicate warnings
+- review one candidate at a time before adoption; separate discoverable, observed, approved, unsupported and rejected states; no default auto-enrollment or credential scraping
+- include a manual legacy/X10 compatibility note and safe Home Assistant bridge path where supported, without pretending direct X10-to-Meross control is implemented
+- **Acceptance:** scanning is opt-in, rejection or timeout changes no existing device, replay/duplicate adoption is blocked, and camera/HA permissions are never bypassed
+
+### Build 141 — Camera Wall V2: Room Groups, Health & Private Views (QUEUED · priority 4)
+- give approved cameras responsive room/site groups, readable health badges, available still previews and operator-selected larger playback panels
+- never auto-load every RTSP stream; respect go2rtc/Frigate health, disabled-camera state, private URLs, role boundaries and bandwidth/concurrency limits
+- allow private user view preferences only after review of current app storage/auth patterns; provide clear empty/offline/cert-error guidance and circled-i help
+- **Acceptance:** multiple cameras render safely on narrow screens, unavailable streams do not block the grid, and no secrets or private RTSP URLs appear in client error output
+
+### Build 142 — Camera Events & Evidence Playback Workbench V2 (QUEUED · priority 5)
+- merge existing camera event/Frigate metadata into a reviewed timeline with source, time zone, camera, event category, deduplication and bounded date filters
+- link only to already authorized footage/playback endpoints; show missing media, clock drift, retention expiry and stale observations explicitly
+- support operator acknowledgement of an event for follow-up without erasing source evidence, modifying retention or triggering automatic enforcement
+- **Acceptance:** duplicate/out-of-order/test fixtures are safe, private playback is role checked, and summaries never invent recordings that are not available
+
+### Build 143 — MQTT Topic Explorer, Device Mapping & Publish Preview (QUEUED · priority 6)
+- add an authorized, bounded topic explorer over existing subscriptions and recent retained message metadata, with allowlisted namespace filters, last-seen and decoded-state previews where safe
+- propose topic-to-device associations for explicit owner approval; redact credentials, tokens and private message bodies by default, and reject secret-bearing wildcard display
+- retain current authenticated publish policy and require a clear exact-topic/payload confirmation before any real message; default to read-only
+- **Acceptance:** unknown topics, floods, reconnects and malicious payloads cannot create implicit controls or disclose sensitive telemetry
+
+### Build 144 — Home Assistant Scenes & Safe Action Drafts (QUEUED · priority 7)
+- let authorized operators assemble and preview small allowlisted Home Assistant actions across selected rooms/entities, with exact target, state and expected effect shown first
+- distinguish preview, deliberate confirmation, executed, rejected and unverified outcome with audited per-action receipts; no background, bulk or AI-triggered execution
+- block locks, alarms, heating extremes, workshop machinery and other high-risk control classes unless a later separately reviewed policy expressly authorizes them
+- **Acceptance:** missing entities, stale previews, role denial and partial failure cannot be misrepresented as successful scenes; existing Home Assistant allowlist remains the final authority
+
+### Build 145 — Workshop Equipment 360 & Preventive Maintenance Planner (QUEUED · priority 8)
+- extend existing workshop stations, inventory and manual inspection history into searchable equipment detail, service intervals and overdue maintenance calendar
+- expose operator-owned manual inspection assignments, observations, parts/checklist references and next-safe-check guidance without certifying machinery
+- keep equipment in blocked/unverified status when maintenance evidence is insufficient and clearly differentiate inspection observations from a permission to operate
+- **Acceptance:** date and timezone edge cases, overdue status and equipment ownership are tested; no laser, forge, CNC, electrical or chemical control is automated
+
+### Build 146 — Windows Service Startup & Recovery Operations Console (QUEUED · priority 9)
+- consolidate read-only health and startup-order guidance for the Hub API, Caddy/private HTTPS, Home Assistant VM, MQTT, go2rtc/Frigate and Ollama, including reboot and power-restoration diagnosis
+- display observed versus assumed status, existing approved local startup-task identity, dependencies and safe next manual checks; never claim remote Windows access from source code alone
+- require explicit separate owner authorization, a local allowlisted executor and witnessed field testing before exposing any restart/stop/repair action; no surprise scheduled-task replacement
+- **Acceptance:** failed dependency and partial recovery fixtures show the right escalation, and default UI actions cannot reboot, kill processes or edit the real server
+
+### Build 147 — Responsive Command Shell, Theme Polish & Contextual Help Refresh (QUEUED · priority 10)
+- standardize compact/expanded sub-screens, card spacing, readable contrast, focus states and mobile-friendly navigation across Home, Devices, Cameras, Home Assistant, MQTT, Workshop and Recovery
+- provide consistent circled-i help on every new operational card, with task-specific guidance, expected status meanings, operator role boundaries and recovery links
+- audit existing Help content for outdated claims (especially Vault: our selected first-party plan is **not** a third-party password-manager installation) and align advice with implemented features only
+- **Acceptance:** keyboard/screen-reader and narrow-screen tests pass, cross-view links work, and help never offers nonexistent capabilities or encourages dangerous Windows/vault workarounds
+
+**Queue policy:** 10 planned builds (138–147), none started. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.

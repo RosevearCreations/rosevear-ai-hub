@@ -2143,3 +2143,21 @@ See docs/BUILD_136_VAULT_GUIDED_ROUTES_PINBOARD.md. This is an operator reading 
 - [ ] Verify feature PR, independent dev CI, promotion PR and final main push CI separately from physical Windows acceptance
 
 See docs/BUILD_137_VAULT_READING_PROGRESS.md. Source GREEN can only certify this UI; the real vault remains **0 / 6 VERIFIED · SECURITY HOLD**.
+
+## Next Functional Build Queue — 138–147 (planning only)
+
+- [x] Build 137 merged to `dev` via PR #338 and `main` via PR #339; independent main push workflow `40199282467` completed GREEN (five successful jobs; commit `a0cedcd9aa7509366a64812b7e911d3c7cd62ea2`)
+- [ ] **138** — Home Operations V2: Rooms, Health & Quick Navigation
+- [ ] **139** — Device 360 Registry, Identity Matching & Room Assignment
+- [ ] **140** — Guided Device Discovery Inbox & Owner-Safe Adoption
+- [ ] **141** — Camera Wall V2: Room Groups, Health & Private Views
+- [ ] **142** — Camera Events & Evidence Playback Workbench V2
+- [ ] **143** — MQTT Topic Explorer, Device Mapping & Publish Preview
+- [ ] **144** — Home Assistant Scenes & Safe Action Drafts
+- [ ] **145** — Workshop Equipment 360 & Preventive Maintenance Planner
+- [ ] **146** — Windows Service Startup & Recovery Operations Console
+- [ ] **147** — Responsive Command Shell, Theme Polish & Contextual Help Refresh
+
+**Queue count: 10 planned / 0 started / 0 promoted.** This section schedules future work; none of Builds 138–147 has been implemented, installed on the Windows server or promoted to production. All actions with real device, camera, Windows runtime or workshop safety impact require existing permissions and appropriate separate owner field acceptance. Actual first-party password/document Vault remains **HOLD** pending independent review and owner authorization.
+
+Implementation order, acceptance conditions and the fail-closed rollout boundary are recorded in `docs/BUILD_ROADMAP.md` under **Phase 12 — Practical Home, Device, Camera and Workshop Operations**.
