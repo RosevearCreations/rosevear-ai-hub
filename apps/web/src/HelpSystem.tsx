@@ -156,8 +156,11 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   Cameras: {
-    purpose: "Private camera discovery, disabled-first registration, transport health and Build 116 owner-supervised moving-video playback checks.",
+    purpose: "Build 141 Camera Wall V2 groups approved cameras by reviewed room, shows stream health and provides one deliberate private playback panel. Build 116 moving-video field acceptance remains separate.",
     tasks: [
+      "Use Room or site to group cameras by Device 360 owner-reviewed room annotations. Unassigned and unavailable rooms are explicit; no guessed camera-to-HA pairing is performed.",
+      "Choose Favorites and Compact cards, then Save private layout to the current signed-in Hub account. Only camera IDs and density are saved, never streams or RTSP source addresses.",
+      "The wall deliberately displays a no-still placeholder if there is no supported authenticated snapshot source. Click Start private preview for one eligible stream, then Stop large preview; switching selection stops the old stream.",
       "Use the summary cards to see total, enabled, configured, healthy, and attention-needed cameras.",
       "Review local ONVIF candidates. Select only recognizable devices; registration keeps newly added cameras disabled until our own verification.",
       "Compare the camera discovery bulk-restore workbench with the existing registry; check duplicate endpoint IDs and network collisions before approving any registration.",
@@ -169,6 +172,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Owner/Admin can add private local event notes, flag/review events, and manually export up to 100 review metadata rows after acknowledgement.",
     ],
     safety: [
+      "Camera Wall never auto-loads streams, cannot start more than one large stream and stops playback if the browser tab is hidden or transport eligibility fails. Private preferences are per-account and revision checked.",
       "Source credentials are submitted only to the encrypted server-side stream configuration and must never be redisplayed or included in help or exports.",
       "A locally healthy producer is not proof of moving video. Session-only review is not an installed Windows or permanent owner field-acceptance receipt.",
       "go2rtc API and RTSP must remain loopback-only; private viewer launch is limited to browsers running on the Windows Hub itself.",

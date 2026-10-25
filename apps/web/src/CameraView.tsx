@@ -5,7 +5,7 @@ import { CameraCompatibilityWorkbench } from "./CameraCompatibilityWorkbench";
 import { ServerCameraInventory } from "./ServerCameraInventory";
 import { CameraBulkRestorePanel } from "./CameraBulkRestorePanel";
 import { CameraPlaybackWorkbench } from "./CameraPlaybackWorkbench";
-import { assessPrivatePlayback } from "./cameraPlaybackReview";
+import { CameraWallV2 } from "./CameraWallV2";
 
 import {
   configureCameraStream,
@@ -50,29 +50,31 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
   const [transport, setTransport] = useState<Go2RTCStatus | null>(null);
   const [dashboard, setDashboard] = useState<CameraDashboard | null>(null);
   const [sourceUrls, setSourceUrls] = useState<Record<number, string>>({});
+  const [cameraMode, setCameraMode] = useState<"wall" | "acceptance">("wall");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<CameraPreviewResult | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
-  const [visiblePreviewIds, setVisiblePreviewIds] = useState<number[]>([]);
   const canAdminister =
     currentUser.role === "owner" || currentUser.role === "administrator";
 
   async function refresh(signal?: AbortSignal) {
     try {
-      const [cameras, go2rtc, cameraDashboard] = await Promise.all([
+      const [cameras, go2rtc, cameraDashboard] = await Promise.allSettled([
         getCameras(signal),
         getGo2RTCStatus(signal),
         getCameraDashboard(signal),
       ]);
-      setState({ kind: "ready", cameras });
-      setTransport(go2rtc);
-      setDashboard(cameraDashboard);
+      if (signal?.aborted) return;
+      if (cameras.status === "rejected") throw cameras.reason;
+      setState({ kind: "ready", cameras: cameras.value });
+      setTransport(go2rtc.status === "fulfilled" ? go2rtc.value : null);
+      setDashboard(cameraDashboard.status === "fulfilled" ? cameraDashboard.value : null);
     } catch (caught: unknown) {
       if (caught instanceof DOMException && caught.name === "AbortError") return;
       setState({
         kind: "error",
-        message: caught instanceof Error ? caught.message : "Unable to load camera dashboard.",
+        message: "Unable to load camera dashboard. Check sign-in and private service availability.",
       });
     }
   }
@@ -87,7 +89,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
     const timer = window.setInterval(() => {
       void getCameraDashboard()
         .then(setDashboard)
-        .catch(() => undefined);
+        .catch(() => setDashboard(null));
     }, 30_000);
     return () => window.clearInterval(timer);
   }, []);
@@ -97,8 +99,8 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
     setMessage("");
     try {
       await action();
-    } catch (caught: unknown) {
-      setMessage(caught instanceof Error ? caught.message : "Camera request failed.");
+    } catch {
+      setMessage("Camera request failed. Check the local service and permissions; sensitive source details are hidden.");
     } finally {
       setBusy(false);
     }
@@ -214,7 +216,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
     <section className="camera-view">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Cameras · Build 116</p>
+          <p className="eyebrow">Cameras · Build 141</p>
           <h1>Camera dashboard</h1>
           <p className="lede">
             Review registered cameras, private playback and current stream health. Preview video only when we choose to start it.
@@ -310,7 +312,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
             <div><dt>RTSP local-only</dt><dd>{transport.local_rtsp_only ? "Yes" : "No"}</dd></div>
           </dl>
         ) : null}
-        {transport?.error ? <p className="auth-error">{transport.error}</p> : null}
+        {transport?.error ? <p className="auth-error">Transport error reported. Check the local service logs privately.</p> : null}
         {transport && (!transport.local_api_only || !transport.local_rtsp_only) ? (
           <p className="auth-error">
             Live viewing is not considered private until both go2rtc API and RTSP listeners are loopback-only.
@@ -319,8 +321,21 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
       </section>
 
       {state.kind === "ready" ? (
-        <CameraPlaybackWorkbench cameras={state.cameras} dashboard={dashboard} transport={transport}
-          canAdminister={canAdminister} onRefresh={refresh} />
+        <section className="camera-mode-switch" aria-label="Private playback workspace">
+          <div role="group" aria-label="Camera workspace mode">
+            <button type="button" aria-pressed={cameraMode === "wall"}
+              onClick={() => setCameraMode("wall")}>Camera wall</button>
+            <button type="button" aria-pressed={cameraMode === "acceptance"}
+              onClick={() => setCameraMode("acceptance")}>Field playback acceptance</button>
+          </div>
+          <p>Opening the other workspace closes any active video iframe. Only one workspace can stream at a time.</p>
+          {cameraMode === "acceptance" ? (
+            <CameraPlaybackWorkbench cameras={state.cameras} dashboard={dashboard} transport={transport}
+              canAdminister={canAdminister} onRefresh={refresh} />
+          ) : (
+            <CameraWallV2 cameras={state.cameras} dashboard={dashboard} transport={transport} userId={currentUser.id} />
+          )}
+        </section>
       ) : null}
 
       <ServerCameraInventory canAdminister={canAdminister} isOwner={currentUser.role === "owner"} />
@@ -341,65 +356,6 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
         </section>
       ) : (
         <>
-          <section className="camera-live-grid" aria-label="Live camera dashboard">
-            {state.cameras.map((camera) => {
-              const health = dashboardByCamera.get(camera.id);
-              const privatePlayback = assessPrivatePlayback(
-                camera, health, transport, window.location.hostname, dashboard?.stale_after_seconds ?? 300,
-              );
-              const previewOpen = visiblePreviewIds.includes(camera.id) && privatePlayback.ready;
-              return (
-                <article className="camera-live-card" key={"live-" + camera.id}>
-                  <header>
-                    <div>
-                      <strong>{camera.display_name}</strong>
-                      <small>{camera.host}</small>
-                    </div>
-                    <span className={"camera-health camera-health-" + (health?.health ?? "untested")}>
-                      {healthLabel(health?.health ?? "untested")}
-                    </span>
-                  </header>
-                  {previewOpen && privatePlayback.viewerUrl ? (
-                    <iframe
-                      className="camera-live-frame"
-                      src={privatePlayback.viewerUrl}
-                      title={camera.display_name + " live view"}
-                      loading="lazy"
-                      sandbox="allow-scripts allow-same-origin"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div className="camera-live-placeholder">
-                      <strong>Live view unavailable</strong>
-                      <small>
-                        {privatePlayback.ready
-                          ? "Preview is stopped. Start it only when ready to view."
-                          : privatePlayback.reason}
-                      </small>
-                    </div>
-                  )}
-                  <div className="camera-live-controls">
-                    <button type="button" disabled={!privatePlayback.ready}
-                      onClick={() => setVisiblePreviewIds((current) => previewOpen
-                        ? current.filter((id) => id !== camera.id)
-                        : [...current, camera.id])}>
-                      {previewOpen ? "Stop preview" : "Start private preview"}
-                    </button>
-                    <small>Owner review required before field acceptance</small>
-                  </div>
-                  <footer>
-                    <span>Last camera discovery: {new Date(camera.last_seen_at).toLocaleString()}</span>
-                    <span>
-                      Last stream check: {health?.last_probe_at
-                        ? new Date(health.last_probe_at).toLocaleString()
-                        : "Not tested"}
-                    </span>
-                  </footer>
-                </article>
-              );
-            })}
-          </section>
-
           <section className="camera-config-section">
             <header>
               <h2>Camera configuration</h2>
@@ -417,9 +373,11 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
                       </small>
                     </div>
                     <dl className="ha-meta">
-                      <div><dt>Address</dt><dd>{camera.host}:{camera.port}</dd></div>
-                      <div><dt>Endpoint</dt><dd><code>{camera.endpoint_uuid}</code></dd></div>
-                      <div><dt>Service</dt><dd><code>{camera.service_url}</code></dd></div>
+                      {canAdminister ? <>
+                        <div><dt>Address</dt><dd>{camera.host}:{camera.port}</dd></div>
+                        <div><dt>Endpoint</dt><dd><code>{camera.endpoint_uuid}</code></dd></div>
+                        <div><dt>Service</dt><dd><code>{camera.service_url}</code></dd></div>
+                      </> : null}
                       <div><dt>Last seen</dt><dd>{new Date(camera.last_seen_at).toLocaleString()}</dd></div>
                     </dl>
 
@@ -427,13 +385,13 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
                       <section className="panel camera-stream-panel">
                         <h3>RTSP transport</h3>
                         <dl className="ha-meta">
-                          <div><dt>Source</dt><dd>{camera.stream.source_scheme}://{camera.stream.source_host}:{camera.stream.source_port}</dd></div>
+                          {canAdminister ? <div><dt>Source</dt><dd>{camera.stream.source_scheme}://{camera.stream.source_host}:{camera.stream.source_port}</dd></div> : null}
                           <div><dt>Credentials</dt><dd>{camera.stream.credentials_present ? "Encrypted" : "Not present"}</dd></div>
                           <div><dt>go2rtc name</dt><dd><code>{camera.stream.stream_name}</code></dd></div>
-                          <div><dt>Local relay</dt><dd><code>{camera.stream.relay_url}</code></dd></div>
+                          {canAdminister ? <div><dt>Local relay</dt><dd><code>{camera.stream.relay_url}</code></dd></div> : null}
                           <div><dt>Health</dt><dd>{healthLabel(health?.health ?? "untested")}</dd></div>
                         </dl>
-                        {camera.stream.last_error ? <p className="auth-error">Transport status: {camera.stream.last_error}</p> : null}
+                        {camera.stream.last_error ? <p className="auth-error">Transport reported an error. Check private service logs locally.</p> : null}
                         {canAdminister ? (
                           <div className="camera-actions">
                             <button type="button" disabled={busy} onClick={() => void probe(camera)}>
