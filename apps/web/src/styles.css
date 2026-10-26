@@ -3725,6 +3725,20 @@ h1 {
 .owner-reassessment-followup .owner-trial-row-actions { display: flex; flex-wrap: wrap; gap: .45rem; }
 .owner-reassessment-followup :is(button,select,input):focus-visible { outline: 3px solid #764724; outline-offset: 3px; }
 .owner-reassessment-followup .owner-review-entry { min-width: 0; }
+/* Build 154 — read-only recurrence replay and fixed private independent review decisions. */
+.owner-decision-replay { display: grid; gap: 1rem; min-width: 0; padding: 1rem; border: 1px solid #9999b7; border-radius: .85rem; background: #f5f7fc; color: #292c45; }
+.owner-decision-replay h3 { margin: .3rem 0; color: #2d3966; }
+.owner-decision-filter { display: grid; gap: .4rem; max-width: 25rem; font-weight: 700; }
+.owner-decision-filter select, .owner-decision-replay .owner-review-entry select { width: 100%; min-width: 0; max-width: 100%; }
+.owner-decision-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: .75rem; }
+.owner-decision-cards > article { display: grid; gap: .6rem; align-content: space-between; min-width: 0; padding: .85rem; background: #fff; border: 1px solid #b7bfd4; border-radius: .65rem; }
+.owner-decision-cards > article.owner-reassessment-selected { outline: 3px solid #48589d; outline-offset: 2px; }
+.owner-decision-cards strong, .owner-decision-cards small, .owner-decision-cards p { overflow-wrap: anywhere; }
+.owner-decision-cards p { margin: .2rem 0; }
+.owner-decision-cards .owner-trial-row-actions { display: flex; flex-wrap: wrap; gap: .45rem; }
+.owner-decision-replay .owner-review-entry { min-width: 0; }
+.owner-decision-replay .owner-review-entry > label:not(.owner-trial-check) { display: grid; gap: .4rem; font-weight: 700; }
+.owner-decision-replay :is(button,select,input):focus-visible { outline: 3px solid #415499; outline-offset: 3px; }
 @media (max-width: 680px) {
   .owner-trial-context, .owner-trial-controls { grid-template-columns: minmax(0, 1fr); }
   .owner-trial-list > article { display: grid; }
