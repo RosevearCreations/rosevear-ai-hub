@@ -3678,6 +3678,17 @@ h1 {
 .owner-trial-handoff { display: grid; gap: .5rem; padding: .75rem; border: 1px solid #abbfca; background: #f3f8fb; border-radius: .65rem; min-width: 0; }
 .owner-trial-handoff .owner-trial-check { font-weight: 600; }
 .owner-trial-handoff > button { justify-self: start; }
+/* Build 150 — independent evidence register, explicit claims only. */
+.owner-independent-review { display: grid; gap: 1rem; min-width: 0; padding: 1rem; border: 1px solid #91a8b8; border-radius: .85rem; background: #f4f8fb; }
+.owner-independent-review h3 { margin: .2rem 0; color: #183a52; }
+.owner-review-gap-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: .65rem; }
+.owner-review-gap-list > article { display: grid; align-content: start; gap: .35rem; padding: .85rem; border: 1px solid #a6b9c5; border-radius: .65rem; background: #fff; min-width: 0; }
+.owner-review-gap-list span { font-weight: 800; color: #684012; }
+.owner-review-gap-list small { color: #375467; overflow-wrap: anywhere; }
+.owner-review-gap-list p { margin: .3rem 0 0; line-height: 1.45; }
+.owner-review-entry { display: grid; gap: .85rem; border: 1px solid #aabcca; border-radius: .65rem; background: #fff; padding: 1rem; min-width: 0; }
+.owner-review-entry legend { padding: 0 .35rem; font-weight: 800; color: #193d56; }
+.owner-review-entry > button { justify-self: start; }
 @media (max-width: 680px) {
   .owner-trial-context, .owner-trial-controls { grid-template-columns: minmax(0, 1fr); }
   .owner-trial-list > article { display: grid; }

@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { OwnerFieldTrialWorkbench } from "./OwnerFieldTrialWorkbench";
 import { createTrialReceipt, recordTrialObservation } from "./ownerFieldTrial";
-import { createReconciliationReceipt, createRepairHandoff } from "./ownerTrialReconciliation";
+import { advanceRepairHandoff, createReconciliationReceipt, createRepairHandoff } from "./ownerTrialReconciliation";
+import { createIndependentReviewReceipt, recordIndependentEvidence } from "./ownerIndependentReview";
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
@@ -73,7 +74,7 @@ describe("Build 148 System owner field trial workbench", () => {
     const file = new File([JSON.stringify(receipt)], "owner-private.json", { type: "application/json" });
     Object.defineProperty(file, "text", { value: () => Promise.resolve(JSON.stringify(receipt)) });
     render(<OwnerFieldTrialWorkbench onNavigate={vi.fn()} />);
-    fireEvent.change(screen.getByLabelText("Import private Build 148/149 JSON receipt"), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText("Import private Build 148/149/150 JSON receipt"), { target: { files: [file] } });
     await waitFor(() => expect(screen.getByText(/Imported history is for context only/)).toBeInTheDocument());
     expect(screen.getByLabelText(/I personally checked the actual installed Windows Hub/)).not.toBeChecked();
     expect(screen.getByText(/OWNER PASS OBSERVED · INDEPENDENT FIELD HOLD/)).toBeInTheDocument();
@@ -125,12 +126,37 @@ describe("Build 148 System owner field trial workbench", () => {
     const file = new File([JSON.stringify(receipt)], "owner-reconciliation-private.json", { type: "application/json" });
     Object.defineProperty(file, "text", { value: () => Promise.resolve(JSON.stringify(receipt)) });
     render(<OwnerFieldTrialWorkbench onNavigate={vi.fn()} />);
-    fireEvent.change(screen.getByLabelText("Import private Build 148/149 JSON receipt"), { target: { files: [file] } });
-    await waitFor(() => expect(screen.getByText(/prior trial and handoffs imported for reconciliation/)).toBeInTheDocument());
+    fireEvent.change(screen.getByLabelText("Import private Build 148/149/150 JSON receipt"), { target: { files: [file] } });
+    await waitFor(() => expect(screen.getByText(/trial, handoffs and reviewer evidence imported for reconciliation/)).toBeInTheDocument());
     const panel = screen.getByRole("region", { name: "Build 149 repair handoff and retest reconciliation" });
     expect(within(panel).getByText(/Handoff · draft/)).toBeInTheDocument();
     expect(within(panel).getByText(/HIGH TRIAGE/)).toBeInTheDocument();
     expect(screen.getByLabelText(/I personally checked the actual installed Windows Hub/)).not.toBeChecked();
     expect(screen.getByText("FIELD ACCEPTANCE: HOLD")).toBeInTheDocument();
+  });
+
+  it("imports Build 150 reviewer receipts as historical, never as fresh independent acceptance", async () => {
+    const environment = { installed_version: "0.0.4-build150", access: "private_lan" as const, installed_windows_witnessed: true };
+    const history = recordTrialObservation([], environment,
+      { case_id: "cameras", outcome: "issue", finding: "playback_missing", next_owner: "camera_operator", witnessed: true },
+      "2026-10-25T08:00:00.000Z");
+    let handoffs = createRepairHandoff(history, [], "cameras", "2026-10-25T09:00:00.000Z");
+    handoffs = advanceRepairHandoff(history, handoffs, "cameras", 0, true, "2026-10-25T10:00:00.000Z");
+    handoffs = advanceRepairHandoff(history, handoffs, "cameras", 0, true, "2026-10-25T11:00:00.000Z");
+    const events = recordIndependentEvidence(history, handoffs, [], environment,
+      { case_id: "cameras", baseline_index: 0, criterion: "original_finding", state: "present_claimed",
+        reviewer_witnessed: true, separate_reviewer: false }, "2026-10-25T12:00:00.000Z");
+    const receipt = createIndependentReviewReceipt(environment, [], history, handoffs, events);
+    const file = new File([JSON.stringify(receipt)], "private-review.json", { type: "application/json" });
+    Object.defineProperty(file, "text", { value: () => Promise.resolve(JSON.stringify(receipt)) });
+    render(<OwnerFieldTrialWorkbench onNavigate={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText("Import private Build 148/149/150 JSON receipt"), { target: { files: [file] } });
+    await waitFor(() => expect(screen.getByText(/trial, handoffs and reviewer evidence imported for reconciliation/)).toBeInTheDocument());
+    const panel = screen.getByRole("region", { name: "Build 150 independent retest review and evidence gap register" });
+    expect(within(panel).getByText("0 / 7 currently claimed present")).toBeInTheDocument();
+    expect(within(panel).getByText("7 unmet evidence criteria")).toBeInTheDocument();
+    expect(within(panel).getByText("imported historical")).toBeInTheDocument();
+    expect(screen.getByLabelText(/I personally checked the actual installed Windows Hub/)).not.toBeChecked();
+    expect(within(panel).getByText("CLOSURE: NOT AUTHORIZED")).toBeInTheDocument();
   });
 });

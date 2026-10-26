@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 
 import { getGo2RTCStatus, getHealth, getHomeAssistantStatus, getMQTTStatus, getOllamaStatus } from "./api";
 import { CardHelp } from "./CommandShell";
+import { IndependentRetestReviewPanel } from "./IndependentRetestReviewPanel";
 import {
   TRIAL_CASES, acknowledgeTrialFollowup, createTrialReceipt, latestTrialObservations,
   recordTrialObservation, summarizeOwnerTrial, trialSourceIsFresh,
@@ -10,9 +11,13 @@ import {
 } from "./ownerFieldTrial";
 import {
   REPAIR_GUIDANCE, advanceRepairHandoff, compareRepairHandoff, createReconciliationReceipt,
-  createRepairHandoff, parseReconciliationReceipt, reconcileTrialFindings,
+  createRepairHandoff, reconcileTrialFindings,
   type FindingSeverity, type RepairHandoff,
 } from "./ownerTrialReconciliation";
+import {
+  createIndependentReviewReceipt, parseIndependentReviewReceipt,
+  type ReviewEvidenceEvent,
+} from "./ownerIndependentReview";
 
 const owners: { value: TrialOwner; label: string }[] = [
   { value: "unassigned", label: "Assign a follow-up owner" },
@@ -40,6 +45,9 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
   const [environment, setEnvironment] = useState<TrialEnvironment>({ installed_version: "", access: "unknown", installed_windows_witnessed: false });
   const [observations, setObservations] = useState<TrialObservation[]>([]);
   const [handoffs, setHandoffs] = useState<RepairHandoff[]>([]);
+  const [reviewEvents, setReviewEvents] = useState<ReviewEvidenceEvent[]>([]);
+  const [importedReviewCount, setImportedReviewCount] = useState(0);
+  const [importedTrialCount, setImportedTrialCount] = useState(0);
   const [readings, setReadings] = useState<TrialSourceReading[]>([]);
   const [selected, setSelected] = useState<TrialCaseId>("home");
   const [outcome, setOutcome] = useState<TrialOutcome>("blocked");
@@ -194,22 +202,40 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     }
   }
 
+  function downloadIndependentReview() {
+    try {
+      const receipt = createIndependentReviewReceipt(environment, readings, observations, handoffs, reviewEvents);
+      const url = URL.createObjectURL(new Blob([JSON.stringify(receipt, null, 2) + "\n"], { type: "application/json" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `rosevear-independent-review-${receipt.exported_at.slice(0, 10)}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      setFeedback("Private Build 150 evidence receipt exported as unverified historical claims; physical acceptance stays on HOLD.");
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Could not export independent evidence receipt.");
+    }
+  }
+
   async function importReceipt(event: ChangeEvent<HTMLInputElement>) {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     if (!file) return;
     try {
-      if (file.size > 260_000) throw new Error("Private reconciliation receipt exceeds 260 KB.");
-      const { trial, handoffs: importedHandoffs } = parseReconciliationReceipt(await file.text());
-      if ((observations.length || handoffs.length) && !window.confirm("Replace this browser session's trial observations and handoffs with the private receipt? Export both first to preserve history.")) return;
+      if (file.size > 360_000) throw new Error("Private independent review receipt exceeds 360 KB.");
+      const { trial, handoffs: importedHandoffs, events } = parseIndependentReviewReceipt(await file.text());
+      if ((observations.length || handoffs.length || reviewEvents.length) && !window.confirm("Replace this session's trial, handoff and independent evidence history with the private receipt? Export the full Build 150 receipt first.")) return;
       setEnvironment({ ...trial.environment, installed_windows_witnessed: false });
       setObservations(trial.observations);
       setReadings(trial.source_readings);
       setHandoffs(importedHandoffs);
+      setReviewEvents(events);
+      setImportedReviewCount(events.length);
+      setImportedTrialCount(trial.observations.length);
       setImported(true);
       setWitnessed(false);
       setReviewTarget(null);
-      setFeedback("Private prior trial and handoffs imported for reconciliation. Imported attestations are historical only. Re-test on Windows before fresh acceptance.");
+      setFeedback("Private trial, handoffs and reviewer evidence imported for reconciliation. Imported attestations are historical only. Re-test on Windows before fresh acceptance.");
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "Invalid trial receipt. Existing session preserved.");
     }
@@ -219,7 +245,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     <section className="panel owner-trial" aria-label="Build 148 cross-module owner field trial">
       <header className="owner-trial-header">
         <div>
-          <p className="eyebrow">Build 148 + 149 · owner trial and repair reconciliation</p>
+          <p className="eyebrow">Builds 148–150 · owner trial, repair and independent review</p>
           <h2>Home operations field trial & follow-ups</h2>
           <p>Compare our actual installed Windows Hub, real devices and private access with the source-level release. Record only what we personally witnessed. All unreviewed cases and independent acceptance remain on HOLD.</p>
         </div>
@@ -233,6 +259,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
           <li>Choose a module, follow its existing screen, personally perform a safe check and record either an observed pass or a categorized issue/hold. An issue requires a next-action owner.</li>
           <li>Acknowledge follow-ups, re-test later and export the private JSON. A subsequent observed pass is still awaiting independent review, not a certified physical GREEN.</li>
           <li>Build 149 groups findings for owner review, prepares internal manual repair handoffs and compares subsequent observations. These never dispatch a job or independently close a finding.</li>
+          <li>Build 150 records a bounded independent evidence gap register after a manual handoff is prepared; every reviewer claim remains unverified and closure is never authorized here.</li>
           <li>Nothing runs in the background. Refresh clears this browser session; use explicit private export/import for continuity. No password vault, camera stream, Home Assistant scene, MQTT publish or Windows service command is activated.</li>
         </ol>
       </details>
@@ -404,15 +431,20 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         ))}
       </section>
 
+      <IndependentRetestReviewPanel history={observations} handoffs={handoffs} environment={environment}
+        events={reviewEvents} importedCount={importedReviewCount} importedTrialCount={importedTrialCount}
+        onEventsChange={setReviewEvents} active={active} />
+
       <div className="owner-trial-export">
         <button type="button" onClick={downloadReceipt}>Download private HOLD-labelled JSON receipt</button>
         <button type="button" onClick={downloadReconciliation}>Download private reconciliation receipt (HOLD)</button>
-        <label>Import private Build 148/149 JSON receipt
+        <button type="button" onClick={downloadIndependentReview}>Download private independent review receipt (HOLD)</button>
+        <label>Import private Build 148/149/150 JSON receipt
           <input type="file" accept=".json,application/json" onChange={event => void importReceipt(event)} />
         </label>
       </div>
       {feedback && <p role="status" className="owner-trial-feedback">{feedback}</p>}
-      <p className="owner-trial-privacy">Trial history, handoffs and coarse API readings remain in this browser session unless manually exported. Handoffs are not sent or executed. No evidence is sent to the server for storage, and no background network calls or server mutations occur. Imported records remain historical operator claims. Source CI, installed Windows version, API claims, personal observations and independent acceptance are different evidence classes. <strong>FIELD_ACCEPTANCE_HOLD and INDEPENDENT_REVIEW_HOLD are unconditional.</strong> The first-party password/document Vault remains at 0/6 verified, SECURITY HOLD.</p>
+      <p className="owner-trial-privacy">Trial history, handoffs, reviewer evidence and coarse API readings remain in this browser session unless manually exported. Handoffs are not sent or executed; independent review claims do not close cases. No evidence is sent to the server for storage, and no background network calls or server mutations occur. Imported records remain historical operator claims. Source CI, installed Windows version, API claims, personal observations and independent acceptance are different evidence classes. <strong>FIELD_ACCEPTANCE_HOLD, INDEPENDENT_REVIEW_HOLD and NOT_AUTHORIZED closure are unconditional.</strong> The first-party password/document Vault remains at 0/6 verified, SECURITY HOLD.</p>
     </section>
   );
 }

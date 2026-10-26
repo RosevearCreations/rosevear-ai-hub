@@ -260,6 +260,9 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
   System: {
     purpose: "Shows owner/admin read-only Windows startup/recovery observations, post-reboot diagnostics, device/camera field review, installed version evidence, resource budgets and private LAN/Tailscale access.",
     tasks: [
+      "Build 150: after a Build 149 handoff is prepared, use the independent retest review to mark one of seven exact evidence criteria as missing, contradictory or personally present. Every mark is a private, unverified reviewer claim.",
+      "Build 150: review original failure, prepared handoff, installed Windows, later witnessed retest, unchanged identity, safety permissions and a separate reviewer; an imported receipt can never count as fresh acceptance.",
+      "Build 150: export the private independent review JSON to preserve the complete Build 148–150 chain, or import any previous Build 148/149/150 receipt. The review packet may be prepared, but closure stays NOT AUTHORIZED.",
       "Build 149: under the field trial ledger, filter historical findings by system, severity, assigned role or repeated observation. Triage is descriptive, not physical risk certification.",
       "Build 149: draft an internal repair handoff from an actual witnessed issue; manually review the exact source issue before preparing it for separate private delivery. Preparation never sends a task or performs the repair.",
       "Build 149: compare later owner trial observations with the original handed-off finding, import old Build 148 or new Build 149 receipts and export the bounded private reconciliation JSON. Observed improvements remain on independent review HOLD.",
@@ -287,6 +290,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Use the private https://*.ts.net URL printed by tailscale serve status. Log into the Hub as normal on each device.",
     ],
     safety: [
+      "Build 150 does not authenticate an independent reviewer or certify their identity. Every reviewer attestation is self-reported, and contradictory, missing, stale or imported evidence cannot authorize closure.",
       "Build 149 does not authorize repairs, dispatch handoffs, close findings automatically or infer installed Windows/device acceptance from a JSON receipt or successful CI.",
       "Build 148 never auto-probes hardware or certifies Windows. Its optional status refresh uses only existing read-only GETs; no secrets, private endpoints, device commands, camera streams or router changes are collected.",
       "Build 147 navigation, themes, help disclosures and keyboard shortcuts never run commands, broaden roles, enroll hardware or affect Vault security holds.",
