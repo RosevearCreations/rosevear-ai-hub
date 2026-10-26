@@ -4,6 +4,7 @@ import { getGo2RTCStatus, getHealth, getHomeAssistantStatus, getMQTTStatus, getO
 import { CardHelp } from "./CommandShell";
 import { FieldEvidenceRoutingPanel } from "./FieldEvidenceRoutingPanel";
 import { IndependentRetestReviewPanel } from "./IndependentRetestReviewPanel";
+import { RepeatTrialReassessmentPanel } from "./RepeatTrialReassessmentPanel";
 import {
   TRIAL_CASES, acknowledgeTrialFollowup, createTrialReceipt, latestTrialObservations,
   recordTrialObservation, summarizeOwnerTrial, trialSourceIsFresh,
@@ -19,7 +20,9 @@ import {
   createIndependentReviewReceipt,
   type ReviewEvidenceEvent,
 } from "./ownerIndependentReview";
-import { createFieldRoutingReceipt, parseFieldRoutingReceipt, type SourceIdentityCheck } from "./ownerFieldRouting";
+import { createFieldRoutingReceipt, type SourceIdentityCheck } from "./ownerFieldRouting";
+import { createReassessmentReceipt, parseReassessmentReceipt,
+  type IndependentHoldReassessment, type RepeatTrialEvidenceLink } from "./ownerRepeatTrialReassessment";
 
 const owners: { value: TrialOwner; label: string }[] = [
   { value: "unassigned", label: "Assign a follow-up owner" },
@@ -52,6 +55,9 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
   const [importedTrialCount, setImportedTrialCount] = useState(0);
   const [identityChecks, setIdentityChecks] = useState<SourceIdentityCheck[]>([]);
   const [importedIdentityCount, setImportedIdentityCount] = useState(0);
+  const [trialLinks, setTrialLinks] = useState<RepeatTrialEvidenceLink[]>([]);
+  const [reassessments, setReassessments] = useState<IndependentHoldReassessment[]>([]);
+  const [importedLinkCount, setImportedLinkCount] = useState(0);
   const [readings, setReadings] = useState<TrialSourceReading[]>([]);
   const [selected, setSelected] = useState<TrialCaseId>("home");
   const [outcome, setOutcome] = useState<TrialOutcome>("blocked");
@@ -236,15 +242,32 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     }
   }
 
+  function downloadReassessment() {
+    try {
+      const receipt = createReassessmentReceipt(environment, readings, observations, handoffs, reviewEvents,
+        identityChecks, trialLinks, reassessments);
+      const url = URL.createObjectURL(new Blob([JSON.stringify(receipt, null, 2) + "\n"], { type: "application/json" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `rosevear-repeat-trial-reassessment-${receipt.exported_at.slice(0, 10)}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      setFeedback("Private Build 152 reassessment chain exported as historical operator claims; closure and field acceptance remain HOLD.");
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Could not export reassessment evidence.");
+    }
+  }
+
   async function importReceipt(event: ChangeEvent<HTMLInputElement>) {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     if (!file) return;
     try {
-      if (file.size > 460_000) throw new Error("Private field routing receipt exceeds 460 KB.");
-      const { trial, handoffs: importedHandoffs, events, checks } = parseFieldRoutingReceipt(await file.text());
-      if ((observations.length || handoffs.length || reviewEvents.length || identityChecks.length) &&
-        !window.confirm("Replace this browser session's trial, handoff, review and source identity history? Export the full Build 151 private receipt first.")) return;
+      if (file.size > 580_000) throw new Error("Private reassessment receipt exceeds 580 KB.");
+      const { trial, handoffs: importedHandoffs, events, checks, links, reassessments: importedReassessments } =
+        parseReassessmentReceipt(await file.text());
+      if ((observations.length || handoffs.length || reviewEvents.length || identityChecks.length || trialLinks.length || reassessments.length) &&
+        !window.confirm("Replace this browser session's entire trial and reassessment history? Export the full Build 152 private receipt first.")) return;
       setEnvironment({ ...trial.environment, installed_windows_witnessed: false });
       setObservations(trial.observations);
       setReadings(trial.source_readings);
@@ -254,10 +277,13 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
       setImportedTrialCount(trial.observations.length);
       setIdentityChecks(checks);
       setImportedIdentityCount(checks.length);
+      setTrialLinks(links);
+      setImportedLinkCount(links.length);
+      setReassessments(importedReassessments);
       setImported(true);
       setWitnessed(false);
       setReviewTarget(null);
-      setFeedback("Private trial, handoffs, reviewer evidence and source identity history imported. All imported attestations remain historical. Re-test on Windows before fresh review.");
+      setFeedback("Private trial, handoffs, reviewer evidence and source identity history imported; exact repeat-trial links and reassessments also imported. All imported claims remain historical; retest the actual Windows installation before fresh review.");
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "Invalid trial receipt. Existing session preserved.");
     }
@@ -267,7 +293,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     <section className="panel owner-trial" aria-label="Build 148 cross-module owner field trial">
       <header className="owner-trial-header">
         <div>
-          <p className="eyebrow">Builds 148–151 · owner trial, review and source identity routing</p>
+          <p className="eyebrow">Builds 148–152 · owner trial, evidence linkage and independent HOLD</p>
           <h2>Home operations field trial & follow-ups</h2>
           <p>Compare our actual installed Windows Hub, real devices and private access with the source-level release. Record only what we personally witnessed. All unreviewed cases and independent acceptance remain on HOLD.</p>
         </div>
@@ -283,6 +309,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
           <li>Build 149 groups findings for owner review, prepares internal manual repair handoffs and compares subsequent observations. These never dispatch a job or independently close a finding.</li>
           <li>Build 150 records a bounded independent evidence gap register after a manual handoff is prepared; every reviewer claim remains unverified and closure is never authorized here.</li>
           <li>Build 151 compares only made-up, owner-safe source aliases, previously witnessed Windows version labels, reopened cases and imported history to suggest repeat trials. Alias equality is not device authentication; all routes stay on HOLD.</li>
+          <li>Build 152 links a new personally witnessed retest to its historical Build 151 routing reason and exact safe source record. A separate reviewer can compare all seven old/current evidence classifications and record a private HOLD-labelled reassessment; no automated release is possible.</li>
           <li>Nothing runs in the background. Refresh clears this browser session; use explicit private export/import for continuity. No password vault, camera stream, Home Assistant scene, MQTT publish or Windows service command is activated.</li>
         </ol>
       </details>
@@ -463,17 +490,24 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         importedTrials={importedTrialCount} importedReviews={importedReviewCount} onChecksChange={setIdentityChecks}
         onChooseCase={choose} onNavigate={onNavigate} active={active} />
 
+      <RepeatTrialReassessmentPanel history={observations} checks={identityChecks} environment={environment}
+        links={trialLinks} reassessments={reassessments} handoffs={handoffs} reviews={reviewEvents}
+        importedTrials={importedTrialCount} importedChecks={importedIdentityCount} importedReviews={importedReviewCount}
+        importedLinks={importedLinkCount} onLinksChange={setTrialLinks} onReassessmentsChange={setReassessments}
+        onChooseCase={choose} active={active} />
+
       <div className="owner-trial-export">
         <button type="button" onClick={downloadReceipt}>Download private HOLD-labelled JSON receipt</button>
         <button type="button" onClick={downloadReconciliation}>Download private reconciliation receipt (HOLD)</button>
         <button type="button" onClick={downloadIndependentReview}>Download private independent review receipt (HOLD)</button>
         <button type="button" onClick={downloadSourceRouting}>Download private source routing receipt (HOLD)</button>
-        <label>Import private Build 148/149/150/151 JSON receipt
+        <button type="button" onClick={downloadReassessment}>Download private repeat-trial reassessment receipt (HOLD)</button>
+        <label>Import private Build 148/149/150/151/152 JSON receipt
           <input type="file" accept=".json,application/json" onChange={event => void importReceipt(event)} />
         </label>
       </div>
       {feedback && <p role="status" className="owner-trial-feedback">{feedback}</p>}
-      <p className="owner-trial-privacy">Trial history, handoffs, reviewer classifications, pseudonymous source checks and coarse API readings remain in this browser session unless manually exported. Handoffs and repeat-trial routes are not sent or executed, and no source match closes a case. No evidence is sent to the server for storage and no background server mutations occur. Imported records remain historical operator claims. Source CI, installed Windows version, API claims, personal observations and independent acceptance are different evidence classes. <strong>FIELD_ACCEPTANCE_HOLD, INDEPENDENT_REVIEW_HOLD and NOT_AUTHORIZED closure are unconditional.</strong> The first-party password/document Vault remains at 0/6 verified, SECURITY HOLD.</p>
+      <p className="owner-trial-privacy">Trial history, handoffs, reviewer classifications, pseudonymous source checks, exact repeat-trial links, private reassessments and coarse API readings remain in this browser session unless manually exported. Handoffs and repeat-trial routes are not sent or executed, and no source match closes a case. No evidence is sent to the server for storage and no background server mutations occur. Imported records remain historical operator claims. Source CI, installed Windows version, API claims, personal observations and independent acceptance are different evidence classes. <strong>FIELD_ACCEPTANCE_HOLD, INDEPENDENT_REVIEW_HOLD and NOT_AUTHORIZED closure are unconditional.</strong> The first-party password/document Vault remains at 0/6 verified, SECURITY HOLD.</p>
     </section>
   );
 }
