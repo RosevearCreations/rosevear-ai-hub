@@ -75,7 +75,7 @@ describe("Build 148 System owner field trial workbench", () => {
     const file = new File([JSON.stringify(receipt)], "owner-private.json", { type: "application/json" });
     Object.defineProperty(file, "text", { value: () => Promise.resolve(JSON.stringify(receipt)) });
     render(<OwnerFieldTrialWorkbench onNavigate={vi.fn()} />);
-    fireEvent.change(screen.getByLabelText("Import private Build 148/149/150/151/152/153/154/155 JSON receipt"), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText("Import private Build 148/149/150/151/152/153/154/155/156 JSON receipt"), { target: { files: [file] } });
     await waitFor(() => expect(screen.getByText(/Imported history is for context only/)).toBeInTheDocument());
     expect(screen.getByLabelText(/I personally checked the actual installed Windows Hub/)).not.toBeChecked();
     expect(screen.getByText(/OWNER PASS OBSERVED · INDEPENDENT FIELD HOLD/)).toBeInTheDocument();
@@ -127,7 +127,7 @@ describe("Build 148 System owner field trial workbench", () => {
     const file = new File([JSON.stringify(receipt)], "owner-reconciliation-private.json", { type: "application/json" });
     Object.defineProperty(file, "text", { value: () => Promise.resolve(JSON.stringify(receipt)) });
     render(<OwnerFieldTrialWorkbench onNavigate={vi.fn()} />);
-    fireEvent.change(screen.getByLabelText("Import private Build 148/149/150/151/152/153/154/155 JSON receipt"), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText("Import private Build 148/149/150/151/152/153/154/155/156 JSON receipt"), { target: { files: [file] } });
     await waitFor(() => expect(screen.getByText(/trial, handoffs, reviewer evidence and source identity history imported/)).toBeInTheDocument());
     const panel = screen.getByRole("region", { name: "Build 149 repair handoff and retest reconciliation" });
     expect(within(panel).getByText(/Handoff · draft/)).toBeInTheDocument();
@@ -151,7 +151,7 @@ describe("Build 148 System owner field trial workbench", () => {
     const file = new File([JSON.stringify(receipt)], "private-review.json", { type: "application/json" });
     Object.defineProperty(file, "text", { value: () => Promise.resolve(JSON.stringify(receipt)) });
     render(<OwnerFieldTrialWorkbench onNavigate={vi.fn()} />);
-    fireEvent.change(screen.getByLabelText("Import private Build 148/149/150/151/152/153/154/155 JSON receipt"), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText("Import private Build 148/149/150/151/152/153/154/155/156 JSON receipt"), { target: { files: [file] } });
     await waitFor(() => expect(screen.getByText(/trial, handoffs, reviewer evidence and source identity history imported/)).toBeInTheDocument());
     const panel = screen.getByRole("region", { name: "Build 150 independent retest review and evidence gap register" });
     expect(within(panel).getByText("0 / 7 currently claimed present")).toBeInTheDocument();
@@ -173,7 +173,7 @@ describe("Build 148 System owner field trial workbench", () => {
     const file = new File([JSON.stringify(receipt)], "owner-source-private.json", { type: "application/json" });
     Object.defineProperty(file, "text", { value: () => Promise.resolve(JSON.stringify(receipt)) });
     render(<OwnerFieldTrialWorkbench onNavigate={vi.fn()} />);
-    fireEvent.change(screen.getByLabelText("Import private Build 148/149/150/151/152/153/154/155 JSON receipt"), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText("Import private Build 148/149/150/151/152/153/154/155/156 JSON receipt"), { target: { files: [file] } });
     await waitFor(() => expect(screen.getByText(/source identity history imported/)).toBeInTheDocument());
     const routes = screen.getByRole("region", { name: "Build 151 source identity change and repeat trial routing" });
     expect(within(routes).getByText("HISTORICAL OWNER TRIAL")).toBeInTheDocument();

@@ -8,6 +8,7 @@ import { RepeatTrialReassessmentPanel } from "./RepeatTrialReassessmentPanel";
 import { ReassessmentFollowupPanel } from "./ReassessmentFollowupPanel";
 import { FollowupDecisionReplayPanel } from "./FollowupDecisionReplayPanel";
 import { RecurrenceResolutionPanel } from "./RecurrenceResolutionPanel";
+import { OverdueHandoffPanel } from "./OverdueHandoffPanel";
 import {
   TRIAL_CASES, acknowledgeTrialFollowup, createTrialReceipt, latestTrialObservations,
   recordTrialObservation, summarizeOwnerTrial, trialSourceIsFresh,
@@ -28,8 +29,10 @@ import { createReassessmentReceipt,
   type IndependentHoldReassessment, type RepeatTrialEvidenceLink } from "./ownerRepeatTrialReassessment";
 import { createFollowupReceipt, type OwnerEvidenceFollowup } from "./ownerReassessmentFollowup";
 import { createDecisionReplayReceipt, type FollowupDecision } from "./ownerFollowupDecisionReplay";
-import { createRecurrenceResolutionReceipt, parseRecurrenceResolutionReceipt,
+import { createRecurrenceResolutionReceipt,
   type RecurrenceResolutionEvidence } from "./ownerRecurrenceResolution";
+import { createOverdueHandoffReceipt, MAX_HANDOFF_BYTES, parseOverdueHandoffReceipt,
+  type OverdueHandoffEvidence } from "./ownerOverdueHandoff";
 
 const owners: { value: TrialOwner; label: string }[] = [
   { value: "unassigned", label: "Assign a follow-up owner" },
@@ -72,6 +75,8 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
   const [importedDecisionCount, setImportedDecisionCount] = useState(0);
   const [resolutionEvidence, setResolutionEvidence] = useState<RecurrenceResolutionEvidence[]>([]);
   const [importedResolutionCount, setImportedResolutionCount] = useState(0);
+  const [overdueHandoffs, setOverdueHandoffs] = useState<OverdueHandoffEvidence[]>([]);
+  const [importedOverdueHandoffCount, setImportedOverdueHandoffCount] = useState(0);
   const [readings, setReadings] = useState<TrialSourceReading[]>([]);
   const [selected, setSelected] = useState<TrialCaseId>("home");
   const [outcome, setOutcome] = useState<TrialOutcome>("blocked");
@@ -321,18 +326,35 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     }
   }
 
+  function downloadOverdueHandoff() {
+    try {
+      const receipt = createOverdueHandoffReceipt(environment, readings, observations, handoffs,
+        reviewEvents, identityChecks, trialLinks, reassessments, ownerFollowups, reviewDecisions,
+        resolutionEvidence, overdueHandoffs);
+      const url = URL.createObjectURL(new Blob([JSON.stringify(receipt, null, 2) + "\n"], { type: "application/json" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `rosevear-private-overdue-handoff-${receipt.exported_at.slice(0, 10)}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      setFeedback("Private Build 156 handoff snapshots and complete Build 148–155 evidence downloaded locally. No packet was sent; every HOLD remains.");
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Could not export Build 156 private handoff packet.");
+    }
+  }
+
   async function importReceipt(event: ChangeEvent<HTMLInputElement>) {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     if (!file) return;
     try {
-      if (file.size > 1_050_000) throw new Error("Private recurrence resolution receipt exceeds 1.05 MB.");
+      if (file.size > MAX_HANDOFF_BYTES) throw new Error("Private Build 156 receipt exceeds 1.2 MB.");
       const { trial, handoffs: importedHandoffs, events, checks, links,
         reassessments: importedReassessments, followups, decisions,
-        resolutions } = parseRecurrenceResolutionReceipt(await file.text());
+        resolutions, overdue_handoffs: importedOverdueHandoffs } = parseOverdueHandoffReceipt(await file.text());
       if ((observations.length || handoffs.length || reviewEvents.length || identityChecks.length || trialLinks.length ||
-        reassessments.length || ownerFollowups.length || reviewDecisions.length || resolutionEvidence.length) &&
-        !window.confirm("Replace this browser session's entire trial, reassessment, owner follow-up, decision and resolution history? Export the complete Build 155 private receipt first.")) return;
+        reassessments.length || ownerFollowups.length || reviewDecisions.length || resolutionEvidence.length || overdueHandoffs.length) &&
+        !window.confirm("Replace this browser session's entire trial, reassessment, decision, resolution and handoff history? Export the complete Build 156 private receipt first.")) return;
       setEnvironment({ ...trial.environment, installed_windows_witnessed: false });
       setObservations(trial.observations);
       setReadings(trial.source_readings);
@@ -352,10 +374,12 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
       setImportedDecisionCount(decisions.length);
       setResolutionEvidence(resolutions);
       setImportedResolutionCount(resolutions.length);
+      setOverdueHandoffs(importedOverdueHandoffs);
+      setImportedOverdueHandoffCount(importedOverdueHandoffs.length);
       setImported(true);
       setWitnessed(false);
       setReviewTarget(null);
-      setFeedback("Private trial, handoffs, reviewer evidence and source identity history imported; exact repeat-trial links, reassessments, owner follow-ups, independent decisions and recurrence resolution evidence also imported. All records remain historical; re-witness the real Windows installation before fresh review.");
+      setFeedback("Private trial, handoffs, reviewer evidence and source identity history imported; exact repeat-trial links, reassessments, owner follow-ups, independent decisions, recurrence resolution evidence and Build 156 handoff snapshots also imported. All records remain historical; re-witness the real Windows installation before fresh review.");
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "Invalid trial receipt. Existing session preserved.");
     }
@@ -365,7 +389,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     <section className="panel owner-trial" aria-label="Build 148 cross-module owner field trial">
       <header className="owner-trial-header">
         <div>
-        <p className="eyebrow">Builds 148–155 · owner trial, recurrence resolution, overdue watch and independent HOLD</p>
+        <p className="eyebrow">Builds 148–156 · owner trial, recurrence resolution, private overdue handoff and independent HOLD</p>
           <h2>Home operations field trial & follow-ups</h2>
           <p>Compare our actual installed Windows Hub, real devices and private access with the source-level release. Record only what we personally witnessed. All unreviewed cases and independent acceptance remain on HOLD.</p>
         </div>
@@ -385,6 +409,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
           <li>Build 153 dates unresolved exceptions from their exact private source link, highlights aging and newly contradictory or superseded claims, then records manually witnessed owner follow-up categories. Aging does not trigger dispatch, notification, independent sign-off or closure.</li>
           <li>Build 154 replays every exact owner follow-up against the current reviewer/source context and flags recurring notes or decisions, identity contradictions, superseded trials and historical imports. A separately witnessed private review note remains unverified, HOLD-only and never dispatches a task.</li>
           <li>Build 155 compares later witnessed owner trials to exact Build 154 decisions, labels overdue review follow-ups only on screen, and records strictly linked manual resolution evidence. Even improvement claims remain unverified and independently on HOLD.</li>
+          <li>Build 156 freezes exact overdue decision age, prior owner improvement, later reopened trials and source-alias comparisons in a manually witnessed private handoff. Nothing is sent, reassigned, auto-escalated or approved.</li>
           <li>Nothing runs in the background. Refresh clears this browser session; use explicit private export/import for continuity. No password vault, camera stream, Home Assistant scene, MQTT publish or Windows service command is activated.</li>
         </ol>
       </details>
@@ -593,6 +618,16 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         onResolutionsChange={setResolutionEvidence} onChooseCase={choose} onNavigate={onNavigate}
         active={active} />
 
+      <OverdueHandoffPanel history={observations} checks={identityChecks} environment={environment}
+        links={trialLinks} decisions={reviewDecisions} resolutions={resolutionEvidence}
+        handoffs={overdueHandoffs}
+        imported={{ trials: importedTrialCount, checks: importedIdentityCount,
+          links: importedLinkCount, followups: importedFollowupCount,
+          decisions: importedDecisionCount, resolutions: importedResolutionCount,
+          handoffs: importedOverdueHandoffCount }}
+        onHandoffsChange={setOverdueHandoffs} onChooseCase={choose} onNavigate={onNavigate}
+        active={active} />
+
       <div className="owner-trial-export">
         <button type="button" onClick={downloadReceipt}>Download private HOLD-labelled JSON receipt</button>
         <button type="button" onClick={downloadReconciliation}>Download private reconciliation receipt (HOLD)</button>
@@ -602,12 +637,13 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         <button type="button" onClick={downloadFollowup}>Download private owner follow-up receipt (HOLD)</button>
         <button type="button" onClick={downloadDecisionReplay}>Download private independent decision replay receipt (HOLD)</button>
         <button type="button" onClick={downloadRecurrenceResolution}>Download private recurrence resolution receipt (HOLD)</button>
-        <label>Import private Build 148/149/150/151/152/153/154/155 JSON receipt
+        <button type="button" onClick={downloadOverdueHandoff}>Download private overdue decision handoff receipt (HOLD)</button>
+        <label>Import private Build 148/149/150/151/152/153/154/155/156 JSON receipt
           <input type="file" accept=".json,application/json" onChange={event => void importReceipt(event)} />
         </label>
       </div>
       {feedback && <p role="status" className="owner-trial-feedback">{feedback}</p>}
-      <p className="owner-trial-privacy">Trial history, handoffs, reviewer classifications, pseudonymous source checks, exact repeat-trial links, private reassessments, owner follow-ups, independent decision replay and coarse API readings remain in this browser session unless manually exported. Handoffs, repeat-trial routes, aging alerts and replay decisions are not sent or executed, and no source match closes a case. No evidence is sent to the server for storage and no background server mutations occur. Imported records remain historical operator claims. Source CI, installed Windows version, API claims, personal observations and independent acceptance are different evidence classes. <strong>FIELD_ACCEPTANCE_HOLD, INDEPENDENT_REVIEW_HOLD and NOT_AUTHORIZED closure are unconditional.</strong> The first-party password/document Vault remains at 0/6 verified, SECURITY HOLD.</p>
+      <p className="owner-trial-privacy">Trial history, handoffs, reviewer classifications, pseudonymous source checks, exact repeat-trial links, private reassessments, owner follow-ups, independent decision replay, overdue handoff snapshots and coarse API readings remain in this browser session unless manually exported. Handoffs, repeat-trial routes, aging alerts and replay decisions are not sent or executed, and no source match closes a case. No evidence is sent to the server for storage and no background server mutations occur. Imported records remain historical operator claims. Source CI, installed Windows version, API claims, personal observations and independent acceptance are different evidence classes. <strong>FIELD_ACCEPTANCE_HOLD, INDEPENDENT_REVIEW_HOLD and NOT_AUTHORIZED closure are unconditional.</strong> The first-party password/document Vault remains at 0/6 verified, SECURITY HOLD.</p>
     </section>
   );
 }

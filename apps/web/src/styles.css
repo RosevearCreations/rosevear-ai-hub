@@ -3745,6 +3745,13 @@ h1 {
 .owner-recurrence-resolution .owner-review-entry > label:not(.owner-trial-check) { display: grid; gap: .4rem; font-weight: 700; }
 .owner-recurrence-resolution .owner-decision-filter select { width: 100%; min-width: 0; }
 .owner-recurrence-resolution :is(button,select,input):focus-visible { outline: 3px solid #7c5127; outline-offset: 3px; }
+/* Build 156 — private overdue handoff snapshots and owner-safe reopened trial comparisons. */
+.owner-overdue-handoff { display: grid; gap: 1rem; min-width: 0; padding: 1rem; border: 1px solid #799d9a; border-radius: .85rem; background: #f1f8f7; color: #203b3a; }
+.owner-overdue-handoff h3 { margin: .3rem 0; color: #244c4a; }
+.owner-overdue-handoff .owner-decision-cards > article { border-color: #9fbcb7; }
+.owner-overdue-handoff .owner-review-entry > label:not(.owner-trial-check) { display: grid; gap: .4rem; font-weight: 700; min-width: 0; }
+.owner-overdue-handoff .owner-decision-filter select, .owner-overdue-handoff .owner-review-entry select { width: 100%; min-width: 0; max-width: 100%; }
+.owner-overdue-handoff :is(button,select,input):focus-visible { outline: 3px solid #277870; outline-offset: 3px; }
 @media (max-width: 680px) {
   .owner-trial-context, .owner-trial-controls { grid-template-columns: minmax(0, 1fr); }
   .owner-trial-list > article { display: grid; }
