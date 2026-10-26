@@ -892,7 +892,7 @@ Each build must:
 
 ## Phase 12 — Practical Home, Device, Camera and Workshop Operations (queued)
 
-Builds 138–151 reached `main` source GREEN; Build 152 is implemented for reviewed promotion, with Build 153 proposed next. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
+Builds 138–152 reached `main` source GREEN; Build 153 is implemented for reviewed promotion, with Build 154 proposed next. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
 
 ### Build 138 — Home Operations V2: Rooms, Health & Quick Navigation (PROMOTED · source GREEN)
 - replace generic status-only landing cards with a functional room/context command center for Home, Cameras, Workshop and Services, with direct routes to the matching operational views
@@ -1006,7 +1006,7 @@ Implementation, validated receipt schema and independent evidence boundaries: `d
 
 Implementation and privacy boundaries: `docs/BUILD_151_SOURCE_IDENTITY_ROUTING.md`. The System workbench compares strictly non-sensitive, manually witnessed tracking aliases and Windows version labels, detects reopened cases and stale identity snapshots, and gives nine bounded role-appropriate manual routes. No observed source token authenticates a physical device, and no route authorizes closure or execution.
 
-### Build 152 — Repeat-Trial Outcome Evidence Linking & Independent Hold Reassessment (IMPLEMENTED · source promotion pending)
+### Build 152 — Repeat-Trial Outcome Evidence Linking & Independent Hold Reassessment (PROMOTED · source GREEN)
 - link each manually repeated trial observation to the precise Build 151 route reason, source pseudonym and Windows version without retaining physical identifiers
 - compare historical-versus-current reviewer classifications and surface what must be witnessed afresh by an independent reviewer
 - prepare private reassessment handoffs and chronological evidence links without dispatching repairs or clearing an unresolved hold
@@ -1014,10 +1014,18 @@ Implementation and privacy boundaries: `docs/BUILD_151_SOURCE_IDENTITY_ROUTING.m
 
 Implementation, exact evidence links, fresh reviewer comparison and private receipt validation: `docs/BUILD_152_REPEAT_TRIAL_REASSESSMENT.md`. Links preserve exact trial indices, one bounded historical reason, made-up source aliases and installed Windows version claims; a separate reviewer may annotate HOLD-only reassessment without automatically clearing any evidence or accepting equipment.
 
-### Build 153 — Independent Reassessment Exception Aging & Owner Evidence Follow-Up (PROPOSED · next)
+### Build 153 — Independent Reassessment Exception Aging & Owner Evidence Follow-Up (IMPLEMENTED · source promotion pending)
 - show which Build 152 review gaps remain open or have aged since the exact linked retest, with role-safe owner follow-up categories and unchanged original timestamps
 - distinguish newly observed independent reviewer findings from imported, superseded or contradictory claims and surface the exact manual follow-up route
 - provide an owner-safe private exception handoff/export without background actions, physical approval, source identity authentication or automated closure
 - **Acceptance:** a historically prepared packet, later contradicted source or missing Windows field evidence cannot become a physical acceptance claim
 
-**Queue policy:** Builds 138–151 promoted to source `main`; 152 awaits reviewed CI promotion; 153 is a proposal pending owner selection. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+Implementation and security boundaries: `docs/BUILD_153_REASSESSMENT_FOLLOWUP.md`. The private owner workbench derives a seven-criterion plus physical HOLD queue from exact Build 152 links, tracks advisory age from linked-at time separately from original observation, records witness-gated role/action categories, and supports bounded nested Build 153 receipts with strictly historical legacy imports.
+
+### Build 154 — Independent Follow-Up Decision Replay & Evidence Recurrence Oversight (PROPOSED · next)
+- compare repeated manual owner follow-up notes on the same exact criterion/link without removing any old event or changing historical source timestamps
+- highlight reopened and recurrent reviewer contradictions, repeated source-identity mismatches and aging follow-up decisions for a new separate reviewer
+- preserve owner-only private handoffs, no background escalation, and immutable physical/independent HOLD outcomes
+- **Acceptance:** no imported note, automatic comparison or apparently complete evidence chain can certify installed Windows operation, dispatch work or clear Vault/security holds
+
+**Queue policy:** Builds 138–152 promoted to source `main`; 153 awaits reviewed CI promotion; 154 is proposed next. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
