@@ -26,7 +26,7 @@ function providerPayload(available = true) {
   ];
 }
 
-function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?: boolean; withModel?: boolean }) {
+function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?: boolean; withModel?: boolean; role?: "owner" | "read_only" }) {
   const providerAvailable = options?.providerAvailable ?? true;
   const modelFailure = options?.modelFailure ?? false;
   const withModel = options?.withModel ?? false;
@@ -45,7 +45,7 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
             user: {
               id: 1,
               username: "owner",
-              role: "owner",
+              role: options?.role ?? "owner",
               enabled: true,
               created_at: "2026-10-04T00:00:00Z",
             },
@@ -511,6 +511,38 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByRole("button", { name: "Workshop" })).toHaveAttribute("aria-current", "page");
     expect(screen.queryByRole("dialog", { name: "Jump to a workspace" })).not.toBeInTheDocument();
+  });
+
+  test("shows owner field trial only to administrative roles, not read-only users", async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "System" }));
+    expect(await screen.findByRole("region", { name: "Build 148 cross-module owner field trial" })).toBeInTheDocument();
+    cleanup();
+
+    installFetchMock({ role: "read_only" });
+    render(<App />);
+    await waitFor(() => expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "System" }));
+    expect(screen.queryByRole("region", { name: "Build 148 cross-module owner field trial" })).not.toBeInTheDocument();
+  });
+
+  test("retains the private owner trial ledger while navigating to an inspected workspace and back", async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "System" }));
+    expect(screen.getByText("FIELD ACCEPTANCE: HOLD")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Finding category"), { target: { value: "offline" } });
+    fireEvent.change(screen.getByLabelText("Next-action owner"), { target: { value: "household_owner" } });
+    fireEvent.click(screen.getByLabelText(/I personally completed this safe check/));
+    fireEvent.click(screen.getByRole("button", { name: /Record witnessed outcome/ }));
+    expect(screen.getByText(/Follow-up acknowledgement pending/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Open Home for this check" }));
+    expect(screen.getByRole("heading", { name: "Home" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "System" }));
+    expect(screen.getByText(/Follow-up acknowledgement pending/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/I personally completed this safe check/)).not.toBeChecked();
   });
 
   test("opens the exact-action confirmation queue and records approval", async () => {

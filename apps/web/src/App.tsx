@@ -27,6 +27,7 @@ import { LocalDiagnosticsPanel } from "./LocalDiagnosticsPanel";
 import { PostRebootAcceptancePanel } from "./PostRebootAcceptancePanel";
 import { StartupRecoveryConsole } from "./StartupRecoveryConsole";
 import { FieldRecoverySummaryPanel } from "./FieldRecoverySummaryPanel";
+import { OwnerFieldTrialWorkbench } from "./OwnerFieldTrialWorkbench";
 import { VaultArchitectureView } from "./VaultArchitectureView";
 import { IntegrationHealthPanel } from "./IntegrationHealthPanel";
 import { RestartAppsPanel } from "./RestartAppsPanel";
@@ -317,6 +318,18 @@ export function App() {
           <button type="button" onClick={() => setCommandOpen(true)}>Jump to another screen</button>
         </div>
         <SectionHelp section={section} />
+        {section === "System" && <header className="page-header">
+          <div>
+            <p className="eyebrow">{hubVersion ? `Version ${hubVersion}` : "System"}</p>
+            <h1>System</h1>
+            <p className="lede">Local health and secure tailnet access.</p>
+          </div>
+          <SystemHealth health={health} />
+        </header>}
+        {/* Keep the supervised trial mounted while reviewing linked modules; it only stores session data and never polls. */}
+        {canAdminister && <div hidden={section !== "System"}>
+          <OwnerFieldTrialWorkbench active={section === "System"} onNavigate={(target) => setSection(target as Section)} />
+        </div>}
         {section === "Chat" ? (
           <ChatView onAskWithCitations={(question) => {
             setKnowledgeQuestion(question);
@@ -352,14 +365,6 @@ export function App() {
           <UsersView currentUser={user} />
         ) : section === "System" ? (
           <>
-            <header className="page-header">
-              <div>
-                <p className="eyebrow">{hubVersion ? `Version ${hubVersion}` : "System"}</p>
-                <h1>System</h1>
-                <p className="lede">Local health and secure tailnet access.</p>
-              </div>
-              <SystemHealth health={health} />
-            </header>
             {canAdminister && <LocalDiagnosticsPanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <PostRebootAcceptancePanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <StartupRecoveryConsole onNavigate={(target) => setSection(target as Section)} />}

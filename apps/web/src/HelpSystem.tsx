@@ -260,6 +260,8 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
   System: {
     purpose: "Shows owner/admin read-only Windows startup/recovery observations, post-reboot diagnostics, device/camera field review, installed version evidence, resource budgets and private LAN/Tailscale access.",
     tasks: [
+      "Build 148: use the Cross-module owner field trial to record witnessed outcomes separately from source CI, read-only integration status, installed Windows evidence and independent acceptance.",
+      "Build 148: choose each module, review the existing screen, categorize any problem and assign a next-action role; a later observed pass remains on independent field HOLD. Export the private receipt explicitly for continuity.",
       "Build 147: use the mobile Open menu button, Ctrl/Cmd+K screen finder or Jump to another screen to navigate authorized Hub sections. Density and contrast controls change presentation only.",
       "Build 146: in Service startup & recovery console, capture an explicit before-maintenance and later after-maintenance API classification; it never starts or stops anything.",
       "Run scripts/inspect-hub-startup-console.ps1 locally on the actual Windows PC after inspecting the script; paste only the classified JSON into the Build 146 import. No usernames, paths, task commands or secrets are accepted.",
@@ -282,6 +284,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Use the private https://*.ts.net URL printed by tailscale serve status. Log into the Hub as normal on each device.",
     ],
     safety: [
+      "Build 148 never auto-probes hardware or certifies Windows. Its optional status refresh uses only existing read-only GETs; no secrets, private endpoints, device commands, camera streams or router changes are collected.",
       "Build 147 navigation, themes, help disclosures and keyboard shortcuts never run commands, broaden roles, enroll hardware or affect Vault security holds.",
       "Build 146 requires a fresh operator-supplied Windows task report and six real operator observations for session review; success statuses or checkboxes cannot certify installed-Windows recovery.",
       "Build 146 does not run PowerShell, repair tasks, reboot Windows, restart services, start VirtualBox, send MQTT messages, poll automatically or modify router/camera settings.",
