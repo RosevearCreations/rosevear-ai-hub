@@ -88,21 +88,25 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   Workshop: {
-    purpose: "Build 057: private multi-project workstations, equipment and manual safety readiness evidence.",
+    purpose: "Build 145: private multi-project equipment 360, manual inspection evidence and owner-reviewed preventive maintenance schedules.",
     tasks: [
       "Register project-specific workstations, hazardous activity labels and equipment as initially unverified.",
       "Filter by project, review maintenance status, and record manual inspection observations.",
       "Inspect history and blocked status before undertaking separate external safety procedures.",
       "Apply Build 057 Alembic migration 0018 after verifying an encrypted restorable backup while the API is stopped.",
+      "Build 145: filter equipment by project, text or due date; open a machine to inspect its due schedule, manual owner assignment, checklist, parts references and append-only maintenance history.",
+      "Owner/Admin may create a service plan with explicit due date and repeat interval. A stale plan revision cannot overwrite an updated schedule. Record checked only after marking every checklist item actually completed.",
+      "Apply Alembic migration 0026 only on the reviewed Windows maintenance path after an encrypted backup and verified restore procedure.",
     ],
     safety: [
       "No inspection record is a permit to operate lasers, CNC, forges, electrical or chemical equipment.",
       "Observed OK still requires independent safety review; unsafe observations mark equipment blocked.",
       "No automatic machine control, remote execution, background task or connector writes are enabled.",
       "Only Owner/Administrator can manage the private workshop register; writes are audited.",
+      "A complete maintenance checklist updates the due date only; it never certifies equipment or clears an unsafe hold. Needs-service and unsafe reports do not advance the date.",
     ],
     troubleshooting: [
-      "Workshop API error: verify local database is migrated through Alembic revision 0018.",
+      "Workshop maintenance API error: verify local database is migrated through Alembic revision 0026 (equipment/inspection foundation was introduced in 0018).",
       "Cannot select a workstation: confirm its project key matches the equipment project.",
       "No recent inspection: manually verify and record a new observation, never assume safe readiness.",
     ],

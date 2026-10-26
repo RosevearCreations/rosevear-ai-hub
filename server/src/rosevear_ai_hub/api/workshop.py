@@ -21,6 +21,7 @@ from rosevear_ai_hub.models import (
     User,
     WorkshopEquipment,
     WorkshopInspection,
+    WorkshopMaintenancePlan,
     WorkshopStation,
 )
 
@@ -172,6 +173,16 @@ def update_equipment(
     if item is None:
         raise HTTPException(status_code=404, detail="Equipment not found.")
     data = body.model_dump(exclude_unset=True)
+    if (
+        "maintenance_due_at" in data
+        and db.scalar(
+            select(WorkshopMaintenancePlan).where(WorkshopMaintenancePlan.equipment_id == item.id)
+        )
+        is not None
+    ):
+        raise HTTPException(
+            status_code=409, detail="Maintenance planner owns this due date; edit its plan."
+        )
     _station_for_project(db, data.get("station_id"), item.project_key)
     for key, value in data.items():
         setattr(item, key, value)

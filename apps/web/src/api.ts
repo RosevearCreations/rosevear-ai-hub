@@ -2513,6 +2513,77 @@ export function recordWorkshopInspection(
   );
 }
 
+// Build 145: a maintenance calendar and manual service provenance only.
+export type WorkshopMaintenanceDue = "unplanned" | "scheduled" | "due_soon" | "overdue" | "blocked" | "disabled";
+export type WorkshopMaintenanceOutcome = "checked" | "needs_service" | "unsafe";
+export interface WorkshopMaintenancePlan {
+  equipment_id: number;
+  revision: number;
+  interval_days: number;
+  next_due_at: string;
+  assigned_user_id: number | null;
+  checklist: string[];
+  parts_refs: string[];
+  notes: string;
+  last_completed_at: string | null;
+}
+export interface WorkshopMaintenanceRow {
+  equipment_id: number;
+  name: string;
+  project_key: string;
+  equipment_type: string;
+  activity_type: WorkshopActivity;
+  station_name: string;
+  readiness_status: WorkshopReadiness;
+  disabled: boolean;
+  last_inspected_at: string | null;
+  due_state: WorkshopMaintenanceDue;
+  is_overdue: boolean;
+  next_safe_check: string;
+  plan: WorkshopMaintenancePlan | null;
+  legacy_due_at: string | null;
+}
+export interface WorkshopMaintenanceOverview {
+  as_of: string;
+  items: WorkshopMaintenanceRow[];
+  overdue_count: number;
+  scope: "manual_records_only";
+  automatic_equipment_control: false;
+  safety_certification: false;
+  counts_limited_to_first: number;
+}
+export interface WorkshopMaintenanceEvent {
+  id: number;
+  outcome: WorkshopMaintenanceOutcome;
+  note: string;
+  completed_checklist: string[];
+  parts_used: string[];
+  previous_due_at: string;
+  next_due_at: string;
+  schedule_updated: boolean;
+  recorded_by_user_id: number | null;
+  recorded_at: string;
+}
+export function getWorkshopMaintenanceOverview(signal?: AbortSignal): Promise<WorkshopMaintenanceOverview> {
+  return authJson<WorkshopMaintenanceOverview>("GET", "/api/v1/workshop/maintenance/overview", undefined, signal);
+}
+export function getWorkshopMaintenanceEvents(equipmentId: number): Promise<WorkshopMaintenanceEvent[]> {
+  return authJson<WorkshopMaintenanceEvent[]>("GET", `/api/v1/workshop/equipment/${equipmentId}/maintenance-events`);
+}
+export function saveWorkshopMaintenancePlan(equipmentId: number, input: {
+  expected_revision: number; interval_days: number; next_due_at: string;
+  assigned_user_id: number | null; checklist: string[]; parts_refs: string[]; notes: string;
+}): Promise<WorkshopMaintenancePlan> {
+  return authJson<WorkshopMaintenancePlan>("PUT", `/api/v1/workshop/equipment/${equipmentId}/maintenance`, input);
+}
+export function recordWorkshopMaintenanceEvent(equipmentId: number, input: {
+  expected_revision: number; outcome: WorkshopMaintenanceOutcome;
+  note: string; completed_checklist: string[]; parts_used: string[];
+  acknowledge_not_certification: boolean;
+}): Promise<WorkshopMaintenanceEvent> {
+  return authJson<WorkshopMaintenanceEvent>("POST", `/api/v1/workshop/equipment/${equipmentId}/maintenance-events`, input);
+}
+
 
 export function getReleaseObservability(signal?: AbortSignal): Promise<ReleaseObservabilityResponse> {
   return getJson<ReleaseObservabilityResponse>("/api/v1/system/release-observability", signal);
