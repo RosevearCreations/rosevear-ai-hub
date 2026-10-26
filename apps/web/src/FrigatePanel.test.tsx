@@ -40,7 +40,7 @@ test("shows local Frigate cameras and recent normalized events", async () => {
         }),
       };
     }
-    if (url.includes("/api/v1/frigate/events?limit=20")) {
+    if (url.includes("/api/v1/frigate/events?limit=100")) {
       return {
         ok: true,
         json: async () => ({

@@ -2099,7 +2099,7 @@ export interface CameraEventReview {
   camera_name: string;
   object_label: string;
   event_start_time: number;
-  review_status: "needs_review" | "reviewed" | "flagged";
+  review_status: "needs_review" | "reviewed" | "flagged" | "follow_up";
   note: string;
   reviewed_by_user_id: number | null;
   updated_at: string;

@@ -156,8 +156,12 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   Cameras: {
-    purpose: "Build 141 Camera Wall V2 groups approved cameras by reviewed room, shows stream health and provides one deliberate private playback panel. Build 116 moving-video field acceptance remains separate.",
+    purpose: "Build 141 Camera Wall V2 provides a single deliberate private video panel; Build 142 combines Frigate event metadata and Hub review-only history with safe evidence filters and manual follow-up.",
     tasks: [
+      "Build 142: Refresh Frigate to inspect at most 100 recent source events, with duplicate event IDs reconciled. Local older reviews are retained but are not proof of available media.",
+      "Filter evidence by camera, source, object category, local calendar dates and review state; change timestamp display from local timezone to UTC as needed.",
+      "Owner/Admin can Acknowledge for follow-up on a fresh, consistent current Frigate event. This writes a local review status, keeps any existing note, and never changes recordings, clip retention or physical controls.",
+      "If the workbench reports conflict, clock drift, stale sample or media unverified, refresh and inspect the recorder through separately authorized access. No raw Frigate or RTSP playback links are exposed.",
       "Use Room or site to group cameras by Device 360 owner-reviewed room annotations. Unassigned and unavailable rooms are explicit; no guessed camera-to-HA pairing is performed.",
       "Choose Favorites and Compact cards, then Save private layout to the current signed-in Hub account. Only camera IDs and density are saved, never streams or RTSP source addresses.",
       "The wall deliberately displays a no-still placeholder if there is no supported authenticated snapshot source. Click Start private preview for one eligible stream, then Stop large preview; switching selection stops the old stream.",

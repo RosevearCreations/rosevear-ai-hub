@@ -2161,7 +2161,7 @@ See `docs/BUILD_138_HOME_OPERATIONS_V2.md`. Vault remains **SECURITY HOLD / 0 of
 - [x] **139** — Device 360 Registry, Identity Matching & Room Assignment (implemented; source promotion pending)
 - [x] **140** — Guided Device Discovery Inbox & Owner-Safe Adoption (source promoted; Windows field acceptance remains separate)
 - [x] **141** — Camera Wall V2: Room Groups, Health & Private Views (source implementation; promotion acceptance tracked in Build 141 notes)
-- [ ] **142** — Camera Events & Evidence Playback Workbench V2
+- [x] **142** — Camera Events & Evidence Playback Workbench V2 (source implemented; promotion and Windows field acceptance separately verified)
 - [ ] **143** — MQTT Topic Explorer, Device Mapping & Publish Preview
 - [ ] **144** — Home Assistant Scenes & Safe Action Drafts
 - [ ] **145** — Workshop Equipment 360 & Preventive Maintenance Planner

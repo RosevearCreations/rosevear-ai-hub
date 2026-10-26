@@ -17,6 +17,8 @@ type FrigateState =
       status: FrigateStatus;
       cameras: FrigateCamera[];
       events: FrigateEvent[];
+      eventsOnline: boolean;
+      observedAt: string | null;
       error: string | null;
     }
   | { kind: "error"; message: string };
@@ -32,23 +34,33 @@ export function FrigatePanel({ canAdminister = false }: { canAdminister?: boolea
   async function refresh(signal?: AbortSignal) {
     setBusy(true);
     try {
-      const [status, cameras, events] = await Promise.all([
+      const [status, cameras, events] = await Promise.allSettled([
         getFrigateStatus(signal),
         getFrigateCameras(signal),
-        getFrigateEvents(20, signal),
+        getFrigateEvents(100, signal),
       ]);
+      if (signal?.aborted) return;
+      const verifiedStatus: FrigateStatus = status.status === "fulfilled" ? status.value : {
+        configured: false, online: false, version: null, base_url: "",
+        local_only: false, error: "Provider status unavailable",
+      };
+      const eventsOnline = events.status === "fulfilled" && events.value.online;
       setState({
         kind: "ready",
-        status,
-        cameras: cameras.cameras,
-        events: events.events,
-        error: status.error ?? cameras.error ?? events.error,
+        status: verifiedStatus,
+        cameras: cameras.status === "fulfilled" ? cameras.value.cameras : [],
+        events: events.status === "fulfilled" ? events.value.events : [],
+        eventsOnline,
+        observedAt: eventsOnline ? new Date().toISOString() : null,
+        error: status.status !== "fulfilled" || cameras.status !== "fulfilled" || events.status !== "fulfilled"
+          || verifiedStatus.error || (events.status === "fulfilled" && events.value.error)
+          ? "One or more Frigate sources are unavailable. Review local service diagnostics privately." : null,
       });
     } catch (caught: unknown) {
       if (caught instanceof DOMException && caught.name === "AbortError") return;
       setState({
         kind: "error",
-        message: caught instanceof Error ? caught.message : "Unable to load Frigate status.",
+        message: "Unable to load Frigate status. Verify local service and sign-in.",
       });
     } finally {
       setBusy(false);
@@ -84,7 +96,7 @@ export function FrigatePanel({ canAdminister = false }: { canAdminister?: boolea
     <section className="frigate-panel">
       <header className="panel frigate-status-card">
         <div>
-          <p className="eyebrow">Build 054</p>
+          <p className="eyebrow">Build 142</p>
           <h2>Frigate adapter</h2>
           <p>
             Optional local object-event integration. The Hub reads Frigate through its loopback-only
@@ -97,7 +109,7 @@ export function FrigatePanel({ canAdminister = false }: { canAdminister?: boolea
         <dl className="ha-meta">
           <div><dt>Status</dt><dd>{state.status.online ? "Online" : "Offline — optional"}</dd></div>
           <div><dt>Version</dt><dd>{state.status.version ?? "Unavailable"}</dd></div>
-          <div><dt>API</dt><dd><code>{state.status.base_url}</code></dd></div>
+          <div><dt>API</dt><dd>Private local service (address hidden)</dd></div>
           <div><dt>Local-only</dt><dd>{state.status.local_only ? "Yes" : "No"}</dd></div>
           <div><dt>Cameras</dt><dd>{enabledCameras}/{state.cameras.length} enabled</dd></div>
           <div><dt>Detection</dt><dd>{detectionCameras} enabled</dd></div>
@@ -126,8 +138,8 @@ export function FrigatePanel({ canAdminister = false }: { canAdminister?: boolea
             ))}
           </section>
 
-          <CameraEventTimeline events={state.events} online={state.status.online}
-            canAdminister={canAdminister} />
+          <CameraEventTimeline events={state.events} online={state.status.online && state.eventsOnline}
+            canAdminister={canAdminister} observedAt={state.observedAt} />
         </>
       ) : (
         <>
@@ -143,7 +155,7 @@ export function FrigatePanel({ canAdminister = false }: { canAdminister?: boolea
             then select Refresh Frigate. No Frigate service is started by this page.
           </p>
         </section>
-        <CameraEventTimeline events={[]} online={false} canAdminister={canAdminister} />
+        <CameraEventTimeline events={[]} online={false} canAdminister={canAdminister} observedAt={null} />
         </>
       )}
     </section>
