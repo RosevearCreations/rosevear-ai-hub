@@ -3663,6 +3663,21 @@ h1 {
 .owner-trial :is(button, input, select, summary):focus-visible { outline: 3px solid #b06b1b; outline-offset: 3px; }
 .owner-trial-feedback { border: 1px solid #96b4c4; padding: .75rem; border-radius: .55rem; background: #edf5f8; color: #153b50 !important; }
 .owner-trial-privacy { font-size: .9rem; padding: .9rem 1rem; border-left: 4px solid #a05a29; background: #fff5e9; color: #60351c !important; line-height: 1.5; }
+/* Build 149 — grouped, read-only reconciliation; handoffs remain private drafts. */
+.owner-trial-reconciliation { display: grid; gap: 1rem; min-width: 0; padding: 1rem; border: 1px solid #99aebc; border-radius: .85rem; background: #f5f8fa; }
+.owner-trial-reconciliation h3, .owner-trial-reconciliation h4 { color: #183a52; margin: .2rem 0; }
+.owner-trial-reconcile-stats { display: flex; gap: .5rem; flex-wrap: wrap; }
+.owner-trial-reconcile-stats > span { background: #e4eef4; color: #173b52; padding: .65rem; border: 1px solid #9eb4c2; border-radius: .5rem; font-weight: 700; }
+.owner-trial-system-group { display: grid; gap: .6rem; min-width: 0; }
+.owner-trial-finding { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 1rem; border: 1px solid #9eafbb; border-radius: .65rem; padding: .9rem; background: #fff; }
+.owner-trial-finding > div:first-child { flex: 2 1 19rem; min-width: 0; }
+.owner-trial-finding p { margin: .45rem 0; }
+.owner-trial-finding small { color: #385568; overflow-wrap: anywhere; }
+.owner-trial-handoff-actions { display: grid; align-items: start; gap: .65rem; flex: 1 1 17rem; min-width: 0; }
+.owner-trial-handoff-actions > button { justify-self: start; }
+.owner-trial-handoff { display: grid; gap: .5rem; padding: .75rem; border: 1px solid #abbfca; background: #f3f8fb; border-radius: .65rem; min-width: 0; }
+.owner-trial-handoff .owner-trial-check { font-weight: 600; }
+.owner-trial-handoff > button { justify-self: start; }
 @media (max-width: 680px) {
   .owner-trial-context, .owner-trial-controls { grid-template-columns: minmax(0, 1fr); }
   .owner-trial-list > article { display: grid; }
