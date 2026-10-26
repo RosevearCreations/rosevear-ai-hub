@@ -1441,6 +1441,36 @@ export function getMQTTMessages(limit = 50, signal?: AbortSignal): Promise<MQTTM
   );
 }
 
+export type MQTTTopicObservation = {
+  topic: string;
+  message_count: number;
+  last_seen_at: string;
+  qos: number;
+  retained: boolean;
+  state_preview: string | null;
+  state_kind: "state" | "numeric" | "redacted";
+};
+export type MQTTTopicExplorer = {
+  observed_at: string;
+  connected: boolean;
+  source: "bounded_received_buffer";
+  topics: MQTTTopicObservation[];
+  note: string;
+};
+export function getMQTTTopicExplorer(namespace = "", signal?: AbortSignal): Promise<MQTTTopicExplorer> {
+  return authJson<MQTTTopicExplorer>("GET", "/api/v1/mqtt/topics/explorer?limit=50&namespace="
+    + encodeURIComponent(namespace), undefined, signal);
+}
+
+export type MQTTPublishPreview = {
+  topic: string; qos: number; retain: false; payload_bytes: number; payload_sha256: string;
+  connected: boolean; allowed: boolean; reason: string;
+};
+export function previewMQTTPublish(topic: string, payload: string): Promise<MQTTPublishPreview> {
+  return authJson<MQTTPublishPreview>("POST", "/api/v1/mqtt/publish-preview",
+    { topic, payload, qos: 0, retain: false });
+}
+
 export function subscribeMQTT(
   topicFilter: string,
   qos = 0,
