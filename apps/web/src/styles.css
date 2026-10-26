@@ -3496,3 +3496,25 @@ h1 {
   .device-registry-results { max-height: 20rem; }
   .device-registry-detail dl > div { grid-template-columns: minmax(0, 1fr); gap: .2rem; }
 }
+
+/* Build 146 — bounded, read-only Windows recovery operations console. */
+.startup-console { display: grid; gap: 1rem; min-width: 0; }
+.startup-console-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+.startup-console-header > div { flex: 1; min-width: min(100%, 17rem); }
+.startup-console-header h2 { margin: .25rem 0 .5rem; }
+.startup-console-header p { max-width: 78ch; }
+.startup-console-actions { display: flex; flex-wrap: wrap; gap: .55rem; }
+.startup-console-actions button { flex: 1 1 11rem; }
+.startup-console-import { display: grid; gap: .55rem; padding: .9rem; background: #f3f6f9; border: 1px solid #aebeca; border-radius: .75rem; }
+.startup-console-import label { font-weight: 700; overflow-wrap: anywhere; }
+.startup-console-import textarea { box-sizing: border-box; width: 100%; min-width: 0; padding: .7rem; background: white; color: #172735; border: 1px solid #7d92a3; border-radius: .55rem; font: inherit; }
+.startup-console-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .75rem; }
+.startup-console-grid article { padding: .9rem; border: 1px solid #9eafbc; border-radius: .75rem; background: #f7fafc; min-width: 0; }
+.startup-console-grid article strong { overflow-wrap: anywhere; color: #263c51; }
+.startup-console-grid article p { margin: .45rem 0 0; }
+.startup-console-grid article small { display: block; margin-top: .45rem; line-height: 1.5; }
+.startup-console-checks { display: grid; gap: .55rem; }
+.startup-console-checks label { display: flex; align-items: flex-start; gap: .65rem; line-height: 1.5; padding: .65rem; border: 1px solid #c3cfd7; border-radius: .55rem; }
+.startup-console-checks input { flex: 0 0 1.2rem; width: 1.2rem; height: 1.2rem; margin-top: .15rem; accent-color: #285579; }
+.startup-console button:disabled { opacity: .55; cursor: not-allowed; }
+.startup-console :is(button, summary, input, textarea):focus-visible { outline: 3px solid #285579; outline-offset: 3px; }
