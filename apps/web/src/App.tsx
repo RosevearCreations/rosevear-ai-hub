@@ -16,6 +16,7 @@ import { AutomationView } from "./AutomationView";
 import { AuditView } from "./AuditView";
 import { AuthView } from "./AuthView";
 import { CameraView } from "./CameraView";
+import { CardHelp, CommandPalette, type ShellDensity, type ShellTheme } from "./CommandShell";
 import { BusinessView } from "./BusinessView";
 import { ChatView } from "./ChatView";
 import { ConfirmationsView } from "./ConfirmationsView";
@@ -88,6 +89,12 @@ export function App() {
   const [section, setSection] = useState<Section>("Home");
   const [knowledgeQuestion, setKnowledgeQuestion] = useState("");
   const [hubVersion, setHubVersion] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
+  const [density, setDensity] = useState<ShellDensity>("comfortable");
+  const [appearance, setAppearance] = useState<ShellTheme>("standard");
+
+  useEffect(() => setMobileMenuOpen(false), [section]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -114,6 +121,7 @@ export function App() {
         status: { bootstrap_required: false, authenticated: false, user: null },
       });
       setSection("Home");
+      setCommandOpen(false);
     };
     window.addEventListener(HUB_AUTH_REQUIRED_EVENT, onExpired);
     return () => window.removeEventListener(HUB_AUTH_REQUIRED_EVENT, onExpired);
@@ -216,6 +224,10 @@ export function App() {
       await logout();
     } finally {
       setSection("Home");
+      setCommandOpen(false);
+      setMobileMenuOpen(false);
+      setDensity("comfortable");
+      setAppearance("standard");
       setKnowledgeQuestion("");
       setHealth({ kind: "loading" });
       setOllama({ kind: "loading" });
@@ -227,23 +239,27 @@ export function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-density={density} data-theme={appearance}>
       <a className="skip-link" href="#main-content">
         Skip to main content
       </a>
 
       <aside className="sidebar">
-        <div className="brand">
-          <span className="brand-mark" aria-hidden="true">
-            R
-          </span>
-          <div>
-            <strong>Rosevear AI Hub</strong>
-            <small>Local-first control centre</small>
+        <div className="sidebar-topline">
+          <div className="brand">
+            <span className="brand-mark" aria-hidden="true">R</span>
+            <div>
+              <strong>Rosevear AI Hub</strong>
+              <small>Local-first control centre</small>
+            </div>
           </div>
+          <button className="mobile-nav-toggle" type="button" aria-controls="hub-primary-nav"
+            aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(value => !value)}>
+            {mobileMenuOpen ? "Close menu" : "Open menu"}
+          </button>
         </div>
 
-        <nav aria-label="Primary navigation">
+        <nav id="hub-primary-nav" aria-label="Primary navigation" className={mobileMenuOpen ? "nav-expanded" : ""}>
           <ul>
             {sections.map((item) => (
               <li key={item}>
@@ -254,6 +270,7 @@ export function App() {
                   onClick={() => {
                     setKnowledgeQuestion("");
                     setSection(item);
+                    setMobileMenuOpen(false);
                   }}
                 >
                   {item}
@@ -262,6 +279,27 @@ export function App() {
             ))}
           </ul>
         </nav>
+
+        <div className="shell-utilities">
+          <button className="shell-find-button" type="button" onClick={() => setCommandOpen(true)}>
+            Find screen <kbd>Ctrl K</kbd>
+          </button>
+          <fieldset className="shell-preferences">
+            <legend>Interface density</legend>
+            {(["comfortable", "compact"] as const).map(value => (
+              <button type="button" key={value} aria-pressed={density === value}
+                onClick={() => setDensity(value)}>{value === "comfortable" ? "Comfortable" : "Compact"}</button>
+            ))}
+          </fieldset>
+          <fieldset className="shell-preferences">
+            <legend>Display contrast</legend>
+            {(["standard", "high-contrast"] as const).map(value => (
+              <button type="button" key={value} aria-pressed={appearance === value}
+                onClick={() => setAppearance(value)}>{value === "standard" ? "Standard" : "High contrast"}</button>
+            ))}
+          </fieldset>
+          <CardHelp title="Interface controls">Density and contrast change this session's display only. Find screen navigates among already-authorized modules; it cannot execute devices or search private data.</CardHelp>
+        </div>
 
         <PwaInstallPanel />
         <div className="account-card">
@@ -274,6 +312,10 @@ export function App() {
       </aside>
 
       <main id="main-content" className="content" tabIndex={-1}>
+        <div className="shell-breadcrumb" aria-label="Current workspace">
+          <span>Rosevear AI Hub</span><span aria-hidden="true">/</span><strong>{section}</strong>
+          <button type="button" onClick={() => setCommandOpen(true)}>Jump to another screen</button>
+        </div>
         <SectionHelp section={section} />
         {section === "Chat" ? (
           <ChatView onAskWithCitations={(question) => {
@@ -346,6 +388,9 @@ export function App() {
           />
         )}
       </main>
+      <CommandPalette open={commandOpen} current={section} sections={sections}
+        onOpen={() => setCommandOpen(true)} onClose={() => setCommandOpen(false)}
+        onChoose={(target) => { setKnowledgeQuestion(""); setSection(target as Section); setMobileMenuOpen(false); }} />
     </div>
   );
 }
@@ -399,12 +444,14 @@ function HomeView({
       <OperationsDashboard role={role} onNavigate={onNavigate} />
       <section className="dashboard-grid" aria-label="Local AI and knowledge shortcuts">
         <article className="panel">
+          <CardHelp title="Local AI status">Ollama is a local model service. An available API reading does not prove any Windows startup task or model inference succeeded.</CardHelp>
           <h2>Local AI</h2>
           <OllamaHealth ollama={ollama} />
           <p>Local chat uses the configured models and profiles.</p>
           <button type="button" onClick={onOpenChat}>Open chat</button>
         </article>
         <article className="panel">
+          <CardHelp title="Knowledge collections">Open Knowledge to search our local collections and inspect citations. This navigation does not upload files or use external providers.</CardHelp>
           <h2>Knowledge</h2>
           <p>Explore local collections and grounded sources.</p>
           <button type="button" onClick={onOpenKnowledge}>Open knowledge</button>

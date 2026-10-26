@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface HelpTopic {
   purpose: string;
@@ -69,22 +69,22 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   Vault: {
-    purpose: "Build 119 designs a separate local household password manager; this is a security-gated, non-operational preview.",
+    purpose: "The planned first-party, locally hosted household password and document vault is a security-gated, non-operational architecture preview, not a third-party installation.",
     tasks: [
-      "Review the mandatory architecture security gates and the private HTTPS access plan before choosing a provider.",
-      "The future vault will use a separately installed, reviewed password-manager client with personal accounts, independent unlock and two-step authentication.",
+      "Review the first-party threat model, mandatory architecture gates, independent encrypted storage and private HTTPS access plan before any pilot.",
+      "A future reviewed first-party vault must have separate personal accounts, independent unlock, hardware-key/passkey MFA, offline emergency recovery and independent encrypted backups.",
       "Keep Knowledge for recipes, car servicing instructions and owners manuals. Keep integration Secrets for tokens used by the Hub only.",
-      "Only after Builds 120–122 pass security and Windows acceptance will an operator make the vault available to store credentials.",
+      "No password storage is available here. The local first-party implementation remains blocked until security verification and a separately authorized Windows pilot pass.",
     ],
     safety: [
       "Do not enter passwords, master keys, recovery codes or two-factor seeds into this Hub preview, Knowledge, Chat, AI tools or Support screenshots.",
-      "Build 119 does not install a server, enable two-factor login, activate sharing or accept secrets. All live credential operations are blocked by design.",
+      "The vault preview does not install a password server, enable two-factor login, activate sharing or accept secrets. All live credential operations remain blocked.",
       "No public port forwarding, Tailscale Funnel, Hub proxy of decrypted entries or reuse of the Hub SECRET_ENCRYPTION_KEY for personal vaults.",
     ],
     troubleshooting: [
-      "If Vault shows SECURITY HOLD, that is expected: architecture work is not an activated password service.",
+      "Vault SECURITY HOLD is expected: architecture drafts and synthetic tests are not an activated password service or proof of a safe first-party implementation.",
       "If the Hub login works, that still does not grant access to anyone's personal password records.",
-      "Do not try to repair this preview by placing passwords in Secrets or Knowledge. Wait for reviewed provider and two-factor acceptance.",
+      "Do not try to repair this preview by placing passwords in Secrets or Knowledge. Wait for a reviewed first-party implementation and separate MFA acceptance.",
     ],
   },
   Workshop: {
@@ -260,6 +260,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
   System: {
     purpose: "Shows owner/admin read-only Windows startup/recovery observations, post-reboot diagnostics, device/camera field review, installed version evidence, resource budgets and private LAN/Tailscale access.",
     tasks: [
+      "Build 147: use the mobile Open menu button, Ctrl/Cmd+K screen finder or Jump to another screen to navigate authorized Hub sections. Density and contrast controls change presentation only.",
       "Build 146: in Service startup & recovery console, capture an explicit before-maintenance and later after-maintenance API classification; it never starts or stops anything.",
       "Run scripts/inspect-hub-startup-console.ps1 locally on the actual Windows PC after inspecting the script; paste only the classified JSON into the Build 146 import. No usernames, paths, task commands or secrets are accepted.",
       "Build 146: compare original Windows task results with Home Assistant, MQTT, Ollama, Hub, private go2rtc and Frigate health; check actual VM identity and private HTTPS separately, then export a private, HOLD-labelled owner review receipt.",
@@ -281,6 +282,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Use the private https://*.ts.net URL printed by tailscale serve status. Log into the Hub as normal on each device.",
     ],
     safety: [
+      "Build 147 navigation, themes, help disclosures and keyboard shortcuts never run commands, broaden roles, enroll hardware or affect Vault security holds.",
       "Build 146 requires a fresh operator-supplied Windows task report and six real operator observations for session review; success statuses or checkboxes cannot certify installed-Windows recovery.",
       "Build 146 does not run PowerShell, repair tasks, reboot Windows, restart services, start VirtualBox, send MQTT messages, poll automatically or modify router/camera settings.",
       "Post-reboot snapshots stay in this browser session unless an operator copies the private identity-only JSON; never share it in a public issue or include credentials and camera endpoint URLs.",
@@ -418,12 +420,20 @@ const DEFAULT_HELP: HelpTopic = {
 
 export function SectionHelp({ section }: { section: string }) {
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
   const topic = HELP_TOPICS[section] ?? DEFAULT_HELP;
+
+  useEffect(() => setOpen(false), [section]);
+
+  function closeHelp() {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }
 
   useEffect(() => {
     if (!open) return;
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") closeHelp();
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -432,9 +442,11 @@ export function SectionHelp({ section }: { section: string }) {
   return (
     <div className="section-help">
       <button
+        ref={triggerRef}
         className="help-trigger"
         type="button"
         aria-label={"Help for " + section}
+        aria-controls="section-help-panel"
         aria-expanded={open}
         onClick={() => setOpen(true)}
       >
@@ -443,6 +455,7 @@ export function SectionHelp({ section }: { section: string }) {
 
       {open ? (
         <aside
+          id="section-help-panel"
           className="help-panel"
           role="dialog"
           aria-modal="false"
@@ -457,7 +470,7 @@ export function SectionHelp({ section }: { section: string }) {
               className="help-close"
               type="button"
               aria-label="Close help"
-              onClick={() => setOpen(false)}
+              onClick={closeHelp}
             >
               ×
             </button>

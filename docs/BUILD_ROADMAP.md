@@ -892,7 +892,7 @@ Each build must:
 
 ## Phase 12 — Practical Home, Device, Camera and Workshop Operations (queued)
 
-Builds 138–140 reached `main` source GREEN; Build 141 is implemented for reviewed promotion, while 142–147 remain queued. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
+Builds 138–146 reached `main` source GREEN; Build 147 is implemented for reviewed promotion, with Build 148 proposed next. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
 
 ### Build 138 — Home Operations V2: Rooms, Health & Quick Navigation (PROMOTED · source GREEN)
 - replace generic status-only landing cards with a functional room/context command center for Home, Cameras, Workshop and Services, with direct routes to the matching operational views
@@ -958,7 +958,7 @@ Implementation, safety boundaries and manual Windows verification: `docs/BUILD_1
 
 Implementation, Alembic migration, manual safety contract and Windows field checklist: `docs/BUILD_145_WORKSHOP_MAINTENANCE.md`.
 
-### Build 146 — Windows Service Startup & Recovery Operations Console (IMPLEMENTED · source promotion pending)
+### Build 146 — Windows Service Startup & Recovery Operations Console (PROMOTED · source GREEN)
 - consolidate read-only health and startup-order guidance for the Hub API, Caddy/private HTTPS, Home Assistant VM, MQTT, go2rtc/Frigate and Ollama, including reboot and power-restoration diagnosis
 - display observed versus assumed status, existing approved local startup-task identity, dependencies and safe next manual checks; never claim remote Windows access from source code alone
 - require explicit separate owner authorization, a local allowlisted executor and witnessed field testing before exposing any restart/stop/repair action; no surprise scheduled-task replacement
@@ -966,10 +966,18 @@ Implementation, Alembic migration, manual safety contract and Windows field chec
 
 Implementation and manual Windows evidence runbook: `docs/BUILD_146_WINDOWS_STARTUP_RECOVERY.md`. The System console uses existing read-only GETs and a sanitized locally produced scheduled-task observation; physical recovery remains unverified.
 
-### Build 147 — Responsive Command Shell, Theme Polish & Contextual Help Refresh (QUEUED · priority 10)
+### Build 147 — Responsive Command Shell, Theme Polish & Contextual Help Refresh (IMPLEMENTED · source promotion pending)
 - standardize compact/expanded sub-screens, card spacing, readable contrast, focus states and mobile-friendly navigation across Home, Devices, Cameras, Home Assistant, MQTT, Workshop and Recovery
 - provide consistent circled-i help on every new operational card, with task-specific guidance, expected status meanings, operator role boundaries and recovery links
 - audit existing Help content for outdated claims (especially Vault: our selected first-party plan is **not** a third-party password-manager installation) and align advice with implemented features only
 - **Acceptance:** keyboard/screen-reader and narrow-screen tests pass, cross-view links work, and help never offers nonexistent capabilities or encourages dangerous Windows/vault workarounds
 
-**Queue policy:** 138–145 promoted to source `main`; 146 is implemented awaiting CI promotion; 147 remains planned. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+Implementation and acceptance details: `docs/BUILD_147_RESPONSIVE_COMMAND_SHELL.md`. Command search is strictly role-scoped navigation, density/contrast are session-only, and contextual help is non-operational.
+
+### Build 148 — Cross-Module Owner Trial, Accessibility & Local Windows Field Acceptance (PROPOSED · next)
+- collect explicitly owner-witnessed outcomes from Home, Devices, Cameras, Home Assistant, MQTT, Workshop and System, including phone-width navigation, keyboard/screen-reader operation and private LAN/Tailscale access
+- label source-ci results, Windows installation/version, API observations and physical device/camera observations separately; never promote a guessed physical GREEN from synthetic tests or screenshots alone
+- turn stale integrations, mismatched device identities, playback gaps, startup problems and inaccessible UI into a bounded manual follow-up queue with owner acknowledgement and exportable private evidence
+- **Acceptance:** representative offline/partial/unavailable cases remain truthful, owner trial failures retain follow-ups, and no background control, live credential intake, router change or unsafe Windows action is introduced
+
+**Queue policy:** 138–146 promoted to source `main`; 147 awaits reviewed CI promotion; 148 is a proposal pending owner selection. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
