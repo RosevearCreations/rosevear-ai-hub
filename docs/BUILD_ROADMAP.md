@@ -942,7 +942,7 @@ Implementation and acceptance: `docs/BUILD_142_CAMERA_EVIDENCE_WORKBENCH_V2.md`.
 
 Implementation, preview contract and field-acceptance boundary: `docs/BUILD_143_MQTT_TOPIC_EXPLORER.md`. Raw broker message payloads are hidden by default, and an explicit owner review does not authorize automatic device controls.
 
-### Build 144 — Home Assistant Scenes & Safe Action Drafts (IMPLEMENTED · source promotion pending)
+### Build 144 — Home Assistant Scenes & Safe Action Drafts (PROMOTED · source GREEN)
 - let authorized operators assemble and preview small allowlisted Home Assistant actions across selected rooms/entities, with exact target, state and expected effect shown first
 - distinguish preview, deliberate confirmation, executed, rejected and unverified outcome with audited per-action receipts; no background, bulk or AI-triggered execution
 - block locks, alarms, heating extremes, workshop machinery and other high-risk control classes unless a later separately reviewed policy expressly authorizes them
@@ -950,11 +950,13 @@ Implementation, preview contract and field-acceptance boundary: `docs/BUILD_143_
 
 Implementation, safety boundaries and manual Windows verification: `docs/BUILD_144_HOME_ASSISTANT_SCENES.md`. Preview tickets are single-use and process-local; source tests do not operate household hardware.
 
-### Build 145 — Workshop Equipment 360 & Preventive Maintenance Planner (QUEUED · priority 8)
+### Build 145 — Workshop Equipment 360 & Preventive Maintenance Planner (IMPLEMENTED · source promotion pending)
 - extend existing workshop stations, inventory and manual inspection history into searchable equipment detail, service intervals and overdue maintenance calendar
 - expose operator-owned manual inspection assignments, observations, parts/checklist references and next-safe-check guidance without certifying machinery
 - keep equipment in blocked/unverified status when maintenance evidence is insufficient and clearly differentiate inspection observations from a permission to operate
 - **Acceptance:** date and timezone edge cases, overdue status and equipment ownership are tested; no laser, forge, CNC, electrical or chemical control is automated
+
+Implementation, Alembic migration, manual safety contract and Windows field checklist: `docs/BUILD_145_WORKSHOP_MAINTENANCE.md`.
 
 ### Build 146 — Windows Service Startup & Recovery Operations Console (QUEUED · priority 9)
 - consolidate read-only health and startup-order guidance for the Hub API, Caddy/private HTTPS, Home Assistant VM, MQTT, go2rtc/Frigate and Ollama, including reboot and power-restoration diagnosis
@@ -968,4 +970,4 @@ Implementation, safety boundaries and manual Windows verification: `docs/BUILD_1
 - audit existing Help content for outdated claims (especially Vault: our selected first-party plan is **not** a third-party password-manager installation) and align advice with implemented features only
 - **Acceptance:** keyboard/screen-reader and narrow-screen tests pass, cross-view links work, and help never offers nonexistent capabilities or encourages dangerous Windows/vault workarounds
 
-**Queue policy:** 138–143 promoted to source `main`; 144 is implemented awaiting CI promotion; 145–147 remain planned. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+**Queue policy:** 138–144 promoted to source `main`; 145 is implemented awaiting CI promotion; 146–147 remain planned. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
