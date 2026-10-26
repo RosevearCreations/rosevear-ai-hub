@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CardHelp } from "./CommandShell";
 
 import type { AuthRole, HomeAssistantBrowserResponse } from "./api";
 import type { ReadinessState } from "./OperationsDashboard";
@@ -179,6 +180,7 @@ export function HomeOperationsHub({ snapshot, loading, role, onNavigate }: {
       {healthLabels.map((item) => {
         const observation = snapshot?.health[item.key] ?? notVerified;
         return <article key={item.key} className="home-ops-health-card">
+          <CardHelp title={`${item.label} observation`}>Status is from the most recent explicit check. It is not live monitoring, proof of successful Windows startup or permission to operate a device. Inspect the original screen for details.</CardHelp>
           <h4>{item.label}</h4>
           <strong className={`operations-state operations-${observation.status}`}>{stateNames[observation.status]}</strong>
           <p>{snapshot ? observation.detail : "Awaiting an explicit check."}</p>
@@ -216,6 +218,7 @@ export function HomeOperationsHub({ snapshot, loading, role, onNavigate }: {
         : <>
           <div className="home-ops-room-grid">
             {visibleRooms.slice(0, 12).map((room) => <article key={room.id}>
+              <CardHelp title="Home Assistant room">The room name and counts are inventory observations only. Devices may be offline, unavailable or awaiting separate safety verification.</CardHelp>
               <h5>{room.name}</h5>
               <p>{room.devices} registered devices · {room.entities} entities</p>
               <small>State not checked per device</small>
