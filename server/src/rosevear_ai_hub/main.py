@@ -27,6 +27,7 @@ from rosevear_ai_hub.api.device_registry import router as device_registry_router
 from rosevear_ai_hub.api.frigate import router as frigate_router
 from rosevear_ai_hub.api.home_assistant import router as home_assistant_router
 from rosevear_ai_hub.api.home_assistant_controls import router as home_assistant_controls_router
+from rosevear_ai_hub.api.home_assistant_scenes import router as home_assistant_scenes_router
 from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.knowledge_reviews import router as knowledge_reviews_router
@@ -145,6 +146,7 @@ def create_app() -> FastAPI:
     application.include_router(profiles_router, dependencies=protected)
     application.include_router(home_assistant_router, dependencies=protected)
     application.include_router(home_assistant_controls_router, dependencies=protected)
+    application.include_router(home_assistant_scenes_router, dependencies=protected)
     application.include_router(mqtt_router, dependencies=protected)
     application.include_router(business_router, dependencies=protected)
     application.include_router(secrets_router, dependencies=protected)
