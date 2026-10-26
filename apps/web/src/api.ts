@@ -1398,6 +1398,44 @@ export function controlHomeAssistantEntity(
   );
 }
 
+// Build 144: owner-reviewed, one-shot low-risk scene drafts. Never a chat tool.
+export type HomeAssistantSceneStep = { entity_id: string; action: "on" | "off" };
+export type HomeAssistantScenePreviewItem = HomeAssistantSceneStep & {
+  friendly_name: string | null;
+  current_state: string;
+  expected_effect: string;
+};
+export type HomeAssistantScenePreview = {
+  preview_id: string;
+  confirmation_phrase: string;
+  expires_in_seconds: number;
+  actions: HomeAssistantScenePreviewItem[];
+  warning: string;
+};
+export type HomeAssistantSceneReceipt = HomeAssistantSceneStep & {
+  outcome: "executed" | "unverified" | "rejected" | "skipped";
+  observed_state: string | null;
+  detail: string;
+};
+export type HomeAssistantSceneExecution = {
+  outcome: "executed" | "partial" | "unverified" | "rejected";
+  preview_id: string;
+  receipts: HomeAssistantSceneReceipt[];
+  warning: string;
+};
+export function previewHomeAssistantScene(actions: HomeAssistantSceneStep[]): Promise<HomeAssistantScenePreview> {
+  return authJson<HomeAssistantScenePreview>("POST", "/api/v1/home-assistant/scene-drafts/preview", { actions });
+}
+export function executeHomeAssistantScene(
+  preview: HomeAssistantScenePreview,
+  actions: HomeAssistantSceneStep[],
+  phrase: string,
+): Promise<HomeAssistantSceneExecution> {
+  return authJson<HomeAssistantSceneExecution>("POST", "/api/v1/home-assistant/scene-drafts/execute", {
+    preview_id: preview.preview_id, confirmation_phrase: phrase, actions,
+  });
+}
+
 
 export interface MQTTStatus {
   recovery_reason?: string;
