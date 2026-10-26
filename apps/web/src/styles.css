@@ -3739,6 +3739,12 @@ h1 {
 .owner-decision-replay .owner-review-entry { min-width: 0; }
 .owner-decision-replay .owner-review-entry > label:not(.owner-trial-check) { display: grid; gap: .4rem; font-weight: 700; }
 .owner-decision-replay :is(button,select,input):focus-visible { outline: 3px solid #415499; outline-offset: 3px; }
+.owner-recurrence-resolution { display: grid; gap: 1rem; min-width: 0; padding: 1rem; border: 1px solid #bca48c; border-radius: .85rem; background: #fbf7f2; color: #493525; }
+.owner-recurrence-resolution h3 { color: #624523; margin: .3rem 0; }
+.owner-recurrence-resolution .owner-decision-cards > article { border-color: #d6c2ad; }
+.owner-recurrence-resolution .owner-review-entry > label:not(.owner-trial-check) { display: grid; gap: .4rem; font-weight: 700; }
+.owner-recurrence-resolution .owner-decision-filter select { width: 100%; min-width: 0; }
+.owner-recurrence-resolution :is(button,select,input):focus-visible { outline: 3px solid #7c5127; outline-offset: 3px; }
 @media (max-width: 680px) {
   .owner-trial-context, .owner-trial-controls { grid-template-columns: minmax(0, 1fr); }
   .owner-trial-list > article { display: grid; }
