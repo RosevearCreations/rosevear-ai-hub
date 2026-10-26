@@ -487,6 +487,32 @@ describe("App", () => {
     });
   });
 
+  test("switches responsive shell preferences and searches only authenticated workspaces", async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument());
+
+    const menu = screen.getByRole("button", { name: "Open menu" });
+    expect(menu).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(menu);
+    expect(screen.getByRole("button", { name: "Close menu" })).toHaveAttribute("aria-expanded", "true");
+
+    fireEvent.click(screen.getByRole("button", { name: "Compact" }));
+    fireEvent.click(screen.getByRole("button", { name: "High contrast" }));
+    const shell = document.querySelector(".app-shell");
+    expect(shell).toHaveAttribute("data-density", "compact");
+    expect(shell).toHaveAttribute("data-theme", "high-contrast");
+    expect(screen.getByRole("button", { name: "Compact" })).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    const finder = screen.getByRole("dialog", { name: "Jump to a workspace" });
+    expect(finder).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("textbox", { name: /Search our available screens/ }), { target: { value: "workshop" } });
+    fireEvent.click(screen.getByRole("button", { name: "Workshop Open screen" }));
+    expect(screen.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Workshop" })).toHaveAttribute("aria-current", "page");
+    expect(screen.queryByRole("dialog", { name: "Jump to a workspace" })).not.toBeInTheDocument();
+  });
+
   test("opens the exact-action confirmation queue and records approval", async () => {
     render(<App />);
     await waitFor(() => {
