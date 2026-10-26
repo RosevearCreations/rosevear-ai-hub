@@ -196,15 +196,16 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   MQTT: {
-    purpose: "Connects to the authenticated local MQTT broker within an explicit topic allow list.",
+    purpose: "Build 143: inspect bounded, redacted MQTT topic observations, review source-to-device links and deliberately preview one exact publish before sending.",
     tasks: [
-      "Verify broker status before subscribing or publishing.",
-      "Subscribe only to an allowed filter and publish only to a concrete allowed topic.",
-      "Use the recent-message view for local diagnostics; automation history is stored separately.",
+      "Verify broker status, then refresh the owner-only topic explorer. It reads only already subscribed and allowlisted buffered observations without adding broker subscriptions.",
+      "Use a concrete namespace filter; hidden or absent message bodies are not proof a physical device is offline.",
+      "Select an observed MQTT topic and a current Home Assistant device for an explicit possible-match review. The saved note cannot pair, adopt or command a device.",
+      "Preview a concrete allowlisted publish, check its payload byte count and checksum, then type that exact topic again to authorize one send. Confirmed broker acceptance is not device action proof.",
     ],
     safety: [
-      "Anonymous fallback is prohibited and retained messages are blocked by the Hub publish path.",
-      "Broker credentials stay server-side and raw MQTT automation payloads are not written to run history.",
+      "Sensitive topic names and received payloads are hidden by default, including direct legacy message API reads. Unknown wildcard topics cannot trigger discovery controls.",
+      "Anonymous fallback and retained publishing are prohibited. Broker credentials remain server-side, and payload text is not copied into audit history.",
     ],
     troubleshooting: [
       "Not configured: set broker host, username, password, and MQTT_ALLOWED_TOPICS.",

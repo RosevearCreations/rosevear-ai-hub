@@ -20,7 +20,7 @@ class FakeMQTTClient:
     def snapshot(self):
         return {
             "connected": True,
-            "subscriptions": [item[0] for item in self.subscriptions],
+            "subscriptions": ["rosevear/#", *[item[0] for item in self.subscriptions]],
             "message_count": 1,
             "connect_generation": 3,
             "last_connected_at": "2026-10-14T12:00:00+00:00",
@@ -100,6 +100,7 @@ def test_mqtt_status_messages_subscribe_publish_and_audit(tmp_path) -> None:
 
     response = client.get("/api/v1/mqtt/messages")
     assert response.json()[0]["topic"] == "rosevear/sensors/temp"
+    assert response.json()[0]["payload"] == "[redacted]"
 
     response = client.post(
         "/api/v1/mqtt/subscriptions",
