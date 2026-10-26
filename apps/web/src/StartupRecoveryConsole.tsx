@@ -8,7 +8,7 @@ import {
   assessStartup, buildStartupSnapshot, createStartupReceipt, parseWindowsStartupEvidence,
   runtimeLabels, runtimeOrder, taskLabels,
   type StartupSnapshot, type WindowsStartupEvidence, type WindowsTask,
-} from "./startupRecoveryConsole";
+} from "./startupRecoveryModel";
 
 const manualChecks = [
   { key: "task", label: "I inspected original Windows task history and confirmed there is no duplicate Hub or VM instance." },
