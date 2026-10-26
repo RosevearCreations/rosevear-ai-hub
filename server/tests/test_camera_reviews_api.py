@@ -141,3 +141,43 @@ def test_offline_frigate_keeps_local_review_index(tmp_path, monkeypatch) -> None
     # Local reviewed data is available even if the provider is not.
     monkeypatch.setattr("rosevear_ai_hub.api.camera_reviews.get_frigate_client", Offline)
     assert client.get("/api/v1/frigate/reviews").json()[0]["note"] == "Call back"
+
+
+def test_follow_up_acknowledgement_is_local_only_and_role_guarded(tmp_path, monkeypatch) -> None:
+    client = make_client(tmp_path, monkeypatch)
+    saved = client.put(
+        "/api/v1/frigate/events/event-1/review",
+        json={"review_status": "follow_up", "note": "Manually inspect in Frigate"},
+    )
+    assert saved.status_code == 200
+    assert saved.json()["review_status"] == "follow_up"
+    assert client.get("/api/v1/frigate/reviews").json()[0]["note"] == "Manually inspect in Frigate"
+    assert (
+        client.post(
+            "/api/v1/auth/users",
+            json={
+                "username": "readonly",
+                "password": "readonly-password-123",
+                "role": "read_only",
+            },
+        ).status_code
+        == 201
+    )
+    client.post("/api/v1/auth/logout")
+    client.post(
+        "/api/v1/auth/login",
+        json={
+            "username": "readonly",
+            "password": "readonly-password-123",
+        },
+    )
+    assert (
+        client.put(
+            "/api/v1/frigate/events/event-1/review",
+            json={
+                "review_status": "follow_up",
+                "note": "Cannot acknowledge",
+            },
+        ).status_code
+        == 403
+    )

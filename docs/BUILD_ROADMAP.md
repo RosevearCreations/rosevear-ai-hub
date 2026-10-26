@@ -918,7 +918,7 @@ Implementation and verification: `docs/BUILD_139_DEVICE_360_REGISTRY.md`. Provid
 
 Implementation, tests and Windows field-acceptance boundary: `docs/BUILD_140_GUIDED_DEVICE_DISCOVERY.md`. Source delivery does not enroll Home Assistant devices, connect MQTT topics or certify real camera operation.
 
-### Build 141 — Camera Wall V2: Room Groups, Health & Private Views (IMPLEMENTED · source promotion pending)
+### Build 141 — Camera Wall V2: Room Groups, Health & Private Views (PROMOTED · source GREEN)
 - give approved cameras responsive room/site groups, readable health badges, available still previews and operator-selected larger playback panels
 - never auto-load every RTSP stream; respect go2rtc/Frigate health, disabled-camera state, private URLs, role boundaries and bandwidth/concurrency limits
 - allow private user view preferences only after review of current app storage/auth patterns; provide clear empty/offline/cert-error guidance and circled-i help
@@ -926,11 +926,13 @@ Implementation, tests and Windows field-acceptance boundary: `docs/BUILD_140_GUI
 
 Implementation and migration notes: `docs/BUILD_141_CAMERA_WALL_V2.md`. No authenticated snapshot endpoint or explicitly verified Frigate-to-registry mapping exists, so the wall shows an honest no-still placeholder until a future separately reviewed source is available; no unauthorized image or RTSP request is invented.
 
-### Build 142 — Camera Events & Evidence Playback Workbench V2 (QUEUED · priority 5)
+### Build 142 — Camera Events & Evidence Playback Workbench V2 (IMPLEMENTED · source promotion pending)
 - merge existing camera event/Frigate metadata into a reviewed timeline with source, time zone, camera, event category, deduplication and bounded date filters
 - link only to already authorized footage/playback endpoints; show missing media, clock drift, retention expiry and stale observations explicitly
 - support operator acknowledgement of an event for follow-up without erasing source evidence, modifying retention or triggering automatic enforcement
 - **Acceptance:** duplicate/out-of-order/test fixtures are safe, private playback is role checked, and summaries never invent recordings that are not available
+
+Implementation and acceptance: `docs/BUILD_142_CAMERA_EVIDENCE_WORKBENCH_V2.md`. Until an authenticated media route and exact recording identity are reviewed, video links explicitly remain on hold even when a Frigate event reports clip or snapshot metadata.
 
 ### Build 143 — MQTT Topic Explorer, Device Mapping & Publish Preview (QUEUED · priority 6)
 - add an authorized, bounded topic explorer over existing subscriptions and recent retained message metadata, with allowlisted namespace filters, last-seen and decoded-state previews where safe

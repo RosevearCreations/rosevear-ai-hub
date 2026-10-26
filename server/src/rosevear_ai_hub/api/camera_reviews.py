@@ -22,7 +22,7 @@ from rosevear_ai_hub.models import CameraEventReview, User
 router = APIRouter(prefix="/api/v1/frigate", tags=["frigate-reviews"])
 Editor = Annotated[User, Depends(require_roles("owner", "administrator"))]
 Database = Annotated[Session, Depends(get_session)]
-ReviewStatus = Literal["needs_review", "reviewed", "flagged"]
+ReviewStatus = Literal["needs_review", "reviewed", "flagged", "follow_up"]
 EVENT_ID_PATTERN = r"^[A-Za-z0-9_.:-]{1,160}$"
 
 
