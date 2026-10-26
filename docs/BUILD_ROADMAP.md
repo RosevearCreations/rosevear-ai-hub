@@ -1038,16 +1038,23 @@ Implementation and security boundaries: `docs/BUILD_154_FOLLOWUP_DECISION_REPLAY
 
 Implementation and security boundaries: `docs/BUILD_155_RECURRENCE_RESOLUTION_WATCH.md`. Each Build 154 decision retains its exact original and current timestamps, and any later owner observation is a separate chronological event. Overdue is a manual on-screen classification, not a background timer or escalation. Build 155 receipt provenance, historical imports, contradictory evidence and fixed HOLD outcomes remain independent of source-level CI.
 
-### Build 156 — Independent Overdue Decision Handoff Evidence & Reopened Trial Comparison (IMPLEMENTED · source promotion pending)
+### Build 156 — Independent Overdue Decision Handoff Evidence & Reopened Trial Comparison (PROMOTED · source main GREEN)
 - preserve exact aged Build 155 decision/evidence snapshots when preparing a private, manual owner/reviewer handoff
 - compare later reopened owner trials and source alias changes against prior owner improvement claims
 - retain explicit witness-gated HOLD-only handoff events and historical import safeguards; never send jobs or lift Vault/security holds
 
 Implementation and acceptance boundaries: `docs/BUILD_156_OVERDUE_HANDOFF_REOPENED_TRIAL.md`. Snapshot time fixes all prior decision and owner-trial indices while later observations stay distinct. Two explicit manual witnesses, an eligible matched HOLD reason, historical import restrictions, a bounded nested private receipt and hard no-dispatch flags are required.
 
-### Build 157 — Independent Handoff Receipt Reconciliation & Recurrence Follow-Up Aging (PROPOSED · next)
+### Build 157 — Independent Handoff Receipt Reconciliation & Recurrence Follow-Up Aging (IMPLEMENTED · source promotion pending)
 - compare successive private Build 156 handoff receipts against precise original decision, reopened-trial and alias-change snapshots
 - highlight manually aged outstanding independent follow-up needs and conflicting owner claims without destroying older decisions
 - keep every reviewer/owner finding historical until fresh Windows witnessing and separate acceptance; never send a packet, schedule work or clear Vault/security holds
 
-**Queue policy:** Builds 138–155 promoted to source `main`; 156 awaits reviewed CI promotion; 157 is proposed next. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+Implementation and security boundaries: `docs/BUILD_157_HANDOFF_RECEIPT_RECONCILIATION.md`. Strict prefix-only comparison of separate Build 156 JSON exports, chronological same-decision pair comparison and manual follow-up age from the first handoff. Immutable, bounded private Build 157 reviews anchor original decision and handoff indices and retain unverified contradictory source/owner claims; nested imports are historical only.
+
+### Build 158 — Independent Follow-Up Outcome Reassessment & Historical Exception Continuity (PROPOSED · next)
+- reconcile fresh manually witnessed owner follow-up observations with aged Build 157 private notes without rewriting past reviewer decisions
+- expose unresolved recurrence and changed source identity across multiple historical handoff rounds
+- keep strict no-dispatch, no auto-clearance and independently witnessed physical/Vault HOLD acceptance boundaries
+
+**Queue policy:** Builds 138–156 promoted to source `main`; 157 awaits reviewed CI promotion; 158 is proposed next. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
