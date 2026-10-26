@@ -3752,6 +3752,13 @@ h1 {
 .owner-overdue-handoff .owner-review-entry > label:not(.owner-trial-check) { display: grid; gap: .4rem; font-weight: 700; min-width: 0; }
 .owner-overdue-handoff .owner-decision-filter select, .owner-overdue-handoff .owner-review-entry select { width: 100%; min-width: 0; max-width: 100%; }
 .owner-overdue-handoff :is(button,select,input):focus-visible { outline: 3px solid #277870; outline-offset: 3px; }
+
+.owner-handoff-reconciliation { display: grid; gap: 1rem; min-width: 0; padding: 1rem; border: 1px solid #8b93b6; border-radius: .85rem; background: #f2f4fc; color: #292f4e; }
+.owner-handoff-reconciliation h3 { margin: .3rem 0; color: #303b70; }
+.owner-handoff-reconciliation > label, .owner-handoff-reconciliation .owner-review-entry > label:not(.owner-trial-check) { display: grid; gap: .4rem; min-width: 0; font-weight: 700; }
+.owner-handoff-reconciliation .owner-decision-cards > article { border-color: #abb5d0; overflow-wrap: anywhere; }
+.owner-handoff-reconciliation :is(input[type="file"],select) { width: 100%; min-width: 0; max-width: 100%; }
+.owner-handoff-reconciliation :is(button,select,input):focus-visible { outline: 3px solid #344f94; outline-offset: 3px; }
 @media (max-width: 680px) {
   .owner-trial-context, .owner-trial-controls { grid-template-columns: minmax(0, 1fr); }
   .owner-trial-list > article { display: grid; }
