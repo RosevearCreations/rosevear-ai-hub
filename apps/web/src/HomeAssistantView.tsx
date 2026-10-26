@@ -17,6 +17,7 @@ import { DeviceCameraRecoveryPanel } from "./DeviceCameraRecoveryPanel";
 import { DeviceDiscoveryInbox } from "./DeviceDiscoveryInbox";
 import { DeviceRegistry360 } from "./DeviceRegistry360";
 import { HomeAssistantDiscoveryPanel } from "./HomeAssistantDiscoveryPanel";
+import { SceneDraftWorkbench } from "./SceneDraftWorkbench";
 
 type LoadState =
   | { kind: "loading" }
@@ -168,8 +169,8 @@ export function HomeAssistantView({ currentUser }: { currentUser: AuthUser }) {
     <section className="home-assistant-view">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 023</p>
-          <h1>Safe Device Controls</h1>
+          <p className="eyebrow">Build 144</p>
+          <h1>Safe Device Controls &amp; Scene Drafts</h1>
           <p className="lede">
             Browse Home Assistant and operate only explicitly allow-listed low-risk lights,
             switches, and non-safety scenes. Every control is audited.
@@ -286,6 +287,8 @@ export function HomeAssistantView({ currentUser }: { currentUser: AuthUser }) {
                   </p>
                 </section>
               )}
+
+              <SceneDraftWorkbench role={currentUser.role} browser={browser} policy={policy} />
 
               <section className="panel ha-filters" aria-label="Entity filters">
                 <label>

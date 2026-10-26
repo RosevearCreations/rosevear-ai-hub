@@ -934,7 +934,7 @@ Implementation and migration notes: `docs/BUILD_141_CAMERA_WALL_V2.md`. No authe
 
 Implementation and acceptance: `docs/BUILD_142_CAMERA_EVIDENCE_WORKBENCH_V2.md`. Until an authenticated media route and exact recording identity are reviewed, video links explicitly remain on hold even when a Frigate event reports clip or snapshot metadata.
 
-### Build 143 — MQTT Topic Explorer, Device Mapping & Publish Preview (IMPLEMENTED · source promotion pending)
+### Build 143 — MQTT Topic Explorer, Device Mapping & Publish Preview (PROMOTED · source GREEN)
 - add an authorized, bounded topic explorer over existing subscriptions and recent retained message metadata, with allowlisted namespace filters, last-seen and decoded-state previews where safe
 - propose topic-to-device associations for explicit owner approval; redact credentials, tokens and private message bodies by default, and reject secret-bearing wildcard display
 - retain current authenticated publish policy and require a clear exact-topic/payload confirmation before any real message; default to read-only
@@ -942,11 +942,13 @@ Implementation and acceptance: `docs/BUILD_142_CAMERA_EVIDENCE_WORKBENCH_V2.md`.
 
 Implementation, preview contract and field-acceptance boundary: `docs/BUILD_143_MQTT_TOPIC_EXPLORER.md`. Raw broker message payloads are hidden by default, and an explicit owner review does not authorize automatic device controls.
 
-### Build 144 — Home Assistant Scenes & Safe Action Drafts (QUEUED · priority 7)
+### Build 144 — Home Assistant Scenes & Safe Action Drafts (IMPLEMENTED · source promotion pending)
 - let authorized operators assemble and preview small allowlisted Home Assistant actions across selected rooms/entities, with exact target, state and expected effect shown first
 - distinguish preview, deliberate confirmation, executed, rejected and unverified outcome with audited per-action receipts; no background, bulk or AI-triggered execution
 - block locks, alarms, heating extremes, workshop machinery and other high-risk control classes unless a later separately reviewed policy expressly authorizes them
 - **Acceptance:** missing entities, stale previews, role denial and partial failure cannot be misrepresented as successful scenes; existing Home Assistant allowlist remains the final authority
+
+Implementation, safety boundaries and manual Windows verification: `docs/BUILD_144_HOME_ASSISTANT_SCENES.md`. Preview tickets are single-use and process-local; source tests do not operate household hardware.
 
 ### Build 145 — Workshop Equipment 360 & Preventive Maintenance Planner (QUEUED · priority 8)
 - extend existing workshop stations, inventory and manual inspection history into searchable equipment detail, service intervals and overdue maintenance calendar
@@ -966,4 +968,4 @@ Implementation, preview contract and field-acceptance boundary: `docs/BUILD_143_
 - audit existing Help content for outdated claims (especially Vault: our selected first-party plan is **not** a third-party password-manager installation) and align advice with implemented features only
 - **Acceptance:** keyboard/screen-reader and narrow-screen tests pass, cross-view links work, and help never offers nonexistent capabilities or encourages dangerous Windows/vault workarounds
 
-**Queue policy:** 138–140 implemented in source; seven planned builds (141–147) remain. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+**Queue policy:** 138–143 promoted to source `main`; 144 is implemented awaiting CI promotion; 145–147 remain planned. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.

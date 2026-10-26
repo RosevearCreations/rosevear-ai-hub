@@ -141,6 +141,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "When adding recognized devices, compare exact IDs and areas before enabling any controls. Save field notes; require a fresh registry read and a real device function check before acceptance.",
       "Owner/Admin can add ordinary lights, switches, and scenes to the safe-control allow list.",
       "Use the bounded control buttons only for the exact approved entity.",
+      "Build 144: Owner/Admin can draft up to four distinct safe light/switch effects. Preview only reads current Home Assistant states; review exact targets and type the one-use phrase within two minutes to execute deliberately.",
     ],
     safety: [
       "Source readings expire after five minutes; stale or unavailable sources are a HOLD, not permission to adopt. Duplicate UUIDs and conflicting camera endpoints prohibit registration.",
@@ -148,6 +149,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Discovery and diagnostic reviews do not automatically enroll devices, repair Home Assistant, change integrations, or issue physical commands.",
       "Safety-sensitive or hazardous targets remain prohibited even if their names resemble ordinary devices.",
       "Home Assistant must be available for writes; the Hub does not queue uncertain physical changes.",
+      "Scene drafts hold opaque native scene activations and high-risk machines, locks, alarms or heating. A partial or unverified scene stops future steps; Home Assistant state is not proof that a physical device moved.",
     ],
     troubleshooting: [
       "An expected device is absent: check Home Assistant Devices & Services, its actual integration and discovery network before treating a guessed entity ID as real.",
