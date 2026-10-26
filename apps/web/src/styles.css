@@ -3689,6 +3689,16 @@ h1 {
 .owner-review-entry { display: grid; gap: .85rem; border: 1px solid #aabcca; border-radius: .65rem; background: #fff; padding: 1rem; min-width: 0; }
 .owner-review-entry legend { padding: 0 .35rem; font-weight: 800; color: #193d56; }
 .owner-review-entry > button { justify-self: start; }
+/* Build 151 — owner-safe source identity comparisons and manual repeat-trial routing. */
+.owner-source-routing { display: grid; gap: 1rem; min-width: 0; padding: 1rem; background: #f2f8f6; border: 1px solid #8badad; border-radius: .85rem; }
+.owner-source-routing h3 { margin: .2rem 0; color: #1c4b49; }
+.owner-source-route-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: .7rem; }
+.owner-source-route-list > article { display: grid; align-content: space-between; gap: .8rem; min-width: 0; padding: .9rem; border: 1px solid #a4bdba; border-radius: .65rem; background: white; }
+.owner-source-route-list strong { display: block; color: #164544; font-size: 1.02rem; }
+.owner-source-route-list p { margin: .3rem 0 .5rem; line-height: 1.45; overflow-wrap: anywhere; }
+.owner-source-route-list b { display: inline-block; padding: .35rem .5rem; border: 1px solid #b98b57; border-radius: .45rem; background: #fff1dc; color: #583719; }
+.owner-source-route-list ul { padding-left: 1.25rem; margin: .55rem 0; overflow-wrap: anywhere; }
+.owner-source-route-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
 @media (max-width: 680px) {
   .owner-trial-context, .owner-trial-controls { grid-template-columns: minmax(0, 1fr); }
   .owner-trial-list > article { display: grid; }
