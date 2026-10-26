@@ -589,6 +589,58 @@ class WorkshopInspection(Base):
     )
 
 
+class WorkshopMaintenancePlan(TimestampMixin, Base):
+    """Owner-maintained schedule and checklist; never equipment permission."""
+
+    __tablename__ = "workshop_maintenance_plans"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    equipment_id: Mapped[int] = mapped_column(
+        ForeignKey("workshop_equipment.id", ondelete="RESTRICT"),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+    interval_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    next_due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    assigned_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    checklist_json: Mapped[Any] = mapped_column(JSON, nullable=False, default=list)
+    parts_refs_json: Mapped[Any] = mapped_column(JSON, nullable=False, default=list)
+    notes: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    last_completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+
+class WorkshopMaintenanceEvent(Base):
+    """Append-only manual maintenance observations and scheduling provenance."""
+
+    __tablename__ = "workshop_maintenance_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    plan_id: Mapped[int] = mapped_column(
+        ForeignKey("workshop_maintenance_plans.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    outcome: Mapped[str] = mapped_column(String(24), nullable=False)
+    note: Mapped[str] = mapped_column(String(500), nullable=False)
+    completed_checklist_json: Mapped[Any] = mapped_column(JSON, nullable=False, default=list)
+    parts_used_json: Mapped[Any] = mapped_column(JSON, nullable=False, default=list)
+    previous_due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    next_due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    schedule_updated: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    recorded_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    recorded_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.current_timestamp()
+    )
+
+
 class CameraCompatibilityRecord(TimestampMixin, Base):
     """Manual, server-backed compatibility plan; does not activate a camera."""
 

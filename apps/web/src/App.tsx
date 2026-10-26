@@ -284,7 +284,7 @@ export function App() {
         ) : section === "Vault" ? (
           <VaultArchitectureView />
         ) : section === "Workshop" ? (
-          <WorkshopView />
+          <WorkshopView role={user.role} />
         ) : section === "Devices" ? (
           <HomeAssistantView currentUser={user} />
         ) : section === "Cameras" ? (

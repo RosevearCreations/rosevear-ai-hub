@@ -14,7 +14,9 @@ import {
   type WorkshopObservation,
   type WorkshopStation,
   type WorkshopSummary,
+  type AuthUser,
 } from "./api";
+import { WorkshopMaintenancePlanner } from "./WorkshopMaintenancePlanner";
 
 const ACTIVITY_OPTIONS: WorkshopActivity[] = [
   "general", "laser", "cnc", "forge", "electrical", "chemical", "other",
@@ -33,7 +35,7 @@ export function readinessMessage(equipment: WorkshopEquipment, now: number): str
   }
 }
 
-export function WorkshopView() {
+export function WorkshopView({ role = "read_only" }: { role?: AuthUser["role"] }) {
   const [stations, setStations] = useState<WorkshopStation[]>([]);
   const [equipment, setEquipment] = useState<WorkshopEquipment[]>([]);
   const [summary, setSummary] = useState<WorkshopSummary | null>(null);
@@ -154,7 +156,7 @@ export function WorkshopView() {
     <div className="workshop-view">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Build 057 · Private workshop operations</p>
+          <p className="eyebrow">Build 145 · Private workshop operations</p>
           <h1>Equipment &amp; safety readiness</h1>
           <p className="lede">One local register across projects and workstations.
             Record observations, not equipment run permissions.</p>
@@ -283,6 +285,7 @@ export function WorkshopView() {
           {history.length === 0 && <p>No inspection history recorded.</p>}
         </section>
       )}
+      <WorkshopMaintenancePlanner role={role} onChanged={refresh} />
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
     </div>
