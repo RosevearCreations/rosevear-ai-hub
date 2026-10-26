@@ -950,7 +950,7 @@ Implementation, preview contract and field-acceptance boundary: `docs/BUILD_143_
 
 Implementation, safety boundaries and manual Windows verification: `docs/BUILD_144_HOME_ASSISTANT_SCENES.md`. Preview tickets are single-use and process-local; source tests do not operate household hardware.
 
-### Build 145 — Workshop Equipment 360 & Preventive Maintenance Planner (IMPLEMENTED · source promotion pending)
+### Build 145 — Workshop Equipment 360 & Preventive Maintenance Planner (PROMOTED · source GREEN)
 - extend existing workshop stations, inventory and manual inspection history into searchable equipment detail, service intervals and overdue maintenance calendar
 - expose operator-owned manual inspection assignments, observations, parts/checklist references and next-safe-check guidance without certifying machinery
 - keep equipment in blocked/unverified status when maintenance evidence is insufficient and clearly differentiate inspection observations from a permission to operate
@@ -958,11 +958,13 @@ Implementation, safety boundaries and manual Windows verification: `docs/BUILD_1
 
 Implementation, Alembic migration, manual safety contract and Windows field checklist: `docs/BUILD_145_WORKSHOP_MAINTENANCE.md`.
 
-### Build 146 — Windows Service Startup & Recovery Operations Console (QUEUED · priority 9)
+### Build 146 — Windows Service Startup & Recovery Operations Console (IMPLEMENTED · source promotion pending)
 - consolidate read-only health and startup-order guidance for the Hub API, Caddy/private HTTPS, Home Assistant VM, MQTT, go2rtc/Frigate and Ollama, including reboot and power-restoration diagnosis
 - display observed versus assumed status, existing approved local startup-task identity, dependencies and safe next manual checks; never claim remote Windows access from source code alone
 - require explicit separate owner authorization, a local allowlisted executor and witnessed field testing before exposing any restart/stop/repair action; no surprise scheduled-task replacement
 - **Acceptance:** failed dependency and partial recovery fixtures show the right escalation, and default UI actions cannot reboot, kill processes or edit the real server
+
+Implementation and manual Windows evidence runbook: `docs/BUILD_146_WINDOWS_STARTUP_RECOVERY.md`. The System console uses existing read-only GETs and a sanitized locally produced scheduled-task observation; physical recovery remains unverified.
 
 ### Build 147 — Responsive Command Shell, Theme Polish & Contextual Help Refresh (QUEUED · priority 10)
 - standardize compact/expanded sub-screens, card spacing, readable contrast, focus states and mobile-friendly navigation across Home, Devices, Cameras, Home Assistant, MQTT, Workshop and Recovery
@@ -970,4 +972,4 @@ Implementation, Alembic migration, manual safety contract and Windows field chec
 - audit existing Help content for outdated claims (especially Vault: our selected first-party plan is **not** a third-party password-manager installation) and align advice with implemented features only
 - **Acceptance:** keyboard/screen-reader and narrow-screen tests pass, cross-view links work, and help never offers nonexistent capabilities or encourages dangerous Windows/vault workarounds
 
-**Queue policy:** 138–144 promoted to source `main`; 145 is implemented awaiting CI promotion; 146–147 remain planned. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+**Queue policy:** 138–145 promoted to source `main`; 146 is implemented awaiting CI promotion; 147 remains planned. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.

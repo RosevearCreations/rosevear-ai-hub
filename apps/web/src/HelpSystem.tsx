@@ -258,8 +258,11 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
     ],
   },
   System: {
-    purpose: "Shows owner/admin service diagnostics, post-reboot field runbook, device/camera recovery summary, installed version evidence, resource budgets and private LAN/Tailscale access.",
+    purpose: "Shows owner/admin read-only Windows startup/recovery observations, post-reboot diagnostics, device/camera field review, installed version evidence, resource budgets and private LAN/Tailscale access.",
     tasks: [
+      "Build 146: in Service startup & recovery console, capture an explicit before-maintenance and later after-maintenance API classification; it never starts or stops anything.",
+      "Run scripts/inspect-hub-startup-console.ps1 locally on the actual Windows PC after inspecting the script; paste only the classified JSON into the Build 146 import. No usernames, paths, task commands or secrets are accepted.",
+      "Build 146: compare original Windows task results with Home Assistant, MQTT, Ollama, Hub, private go2rtc and Frigate health; check actual VM identity and private HTTPS separately, then export a private, HOLD-labelled owner review receipt.",
       "Build 117 Post-reboot acceptance is manual: inspect backups, the existing Windows startup task and original Home Assistant VM first. No Runbook button reboots or repairs a service.",
       "Capture a before-reboot snapshot, show its private JSON and save it securely. After an owner-supervised Windows reboot, import that baseline and take a separate after snapshot.",
       "Compare exact Home Assistant entity IDs, separate Hub camera IDs, service status and Hub version. Matching counts alone cannot prove equipment recovered.",
@@ -278,6 +281,8 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Use the private https://*.ts.net URL printed by tailscale serve status. Log into the Hub as normal on each device.",
     ],
     safety: [
+      "Build 146 requires a fresh operator-supplied Windows task report and six real operator observations for session review; success statuses or checkboxes cannot certify installed-Windows recovery.",
+      "Build 146 does not run PowerShell, repair tasks, reboot Windows, restart services, start VirtualBox, send MQTT messages, poll automatically or modify router/camera settings.",
       "Post-reboot snapshots stay in this browser session unless an operator copies the private identity-only JSON; never share it in a public issue or include credentials and camera endpoint URLs.",
       "Build 117 cannot prove the PC actually rebooted; the owner must review the Windows scheduled task and after-start logs separately. Session reviewed is not an installed acceptance receipt.",
       "Build 118 historical closure, a healthy stream probe and owner checkbox are not independently signed proof of real device function or installed Windows success. Its exported summary always remains FIELD_ACCEPTANCE_HOLD.",
@@ -288,6 +293,8 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "A remote PWA still cannot queue offline actions, view cached private data or bypass confirmations.",
     ],
     troubleshooting: [
+      "Build 146 service marked unverified: an authenticated GET was unavailable; inspect the original Windows host and integration logs instead of assuming the device is broken.",
+      "Build 146 Windows report rejected: run the exact local inspector and paste only its JSON, within 24 hours; do not copy raw Task Scheduler XML or action arguments.",
       "Missing device after restart: investigate existing Home Assistant integration and device-registry provenance before adding anything; a disappeared camera registry is independent from Home Assistant discoveries.",
       "Baseline import rejected: use only the exact Build 117 JSON schema copied from the local review. Unexpected URLs, keys or credentials are rejected.",
       "Service status ready but camera video missing: keep physical field acceptance on hold and use the separate Build 116 supervised moving-video check on the Windows Hub itself.",
