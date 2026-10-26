@@ -926,7 +926,7 @@ Implementation, tests and Windows field-acceptance boundary: `docs/BUILD_140_GUI
 
 Implementation and migration notes: `docs/BUILD_141_CAMERA_WALL_V2.md`. No authenticated snapshot endpoint or explicitly verified Frigate-to-registry mapping exists, so the wall shows an honest no-still placeholder until a future separately reviewed source is available; no unauthorized image or RTSP request is invented.
 
-### Build 142 — Camera Events & Evidence Playback Workbench V2 (IMPLEMENTED · source promotion pending)
+### Build 142 — Camera Events & Evidence Playback Workbench V2 (PROMOTED · source GREEN)
 - merge existing camera event/Frigate metadata into a reviewed timeline with source, time zone, camera, event category, deduplication and bounded date filters
 - link only to already authorized footage/playback endpoints; show missing media, clock drift, retention expiry and stale observations explicitly
 - support operator acknowledgement of an event for follow-up without erasing source evidence, modifying retention or triggering automatic enforcement
@@ -934,11 +934,13 @@ Implementation and migration notes: `docs/BUILD_141_CAMERA_WALL_V2.md`. No authe
 
 Implementation and acceptance: `docs/BUILD_142_CAMERA_EVIDENCE_WORKBENCH_V2.md`. Until an authenticated media route and exact recording identity are reviewed, video links explicitly remain on hold even when a Frigate event reports clip or snapshot metadata.
 
-### Build 143 — MQTT Topic Explorer, Device Mapping & Publish Preview (QUEUED · priority 6)
+### Build 143 — MQTT Topic Explorer, Device Mapping & Publish Preview (IMPLEMENTED · source promotion pending)
 - add an authorized, bounded topic explorer over existing subscriptions and recent retained message metadata, with allowlisted namespace filters, last-seen and decoded-state previews where safe
 - propose topic-to-device associations for explicit owner approval; redact credentials, tokens and private message bodies by default, and reject secret-bearing wildcard display
 - retain current authenticated publish policy and require a clear exact-topic/payload confirmation before any real message; default to read-only
 - **Acceptance:** unknown topics, floods, reconnects and malicious payloads cannot create implicit controls or disclose sensitive telemetry
+
+Implementation, preview contract and field-acceptance boundary: `docs/BUILD_143_MQTT_TOPIC_EXPLORER.md`. Raw broker message payloads are hidden by default, and an explicit owner review does not authorize automatic device controls.
 
 ### Build 144 — Home Assistant Scenes & Safe Action Drafts (QUEUED · priority 7)
 - let authorized operators assemble and preview small allowlisted Home Assistant actions across selected rooms/entities, with exact target, state and expected effect shown first

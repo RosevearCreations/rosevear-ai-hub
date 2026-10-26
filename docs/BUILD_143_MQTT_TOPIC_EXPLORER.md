@@ -1,0 +1,20 @@
+# Build 143 — MQTT Topic Explorer, Device Mapping & Publish Preview
+
+## Operator workflow
+
+1. Open **MQTT**, check the configured/private broker connection, and refresh. Owner/Admin may inspect the new explorer; non-privileged accounts still see basic status without topic evidence.
+2. Explorer reads **at most 200 existing buffered messages** and returns the **50 most recent distinct safe topics**. Only topics matching both configured allowlisted MQTT filters **and** currently active subscriptions are eligible. It never starts a new wildcard subscription, fetches broker history, changes reconnect rules or publishes. Apply an optional *concrete* namespace prefix to narrow observations; wildcard/secret-bearing prefixes are rejected.
+3. Every topic shows local last-received time, bounded buffered count, QoS and retained flag. Arbitrary message bodies are **never** returned. Only simple enumerated state labels (`on`, `off`, `open`, etc.) or numeric values from a small allowlist of non-sensitive measurement suffixes (`temp`, `humidity`, `battery`, etc.) may appear in a decoded preview; an unknown numeric field could contain a PIN and is redacted. JSON objects must consist of a single `state` or `value` key with a safe scalar. The existing `/messages` endpoint also returns redacted payloads for safe subscribed topics so an old direct link cannot bypass the new default.
+4. Owner/Admin may choose an **observed MQTT topic** and an **observed Home Assistant device** from their current respective sources. *Preview possible match* shows exact IDs; **Save reviewed possible match** reuses Build 139's audited, revision-checked `device-registry/match-review` record. No device is paired, adopted, subscribed, renamed or commanded. An identity that disappears between refreshes cannot be saved from the UI.
+5. Publishing is now a **two-step client workflow**: enter a concrete topic and payload, select **Preview — do not publish**, inspect exact topic, QoS, byte count, SHA-256 and server policy/connection result, then type the exact topic again and select **Confirm and publish once**. Editing either field invalidates the preview and acknowledgement. The existing server-side authenticated allowlist still decides the actual send, blocks retained publishing, and records a non-payload audit receipt. A disconnected broker rejects the send; acknowledgement does not mean the device performed an action.
+
+## Evidence, privacy and limits
+
+- No new hardware broker commands, MQTT subscription side effects, device controls, database schema migration, firewall changes, or external providers. Existing backend and device registry contracts are reused; new endpoints are `GET /api/v1/mqtt/topics/explorer` (owner/admin) and `POST /api/v1/mqtt/publish-preview` (authenticated, no send).
+- Sensitive/credential namespaces, unknown topics and unrecognized payload structures are held. Topic identities are bounded to 160 printable characters, receipt/export shows no raw payload, and the broker host address is hidden in the new operator view.
+- Old or missing buffer data, retained flags, reconnect gaps and simple state strings are *observations*, not confirmed device state. Exact topic-to-HA mapping remains an operator proposal until independently verified in the household network.
+- Tests cover role enforcement, secret suppression (including direct legacy API), allowed/subscribed filtering, bounded reads, malformed prefixes, no-send preview, retained-publish denial, offline confirmation, client preview invalidation, deliberate publishing, and metadata-only reviewed mapping. Run complete backend lint/format/tests and web typecheck/Vitest/build, then protected PR → independent `dev` CI → production PR → independent `main` CI.
+
+Source GREEN does not deploy code to the Windows Hub or confirm real MQTT sensors or Home Assistant IDs. Local household field acceptance is separate. The first-party password/document vault remains **HARD SECURITY HOLD / 0 of 6 VERIFIED**.
+
+**Next expected build: Build 144 — Home Assistant Scenes & Safe Action Drafts.**
