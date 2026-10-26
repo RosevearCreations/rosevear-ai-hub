@@ -179,14 +179,25 @@ describe("CameraView", () => {
       if (url.endsWith("/api/v1/cameras/dashboard")) {
         return { ok: true, json: async () => dashboard(1, "healthy", viewerUrl) };
       }
+      if (url.endsWith("/api/v1/device-registry/reviews")) {
+        return { ok: true, json: async () => ({ annotations: [], matches: [] }) };
+      }
+      if (url.endsWith("/api/v1/camera-wall/preferences")) {
+        return { ok: true, json: async () => ({ favorite_camera_ids: [], compact: false, revision: 0 }) };
+      }
       return { ok: false, status: 404, json: async () => ({}) };
     }));
 
     render(<CameraView currentUser={owner} />);
 
-    await screen.findByRole("button", { name: "Start private preview" });
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Start private preview" })).toBeEnabled();
+      expect(screen.queryByText("Room annotations unavailable or loading; camera identities remain separate and unassigned.")).not.toBeInTheDocument();
+      expect(screen.queryByText("Personal layout not yet verified; saved preferences are unavailable.")).not.toBeInTheDocument();
+    });
+    const start = screen.getByRole("button", { name: "Start private preview" });
     expect(screen.queryByTitle("Front Door live view")).not.toBeInTheDocument();
-    fireEvent.click(screen.getAllByRole("button", { name: "Start private preview" }).at(-1)!);
+    fireEvent.click(start);
     const frame = await screen.findByTitle("Front Door live view");
     expect(frame).toHaveAttribute("src", viewerUrl);
     expect(screen.getAllByText("Healthy").length).toBeGreaterThan(0);
