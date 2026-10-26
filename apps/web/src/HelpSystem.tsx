@@ -260,6 +260,9 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
   System: {
     purpose: "Shows owner/admin read-only Windows startup/recovery observations, post-reboot diagnostics, device/camera field review, installed version evidence, resource budgets and private LAN/Tailscale access.",
     tasks: [
+      "Build 152: record a fresh owner-observed repeat trial after Build 151 identified a route; link the exact preceding observation, routing reason, made-up source alias (if available), and verified installed Windows version. Imported trial results are never fresh.",
+      "Build 152: select a linked result, compare seven original-versus-current independent reviewer criteria, and record a private HOLD-labelled reassessment only after personal review. Missing or contradictory evidence requires renewed review, not a checkbox override.",
+      "Build 152: export a complete private reassessment receipt with validated Builds 148–151 evidence or import a Build 148–152 private receipt. Every imported claim becomes historical; review packet preparation cannot close or certify any device.",
       "Build 151: under Independent retest review, inspect the nine Source identity change & repeat-trial routes. Filter repeat-required changes or missing/historical evidence, then select the exact trial case and open its existing module to check manually.",
       "Build 151: after personally verifying the actual Windows version and recording a field trial, classify the source as confirmed alias, unknown or mismatch. Enter only a made-up asset_ tracking token, never a device identifier, location, serial, MAC, IP or secret.",
       "Build 151: export a private source routing receipt containing the Build 148–150 evidence chain and owner-safe checks; Build 148–151 imports always become historical and require new Windows verification. No route dispatches a job.",
@@ -293,6 +296,7 @@ const HELP_TOPICS: Record<string, HelpTopic> = {
       "Use the private https://*.ts.net URL printed by tailscale serve status. Log into the Hub as normal on each device.",
     ],
     safety: [
+      "Build 152 preserves physical FIELD_ACCEPTANCE_HOLD, INDEPENDENT_REVIEW_HOLD and NOT_AUTHORIZED closure even when all seven review criteria were claimed. Source tokens and reviewer attestations are never independently authenticated hardware evidence; no handoff is sent.",
       "Build 151 compares unverified pseudonymous aliases and installed-version labels. Equal aliases do not prove the same physical source; a change, reopened case, historical import, stale source or unknown Windows context always retains FIELD_ACCEPTANCE_HOLD.",
       "Build 150 does not authenticate an independent reviewer or certify their identity. Every reviewer attestation is self-reported, and contradictory, missing, stale or imported evidence cannot authorize closure.",
       "Build 149 does not authorize repairs, dispatch handoffs, close findings automatically or infer installed Windows/device acceptance from a JSON receipt or successful CI.",

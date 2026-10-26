@@ -3699,6 +3699,18 @@ h1 {
 .owner-source-route-list b { display: inline-block; padding: .35rem .5rem; border: 1px solid #b98b57; border-radius: .45rem; background: #fff1dc; color: #583719; }
 .owner-source-route-list ul { padding-left: 1.25rem; margin: .55rem 0; overflow-wrap: anywhere; }
 .owner-source-route-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+/* Build 152 — exact private evidence links and independent review comparison. */
+.owner-repeat-reassessment { display: grid; gap: 1rem; min-width: 0; padding: 1rem; background: #f7f5fa; border: 1px solid #a99fb6; border-radius: .85rem; }
+.owner-repeat-reassessment h3, .owner-repeat-reassessment h4 { color: #453255; margin: .3rem 0; }
+.owner-repeat-reassessment .owner-review-entry > label:not(.owner-trial-check) { display: grid; gap: .4rem; font-weight: 700; min-width: 0; }
+.owner-repeat-reassessment select { min-width: 0; max-width: 100%; }
+.owner-repeat-reassessment .owner-review-entry > p, .owner-repeat-reassessment li { overflow-wrap: anywhere; }
+.owner-repeat-review-table { display: block; width: 100%; max-width: 100%; overflow-x: auto; border-collapse: collapse; color: #24394c; }
+.owner-repeat-review-table caption { text-align: left; padding: .5rem 0; font-weight: 700; }
+.owner-repeat-review-table th, .owner-repeat-review-table td { padding: .6rem .7rem; min-width: 8rem; border: 1px solid #bbc4cf; text-align: left; vertical-align: top; }
+.owner-repeat-review-table th:first-child { min-width: 12rem; }
+.owner-repeat-review-table thead { background: #e5eaf2; }
+.owner-repeat-review-table tbody tr:nth-child(even) { background: #f1f4f9; }
 @media (max-width: 680px) {
   .owner-trial-context, .owner-trial-controls { grid-template-columns: minmax(0, 1fr); }
   .owner-trial-list > article { display: grid; }
