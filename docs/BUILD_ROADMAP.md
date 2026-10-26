@@ -892,7 +892,7 @@ Each build must:
 
 ## Phase 12 — Practical Home, Device, Camera and Workshop Operations (queued)
 
-Builds 138–147 reached `main` source GREEN; Build 148 is implemented for reviewed promotion, with Build 149 proposed next. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
+Builds 138–148 reached `main` source GREEN; Build 149 is implemented for reviewed promotion, with Build 150 proposed next. Deliver one build at a time through the existing reviewed `dev` → `main` process. Use the current Windows Hub, Home Assistant VM, MQTT, Frigate/go2rtc, Ollama and existing authenticated UI instead of introducing paid infrastructure. Read-only inspection comes before any separately authorized action. Local CI and GitHub GREEN never assert field acceptance on the household Windows server.
 
 ### Build 138 — Home Operations V2: Rooms, Health & Quick Navigation (PROMOTED · source GREEN)
 - replace generic status-only landing cards with a functional room/context command center for Home, Cameras, Workshop and Services, with direct routes to the matching operational views
@@ -974,7 +974,7 @@ Implementation and manual Windows evidence runbook: `docs/BUILD_146_WINDOWS_STAR
 
 Implementation and acceptance details: `docs/BUILD_147_RESPONSIVE_COMMAND_SHELL.md`. Command search is strictly role-scoped navigation, density/contrast are session-only, and contextual help is non-operational.
 
-### Build 148 — Cross-Module Owner Trial, Accessibility & Local Windows Field Acceptance (IMPLEMENTED · source promotion pending)
+### Build 148 — Cross-Module Owner Trial, Accessibility & Local Windows Field Acceptance (PROMOTED · source GREEN)
 - collect explicitly owner-witnessed outcomes from Home, Devices, Cameras, Home Assistant, MQTT, Workshop and System, including phone-width navigation, keyboard/screen-reader operation and private LAN/Tailscale access
 - label source-ci results, Windows installation/version, API observations and physical device/camera observations separately; never promote a guessed physical GREEN from synthetic tests or screenshots alone
 - turn stale integrations, mismatched device identities, playback gaps, startup problems and inaccessible UI into a bounded manual follow-up queue with owner acknowledgement and exportable private evidence
@@ -982,10 +982,18 @@ Implementation and acceptance details: `docs/BUILD_147_RESPONSIVE_COMMAND_SHELL.
 
 Implementation and field trial: `docs/BUILD_148_OWNER_FIELD_TRIAL.md`. The System workbench preserves nine classified manual checks, follow-up acknowledgement and historical retests in a private, bounded HOLD-labelled JSON receipt. No real Windows trial is inferred or fabricated by CI.
 
-### Build 149 — Owner Trial Finding Reconciliation, Repair Handoff & Safe Retest Comparison (PROPOSED · next)
+### Build 149 — Owner Trial Finding Reconciliation, Repair Handoff & Safe Retest Comparison (IMPLEMENTED · source promotion pending)
 - import the private Build 148 owner-trial receipt, group active and historically recurring findings by system, severity and next-action role, and retain original event timestamps
 - create reviewed, manual repair handoffs for Windows startup, stale HA/MQTT mappings, unavailable camera playback, workshop holds and inaccessible UI without activating physical controls
 - compare later field observations against original findings; an owner-observed improvement is not independent acceptance, and missing proof must remain open
 - **Acceptance:** no false automatic closures or inferred Windows/device GREEN, historical evidence stays intact, and private handoff data is explicit, bounded and non-secret
 
-**Queue policy:** 138–147 promoted to source `main`; 148 awaits reviewed CI promotion; 149 is a proposal pending owner selection. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+Implementation and privacy/acceptance details: `docs/BUILD_149_TRIAL_RECONCILIATION.md`. Handoffs are session-only private drafts with explicit owner review; their "prepared" status never sends a task or proves a repair. Imported receipts are historical claims. Every comparison remains on physical HOLD until independent review.
+
+### Build 150 — Independent Retest Review, Evidence Gap Register & Conditional Closure Readiness (PROPOSED · next)
+- add an independent reviewer evidence checklist for the exact source finding, repair handoff, installed Windows observation and latest owner retest, while retaining chronological trial history
+- expose missing or stale proof, permission or safety exclusions and unresolved contradictory findings without deriving a passed inspection from unverified imported attestations
+- prepare strictly private reviewer receipts for possible later manual closure decisions; never automatically close a case, enable a vault, issue hardware controls or label physical Windows production GREEN
+- **Acceptance:** an absent independent witness, changed hardware identity, unsigned receipt or incomplete safety evidence cannot clear the HOLD
+
+**Queue policy:** 138–148 promoted to source `main`; 149 awaits reviewed CI promotion; 150 is a proposal pending owner selection. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.

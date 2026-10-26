@@ -4,10 +4,15 @@ import { getGo2RTCStatus, getHealth, getHomeAssistantStatus, getMQTTStatus, getO
 import { CardHelp } from "./CommandShell";
 import {
   TRIAL_CASES, acknowledgeTrialFollowup, createTrialReceipt, latestTrialObservations,
-  parseTrialReceipt, recordTrialObservation, summarizeOwnerTrial, trialSourceIsFresh,
+  recordTrialObservation, summarizeOwnerTrial, trialSourceIsFresh,
   type TrialAccess, type TrialCaseId, type TrialEnvironment, type TrialFinding,
   type TrialObservation, type TrialOutcome, type TrialOwner, type TrialSourceReading,
 } from "./ownerFieldTrial";
+import {
+  REPAIR_GUIDANCE, advanceRepairHandoff, compareRepairHandoff, createReconciliationReceipt,
+  createRepairHandoff, parseReconciliationReceipt, reconcileTrialFindings,
+  type FindingSeverity, type RepairHandoff,
+} from "./ownerTrialReconciliation";
 
 const owners: { value: TrialOwner; label: string }[] = [
   { value: "unassigned", label: "Assign a follow-up owner" },
@@ -28,11 +33,13 @@ const findings: { value: TrialFinding; label: string }[] = [
 ];
 
 type ListFilter = "all" | "followups" | "retests" | "not_tested";
+type ReconcileFilter = "all" | "active" | "improved" | "recurring";
 
 /** Owner/admin-only System workbench. Observations are ephemeral until deliberately exported. */
 export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavigate: (section: string) => void; active?: boolean }) {
   const [environment, setEnvironment] = useState<TrialEnvironment>({ installed_version: "", access: "unknown", installed_windows_witnessed: false });
   const [observations, setObservations] = useState<TrialObservation[]>([]);
+  const [handoffs, setHandoffs] = useState<RepairHandoff[]>([]);
   const [readings, setReadings] = useState<TrialSourceReading[]>([]);
   const [selected, setSelected] = useState<TrialCaseId>("home");
   const [outcome, setOutcome] = useState<TrialOutcome>("blocked");
@@ -41,14 +48,19 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
   const [witnessed, setWitnessed] = useState(false);
   const [filter, setFilter] = useState<ListFilter>("all");
   const [imported, setImported] = useState(false);
+  const [reconcileFilter, setReconcileFilter] = useState<ReconcileFilter>("all");
+  const [severityFilter, setSeverityFilter] = useState<FindingSeverity | "all">("all");
+  const [ownerFilter, setOwnerFilter] = useState<TrialOwner>("unassigned");
+  const [reviewTarget, setReviewTarget] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState("");
 
   // Visiting another module retains the private ledger but never carries a stale witness confirmation.
-  useEffect(() => { if (!active) setWitnessed(false); }, [active]);
+  useEffect(() => { if (!active) { setWitnessed(false); setReviewTarget(null); } }, [active]);
 
   const latest = useMemo(() => latestTrialObservations(observations), [observations]);
   const summary = useMemo(() => summarizeOwnerTrial(observations), [observations]);
+  const reconciled = useMemo(() => reconcileTrialFindings(observations), [observations]);
   const currentCase = TRIAL_CASES.find(item => item.id === selected)!;
 
   const visible = TRIAL_CASES.filter(item => {
@@ -58,6 +70,13 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     if (filter === "retests") return last?.outcome === "passed" && observations.some(previous => previous.case_id === item.id && previous.outcome !== "passed");
     return true;
   });
+  const visibleFindings = reconciled.filter(item =>
+    (severityFilter === "all" || item.severity === severityFilter) &&
+    (ownerFilter === "unassigned" || item.next_owner === ownerFilter) &&
+    (reconcileFilter === "all" ||
+      (reconcileFilter === "active" && item.comparison !== "owner_improvement_review_hold") ||
+      (reconcileFilter === "improved" && item.comparison === "owner_improvement_review_hold") ||
+      (reconcileFilter === "recurring" && item.occurrence_count > 1)));
 
   function choose(id: TrialCaseId) {
     setSelected(id);
@@ -66,6 +85,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     setFinding("none");
     setNextOwner("unassigned");
     setFeedback("");
+    setReviewTarget(null);
   }
 
   function record() {
@@ -85,6 +105,27 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
       setFeedback("Follow-up owner acknowledgement recorded. This does not close or certify the finding.");
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "Could not acknowledge this follow-up.");
+    }
+  }
+
+  function draftHandoff(id: TrialCaseId) {
+    try {
+      setHandoffs(previous => createRepairHandoff(observations, previous, id));
+      setFeedback("Repair handoff drafted locally. No task was sent or repair action executed.");
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Could not draft the manual handoff.");
+    }
+  }
+
+  function advanceHandoff(handoff: RepairHandoff) {
+    try {
+      setHandoffs(previous => advanceRepairHandoff(observations, previous, handoff.case_id, handoff.baseline_index,
+        reviewTarget === `${handoff.case_id}:${handoff.baseline_index}`));
+      setFeedback(handoff.stage === "draft" ? "Owner review recorded locally; independent acceptance remains on HOLD."
+        : "Handoff prepared for separate private manual delivery. Nothing was sent; field acceptance remains on HOLD.");
+      setReviewTarget(null);
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Could not advance this handoff.");
     }
   }
 
@@ -138,20 +179,37 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     }
   }
 
+  function downloadReconciliation() {
+    try {
+      const receipt = createReconciliationReceipt(environment, readings, observations, handoffs);
+      const url = URL.createObjectURL(new Blob([JSON.stringify(receipt, null, 2) + "\n"], { type: "application/json" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `rosevear-owner-reconciliation-${receipt.exported_at.slice(0, 10)}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      setFeedback("Private HOLD-labelled reconciliation exported; preserve the receipt outside public issues and attachments.");
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Could not export reconciliation.");
+    }
+  }
+
   async function importReceipt(event: ChangeEvent<HTMLInputElement>) {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     if (!file) return;
     try {
-      if (file.size > 200_000) throw new Error("Private trial receipt exceeds 200 KB.");
-      const receipt = parseTrialReceipt(await file.text());
-      if (observations.length && !window.confirm("Replace this browser session's trial observations with the imported private receipt? Export first to keep both histories.")) return;
-      setEnvironment({ ...receipt.environment, installed_windows_witnessed: false });
-      setObservations(receipt.observations);
-      setReadings(receipt.source_readings);
+      if (file.size > 260_000) throw new Error("Private reconciliation receipt exceeds 260 KB.");
+      const { trial, handoffs: importedHandoffs } = parseReconciliationReceipt(await file.text());
+      if ((observations.length || handoffs.length) && !window.confirm("Replace this browser session's trial observations and handoffs with the private receipt? Export both first to preserve history.")) return;
+      setEnvironment({ ...trial.environment, installed_windows_witnessed: false });
+      setObservations(trial.observations);
+      setReadings(trial.source_readings);
+      setHandoffs(importedHandoffs);
       setImported(true);
       setWitnessed(false);
-      setFeedback("Private prior trial imported for review. Imported attestations are historical, not proof of current operation. Re-test on Windows before fresh acceptance.");
+      setReviewTarget(null);
+      setFeedback("Private prior trial and handoffs imported for reconciliation. Imported attestations are historical only. Re-test on Windows before fresh acceptance.");
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "Invalid trial receipt. Existing session preserved.");
     }
@@ -161,7 +219,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     <section className="panel owner-trial" aria-label="Build 148 cross-module owner field trial">
       <header className="owner-trial-header">
         <div>
-          <p className="eyebrow">Build 148 · owner-witnessed field trial</p>
+          <p className="eyebrow">Build 148 + 149 · owner trial and repair reconciliation</p>
           <h2>Home operations field trial & follow-ups</h2>
           <p>Compare our actual installed Windows Hub, real devices and private access with the source-level release. Record only what we personally witnessed. All unreviewed cases and independent acceptance remain on HOLD.</p>
         </div>
@@ -174,6 +232,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
           <li>Read coarse service health with explicit GETs if useful. Service claims are different from real moving playback, device operation, Windows task inspection and accessible screen use.</li>
           <li>Choose a module, follow its existing screen, personally perform a safe check and record either an observed pass or a categorized issue/hold. An issue requires a next-action owner.</li>
           <li>Acknowledge follow-ups, re-test later and export the private JSON. A subsequent observed pass is still awaiting independent review, not a certified physical GREEN.</li>
+          <li>Build 149 groups findings for owner review, prepares internal manual repair handoffs and compares subsequent observations. These never dispatch a job or independently close a finding.</li>
           <li>Nothing runs in the background. Refresh clears this browser session; use explicit private export/import for continuity. No password vault, camera stream, Home Assistant scene, MQTT publish or Windows service command is activated.</li>
         </ol>
       </details>
@@ -275,14 +334,85 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         </div>
       </div>
 
+      <section className="owner-trial-reconciliation" aria-label="Build 149 repair handoff and retest reconciliation">
+        <div className="owner-trial-ledger-heading">
+          <div><h3>Finding reconciliation & safe repair handoffs</h3><p>These are manual triage categories, not operational risk certification. Historical issues stay visible after a new observed pass.</p></div>
+          <strong className="owner-trial-hold">INDEPENDENT REVIEW: HOLD</strong>
+        </div>
+        <div className="owner-trial-reconcile-stats" aria-label="Repair reconciliation counts">
+          <span>{reconciled.length} cases with historical findings</span>
+          <span>{reconciled.filter(item => item.occurrence_count > 1).length} recurring cases</span>
+          <span>{handoffs.filter(item => item.stage === "prepared_for_private_handoff").length} handoffs prepared (not sent)</span>
+        </div>
+        <div className="owner-trial-controls">
+          <label>Finding status
+            <select value={reconcileFilter} onChange={event => setReconcileFilter(event.target.value as ReconcileFilter)}>
+              <option value="all">All historical findings</option><option value="active">Outstanding or not retested</option>
+              <option value="improved">Owner improvement · review hold</option><option value="recurring">Repeated issue observations</option>
+            </select>
+          </label>
+          <label>Triage severity
+            <select value={severityFilter} onChange={event => setSeverityFilter(event.target.value as FindingSeverity | "all")}>
+              <option value="all">All severities</option><option value="high">High</option><option value="moderate">Moderate</option><option value="low">Low</option>
+            </select>
+          </label>
+          <label>Next-action role
+            <select value={ownerFilter} onChange={event => setOwnerFilter(event.target.value as TrialOwner)}>
+              <option value="unassigned">All assigned roles</option>{owners.filter(item => item.value !== "unassigned").map(item => (
+                <option value={item.value} key={item.value}>{item.label}</option>))}
+            </select>
+          </label>
+        </div>
+        {visibleFindings.length === 0 && <p>No historical findings match this filter. No field checks or repairs are implied.</p>}
+        {[...new Set(visibleFindings.map(item => item.section))].map(section => (
+          <div className="owner-trial-system-group" key={section}>
+            <h4>{section} · reported findings</h4>
+            {visibleFindings.filter(item => item.section === section).map(item => {
+              const related = handoffs.filter(handoff => handoff.case_id === item.case_id);
+              const matching = related.find(handoff => handoff.baseline_index === item.baseline_index);
+              return <article className="owner-trial-finding" key={item.case_id}>
+                <div><strong>{item.label}</strong>
+                  <p><strong>{item.severity.toUpperCase()} TRIAGE</strong> · {item.finding.replaceAll("_", " ")} · {item.next_owner.replaceAll("_", " ")}</p>
+                  <small>First reported {item.first_observed_at} · newest source finding {item.baseline_observed_at} · {item.occurrence_count} issue/block observations</small>
+                  <p>{item.comparison === "owner_improvement_review_hold" ? "OWNER-OBSERVED IMPROVEMENT · INDEPENDENT REVIEW HOLD" : "OPEN OR UNRETESTED · FIELD HOLD"}</p>
+                  <p className="owner-trial-instruction">Manual repair guidance: {REPAIR_GUIDANCE[item.case_id]}</p>
+                </div>
+                <div className="owner-trial-handoff-actions">
+                  <CardHelp title="Repair evidence boundary">The report is operator-authored and may be imported history. No repair, physical validation, independent sign-off or task dispatch is performed here.</CardHelp>
+                  {!matching && <button type="button" onClick={() => draftHandoff(item.case_id)}>Draft latest finding handoff</button>}
+                  {related.map(handoff => {
+                    const comparison = compareRepairHandoff(observations, handoff);
+                    const key = `${handoff.case_id}:${handoff.baseline_index}`;
+                    return <div className="owner-trial-handoff" key={key}>
+                      <strong>Handoff · {handoff.stage.replaceAll("_", " ")}</strong>
+                      <small>Original issue index {handoff.baseline_index + 1} · created {handoff.created_at}</small>
+                      <small>Retest comparison: {comparison.state.replaceAll("_", " ")}{comparison.latest_observed_at ? ` · ${comparison.latest_observed_at}` : " · no later observation"}</small>
+                      {handoff.stage !== "prepared_for_private_handoff" && <>
+                        <label className="owner-trial-check"><input type="checkbox" checked={reviewTarget === key}
+                          onChange={event => setReviewTarget(event.target.checked ? key : null)} />
+                          I manually reviewed this exact handoff and its source observation.</label>
+                        <button type="button" disabled={reviewTarget !== key} onClick={() => advanceHandoff(handoff)}>
+                          {handoff.stage === "draft" ? "Record owner review" : "Prepare for private manual handoff (do not send)"}
+                        </button>
+                      </>}
+                    </div>;
+                  })}
+                </div>
+              </article>;
+            })}
+          </div>
+        ))}
+      </section>
+
       <div className="owner-trial-export">
         <button type="button" onClick={downloadReceipt}>Download private HOLD-labelled JSON receipt</button>
-        <label>Import previous private trial JSON
+        <button type="button" onClick={downloadReconciliation}>Download private reconciliation receipt (HOLD)</button>
+        <label>Import private Build 148/149 JSON receipt
           <input type="file" accept=".json,application/json" onChange={event => void importReceipt(event)} />
         </label>
       </div>
       {feedback && <p role="status" className="owner-trial-feedback">{feedback}</p>}
-      <p className="owner-trial-privacy">This ledger and coarse API readings stay in this browser session unless manually exported. No evidence is sent to the server for storage, and no background network calls or server mutations occur. Source CI, installed Windows version, API claims, personal observations and independent acceptance are different evidence classes. <strong>FIELD_ACCEPTANCE_HOLD is unconditional.</strong> The first-party password/document Vault remains at 0/6 verified, SECURITY HOLD.</p>
+      <p className="owner-trial-privacy">Trial history, handoffs and coarse API readings remain in this browser session unless manually exported. Handoffs are not sent or executed. No evidence is sent to the server for storage, and no background network calls or server mutations occur. Imported records remain historical operator claims. Source CI, installed Windows version, API claims, personal observations and independent acceptance are different evidence classes. <strong>FIELD_ACCEPTANCE_HOLD and INDEPENDENT_REVIEW_HOLD are unconditional.</strong> The first-party password/document Vault remains at 0/6 verified, SECURITY HOLD.</p>
     </section>
   );
 }

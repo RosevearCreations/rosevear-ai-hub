@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { OwnerFieldTrialWorkbench } from "./OwnerFieldTrialWorkbench";
 import { createTrialReceipt, recordTrialObservation } from "./ownerFieldTrial";
+import { createReconciliationReceipt, createRepairHandoff } from "./ownerTrialReconciliation";
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
@@ -72,10 +73,64 @@ describe("Build 148 System owner field trial workbench", () => {
     const file = new File([JSON.stringify(receipt)], "owner-private.json", { type: "application/json" });
     Object.defineProperty(file, "text", { value: () => Promise.resolve(JSON.stringify(receipt)) });
     render(<OwnerFieldTrialWorkbench onNavigate={vi.fn()} />);
-    fireEvent.change(screen.getByLabelText("Import previous private trial JSON"), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText("Import private Build 148/149 JSON receipt"), { target: { files: [file] } });
     await waitFor(() => expect(screen.getByText(/Imported history is for context only/)).toBeInTheDocument());
     expect(screen.getByLabelText(/I personally checked the actual installed Windows Hub/)).not.toBeChecked();
     expect(screen.getByText(/OWNER PASS OBSERVED · INDEPENDENT FIELD HOLD/)).toBeInTheDocument();
+    expect(screen.getByText("FIELD ACCEPTANCE: HOLD")).toBeInTheDocument();
+  });
+
+  it("reconciles a witnessed finding into a reviewed private handoff and preserves the retest hold", () => {
+    render(<OwnerFieldTrialWorkbench onNavigate={vi.fn()} />);
+    const panel = screen.getByRole("region", { name: "Build 149 repair handoff and retest reconciliation" });
+    expect(within(panel).getByText("0 cases with historical findings")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Finding category"), { target: { value: "offline" } });
+    fireEvent.change(screen.getByLabelText("Next-action owner"), { target: { value: "household_owner" } });
+    fireEvent.click(screen.getByLabelText(/I personally completed this safe check/));
+    fireEvent.click(screen.getByRole("button", { name: /Record witnessed outcome/ }));
+
+    expect(within(panel).getByText("1 cases with historical findings")).toBeInTheDocument();
+    expect(within(panel).getByText(/OPEN OR UNRETESTED · FIELD HOLD/)).toBeInTheDocument();
+    fireEvent.click(within(panel).getByRole("button", { name: "Draft latest finding handoff" }));
+    expect(within(panel).getByText(/Handoff · draft/)).toBeInTheDocument();
+    const reviewButton = within(panel).getByRole("button", { name: "Record owner review" });
+    expect(reviewButton).toBeDisabled();
+    fireEvent.click(within(panel).getByLabelText(/I manually reviewed this exact handoff/));
+    fireEvent.click(reviewButton);
+    expect(within(panel).getByText(/Handoff · owner reviewed/)).toBeInTheDocument();
+    fireEvent.click(within(panel).getByLabelText(/I manually reviewed this exact handoff/));
+    fireEvent.click(within(panel).getByRole("button", { name: /Prepare for private manual handoff/ }));
+    expect(within(panel).getByText(/Handoff · prepared for private handoff/)).toBeInTheDocument();
+    expect(within(panel).getByText("1 handoffs prepared (not sent)")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Witnessed installed version label"), { target: { value: "0.0.4-build149" } });
+    fireEvent.change(screen.getByLabelText("Access path personally used"), { target: { value: "local_console" } });
+    fireEvent.click(screen.getByLabelText(/I personally checked the actual installed Windows Hub/));
+    fireEvent.change(screen.getByLabelText("Observed outcome"), { target: { value: "passed" } });
+    fireEvent.change(screen.getByLabelText("Finding category"), { target: { value: "none" } });
+    fireEvent.click(screen.getByLabelText(/I personally completed this safe check/));
+    fireEvent.click(screen.getByRole("button", { name: /Record witnessed outcome/ }));
+    expect(within(panel).getByText(/OWNER-OBSERVED IMPROVEMENT · INDEPENDENT REVIEW HOLD/)).toBeInTheDocument();
+    expect(within(panel).getByText(/Retest comparison: owner improvement review hold/)).toBeInTheDocument();
+    expect(screen.getByText("FIELD ACCEPTANCE: HOLD")).toBeInTheDocument();
+  });
+
+  it("imports Build 149 private handoff history, leaves stages historical, and resets fresh witness", async () => {
+    const environment = { installed_version: "0.0.4-build149", access: "private_lan" as const, installed_windows_witnessed: true };
+    const history = recordTrialObservation([], environment,
+      { case_id: "windows", outcome: "issue", finding: "startup", next_owner: "household_owner", witnessed: true },
+      "2026-10-25T08:00:00.000Z");
+    const handoffs = createRepairHandoff(history, [], "windows", "2026-10-25T09:00:00.000Z");
+    const receipt = createReconciliationReceipt(environment, [], history, handoffs);
+    const file = new File([JSON.stringify(receipt)], "owner-reconciliation-private.json", { type: "application/json" });
+    Object.defineProperty(file, "text", { value: () => Promise.resolve(JSON.stringify(receipt)) });
+    render(<OwnerFieldTrialWorkbench onNavigate={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText("Import private Build 148/149 JSON receipt"), { target: { files: [file] } });
+    await waitFor(() => expect(screen.getByText(/prior trial and handoffs imported for reconciliation/)).toBeInTheDocument());
+    const panel = screen.getByRole("region", { name: "Build 149 repair handoff and retest reconciliation" });
+    expect(within(panel).getByText(/Handoff · draft/)).toBeInTheDocument();
+    expect(within(panel).getByText(/HIGH TRIAGE/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/I personally checked the actual installed Windows Hub/)).not.toBeChecked();
     expect(screen.getByText("FIELD ACCEPTANCE: HOLD")).toBeInTheDocument();
   });
 });
