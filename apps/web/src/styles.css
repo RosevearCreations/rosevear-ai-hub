@@ -3711,6 +3711,20 @@ h1 {
 .owner-repeat-review-table th:first-child { min-width: 12rem; }
 .owner-repeat-review-table thead { background: #e5eaf2; }
 .owner-repeat-review-table tbody tr:nth-child(even) { background: #f1f4f9; }
+/* Build 153 — bounded exception aging and witness-gated owner-only follow-up. */
+.owner-reassessment-followup { display: grid; gap: 1rem; min-width: 0; padding: 1rem; border: 1px solid #b1a5a2; border-radius: .85rem; background: #fbf7f3; color: #34313b; }
+.owner-reassessment-followup h3 { margin: .3rem 0; color: #623c2c; }
+.owner-reassessment-followup .owner-trial-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: .7rem; }
+.owner-reassessment-followup .owner-trial-controls label { display: grid; gap: .35rem; font-weight: 700; }
+.owner-reassessment-followup select { min-width: 0; width: 100%; max-width: 100%; }
+.owner-reassessment-queue { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: .75rem; }
+.owner-reassessment-queue > article { display: grid; gap: .8rem; align-content: space-between; min-width: 0; padding: .9rem; border: 1px solid #c3b7ad; border-radius: .65rem; background: #fff; }
+.owner-reassessment-queue > article.owner-reassessment-selected { outline: 3px solid #81604a; outline-offset: 2px; }
+.owner-reassessment-queue strong, .owner-reassessment-queue small { display: block; overflow-wrap: anywhere; }
+.owner-reassessment-queue p { overflow-wrap: anywhere; margin: .45rem 0; }
+.owner-reassessment-followup .owner-trial-row-actions { display: flex; flex-wrap: wrap; gap: .45rem; }
+.owner-reassessment-followup :is(button,select,input):focus-visible { outline: 3px solid #764724; outline-offset: 3px; }
+.owner-reassessment-followup .owner-review-entry { min-width: 0; }
 @media (max-width: 680px) {
   .owner-trial-context, .owner-trial-controls { grid-template-columns: minmax(0, 1fr); }
   .owner-trial-list > article { display: grid; }
