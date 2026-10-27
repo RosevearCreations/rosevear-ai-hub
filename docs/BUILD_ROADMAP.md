@@ -974,16 +974,23 @@ Implementation and security boundaries: `docs/BUILD_157_HANDOFF_RECEIPT_RECONCIL
 
 Implementation: `docs/BUILD_158_FOLLOWUP_OUTCOME_CONTINUITY.md`. Append-only local notes link newer witnessed owner trials to exact Build 157 follow-ups, while retaining all historical exceptions and HOLDs.
 
-### Build 159 — Independent Outcome Recurrence Comparison & Historical Exception Recheck Oversight (IMPLEMENTED · source promotion pending)
+### Build 159 — Independent Outcome Recurrence Comparison & Historical Exception Recheck Oversight (PROMOTED · source main GREEN)
 - compare two chronological Build 158 private outcome rounds for one exact Build 157 follow-up, preserving the older owner and source claims
 - flag issue recurrence after reported improvement, missing or changed source identity evidence, and manually aged independent rechecks
 - append bounded, witnessed HOLD-only private notes and nested historical receipts without dispatch, scheduler, closure or Vault clearance
 
 Implementation and release gates: `docs/BUILD_159_OUTCOME_RECURRENCE_RECHECK.md`.
 
-### Build 160 — Independent Recheck Receipt Comparison & Exception Decision Watch (PROPOSED · next)
+### Build 160 — Independent Recheck Receipt Comparison & Exception Decision Watch (IMPLEMENTED · source promotion pending)
 - compare chronological private Build 159 receipts and preserve immutable recurrence findings across subsequent exports
 - highlight still-unverified owner/source exception decisions with bounded manual age bands and historical import warnings
 - require separate witnessed evidence for any later note; never automate review, assignment, closure or Vault clearance
 
-**Queue policy:** Builds 138–158 promoted to source `main`; 159 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+Implementation and release gates: `docs/BUILD_160_RECHECK_RECEIPT_DECISION_WATCH.md`. Exact append-only chronological private Build 159 receipt prefix comparison, immutable same-follow-up recheck pair signals, manually aged watch and two-witness HOLD-only private notes. Imported data never grants live reviewer authority.
+
+### Build 161 — Historical Watch Outcome Follow-Up & Independent Exception Aging Audit (PROPOSED · next)
+- compare new owner trial observations against prior Build 160 private exception-watch snapshots, without superseding the old decision
+- independently date unresolved exception/watch age and retain contradicting source identity evidence across rounds
+- keep strict historical import, manual witness, no-dispatch and Vault/security HOLD boundaries
+
+**Queue policy:** Builds 138–159 promoted to source `main`; 160 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
