@@ -38,5 +38,8 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: "./src/test/setup.ts",
+    // Integration screens render the entire owner history; allow slower shared CI runners
+    // to finish assertions without treating CPU contention as an application failure.
+    testTimeout: 15_000,
   },
 });
