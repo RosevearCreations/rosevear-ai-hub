@@ -28,6 +28,8 @@ import { compareOwnerReviewEvidence, comparePrivateReassignmentReceipts,
 import { compareOwnerReviewRounds, comparePrivateOwnerReviewReceipts,
   createReviewRecurrenceReceipt, parseReviewRecurrenceReceipt,
   recordReviewRecurrence } from "./ownerReviewRecurrence";
+import { comparePrivateRecurrenceReceipts, compareRecurrenceDispositions,
+  createDispositionReceipt, parseDispositionReceipt, recordDispositionFollowup } from "./ownerRecurrenceDisposition";
 
 const environment: TrialEnvironment = { installed_version: "0.0.7-build157", access: "local_console",
   installed_windows_witnessed: true };
@@ -544,5 +546,74 @@ describe("Build 160 chronological recheck receipts and private exception decisio
       { baseline_followup_index: 0, latest_followup_index: 1,
         category: "CONTINUE_INDEPENDENT_HOLD", personally_compared: true,
         hold_acknowledged: true }, time(DAY * 18 + 93))).toThrow(/non-imported/);
+
+    // Build 165: a truly later recurrence disposition must carry a newer witnessed
+    // owner review and source claim across the entire immutable 148–164 receipt chain.
+    f.history = recordTrialObservation(f.history, environment, { case_id: "cameras",
+      outcome: "issue", finding: "stale_evidence", next_owner: "camera_operator",
+      witnessed: true }, time(DAY * 18 + 95));
+    f.checks = recordSourceIdentityCheck(f.history, f.checks, environment, {
+      case_id: "cameras", identity_state: "operator_mismatch", safe_alias: "asset_abc789",
+      personally_witnessed: true }, time(DAY * 18 + 96));
+    const newestFollowups = recordOwnerReviewFollowup(moreWatches, f.history, f.checks,
+      laterFollowups, environment, { trials: 9, followups: 2 },
+      { reassignment_watch_index: 0, observation_index: 9, source_check_index: 6,
+        category: "REQUEST_OWNER_REVIEW_REEVIDENCE", personally_witnessed: true,
+        hold_acknowledged: true }, time(DAY * 18 + 97));
+    const latestRecurrences = recordReviewRecurrence(newestFollowups, f.history, f.checks,
+      notes164, environment, { followups: 2, recurrences: 1 },
+      { baseline_followup_index: 1, latest_followup_index: 2,
+        category: "REQUEST_SOURCE_WITNESS_RECHECK", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 98));
+    const private157fourth = private157(f, reviews, DAY * 18 + 99);
+    const private158fourth = createFollowupOutcomeReceipt(private157fourth, outcomes, time(DAY * 18 + 100));
+    const private159fourth = createOutcomeRecurrenceReceipt(private158fourth, rechecks, time(DAY * 18 + 101));
+    const private160fourth = createRecheckDecisionWatchReceipt(private159fourth, watches, time(DAY * 18 + 102));
+    const private161fourth = createHistoricalWatchAuditReceipt(private160fourth, laterAudits, time(DAY * 18 + 103));
+    const private162fourth = createAuditReassignmentWatchReceipt(private161fourth, moreWatches, time(DAY * 18 + 104));
+    const private163fourth = createOwnerReviewFollowupReceipt(private162fourth, newestFollowups,
+      time(DAY * 18 + 105));
+    const private164fourth = createReviewRecurrenceReceipt(private163fourth, latestRecurrences,
+      time(DAY * 18 + 106));
+    const compared165 = comparePrivateRecurrenceReceipts(JSON.stringify(private164),
+      JSON.stringify(private164fourth));
+    expect(compared165).toMatchObject({ previous_recurrences: 1,
+      current_recurrences: 2, new_recurrences: 1,
+      comparison: { reassignment_watch_index: 0, source_evidence_renewed: true, unresolved: true } });
+    expect(() => comparePrivateRecurrenceReceipts(JSON.stringify(private164fourth),
+      JSON.stringify(private164))).toThrow(/chronological/);
+    expect(() => comparePrivateRecurrenceReceipts(JSON.stringify(private164),
+      JSON.stringify({ ...private164fourth, review_recurrences: [
+        { ...latestRecurrences[0], first_review_age_days: 555 }, latestRecurrences[1]] })))
+      .toThrow(/immutable/);
+    const disposition165 = compareRecurrenceDispositions(latestRecurrences, newestFollowups,
+      f.history, f.checks, 0, 1, time(DAY * 18 + 107));
+    expect(disposition165.signals).toContain("OWNER_OUTCOME_CHANGED");
+    expect(disposition165.signals).toContain("SOURCE_EVIDENCE_CHANGED");
+    const notes165 = recordDispositionFollowup(latestRecurrences, newestFollowups,
+      f.history, f.checks, [], environment, { recurrences: 1, dispositions: 0 },
+      { baseline_recurrence_index: 0, latest_recurrence_index: 1,
+        category: "REQUEST_SOURCE_EVIDENCE_RENEWAL", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 107));
+    const private165 = createDispositionReceipt(private164fourth, notes165,
+      time(DAY * 18 + 108));
+    expect(parseDispositionReceipt(JSON.stringify(private165)).disposition_followups)
+      .toEqual(notes165);
+    expect(parseDispositionReceipt(JSON.stringify(private164fourth)).disposition_followups)
+      .toEqual([]);
+    expect(() => parseDispositionReceipt(JSON.stringify({ ...private165,
+      disposition_followups: [{ ...notes165[0], source_evidence_renewed: false }] })))
+      .toThrow(/immutable/);
+    expect(() => parseDispositionReceipt(JSON.stringify({ ...private165,
+      closure: "APPROVED" }))).toThrow(/HOLD/);
+    expect(() => parseDispositionReceipt(JSON.stringify({ ...private165,
+      recurrence_receipt: { ...private164fourth, review_recurrences: [
+        { ...latestRecurrences[0], first_review_age_days: 999 }, latestRecurrences[1]] } })))
+      .toThrow(/immutable/);
+    expect(() => recordDispositionFollowup(latestRecurrences, newestFollowups,
+      f.history, f.checks, [], environment, { recurrences: 2, dispositions: 0 },
+      { baseline_recurrence_index: 0, latest_recurrence_index: 1,
+        category: "CONTINUE_INDEPENDENT_HOLD", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 107))).toThrow(/non-imported/);
   });
 });
