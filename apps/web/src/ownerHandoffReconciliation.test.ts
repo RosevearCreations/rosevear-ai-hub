@@ -22,6 +22,9 @@ import { compareHistoricalWatchFollowup, comparePrivateWatchReceipts,
 import { compareAuditRounds, comparePrivateAgingAuditReceipts,
   createAuditReassignmentWatchReceipt, parseAuditReassignmentWatchReceipt,
   recordReassignmentWatch } from "./ownerAuditReassignmentWatch";
+import { compareOwnerReviewEvidence, comparePrivateReassignmentReceipts,
+  createOwnerReviewFollowupReceipt, parseOwnerReviewFollowupReceipt,
+  recordOwnerReviewFollowup } from "./ownerReassignmentReviewFollowup";
 
 const environment: TrialEnvironment = { installed_version: "0.0.7-build157", access: "local_console",
   installed_windows_witnessed: true };
@@ -428,5 +431,57 @@ describe("Build 160 chronological recheck receipts and private exception decisio
       { audits: 2, watches: 0 }, { baseline_audit_index: 0, latest_audit_index: 1,
         category: "CONTINUE_INDEPENDENT_HOLD", personally_compared: true,
         hold_acknowledged: true }, time(DAY * 18 + 52))).toThrow(/non-imported/);
+
+    // Build 163: append a later same-case owner trial and a second private watch, without erasing either.
+    f.history = recordTrialObservation(f.history, environment, { case_id: "cameras", outcome: "issue",
+      finding: "stale_evidence", next_owner: "camera_operator", witnessed: true }, time(DAY * 18 + 70));
+    f.checks = recordSourceIdentityCheck(f.history, f.checks, environment, { case_id: "cameras",
+      identity_state: "operator_mismatch", safe_alias: "asset_abc234", personally_witnessed: true },
+    time(DAY * 18 + 71));
+    const moreWatches = recordReassignmentWatch(laterAudits, f.history, f.checks,
+      reassignment, environment, { audits: 1, watches: 1 },
+      { baseline_audit_index: 0, latest_audit_index: 1,
+        category: "CONTINUE_INDEPENDENT_HOLD", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 72));
+    const private157new = private157(f, reviews, DAY * 18 + 74);
+    const private158new = createFollowupOutcomeReceipt(private157new, outcomes, time(DAY * 18 + 75));
+    const private159new = createOutcomeRecurrenceReceipt(private158new, rechecks, time(DAY * 18 + 76));
+    const private160new = createRecheckDecisionWatchReceipt(private159new, watches, time(DAY * 18 + 77));
+    const private161new = createHistoricalWatchAuditReceipt(private160new, laterAudits, time(DAY * 18 + 78));
+    const private162new = createAuditReassignmentWatchReceipt(private161new, moreWatches, time(DAY * 18 + 79));
+    expect(comparePrivateReassignmentReceipts(JSON.stringify(private162),
+      JSON.stringify(private162new))).toMatchObject({ previous_watches: 1,
+      current_watches: 2, new_watches: 1, latest_unverified_case: "cameras" });
+    expect(() => comparePrivateReassignmentReceipts(JSON.stringify(private162new),
+      JSON.stringify(private162))).toThrow(/chronological/);
+    expect(() => comparePrivateReassignmentReceipts(JSON.stringify(private162),
+      JSON.stringify({ ...private162new, reassignment_watches: [
+        { ...moreWatches[0], category: "CONTINUE_INDEPENDENT_HOLD" }, moreWatches[1] ] })))
+      .toThrow(/Duplicate|matching|immutable|prefix/);
+    const review = compareOwnerReviewEvidence(moreWatches, f.history, f.checks, 0, 7, 4,
+      time(DAY * 18 + 80));
+    expect(review).toMatchObject({ reassignment_watch_index: 0, observation_index: 7,
+      owner_outcome: "issue", prior_owner_claim: "household_owner", unresolved: true });
+    expect(review.signals).toContain("OWNER_NEXT_ACTION_CLAIM_CHANGED");
+    const followups163 = recordOwnerReviewFollowup(moreWatches, f.history, f.checks,
+      [], environment, { trials: 7, followups: 0 }, { reassignment_watch_index: 0,
+        observation_index: 7, source_check_index: 4,
+        category: "REQUEST_OWNER_REVIEW_REEVIDENCE", personally_witnessed: true,
+        hold_acknowledged: true }, time(DAY * 18 + 80));
+    const private163 = createOwnerReviewFollowupReceipt(private162new, followups163, time(DAY * 18 + 81));
+    expect(parseOwnerReviewFollowupReceipt(JSON.stringify(private163)).owner_review_followups)
+      .toEqual(followups163);
+    expect(parseOwnerReviewFollowupReceipt(JSON.stringify(private162new)).owner_review_followups)
+      .toEqual([]);
+    expect(() => parseOwnerReviewFollowupReceipt(JSON.stringify({ ...private163,
+      owner_review_followups: [{ ...followups163[0], watch_age_days: 99 }] })))
+      .toThrow(/immutable/);
+    expect(() => parseOwnerReviewFollowupReceipt(JSON.stringify({ ...private163,
+      closure: "APPROVED" }))).toThrow(/HOLD/);
+    expect(() => recordOwnerReviewFollowup(moreWatches, f.history, f.checks, [], environment,
+      { trials: 8, followups: 0 }, { reassignment_watch_index: 0,
+        observation_index: 7, source_check_index: 4,
+        category: "CONTINUE_REASSIGNMENT_HOLD", personally_witnessed: true,
+        hold_acknowledged: true }, time(DAY * 18 + 80))).toThrow(/non-imported/);
   });
 });
