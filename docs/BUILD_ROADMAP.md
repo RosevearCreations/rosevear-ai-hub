@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 22583)
+Total output lines: 1062
+
 # Build Roadmap
 
 This is the canonical implementation sequence. Build numbers are never reused.
@@ -683,95 +686,7 @@ Each build must:
 ### Build 112 — Supervised Field Recheck Drift & Evidence Chain Handoff
 - compare successive Build 111 closure ledger entries for reopened, still-held and owner-rechecked identities without rewriting history
 - produce a private owner handoff listing unresolved HA integrations and camera/video holds, with source timestamps and no secrets
-- keep independent physical acceptance and explicit human controls; no device action, camera enrollment or database restoration
-- import only matching private Build 110 worklists and validated Build 111 ledgers; first review is a baseline, not a comparison
-- distinguish session-only review of a written handoff from actual physical device/camera acceptance
-- export private chronological evidence summary and suggested supervised next steps without stream URLs or secrets
-- see docs/BUILD_112_SUPERVISED_DRIFT_EVIDENCE_CHAIN_HANDOFF.md
-
-### Build 113 — Installed Windows Hub Version & Field Evidence Adoption
-- verify the installed server/PWA version against protected main release receipts without modifying services
-- distinguish source CI, downloaded desktop artifacts and actual owner-installed Windows runtime
-- expose uninstalled or stale frontend/assets as field-adoption holds rather than fabricated production health
-- stamp frontend builds with a source SHA and tracked-checkout clean flag; compare against owner-entered main Actions evidence and local updater pointer
-- import only Build 112 summary counts and lineage, require separate operator checks and export a metadata-only private FIELD ADOPTION HOLD receipt
-- preserve an explicit unverified process/device state even when all owner-entered version markers match
-- see docs/BUILD_113_INSTALLED_WINDOWS_VERSION_FIELD_ADOPTION.md
-
-### Build 114 — Home Assistant Integration Discovery & Missing Device Diagnosis
-- group current missing identities by owner-confirmed HA integrations and safe read-only diagnostics
-- guide batch-assisted integration recovery while preventing automatic onboarding, credentials disclosure and blind entity creation
-- require fresh registry and real physical device-function tests before owner acceptance
-- implement an owner-only HA workbench accepting validated Build 107 inventory or Build 110 follow-up JSON and an explicit current authenticated registry GET
-- distinguish absent, unavailable and reported exact IDs, showing live entity-platform hints without asserting absent integration configuration
-- support batch owner-confirmed grouping, per-integration HA UI findings and per-identity fresh physical function observations; reset observations on refresh
-- export identity-only private diagnostic receipt with all unresolved holds; retain separate independent Windows/HA field-acceptance gate
-- see docs/BUILD_114_HOME_ASSISTANT_INTEGRATION_DISCOVERY.md
-
-### Build 115 — Operator-Reviewed Camera Discovery & Bulk Restore Candidates
-- compare existing camera registry and ONVIF discovery receipts by stable identity and bounded model evidence
-- present owner-selected multi-camera registration candidates with conflict/duplicate safety gates
-- never add, replace or switch live feeds without explicit operator approval and reversible record evidence
-- import allowlisted prior Build 107/110 camera identities locally; exact UUID + prior-name matches only become supervised bulk candidates
-- explicitly take one bounded ONVIF preview and live camera-registry reading; compare registered, endpoint drift, network collisions, repeated names, unmatched IDs and renamed identities
-- require physical hardware/model confirmation, fresh registry preflight and one-time owner-bound authorization before batch registering disabled entries
-- return a private identity-only registration receipt; retain camera stream/playback physical acceptance holds
-- see docs/BUILD_115_CAMERA_DISCOVERY_BULK_RESTORE.md
-
-### Build 116 — Private Camera Stream Health & Playback Acceptance
-- reconcile camera registration, private go2rtc listener safety and fresh per-camera probe evidence
-- guide supervised RTSP source checks without leaking endpoint URLs or passwords
-- require live moving video, not a healthy API flag, before per-camera field acceptance
-- implement explicit single-camera session acceptance with a fresh exact stream probe, owner-observed moving video and repeat probe; no durable field receipt or automatic enablement
-- restrict private go2rtc viewer launch to a browser running on the Windows Hub itself, validate loopback-only ports and exact stream identity; no automatic iframe playback
-- refresh contextual Cameras/Devices help, add a circled information guide per playback workbench, and refine accessible responsive camera cards and status styling
-- see docs/BUILD_116_PRIVATE_CAMERA_STREAM_PLAYBACK_ACCEPTANCE.md
-
-### Build 117 — Post-Reboot Home, Workshop & Camera Acceptance Runbook
-- verify existing Windows startup task, Home Assistant VM, MQTT, Ollama, HTTPS and camera dependencies in their real order
-- compare before/after authenticated inventory and startup availability after owner-supervised reboot
-- preserve manual control of restarts, credentials, backups and any integration repair
-- implement an owner-only **System** review with explicit on-demand read-only status capture and private validated baseline import
-- compare exact HA entity IDs and registered camera UUIDs; hold if identities change, services fail, installation version drifts or there is no positive baseline camera evidence
-- gate transient review on six separate manually observed Windows, VM, authenticated integrations, installed model, private HTTPS and moving-video checks
-- add circled-i help, accessible status display, responsive service and evidence cards; no automation or durable acceptance assertions
-- see docs/BUILD_117_POST_REBOOT_ACCEPTANCE_RUNBOOK.md
-
-### Build 118 — Device & Camera Field Recovery Acceptance Summary
-- consolidate authenticated Home Assistant device outcomes and per-camera playback owner receipts
-- keep unresolved and reopened identities visible with explicit next-action ownership
-- separate source CI GREEN from installed Windows runtime and actual household equipment acceptance
-- add owner-only System workbench for validated Build 110 worklist and matching Build 111 chronological closure ledger
-- acquire six authenticated GET-only integration/device/camera status readings only on explicit request; reject absent, stale and malformed evidence
-- reconcile exact HA device/entity IDs, registered cameras and bounded private encrypted stream health while requiring real device function and supervised moving video
-- filter all/open/reopened identities, assign role-based next actions, and reset any owner observation on new capture
-- generate sanitized private identity-only summary preserving historical/newly reopened holds and unconditional independent installed-Windows field HOLD
-- see docs/BUILD_118_DEVICE_CAMERA_FIELD_RECOVERY_SUMMARY.md
-
-### Build 119 — Local Household Password Vault Security Architecture (implemented; release verification pending)
-- scope a distinct household personal password manager accessible from the authenticated Hub client; do **not** reuse Knowledge, integration Secrets, chat memory or AI tools for plaintext passwords
-- security review covering Windows server compromise, stolen client, shared household accounts, backup theft, recovery, LAN and limited Tailscale access, and phishing
-- select mature, independently reviewed cryptographic primitives/libraries and investigate a mature self-hosted password-manager integration versus custom vault implementation before approving a build direction
-- define client-side encryption, unique per-user vault separation, vault lock/unlock and audit without secret values; no production storage until security review is complete
-- expose a read-only, fail-closed Vault architecture page and contextual help to all signed-in Hub clients; every live credential interaction, MFA assertion and vault API remains disabled
-- recommend evaluating official Bitwarden Lite before any custom cryptography, conditional on household licensing/sharing, Windows resources and a separate private HTTPS origin; no provider is installed or approved yet
-- record ten mandatory review gates, threat model, owner approval conditions and unconditional `PASSWORD_VAULT_HOLD` on installed-Windows security acceptance
-- see docs/BUILD_119_LOCAL_VAULT_SECURITY_ARCHITECTURE.md
-
-### Build 120 — Encrypted Local Vault, Client Lock & Secret-Isolation Boundary (security-preparation subset implemented; live vault on HOLD)
-- owner selected the preparation-only path: add a deterministic, fail-closed readiness contract and dedicated Hub review cards for provider approval, storage isolation, private origin, separate client lock, leak prevention and encrypted recovery
-- no provider approval, deployment, actual encryption service, password form, client unlock, secret persistence, URL shortcut, vault endpoints or MFA assertion; all are explicitly disabled regardless of forged review flags
-- see docs/BUILD_120_VAULT_PREPARATION.md; installation portion is gated on explicit provider/hosting approval and independent security review
-- implement or integrate reviewed, authenticated encrypted local-only vault storage with client-side unlock; keep master password, derived vault key and plaintext item values out of Hub server logs, SQL query results, AI prompts, Knowledge search and exports
-- protect clipboard exposure, autofill/injection surfaces, browser persistence, unlock idle timeout, session revocation, secure item editing and least-privilege owner/household separation
-- enforce safe, separately encrypted backup and tested restore with no silent cloud synchronization
-
-### Build 121 — Hardware-Key/Passkey MFA, Step-Up & Emergency Recovery (security policy subset implemented; actual MFA and recovery gated)
-- document and display the eight mandatory independent-provider MFA, private-origin, identity, primary/backup factor, step-up, emergency recovery and denial-case reviews
-- fail-closed non-interactive readiness assessment rejects forged review completion; no WebAuthn ceremony, factor registration, recovery code, secret entry, vault endpoint or new data persistence
-- see docs/BUILD_121_MFA_RECOVERY_READINESS.md; actual factor enrollment and emergency recovery are gated on owner-approved provider and isolated live foundation
-- add a phishing-resistant WebAuthn/passkey or supported hardware authenticator second factor, with backup authenticator, device registration/revocation, reauthentication for vault unlock or recovery
-- require a verified private HTTPS origin (Caddy) on LAN and carefully restricted remote Tailscale access; do not expose vault endpoints via public router forwarding
+- keep independent physical acceptance and explicit huma…2583 tokens truncated…ts via public router forwarding
 - document safe offline recovery codes and owner-held encrypted recovery materials; MFA must not be bypassable by ordinary Hub role escalation
 
 ### Build 122 — Password Vault Security Verification & Windows Owner Acceptance (review/runbook subset implemented; actual field verification on HOLD)
@@ -1045,16 +960,18 @@ Implementation and security boundaries: `docs/BUILD_155_RECURRENCE_RESOLUTION_WA
 
 Implementation and acceptance boundaries: `docs/BUILD_156_OVERDUE_HANDOFF_REOPENED_TRIAL.md`. Snapshot time fixes all prior decision and owner-trial indices while later observations stay distinct. Two explicit manual witnesses, an eligible matched HOLD reason, historical import restrictions, a bounded nested private receipt and hard no-dispatch flags are required.
 
-### Build 157 — Independent Handoff Receipt Reconciliation & Recurrence Follow-Up Aging (IMPLEMENTED · source promotion pending)
+### Build 157 — Independent Handoff Receipt Reconciliation & Recurrence Follow-Up Aging (PROMOTED · source main GREEN)
 - compare successive private Build 156 handoff receipts against precise original decision, reopened-trial and alias-change snapshots
 - highlight manually aged outstanding independent follow-up needs and conflicting owner claims without destroying older decisions
 - keep every reviewer/owner finding historical until fresh Windows witnessing and separate acceptance; never send a packet, schedule work or clear Vault/security holds
 
 Implementation and security boundaries: `docs/BUILD_157_HANDOFF_RECEIPT_RECONCILIATION.md`. Strict prefix-only comparison of separate Build 156 JSON exports, chronological same-decision pair comparison and manual follow-up age from the first handoff. Immutable, bounded private Build 157 reviews anchor original decision and handoff indices and retain unverified contradictory source/owner claims; nested imports are historical only.
 
-### Build 158 — Independent Follow-Up Outcome Reassessment & Historical Exception Continuity (PROPOSED · next)
+### Build 158 — Independent Follow-Up Outcome Reassessment & Historical Exception Continuity (IMPLEMENTED · source promotion pending)
 - reconcile fresh manually witnessed owner follow-up observations with aged Build 157 private notes without rewriting past reviewer decisions
 - expose unresolved recurrence and changed source identity across multiple historical handoff rounds
 - keep strict no-dispatch, no auto-clearance and independently witnessed physical/Vault HOLD acceptance boundaries
 
-**Queue policy:** Builds 138–156 promoted to source `main`; 157 awaits reviewed CI promotion; 158 is proposed next. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+Implementation: `docs/BUILD_158_FOLLOWUP_OUTCOME_CONTINUITY.md`. Append-only local notes link newer witnessed owner trials to exact Build 157 follow-ups, while retaining all historical exceptions and HOLDs.
+
+**Queue policy:** Builds 138–157 promoted to source `main`; 158 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
