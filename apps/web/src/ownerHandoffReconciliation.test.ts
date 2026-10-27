@@ -30,6 +30,8 @@ import { compareOwnerReviewRounds, comparePrivateOwnerReviewReceipts,
   recordReviewRecurrence } from "./ownerReviewRecurrence";
 import { comparePrivateRecurrenceReceipts, compareRecurrenceDispositions,
   createDispositionReceipt, parseDispositionReceipt, recordDispositionFollowup } from "./ownerRecurrenceDisposition";
+import { compareDispositionContinuity, comparePrivateDispositionReceipts,
+  createContinuityReceipt, parseContinuityReceipt, recordContinuityWatch } from "./ownerDispositionContinuity";
 
 const environment: TrialEnvironment = { installed_version: "0.0.7-build157", access: "local_console",
   installed_windows_witnessed: true };
@@ -615,5 +617,88 @@ describe("Build 160 chronological recheck receipts and private exception decisio
       { baseline_recurrence_index: 0, latest_recurrence_index: 1,
         category: "CONTINUE_INDEPENDENT_HOLD", personally_compared: true,
         hold_acknowledged: true }, time(DAY * 18 + 107))).toThrow(/non-imported/);
+
+    // Build 166: another real operator-trial claim, 163 review, 164 recurrence
+    // and 165 disposition on the same held watch. No future source is certified.
+    f.history = recordTrialObservation(f.history, environment, { case_id: "cameras",
+      outcome: "passed", finding: "none", next_owner: "household_owner",
+      witnessed: true }, time(DAY * 18 + 109));
+    f.checks = recordSourceIdentityCheck(f.history, f.checks, environment, {
+      case_id: "cameras", identity_state: "confirmed_alias", safe_alias: "asset_999aaa",
+      personally_witnessed: true }, time(DAY * 18 + 110));
+    const fourthFollowups = recordOwnerReviewFollowup(moreWatches, f.history, f.checks,
+      newestFollowups, environment, { trials: 10, followups: 3 },
+      { reassignment_watch_index: 0, observation_index: 10, source_check_index: 7,
+        category: "CONTINUE_REASSIGNMENT_HOLD", personally_witnessed: true,
+        hold_acknowledged: true }, time(DAY * 18 + 111));
+    const finalRecurrences = recordReviewRecurrence(fourthFollowups, f.history, f.checks,
+      latestRecurrences, environment, { followups: 3, recurrences: 2 },
+      { baseline_followup_index: 2, latest_followup_index: 3,
+        category: "REQUEST_SOURCE_WITNESS_RECHECK", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 112));
+    const finalDispositions = recordDispositionFollowup(finalRecurrences,
+      fourthFollowups, f.history, f.checks, notes165, environment,
+      { recurrences: 2, dispositions: 1 },
+      { baseline_recurrence_index: 1, latest_recurrence_index: 2,
+        category: "REQUEST_SOURCE_EVIDENCE_RENEWAL", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 113));
+    const private157fifth = private157(f, reviews, DAY * 18 + 114);
+    const private158fifth = createFollowupOutcomeReceipt(private157fifth, outcomes, time(DAY * 18 + 115));
+    const private159fifth = createOutcomeRecurrenceReceipt(private158fifth, rechecks, time(DAY * 18 + 116));
+    const private160fifth = createRecheckDecisionWatchReceipt(private159fifth, watches, time(DAY * 18 + 117));
+    const private161fifth = createHistoricalWatchAuditReceipt(private160fifth, laterAudits, time(DAY * 18 + 118));
+    const private162fifth = createAuditReassignmentWatchReceipt(private161fifth, moreWatches, time(DAY * 18 + 119));
+    const private163fifth = createOwnerReviewFollowupReceipt(private162fifth, fourthFollowups,
+      time(DAY * 18 + 120));
+    const private164fifth = createReviewRecurrenceReceipt(private163fifth, finalRecurrences,
+      time(DAY * 18 + 121));
+    const private165fifth = createDispositionReceipt(private164fifth, finalDispositions,
+      time(DAY * 18 + 122));
+    expect(comparePrivateDispositionReceipts(JSON.stringify(private165),
+      JSON.stringify(private165fifth))).toMatchObject({ previous_dispositions: 1,
+      current_dispositions: 2, new_dispositions: 1,
+      comparison: { reassignment_watch_index: 0,
+        source_renewal_since_prior_disposition: true, unresolved: true } });
+    expect(() => comparePrivateDispositionReceipts(JSON.stringify(private165fifth),
+      JSON.stringify(private165))).toThrow(/chronological/);
+    expect(() => comparePrivateDispositionReceipts(JSON.stringify(private165),
+      JSON.stringify({ ...private165fifth,
+        disposition_followups: [{ ...finalDispositions[0],
+          source_evidence_renewed: false }, finalDispositions[1]] })))
+      .toThrow(/immutable/);
+    const comparison166 = compareDispositionContinuity(finalDispositions,
+      finalRecurrences, fourthFollowups, f.history, f.checks, 0, 1,
+      time(DAY * 18 + 123));
+    expect(comparison166).toMatchObject({ latest_recurrence_index: 2,
+      source_renewal_since_prior_disposition: true, latest_source_verified_claim: true,
+      unresolved: true });
+    expect(comparison166.signals).toContain("SOURCE_RENEWAL_RECORDED_NOT_CERTIFIED");
+    const watches166 = recordContinuityWatch(finalDispositions, finalRecurrences,
+      fourthFollowups, f.history, f.checks, [], environment,
+      { dispositions: 1, watches: 0 },
+      { baseline_disposition_index: 0, latest_disposition_index: 1,
+        category: "REQUEST_SOURCE_RENEWAL_WITNESS", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 123));
+    const private166 = createContinuityReceipt(private165fifth, watches166,
+      time(DAY * 18 + 124));
+    expect(parseContinuityReceipt(JSON.stringify(private166)).continuity_watches)
+      .toEqual(watches166);
+    expect(parseContinuityReceipt(JSON.stringify(private165fifth)).continuity_watches)
+      .toEqual([]);
+    expect(() => parseContinuityReceipt(JSON.stringify({ ...private166,
+      continuity_watches: [{ ...watches166[0], latest_source_verified_claim: false }] })))
+      .toThrow(/immutable/);
+    expect(() => parseContinuityReceipt(JSON.stringify({ ...private166,
+      closure: "APPROVED" }))).toThrow(/HOLD/);
+    expect(() => parseContinuityReceipt(JSON.stringify({ ...private166,
+      disposition_receipt: { ...private165fifth,
+        disposition_followups: [{ ...finalDispositions[0], age_band: "OVER_SEVEN_DAYS" },
+          finalDispositions[1]] } }))).toThrow(/immutable/);
+    expect(() => recordContinuityWatch(finalDispositions, finalRecurrences,
+      fourthFollowups, f.history, f.checks, [], environment,
+      { dispositions: 2, watches: 0 },
+      { baseline_disposition_index: 0, latest_disposition_index: 1,
+        category: "CONTINUE_INDEPENDENT_HOLD", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 123))).toThrow(/non-imported/);
   });
 });
