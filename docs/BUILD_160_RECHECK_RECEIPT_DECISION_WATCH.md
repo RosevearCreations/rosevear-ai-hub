@@ -1,6 +1,6 @@
 # Build 160 — Independent Recheck Receipt Comparison & Exception Decision Watch
 
-Status: IMPLEMENTED; reviewed `dev` → `main` promotion and source CI verification pending.
+Status: PROMOTED; reviewed `dev` → `main` and the independent `main` source workflow GREEN (five jobs). Physical Windows and Vault acceptance remain separate HOLDs.
 
 ## Scope
 
