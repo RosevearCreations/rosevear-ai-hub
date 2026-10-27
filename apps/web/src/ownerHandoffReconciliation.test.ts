@@ -16,11 +16,14 @@ import { compareOutcomeRounds, createOutcomeRecurrenceReceipt,
 import { comparePrivateRecheckReceipts, compareRecheckRounds,
   createRecheckDecisionWatchReceipt, parseRecheckDecisionWatchReceipt,
   recordExceptionWatch } from "./ownerRecheckDecisionWatch";
+import { compareHistoricalWatchFollowup, comparePrivateWatchReceipts,
+  createHistoricalWatchAuditReceipt, parseHistoricalWatchAuditReceipt,
+  recordHistoricalWatchAudit } from "./ownerHistoricalWatchAudit";
 
 const environment: TrialEnvironment = { installed_version: "0.0.7-build157", access: "local_console",
   installed_windows_witnessed: true };
 const unknown: TrialEnvironment = { installed_version: "", access: "unknown", installed_windows_witnessed: false };
-const time = (minute: number) => new Date(Date.parse("2026-10-12T08:00:00Z") + minute * 60_000).toISOString();
+const time = (minute: number) => new Date(Date.parse("2026-10-08T08:00:00Z") + minute * 60_000).toISOString();
 const DAY = 1440;
 const priorCounts = { trials: 0, checks: 0, links: 0, followups: 0, decisions: 0, resolutions: 0, handoffs: 0 };
 const upstream = { trials: 0, checks: 0, reviews: 0, links: 0, reassessments: 0, followups: 0, decisions: 0 };
@@ -326,5 +329,50 @@ describe("Build 160 chronological recheck receipts and private exception decisio
     expect(() => recordExceptionWatch(rechecks, [], environment, { rechecks: 2, watches: 0 },
       { baseline_recheck_index: 0, latest_recheck_index: 1, category: "CONTINUE_INDEPENDENT_REVIEW_HOLD",
         personally_compared: true, hold_acknowledged: true }, time(DAY * 14 + 58))).toThrow(/non-imported/);
+
+    // Build 161: a fresh owner trial follows an older private watch, but never supersedes that watch.
+    f.history = recordTrialObservation(f.history, environment, { case_id: "cameras", outcome: "issue",
+      finding: "playback_missing", next_owner: "camera_operator", witnessed: true }, time(DAY * 16 + 20));
+    f.checks = recordSourceIdentityCheck(f.history, f.checks, environment, { case_id: "cameras",
+      identity_state: "operator_mismatch", safe_alias: "asset_456def", personally_witnessed: true },
+      time(DAY * 16 + 21));
+    const comparison161 = compareHistoricalWatchFollowup(watches, f.history, f.checks,
+      0, 5, 2, time(DAY * 17 + 60));
+    expect(comparison161).toMatchObject({ watch_index: 0, observation_index: 5,
+      source_check_index: 2, baseline_source_check_index: 1,
+      case_id: "cameras", watch_age_band: "THREE_TO_SEVEN_DAYS", outstanding: true,
+      owner_outcome: "issue", owner_finding: "playback_missing" });
+    expect(comparison161.signals).toContain("SOURCE_IDENTITY_CONTRADICTION");
+    expect(comparison161.signals).toContain("HISTORICAL_EXCEPTION_UNRESOLVED");
+    const audits = recordHistoricalWatchAudit(watches, f.history, f.checks, [], environment,
+      { trials: 5, checks: 2, audits: 0 }, { watch_index: 0, observation_index: 5,
+        source_check_index: 2, category: "REQUEST_SOURCE_IDENTITY_RECHECK",
+        personally_witnessed: true, hold_acknowledged: true }, time(DAY * 17 + 60));
+    const private157now = private157(f, reviews, DAY * 17 + 61);
+    const private158now = createFollowupOutcomeReceipt(private157now, outcomes, time(DAY * 17 + 62));
+    const private159now = createOutcomeRecurrenceReceipt(private158now, rechecks, time(DAY * 17 + 63));
+    const private160now = createRecheckDecisionWatchReceipt(private159now, watches, time(DAY * 17 + 64));
+    const auditReceipt = createHistoricalWatchAuditReceipt(private160now, audits, time(DAY * 17 + 65));
+    expect(parseHistoricalWatchAuditReceipt(JSON.stringify(auditReceipt)).watch_followup_audits).toEqual(audits);
+    expect(parseHistoricalWatchAuditReceipt(JSON.stringify(private160now)).watch_followup_audits).toEqual([]);
+    expect(comparePrivateWatchReceipts(JSON.stringify(receipt), JSON.stringify(private160now))).toMatchObject({
+      previous_watches: 1, new_observations: 1, comparison: { case_id: "cameras",
+        observation_index: 5, outstanding: true } });
+    expect(() => comparePrivateWatchReceipts(JSON.stringify(private160now), JSON.stringify(receipt)))
+      .toThrow(/chronological/);
+    expect(() => parseHistoricalWatchAuditReceipt(JSON.stringify({ ...auditReceipt,
+      watch_followup_audits: [{ ...audits[0], watch_age_days: 0 }] }))).toThrow(/changed/);
+    expect(() => parseHistoricalWatchAuditReceipt(JSON.stringify({ ...auditReceipt,
+      closure: "APPROVED" }))).toThrow(/HOLD/);
+    expect(() => recordHistoricalWatchAudit(watches, f.history, f.checks, audits, environment,
+      { trials: 5, checks: 2, audits: 0 }, { watch_index: 0, observation_index: 5,
+        source_check_index: 2, category: "REQUEST_SOURCE_IDENTITY_RECHECK",
+        personally_witnessed: true, hold_acknowledged: true }, time(DAY * 17 + 61)))
+      .toThrow(/Duplicate/);
+    expect(() => recordHistoricalWatchAudit(watches, f.history, f.checks, [], environment,
+      { trials: 6, checks: 3, audits: 0 }, { watch_index: 0, observation_index: 5,
+        source_check_index: 2, category: "CONTINUE_HISTORICAL_REVIEW_HOLD",
+        personally_witnessed: true, hold_acknowledged: true }, time(DAY * 17 + 60)))
+      .toThrow(/non-imported/);
   });
 });
