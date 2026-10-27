@@ -1,6 +1,6 @@
 # Build 163 — Independent Reassignment Watch Receipt Follow-Up & Overdue Owner Review Evidence Audit
 
-Status: IMPLEMENTED; independent reviewed source promotion and `main` CI verification pending.
+Status: PROMOTED; independently reviewed source `main` and CI GREEN (PRs #393 and #394, workflow 40520977646).
 
 ## Scope
 

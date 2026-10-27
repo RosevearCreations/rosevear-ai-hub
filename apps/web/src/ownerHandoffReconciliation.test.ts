@@ -25,6 +25,9 @@ import { compareAuditRounds, comparePrivateAgingAuditReceipts,
 import { compareOwnerReviewEvidence, comparePrivateReassignmentReceipts,
   createOwnerReviewFollowupReceipt, parseOwnerReviewFollowupReceipt,
   recordOwnerReviewFollowup } from "./ownerReassignmentReviewFollowup";
+import { compareOwnerReviewRounds, comparePrivateOwnerReviewReceipts,
+  createReviewRecurrenceReceipt, parseReviewRecurrenceReceipt,
+  recordReviewRecurrence } from "./ownerReviewRecurrence";
 
 const environment: TrialEnvironment = { installed_version: "0.0.7-build157", access: "local_console",
   installed_windows_witnessed: true };
@@ -483,5 +486,63 @@ describe("Build 160 chronological recheck receipts and private exception decisio
         observation_index: 7, source_check_index: 4,
         category: "CONTINUE_REASSIGNMENT_HOLD", personally_witnessed: true,
         hold_acknowledged: true }, time(DAY * 18 + 80))).toThrow(/non-imported/);
+
+    // Build 164: later privately witnessed owner review compares against exact earlier watch/review.
+    f.history = recordTrialObservation(f.history, environment, { case_id: "cameras", outcome: "passed",
+      finding: "none", next_owner: "household_owner", witnessed: true }, time(DAY * 18 + 82));
+    f.checks = recordSourceIdentityCheck(f.history, f.checks, environment, { case_id: "cameras",
+      identity_state: "confirmed_alias", safe_alias: "asset_def567", personally_witnessed: true },
+      time(DAY * 18 + 83));
+    const laterFollowups = recordOwnerReviewFollowup(moreWatches, f.history, f.checks,
+      followups163, environment, { trials: 8, followups: 1 },
+      { reassignment_watch_index: 0, observation_index: 8, source_check_index: 5,
+        category: "CONTINUE_REASSIGNMENT_HOLD", personally_witnessed: true,
+        hold_acknowledged: true }, time(DAY * 18 + 84));
+    const private157third = private157(f, reviews, DAY * 18 + 86);
+    const private158third = createFollowupOutcomeReceipt(private157third, outcomes, time(DAY * 18 + 87));
+    const private159third = createOutcomeRecurrenceReceipt(private158third, rechecks, time(DAY * 18 + 88));
+    const private160third = createRecheckDecisionWatchReceipt(private159third, watches, time(DAY * 18 + 89));
+    const private161third = createHistoricalWatchAuditReceipt(private160third, laterAudits, time(DAY * 18 + 90));
+    const private162third = createAuditReassignmentWatchReceipt(private161third, moreWatches, time(DAY * 18 + 91));
+    const private163third = createOwnerReviewFollowupReceipt(private162third, laterFollowups,
+      time(DAY * 18 + 92));
+    expect(comparePrivateOwnerReviewReceipts(JSON.stringify(private163),
+      JSON.stringify(private163third))).toMatchObject({ previous_followups: 1,
+      current_followups: 2, new_followups: 1,
+      comparison: { reassignment_watch_index: 0, unresolved: true } });
+    expect(() => comparePrivateOwnerReviewReceipts(JSON.stringify(private163third),
+      JSON.stringify(private163))).toThrow(/chronological/);
+    expect(() => comparePrivateOwnerReviewReceipts(JSON.stringify(private163),
+      JSON.stringify({ ...private163third,
+        owner_review_followups: [{ ...laterFollowups[0], owner_outcome: "passed" }, laterFollowups[1]] })))
+      .toThrow(/immutable|identity|changed/);
+    const comparison164 = compareOwnerReviewRounds(laterFollowups, f.history, f.checks, 0, 1,
+      time(DAY * 18 + 93));
+    expect(comparison164).toMatchObject({ baseline_followup_index: 0,
+      latest_followup_index: 1, baseline_outcome: "issue", latest_outcome: "passed",
+      unresolved: true });
+    expect(comparison164.signals).toContain("REVIEW_OUTCOME_CHANGED");
+    expect(comparison164.signals).toContain("FOLLOWUP_SOURCE_IDENTITY_CHANGED");
+    const notes164 = recordReviewRecurrence(laterFollowups, f.history, f.checks,
+      [], environment, { followups: 1, recurrences: 0 },
+      { baseline_followup_index: 0, latest_followup_index: 1,
+        category: "REQUEST_RECURRENCE_EVIDENCE_RECHECK", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 93));
+    const private164 = createReviewRecurrenceReceipt(private163third, notes164,
+      time(DAY * 18 + 94));
+    expect(parseReviewRecurrenceReceipt(JSON.stringify(private164)).review_recurrences)
+      .toEqual(notes164);
+    expect(parseReviewRecurrenceReceipt(JSON.stringify(private163third)).review_recurrences)
+      .toEqual([]);
+    expect(() => parseReviewRecurrenceReceipt(JSON.stringify({ ...private164,
+      review_recurrences: [{ ...notes164[0], first_review_age_days: 100 }] })))
+      .toThrow(/immutable/);
+    expect(() => parseReviewRecurrenceReceipt(JSON.stringify({ ...private164,
+      closure: "APPROVED" }))).toThrow(/HOLD/);
+    expect(() => recordReviewRecurrence(laterFollowups, f.history, f.checks,
+      [], environment, { followups: 2, recurrences: 0 },
+      { baseline_followup_index: 0, latest_followup_index: 1,
+        category: "CONTINUE_INDEPENDENT_HOLD", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 93))).toThrow(/non-imported/);
   });
 });

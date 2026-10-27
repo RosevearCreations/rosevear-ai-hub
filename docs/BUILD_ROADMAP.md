@@ -1002,16 +1002,23 @@ Implementation and release gates: `docs/BUILD_161_HISTORICAL_WATCH_AGING_AUDIT.m
 
 Implementation and release gates: `docs/BUILD_162_AUDIT_REASSIGNMENT_WATCH.md`. Strict chronological Build 161 receipt prefix reconciliation, immutable same-watch audit pair signals, potential owner-role reassignment and source-claim drift, manually aged independent response and two-gate private HOLD watches. No actual staff assignment, notification, scheduling or approval can result from comparison.
 
-### Build 163 — Independent Reassignment Watch Receipt Follow-Up & Overdue Owner Review Evidence Audit (IMPLEMENTED · source promotion pending)
+### Build 163 — Independent Reassignment Watch Receipt Follow-Up & Overdue Owner Review Evidence Audit (PROMOTED · source main GREEN)
 - compare successive Build 162 private watch receipts and retain every earlier reassignment/source discrepancy
 - reconcile later manually witnessed owner review outcomes against exact watched audit pair and overdue response age
 - require separate physical owner witness, independent hold and strict historical-only imports; no automatic reassignment or Vault clearance
 
 Implementation and release gates: `docs/BUILD_163_REASSIGNMENT_REVIEW_FOLLOWUP.md`. Compare strictly chronological complete Build 162 watch receipt prefixes; match exact watched owner-audit pair to later witnessed owner trials with independent age bands, owner outcome and pseudonymous source discrepancies, bounded append-only private follow-up notes, separate physical Windows and HOLD confirmations, strict history-only receipt imports, and nested Build 163 export.
 
-### Build 164 — Independent Owner Review Follow-Up Recurrence & Overdue Evidence Recheck (PROPOSED · next)
+### Build 164 — Independent Owner Review Follow-Up Recurrence & Overdue Evidence Recheck (IMPLEMENTED · source promotion pending)
 - compare independent Build 163 owner review follow-up rounds for unresolved prior watch cases
 - flag renewed overdue reviewer disposition and conflicting owner-source evidence without automatic action
 - preserve strict receipt provenance, field acceptance and first-party Vault/security holds
 
-**Queue policy:** Builds 138–162 promoted to source `main`; 163 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+Implementation and release gates: `docs/BUILD_164_OWNER_REVIEW_RECURRENCE.md`. Strict Build 163 historical receipt prefix comparison; identical original Build 162 watch and chronological Build 163 independent follow-up pair comparisons; manual recurrence, source contradiction and overdue bands; append-only private reviewed notes with separate HOLD acknowledgment; nested Build 164 receipt and historical-only imports. No assignment, timer, outside contact or field acceptance.
+
+### Build 165 — Independent Recurrence Disposition Follow-Up Aging & Source Evidence Renewal (PROPOSED · next)
+- compare subsequent Build 164 recurrence outcomes against held initial evidence
+- review new owner-source claims and long-overdue independent dispositions before any owner approval
+- preserve field and first-party Vault SECURITY HOLD until independently witnessed
+
+**Queue policy:** Builds 138–163 promoted to source `main`; 164 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
