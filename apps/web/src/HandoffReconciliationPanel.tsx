@@ -42,6 +42,7 @@ export function HandoffReconciliationPanel({ handoffs, links, followupReviews, e
   const [priorCheck, setPriorCheck] = useState<ReturnType<typeof compareEarlierReceipt> | null>(null);
   const [outcomeReview, setOutcomeReview] = useState(0);
   const [outcomeObservation, setOutcomeObservation] = useState(0);
+  const [outcomeSourceCheck, setOutcomeSourceCheck] = useState(-1);
   const [outcomeWitness, setOutcomeWitness] = useState(false);
   const [outcomeHold, setOutcomeHold] = useState(false);
   useEffect(() => { if (!active) { setCompared(false); setAcknowledged(false); } }, [active]);
@@ -96,7 +97,8 @@ export function HandoffReconciliationPanel({ handoffs, links, followupReviews, e
     try {
       onOutcomesChange(recordFollowupOutcome(followupReviews, observations, identityChecks, outcomes,
         environment, { reviews: importedReviews, observations: importedObservations, outcomes: importedOutcomes },
-        { review_index: outcomeReview, observation_index: outcomeObservation, source_check_index: null,
+        { review_index: outcomeReview, observation_index: outcomeObservation,
+          source_check_index: outcomeSourceCheck < 0 ? null : outcomeSourceCheck,
           personally_witnessed: outcomeWitness, hold_acknowledged: outcomeHold }));
       setOutcomeWitness(false); setOutcomeHold(false);
       setFeedback("A fresh private outcome was appended. Earlier recurrence and source exceptions remain unresolved; nothing was sent or closed.");
@@ -193,8 +195,16 @@ export function HandoffReconciliationPanel({ handoffs, links, followupReviews, e
         </select>
       </label>
       <label>Later owner trial observation
-        <select value={outcomeObservation} disabled={!active} onChange={event => { setOutcomeObservation(Number(event.target.value)); setOutcomeWitness(false); }}>
+        <select value={outcomeObservation} disabled={!active} onChange={event => { setOutcomeObservation(Number(event.target.value)); setOutcomeSourceCheck(-1); setOutcomeWitness(false); }}>
           {observations.map((item, index) => <option key={index} value={index}>Trial #{index + 1} · {item.case_id} · {item.outcome} · {item.observed_at}</option>)}
+        </select>
+      </label>
+      <label>Optional witnessed source identity evidence for this same case
+        <select value={outcomeSourceCheck} disabled={!active}
+          onChange={event => { setOutcomeSourceCheck(Number(event.target.value)); setOutcomeWitness(false); }}>
+          <option value={-1}>No additional source identity check</option>
+          {identityChecks.map((check, index) => check.case_id === observations[outcomeObservation]?.case_id &&
+            <option key={index} value={index}>Check #{index + 1} · {check.identity_state} · {check.captured_at}</option>)}
         </select>
       </label>
       <label className="owner-trial-check"><input type="checkbox" disabled={!active || !followupReviews.length} checked={outcomeWitness}
