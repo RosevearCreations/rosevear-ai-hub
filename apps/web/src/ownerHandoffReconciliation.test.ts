@@ -9,6 +9,8 @@ import { createOverdueHandoffReceipt, recordOverdueHandoff } from "./ownerOverdu
 import { compareIndependentHandoffs, comparePrivateHandoffReceipts,
   createHandoffReconciliationReceipt, parseHandoffReconciliationReceipt, recordHandoffFollowup,
   type HandoffFollowupCategory, type HandoffReconciliationReceipt } from "./ownerHandoffReconciliation";
+import { createFollowupOutcomeReceipt, parseFollowupOutcomeReceipt,
+  recordFollowupOutcome } from "./ownerFollowupOutcome";
 
 const environment: TrialEnvironment = { installed_version: "0.0.7-build157", access: "local_console",
   installed_windows_witnessed: true };
@@ -179,5 +181,33 @@ describe("Build 157 independent handoff receipt reconciliation", () => {
       .toThrow(/contradicts/);
     expect(() => parseHandoffReconciliationReceipt("x".repeat(1_450_001)))
       .toThrow(/exceeds 1.45 MB/);
+  });
+});
+
+describe("Build 158 private outcome and historical exception continuity", () => {
+  it("records a fresh same-case observation without clearing an aged independent HOLD", () => {
+    const f = nextHandoff(fixture());
+    const reviews = followup(f);
+    f.history = recordTrialObservation(f.history, environment, { case_id: "cameras", outcome: "passed",
+      finding: "none", next_owner: "household_owner", witnessed: true }, time(DAY * 10 + 22));
+    const outcomes = recordFollowupOutcome(reviews, f.history, f.checks, [], environment,
+      { reviews: 0, observations: 2, outcomes: 0 },
+      { review_index: 0, observation_index: 2, source_check_index: null,
+        personally_witnessed: true, hold_acknowledged: true }, time(DAY * 11 + 22));
+    expect(outcomes[0]).toMatchObject({ outcome: "OWNER_IMPROVEMENT_UNVERIFIED",
+      historical_exception_continues: true, closure: "NOT_AUTHORIZED" });
+    const prior = private157(f, reviews, DAY * 12 + 22);
+    const receipt = createFollowupOutcomeReceipt(prior, outcomes, time(DAY * 13 + 22));
+    expect(parseFollowupOutcomeReceipt(JSON.stringify(receipt)).outcome_reviews).toEqual(outcomes);
+    const forged = { ...receipt, outcome_reviews: [{ ...outcomes[0], historical_exception_continues: false }] };
+    expect(() => parseFollowupOutcomeReceipt(JSON.stringify(forged))).toThrow(/HOLD-only/);
+    expect(() => recordFollowupOutcome(reviews, f.history, f.checks, outcomes, environment,
+      { reviews: 0, observations: 2, outcomes: 0 },
+      { review_index: 0, observation_index: 2, source_check_index: null,
+        personally_witnessed: true, hold_acknowledged: true }, time(DAY * 12 + 22))).toThrow(/Duplicate/);
+    expect(() => recordFollowupOutcome(reviews, f.history, f.checks, [], environment,
+      { reviews: 1, observations: 2, outcomes: 0 },
+      { review_index: 0, observation_index: 2, source_check_index: null,
+        personally_witnessed: true, hold_acknowledged: true }, time(DAY * 11 + 22))).toThrow(/non-imported/);
   });
 });

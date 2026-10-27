@@ -35,8 +35,9 @@ import { createRecurrenceResolutionReceipt,
 import { createOverdueHandoffReceipt,
   type OverdueHandoffEvidence } from "./ownerOverdueHandoff";
 import { comparePrivateHandoffReceipts, createHandoffReconciliationReceipt,
-  MAX_RECONCILIATION_BYTES, parseHandoffReconciliationReceipt,
   type HandoffFollowupEvent } from "./ownerHandoffReconciliation";
+import { createFollowupOutcomeReceipt, parseFollowupOutcomeReceipt, MAX_OUTCOME_BYTES,
+  type FollowupOutcomeEvent } from "./ownerFollowupOutcome";
 
 const owners: { value: TrialOwner; label: string }[] = [
   { value: "unassigned", label: "Assign a follow-up owner" },
@@ -83,6 +84,8 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
   const [importedOverdueHandoffCount, setImportedOverdueHandoffCount] = useState(0);
   const [handoffFollowupReviews, setHandoffFollowupReviews] = useState<HandoffFollowupEvent[]>([]);
   const [importedHandoffFollowupCount, setImportedHandoffFollowupCount] = useState(0);
+  const [followupOutcomes, setFollowupOutcomes] = useState<FollowupOutcomeEvent[]>([]);
+  const [importedOutcomeCount, setImportedOutcomeCount] = useState(0);
   const [readings, setReadings] = useState<TrialSourceReading[]>([]);
   const [selected, setSelected] = useState<TrialCaseId>("home");
   const [outcome, setOutcome] = useState<TrialOutcome>("blocked");
@@ -370,19 +373,35 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not export Build 157 private reconciliation."); }
   }
 
+  function downloadFollowupOutcomes() {
+    try {
+      const prior = createHandoffReconciliationReceipt(environment, readings, observations, handoffs,
+        reviewEvents, identityChecks, trialLinks, reassessments, ownerFollowups, reviewDecisions,
+        resolutionEvidence, overdueHandoffs, handoffFollowupReviews);
+      const receipt = createFollowupOutcomeReceipt(prior, followupOutcomes);
+      const url = URL.createObjectURL(new Blob([JSON.stringify(receipt, null, 2) + "\n"], { type: "application/json" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `rosevear-private-followup-outcomes-${receipt.exported_at.slice(0, 10)}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      setFeedback("Build 158 private outcome continuity exported locally. Every historical exception and security HOLD remains.");
+    } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not export Build 158 receipt."); }
+  }
+
   async function importReceipt(event: ChangeEvent<HTMLInputElement>) {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     if (!file) return;
     try {
-      if (file.size > MAX_RECONCILIATION_BYTES) throw new Error("Private Build 157 receipt exceeds 1.45 MB.");
+      if (file.size > MAX_OUTCOME_BYTES) throw new Error("Private Build 158 receipt exceeds 1.65 MB.");
       const { trial, handoffs: importedHandoffs, events, checks, links,
         reassessments: importedReassessments, followups, decisions,
         resolutions, overdue_handoffs: importedOverdueHandoffs,
-        followup_reviews: importedHandoffReviews } = parseHandoffReconciliationReceipt(await file.text());
+        followup_reviews: importedHandoffReviews, outcome_reviews: importedOutcomes } = parseFollowupOutcomeReceipt(await file.text());
       if ((observations.length || handoffs.length || reviewEvents.length || identityChecks.length || trialLinks.length ||
         reassessments.length || ownerFollowups.length || reviewDecisions.length || resolutionEvidence.length ||
-        overdueHandoffs.length || handoffFollowupReviews.length) &&
+        overdueHandoffs.length || handoffFollowupReviews.length || followupOutcomes.length) &&
         !window.confirm("Replace this browser session's entire trial, reassessment, decision, resolution, handoff and follow-up history? Export the complete Build 157 private receipt first.")) return;
       setEnvironment({ ...trial.environment, installed_windows_witnessed: false });
       setObservations(trial.observations);
@@ -407,6 +426,8 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
       setImportedOverdueHandoffCount(importedOverdueHandoffs.length);
       setHandoffFollowupReviews(importedHandoffReviews);
       setImportedHandoffFollowupCount(importedHandoffReviews.length);
+      setFollowupOutcomes(importedOutcomes);
+      setImportedOutcomeCount(importedOutcomes.length);
       setImported(true);
       setWitnessed(false);
       setReviewTarget(null);
@@ -420,7 +441,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     <section className="panel owner-trial" aria-label="Build 148 cross-module owner field trial">
       <header className="owner-trial-header">
         <div>
-        <p className="eyebrow">Builds 148–157 · owner trial, recurrence resolution, private handoff follow-up and independent HOLD</p>
+        <p className="eyebrow">Builds 148–158 · owner trial, historical outcome reassessment and independent HOLD</p>
           <h2>Home operations field trial & follow-ups</h2>
           <p>Compare our actual installed Windows Hub, real devices and private access with the source-level release. Record only what we personally witnessed. All unreviewed cases and independent acceptance remain on HOLD.</p>
         </div>
@@ -661,7 +682,9 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         active={active} />
 
       <HandoffReconciliationPanel handoffs={overdueHandoffs} links={trialLinks}
-        followupReviews={handoffFollowupReviews}
+        followupReviews={handoffFollowupReviews} observations={observations} identityChecks={identityChecks}
+        outcomes={followupOutcomes} importedOutcomes={importedOutcomeCount}
+        importedObservations={importedTrialCount} onOutcomesChange={setFollowupOutcomes}
         environment={environment} importedHandoffs={importedOverdueHandoffCount}
         importedReviews={importedHandoffFollowupCount}
         onFollowupReviewsChange={setHandoffFollowupReviews}
@@ -679,6 +702,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         <button type="button" onClick={downloadRecurrenceResolution}>Download private recurrence resolution receipt (HOLD)</button>
         <button type="button" onClick={downloadOverdueHandoff}>Download private overdue decision handoff receipt (HOLD)</button>
         <button type="button" onClick={downloadHandoffReconciliation}>Download private handoff follow-up reconciliation receipt (HOLD)</button>
+        <button type="button" onClick={downloadFollowupOutcomes}>Download Build 158 private outcome continuity receipt (HOLD)</button>
         <label>Import private Build 148/149/150/151/152/153/154/155/156/157 JSON receipt
           <input type="file" accept=".json,application/json" onChange={event => void importReceipt(event)} />
         </label>
