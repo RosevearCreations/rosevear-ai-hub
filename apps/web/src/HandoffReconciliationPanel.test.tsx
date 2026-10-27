@@ -30,7 +30,9 @@ const handoffs = [base, { ...base, captured_at: later,
   reopened_comparison: "NEW_OWNER_TRIAL_UNVERIFIED" as const }];
 const links = [{ installed_version: env.installed_version }] as RepeatTrialEvidenceLink[];
 const defaults = { handoffs, links, followupReviews: [], environment: env, importedHandoffs: 0,
-  importedReviews: 0, onFollowupReviewsChange: vi.fn(), compareEarlierReceipt: vi.fn() };
+  importedReviews: 0, onFollowupReviewsChange: vi.fn(), compareEarlierReceipt: vi.fn(),
+  observations: [], identityChecks: [], outcomes: [], importedOutcomes: 0,
+  importedObservations: 0, onOutcomesChange: vi.fn() };
 
 describe("Build 157 private handoff reconciliation UI", () => {
   it("remains HOLD with no network or fresh action when the receipt chain has no pair", () => {

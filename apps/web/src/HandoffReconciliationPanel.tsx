@@ -3,6 +3,9 @@ import { CardHelp } from "./CommandShell";
 import { type TrialEnvironment } from "./ownerFieldTrial";
 import { type OverdueHandoffEvidence } from "./ownerOverdueHandoff";
 import { type RepeatTrialEvidenceLink } from "./ownerRepeatTrialReassessment";
+import { type TrialObservation } from "./ownerFieldTrial";
+import { type SourceIdentityCheck } from "./ownerFieldRouting";
+import { recordFollowupOutcome, type FollowupOutcomeEvent } from "./ownerFollowupOutcome";
 import { HANDOFF_FOLLOWUP_CATEGORIES, compareIndependentHandoffs, recordHandoffFollowup,
   type HandoffComparison, type HandoffFollowupCategory, type HandoffFollowupEvent } from "./ownerHandoffReconciliation";
 
@@ -10,7 +13,8 @@ type WatchFilter = "all" | "recurring" | "aged" | "historical";
 
 /** Owner/Admin System child. All reconciliation stays private and locally witnessed. */
 export function HandoffReconciliationPanel({ handoffs, links, followupReviews, environment, importedHandoffs,
-  importedReviews, onFollowupReviewsChange, compareEarlierReceipt, active = true }: {
+  importedReviews, onFollowupReviewsChange, compareEarlierReceipt, observations, identityChecks,
+  outcomes, importedOutcomes, importedObservations, onOutcomesChange, active = true }: {
   handoffs: readonly OverdueHandoffEvidence[];
   links: readonly RepeatTrialEvidenceLink[];
   followupReviews: HandoffFollowupEvent[];
@@ -20,6 +24,12 @@ export function HandoffReconciliationPanel({ handoffs, links, followupReviews, e
   onFollowupReviewsChange: (items: HandoffFollowupEvent[]) => void;
   compareEarlierReceipt: (raw: string) => { previous_handoffs: number; current_handoffs: number;
     new_handoffs: number; comparison: HandoffComparison | null };
+  observations: readonly TrialObservation[];
+  identityChecks: readonly SourceIdentityCheck[];
+  outcomes: FollowupOutcomeEvent[];
+  importedOutcomes: number;
+  importedObservations: number;
+  onOutcomesChange: (items: FollowupOutcomeEvent[]) => void;
   active?: boolean;
 }) {
   const [filter, setFilter] = useState<WatchFilter>("all");
@@ -30,6 +40,10 @@ export function HandoffReconciliationPanel({ handoffs, links, followupReviews, e
   const [acknowledged, setAcknowledged] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [priorCheck, setPriorCheck] = useState<ReturnType<typeof compareEarlierReceipt> | null>(null);
+  const [outcomeReview, setOutcomeReview] = useState(0);
+  const [outcomeObservation, setOutcomeObservation] = useState(0);
+  const [outcomeWitness, setOutcomeWitness] = useState(false);
+  const [outcomeHold, setOutcomeHold] = useState(false);
   useEffect(() => { if (!active) { setCompared(false); setAcknowledged(false); } }, [active]);
 
   const comparisons: (HandoffComparison & { historical: boolean })[] = [];
@@ -76,6 +90,17 @@ export function HandoffReconciliationPanel({ handoffs, links, followupReviews, e
       setAcknowledged(false);
       setFeedback("Exact private follow-up recorded locally as unverified HOLD evidence. No message, schedule, escalation, assignment or closure occurred.");
     } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not record private HOLD follow-up."); }
+  }
+
+  function recordOutcome() {
+    try {
+      onOutcomesChange(recordFollowupOutcome(followupReviews, observations, identityChecks, outcomes,
+        environment, { reviews: importedReviews, observations: importedObservations, outcomes: importedOutcomes },
+        { review_index: outcomeReview, observation_index: outcomeObservation, source_check_index: null,
+          personally_witnessed: outcomeWitness, hold_acknowledged: outcomeHold }));
+      setOutcomeWitness(false); setOutcomeHold(false);
+      setFeedback("A fresh private outcome was appended. Earlier recurrence and source exceptions remain unresolved; nothing was sent or closed.");
+    } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not append a private outcome."); }
   }
 
   async function comparePrevious(event: ChangeEvent<HTMLInputElement>) {
@@ -158,6 +183,27 @@ export function HandoffReconciliationPanel({ handoffs, links, followupReviews, e
       <button type="button" disabled={!canRecord || !compared || !acknowledged} onClick={prepare}>
         Record private HOLD follow-up (not sent)
       </button>
+    </fieldset>
+    <fieldset className="owner-review-entry" aria-label="Build 158 independent follow-up outcome reassessment">
+      <legend>Build 158 · witnessed outcome reassessment (private HOLD)</legend>
+      <p>Link a later real Windows observation to an exact Build 157 follow-up. A reported pass remains an unverified owner improvement, never independent clearance. Earlier recurrence and alias discrepancies stay in the historical chain.</p>
+      <label>Original follow-up note
+        <select value={outcomeReview} disabled={!active} onChange={event => { setOutcomeReview(Number(event.target.value)); setOutcomeWitness(false); }}>
+          {followupReviews.map((review, index) => <option key={index} value={index}>Note #{index + 1} · {review.case_id} · {review.followup_category}</option>)}
+        </select>
+      </label>
+      <label>Later owner trial observation
+        <select value={outcomeObservation} disabled={!active} onChange={event => { setOutcomeObservation(Number(event.target.value)); setOutcomeWitness(false); }}>
+          {observations.map((item, index) => <option key={index} value={index}>Trial #{index + 1} · {item.case_id} · {item.outcome} · {item.observed_at}</option>)}
+        </select>
+      </label>
+      <label className="owner-trial-check"><input type="checkbox" disabled={!active || !followupReviews.length} checked={outcomeWitness}
+        onChange={event => { setOutcomeWitness(event.target.checked); setOutcomeHold(false); }} />I personally witnessed the newer trial on our installed Windows Hub, separately from the historical note.</label>
+      <label className="owner-trial-check"><input type="checkbox" disabled={!active || !outcomeWitness} checked={outcomeHold}
+        onChange={event => setOutcomeHold(event.target.checked)} />I acknowledge all prior exceptions remain open historical HOLD evidence, including source identity changes; no independent closure or Vault release.</label>
+      <button type="button" disabled={!active || !outcomeWitness || !outcomeHold} onClick={recordOutcome}>Append private reassessment (not sent)</button>
+      <p>{outcomes.length} private outcomes · {importedOutcomes} historical imports · 0 authorized closures.</p>
+      {outcomes.map((item, index) => <p key={index}>Outcome #{index + 1}: follow-up #{item.review_index + 1}, trial #{item.observation_index + 1} · {item.outcome.replaceAll("_", " ")} · historical exceptions continue ({followupReviews[item.review_index]?.discrepancies.join(", ") || "independent review outstanding"}) · {index < importedOutcomes ? "imported historical" : "local unverified"}.</p>)}
     </fieldset>
     {feedback && <p role="status" className="owner-trial-feedback">{feedback}</p>}
     <p className="owner-trial-privacy">Build 157 stores bounded, append-only private note indices and advisory age only. Prior private JSON comparison is read-only and locally processed. No notifications, background work, credential storage, case closure or automatic dispatch. FIELD_ACCEPTANCE_HOLD · INDEPENDENT_REVIEW_HOLD · NOT_AUTHORIZED. First-party Vault: 0/6 verified · SECURITY HOLD.</p>
