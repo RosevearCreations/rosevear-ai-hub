@@ -967,11 +967,23 @@ Implementation and acceptance boundaries: `docs/BUILD_156_OVERDUE_HANDOFF_REOPEN
 
 Implementation and security boundaries: `docs/BUILD_157_HANDOFF_RECEIPT_RECONCILIATION.md`. Strict prefix-only comparison of separate Build 156 JSON exports, chronological same-decision pair comparison and manual follow-up age from the first handoff. Immutable, bounded private Build 157 reviews anchor original decision and handoff indices and retain unverified contradictory source/owner claims; nested imports are historical only.
 
-### Build 158 — Independent Follow-Up Outcome Reassessment & Historical Exception Continuity (IMPLEMENTED · source promotion pending)
+### Build 158 — Independent Follow-Up Outcome Reassessment & Historical Exception Continuity (PROMOTED · source main GREEN)
 - reconcile fresh manually witnessed owner follow-up observations with aged Build 157 private notes without rewriting past reviewer decisions
 - expose unresolved recurrence and changed source identity across multiple historical handoff rounds
 - keep strict no-dispatch, no auto-clearance and independently witnessed physical/Vault HOLD acceptance boundaries
 
 Implementation: `docs/BUILD_158_FOLLOWUP_OUTCOME_CONTINUITY.md`. Append-only local notes link newer witnessed owner trials to exact Build 157 follow-ups, while retaining all historical exceptions and HOLDs.
 
-**Queue policy:** Builds 138–157 promoted to source `main`; 158 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+### Build 159 — Independent Outcome Recurrence Comparison & Historical Exception Recheck Oversight (IMPLEMENTED · source promotion pending)
+- compare two chronological Build 158 private outcome rounds for one exact Build 157 follow-up, preserving the older owner and source claims
+- flag issue recurrence after reported improvement, missing or changed source identity evidence, and manually aged independent rechecks
+- append bounded, witnessed HOLD-only private notes and nested historical receipts without dispatch, scheduler, closure or Vault clearance
+
+Implementation and release gates: `docs/BUILD_159_OUTCOME_RECURRENCE_RECHECK.md`.
+
+### Build 160 — Independent Recheck Receipt Comparison & Exception Decision Watch (PROPOSED · next)
+- compare chronological private Build 159 receipts and preserve immutable recurrence findings across subsequent exports
+- highlight still-unverified owner/source exception decisions with bounded manual age bands and historical import warnings
+- require separate witnessed evidence for any later note; never automate review, assignment, closure or Vault clearance
+
+**Queue policy:** Builds 138–158 promoted to source `main`; 159 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.

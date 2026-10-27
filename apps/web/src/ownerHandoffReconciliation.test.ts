@@ -11,6 +11,8 @@ import { compareIndependentHandoffs, comparePrivateHandoffReceipts,
   type HandoffFollowupCategory, type HandoffReconciliationReceipt } from "./ownerHandoffReconciliation";
 import { createFollowupOutcomeReceipt, parseFollowupOutcomeReceipt,
   recordFollowupOutcome } from "./ownerFollowupOutcome";
+import { compareOutcomeRounds, createOutcomeRecurrenceReceipt,
+  parseOutcomeRecurrenceReceipt, recordOutcomeRecheck } from "./ownerOutcomeRecurrence";
 
 const environment: TrialEnvironment = { installed_version: "0.0.7-build157", access: "local_console",
   installed_windows_witnessed: true };
@@ -209,5 +211,55 @@ describe("Build 158 private outcome and historical exception continuity", () => 
       { reviews: 1, observations: 2, outcomes: 0 },
       { review_index: 0, observation_index: 2, source_check_index: null,
         personally_witnessed: true, hold_acknowledged: true }, time(DAY * 11 + 22))).toThrow(/non-imported/);
+  });
+});
+
+describe("Build 159 same-follow-up recurrence and exception recheck continuity", () => {
+  it("detects a renewed issue after reported owner improvement and retains independent HOLDs", () => {
+    const f = nextHandoff(fixture());
+    const reviews = followup(f);
+    f.history = recordTrialObservation(f.history, environment, { case_id: "cameras", outcome: "passed",
+      finding: "none", next_owner: "household_owner", witnessed: true }, time(DAY * 10 + 22));
+    let outcomes = recordFollowupOutcome(reviews, f.history, f.checks, [], environment,
+      { reviews: 0, observations: 0, outcomes: 0 },
+      { review_index: 0, observation_index: 2, source_check_index: null,
+      personally_witnessed: true, hold_acknowledged: true }, time(DAY * 10 + 32));
+    f.history = recordTrialObservation(f.history, environment, { case_id: "cameras", outcome: "issue",
+      finding: "playback_missing", next_owner: "camera_operator", witnessed: true }, time(DAY * 11 + 22));
+    outcomes = recordFollowupOutcome(reviews, f.history, f.checks, outcomes, environment,
+      { reviews: 0, observations: 0, outcomes: 0 },
+      { review_index: 0, observation_index: 3, source_check_index: 1,
+        personally_witnessed: true, hold_acknowledged: true }, time(DAY * 12 + 22));
+    const comparison = compareOutcomeRounds(outcomes, reviews, f.checks, 0, 1, time(DAY * 13 + 32));
+    expect(comparison).toMatchObject({ review_index: 0, age_days: 3, outstanding: true,
+      signals: ["OWNER_OUTCOME_CHANGED", "ISSUE_RECURRED_AFTER_IMPROVEMENT",
+        "SOURCE_CHECK_COVERAGE_CHANGED", "HISTORICAL_EXCEPTIONS_CONTINUE", "INDEPENDENT_RECHECK_AGED"] });
+    const notes = recordOutcomeRecheck(outcomes, reviews, f.checks, [], environment,
+      { outcomes: 0, rechecks: 0 }, { baseline_outcome_index: 0, latest_outcome_index: 1,
+        reason: "REQUEST_RECURRENCE_WITNESS", personally_compared: true, hold_acknowledged: true }, time(DAY * 13 + 32));
+    expect(notes[0]).toMatchObject({ state: "PRIVATE_RECHECK_NOT_SENT",
+      independent_review: "INDEPENDENT_REVIEW_HOLD", closure: "NOT_AUTHORIZED" });
+    const prior = createFollowupOutcomeReceipt(private157(f, reviews, DAY * 14 + 22), outcomes,
+      time(DAY * 14 + 23));
+    const receipt = createOutcomeRecurrenceReceipt(prior, notes, time(DAY * 14 + 32));
+    expect(parseOutcomeRecurrenceReceipt(JSON.stringify(receipt)).recurrence_rechecks).toEqual(notes);
+    expect(parseOutcomeRecurrenceReceipt(JSON.stringify(prior)).recurrence_rechecks).toEqual([]);
+    expect(() => parseOutcomeRecurrenceReceipt(JSON.stringify({ ...receipt,
+      recurrence_rechecks: [{ ...notes[0], closure: "APPROVED" }] }))).toThrow(/HOLD/);
+    expect(() => parseOutcomeRecurrenceReceipt(JSON.stringify({ ...receipt,
+      recurrence_rechecks: [{ ...notes[0], signals: ["HISTORICAL_EXCEPTIONS_CONTINUE"] }] }))).toThrow(/changed/);
+    expect(() => recordOutcomeRecheck(outcomes, reviews, f.checks, notes, environment,
+      { outcomes: 0, rechecks: 0 }, { baseline_outcome_index: 0, latest_outcome_index: 1,
+        reason: "REQUEST_RECURRENCE_WITNESS", personally_compared: true, hold_acknowledged: true },
+      time(DAY * 14 + 40))).toThrow(/Duplicate/);
+    expect(() => recordOutcomeRecheck(outcomes, reviews, f.checks, [], environment,
+      { outcomes: 2, rechecks: 0 }, { baseline_outcome_index: 0, latest_outcome_index: 1,
+        reason: "REQUEST_RECURRENCE_WITNESS", personally_compared: true, hold_acknowledged: true },
+      time(DAY * 13 + 32))).toThrow(/non-imported/);
+    expect(recordOutcomeRecheck(outcomes, reviews, f.checks, [], environment,
+      { outcomes: 0, rechecks: 0 }, { baseline_outcome_index: 0, latest_outcome_index: 1,
+        reason: "REQUEST_SOURCE_IDENTITY_RECHECK", personally_compared: true, hold_acknowledged: true },
+      time(DAY * 13 + 32))).toHaveLength(1);
+    expect(() => compareOutcomeRounds(outcomes, reviews, f.checks, 1, 0)).toThrow(/chronological/);
   });
 });
