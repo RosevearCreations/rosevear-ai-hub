@@ -19,6 +19,9 @@ import { comparePrivateRecheckReceipts, compareRecheckRounds,
 import { compareHistoricalWatchFollowup, comparePrivateWatchReceipts,
   createHistoricalWatchAuditReceipt, parseHistoricalWatchAuditReceipt,
   recordHistoricalWatchAudit } from "./ownerHistoricalWatchAudit";
+import { compareAuditRounds, comparePrivateAgingAuditReceipts,
+  createAuditReassignmentWatchReceipt, parseAuditReassignmentWatchReceipt,
+  recordReassignmentWatch } from "./ownerAuditReassignmentWatch";
 
 const environment: TrialEnvironment = { installed_version: "0.0.7-build157", access: "local_console",
   installed_windows_witnessed: true };
@@ -374,5 +377,56 @@ describe("Build 160 chronological recheck receipts and private exception decisio
         source_check_index: 2, category: "CONTINUE_HISTORICAL_REVIEW_HOLD",
         personally_witnessed: true, hold_acknowledged: true }, time(DAY * 17 + 60)))
       .toThrow(/non-imported/);
+
+    // Build 162: later private aging audit changes both owner role and pseudonymous source claims.
+    f.history = recordTrialObservation(f.history, environment, { case_id: "cameras", outcome: "passed",
+      finding: "none", next_owner: "household_owner", witnessed: true }, time(DAY * 18 + 20));
+    f.checks = recordSourceIdentityCheck(f.history, f.checks, environment, { case_id: "cameras",
+      identity_state: "confirmed_alias", safe_alias: "asset_789abc", personally_witnessed: true },
+      time(DAY * 18 + 21));
+    const laterAudits = recordHistoricalWatchAudit(watches, f.history, f.checks, audits, environment,
+      { trials: 6, checks: 3, audits: 1 }, { watch_index: 0, observation_index: 6,
+        source_check_index: 3, category: "CONTINUE_HISTORICAL_REVIEW_HOLD",
+        personally_witnessed: true, hold_acknowledged: true }, time(DAY * 18 + 50));
+    const round = compareAuditRounds(laterAudits, f.history, f.checks, 0, 1, time(DAY * 18 + 51));
+    expect(round).toMatchObject({ case_id: "cameras", watch_index: 0,
+      baseline_owner: "camera_operator", latest_owner: "household_owner", unresolved: true });
+    expect(round.signals).toContain("OWNER_REASSIGNMENT_PROPOSED");
+    expect(round.signals).toContain("SOURCE_ALIAS_OR_STATE_CHANGED");
+    expect(round.signals).toContain("ORIGINAL_EXCEPTION_STILL_HELD");
+    const reassignment = recordReassignmentWatch(laterAudits, f.history, f.checks, [], environment,
+      { audits: 1, watches: 0 }, { baseline_audit_index: 0, latest_audit_index: 1,
+        category: "REQUEST_OWNER_REASSIGNMENT_WITNESS", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 52));
+    const private157later = private157(f, reviews, DAY * 18 + 60);
+    const private158later = createFollowupOutcomeReceipt(private157later, outcomes, time(DAY * 18 + 61));
+    const private159later = createOutcomeRecurrenceReceipt(private158later, rechecks, time(DAY * 18 + 62));
+    const private160later = createRecheckDecisionWatchReceipt(private159later, watches, time(DAY * 18 + 63));
+    const private161later = createHistoricalWatchAuditReceipt(private160later, laterAudits,
+      time(DAY * 18 + 64));
+    expect(comparePrivateAgingAuditReceipts(JSON.stringify(auditReceipt),
+      JSON.stringify(private161later))).toMatchObject({ previous_audits: 1,
+      current_audits: 2, new_audits: 1, comparison: { watch_index: 0, unresolved: true } });
+    const private162 = createAuditReassignmentWatchReceipt(private161later, reassignment,
+      time(DAY * 18 + 65));
+    expect(parseAuditReassignmentWatchReceipt(JSON.stringify(private162)).reassignment_watches)
+      .toEqual(reassignment);
+    expect(parseAuditReassignmentWatchReceipt(JSON.stringify(private161later)).reassignment_watches)
+      .toEqual([]);
+    expect(() => parseAuditReassignmentWatchReceipt(JSON.stringify({ ...private162,
+      reassignment_watches: [{ ...reassignment[0], latest_owner: "camera_operator" }] })))
+      .toThrow(/immutable/);
+    expect(() => parseAuditReassignmentWatchReceipt(JSON.stringify({ ...private162,
+      closure: "APPROVED" }))).toThrow(/HOLD/);
+    expect(() => comparePrivateAgingAuditReceipts(JSON.stringify(private161later),
+      JSON.stringify(auditReceipt))).toThrow(/chronological/);
+    expect(() => recordReassignmentWatch(laterAudits, f.history, f.checks, reassignment, environment,
+      { audits: 1, watches: 0 }, { baseline_audit_index: 0, latest_audit_index: 1,
+        category: "REQUEST_OWNER_REASSIGNMENT_WITNESS", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 53))).toThrow(/Duplicate/);
+    expect(() => recordReassignmentWatch(laterAudits, f.history, f.checks, [], environment,
+      { audits: 2, watches: 0 }, { baseline_audit_index: 0, latest_audit_index: 1,
+        category: "CONTINUE_INDEPENDENT_HOLD", personally_compared: true,
+        hold_acknowledged: true }, time(DAY * 18 + 52))).toThrow(/non-imported/);
   });
 });

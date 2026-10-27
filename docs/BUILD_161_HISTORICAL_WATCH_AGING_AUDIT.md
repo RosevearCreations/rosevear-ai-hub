@@ -1,6 +1,6 @@
 # Build 161 — Historical Watch Outcome Follow-Up & Independent Exception Aging Audit
 
-Status: IMPLEMENTED; reviewed `dev` → `main` promotion and source CI verification pending.
+Status: PROMOTED; reviewed `dev` → `main` promotion and independent `main` source CI GREEN (five jobs). Installed Windows and first-party Vault field acceptance remain HOLD.
 
 ## Scope
 

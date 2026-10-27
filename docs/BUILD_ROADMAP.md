@@ -988,16 +988,23 @@ Implementation and release gates: `docs/BUILD_159_OUTCOME_RECURRENCE_RECHECK.md`
 
 Implementation and release gates: `docs/BUILD_160_RECHECK_RECEIPT_DECISION_WATCH.md`. Exact append-only chronological private Build 159 receipt prefix comparison, immutable same-follow-up recheck pair signals, manually aged watch and two-witness HOLD-only private notes. Imported data never grants live reviewer authority.
 
-### Build 161 — Historical Watch Outcome Follow-Up & Independent Exception Aging Audit (IMPLEMENTED · source promotion pending)
+### Build 161 — Historical Watch Outcome Follow-Up & Independent Exception Aging Audit (PROMOTED · source main GREEN)
 - compare new owner trial observations against prior Build 160 private exception-watch snapshots, without superseding the old decision
 - independently date unresolved exception/watch age and retain contradicting source identity evidence across rounds
 - keep strict historical import, manual witness, no-dispatch and Vault/security HOLD boundaries
 
 Implementation and release gates: `docs/BUILD_161_HISTORICAL_WATCH_AGING_AUDIT.md`. Compare older watched exceptions with later exact-case owner observations, select optional same-trial pseudonymous source evidence, explicitly age original and watch exceptions, and preserve all independent HOLDs. Bounded append-only private audits require a non-imported owner trial and two witnessed HOLD confirmations. Strict Build 160 receipt-prefix comparison is read-only; Builds 148–161 are imported as historical claims only.
 
-### Build 162 — Independent Aging Audit Receipt Reconciliation & Owner Exception Reassignment Watch (PROPOSED · next)
+### Build 162 — Independent Aging Audit Receipt Reconciliation & Owner Exception Reassignment Watch (IMPLEMENTED · source promotion pending)
 - compare chronologically ordered Build 161 private audits for one exact historical watch without erasing the original exception
 - flag changed owner recheck assignments, contradictory pseudonymous identity claims and unanswered aging follow-ups for manual review
 - preserve strict physical installed-Windows acceptance, independent reviewer and Vault/security HOLDs with no automated dispatch
 
-**Queue policy:** Builds 138–160 promoted to source `main`; 161 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+Implementation and release gates: `docs/BUILD_162_AUDIT_REASSIGNMENT_WATCH.md`. Strict chronological Build 161 receipt prefix reconciliation, immutable same-watch audit pair signals, potential owner-role reassignment and source-claim drift, manually aged independent response and two-gate private HOLD watches. No actual staff assignment, notification, scheduling or approval can result from comparison.
+
+### Build 163 — Independent Reassignment Watch Receipt Follow-Up & Overdue Owner Review Evidence Audit (PROPOSED · next)
+- compare successive Build 162 private watch receipts and retain every earlier reassignment/source discrepancy
+- reconcile later manually witnessed owner review outcomes against exact watched audit pair and overdue response age
+- require separate physical owner witness, independent hold and strict historical-only imports; no automatic reassignment or Vault clearance
+
+**Queue policy:** Builds 138–161 promoted to source `main`; 162 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.

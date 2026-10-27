@@ -15,19 +15,23 @@ const empty = { history: [], checks: [], links: [], reassessments: [], handoffs:
   importedReassessments: 0, importedFollowups: 0, ...handlers };
 
 function fixture() {
+  // Exercise a recent link independently of the calendar date; the manual-age filter
+  // must not start failing three days after this test fixture was written.
+  const start = Date.now() - 60 * 60_000;
+  const time = (minute: number) => new Date(start + minute * 60_000).toISOString();
   let history = recordTrialObservation([], unknown, { case_id: "cameras", outcome: "issue",
-    finding: "playback_missing", next_owner: "camera_operator", witnessed: true }, "2026-10-24T08:00:00Z");
-  let handoffs = createRepairHandoff(history, [], "cameras", "2026-10-24T08:01:00Z");
-  handoffs = advanceRepairHandoff(history, handoffs, "cameras", 0, true, "2026-10-24T08:02:00Z");
-  handoffs = advanceRepairHandoff(history, handoffs, "cameras", 0, true, "2026-10-24T08:03:00Z");
+    finding: "playback_missing", next_owner: "camera_operator", witnessed: true }, time(0));
+  let handoffs = createRepairHandoff(history, [], "cameras", time(1));
+  handoffs = advanceRepairHandoff(history, handoffs, "cameras", 0, true, time(2));
+  handoffs = advanceRepairHandoff(history, handoffs, "cameras", 0, true, time(3));
   let checks = recordSourceIdentityCheck(history, [], env, { case_id: "cameras", identity_state: "confirmed_alias",
-    safe_alias: "asset_123abc", personally_witnessed: true }, "2026-10-24T08:04:00Z");
+    safe_alias: "asset_123abc", personally_witnessed: true }, time(4));
   history = recordTrialObservation(history, env, { case_id: "cameras", outcome: "passed", finding: "none",
-    next_owner: "household_owner", witnessed: true }, "2026-10-24T08:05:00Z");
+    next_owner: "household_owner", witnessed: true }, time(5));
   checks = recordSourceIdentityCheck(history, checks, env, { case_id: "cameras", identity_state: "confirmed_alias",
-    safe_alias: "asset_123abc", personally_witnessed: true }, "2026-10-24T08:06:00Z");
+    safe_alias: "asset_123abc", personally_witnessed: true }, time(6));
   const links = recordRepeatTrialLink(history, checks, [], env, handoffs, [], { trials: 0, checks: 0, reviews: 0 },
-    { case_id: "cameras", route_reason: "ACTIVE_FINDING", personally_witnessed: true }, "2026-10-24T08:07:00Z");
+    { case_id: "cameras", route_reason: "ACTIVE_FINDING", personally_witnessed: true }, time(7));
   return { ...empty, history, handoffs, checks, links, environment: env };
 }
 
