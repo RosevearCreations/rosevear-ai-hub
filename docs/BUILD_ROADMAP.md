@@ -1016,16 +1016,23 @@ Implementation and release gates: `docs/BUILD_163_REASSIGNMENT_REVIEW_FOLLOWUP.m
 
 Implementation and release gates: `docs/BUILD_164_OWNER_REVIEW_RECURRENCE.md`. Strict Build 163 historical receipt prefix comparison; identical original Build 162 watch and chronological Build 163 independent follow-up pair comparisons; manual recurrence, source contradiction and overdue bands; append-only private reviewed notes with separate HOLD acknowledgment; nested Build 164 receipt and historical-only imports. No assignment, timer, outside contact or field acceptance.
 
-### Build 165 — Independent Recurrence Disposition Follow-Up Aging & Source Evidence Renewal (IMPLEMENTED · promotion pending)
+### Build 165 — Independent Recurrence Disposition Follow-Up Aging & Source Evidence Renewal (PROMOTED · main source CI GREEN)
 - compare subsequent Build 164 recurrence outcomes against held initial evidence
 - review new owner-source claims and long-overdue independent dispositions before any owner approval
 - preserve field and first-party Vault SECURITY HOLD until independently witnessed
 
 Implementation and release gates: `docs/BUILD_165_RECURRENCE_DISPOSITION_RENEWAL.md`. Compare same held Build 162 watch across two distinct, chronological Build 164 recurrence notes, each reaching a newer Build 163 owner review; recompute source renewal using a later independently recorded private alias check. Freeze fixed-category aging, outcome/source/owner changes in bounded append-only, HOLD-only Build 165 notes. Full nested receipt preserves strict source provenance and historical-only imports.
 
-### Build 166 — Independent Disposition Evidence Recheck Continuity & Overdue Source Renewal Watch (PROPOSED · next)
+### Build 166 — Independent Disposition Evidence Recheck Continuity & Overdue Source Renewal Watch (IMPLEMENTED · promotion pending)
 - compare fresh Build 165 disposition follow-ups with older held evidence and source-renewal claims
 - flag repeated or missing independently witnessed renewal without automatic reminders
 - retain full historical receipt chain and owner/field/Vault independent HOLD boundaries
 
-**Queue policy:** Builds 138–164 promoted to source `main`; 165 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs.
+Implementation and release gates: `docs/BUILD_166_DISPOSITION_CONTINUITY_WATCH.md`. Strict chronological Build 165 same-watch disposition pairs with genuinely newer Build 164 recurrence; later source evidence is private and cannot certify hardware. Manual 3+ and 8+ day age bands; fixed-category HOLD-only notes; strict complete Build 165 receipt-prefix comparison, 148–166 nested exports and historical-only imports. No timers, messages or assignments. Cross-application handoff `docs/ROSEVEAR_INTEGRATION_CONTRACT_V1_AI_HUB_HANDOFF.md` records the attached gateway-first plan without enabling any connection.
+
+### Build 167 — Independent Continuity Watch Outcome Reconciliation & Source Renewal Evidence Freshness (PROPOSED · next)
+- compare successive Build 166 HOLD-only continuity records with renewed owner trial/source evidence
+- flag aging, contradictory identity claims and repeated owner disposition exceptions
+- preserve private provenance, non-imported witness gates and security/field HOLDs
+
+**Queue policy:** Builds 138–165 promoted to source `main`; 166 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
