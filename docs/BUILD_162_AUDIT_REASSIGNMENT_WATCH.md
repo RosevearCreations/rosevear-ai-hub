@@ -1,6 +1,6 @@
 # Build 162 — Independent Aging Audit Receipt Reconciliation & Owner Exception Reassignment Watch
 
-Status: IMPLEMENTED; reviewed source promotion and independent `main` CI verification pending.
+Status: PROMOTED; reviewed source main and independent `main` CI GREEN (PRs #391 and #392, workflow 40514820065).
 
 ## Scope
 
