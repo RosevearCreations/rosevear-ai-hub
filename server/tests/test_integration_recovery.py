@@ -80,7 +80,11 @@ def test_old_and_duplicate_or_oversize_records(tmp_path):
 
 
 def test_release_snapshot_safely_includes_acceptance(tmp_path, monkeypatch):
-    _record(tmp_path, [_review(name="home_assistant", status="investigating")])
+    # The snapshot gathers at real wall-clock time, unlike the fixed historical
+    # NOW used by the other deterministic age-band tests. Keep this one fresh.
+    fresh_review = _review(name="home_assistant", status="investigating")
+    fresh_review["observed_at_utc"] = datetime.now(UTC).isoformat()
+    _record(tmp_path, [fresh_review])
     monkeypatch.setattr(
         "rosevear_ai_hub.release_observability.task_evidence",
         lambda root: {

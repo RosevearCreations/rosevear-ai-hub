@@ -1023,16 +1023,23 @@ Implementation and release gates: `docs/BUILD_164_OWNER_REVIEW_RECURRENCE.md`. S
 
 Implementation and release gates: `docs/BUILD_165_RECURRENCE_DISPOSITION_RENEWAL.md`. Compare same held Build 162 watch across two distinct, chronological Build 164 recurrence notes, each reaching a newer Build 163 owner review; recompute source renewal using a later independently recorded private alias check. Freeze fixed-category aging, outcome/source/owner changes in bounded append-only, HOLD-only Build 165 notes. Full nested receipt preserves strict source provenance and historical-only imports.
 
-### Build 166 — Independent Disposition Evidence Recheck Continuity & Overdue Source Renewal Watch (IMPLEMENTED · promotion pending)
+### Build 166 — Independent Disposition Evidence Recheck Continuity & Overdue Source Renewal Watch (PROMOTED · main source CI GREEN)
 - compare fresh Build 165 disposition follow-ups with older held evidence and source-renewal claims
 - flag repeated or missing independently witnessed renewal without automatic reminders
 - retain full historical receipt chain and owner/field/Vault independent HOLD boundaries
 
 Implementation and release gates: `docs/BUILD_166_DISPOSITION_CONTINUITY_WATCH.md`. Strict chronological Build 165 same-watch disposition pairs with genuinely newer Build 164 recurrence; later source evidence is private and cannot certify hardware. Manual 3+ and 8+ day age bands; fixed-category HOLD-only notes; strict complete Build 165 receipt-prefix comparison, 148–166 nested exports and historical-only imports. No timers, messages or assignments. Cross-application handoff `docs/ROSEVEAR_INTEGRATION_CONTRACT_V1_AI_HUB_HANDOFF.md` records the attached gateway-first plan without enabling any connection.
 
-### Build 167 — Independent Continuity Watch Outcome Reconciliation & Source Renewal Evidence Freshness (PROPOSED · next)
+### Build 167 — Independent Continuity Watch Outcome Reconciliation & Source Renewal Evidence Freshness (IMPLEMENTED · promotion pending)
 - compare successive Build 166 HOLD-only continuity records with renewed owner trial/source evidence
 - flag aging, contradictory identity claims and repeated owner disposition exceptions
 - preserve private provenance, non-imported witness gates and security/field HOLDs
 
-**Queue policy:** Builds 138–165 promoted to source `main`; 166 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+Implementation and release gates: `docs/BUILD_167_CONTINUITY_OUTCOME_FRESHNESS.md`. Strict chronological same-watch Build 166 pairs must cite a newer Build 165 disposition; owner observation must be newer than the earlier watch for a new private note. Source age is only manually assessed and remains unverified even for confirmed aliases. Fixed-category bounded append-only outcome notes, strict full Build 166 receipt-prefix comparisons, nested Build 167 export and historical-only imports. No live gateway handshake or commands; shared SDK and separate approval are prerequisites.
+
+### Build 168 — Independent Continuity Outcome Aging Audit & Source Freshness Recheck (PROPOSED · next)
+- compare successive Build 167 private HOLD outcomes and overdue freshness evidence
+- flag unresolved owner-source contradictions without automated notices, assignments or approval
+- preserve independent source/field/Vault holds and gateway-first contract boundaries
+
+**Queue policy:** Builds 138–166 promoted to source `main`; 167 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
