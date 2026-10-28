@@ -1072,16 +1072,22 @@ Implementation and release gates: `docs/BUILD_171_SOURCE_DRIFT_OUTCOME_CONTINUIT
 
 Implementation and release gates: `docs/BUILD_172_EXCEPTION_RECURRENCE_OWNER_FRESHNESS.md`. Strict chronological same-watch Build 171 outcome pairs with no regression to older Build 170 rechecks. Recompute genuinely newer owner observation and source check **after the earlier outcome**, repeated owner/source gaps, outstanding source version/access conflicts and manual 3+/8+ day aging. Fixed-category append-only browser-local NOT SENT recurrence notes require a non-imported later outcome, witnessed installed Windows and two HOLD confirmations. Full Build 148–172 nested private export, exact historical-prefix Build 171 comparison and historical-only import; no automatic gateway request, notification, source authentication, owner approval or command. Build 171 QL-243 server-only health/capability boundary remains disabled by default and nonproduction-only; gateway receipts, identity witness and live owner pilot are not authorized.
 
-### Build 173 — Independent Recurrence Disposition Follow-Up Aging & Verified Owner Source Recheck (IMPLEMENTED · promotion pending)
+### Build 173 — Independent Recurrence Disposition Follow-Up Aging & Verified Owner Source Recheck (PROMOTED · main source CI GREEN)
 - compare successive held Build 172 recurring exception notes against truly later owner and source observations
 - retain overdue source or role-claim contradictions for separate independent review
 - preserve immutable private evidence lineage and gateway/field/Vault HOLDs
 
 Implementation and release gates: `docs/BUILD_173_RECURRENCE_DISPOSITION_QL245.md`. Chronological same-watch Build 172 private recurrence pair comparison, strictly later owner observation and distinct source check claims, repeated stale/contradictory evidence and manual 3+/8+ day aging. Fixed-category browser-local NOT SENT disposition notes require a non-imported later recurrence, installed Windows witness and separate HOLD attestation; full Build 148–173 private receipt with exact nested Build 172 historical prefix, historical-only import. Revised QL-245 health/capability source contract has only ordered `read_health` / `read_capabilities`, `np-...` key format and seven synthetic negative tests; **no** real signed receipts, provisioned connection, pin trust, gateway audit proof or owner pilot.
 
-### Build 174 — Held Disposition Source Recheck Exception Continuity & Independent Reviewer Evidence Reassessment (PROPOSED · next)
+### Build 174 — Held Disposition Source Recheck Exception Continuity & Independent Reviewer Evidence Reassessment (IMPLEMENTED · promotion pending)
 - reconcile later Build 173 private held disposition notes with newly witnessed owner/source claims
 - preserve source identity conflict, overdue exceptions and independent verification gaps
-- maintain full history, fixed HOLD labels and nonproduction QL-245 DISCONNECTED boundaries
+- maintain full history, fixed HOLD labels and nonproduction QL-246 DISCONNECTED boundaries
 
-**Queue policy:** Builds 138–172 promoted to source `main`; 173 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+Implementation and release gates: `docs/BUILD_174_HELD_DISPOSITION_QL246.md` and `docs/integration/QL246_HUB_PENDING.md`. Strict same-watch Build 173 private HOLD follow-up comparison, strictly newer owner/source claims, pseudonymous identity conflict and manual 3+/8+ day aging; fixed-category browser-local NOT SENT reassessments require a non-imported later follow-up and independent HOLD confirmation. Full Build 148–174 private export/import, historical-only import and append-only historical Build 173 receipt comparison. QL-246 demands separately authenticated Ed25519 pins, one-time operator challenge, real seven negative gateway observations and immutable public signed metadata. **No challenge, private secret-manager key, independent pins, real external negative tests, receipts or owner permission are available; public source proof is PENDING, integration DISCONNECTED.** The containing-file commit cannot be its own signed `source_revision`; the gateway must distinguish source revision and proof publication revision.
+
+### Build 175 — Held Independent Reviewer Follow-Up Recheck & Overdue Owner Source Evidence Renewal (PROPOSED · next)
+- reconcile fresh private Build 174 HOLD reassessments with later owner/source evidence and separate reviewer requests
+- retain independent review, physical Windows, QL-246 source-proof and first-party Vault holds
+
+**Queue policy:** Builds 138–173 promoted to source `main`; 174 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.

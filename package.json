@@ -11,6 +11,7 @@
     "web:build": "npm --workspace apps/web run build",
     "web:test": "npm --workspace apps/web run test",
     "web:typecheck": "npm --workspace apps/web run typecheck",
+    "integration:ql246:contract:test": "node --test scripts/ql246-source-proof-contract.test.mjs",
     "desktop:dev": "npm --workspace apps/desktop run dev",
     "desktop:check": "npm --workspace apps/desktop run check",
     "desktop:build": "npm run web:build && npm --workspace apps/desktop run build"
