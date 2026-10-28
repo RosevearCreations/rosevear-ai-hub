@@ -2,7 +2,7 @@
 
 **Application:** `rosevear-ai-hub` / `RosevearCreations/rosevear-ai-hub`
 
-**Scope:** public nonsecret source verification only. This response grants **no credentials, private runner, authenticated GET, physical device access or pilot authorization**. After Build 176 is promoted, report the exact current immutable `main` source SHA and matching GREEN CI URL from GitHub; earlier Build 175 SHA/CI cannot stand in for the newer source.
+**Scope:** public nonsecret source verification only. This response grants **no credentials, private runner, authenticated GET, physical device access or pilot authorization**. For each release, report the exact current immutable `main` source SHA and matching GREEN CI URL from GitHub. Build 177 audit preparation checks only public identifier formats; a previous build's SHA/CI cannot stand in for the newer source.
 
 ## QL-248 amended proof provenance — explicit agreement requested
 
@@ -24,10 +24,11 @@ The Hub provides an offline-only source envelope validator in `scripts/ql246-sou
 
 ```text
 Repository: RosevearCreations/rosevear-ai-hub
-Exact current tested main SHA / same-SHA source CI: RETURN AFTER BUILD 176 MAIN GREEN
+Exact current tested main SHA / same-SHA source CI: INDEPENDENTLY VERIFY THE LATEST MAIN BUILD
 Separate proof-bearing commit SHA / raw proof SHA-256: MISSING / NOT AVAILABLE
 Independently authenticated app-owned Ed25519 public SPKI pin: NOT VERIFIED
 QL-248 two-SHA amendment adopted in source checker: IMPLEMENTED AS OFFLINE CONTRACT
+Build 177 additional public audit candidate: FORMAT-ONLY, NOT AUTHENTICATED
 QL-248 two-SHA amendment accepted by AI Data Platform consumer: UNVERIFIED / PENDING
 Seven genuinely witnessed nonproduction denials and original receipts: PENDING
 Durable audit after restart, revocation and rollback: PENDING
