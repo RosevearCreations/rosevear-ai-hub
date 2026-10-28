@@ -28,6 +28,7 @@ from rosevear_ai_hub.api.frigate import router as frigate_router
 from rosevear_ai_hub.api.home_assistant import router as home_assistant_router
 from rosevear_ai_hub.api.home_assistant_controls import router as home_assistant_controls_router
 from rosevear_ai_hub.api.home_assistant_scenes import router as home_assistant_scenes_router
+from rosevear_ai_hub.api.integration_v1 import router as integration_v1_router
 from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.knowledge_reviews import router as knowledge_reviews_router
@@ -99,7 +100,7 @@ def create_app() -> FastAPI:
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "no-referrer"
-        if request.url.path.startswith("/api/v1/"):
+        if request.url.path.startswith(("/api/v1/", "/api/integration/v1/")):
             response.headers["Cache-Control"] = "no-store"
         return response
 
@@ -123,6 +124,8 @@ def create_app() -> FastAPI:
         )
 
     application.include_router(auth_router)
+    # QL-243: default-off, nonproduction-only, authenticated GET health metadata.
+    application.include_router(integration_v1_router)
     application.include_router(
         resources_router,
         dependencies=[Depends(require_roles("owner", "administrator"))],
