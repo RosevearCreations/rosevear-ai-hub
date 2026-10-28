@@ -1044,16 +1044,23 @@ Implementation and release gates: `docs/BUILD_167_CONTINUITY_OUTCOME_FRESHNESS.m
 
 Implementation and release gates: `docs/BUILD_168_OUTCOME_AGING_SOURCE_FRESHNESS.md`. Exact same-watch Build 167 outcome pairs with newer continuity and post-earlier-outcome owner witness; recomputed source freshness, identity contradictions and manual overdue age bands; fixed-category append-only private NOT SENT audits. Full Build 148–168 nested JSON receipt and strict historical Build 167 receipt-prefix comparison. No live integration endpoint, timer, notification, assignment, field acceptance or Vault clearance.
 
-### Build 169 — Independent Outcome Aging Follow-Up Reconciliation & Overdue Source Evidence Continuity (IMPLEMENTED · promotion pending)
+### Build 169 — Independent Outcome Aging Follow-Up Reconciliation & Overdue Source Evidence Continuity (PROMOTED · main source CI GREEN)
 - compare successive Build 168 HOLD audits with later independently witnessed owner/source claims
 - retain unresolved source-aging exceptions and reconcile manual overdue review outcomes
 - maintain full private provenance and independent field, reviewer, Vault and gateway permission holds
 
 Implementation and release gates: `docs/BUILD_169_AGING_FOLLOWUP_SOURCE_CONTINUITY.md`. Strict chronological same-watch Build 168 aging audit pairs with genuinely newer Build 167 outcome references; source renewal is a private alias-only claim, with repeated 8+ day overdue evidence and 3+ day age bands recomputed at manual review. Fixed-category append-only NOT SENT follow-up notes require a newer owner observation and two witnessed HOLD acknowledgments. Full Build 148–169 nested export, exact append-only Build 168 receipt comparison and historical-only import. No timers, remote connector, automatic reminders, assignment or security-Vault activation.
 
-### Build 170 — Independent Aging Follow-Up Evidence Renewal & Source-Identity Drift Recheck (PROPOSED · next)
+### Build 170 — Independent Aging Follow-Up Evidence Renewal & Source-Identity Drift Recheck (IMPLEMENTED · promotion pending)
 - recompare chronological Build 169 held follow-up rounds with newer evidence and claimed identity drift
 - maintain separate owner/independent acceptance decisions without automatic actions
 - preserve full private nested source provenance and field/reviewer/Vault holds
 
-**Queue policy:** Builds 138–168 promoted to source `main`; 169 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+Implementation and release gates: `docs/BUILD_170_EVIDENCE_RENEWAL_IDENTITY_DRIFT.md`. Strict same-watch chronological Build 169 follow-up pairs with no backward audit-reference movement; distinguish an actually later witnessed owner trial and source check from repeated stale evidence. Manual source alias/identity/version/access comparison, 3+ and 8+ day age bands and separate HOLD-only append gate. Complete nested Build 148–170 private JSON receipt, exact append-only Build 169 comparison, historical-only import. No live gateway, notifications, timers, device certification or case approval.
+
+### Build 171 — Independent Source Drift Follow-Up Outcome Aging & Owner Evidence Continuity (PROPOSED · next)
+- compare successive held Build 170 source-drift recheck rounds for the same original held case
+- retain unresolved repeated source age, changed claims and owner witness gaps under manual review
+- preserve complete private evidence chain and immutable field/reviewer/Vault HOLDs
+
+**Queue policy:** Builds 138–169 promoted to source `main`; 170 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
