@@ -67,7 +67,11 @@ import { comparePrivateContinuityReceipts, createOutcomeReceipt,
   type OutcomeNote } from "./ownerContinuityOutcome";
 import { OutcomeAgingAuditPanel } from "./OutcomeAgingAuditPanel";
 import { comparePrivateOutcomeReceipts, createAgingAuditReceipt,
-  MAX_AGING_AUDIT_BYTES, parseAgingAuditReceipt, type AgingAuditNote } from "./ownerOutcomeAgingAudit";
+  type AgingAuditNote } from "./ownerOutcomeAgingAudit";
+import { OutcomeAgingFollowupPanel } from "./OutcomeAgingFollowupPanel";
+import { comparePrivateAgingReceipts, createAgingFollowupReceipt,
+  MAX_AGING_FOLLOWUP_BYTES, parseAgingFollowupReceipt,
+  type FollowupNote } from "./ownerOutcomeAgingFollowup";
 
 const owners: { value: TrialOwner; label: string }[] = [
   { value: "unassigned", label: "Assign a follow-up owner" },
@@ -136,6 +140,8 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
   const [importedContinuityOutcomeCount, setImportedContinuityOutcomeCount] = useState(0);
   const [outcomeAgingAudits, setOutcomeAgingAudits] = useState<AgingAuditNote[]>([]);
   const [importedOutcomeAgingCount, setImportedOutcomeAgingCount] = useState(0);
+  const [outcomeAgingFollowups, setOutcomeAgingFollowups] = useState<FollowupNote[]>([]);
+  const [importedAgingFollowupCount, setImportedAgingFollowupCount] = useState(0);
   const [readings, setReadings] = useState<TrialSourceReading[]>([]);
   const [selected, setSelected] = useState<TrialCaseId>("home");
   const [outcome, setOutcome] = useState<TrialOutcome>("blocked");
@@ -599,12 +605,28 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not export Build 168 receipt."); }
   }
 
+  function currentPrivateAgingReceipt() {
+    return createAgingAuditReceipt(currentPrivateOutcomeReceipt(), outcomeAgingAudits);
+  }
+
+  function downloadOutcomeAgingFollowup() {
+    try {
+      const receipt = createAgingFollowupReceipt(currentPrivateAgingReceipt(), outcomeAgingFollowups);
+      const url = URL.createObjectURL(new Blob([JSON.stringify(receipt, null, 2) + "\n"], { type: "application/json" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `rosevear-private-outcome-aging-followup-${receipt.exported_at.slice(0, 10)}.json`;
+      anchor.click(); URL.revokeObjectURL(url);
+      setFeedback("Build 169 complete private aging follow-up chain exported. Nothing was notified, certified, reassigned or approved.");
+    } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not export Build 169 private receipt."); }
+  }
+
   async function importReceipt(event: ChangeEvent<HTMLInputElement>) {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     if (!file) return;
     try {
-      if (file.size > MAX_AGING_AUDIT_BYTES) throw new Error("Private Build 168 receipt exceeds 5.05 MB.");
+      if (file.size > MAX_AGING_FOLLOWUP_BYTES) throw new Error("Private Build 169 receipt exceeds 5.45 MB.");
       const { trial, handoffs: importedHandoffs, events, checks, links,
         reassessments: importedReassessments, followups, decisions,
         resolutions, overdue_handoffs: importedOverdueHandoffs,
@@ -618,11 +640,12 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         disposition_followups: importedDispositions,
         continuity_watches: importedContinuity,
         outcome_notes: importedContinuityOutcomes,
-        aging_audits: importedAgingAudits } = parseAgingAuditReceipt(await file.text());
+        aging_audits: importedAgingAudits,
+        aging_followups: importedAgingFollowups } = parseAgingFollowupReceipt(await file.text());
       if ((observations.length || handoffs.length || reviewEvents.length || identityChecks.length || trialLinks.length ||
         reassessments.length || ownerFollowups.length || reviewDecisions.length || resolutionEvidence.length ||
-        overdueHandoffs.length || handoffFollowupReviews.length || followupOutcomes.length || outcomeRechecks.length || exceptionWatches.length || historicalWatchAudits.length || reassignmentWatches.length || ownerReviewFollowups.length || ownerReviewRecurrences.length || dispositionFollowups.length || continuityWatches.length || continuityOutcomes.length || outcomeAgingAudits.length) &&
-        !window.confirm("Replace this browser session's entire trial, recheck, exception watch and follow-up history? Export the complete Build 168 private receipt first.")) return;
+        overdueHandoffs.length || handoffFollowupReviews.length || followupOutcomes.length || outcomeRechecks.length || exceptionWatches.length || historicalWatchAudits.length || reassignmentWatches.length || ownerReviewFollowups.length || ownerReviewRecurrences.length || dispositionFollowups.length || continuityWatches.length || continuityOutcomes.length || outcomeAgingAudits.length || outcomeAgingFollowups.length) &&
+        !window.confirm("Replace this browser session's entire trial, recheck, exception watch and follow-up history? Export the complete Build 169 private receipt first.")) return;
       setEnvironment({ ...trial.environment, installed_windows_witnessed: false });
       setObservations(trial.observations);
       setReadings(trial.source_readings);
@@ -668,10 +691,12 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
       setImportedContinuityOutcomeCount(importedContinuityOutcomes.length);
       setOutcomeAgingAudits(importedAgingAudits);
       setImportedOutcomeAgingCount(importedAgingAudits.length);
+      setOutcomeAgingFollowups(importedAgingFollowups);
+      setImportedAgingFollowupCount(importedAgingFollowups.length);
       setImported(true);
       setWitnessed(false);
       setReviewTarget(null);
-      setFeedback("Private trial, handoffs, reviewer evidence and source identity history imported; Build 156–168 rechecks, recurrence dispositions, continuity watches, outcomes and aging audits are historical unverified claims. Re-witness the actual Windows Hub before any fresh review; no independent, field or Vault hold was removed.");
+      setFeedback("Private trial, handoffs, reviewer evidence and source identity history imported; Build 156–169 rechecks, continuity outcomes, aging audits and follow-ups are historical unverified claims. Re-witness the actual Windows Hub before fresh review; no independent, field or Vault hold was removed.");
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "Invalid trial receipt. Existing session preserved.");
     }
@@ -681,7 +706,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     <section className="panel owner-trial" aria-label="Build 148 cross-module owner field trial">
       <header className="owner-trial-header">
         <div>
-        <p className="eyebrow">Builds 148–168 · owner trial, outcome aging audit and source freshness HOLD</p>
+        <p className="eyebrow">Builds 148–169 · owner trial, aging follow-up and source freshness HOLD</p>
           <h2>Home operations field trial & follow-ups</h2>
           <p>Compare our actual installed Windows Hub, real devices and private access with the source-level release. Record only what we personally witnessed. All unreviewed cases and independent acceptance remain on HOLD.</p>
         </div>
@@ -706,6 +731,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
           <li>Builds 164–166 compare exact chronological owner review, recurrence and disposition follow-up rounds for one held reassignment watch; a newer source check remains an unverified operator claim. Manually date overdue evidence, explicitly confirm installed Windows context and independent HOLD, and export the full receipt. Nothing is sent, reassigned, approved or automatically escalated.</li>
           <li>Build 167 reconciles successive same-case Build 166 continuity watches, newer owner trials and source-evidence freshness. Export/import a complete private history, keep imported notes historical, and separately acknowledge field and independent HOLD. No gateway connection, assignment, messaging or security-Vault release is enabled.</li>
           <li>Build 168 compares successive Build 167 independent HOLD outcomes, flags manually aged or overdue outcome/source rechecks and conflicting claims, and demands a newer owner trial plus two HOLD attestations before appending an unverified private audit. No timer, alert, outside contact, assignment or approval is enabled.</li>
+          <li>Build 169 compares chronological Build 168 aging audits for one held case and explicitly reports owner outcome drift, source-alias renewal, repeated overdue source evidence and the prior audit's age. A fresh later audit, newer personally witnessed owner observation, installed Windows confirmation and two HOLD attestations are required for a private NOT SENT follow-up. No automatic recheck or external action is enabled.</li>
           <li>Nothing runs in the background. Refresh clears this browser session; use explicit private export/import for continuity. No password vault, camera stream, Home Assistant scene, MQTT publish or Windows service command is activated.</li>
         </ol>
       </details>
@@ -1009,6 +1035,15 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         compareEarlierReceipt={raw => comparePrivateOutcomeReceipts(raw,
           JSON.stringify(currentPrivateOutcomeReceipt()))} active={active} />
 
+      <OutcomeAgingFollowupPanel audits={outcomeAgingAudits} outcomes={continuityOutcomes}
+        watches={continuityWatches} dispositions={dispositionFollowups}
+        recurrences={ownerReviewRecurrences} followups={ownerReviewFollowups}
+        history={observations} checks={identityChecks} notes={outcomeAgingFollowups}
+        environment={environment} importedAudits={importedOutcomeAgingCount}
+        importedNotes={importedAgingFollowupCount} onNotesChange={setOutcomeAgingFollowups}
+        compareEarlierReceipt={raw => comparePrivateAgingReceipts(raw,
+          JSON.stringify(currentPrivateAgingReceipt()))} active={active} />
+
       <div className="owner-trial-export">
         <button type="button" onClick={downloadReceipt}>Download private HOLD-labelled JSON receipt</button>
         <button type="button" onClick={downloadReconciliation}>Download private reconciliation receipt (HOLD)</button>
@@ -1031,10 +1066,11 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         <button type="button" onClick={downloadContinuityWatch}>Download Build 166 private disposition continuity receipt (HOLD)</button>
         <button type="button" onClick={downloadContinuityOutcome}>Download Build 167 private continuity outcome receipt (HOLD)</button>
         <button type="button" onClick={downloadOutcomeAgingAudit}>Download Build 168 private outcome aging audit receipt (HOLD)</button>
+        <button type="button" onClick={downloadOutcomeAgingFollowup}>Download Build 169 private outcome aging follow-up receipt (HOLD)</button>
         <label>Import private Build 148/149/150/151/152/153/154/155/156/157 JSON receipt
           <input type="file" accept=".json,application/json" onChange={event => void importReceipt(event)} />
         </label>
-        <p>Builds 158–168 private receipts are also supported; all imports are historical only.</p>
+        <p>Builds 158–169 private receipts are also supported; all imports are historical only.</p>
       </div>
       {feedback && <p role="status" className="owner-trial-feedback">{feedback}</p>}
       <p className="owner-trial-privacy">Trial history, handoffs, reviewer classifications, pseudonymous source checks, exact repeat-trial links, private reassessments, owner follow-ups, independent decision replay, overdue handoff snapshots, Build 157 reconciliation notes and coarse API readings remain in this browser session unless manually exported. Handoffs, repeat-trial routes, aging alerts and replay decisions are not sent or executed, and no source match closes a case. No evidence is sent to the server for storage and no background server mutations occur. Imported records remain historical operator claims. Source CI, installed Windows version, API claims, personal observations and independent acceptance are different evidence classes. <strong>FIELD_ACCEPTANCE_HOLD, INDEPENDENT_REVIEW_HOLD and NOT_AUTHORIZED closure are unconditional.</strong> The first-party password/document Vault remains at 0/6 verified, SECURITY HOLD.</p>
