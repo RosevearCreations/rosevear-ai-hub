@@ -1065,16 +1065,23 @@ Implementation and release gates: `docs/BUILD_170_EVIDENCE_RENEWAL_IDENTITY_DRIF
 
 Implementation and release gates: `docs/BUILD_171_SOURCE_DRIFT_OUTCOME_CONTINUITY_QL243.md`. Chronological same-watch Build 170 recheck pairs with no follow-up regression; recompute post-prior-recheck owner witness and pseudonymous source check continuity, claimed identity/version/access drift, repeated 8+ day overdue source and 3+ day outcome age. Fixed-category append-only local `PRIVATE_DRIFT_OUTCOME_AGING_NOT_SENT` notes require a non-imported later recheck, witnessed Windows and separate HOLD confirmations; full nested Build 148–171 receipts, historical-only import and strict old-receipt-prefix comparison. QL-243 staged backend GET health/capabilities boundary is **disabled by default**, limited to scoped signed nonproduction AI Data Platform reads, durable nonce rejection, no access to devices, Vault, cameras or automation; gateway Ed25519 receipts, independent identity attestation, server deployment, and owner pilot authorization remain unverified HOLD.
 
-### Build 172 — Independent Recheck Outcome Exception Recurrence & Owner Continuity Freshness (IMPLEMENTED · promotion pending)
+### Build 172 — Independent Recheck Outcome Exception Recurrence & Owner Continuity Freshness (PROMOTED · main source CI GREEN)
 - compare successive Build 171 private aging outcomes for repeated owner/source gaps
 - retain held source version/access conflicts and separate witnessed Windows rechecks
 - preserve complete append-only evidence lineage and gateway/field/Vault HOLDs
 
 Implementation and release gates: `docs/BUILD_172_EXCEPTION_RECURRENCE_OWNER_FRESHNESS.md`. Strict chronological same-watch Build 171 outcome pairs with no regression to older Build 170 rechecks. Recompute genuinely newer owner observation and source check **after the earlier outcome**, repeated owner/source gaps, outstanding source version/access conflicts and manual 3+/8+ day aging. Fixed-category append-only browser-local NOT SENT recurrence notes require a non-imported later outcome, witnessed installed Windows and two HOLD confirmations. Full Build 148–172 nested private export, exact historical-prefix Build 171 comparison and historical-only import; no automatic gateway request, notification, source authentication, owner approval or command. Build 171 QL-243 server-only health/capability boundary remains disabled by default and nonproduction-only; gateway receipts, identity witness and live owner pilot are not authorized.
 
-### Build 173 — Independent Recurrence Disposition Follow-Up Aging & Verified Owner Source Recheck (PROPOSED · next)
+### Build 173 — Independent Recurrence Disposition Follow-Up Aging & Verified Owner Source Recheck (IMPLEMENTED · promotion pending)
 - compare successive held Build 172 recurring exception notes against truly later owner and source observations
 - retain overdue source or role-claim contradictions for separate independent review
 - preserve immutable private evidence lineage and gateway/field/Vault HOLDs
 
-**Queue policy:** Builds 138–171 promoted to source `main`; 172 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+Implementation and release gates: `docs/BUILD_173_RECURRENCE_DISPOSITION_QL245.md`. Chronological same-watch Build 172 private recurrence pair comparison, strictly later owner observation and distinct source check claims, repeated stale/contradictory evidence and manual 3+/8+ day aging. Fixed-category browser-local NOT SENT disposition notes require a non-imported later recurrence, installed Windows witness and separate HOLD attestation; full Build 148–173 private receipt with exact nested Build 172 historical prefix, historical-only import. Revised QL-245 health/capability source contract has only ordered `read_health` / `read_capabilities`, `np-...` key format and seven synthetic negative tests; **no** real signed receipts, provisioned connection, pin trust, gateway audit proof or owner pilot.
+
+### Build 174 — Held Disposition Source Recheck Exception Continuity & Independent Reviewer Evidence Reassessment (PROPOSED · next)
+- reconcile later Build 173 private held disposition notes with newly witnessed owner/source claims
+- preserve source identity conflict, overdue exceptions and independent verification gaps
+- maintain full history, fixed HOLD labels and nonproduction QL-245 DISCONNECTED boundaries
+
+**Queue policy:** Builds 138–172 promoted to source `main`; 173 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.

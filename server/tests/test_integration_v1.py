@@ -24,7 +24,7 @@ def _headers(
     stamp: int | None = None,
     source: str = "ai-data-platform",
     business: str = "rosevear-ai-hub",
-    key_id: str = "hub-np-001",
+    key_id: str = "np-hub-001",
     method: str = "GET",
 ) -> dict[str, str]:
     timestamp = str(stamp if stamp is not None else int(time.time() * 1000))
@@ -67,7 +67,7 @@ def _configured(monkeypatch, tmp_path: Path) -> Path:
     ledger = tmp_path / "integration-test.sqlite3"
     monkeypatch.setenv("APP_ENV", "nonproduction")
     monkeypatch.setenv("ROSEVEAR_INTEGRATION_V1_ENABLED", "1")
-    monkeypatch.setenv("ROSEVEAR_INTEGRATION_V1_KEY_ID", "hub-np-001")
+    monkeypatch.setenv("ROSEVEAR_INTEGRATION_V1_KEY_ID", "np-hub-001")
     monkeypatch.setenv("ROSEVEAR_INTEGRATION_V1_HMAC_KEY_B64", base64.b64encode(SECRET).decode())
     monkeypatch.setenv("ROSEVEAR_INTEGRATION_V1_AUDIT_SQLITE", str(ledger))
     return ledger
@@ -89,14 +89,15 @@ def test_valid_signed_gets_are_held_redacted_and_replay_is_durable(monkeypatch, 
         "contract_version": "rosevear.integration.v1",
         "environment": "nonproduction",
         "tenant_id": None,
-        "connection_status": "HOLD",
+        "connection_status": "DISCONNECTED",
         "service_status": "UNVERIFIED",
     }
     assert response.headers["Cache-Control"] == "no-store"
     assert client.get(PATH, headers=_headers()).status_code == 409
     other = client.get(CAPS, headers=_headers(CAPS, nonce="np-" + "1" * 32))
     assert other.status_code == 200
-    assert other.json()["capabilities"] == ["read_service_health"]
+    assert other.json()["capabilities"] == ["read_health", "read_capabilities"]
+    assert other.json()["allowed_paths"] == [PATH, CAPS]
     assert other.json()["enabled_operations"] == []
     # A new TestClient instance shares the durable replay ledger, not process memory.
     assert (
@@ -137,12 +138,12 @@ def test_revocation_rotation_and_missing_durable_storage_fail_closed(monkeypatch
     monkeypatch.setenv("ROSEVEAR_INTEGRATION_V1_KEY_REVOKED", "1")
     assert client.get(PATH, headers=_headers()).status_code == 401
     monkeypatch.setenv("ROSEVEAR_INTEGRATION_V1_KEY_REVOKED", "0")
-    monkeypatch.setenv("ROSEVEAR_INTEGRATION_V1_KEY_ID", "hub-np-002")
+    monkeypatch.setenv("ROSEVEAR_INTEGRATION_V1_KEY_ID", "np-hub-002")
     assert client.get(PATH, headers=_headers()).status_code == 401
-    assert client.get(PATH, headers=_headers(key_id="hub-np-002")).status_code == 200
+    assert client.get(PATH, headers=_headers(key_id="np-hub-002")).status_code == 200
     monkeypatch.setenv("APP_ENV", "production")
     assert (
-        client.get(PATH, headers=_headers(nonce="np-" + "2" * 32, key_id="hub-np-002")).status_code
+        client.get(PATH, headers=_headers(nonce="np-" + "2" * 32, key_id="np-hub-002")).status_code
         == 403
     )
     monkeypatch.setenv("APP_ENV", "nonproduction")
@@ -150,6 +151,56 @@ def test_revocation_rotation_and_missing_durable_storage_fail_closed(monkeypatch
         "ROSEVEAR_INTEGRATION_V1_AUDIT_SQLITE", str(tmp_path / "absent" / "file.sqlite3")
     )
     assert (
-        client.get(PATH, headers=_headers(nonce="np-" + "3" * 32, key_id="hub-np-002")).status_code
+        client.get(PATH, headers=_headers(nonce="np-" + "3" * 32, key_id="np-hub-002")).status_code
         == 409
     )
+
+
+def test_ql245_seven_denial_fixtures_are_only_local_tests(monkeypatch, tmp_path):
+    """These HTTP and SQLite assertions are not original live gateway receipts."""
+    ledger = _configured(monkeypatch, tmp_path)
+    first = client.get(PATH, headers=_headers())
+    assert first.status_code == 200
+    denials = {
+        "nonce_replay": client.get(PATH, headers=_headers()),
+        "stale_request": client.get(
+            PATH, headers=_headers(nonce="np-" + "1" * 32, stamp=int(time.time() * 1000) - 301_000)
+        ),
+        "wrong_business": client.get(PATH, headers=_headers(business="devilndove")),
+        "wrong_tenant": client.get(
+            PATH, headers={**_headers(), "X-Rosevear-Tenant": "another-household"}
+        ),
+    }
+    monkeypatch.setenv("ROSEVEAR_INTEGRATION_V1_KEY_REVOKED", "1")
+    denials["revoked_key"] = client.get(PATH, headers=_headers())
+    monkeypatch.setenv("ROSEVEAR_INTEGRATION_V1_KEY_REVOKED", "0")
+    denials["prohibited_write"] = client.post(
+        "/api/integration/v1/events", headers=_headers(method="POST")
+    )
+    denials["prohibited_dispatch"] = client.post(
+        "/api/integration/v1/dispatch", headers=_headers(method="POST")
+    )
+    assert list(denials) == [
+        "nonce_replay",
+        "stale_request",
+        "wrong_business",
+        "wrong_tenant",
+        "revoked_key",
+        "prohibited_write",
+        "prohibited_dispatch",
+    ]
+    assert [response.status_code for response in denials.values()] == [
+        409,
+        401,
+        403,
+        403,
+        401,
+        403,
+        403,
+    ]
+    with sqlite3.connect(ledger) as connection:
+        rows = connection.execute(
+            "SELECT result,reason FROM integration_v1_audit WHERE result='DENIED'"
+        ).fetchall()
+        assert len(rows) >= 7
+        assert all(result == "DENIED" for result, _ in rows)
