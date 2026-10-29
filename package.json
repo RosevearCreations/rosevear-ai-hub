@@ -18,6 +18,8 @@
     "integration:ql252:publication:test": "node scripts/ql252-hub-publication-guard.test.mjs",
     "integration:ql253:hub:check": "node scripts/ql253-hub-provenance-readiness.mjs",
     "integration:ql253:hub:test": "node scripts/ql253-hub-provenance-readiness.test.mjs",
+    "integration:ql254:hub:check": "node scripts/ql254-hub-provenance-relay.mjs",
+    "integration:ql254:hub:test": "node scripts/ql254-hub-provenance-relay.test.mjs",
     "desktop:dev": "npm --workspace apps/desktop run dev",
     "desktop:check": "npm --workspace apps/desktop run check",
     "desktop:build": "npm run web:build && npm --workspace apps/desktop run build"

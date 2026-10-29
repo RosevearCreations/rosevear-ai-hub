@@ -37,6 +37,8 @@ jobs:
         run: node scripts/ql252-hub-publication-guard.test.mjs && node scripts/ql252-hub-public-check.test.mjs
       - name: QL-253 offline public-provenance and private relay HOLD regressions
         run: node scripts/ql253-hub-provenance-readiness.test.mjs
+      - name: QL-254 synthetic private relay rollback and source registry HOLD regressions
+        run: node scripts/ql254-hub-provenance-relay.test.mjs
 
   backend:
     runs-on: ubuntu-latest
