@@ -31,6 +31,10 @@ jobs:
           test -f docs/BUILD_STATUS.md
           test -f docs/DESKTOP_RUNTIME.md
           test -f docs/OLLAMA_SETUP.md
+      - name: QL-252 public source-proof publication must remain fail-closed without original witness authorization
+        run: node scripts/ql252-hub-publication-guard.mjs
+      - name: QL-252 publication and public provenance synthetic contract regressions
+        run: node scripts/ql252-hub-publication-guard.test.mjs && node scripts/ql252-hub-public-check.test.mjs
 
   backend:
     runs-on: ubuntu-latest
