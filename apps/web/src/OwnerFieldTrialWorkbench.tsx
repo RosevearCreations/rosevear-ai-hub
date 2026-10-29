@@ -92,10 +92,13 @@ import { compareHeldReviewerReceipts, createHeldReviewerReceipt,
 import { ReviewerRenewalTriagePanel } from "./ReviewerRenewalTriagePanel";
 import { compareReviewerRenewalReceipts, createReviewerRenewalReceipt,
   type RenewalTriageNote } from "./ownerReviewerRenewalTriage";
-import { ReviewerTriageContinuityPanel } from "./ReviewerTriageContinuityPanel";
+import { ReviewerTriageContinuityPanel, blankQl248PublicAudit } from "./ReviewerTriageContinuityPanel";
 import { compareHistoricalTriageContinuity, createTriageContinuityReceipt,
-  MAX_TRIAGE_CONTINUITY_BYTES, parseTriageContinuityReceipt,
-  type TriageContinuityNote } from "./ownerReviewerTriageContinuity";
+  type Ql248AuditDraft, type TriageContinuityNote } from "./ownerReviewerTriageContinuity";
+import { TriageExceptionAgingPanel } from "./TriageExceptionAgingPanel";
+import { compareHistoricalTriageExceptions, createTriageExceptionReceipt,
+  MAX_TRIAGE_EXCEPTION_BYTES, parseTriageExceptionReceipt,
+  type TriageExceptionNote } from "./ownerTriageExceptionAging";
 
 const owners: { value: TrialOwner; label: string }[] = [
   { value: "unassigned", label: "Assign a follow-up owner" },
@@ -182,6 +185,10 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
   const [importedRenewalTriageCount, setImportedRenewalTriageCount] = useState(0);
   const [triageContinuityNotes, setTriageContinuityNotes] = useState<TriageContinuityNote[]>([]);
   const [importedTriageContinuityCount, setImportedTriageContinuityCount] = useState(0);
+  const [triageExceptionNotes, setTriageExceptionNotes] = useState<TriageExceptionNote[]>([]);
+  const [importedTriageExceptionCount, setImportedTriageExceptionCount] = useState(0);
+  const [ql248PublicAuditDraft, setQl248PublicAuditDraft] = useState<Ql248AuditDraft>(
+    { ...blankQl248PublicAudit });
   const [readings, setReadings] = useState<TrialSourceReading[]>([]);
   const [selected, setSelected] = useState<TrialCaseId>("home");
   const [outcome, setOutcome] = useState<TrialOutcome>("blocked");
@@ -782,13 +789,28 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not export Build 177 receipt."); }
   }
 
+  function currentPrivateTriageContinuityReceipt() {
+    return createTriageContinuityReceipt(currentPrivateReviewerRenewalReceipt(), triageContinuityNotes);
+  }
+
+  function downloadTriageException() {
+    try {
+      const receipt = createTriageExceptionReceipt(currentPrivateTriageContinuityReceipt(), triageExceptionNotes);
+      const url = URL.createObjectURL(new Blob([JSON.stringify(receipt, null, 2) + "\n"], { type: "application/json" }));
+      const anchor = document.createElement("a"); anchor.href = url;
+      anchor.download = `rosevear-private-triage-exception-aging-${receipt.exported_at.slice(0, 10)}.json`;
+      anchor.click(); URL.revokeObjectURL(url);
+      setFeedback("Build 178 complete private exception history exported. Any public QL-248 proof check was local/untrusted; gateway DISCONNECTED.");
+    } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not export Build 178 receipt."); }
+  }
+
   async function importReceipt(event: ChangeEvent<HTMLInputElement>) {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     if (!file) return;
     try {
-      if (file.size > MAX_TRIAGE_CONTINUITY_BYTES)
-        throw new Error("Private Build 177 receipt exceeds 8.2 MB.");
+      if (file.size > MAX_TRIAGE_EXCEPTION_BYTES)
+        throw new Error("Private Build 178 receipt exceeds 8.5 MB.");
       const { trial, handoffs: importedHandoffs, events, checks, links,
         reassessments: importedReassessments, followups, decisions,
         resolutions, overdue_handoffs: importedOverdueHandoffs,
@@ -811,11 +833,12 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         held_disposition_reassessments: importedHeldReassessments,
         reviewer_followups: importedReviewerFollowups,
         renewal_triage_notes: importedRenewalTriages,
-        triage_continuity_notes: importedTriageContinuity } = parseTriageContinuityReceipt(await file.text());
+        triage_continuity_notes: importedTriageContinuity,
+        triage_exception_notes: importedTriageExceptions } = parseTriageExceptionReceipt(await file.text());
       if ((observations.length || handoffs.length || reviewEvents.length || identityChecks.length || trialLinks.length ||
         reassessments.length || ownerFollowups.length || reviewDecisions.length || resolutionEvidence.length ||
-        overdueHandoffs.length || handoffFollowupReviews.length || followupOutcomes.length || outcomeRechecks.length || exceptionWatches.length || historicalWatchAudits.length || reassignmentWatches.length || ownerReviewFollowups.length || ownerReviewRecurrences.length || dispositionFollowups.length || continuityWatches.length || continuityOutcomes.length || outcomeAgingAudits.length || outcomeAgingFollowups.length || evidenceRenewalRechecks.length || sourceDriftOutcomes.length || outcomeExceptionRecurrences.length || recurrenceDispositionFollowups.length || heldDispositionReassessments.length || heldReviewerFollowups.length || reviewerRenewalTriages.length || triageContinuityNotes.length) &&
-        !window.confirm("Replace this browser session's entire private evidence history? Export the complete Build 177 private receipt first.")) return;
+        overdueHandoffs.length || handoffFollowupReviews.length || followupOutcomes.length || outcomeRechecks.length || exceptionWatches.length || historicalWatchAudits.length || reassignmentWatches.length || ownerReviewFollowups.length || ownerReviewRecurrences.length || dispositionFollowups.length || continuityWatches.length || continuityOutcomes.length || outcomeAgingAudits.length || outcomeAgingFollowups.length || evidenceRenewalRechecks.length || sourceDriftOutcomes.length || outcomeExceptionRecurrences.length || recurrenceDispositionFollowups.length || heldDispositionReassessments.length || heldReviewerFollowups.length || reviewerRenewalTriages.length || triageContinuityNotes.length || triageExceptionNotes.length) &&
+        !window.confirm("Replace this browser session's entire private evidence history? Export the complete Build 178 private receipt first.")) return;
       setEnvironment({ ...trial.environment, installed_windows_witnessed: false });
       setObservations(trial.observations);
       setReadings(trial.source_readings);
@@ -879,10 +902,13 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
       setImportedRenewalTriageCount(importedRenewalTriages.length);
       setTriageContinuityNotes(importedTriageContinuity);
       setImportedTriageContinuityCount(importedTriageContinuity.length);
+      setTriageExceptionNotes(importedTriageExceptions);
+      setImportedTriageExceptionCount(importedTriageExceptions.length);
+      setQl248PublicAuditDraft({ ...blankQl248PublicAudit });
       setImported(true);
       setWitnessed(false);
       setReviewTarget(null);
-      setFeedback("Private trial, handoffs, reviewer evidence and source identity history imported; Build 156–177 outcomes remain historical unverified claims. Re-witness Windows before new review. QL-248 remains PENDING/DISCONNECTED and no field, independent or Vault hold was removed.");
+      setFeedback("Private trial, handoffs, reviewer evidence and source identity history imported; Build 156–178 outcomes remain historical unverified claims. Re-witness Windows and re-enter separately verified public audit details before new review. QL-248 remains PENDING/DISCONNECTED and no field, independent or Vault hold was removed.");
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "Invalid trial receipt. Existing session preserved.");
     }
@@ -892,7 +918,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
     <section className="panel owner-trial" aria-label="Build 148 cross-module owner field trial">
       <header className="owner-trial-header">
         <div>
-        <p className="eyebrow">Builds 148–177 · owner trial, triage continuity and QL-248 audit-preparation HOLD</p>
+        <p className="eyebrow">Builds 148–178 · owner triage exceptions and QL-248 public-proof HOLD</p>
           <h2>Home operations field trial & follow-ups</h2>
           <p>Compare our actual installed Windows Hub, real devices and private access with the source-level release. Record only what we personally witnessed. All unreviewed cases and independent acceptance remain on HOLD.</p>
         </div>
@@ -1292,8 +1318,17 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         importedTriages={importedRenewalTriageCount}
         importedContinuity={importedTriageContinuityCount}
         onNotesChange={setTriageContinuityNotes}
+        auditDraft={ql248PublicAuditDraft} onAuditDraftChange={setQl248PublicAuditDraft}
         compareEarlierReceipt={raw => compareHistoricalTriageContinuity(raw,
           JSON.stringify(currentPrivateReviewerRenewalReceipt()))} active={active} />
+
+      <TriageExceptionAgingPanel prior={currentPrivateTriageContinuityReceipt()}
+        notes={triageExceptionNotes} environment={environment}
+        importedContinuity={importedTriageContinuityCount}
+        importedExceptions={importedTriageExceptionCount}
+        onNotesChange={setTriageExceptionNotes} auditDraft={ql248PublicAuditDraft}
+        compareEarlierReceipt={raw => compareHistoricalTriageExceptions(raw,
+          JSON.stringify(currentPrivateTriageContinuityReceipt()))} active={active} />
 
       <div className="owner-trial-export">
         <button type="button" onClick={downloadReceipt}>Download private HOLD-labelled JSON receipt</button>
@@ -1326,10 +1361,11 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         <button type="button" onClick={downloadHeldReviewerFollowup}>Download Build 175 private held reviewer follow-up receipt (HOLD)</button>
         <button type="button" onClick={downloadReviewerRenewalTriage}>Download Build 176 private reviewer renewal and runner triage receipt (HOLD)</button>
         <button type="button" onClick={downloadTriageContinuity}>Download Build 177 private triage-continuity and QL-248 audit preparation receipt (HOLD)</button>
+        <button type="button" onClick={downloadTriageException}>Download Build 178 private triage exception aging and QL-248 provenance receipt (HOLD)</button>
         <label>Import private Build 148/149/150/151/152/153/154/155/156/157 JSON receipt
           <input type="file" accept=".json,application/json" onChange={event => void importReceipt(event)} />
         </label>
-        <p>Builds 158–177 private receipts are also supported; all imports are historical only. QL-248 two-SHA consumer amendment, private runner and signed source-proof remain PENDING.</p>
+        <p>Builds 158–178 private receipts are also supported; all imports are historical only. QL-248 two-SHA consumer amendment, private runner and signed source-proof remain PENDING.</p>
       </div>
       {feedback && <p role="status" className="owner-trial-feedback">{feedback}</p>}
       <p className="owner-trial-privacy">Trial history, handoffs, reviewer classifications, pseudonymous source checks, exact repeat-trial links, private reassessments, owner follow-ups, independent decision replay, overdue handoff snapshots, Build 157 reconciliation notes and coarse API readings remain in this browser session unless manually exported. Handoffs, repeat-trial routes, aging alerts and replay decisions are not sent or executed, and no source match closes a case. No evidence is sent to the server for storage and no background server mutations occur. Imported records remain historical operator claims. Source CI, installed Windows version, API claims, personal observations and independent acceptance are different evidence classes. <strong>FIELD_ACCEPTANCE_HOLD, INDEPENDENT_REVIEW_HOLD and NOT_AUTHORIZED closure are unconditional.</strong> The first-party password/document Vault remains at 0/6 verified, SECURITY HOLD.</p>

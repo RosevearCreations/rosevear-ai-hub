@@ -8,7 +8,7 @@ import { compareTriageRenewalContinuity, inspectQl248AuditDraft,
   type TriageContinuityNote } from "./ownerReviewerTriageContinuity";
 
 type Filter = "all" | "owner" | "source" | "overdue" | "historical";
-const blankPublicAudit: Ql248AuditDraft = {
+export const blankQl248PublicAudit: Ql248AuditDraft = {
   repository: "RosevearCreations/rosevear-ai-hub", source_sha: "", source_ci_url: "",
   proof_commit_sha: "", raw_proof_sha256: "", public_spki_sha256: "",
 };
@@ -22,7 +22,8 @@ const auditLabels: { field: keyof Ql248AuditDraft; label: string }[] = [
 ];
 
 export function ReviewerTriageContinuityPanel({ prior, notes, environment,
-  importedTriages, importedContinuity, onNotesChange, compareEarlierReceipt, active = true }: {
+  importedTriages, importedContinuity, onNotesChange, compareEarlierReceipt,
+  auditDraft, onAuditDraftChange, active = true }: {
   prior: RenewalTriageReceipt;
   notes: TriageContinuityNote[];
   environment: TrialEnvironment;
@@ -31,6 +32,8 @@ export function ReviewerTriageContinuityPanel({ prior, notes, environment,
   onNotesChange: (notes: TriageContinuityNote[]) => void;
   compareEarlierReceipt: (raw: string) => { previous_triages: number;
     current_triages: number; new_triages: number; comparison: unknown };
+  auditDraft?: Ql248AuditDraft;
+  onAuditDraftChange?: (value: Ql248AuditDraft) => void;
   active?: boolean;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
@@ -40,7 +43,8 @@ export function ReviewerTriageContinuityPanel({ prior, notes, environment,
   const [separateHold, setSeparateHold] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [historical, setHistorical] = useState("");
-  const [publicAudit, setPublicAudit] = useState<Ql248AuditDraft>(blankPublicAudit);
+  const [localPublicAudit, setLocalPublicAudit] = useState<Ql248AuditDraft>(blankQl248PublicAudit);
+  const publicAudit = auditDraft ?? localPublicAudit;
   useEffect(() => { if (!active) { setPersonallyRechecked(false); setSeparateHold(false); } }, [active]);
   const comparisons = prior.renewal_triage_notes.flatMap((later, index) => {
     if (!index) return [];
@@ -113,7 +117,9 @@ export function ReviewerTriageContinuityPanel({ prior, notes, environment,
       {auditLabels.map(item => <label key={item.field}>{item.label}
         <input type="text" autoComplete="off" spellCheck={false} value={publicAudit[item.field]}
           disabled={!active} onChange={event => { const value = event.currentTarget.value.trim();
-            setPublicAudit(prev => ({ ...prev, [item.field]: value })); }} />
+            const next = { ...publicAudit, [item.field]: value };
+            if (onAuditDraftChange) onAuditDraftChange(next); else setLocalPublicAudit(next);
+          }} />
       </label>)}
       <ul>{audit.checks.map(item => <li key={item.check}>
         <strong>{item.ready ? "FORMAT OK" : "MISSING / INVALID"}</strong> — {item.check}
