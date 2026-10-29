@@ -28,6 +28,8 @@
     "desktop:check": "npm --workspace apps/desktop run check",
     "desktop:build": "npm run web:build && npm --workspace apps/desktop run build",
     "integration:ql257:hub:check": "node scripts/ql257-hub-checkpoint.mjs",
-    "integration:ql257:hub:test": "node scripts/ql257-hub-checkpoint.test.mjs"
+    "integration:ql257:hub:test": "node scripts/ql257-hub-checkpoint.test.mjs",
+    "integration:ql258:hub:check": "node scripts/ql258-hub-public-refresh.mjs",
+    "integration:ql258:hub:test": "node scripts/ql258-hub-public-refresh.test.mjs"
   }
 }

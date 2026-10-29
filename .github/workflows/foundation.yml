@@ -45,6 +45,8 @@ jobs:
         run: npm run integration:ql256:witness:test
       - name: QL-257 six-app owner status and expiring witness challenge fail-closed regressions
         run: npm run integration:ql257:hub:test
+      - name: QL-258 public current-source proof refresh and fail-closed regressions
+        run: npm run integration:ql258:hub:test
 
   backend:
     runs-on: ubuntu-latest
