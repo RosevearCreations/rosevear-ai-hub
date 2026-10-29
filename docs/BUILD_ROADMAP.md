@@ -1143,13 +1143,17 @@ Implementation and release gates: `docs/BUILD_179_EXCEPTION_RENEWAL_QL252.md` an
 - document the exact real operator path to independent private signer provisioning, distinct custodian/witness, real owner TEST-only decision, original gateway receipts, final A→B signed proof and separately authorized future 24/7 private relay
 - see `docs/BUILD_183_QL256_REAL_SIGNER_CUSTODY_READINESS.md` and `docs/integration/QL256_HUB_REAL_SIGNER_CUSTODY_OPERATOR_HANDOFF.md`
 
-### Build 184 — QL-256 Private Signer Custody Decision Intake & Independently Witnessed Proof Publication Preparation (HELD · implemented, promotion pending)
+### Build 184 — QL-256 Private Signer Custody Decision Intake & Independently Witnessed Proof Publication Preparation (PROMOTED · main CI GREEN)
 - add a browser-local candidate-only signer status intake with safe, distinct opaque custodian/witness/reviewer IDs, optional public SPKI and registry digests, two HOLD acknowledgments and no backend persistence or identity upgrade
 - verify canonical public QL-256 Ed25519 witness envelope offline; reject altered/expired/wrong-repository/non-Ed25519/role-colliding data; mathematical signature match remains UNTRUSTED without independent real custodian authentication
 - preserve genuine previous source A `b992fdf6a30c62ad627f561c3808f39d4bf6f816` and completed GREEN Actions run `40914482643`; no genuine proof B or custody receipt is available, so connection remains DISCONNECTED / HOLD
 - see `docs/BUILD_184_QL256_CUSTODY_INTAKE_AND_WITNESS.md` and `docs/integration/QL256_HUB_CUSTODY_WITNESS_EVIDENCE_RETURN.md`
 
-### Build 185 — QL-256 Private Custody Receipt Witness Review & Source-Proof Challenge Renewal (HELD · proposed next)
-- renew candidate evidence ages, receipt-origin review and nonproduction challenge readiness while waiting for genuine signer and independently authenticated custodian/witness/reviewer; keep separate owner TEST-only gate and relay prohibition
+### Build 185 — QL-257 Six-App Owner Status Review & Private Witness Challenge Renewal (HELD · implemented, promotion pending)
+- accept only exact nonsecret status words for all six applications, with isolated nonproduction tenant fields for iCamp/Yard Workers; reject private data, false connected state and owner TEST approval
+- offer offline safe packet generation and per-app blocker reports while labelling every claim as operator-stated, not independently authenticated
+- reuse public-only Build 184 witness cryptography to distinguish a current local Ed25519 match from expired/altered witness envelopes needing a genuine private re-challenge; neither path certifies custody or publishes proof B
+- run strict QL-257 regression checks in CI; no home server access, relay start, new keys, gateway GETs, Cloudflare/GitHub variables or new secrets
+- see `docs/BUILD_185_QL257_OWNER_CHECKPOINT.md` and `docs/integration/QL257_HUB_OWNER_STATUS_SAFE_RETURN.md`
 
-**Queue policy:** Builds 138–183 promoted to source `main`; 184 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+**Queue policy:** Builds 138–184 promoted to source `main`; Build 185 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
