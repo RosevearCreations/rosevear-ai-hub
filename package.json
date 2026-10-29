@@ -26,6 +26,8 @@
     "integration:ql256:witness:test": "node scripts/ql256-hub-witness-envelope.test.mjs",
     "desktop:dev": "npm --workspace apps/desktop run dev",
     "desktop:check": "npm --workspace apps/desktop run check",
-    "desktop:build": "npm run web:build && npm --workspace apps/desktop run build"
+    "desktop:build": "npm run web:build && npm --workspace apps/desktop run build",
+    "integration:ql257:hub:check": "node scripts/ql257-hub-checkpoint.mjs",
+    "integration:ql257:hub:test": "node scripts/ql257-hub-checkpoint.test.mjs"
   }
 }
