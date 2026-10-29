@@ -39,6 +39,8 @@ jobs:
         run: node scripts/ql253-hub-provenance-readiness.test.mjs
       - name: QL-254 synthetic private relay rollback and source registry HOLD regressions
         run: node scripts/ql254-hub-provenance-relay.test.mjs
+      - name: QL-256 real source-CI and redacted signer-custody readiness regressions
+        run: npm run integration:ql256:hub:test
 
   backend:
     runs-on: ubuntu-latest

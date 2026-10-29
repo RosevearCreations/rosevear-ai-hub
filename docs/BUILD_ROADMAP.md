@@ -1129,14 +1129,22 @@ Implementation and release gates: `docs/BUILD_179_EXCEPTION_RENEWAL_QL252.md` an
 - add offline-by-default `integration:ql253:hub:check`, opt-in allowlisted public GitHub only, and source-CI synthetic fail-closed regression tests
 - see `docs/BUILD_181_RECURRENCE_QL253.md` and `docs/integration/QL253_HUB_PRIVATE_RELAY_PROVENANCE_HOLD_HANDOFF.md`
 
-### Build 182 — Independent Private Recurrence Exception Reassessment & QL-254 Trusted Registry Source Proof Renewal (IMPLEMENTED · promotion pending)
+### Build 182 — Independent Private Recurrence Exception Reassessment & QL-254 Trusted Registry Source Proof Renewal (PROMOTED · main source CI GREEN)
 - independently review chronological same-case later Build 181 private recurrence notes for repeated original-source gaps and overdue exception decisions; append bounded private HOLD-only reassessment after new Windows recheck and two explicit HOLD acknowledgements
 - reject altered, duplicate, imported-as-new and unauthorized Build 148–182 nested receipts; add private review panel and latest QL-254 original source proof / independent pin registry readiness guidance
 - add QL-254 offline-by-default public GitHub-only A/B proof verification with an optional pure in-memory 30–300 second bounded health/kill-switch/revocation/rollback simulation; never install or start a Windows relay service
 - see `docs/BUILD_182_RECURRENCE_REASSESSMENT_QL254.md` and `docs/integration/QL254_HUB_REGISTRY_RELAY_SIMULATION_HOLD_HANDOFF.md`
 
-### Build 183 — Independent Reassessment Exception Renewal Continuity & QL-255 Private Relay Witness Approval Readiness (PROPOSED · next)
-- renew private recurrence reassessment aging with original evidence and owner source provenance gap classification while leaving all independent field and integration holds unchanged
-- prepare independent QL-255 registry witness and bounded private relay trial approval evidence without live service installation or gateway calls
+### Build 183 — Independent Reassessment Exception Renewal Continuity & QL-255/256 Private Relay Witness Approval Readiness (IMPLEMENTED · promotion pending)
+- independently summarize Build 182 private recheck aging, repeat original source gap and case/watch continuity without treating imported private notes as trust or owner permission
+- verify the actual previous main source A `9cac2ebcb386bec7dfcf2379acb0998c531c6aa1` and exact completed GREEN Actions run `40878851316`, with the genuinely missing signed proof B; do not infer private signer absence from a public 404
+- add a public-template-only variable and secret-name inventory that never reads runtime values; proposed future QL-256 bindings are listed as unimplemented and secrets remain in distinct private custody
+- add offline/default QL-256 source/custody preflight, public GitHub-only exact SHA CI/proof inspection, and real **public SPKI only** Ed25519 candidate fingerprinting without custody upgrade; test fail-closed cases
+- document the exact real operator path to independent private signer provisioning, distinct custodian/witness, real owner TEST-only decision, original gateway receipts, final A→B signed proof and separately authorized future 24/7 private relay
+- see `docs/BUILD_183_QL256_REAL_SIGNER_CUSTODY_READINESS.md` and `docs/integration/QL256_HUB_REAL_SIGNER_CUSTODY_OPERATOR_HANDOFF.md`
 
-**Queue policy:** Builds 138–181 promoted to source `main`; 182 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+### Build 184 — QL-256 Private Signer Custody Decision Intake & Independently Witnessed Proof Publication Preparation (HELD · proposed next)
+- accept private-operator signer provisioning decision and separately authenticated custodian/witness receipt references only through a real approved channel; continue exact source A/CI checks and preserve owner TEST-only HOLD
+- prepare evidence-aware final signed proof gate without fabricating owner decision, negative tests, live gateway calls or Windows relay deployment
+
+**Queue policy:** Builds 138–182 promoted to source `main`; 183 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
