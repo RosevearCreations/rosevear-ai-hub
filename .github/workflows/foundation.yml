@@ -35,6 +35,8 @@ jobs:
         run: node scripts/ql252-hub-publication-guard.mjs
       - name: QL-252 publication and public provenance synthetic contract regressions
         run: node scripts/ql252-hub-publication-guard.test.mjs && node scripts/ql252-hub-public-check.test.mjs
+      - name: QL-253 offline public-provenance and private relay HOLD regressions
+        run: node scripts/ql253-hub-provenance-readiness.test.mjs
 
   backend:
     runs-on: ubuntu-latest
