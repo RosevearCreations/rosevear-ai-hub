@@ -1149,11 +1149,18 @@ Implementation and release gates: `docs/BUILD_179_EXCEPTION_RENEWAL_QL252.md` an
 - preserve genuine previous source A `b992fdf6a30c62ad627f561c3808f39d4bf6f816` and completed GREEN Actions run `40914482643`; no genuine proof B or custody receipt is available, so connection remains DISCONNECTED / HOLD
 - see `docs/BUILD_184_QL256_CUSTODY_INTAKE_AND_WITNESS.md` and `docs/integration/QL256_HUB_CUSTODY_WITNESS_EVIDENCE_RETURN.md`
 
-### Build 185 — QL-257 Six-App Owner Status Review & Private Witness Challenge Renewal (HELD · implemented, promotion pending)
+### Build 185 — QL-257 Six-App Owner Status Review & Private Witness Challenge Renewal (PROMOTED · main CI GREEN)
 - accept only exact nonsecret status words for all six applications, with isolated nonproduction tenant fields for iCamp/Yard Workers; reject private data, false connected state and owner TEST approval
 - offer offline safe packet generation and per-app blocker reports while labelling every claim as operator-stated, not independently authenticated
 - reuse public-only Build 184 witness cryptography to distinguish a current local Ed25519 match from expired/altered witness envelopes needing a genuine private re-challenge; neither path certifies custody or publishes proof B
 - run strict QL-257 regression checks in CI; no home server access, relay start, new keys, gateway GETs, Cloudflare/GitHub variables or new secrets
 - see `docs/BUILD_185_QL257_OWNER_CHECKPOINT.md` and `docs/integration/QL257_HUB_OWNER_STATUS_SAFE_RETURN.md`
 
-**Queue policy:** Builds 138–184 promoted to source `main`; Build 185 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+### Build 186 — QL-258 Comms Hub Owner Return Intake & Exact Public Proof Refresh (HELD · implemented, promotion pending)
+- provide an owner-only temporary paste/review of exactly the original Rosevear AI Hub seven-progress-label QL-258 handoff, rejecting extra fields, private details, false approval, altered snapshots and CONNECTED claims
+- preserve the QL-258 historical source 404 at `99d64047c49678733af762ff906f288ec3ee0bb8` as dated, not current; distinguish newer Build 185 GREEN source from genuine QL-246 signed proof B
+- add opt-in public GitHub only exact-main-head / CI / immutable-proof refresh with start/end head stability check, strict fail-closed behavior, and no private gateway, Windows, keys, service or runtime variable access
+- run React/parser and synthetic offline public fetch tests; original custody and owner TEST remain unverified and DISCONNECTED / HOLD
+- see `docs/BUILD_186_QL258_OWNER_RETURN_AND_PUBLIC_REFRESH.md` and `docs/integration/QL258_HUB_SAFE_RETURN.md`
+
+**Queue policy:** Builds 138–185 promoted to source `main`; Build 186 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
