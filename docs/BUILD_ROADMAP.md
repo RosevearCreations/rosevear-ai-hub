@@ -1117,14 +1117,20 @@ Implementation and release gates: `docs/BUILD_178_TRIAGE_EXCEPTION_AGING_QL248.m
 
 Implementation and release gates: `docs/BUILD_179_EXCEPTION_RENEWAL_QL252.md` and `docs/integration/QL252_HUB_PUBLIC_SOURCE_RETURN.md`. **The genuine QL-246 signed proof file remains MISSING/BLOCKED**: no authenticated private runner, independent witness receipts, signer private key or nonproduction-test authorization exists. No mocked proof is published and no household gateway exposed. All integration remains DISCONNECTED, owner TEST and pilot NOT GIVEN.
 
-### Build 180 — Independent Renewal Watch Exception Disposition & QL-252 Original Source Proof Blocker Reassessment (IMPLEMENTED · promotion pending)
+### Build 180 — Independent Renewal Watch Exception Disposition & QL-252 Original Source Proof Blocker Reassessment (PROMOTED · main source CI GREEN)
 - reconcile append-only later Build 179 private renewal dispositions and aging, separately identifying source drift, overdue evidence, absent owner custody and recurring private exception gaps without treating private notes as witnessed source proof
 - add a private-only owner panel with strict import, compare, two-HOLD-attestation gates and downloadable Build 148–180 receipt; preserve historical receipts
 - add CI fail-closed QL-252 real-file absence guard and offline synthetic regression checks; do not forge Ed25519 signed source proof or claim nonproduction runner authorization
 - see `docs/BUILD_180_RENEWAL_DISPOSITION_QL252.md` and `docs/integration/QL252_HUB_ORIGINAL_PROOF_BLOCKER_REASSESSMENT.md`
 
-### Build 181 — Independent Renewal Disposition Exception Recurrence & QL-253 Original-Proof Provenance Witness Readiness (PROPOSED · next)
-- independently reconcile Build 180 private disposition recurrence and owner evidence freshness; reject unsupported source or custodian provenance upgrades
-- prepare QL-253 immutable A/B provenance rechecks for an eventual real signed source proof, subject to separately authenticated authorization and private runner approval
+### Build 181 — Independent Renewal Disposition Exception Recurrence & QL-253 Original-Proof Provenance Witness Readiness (IMPLEMENTED · promotion pending)
+- reconcile chronological same-watch Build 180 private recurrence, source drift and overdue original evidence; validate immutable append-only Build 148–181 nested receipts without treating private assertions as authenticated provenance
+- add private manual reviewer HOLD panel, strictly limited fixed category recheck, QL-253 source-proof / out-of-band registry evidence readiness and private 24/7 Windows relay boundary; no background network or daemon
+- add offline-by-default `integration:ql253:hub:check`, opt-in allowlisted public GitHub only, and source-CI synthetic fail-closed regression tests
+- see `docs/BUILD_181_RECURRENCE_QL253.md` and `docs/integration/QL253_HUB_PRIVATE_RELAY_PROVENANCE_HOLD_HANDOFF.md`
 
-**Queue policy:** Builds 138–179 promoted to source `main`; 180 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+### Build 182 — Independent Private Recurrence Exception Reassessment & QL-254 Trusted Registry Source Proof Renewal (PROPOSED · next)
+- independently renew Build 181 recurrence evidence, aging and trust-origin exception decisions without upgrading owner or field holds
+- reconcile immutable QL-254 source-proof retrieval and private registry witness readiness; keep private Hub relay disabled pending separate authorization
+
+**Queue policy:** Builds 138–180 promoted to source `main`; 181 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
