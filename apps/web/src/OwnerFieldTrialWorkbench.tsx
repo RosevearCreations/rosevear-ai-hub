@@ -109,6 +109,7 @@ import { createRecurrenceReceipt,
   type RecurrenceNote } from "./ownerRenewalRecurrence";
 import { RecurrenceReassessmentPanel } from "./RecurrenceReassessmentPanel";
 import { Ql256SignerCustodyPanel } from "./Ql256SignerCustodyPanel";
+import { Ql256CustodyIntakePanel } from "./Ql256CustodyIntakePanel";
 import { createReassessmentReceipt as createRecurrenceReassessmentReceipt,
   MAX_REASSESSMENT_BYTES, parseReassessmentReceipt,
   type ReassessmentNote } from "./ownerRecurrenceReassessment";
@@ -1453,6 +1454,7 @@ export function OwnerFieldTrialWorkbench({ onNavigate, active = true }: { onNavi
         onNotesChange={setRecurrenceReassessmentNotes} active={active} />
 
       <Ql256SignerCustodyPanel reassessments={recurrenceReassessmentNotes} />
+      <Ql256CustodyIntakePanel active={active} />
 
       <div className="owner-trial-export">
         <button type="button" onClick={downloadReceipt}>Download private HOLD-labelled JSON receipt</button>

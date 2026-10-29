@@ -41,6 +41,8 @@ jobs:
         run: node scripts/ql254-hub-provenance-relay.test.mjs
       - name: QL-256 real source-CI and redacted signer-custody readiness regressions
         run: npm run integration:ql256:hub:test
+      - name: QL-256 witness public signature candidate cryptography and fail-closed regressions
+        run: npm run integration:ql256:witness:test
 
   backend:
     runs-on: ubuntu-latest
