@@ -1163,13 +1163,20 @@ Implementation and release gates: `docs/BUILD_179_EXCEPTION_RENEWAL_QL252.md` an
 - run React/parser and synthetic offline public fetch tests; original custody and owner TEST remain unverified and DISCONNECTED / HOLD
 - see `docs/BUILD_186_QL258_OWNER_RETURN_AND_PUBLIC_REFRESH.md` and `docs/integration/QL258_HUB_SAFE_RETURN.md`
 
-### Build 187 — QL-261 Source-App Nonproduction GET Safety Gate & Sanitized Owner Return (HELD · implemented, promotion pending)
+### Build 187 — QL-261 Source-App Nonproduction GET Safety Gate & Sanitized Owner Return (PROMOTED · main source CI GREEN)
 - extend already-disabled server-only health/capabilities with explicit no-cache/no-sniff response headers and in-process synthetic checks that forbid socket connections, reject production use and expose no home/vault/customer detail
 - validate exact seven-field sanitized QL-258 Rosevear AI Hub owner packet offline; reject extra credentials, false source identity/approval, and misleading DONE claims; do not invent an owner packet where none is provided
 - keep real signer existence UNKNOWN, custodial roles unverified, independent pin missing and original source-proof A→B publication blocked pending separate authorization
 - record the known Build 186 exact `main` source and matching GREEN CI as public baseline only; Windows relay remains NOT INSTALLED / OFF, owner TEST NOT_GIVEN
 - see `docs/BUILD_187_QL261_SOURCE_APP_SAFETY_GATE.md` and `docs/integration/QL261_HUB_SOURCE_RETURN.md`
 
-**Next Build 188 (proposed) — QL-261 Actual Owner Packet Receipt Reconciliation, Independent Signer-Custody Evidence Gate & Source-Proof A→B Publication Readiness (HELD).**
+### Build 188 — QL-261 Actual Owner Packet Receipt Reconciliation, Independent Signer-Custody Evidence Gate & Source-Proof A→B Publication Readiness (HELD · implemented, promotion pending)
+- reconcile only the exact original nonsecret QL-258 owner return, record source bytes digest to prevent accidental substitution, reject extra private data and false consent while always treating owner progress as unverified self-report
+- add opt-in strictly public GitHub source A to descendant B check and exact original proof HTTP 404 or 200/raw-bytes digest, without inferring trusted signer status from public file presence
+- require independent private custodian, distinct nonce witness, separate reviewer and a restricted persistent signer store before any real private signer status or original signed proof publication can be independently accepted
+- do not install or start Windows relay, enable home systems, request live gateway GET, or grant owner TEST consent as part of source CI
+- see `docs/BUILD_188_QL261_OWNER_RECEIPT_AND_PROOF_LINEAGE.md` and `docs/integration/QL261_HUB_BUILD188_RETURN.md`
 
-**Queue policy:** Builds 138–186 promoted to source `main`; Build 187 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+**Next Build 189 (proposed) — QL-262 Original Evidence Packet Freshness, Independent Signer-Witness Decision Reconciliation & Public Proof-B Acceptance Guard (HELD).**
+
+**Queue policy:** Builds 138–187 promoted to source `main`; Build 188 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
