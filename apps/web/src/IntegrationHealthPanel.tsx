@@ -8,6 +8,7 @@ import {
   getOllamaStatus,
 } from "./api";
 import { IntegrationAcceptancePanel } from "./IntegrationAcceptancePanel";
+import { CommsHubConnectionPanel } from "./CommsHubConnectionPanel";
 
 type IntegrationState = "online" | "offline" | "not_configured" | "unavailable";
 type Observation = {
@@ -127,6 +128,7 @@ export function IntegrationHealthPanel() {
         </>
       ) : <p>No status requests made in this session.</p>}
       <IntegrationAcceptancePanel />
+      <CommsHubConnectionPanel />
     </section>
   );
 }
