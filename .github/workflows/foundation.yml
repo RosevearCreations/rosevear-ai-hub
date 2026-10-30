@@ -53,6 +53,8 @@ jobs:
         run: npm run integration:ql261:hub:188:test
       - name: Build 189 QL-262 original receipt, witness freshness and proof B rejection regressions
         run: npm run integration:ql262:hub:test
+      - name: Build 190 QL-263 public reviewer origin and immutable proof-B recheck fail-closed regressions
+        run: npm run integration:ql263:hub:test
 
   backend:
     runs-on: ubuntu-latest
