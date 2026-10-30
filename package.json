@@ -40,6 +40,7 @@
     "integration:ql263:hub:check": "node scripts/ql263-hub-reviewer-proof-gate.mjs",
     "integration:ql263:hub:test": "node scripts/ql263-hub-reviewer-proof-gate.test.mjs",
     "integration:ql264:hub:check": "node scripts/ql264-hub-custody-proof-readiness.mjs",
-    "integration:ql264:hub:test": "node scripts/ql264-hub-custody-proof-readiness.test.mjs"
+    "integration:ql264:hub:test": "node scripts/ql264-hub-custody-proof-readiness.test.mjs",
+    "integration:ql267:hub:test": "npm --workspace apps/web run test -- ql267HubEvidence.test.ts CommsHubConnectionPanel.test.tsx"
   }
 }

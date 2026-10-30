@@ -45,4 +45,34 @@ describe("Build 191 / QL-264 private decision and reversible TEST-only preview",
     expect(preview.ownerTestAuthorization).toBe("NOT_GIVEN");
     expect(preview.remoteConnection).toBe("DISCONNECTED / HOLD");
   });
+  it("rejects unsafe pasted public decisions and exports only fixed HOLD statuses", () => {
+    render(<CommsHubConnectionPanel />);
+    const input = screen.getByRole("textbox", { name: /Sanitized public status JSON/ });
+    fireEvent.change(input, { target: { value: '{"ownerTestAuthorization":"GIVEN","password":"PRIVATE"}' } });
+    fireEvent.click(screen.getByRole("button", { name: /Validate and prepare sanitized Hub handoff/ }));
+    expect(input).toHaveValue("");
+    const packet = JSON.parse(screen.getByLabelText("QL-267 sanitized Hub handoff").textContent ?? "{}");
+    expect(packet.ql264OriginalPublicDecisionIntake).toBe("REJECTED_UNTRUSTED_OR_MALFORMED");
+    expect(packet.activationEligible).toBe(false);
+    expect(packet.ownerTestAuthorization).toBe("NOT_GIVEN");
+    expect(packet.authenticatedGatewayGets).toBe(0);
+    expect(JSON.stringify(packet)).not.toContain("PRIVATE");
+    expect(screen.getByRole("button", { name: /Copy sanitized Hub handoff/ })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: /Clear in-memory handoff/ }));
+    expect(screen.getByLabelText("QL-267 sanitized Hub handoff").textContent)
+      .toContain("No handoff prepared");
+    expect(screen.getByLabelText("QL-267 public decision intake status")).toHaveTextContent("NOT_RECEIVED");
+  });
+
+  it("keeps QL-267 copy restricted to the sanitized current in-memory export", () => {
+    render(<CommsHubConnectionPanel />);
+    expect(screen.getByRole("button", { name: /Copy sanitized Hub handoff/ })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: /Validate and prepare sanitized Hub handoff/ }));
+    const packet = JSON.parse(screen.getByLabelText("QL-267 sanitized Hub handoff").textContent ?? "{}");
+    expect(packet.ql264OriginalPublicDecisionIntake).toBe("NOT_RECEIVED");
+    expect(packet.originalSignedProofB).toBe("NOT_AVAILABLE");
+    expect(packet.conditionalTestSlot).toBe("HELD_UNSCHEDULED");
+    expect(packet.windowsPrivateRelay).toBe("NOT_INSTALLED_OFF");
+    expect(packet.livePilotHolds).toBe(12);
+  });
 });
