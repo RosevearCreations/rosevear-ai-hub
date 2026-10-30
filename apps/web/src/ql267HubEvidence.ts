@@ -53,9 +53,10 @@ export function inspectQl267HubDecision(raw: string, nowMs = Date.now()): Ql267H
     return rejected();
   try {
     const candidate: unknown = JSON.parse(raw);
-    if (!exact(candidate, FIELDS) || !exact(candidate.role_receipts, ROLES))
-      return rejected();
-    const refs = ROLES.map(role => candidate.role_receipts[role]);
+    if (!exact(candidate, FIELDS)) return rejected();
+    const roleReceipts = candidate.role_receipts;
+    if (!exact(roleReceipts, ROLES)) return rejected();
+    const refs = ROLES.map(role => roleReceipts[role]);
     const populated = refs.filter((ref): ref is string => typeof ref === "string");
     if (refs.some(ref => ref !== null && (typeof ref !== "string" || !OPAQUE.test(ref))) ||
       new Set(populated).size !== populated.length)
@@ -88,7 +89,7 @@ export function inspectQl267HubDecision(raw: string, nowMs = Date.now()): Ql267H
       return rejected();
     for (const role of ROLES) {
       if (candidate[`${role}_status`] === "REVIEWER_REPORTS_VERIFIED_OUT_OF_BAND" &&
-        candidate.role_receipts[role] === null) return rejected();
+        roleReceipts[role] === null) return rejected();
     }
     return {
       status: "PUBLIC_CUSTODY_STATUS_CLAIM_ONLY",
