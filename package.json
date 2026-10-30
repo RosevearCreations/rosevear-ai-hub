@@ -30,6 +30,8 @@
     "integration:ql257:hub:check": "node scripts/ql257-hub-checkpoint.mjs",
     "integration:ql257:hub:test": "node scripts/ql257-hub-checkpoint.test.mjs",
     "integration:ql258:hub:check": "node scripts/ql258-hub-public-refresh.mjs",
-    "integration:ql258:hub:test": "node scripts/ql258-hub-public-refresh.test.mjs"
+    "integration:ql258:hub:test": "node scripts/ql258-hub-public-refresh.test.mjs",
+    "integration:ql261:hub:check": "node scripts/ql261-hub-source-return.mjs",
+    "integration:ql261:hub:test": "node scripts/ql261-hub-source-return.test.mjs"
   }
 }
