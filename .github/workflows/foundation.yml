@@ -55,6 +55,8 @@ jobs:
         run: npm run integration:ql262:hub:test
       - name: Build 190 QL-263 public reviewer origin and immutable proof-B recheck fail-closed regressions
         run: npm run integration:ql263:hub:test
+      - name: Build 191 QL-264 private-role public decision, proof-B and reversible TEST-only HOLD regressions
+        run: npm run integration:ql264:hub:test
 
   backend:
     runs-on: ubuntu-latest

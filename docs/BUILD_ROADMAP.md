@@ -1184,13 +1184,19 @@ Implementation and release gates: `docs/BUILD_179_EXCEPTION_RENEWAL_QL252.md` an
 - preserve concurrently integrated QL-265 Comms Hub I.T. source-panel UI; its local PASS is not a live gateway receipt, never installs or starts the Windows mini-server relay
 - see `docs/BUILD_189_QL262_EVIDENCE_FRESHNESS_AND_PROOF_GUARD.md` and `docs/integration/QL262_HUB_BUILD189_RETURN.md`
 
-### Build 190 — QL-263 Original Independent Reviewer Receipt Intake, Fresh Signed-Proof B Recheck & Safe Connection-Panel Decision Alignment (HELD · implemented, promotion pending)
+### Build 190 — QL-263 Original Independent Reviewer Receipt Intake, Fresh Signed-Proof B Recheck & Safe Connection-Panel Decision Alignment (PROMOTED · main source CI GREEN)
 - add strict original public reviewer-envelope schema, <=5-minute Ed25519 math, fixed HOLD, separate opaque role receipt checks and reviewer/witness/source SPKI collision detection; public signature never authenticates human custody or owner TEST
 - opt-in public GitHub-only latest immutable proof B recheck requires current main, successful exact-main push CI, strict source A ancestry, stable main head, original proof HTTP 404 versus 200/raw digest; neither result authorizes gateway GETs
 - preserve the QL-265 Comms Hub I.T. panel but label local PASS as synthetic; add explicit QL-263 independent HOLD and activationEligible=false, no network request or relay button
 - add Node and React regression tests; no live home devices, cameras, MQTT, document vault, Windows scheduler/tunnel, private keys, gateway or owner approval involved
 - see `docs/BUILD_190_QL263_ORIGINAL_REVIEWER_PROOF_AND_UI_HOLD.md` and `docs/integration/QL263_HUB_BUILD190_RETURN.md`
 
-**Next Build 191 (proposed) — QL-264 Authentic Private Custody Decision Evidence Reconciliation, Original Signed Source-Proof Publication Audit & Reversible TEST-Only Gate Readiness (HELD).**
+### Build 191 — QL-264 Authentic Private Custody Decision Evidence Reconciliation, Original Signed Source-Proof Publication Audit & Reversible TEST-Only Gate Readiness (HELD · implemented, promotion pending)
+- enforce strict original public status-return schema, source A, opaque role-reference separation and <=15-minute freshness; statuses and public digests remain untrusted without independent private reviewer authentication
+- expose opt-in public GitHub-only exact original proof A→B recheck and explicitly reject false trust promotion on either HTTP 404 or unreviewed public HTTP 200
+- preview bounded GET-only <=15-minute <=9-GET seven-denial reversible TEST plan in the QL-265 I.T. panel, but make zero network requests and preserve relay OFF, owner TEST NOT_GIVEN and integration HOLD
+- add offline Node and React regressions; see `docs/BUILD_191_QL264_PRIVATE_CUSTODY_PUBLICATION_AND_TEST_GATE.md` and `docs/integration/QL264_HUB_BUILD191_RETURN.md`
 
-**Queue policy:** Builds 138–189 promoted to source `main`; Build 190 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+**Next Build 192 (proposed) — QL-267 Original Custody Decision Return Intake, Source Connection UI Evidence Export & TEST-Only Authorization Guard (HELD).**
+
+**Queue policy:** Builds 138–190 promoted to source `main`; Build 191 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
