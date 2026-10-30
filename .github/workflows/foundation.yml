@@ -47,6 +47,8 @@ jobs:
         run: npm run integration:ql257:hub:test
       - name: QL-258 public current-source proof refresh and fail-closed regressions
         run: npm run integration:ql258:hub:test
+      - name: QL-261 exact owner return packet and private proof HOLD regressions
+        run: npm run integration:ql261:hub:test
 
   backend:
     runs-on: ubuntu-latest

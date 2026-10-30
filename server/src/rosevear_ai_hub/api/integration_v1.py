@@ -35,6 +35,11 @@ _APP = "rosevear-ai-hub"
 _SOURCE = "ai-data-platform"
 _CONTRACT = "rosevear.integration.v1"
 _PATHS = {"/api/integration/v1/health", "/api/integration/v1/capabilities"}
+_PUBLIC_METADATA_HEADERS = {
+    "Cache-Control": "no-store",
+    "Pragma": "no-cache",
+    "X-Content-Type-Options": "nosniff",
+}
 _NONCE_PATTERN = re.compile(r"np-[a-f0-9]{32}\Z")
 # QL-245 requires an independently issued *nonproduction* key ID. This is a
 # format guard only; no key or trusted gateway identity is provisioned here.
@@ -197,7 +202,7 @@ async def integration_health(request: Request):
             "connection_status": "DISCONNECTED",
             "service_status": "UNVERIFIED",
         },
-        headers={"Cache-Control": "no-store"},
+        headers=_PUBLIC_METADATA_HEADERS,
     )
 
 
@@ -215,7 +220,7 @@ async def integration_capabilities(request: Request):
             "allowed_paths": ["/api/integration/v1/health", "/api/integration/v1/capabilities"],
             "enabled_operations": [],
         },
-        headers={"Cache-Control": "no-store"},
+        headers=_PUBLIC_METADATA_HEADERS,
     )
 
 

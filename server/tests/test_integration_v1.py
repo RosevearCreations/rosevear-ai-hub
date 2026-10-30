@@ -3,6 +3,7 @@
 import base64
 import hashlib
 import hmac
+import socket
 import sqlite3
 import time
 from pathlib import Path
@@ -204,3 +205,58 @@ def test_ql245_seven_denial_fixtures_are_only_local_tests(monkeypatch, tmp_path)
         ).fetchall()
         assert len(rows) >= 7
         assert all(result == "DENIED" for result, _ in rows)
+
+
+def test_ql261_synthetic_health_capabilities_never_contact_home_systems(monkeypatch, tmp_path):
+    """In-process synthetic GET only: no LAN, Internet, devices, MQTT or home gateway IO."""
+
+    def forbid_network(*_args, **_kwargs):
+        raise AssertionError("QL-261 synthetic source contract attempted a network socket")
+
+    monkeypatch.setattr(socket.socket, "connect", forbid_network)
+    _configured(monkeypatch, tmp_path)
+    health = client.get(PATH, headers=_headers(nonce="np-" + "a" * 32))
+    capabilities = client.get(CAPS, headers=_headers(CAPS, nonce="np-" + "b" * 32))
+    assert health.status_code == 200
+    assert capabilities.status_code == 200
+    assert health.json() == {
+        "source_system": "rosevear-ai-hub",
+        "contract_version": "rosevear.integration.v1",
+        "environment": "nonproduction",
+        "tenant_id": None,
+        "connection_status": "DISCONNECTED",
+        "service_status": "UNVERIFIED",
+    }
+    assert capabilities.json() == {
+        "source_system": "rosevear-ai-hub",
+        "contract_version": "rosevear.integration.v1",
+        "environment": "nonproduction",
+        "tenant_id": None,
+        "connection_status": "DISCONNECTED",
+        "capabilities": ["read_health", "read_capabilities"],
+        "allowed_paths": [PATH, CAPS],
+        "enabled_operations": [],
+    }
+    for response in (health, capabilities):
+        assert response.headers["Cache-Control"] == "no-store"
+        assert response.headers["Pragma"] == "no-cache"
+        assert response.headers["X-Content-Type-Options"] == "nosniff"
+        assert all(
+            secret not in response.text.lower()
+            for secret in (
+                "camera",
+                "mqtt",
+                "home_assistant",
+                "vault",
+                "ip_address",
+                "hostname",
+                "credential",
+                "customer",
+                "secret",
+                "session",
+                "device",
+            )
+        )
+    assert client.post("/api/integration/v1/dispatch", headers=_headers()).status_code == 403
+    monkeypatch.setenv("APP_ENV", "production")
+    assert client.get(PATH, headers=_headers(nonce="np-" + "c" * 32)).status_code == 403
