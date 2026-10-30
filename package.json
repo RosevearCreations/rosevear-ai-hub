@@ -42,6 +42,7 @@
     "integration:ql264:hub:check": "node scripts/ql264-hub-custody-proof-readiness.mjs",
     "integration:ql264:hub:test": "node scripts/ql264-hub-custody-proof-readiness.test.mjs",
     "integration:ql267:hub:test": "npm --workspace apps/web run test -- ql267HubEvidence.test.ts CommsHubConnectionPanel.test.tsx",
-    "integration:ql268:hub:test": "npm --workspace apps/web run test -- ql268HubAudit.test.ts CommsHubConnectionPanel.test.tsx App.test.tsx"
+    "integration:ql268:hub:test": "npm --workspace apps/web run test -- ql268HubAudit.test.ts CommsHubConnectionPanel.test.tsx App.test.tsx",
+    "integration:ql269:hub:test": "npm --workspace apps/web run test -- ql269HubReview.test.ts Ql269ConnectionReview.test.tsx StandardThemeAcceptancePanel.test.tsx CommsHubConnectionPanel.test.tsx App.test.tsx"
   }
 }
