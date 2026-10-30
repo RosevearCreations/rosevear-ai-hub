@@ -1,9 +1,37 @@
 import { useState } from "react";
+import { inspectQl267HubDecision, makeQl267HubSafeHandoff } from "./ql267HubEvidence";
 
-/** QL-265 local UI; Build 191 / QL-264 adds a reversible TEST-only planning preview. */
+/** QL-265 local UI; Build 192 / QL-267 adds safe in-memory status return and export. */
 export function CommsHubConnectionPanel() {
   const [report, setReport] = useState("");
   const [dryRunPlan, setDryRunPlan] = useState("");
+  const [publicDecisionInput, setPublicDecisionInput] = useState("");
+  const [decisionStatus, setDecisionStatus] = useState("NOT_RECEIVED");
+  const [safeHandoff, setSafeHandoff] = useState("");
+  const [copyMessage, setCopyMessage] = useState("");
+  function prepareQl267Handoff() {
+    const inspected = inspectQl267HubDecision(publicDecisionInput);
+    setDecisionStatus(inspected.status);
+    setSafeHandoff(JSON.stringify(makeQl267HubSafeHandoff(inspected), null, 2));
+    setPublicDecisionInput("");
+    setCopyMessage("Prepared locally. No network request or private receipt authentication.");
+  }
+  async function copyQl267Handoff() {
+    if (!safeHandoff) return;
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(safeHandoff);
+      setCopyMessage("Copied sanitized HOLD handoff. Nothing sent to a server.");
+    } catch {
+      setCopyMessage("Clipboard unavailable. Select and copy the sanitized JSON shown below.");
+    }
+  }
+  function clearQl267Handoff() {
+    setPublicDecisionInput("");
+    setSafeHandoff("");
+    setDecisionStatus("NOT_RECEIVED");
+    setCopyMessage("Cleared this panel’s in-memory input and export.");
+  }
   function checkLocalContract() {
     setReport(JSON.stringify({
       schema: "rosevear-comms-local-preflight/v1",
@@ -60,5 +88,24 @@ export function CommsHubConnectionPanel() {
     <pre role="status" aria-live="polite" style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: 340, overflow: "auto" }}>{report || "Not run. Private relay remains OFF."}</pre>
     <p>The optional QL-264 preview is a static checklist: proposed GET limits and denials are not executed, no credential or home-network route is used, and rollback is not authorized.</p>
     <pre aria-label="QL-264 reversible TEST-only plan" style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: 340, overflow: "auto" }}>{dryRunPlan || "Plan not previewed. Integration still HELD."}</pre>
+    <h3>QL-267 · Original public custody decision return (offline)</h3>
+    <p>Paste only the original <strong>sanitized public QL-264 decision status JSON</strong> if an authorized source reviewer actually returned it. Never paste identities, signatures, challenges, credentials, key material, private paths, home addresses or customer information. Public status is a self-report, not verified custody.</p>
+    <label htmlFor="ql267-hub-original-public-decision">Sanitized public status JSON (cleared after inspection; not saved)</label>
+    <textarea id="ql267-hub-original-public-decision" value={publicDecisionInput} maxLength={8192} rows={5}
+      onChange={event => {
+        setPublicDecisionInput(event.target.value);
+        setSafeHandoff("");
+        setDecisionStatus("NOT_RECEIVED");
+        setCopyMessage("");
+      }}
+      placeholder="Optional original public QL-264 status JSON only" />
+    <div>
+      <button type="button" onClick={prepareQl267Handoff}>Validate and prepare sanitized Hub handoff (offline)</button>
+      <button type="button" onClick={copyQl267Handoff} disabled={!safeHandoff}>Copy sanitized Hub handoff</button>
+      <button type="button" onClick={clearQl267Handoff}>Clear in-memory handoff</button>
+    </div>
+    <p><strong>Public decision intake:</strong> <span aria-label="QL-267 public decision intake status">{decisionStatus}</span>. No public report or copy action can grant TEST authorization, verify humans or schedule gateway GETs.</p>
+    <p aria-live="polite">{copyMessage}</p>
+    <pre aria-label="QL-267 sanitized Hub handoff" style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: 420, overflow: "auto" }}>{safeHandoff || "No handoff prepared. Private relay and connection remain OFF / HOLD."}</pre>
   </section>;
 }
