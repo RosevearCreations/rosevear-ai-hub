@@ -17,6 +17,7 @@ import { AuditView } from "./AuditView";
 import { AuthView } from "./AuthView";
 import { CameraView } from "./CameraView";
 import { CardHelp, CommandPalette, type ShellDensity, type ShellTheme } from "./CommandShell";
+import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
 import { HubNavIcon } from "./HubNavIcon";
 import { BusinessView } from "./BusinessView";
 import { ChatView } from "./ChatView";
@@ -376,6 +377,7 @@ export function App() {
           <UsersView currentUser={user} />
         ) : section === "System" ? (
           <>
+            {canAdminister && <StandardThemeAcceptancePanel role={user.role as "owner" | "administrator"} appearance={appearance} density={density} />}
             {canAdminister && <LocalDiagnosticsPanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <PostRebootAcceptancePanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <StartupRecoveryConsole onNavigate={(target) => setSection(target as Section)} />}

@@ -105,6 +105,8 @@ jobs:
         run: npm run test -- ql267HubEvidence.test.ts CommsHubConnectionPanel.test.tsx
       - name: Build 193 QL-268 proof-B exception, TEST-HOLD and shell navigation regressions
         run: npm run test -- ql268HubAudit.test.ts CommsHubConnectionPanel.test.tsx App.test.tsx
+      - name: Build 194 QL-269 original proof readback, isolated GET HOLD and Standard theme review
+        run: npm run test -- ql269HubReview.test.ts Ql269ConnectionReview.test.tsx StandardThemeAcceptancePanel.test.tsx CommsHubConnectionPanel.test.tsx
       - name: Test
         run: npm run test
       - name: Production build

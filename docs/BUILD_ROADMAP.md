@@ -1203,12 +1203,18 @@ Implementation and release gates: `docs/BUILD_179_EXCEPTION_RENEWAL_QL252.md` an
 - preserve historical exact `main` SHA/CI/HTTP 404 as dated evidence rather than automatically applying it to future commits; retain all twelve pilot holds, owner TEST NOT_GIVEN and zero gateway GETs
 - add TypeScript parser, component and focused CI tests; see `docs/BUILD_192_QL267_ORIGINAL_DECISION_UI_AND_TEST_HOLD.md` and `docs/integration/QL267_HUB_BUILD192_RETURN.md`
 
-### Build 193 — QL-268 Original Signed Proof-B Publication Exception Review, Nonproduction Isolation Evidence & Conditional GET Slot HOLD Audit (HELD · implementation in review)
+### Build 193 — QL-268 Original Signed Proof-B Publication Exception Review, Nonproduction Isolation Evidence & Conditional GET Slot HOLD Audit (PROMOTED · main source CI GREEN)
 - screen original **public-only** proof-B publication metadata with exact immutable source A, distinct proof B, GitHub CI URL, 15-minute freshness and no unknown/private fields; never call a source endpoint or interpret a self-report as authenticated signature/custody
 - export a source-only fixed-field HOLD exception with the observed Build 192 main SHA/CI/real proof HTTP 404, no authenticated signer/witness/pin/isolation, no owner TEST and zero gateway GETs; relay stays uninstalled/OFF
 - introduce the Rosevear **Standard** midnight command-centre theme, distinct AI server-room photo banner, compact module navigation, readable status cards, responsive tables/panels, while retaining actual existing content, all permissions and high contrast
 - add full web/Windows/backend CI and focused QL-268 UI/parser/guard regressions; see `docs/BUILD_193_QL268_PUBLIC_PROOF_HOLD_AND_MIDNIGHT_SHELL.md` and `docs/integration/QL268_HUB_BUILD193_RETURN.md`
 
-**Next Build 194 (proposed) — QL-269 Independent Proof-B Return Source Verification, Isolated Nonproduction GET Preflight & Standard Theme Owner Acceptance (HELD).**
+### Build 194 — QL-269 Independent Proof-B Return Source Verification, Isolated Nonproduction GET Preflight & Standard Theme Owner Acceptance (HELD · implementation in review)
+- add strict, bounded, ephemeral public proof-B return metadata screening and compare claimed A/B values with the earlier QL-268 public candidate; even matching claims never constitute independent signature, pinned signer, commit ancestry or reviewer verification
+- prepare a fixed-field isolated nonproduction GET-only preflight report with 2 proposed health/capability paths, 7 denial cases, 9 GET / 15-minute limits, unscheduled slot, unissued credentials, zero actual requests, relay OFF and owner TEST NOT_GIVEN
+- add real Standard theme owner-review controls in System for front end/navigation, I.T., management, statistics and system status; screen-by-screen findings and a session-only safe handoff never grant integration permission
+- keep full web/Windows/backend CI and focused parser/UI tests; see `docs/BUILD_194_QL269_SOURCE_RETURN_GET_HOLD_AND_THEME_ACCEPTANCE.md` and `docs/integration/QL269_HUB_BUILD194_RETURN.md`
 
-**Queue policy:** Builds 138–192 promoted to source `main`; Build 193 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+**Next Build 195 (proposed) — QL-270 Original Proof-B Source Recheck, Independent Custody/Pin Evidence Renewal & Standard Theme Issue Resolution (HELD).**
+
+**Queue policy:** Builds 138–193 promoted to source `main`; Build 194 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
