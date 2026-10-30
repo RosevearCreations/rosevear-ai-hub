@@ -470,6 +470,9 @@ describe("App", () => {
       expect(screen.getByRole("button", { name: "Secrets" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Tools" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Users" })).toBeInTheDocument();
+      expect(screen.getByLabelText("Rosevear AI Hub workspace banner")).toHaveTextContent("Our private command centre");
+      expect(screen.getByRole("region", { name: "Rosevear AI Hub source status cards" })).toHaveTextContent("Comms connection");
+      expect(screen.getByRole("region", { name: "Rosevear AI Hub source status cards" })).toHaveTextContent("HOLD");
     });
 
     await waitFor(() => {

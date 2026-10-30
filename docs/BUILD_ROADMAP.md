@@ -1197,12 +1197,18 @@ Implementation and release gates: `docs/BUILD_179_EXCEPTION_RENEWAL_QL252.md` an
 - preview bounded GET-only <=15-minute <=9-GET seven-denial reversible TEST plan in the QL-265 I.T. panel, but make zero network requests and preserve relay OFF, owner TEST NOT_GIVEN and integration HOLD
 - add offline Node and React regressions; see `docs/BUILD_191_QL264_PRIVATE_CUSTODY_PUBLICATION_AND_TEST_GATE.md` and `docs/integration/QL264_HUB_BUILD191_RETURN.md`
 
-### Build 192 — QL-267 Original Custody Decision Return Intake, Source Connection UI Evidence Export & TEST-Only Authorization Guard (HELD · implemented, promotion pending)
+### Build 192 — QL-267 Original Custody Decision Return Intake, Source Connection UI Evidence Export & TEST-Only Authorization Guard (PROMOTED · main source CI GREEN)
 - inspect strict original public QL-264 custody status in browser memory, reject extra/private fields, stale statuses, role collision and forged owner TEST/relay activity; self-report is not authenticated custody
 - add local source connection-panel sanitized JSON export with explicit copy and clear controls; no automatic source-to-Comms transport, no persisted packet and no role receipt ID export
 - preserve historical exact `main` SHA/CI/HTTP 404 as dated evidence rather than automatically applying it to future commits; retain all twelve pilot holds, owner TEST NOT_GIVEN and zero gateway GETs
 - add TypeScript parser, component and focused CI tests; see `docs/BUILD_192_QL267_ORIGINAL_DECISION_UI_AND_TEST_HOLD.md` and `docs/integration/QL267_HUB_BUILD192_RETURN.md`
 
-**Next Build 193 (proposed) — QL-268 Original Signed Proof-B Publication Exception Review, Nonproduction Isolation Evidence & Conditional GET Slot HOLD Audit.**
+### Build 193 — QL-268 Original Signed Proof-B Publication Exception Review, Nonproduction Isolation Evidence & Conditional GET Slot HOLD Audit (HELD · implementation in review)
+- screen original **public-only** proof-B publication metadata with exact immutable source A, distinct proof B, GitHub CI URL, 15-minute freshness and no unknown/private fields; never call a source endpoint or interpret a self-report as authenticated signature/custody
+- export a source-only fixed-field HOLD exception with the observed Build 192 main SHA/CI/real proof HTTP 404, no authenticated signer/witness/pin/isolation, no owner TEST and zero gateway GETs; relay stays uninstalled/OFF
+- introduce the Rosevear **Standard** midnight command-centre theme, distinct AI server-room photo banner, compact module navigation, readable status cards, responsive tables/panels, while retaining actual existing content, all permissions and high contrast
+- add full web/Windows/backend CI and focused QL-268 UI/parser/guard regressions; see `docs/BUILD_193_QL268_PUBLIC_PROOF_HOLD_AND_MIDNIGHT_SHELL.md` and `docs/integration/QL268_HUB_BUILD193_RETURN.md`
 
-**Queue policy:** Builds 138–191 promoted to source `main`; Build 192 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+**Next Build 194 (proposed) — QL-269 Independent Proof-B Return Source Verification, Isolated Nonproduction GET Preflight & Standard Theme Owner Acceptance (HELD).**
+
+**Queue policy:** Builds 138–192 promoted to source `main`; Build 193 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
