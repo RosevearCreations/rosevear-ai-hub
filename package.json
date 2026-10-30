@@ -36,6 +36,8 @@
     "integration:ql261:hub:188:check": "node scripts/ql261-hub-build188-reconcile.mjs",
     "integration:ql261:hub:188:test": "node scripts/ql261-hub-build188-reconcile.test.mjs",
     "integration:ql262:hub:check": "node scripts/ql262-hub-evidence-freshness.mjs",
-    "integration:ql262:hub:test": "node scripts/ql262-hub-evidence-freshness.test.mjs"
+    "integration:ql262:hub:test": "node scripts/ql262-hub-evidence-freshness.test.mjs",
+    "integration:ql263:hub:check": "node scripts/ql263-hub-reviewer-proof-gate.mjs",
+    "integration:ql263:hub:test": "node scripts/ql263-hub-reviewer-proof-gate.test.mjs"
   }
 }
