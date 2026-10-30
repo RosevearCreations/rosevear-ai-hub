@@ -49,6 +49,8 @@ jobs:
         run: npm run integration:ql258:hub:test
       - name: QL-261 exact owner return packet and private proof HOLD regressions
         run: npm run integration:ql261:hub:test
+      - name: Build 188 original owner packet and public A-to-B ancestry fail-closed regressions
+        run: npm run integration:ql261:hub:188:test
 
   backend:
     runs-on: ubuntu-latest
