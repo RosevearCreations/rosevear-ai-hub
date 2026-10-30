@@ -1177,13 +1177,20 @@ Implementation and release gates: `docs/BUILD_179_EXCEPTION_RENEWAL_QL252.md` an
 - do not install or start Windows relay, enable home systems, request live gateway GET, or grant owner TEST consent as part of source CI
 - see `docs/BUILD_188_QL261_OWNER_RECEIPT_AND_PROOF_LINEAGE.md` and `docs/integration/QL261_HUB_BUILD188_RETURN.md`
 
-### Build 189 — QL-262 Original Evidence Packet Freshness, Independent Signer-Witness Decision Reconciliation & Public Proof-B Acceptance Guard (HELD · implemented, promotion pending)
+### Build 189 — QL-262 Original Evidence Packet Freshness, Independent Signer-Witness Decision Reconciliation & Public Proof-B Acceptance Guard (PROMOTED · main source CI GREEN)
 - accept actual original QL-258 sanitized owner packet only, optionally compare to separately provided SHA-256; historical snapshot is not a current identity verification or TEST permission
 - verify original public QL-256 witness signatures against canonical bytes, an audited immutable source A and current <=5-minute window, retaining independent witness role, private custody and reviewer authentication as separately unverified
 - guard actual immutable proof B HTTP 404 versus original raw 200 bytes; even a complete detached Ed25519 signature match with operator-provided pin and seven-negative claims is METADATA ONLY pending independent private review
 - preserve concurrently integrated QL-265 Comms Hub I.T. source-panel UI; its local PASS is not a live gateway receipt, never installs or starts the Windows mini-server relay
 - see `docs/BUILD_189_QL262_EVIDENCE_FRESHNESS_AND_PROOF_GUARD.md` and `docs/integration/QL262_HUB_BUILD189_RETURN.md`
 
-**Next Build 190 (proposed) — QL-263 Original Independent Reviewer Receipt Intake, Fresh Signed-Proof B Recheck & Safe Connection-Panel Decision Alignment (HELD).**
+### Build 190 — QL-263 Original Independent Reviewer Receipt Intake, Fresh Signed-Proof B Recheck & Safe Connection-Panel Decision Alignment (HELD · implemented, promotion pending)
+- add strict original public reviewer-envelope schema, <=5-minute Ed25519 math, fixed HOLD, separate opaque role receipt checks and reviewer/witness/source SPKI collision detection; public signature never authenticates human custody or owner TEST
+- opt-in public GitHub-only latest immutable proof B recheck requires current main, successful exact-main push CI, strict source A ancestry, stable main head, original proof HTTP 404 versus 200/raw digest; neither result authorizes gateway GETs
+- preserve the QL-265 Comms Hub I.T. panel but label local PASS as synthetic; add explicit QL-263 independent HOLD and activationEligible=false, no network request or relay button
+- add Node and React regression tests; no live home devices, cameras, MQTT, document vault, Windows scheduler/tunnel, private keys, gateway or owner approval involved
+- see `docs/BUILD_190_QL263_ORIGINAL_REVIEWER_PROOF_AND_UI_HOLD.md` and `docs/integration/QL263_HUB_BUILD190_RETURN.md`
 
-**Queue policy:** Builds 138–188 promoted to source `main`; Build 189 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+**Next Build 191 (proposed) — QL-264 Authentic Private Custody Decision Evidence Reconciliation, Original Signed Source-Proof Publication Audit & Reversible TEST-Only Gate Readiness (HELD).**
+
+**Queue policy:** Builds 138–189 promoted to source `main`; Build 190 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
