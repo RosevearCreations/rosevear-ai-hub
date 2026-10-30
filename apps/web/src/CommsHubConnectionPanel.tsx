@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { inspectQl267HubDecision, makeQl267HubSafeHandoff } from "./ql267HubEvidence";
+import { inspectQl268PublicMetadata, makeQl268HubHoldAudit } from "./ql268HubAudit";
 
 /** QL-265 local UI; Build 192 / QL-267 adds safe in-memory status return and export. */
 export function CommsHubConnectionPanel() {
@@ -9,6 +10,9 @@ export function CommsHubConnectionPanel() {
   const [decisionStatus, setDecisionStatus] = useState("NOT_RECEIVED");
   const [safeHandoff, setSafeHandoff] = useState("");
   const [copyMessage, setCopyMessage] = useState("");
+  const [proofMetadataInput, setProofMetadataInput] = useState("");
+  const [proofAudit, setProofAudit] = useState("");
+  const [proofStatus, setProofStatus] = useState("NOT_RECEIVED");
   function prepareQl267Handoff() {
     const inspected = inspectQl267HubDecision(publicDecisionInput);
     setDecisionStatus(inspected.status);
@@ -31,6 +35,17 @@ export function CommsHubConnectionPanel() {
     setSafeHandoff("");
     setDecisionStatus("NOT_RECEIVED");
     setCopyMessage("Cleared this panel’s in-memory input and export.");
+  }
+  function prepareQl268ProofAudit() {
+    const result = inspectQl268PublicMetadata(proofMetadataInput);
+    setProofStatus(result.status);
+    setProofAudit(JSON.stringify(makeQl268HubHoldAudit(result), null, 2));
+    setProofMetadataInput("");
+  }
+  function clearQl268ProofAudit() {
+    setProofMetadataInput("");
+    setProofStatus("NOT_RECEIVED");
+    setProofAudit("");
   }
   function checkLocalContract() {
     setReport(JSON.stringify({
@@ -107,5 +122,20 @@ export function CommsHubConnectionPanel() {
     <p><strong>Public decision intake:</strong> <span aria-label="QL-267 public decision intake status">{decisionStatus}</span>. No public report or copy action can grant TEST authorization, verify humans or schedule gateway GETs.</p>
     <p aria-live="polite">{copyMessage}</p>
     <pre aria-label="QL-267 sanitized Hub handoff" style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: 420, overflow: "auto" }}>{safeHandoff || "No handoff prepared. Private relay and connection remain OFF / HOLD."}</pre>
+    <div className="hub-connection-evidence">
+      <h3>QL-268 · Original proof-B exception audit (offline)</h3>
+      <p><strong>Last independently observed source main:</strong> <code>57a4bce43be6b8af175c0c7f45afa325c2900619</code>. Its source workflow was GREEN, but the actual signed proof file was <strong>HTTP 404</strong>. Neither a new commit nor a pasted public claim changes that observation.</p>
+      <p>A reviewer may give us <em>nonsecret public publication metadata</em> for a claimed source A → proof B. This field checks only shape, freshness and immutable URL formats. It never fetches the URL, verifies a key or signature, accepts a private receipt or authorizes a trial.</p>
+      <label htmlFor="ql268-hub-public-proof-metadata">Optional QL-268 public proof metadata JSON (memory only)</label>
+      <textarea id="ql268-hub-public-proof-metadata" rows={5} maxLength={4096}
+        value={proofMetadataInput} onChange={event => { setProofMetadataInput(event.target.value); setProofAudit(""); setProofStatus("NOT_RECEIVED"); }}
+        placeholder="Optional sanitized public proof publication claim only; no signatures, credentials, human identities, private paths or private endpoints" />
+      <div className="hub-connection-actions">
+        <button type="button" onClick={prepareQl268ProofAudit}>Screen public proof metadata (offline)</button>
+        <button type="button" onClick={clearQl268ProofAudit}>Clear QL-268 memory</button>
+      </div>
+      <p><strong>Publication claim status:</strong> <span aria-label="QL-268 public proof metadata status">{proofStatus}</span>. An external reviewer must still compare original signature, signer pin, A→B ancestry, exact-source CI, private human custody and isolated nonproduction boundaries. All twelve pilot HOLD gates remain unchanged.</p>
+      <pre aria-label="QL-268 sanitized proof exception audit" style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: 420, overflow: "auto" }}>{proofAudit || "No proof-B exception audit prepared. TEST slot held; no GETs executed."}</pre>
+    </div>
   </section>;
 }

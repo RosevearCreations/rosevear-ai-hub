@@ -17,6 +17,7 @@ import { AuditView } from "./AuditView";
 import { AuthView } from "./AuthView";
 import { CameraView } from "./CameraView";
 import { CardHelp, CommandPalette, type ShellDensity, type ShellTheme } from "./CommandShell";
+import { HubNavIcon } from "./HubNavIcon";
 import { BusinessView } from "./BusinessView";
 import { ChatView } from "./ChatView";
 import { ConfirmationsView } from "./ConfirmationsView";
@@ -244,16 +245,25 @@ export function App() {
       <a className="skip-link" href="#main-content">
         Skip to main content
       </a>
-
+      <header className="hub-topbar">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true">R</span>
+          <div>
+            <strong>Rosevear AI Hub</strong>
+            <small>Home, AI &amp; operations centre</small>
+          </div>
+        </div>
+        <div className="hub-topbar-detail" aria-label="Hub safeguards">
+          <span className="hub-topbar-chip"><span className="hub-chip-dot" /> Local-first</span>
+          <span className="hub-topbar-chip hub-topbar-held">Comms integration · HOLD</span>
+          <span className="hub-topbar-chip">Private relay · OFF</span>
+        </div>
+        <div className="hub-topbar-account"><span><strong>{user.username}</strong> · {roleLabel(user)}</span>
+          <button type="button" onClick={() => void signOut()}>Sign out</button></div>
+      </header>
       <aside className="sidebar">
         <div className="sidebar-topline">
-          <div className="brand">
-            <span className="brand-mark" aria-hidden="true">R</span>
-            <div>
-              <strong>Rosevear AI Hub</strong>
-              <small>Local-first control centre</small>
-            </div>
-          </div>
+          <strong className="hub-nav-caption">Workspaces</strong>
           <button className="mobile-nav-toggle" type="button" aria-controls="hub-primary-nav"
             aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(value => !value)}>
             {mobileMenuOpen ? "Close menu" : "Open menu"}
@@ -274,7 +284,7 @@ export function App() {
                     setMobileMenuOpen(false);
                   }}
                 >
-                  {item}
+                  <HubNavIcon section={item} /><span>{item}</span>
                 </button>
               </li>
             ))}
@@ -303,19 +313,19 @@ export function App() {
         </div>
 
         <PwaInstallPanel />
-        <div className="account-card">
-          <strong>{user.username}</strong>
-          <small>{roleLabel(user)}</small>
-          <button type="button" onClick={() => void signOut()}>
-            Sign out
-          </button>
-        </div>
+        <p className="hub-sidebar-note">Workspace settings are local to this session. No system connection starts from navigation.</p>
       </aside>
 
       <main id="main-content" className="content" tabIndex={-1}>
         <div className="shell-breadcrumb" aria-label="Current workspace">
           <span>Rosevear AI Hub</span><span aria-hidden="true">/</span><strong>{section}</strong>
           <button type="button" onClick={() => setCommandOpen(true)}>Jump to another screen</button>
+        </div>
+        <div className="hub-hero" aria-label="Rosevear AI Hub workspace banner">
+          <p className="eyebrow">Rosevear operations / {section}</p>
+          <strong>Our private command centre</strong>
+          <p>One place for our home, AI, cameras, workshop and connected businesses.</p>
+          <span className="hub-hero-guard">Source connections: DISCONNECTED / HOLD</span>
         </div>
         <SectionHelp section={section} />
         {section === "System" && <header className="page-header">
@@ -326,6 +336,7 @@ export function App() {
           </div>
           <SystemHealth health={health} />
         </header>}
+        {section === "System" && <HubVitalCards health={health} ollama={ollama} />}
         {/* Keep the supervised trial mounted while reviewing linked modules; it only stores session data and never polls. */}
         {canAdminister && <div hidden={section !== "System"}>
           <OwnerFieldTrialWorkbench active={section === "System"} onNavigate={(target) => setSection(target as Section)} />
@@ -446,6 +457,8 @@ function HomeView({
         <SystemHealth health={health} />
       </header>
 
+      <HubVitalCards health={health} ollama={ollama} />
+
       <OperationsDashboard role={role} onNavigate={onNavigate} />
       <section className="dashboard-grid" aria-label="Local AI and knowledge shortcuts">
         <article className="panel">
@@ -464,6 +477,17 @@ function HomeView({
       </section>
     </>
   );
+}
+
+function HubVitalCards({ health, ollama }: { health: HealthState; ollama: OllamaState }) {
+  const backend = health.kind === "loading" ? "Checking" : health.kind === "online" ? "Online" : "Offline";
+  const localAi = ollama.kind === "loading" ? "Checking" : ollama.kind === "online" ? "Available" : "Not detected";
+  return <section className="hub-vital-grid" aria-label="Rosevear AI Hub source status cards">
+    <article className="hub-vital hub-vital-cyan"><span className="hub-vital-mark">01</span><div><small>Local backend</small><strong>{backend}</strong><span>Live Hub health check</span></div></article>
+    <article className="hub-vital hub-vital-purple"><span className="hub-vital-mark">02</span><div><small>Local AI</small><strong>{localAi}</strong><span>Ollama service status</span></div></article>
+    <article className="hub-vital hub-vital-amber"><span className="hub-vital-mark">03</span><div><small>Comms connection</small><strong>HOLD</strong><span>Independent proof pending</span></div></article>
+    <article className="hub-vital hub-vital-green"><span className="hub-vital-mark">04</span><div><small>Private relay</small><strong>OFF</strong><span>Installation not authorized</span></div></article>
+  </section>;
 }
 
 function OllamaHealth({ ollama }: { ollama: OllamaState }) {

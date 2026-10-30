@@ -470,6 +470,9 @@ describe("App", () => {
       expect(screen.getByRole("button", { name: "Secrets" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Tools" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Users" })).toBeInTheDocument();
+      expect(screen.getByLabelText("Rosevear AI Hub workspace banner")).toHaveTextContent("Our private command centre");
+      expect(screen.getByRole("region", { name: "Rosevear AI Hub source status cards" })).toHaveTextContent("Comms connection");
+      expect(screen.getByRole("region", { name: "Rosevear AI Hub source status cards" })).toHaveTextContent("HOLD");
     });
 
     await waitFor(() => {
@@ -543,7 +546,7 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "System" }));
     expect(screen.getByText(/Follow-up acknowledgement pending/)).toBeInTheDocument();
     expect(screen.getByLabelText(/I personally completed this safe check/)).not.toBeChecked();
-  });
+  }, 45_000); // Shared CI runners can take longer to mount the full multi-workspace owner ledger.
 
   test("opens the exact-action confirmation queue and records approval", async () => {
     render(<App />);
