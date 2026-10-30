@@ -34,6 +34,8 @@
     "integration:ql261:hub:check": "node scripts/ql261-hub-source-return.mjs",
     "integration:ql261:hub:test": "node scripts/ql261-hub-source-return.test.mjs",
     "integration:ql261:hub:188:check": "node scripts/ql261-hub-build188-reconcile.mjs",
-    "integration:ql261:hub:188:test": "node scripts/ql261-hub-build188-reconcile.test.mjs"
+    "integration:ql261:hub:188:test": "node scripts/ql261-hub-build188-reconcile.test.mjs",
+    "integration:ql262:hub:check": "node scripts/ql262-hub-evidence-freshness.mjs",
+    "integration:ql262:hub:test": "node scripts/ql262-hub-evidence-freshness.test.mjs"
   }
 }

@@ -1170,13 +1170,20 @@ Implementation and release gates: `docs/BUILD_179_EXCEPTION_RENEWAL_QL252.md` an
 - record the known Build 186 exact `main` source and matching GREEN CI as public baseline only; Windows relay remains NOT INSTALLED / OFF, owner TEST NOT_GIVEN
 - see `docs/BUILD_187_QL261_SOURCE_APP_SAFETY_GATE.md` and `docs/integration/QL261_HUB_SOURCE_RETURN.md`
 
-### Build 188 — QL-261 Actual Owner Packet Receipt Reconciliation, Independent Signer-Custody Evidence Gate & Source-Proof A→B Publication Readiness (HELD · implemented, promotion pending)
+### Build 188 — QL-261 Actual Owner Packet Receipt Reconciliation, Independent Signer-Custody Evidence Gate & Source-Proof A→B Publication Readiness (PROMOTED · main source CI GREEN)
 - reconcile only the exact original nonsecret QL-258 owner return, record source bytes digest to prevent accidental substitution, reject extra private data and false consent while always treating owner progress as unverified self-report
 - add opt-in strictly public GitHub source A to descendant B check and exact original proof HTTP 404 or 200/raw-bytes digest, without inferring trusted signer status from public file presence
 - require independent private custodian, distinct nonce witness, separate reviewer and a restricted persistent signer store before any real private signer status or original signed proof publication can be independently accepted
 - do not install or start Windows relay, enable home systems, request live gateway GET, or grant owner TEST consent as part of source CI
 - see `docs/BUILD_188_QL261_OWNER_RECEIPT_AND_PROOF_LINEAGE.md` and `docs/integration/QL261_HUB_BUILD188_RETURN.md`
 
-**Next Build 189 (proposed) — QL-262 Original Evidence Packet Freshness, Independent Signer-Witness Decision Reconciliation & Public Proof-B Acceptance Guard (HELD).**
+### Build 189 — QL-262 Original Evidence Packet Freshness, Independent Signer-Witness Decision Reconciliation & Public Proof-B Acceptance Guard (HELD · implemented, promotion pending)
+- accept actual original QL-258 sanitized owner packet only, optionally compare to separately provided SHA-256; historical snapshot is not a current identity verification or TEST permission
+- verify original public QL-256 witness signatures against canonical bytes, an audited immutable source A and current <=5-minute window, retaining independent witness role, private custody and reviewer authentication as separately unverified
+- guard actual immutable proof B HTTP 404 versus original raw 200 bytes; even a complete detached Ed25519 signature match with operator-provided pin and seven-negative claims is METADATA ONLY pending independent private review
+- preserve concurrently integrated QL-265 Comms Hub I.T. source-panel UI; its local PASS is not a live gateway receipt, never installs or starts the Windows mini-server relay
+- see `docs/BUILD_189_QL262_EVIDENCE_FRESHNESS_AND_PROOF_GUARD.md` and `docs/integration/QL262_HUB_BUILD189_RETURN.md`
 
-**Queue policy:** Builds 138–187 promoted to source `main`; Build 188 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+**Next Build 190 (proposed) — QL-263 Original Independent Reviewer Receipt Intake, Fresh Signed-Proof B Recheck & Safe Connection-Panel Decision Alignment (HELD).**
+
+**Queue policy:** Builds 138–188 promoted to source `main`; Build 189 awaits reviewed CI promotion. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
