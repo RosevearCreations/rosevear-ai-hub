@@ -101,6 +101,8 @@ jobs:
           fi
       - name: Type check
         run: npm run typecheck
+      - name: Build 192 QL-267 local-only source status export and TEST-HOLD UI regressions
+        run: npm run test -- ql267HubEvidence.test.ts CommsHubConnectionPanel.test.tsx
       - name: Test
         run: npm run test
       - name: Production build
