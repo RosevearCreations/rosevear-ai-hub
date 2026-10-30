@@ -76,3 +76,24 @@ describe("Build 191 / QL-264 private decision and reversible TEST-only preview",
     expect(packet.livePilotHolds).toBe(12);
   });
 });
+
+describe("Build 193 / QL-268 offline source-proof publication exception", () => {
+  it("rejects public self-report with secret fields, clears raw input and leaves GET/relay blocked", () => {
+    render(<CommsHubConnectionPanel />);
+    const input = screen.getByRole("textbox", { name: /Optional QL-268 public proof metadata JSON/ });
+    fireEvent.change(input, { target: { value: '{"private_key":"SHOULD_NEVER_LEAVE_PANEL"}' } });
+    fireEvent.click(screen.getByRole("button", { name: /Screen public proof metadata/ }));
+    expect(input).toHaveValue("");
+    expect(screen.getByLabelText("QL-268 public proof metadata status")).toHaveTextContent("REJECTED_UNTRUSTED_OR_MALFORMED");
+    const audit = JSON.parse(screen.getByLabelText("QL-268 sanitized proof exception audit").textContent ?? "{}");
+    expect(audit.claimedProofB).toBeNull();
+    expect(audit.originalProofAtObservedMain).toBe("HTTP_404");
+    expect(audit.ownerTestAuthorization).toBe("NOT_GIVEN");
+    expect(audit.authenticatedGatewayGets).toBe(0);
+    expect(audit.windowsPrivateRelay).toBe("NOT_INSTALLED_OFF");
+    expect(audit.integration).toBe("DISCONNECTED / HOLD");
+    expect(JSON.stringify(audit)).not.toContain("SHOULD_NEVER_LEAVE_PANEL");
+    fireEvent.click(screen.getByRole("button", { name: "Clear QL-268 memory" }));
+    expect(screen.getByLabelText("QL-268 public proof metadata status")).toHaveTextContent("NOT_RECEIVED");
+  });
+});
