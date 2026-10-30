@@ -217,6 +217,24 @@
 .hub-connection-evidence p { margin: .25rem 0; }
 .hub-connection-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
 
+/* Build 194 — real-screen visual acceptance and conditional GET HOLD ledger. */
+.hub-evidence-title { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: space-between; }
+.hub-evidence-title .eyebrow { margin: 0 0 .25rem; text-transform: uppercase; font-size: .67rem; letter-spacing: .13em; }
+.hub-evidence-title :is(h2,h3) { margin: 0; }
+.hub-guard-badge { padding: .35rem .65rem; border: 1px solid #bb9b58; border-radius: 99px; font-size: .75rem; color: #ffd28a; background: #3b2c18; white-space: nowrap; }
+.hub-connection-evidence.ql269-inspection { border-color: #45769c; background: linear-gradient(135deg, #0c2541, #0b1b34); }
+.hub-theme-review { margin: .75rem 0 1rem; }
+.hub-theme-review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: .65rem; margin: 1rem 0; }
+.hub-theme-review-card { display: grid; align-content: space-between; gap: .45rem; min-width: 0; padding: .75rem; border: 1px solid #325778; border-radius: .75rem; background: #0e2843; }
+.hub-theme-review-card strong { font-size: .92rem; }
+.hub-theme-review-card small { display: block; font-size: .75rem; line-height: 1.5; margin-top: .2rem; }
+.hub-theme-review-card label { font-size: .74rem; }
+.hub-theme-review-card select { width: 100%; max-width: 100%; }
+.app-shell[data-theme="high-contrast"] .hub-guard-badge { color: #2b250e; background: #fff1c0; border-color: #5c4f1f; }
+.app-shell[data-theme="high-contrast"] .hub-theme-review-card { color: #172f46; background: #fff; border: 2px solid #2d5171; }
+.app-shell[data-theme="high-contrast"] .hub-theme-review-card :is(strong,small,label) { color: #172f46; }
+.app-shell[data-theme="high-contrast"] .hub-connection-evidence.ql269-inspection { color: #172f46; background: white; border-color: #2d5171; }
+
 .app-shell[data-theme="high-contrast"] .content { grid-column: 2; grid-row: 2; }
 .app-shell[data-theme="high-contrast"] .hub-hero { background: #fff; color: #142c3d; border: 2px solid #143f67; }
 .app-shell[data-theme="high-contrast"] .hub-hero :is(p,strong,.eyebrow) { color: #142c3d; }
