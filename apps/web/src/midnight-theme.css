@@ -306,6 +306,10 @@
 .hub-system-source strong { color: #fff; font-size: 1.23rem; }
 .hub-system-source-origin { width: fit-content; border-radius: 99px; padding: .16rem .5rem; background: #2b2756; color: #e0ceff; font-size: .69rem; font-weight: 700; }
 .hub-system-source p { font-size: .75rem; line-height: 1.5; color: #bed0e3; margin: .18rem 0 0; }
+.hub-system-source-detail { margin-top: .4rem; border-top: 1px solid #476381; padding-top: .45rem; }
+.hub-system-source-detail summary { cursor: pointer; color: #f3e8ff; font-size: .82rem; font-weight: 750; min-height: 1.6rem; }
+.hub-system-source-detail a { display: inline-block; margin: .55rem 0 .1rem; color: #e9c9ff; font-weight: 750; font-size: .8rem; text-decoration: underline; text-underline-offset: .17rem; }
+.hub-system-source-detail :is(summary,a):focus-visible { outline: 3px solid #deb9ff; outline-offset: 3px; border-radius: .25rem; }
 .hub-system-jumps, .hub-theme-review-jumps { display: flex; flex-wrap: wrap; gap: .55rem; margin: .8rem 0; }
 .hub-system-jumps a, .hub-theme-review-jumps a { display: inline-flex; align-items: center; min-height: 2.5rem; padding: .5rem .7rem; border: 1px solid #805cae; border-radius: .55rem; background: #221c41; color: #e8dcff; text-decoration: none; font-size: .82rem; font-weight: 700; }
 .hub-system-jumps a:hover, .hub-theme-review-jumps a:hover { background: #382761; }
@@ -314,10 +318,22 @@
 .hub-theme-review-next { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; padding: .85rem 1rem; border: 1px solid #5b6fa1; border-radius: .7rem; background: #102542; margin: .85rem 0; }
 .hub-theme-review-next p { flex: 1 1 250px; margin: 0; line-height: 1.5; }
 .hub-theme-review-next button { flex: 0 1 auto; min-height: 2.5rem; }
+.hub-theme-accessibility-guide { padding: .7rem .85rem; border-left: 4px solid #ad80eb; background: #1a2545; line-height: 1.5; }
+.hub-theme-accessibility-guide a { color: #f0cfff; font-weight: 750; text-underline-offset: .2rem; }
+.hub-device-findings-summary { margin: .8rem 0; padding: .75rem; border: 1px solid #5d78a0; border-radius: .65rem; background: #142643; }
+.hub-device-findings-summary h4 { margin: 0 0 .35rem; font-size: .97rem; }
+.hub-device-findings-summary ul { margin: .45rem 0; padding-left: 1.3rem; }
+.hub-device-findings-summary li { margin: .35rem 0; line-height: 1.45; }
+.hub-device-findings-summary a { color: #f0cfff; font-weight: 700; }
+.hub-theme-accessibility-guide a:focus-visible, .hub-device-findings-summary a:focus-visible, .hub-theme-device-check select:focus-visible { outline: 3px solid #e6c5ff; outline-offset: 3px; }
 .hub-system-guide, .hub-theme-review :is(.hub-theme-device,.hub-theme-retest,.hub-theme-issues,.hub-theme-review-grid), #hub-system-diagnostics, #hub-system-connection, #hub-system-remote { scroll-margin-top: 5rem; }
+.hub-theme-device-check { scroll-margin-top: 5rem; }
 .app-shell[data-theme="high-contrast"] .hub-system-guide, .app-shell[data-theme="high-contrast"] .hub-system-source, .app-shell[data-theme="high-contrast"] .hub-theme-review-next { color: #142c3d; background: #fff; border: 2px solid #2d5171; }
 .app-shell[data-theme="high-contrast"] .hub-system-guide :is(h2,p,small,strong), .app-shell[data-theme="high-contrast"] .hub-system-source :is(p,small,strong), .app-shell[data-theme="high-contrast"] .hub-theme-review-next p { color: #142c3d; }
 .app-shell[data-theme="high-contrast"] .hub-system-source-origin, .app-shell[data-theme="high-contrast"] .hub-system-jumps a, .app-shell[data-theme="high-contrast"] .hub-theme-review-jumps a { background: #efe0ff; color: #25113f; border-color: #54287c; }
+.app-shell[data-theme="high-contrast"] .hub-system-source-detail :is(summary,a), .app-shell[data-theme="high-contrast"] .hub-theme-accessibility-guide a, .app-shell[data-theme="high-contrast"] .hub-device-findings-summary a { color: #542168; }
+.app-shell[data-theme="high-contrast"] .hub-theme-accessibility-guide, .app-shell[data-theme="high-contrast"] .hub-device-findings-summary { background: #fff; color: #152d43; border-color: #345578; }
+.app-shell[data-theme="high-contrast"] .hub-theme-accessibility-guide :is(p,strong), .app-shell[data-theme="high-contrast"] .hub-device-findings-summary :is(h4,p,li) { color: #152d43; }
 .app-shell[data-theme="high-contrast"] .hub-topnav button { color: #fff; }
 
 .app-shell[data-theme="high-contrast"] .content { grid-column: 2; grid-row: 2; }

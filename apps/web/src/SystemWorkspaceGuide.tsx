@@ -29,21 +29,33 @@ export function SystemWorkspaceGuide({ backend, ollama, models, canAdminister }:
   backend: Signal; ollama: Signal; models: number | null; canAdminister: boolean;
 }) {
   const signals = summarizeSystemSignals(backend, ollama, models);
-  return <section id="hub-system-overview" className="hub-system-guide" aria-label="Build 201 system overview and navigation">
+  return <section id="hub-system-overview" className="hub-system-guide" aria-label="System source status and navigation">
     <div className="hub-evidence-title">
-      <div><p className="eyebrow">Build 201 · System command view</p><h2>System at a glance</h2></div>
+      <div><p className="eyebrow">Source-labelled system guide</p><h2>System at a glance</h2></div>
       <span className="hub-ql275-badge" aria-label="QL-275 project review status">QL-275 · Under Review</span>
     </div>
     <p>The first two readings come from existing APIs <strong>when this Hub session loads</strong>; they are not continuous monitoring. Connection and relay indicators describe <strong>access safeguards</strong>, not a scan of the Windows computer. A responding API never proves our cameras, devices or startup tasks work.</p>
     <div className="hub-system-source-grid">
-      {signals.map(item => <article className="hub-system-source" key={item.id} aria-label={`${item.title} source status`}>
-        <small>{item.title}</small><strong>{item.value}</strong>
-        <span className="hub-system-source-origin">{item.source}</span><p>{item.detail}</p>
-      </article>)}
+      {signals.map(item => {
+        const destination = item.id === "backend" || item.id === "ollama"
+          ? { href: "#hub-system-diagnostics", label: `Open ${item.title} diagnostics` }
+          : { href: "#hub-system-connection", label: `Open ${item.title} safeguards` };
+        return <article className="hub-system-source" key={item.id} aria-label={`${item.title} source status`}>
+          <small>{item.title}</small><strong>{item.value}</strong>
+          <span className="hub-system-source-origin">{item.source}</span>
+          <details className="hub-system-source-detail">
+            <summary>Meaning and next step</summary>
+            <p>{item.detail}</p>
+            {canAdminister
+              ? <a href={destination.href}>{destination.label}</a>
+              : <p>Detailed administrative checks are available to authorized owners or administrators.</p>}
+          </details>
+        </article>;
+      })}
     </div>
     <nav className="hub-system-jumps" aria-label="System page quick navigation">
       <a href="#hub-system-overview">Status overview</a>
-      {canAdminister && <a href="#hub-system-owner-review">Theme owner review</a>}
+      {canAdminister && <a href="#hub-theme-screen-review">Theme owner review</a>}
       {canAdminister && <a href="#hub-system-diagnostics">Diagnostics</a>}
       {canAdminister && <a href="#hub-system-connection">I.T. &amp; connections</a>}
       <a href="#hub-system-remote">Remote access</a>
