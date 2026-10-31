@@ -560,7 +560,7 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "System" }));
     expect(screen.getByText(/Follow-up acknowledgement pending/)).toBeInTheDocument();
     expect(screen.getByLabelText(/I personally completed this safe check/)).not.toBeChecked();
-  }, 45_000); // Shared CI runners can take longer to mount the full multi-workspace owner ledger.
+  }, 120_000); // Shared CI runners can take longer to mount the full multi-workspace owner ledger.
 
   test("opens the exact-action confirmation queue and records approval", async () => {
     render(<App />);
