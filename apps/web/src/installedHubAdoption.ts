@@ -31,7 +31,24 @@ type Input = {
   field: PrivateFieldHandoff | null;
   ownerOpenedWindowsHub: boolean;
   ownerReloadedBrowser: boolean;
+  ownerRebootReviewed?: boolean;
+  ownerRollbackPlanReviewed?: boolean;
 };
+
+/** Source-to-device drift suggestions only; backend version is not a commit identity. */
+export function installedVersionDriftReadback(input: Input) {
+  const review = assessInstalledHub(input);
+  const actions: string[] = [];
+  if (review.source_reference === "missing_or_invalid") actions.push("Confirm the exact successful main push commit and Actions run in GitHub before comparing installation state.");
+  if (review.web_status === "stale_or_other_build") actions.push("Review the Windows web asset installation location and refresh the authorized client; do not overwrite files automatically.");
+  if (review.web_status === "unknown" || review.web_status === "unverified_local_changes") actions.push("Record the original browser asset source provenance locally before claiming this frontend matches a release.");
+  if (review.recorded_release_status === "different_release_recorded") actions.push("Review the original updater journal and active release pointer, then use the documented manual rollback procedure if needed.");
+  if (review.recorded_release_status === "not_recorded") actions.push("Inspect the installed release journal and recovery task locally; no release pointer has been verified.");
+  if (!input.api) actions.push("Check the backend health and package version on the Windows host; a missing response is not proof it is stopped.");
+  if (input.local?.adoption_state === "FAILED" || input.local?.adoption_state === "ROLLBACK_FAILED") actions.push("Stop the update attempt and inspect existing recovery logs; restore only through an owner-approved supervised procedure.");
+  if (actions.length === 0) actions.push("Reported sources align. Independently inspect running Windows process identity, startup after reboot and actual device/camera behavior before accepting installation.");
+  return { disposition: review.web_status === "matches_reported_main" && review.recorded_release_status === "matches_reported_main" ? "REPORTED_SOURCE_ALIGNMENT_ONLY" : "SOURCE_TO_WINDOWS_REVIEW_REQUIRED", actions } as const;
+}
 
 const validTime = (value: unknown): value is string => typeof value === "string"
   && value.length <= 40 && !Number.isNaN(Date.parse(value));
@@ -86,6 +103,8 @@ export function assessInstalledHub(input: Input) {
   if (!input.local) holds.push("The private local updater evidence could not be read.");
   if (!input.ownerOpenedWindowsHub) holds.push("Owner has not personally opened and checked the installed Windows Hub in this review.");
   if (!input.ownerReloadedBrowser) holds.push("Owner has not reloaded the installed browser/PWA in this review.");
+  if (!input.ownerRebootReviewed) holds.push("Owner has not recorded a post-reboot Windows walkthrough in this review.");
+  if (!input.ownerRollbackPlanReviewed) holds.push("Owner has not reviewed the local rollback and safe-stop procedure.");
   if (!input.field) holds.push("Build 112 private field handoff has not been imported on this installation.");
   // /version returns a Python package version, not a running-process commit.
   // Even if stamps and self-attestations agree, independent runtime proof is missing.
@@ -115,7 +134,8 @@ export function createInstalledHubReceipt(input: Input, generatedAt = new Date()
     browser_assets: { source_sha: input.web.sha, tracked_checkout_clean: input.web.clean },
     backend: { package_version: input.api?.version ?? null, responded: Boolean(input.api) },
     local_release_pointer: { active_sha: input.local?.active_release ?? null, adoption_state: input.local?.adoption_state ?? "UNVERIFIED", installed_runtime_verified: false },
-    owner_checks: { windows_hub_opened: input.ownerOpenedWindowsHub, installed_browser_reloaded: input.ownerReloadedBrowser },
+    owner_checks: { windows_hub_opened: input.ownerOpenedWindowsHub, installed_browser_reloaded: input.ownerReloadedBrowser,
+      post_reboot_walkthrough_reported: input.ownerRebootReviewed === true, rollback_plan_reviewed: input.ownerRollbackPlanReviewed === true },
     private_field_evidence: input.field,
     machine_acceptance: false,
     physical_camera_acceptance: false,
