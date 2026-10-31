@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { getHubVersion, getReleaseObservability, type HubVersionResponse, type ReleaseObservabilityResponse } from "./api";
-import { assessInstalledHub, browserBuild, createInstalledHubReceipt, parsePrivateFieldHandoff, type PrivateFieldHandoff } from "./installedHubAdoption";
+import { assessInstalledHub, browserBuild, createInstalledHubReceipt, installedVersionDriftReadback, parsePrivateFieldHandoff, type PrivateFieldHandoff } from "./installedHubAdoption";
 
 type Snapshot = { backend: HubVersionResponse | null; local: ReleaseObservabilityResponse | null };
 
@@ -13,15 +13,18 @@ export function InstalledHubAdoptionPanel() {
   const [field, setField] = useState<PrivateFieldHandoff | null>(null);
   const [ownerOpenedWindowsHub, setOwnerOpenedWindowsHub] = useState(false);
   const [ownerReloadedBrowser, setOwnerReloadedBrowser] = useState(false);
+  const [ownerRebootReviewed, setOwnerRebootReviewed] = useState(false);
+  const [ownerRollbackPlanReviewed, setOwnerRollbackPlanReviewed] = useState(false);
   const request = useRef<AbortController | null>(null);
   useEffect(() => () => request.current?.abort(), []);
 
   const input = useMemo(() => ({
     expectedMainSha: mainSha, mainRunUrl: runUrl, web: browserBuild,
     api: snapshot?.backend ?? null, local: snapshot?.local ?? null, field,
-    ownerOpenedWindowsHub, ownerReloadedBrowser,
-  }), [mainSha, runUrl, snapshot, field, ownerOpenedWindowsHub, ownerReloadedBrowser]);
+    ownerOpenedWindowsHub, ownerReloadedBrowser, ownerRebootReviewed, ownerRollbackPlanReviewed,
+  }), [mainSha, runUrl, snapshot, field, ownerOpenedWindowsHub, ownerReloadedBrowser, ownerRebootReviewed, ownerRollbackPlanReviewed]);
   const review = useMemo(() => assessInstalledHub(input), [input]);
+  const drift = useMemo(() => installedVersionDriftReadback(input), [input]);
 
   async function checkInstallation() {
     request.current?.abort();
@@ -32,6 +35,8 @@ export function InstalledHubAdoptionPanel() {
     // An earlier session's human marks cannot validate a new observation.
     setOwnerOpenedWindowsHub(false);
     setOwnerReloadedBrowser(false);
+    setOwnerRebootReviewed(false);
+    setOwnerRollbackPlanReviewed(false);
     setField(null);
     const [backend, local] = await Promise.allSettled([
       getHubVersion(controller.signal), getReleaseObservability(controller.signal),
@@ -83,12 +88,12 @@ export function InstalledHubAdoptionPanel() {
       <div className="installed-adoption-fields">
         <label>Protected main commit (40 hexadecimal characters)
           <input aria-label="Expected main commit SHA" type="text" value={mainSha} maxLength={40} spellCheck={false}
-            placeholder="Paste main commit SHA" onChange={(event) => { setMainSha(event.target.value); setOwnerOpenedWindowsHub(false); setOwnerReloadedBrowser(false); }} />
+            placeholder="Paste main commit SHA" onChange={(event) => { setMainSha(event.target.value); setOwnerOpenedWindowsHub(false); setOwnerReloadedBrowser(false); setOwnerRebootReviewed(false); setOwnerRollbackPlanReviewed(false); }} />
         </label>
         <label>Matching GitHub Actions run URL
           <input aria-label="Expected main GitHub Actions run" type="url" value={runUrl} spellCheck={false}
             placeholder="https://github.com/RosevearCreations/rosevear-ai-hub/actions/runs/…"
-            onChange={(event) => { setRunUrl(event.target.value); setOwnerOpenedWindowsHub(false); setOwnerReloadedBrowser(false); }} />
+            onChange={(event) => { setRunUrl(event.target.value); setOwnerOpenedWindowsHub(false); setOwnerReloadedBrowser(false); setOwnerRebootReviewed(false); setOwnerRollbackPlanReviewed(false); }} />
         </label>
       </div>
       <button type="button" onClick={() => void checkInstallation()} disabled={loading}>
@@ -103,6 +108,12 @@ export function InstalledHubAdoptionPanel() {
         <dt>Release pointer comparison</dt><dd>{review.recorded_release_status.replaceAll("_", " ")}</dd>
         <dt>Build 112 field handoff</dt><dd>{field ? `${field.unresolved_ha} unresolved HA, ${field.unresolved_camera} unresolved cameras; historical owner evidence only` : "Not imported"}</dd>
       </dl>
+      <section aria-label="Build 211 release-to-device drift review" className="hub-diagnostics-guide">
+        <h3>Source-to-Windows version and configuration review</h3>
+        <p><strong>{drift.disposition.replaceAll("_", " ")}</strong>. The browser SHA is a build stamp, the active release is an updater record, and the backend reports a package version—not its exact running Git commit. Caddy, Tailscale, Windows tasks and actual camera/device operation require separate checks.</p>
+        <ol>{drift.actions.map(action => <li key={action}>{action}</li>)}</ol>
+        <p>For rollback: keep the previous known-good installation and recovery evidence, review original logs and task identity, use only the existing supervised Windows procedure, then manually verify startup and the browser. This panel cannot change installed software.</p>
+      </section>
       <div className="installed-adoption-fields">
         <label>Optional private Build 112 drift handoff (.json, 1 MB max)
           <input aria-label="Choose Build 112 private field handoff" type="file" accept=".json,application/json" onChange={(event) => void importField(event)} />
@@ -116,6 +127,16 @@ export function InstalledHubAdoptionPanel() {
           <input type="checkbox" checked={ownerReloadedBrowser} disabled={!snapshot}
             onChange={(event) => setOwnerReloadedBrowser(event.target.checked)} />
           I manually reloaded the installed browser/PWA and checked the current screen
+        </label>
+        <label className="installed-adoption-check">
+          <input type="checkbox" checked={ownerRebootReviewed} disabled={!snapshot}
+            onChange={(event) => setOwnerRebootReviewed(event.target.checked)} />
+          I personally reviewed startup after a Windows reboot (owner report only)
+        </label>
+        <label className="installed-adoption-check">
+          <input type="checkbox" checked={ownerRollbackPlanReviewed} disabled={!snapshot}
+            onChange={(event) => setOwnerRollbackPlanReviewed(event.target.checked)} />
+          I reviewed our original manual rollback, logs and safe-stop procedure (no rollback executed here)
         </label>
       </div>
       <p role="status"><strong>FIELD ADOPTION HOLD</strong> · {review.holds.length} outstanding evidence conditions. No combination of these checkboxes proves process identity or working cameras.</p>

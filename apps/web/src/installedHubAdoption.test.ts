@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assessInstalledHub, createInstalledHubReceipt, parsePrivateFieldHandoff } from "./installedHubAdoption";
+import { assessInstalledHub, createInstalledHubReceipt, installedVersionDriftReadback, parsePrivateFieldHandoff } from "./installedHubAdoption";
 
 const main = "a".repeat(40);
 const other = "b".repeat(40);
@@ -16,6 +16,19 @@ const source = {
 };
 
 describe("Build 113 installed Windows Hub evidence", () => {
+  it("Build 211 routes source mismatches and failed updater state to manual checks", () => {
+    const mismatched = installedVersionDriftReadback({ ...source, web: { sha: other, clean: true },
+      local: { active_release: other, adoption_state: "FAILED" } as never });
+    expect(mismatched.disposition).toBe("SOURCE_TO_WINDOWS_REVIEW_REQUIRED");
+    expect(mismatched.actions.join(" ")).toContain("web asset installation");
+    expect(mismatched.actions.join(" ")).toContain("Stop the update attempt");
+    const aligned = installedVersionDriftReadback(source);
+    expect(aligned.disposition).toBe("REPORTED_SOURCE_ALIGNMENT_ONLY");
+    expect(aligned.actions.join(" ")).toContain("running Windows process identity");
+    const receipt = createInstalledHubReceipt({ ...source, ownerRebootReviewed: true, ownerRollbackPlanReviewed: true });
+    expect(receipt.owner_checks.post_reboot_walkthrough_reported).toBe(true);
+    expect(receipt.machine_acceptance).toBe(false);
+  });
   it("does not equate matching stamps and operator marks to machine acceptance", () => {
     const result = assessInstalledHub(source);
     expect(result.source_reference).toBe("owner_entered_not_independently_verified");
