@@ -85,4 +85,31 @@ describe("Build 194 actual Standard theme owner review", () => {
     const region = screen.getByRole("region", { name: "Standard theme on-device field checks" });
     Array.from(region.querySelectorAll("select")).forEach(select => expect(select).toBeDisabled());
   });
+
+  it("records Windows-only owner retest disposition for a prior failure without claiming an engineering fix", () => {
+    render(<StandardThemeAcceptancePanel role="owner" appearance="standard" density="comfortable" />);
+    const device = screen.getByRole("region", { name: "Standard theme on-device field checks" });
+    const retest = screen.getByRole("region", { name: "Windows theme retest disposition" });
+    fireEvent.change(screen.getByLabelText("Where did we personally test the screens?"), { target: { value: "other_browser_device" } });
+    const checks = Array.from(device.querySelectorAll(".hub-theme-device-check select"));
+    fireEvent.change(checks[1], { target: { value: "observed_fail" } });
+    expect(screen.getByLabelText("Windows theme retest status")).toHaveTextContent("WINDOWS_RETEST_NOT_ELIGIBLE_OR_NOT_RECORDED");
+    expect(retest.querySelector("select")).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("Where did we personally test the screens?"), { target: { value: "windows_hub_server" } });
+    expect(retest.querySelector("select")).toBeNull();
+    fireEvent.change(checks[1], { target: { value: "observed_fail" } });
+    expect(screen.getByLabelText("Windows theme retest status")).toHaveTextContent("WINDOWS_RETEST_PENDING");
+    fireEvent.change(screen.getByLabelText("Retest disposition"), { target: { value: "issue_persists" } });
+    expect(screen.getByLabelText("Windows theme retest status")).toHaveTextContent("OWNER_REPORTS_WINDOWS_ISSUES_PERSIST");
+    fireEvent.click(screen.getByRole("button", { name: "Prepare local visual-review report" }));
+    const report = JSON.parse(screen.getByLabelText("Build 194 sanitized Standard theme review report").textContent || "{}");
+    expect(report.windowsThemeRetest.retestsWithPersistentIssues).toBe(1);
+    expect(report.windowsThemeRetest.engineeringFixVerified).toBe(false);
+    expect(report.windowsThemeRetest.independentWindowsWitness).toBe("NOT_VERIFIED");
+    fireEvent.change(screen.getByLabelText("Retest disposition"), { target: { value: "owner_reports_improvement" } });
+    expect(screen.getByLabelText("Windows theme retest status")).toHaveTextContent("OWNER_REPORTS_IMPROVEMENT_UNVERIFIED");
+    fireEvent.change(checks[1], { target: { value: "observed_pass" } });
+    expect(retest.querySelector("select")).toBeNull();
+    expect(screen.getByLabelText("Windows theme retest status")).toHaveTextContent("NO_PRIOR_FAILED_WINDOWS_OBSERVATIONS");
+  });
 });
