@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ShellDensity, ShellTheme } from "./CommandShell";
 import { makeWindowsThemeRetestDisposition, type RetestOutcome } from "./windowsThemeRetest";
 import { makeWindowsRetestFollowup, type FollowupStage } from "./windowsRetestFollowup";
@@ -40,6 +40,7 @@ const DEVICE_CHECKS = [
 ] as const;
 type DeviceCheck = (typeof DEVICE_CHECKS)[number]["id"];
 type DeviceFinding = "not_checked" | "observed_pass" | "observed_fail";
+type RetestFilter = "all" | RetestOutcome;
 type DeviceSymptom = "none" | "text_clipped" | "focus_not_visible" | "wrong_destination" | "control_unresponsive" | "source_unclear";
 const DEVICE_SYMPTOMS: { id: DeviceSymptom; label: string }[] = [
   { id: "none", label: "Choose the observed issue" },
@@ -77,6 +78,8 @@ export function StandardThemeAcceptancePanel({
   const [deviceSymptoms, setDeviceSymptoms] = useState<Record<DeviceCheck, DeviceSymptom>>({ ...INITIAL_DEVICE_SYMPTOMS });
   const [deviceRetests, setDeviceRetests] = useState<Record<DeviceCheck, RetestOutcome>>({ ...INITIAL_RETEST });
   const [retestFollowups, setRetestFollowups] = useState<Record<DeviceCheck, FollowupStage>>({ ...INITIAL_RETEST_FOLLOWUP });
+  const [retestFilter, setRetestFilter] = useState<RetestFilter>("all");
+  const checkpointStatusRef = useRef<HTMLParagraphElement>(null);
   const [auditBaseline, setAuditBaseline] = useState<WindowsRetestAuditItem[] | null>(null);
   const [hasCheckpoint, setHasCheckpoint] = useState(() => parseOwnerReviewCheckpoint(readOwnerCheckpoint()) !== null);
   const [checkpointMessage, setCheckpointMessage] = useState("No owner review checkpoint restored in this view.");
@@ -121,6 +124,7 @@ export function StandardThemeAcceptancePanel({
   const savedDeviceCount = savedCheckpoint ? DEVICE_CHECKS.filter(check => savedCheckpoint.deviceFindings[check.id] !== "not_checked").length : 0;
   const failedRetests = DEVICE_CHECKS.filter(check => deviceFindings[check.id] === "observed_fail");
   const pendingRetests = failedRetests.filter(check => deviceRetests[check.id] === "not_retested");
+  const visibleRetests = failedRetests.filter(check => retestFilter === "all" || deviceRetests[check.id] === retestFilter);
   const nextDeviceCheck = DEVICE_CHECKS.find(check => deviceFindings[check.id] === "not_checked");
   const nextFailedCheck = DEVICE_CHECKS.find(check => deviceFindings[check.id] === "observed_fail" && deviceSymptoms[check.id] === "none");
   const nextCompletion = completionSteps.find(step => !step.done);
@@ -160,6 +164,7 @@ export function StandardThemeAcceptancePanel({
     setAuditBaseline(null);
     setHandoff("");
     setCheckpointMessage("Fixed-choice findings recovered. Live Windows status, independent acceptance and old baseline audit were not restored.");
+    checkpointStatusRef.current?.focus();
   }
 
   function clearCheckpoint() {
@@ -219,7 +224,7 @@ export function StandardThemeAcceptancePanel({
         <button type="button" disabled={!isOwner || !hasCheckpoint} onClick={restoreCheckpoint}>Recover saved review</button>
         <button type="button" disabled={!isOwner || !hasCheckpoint} onClick={clearCheckpoint}>Clear saved checkpoint</button>
       </div>
-      <p aria-live="polite" aria-label="Owner review recovery message">{checkpointMessage}</p>
+      <p ref={checkpointStatusRef} tabIndex={-1} aria-live="polite" aria-label="Owner review recovery message">{checkpointMessage}</p>
       <p role="status" aria-label="Local checkpoint change status">{checkpointChanged
         ? "Unsaved changes since the last save or recovery. Save again to keep these fixed-choice findings."
         : checkpointBaseline ? "Current fixed-choice findings match the saved checkpoint."
@@ -292,8 +297,18 @@ export function StandardThemeAcceptancePanel({
       <div id="hub-theme-retest-review" className="hub-theme-retest" role="region" aria-label="Windows theme retest disposition">
         <div className="hub-evidence-title"><h3>Windows theme retest · prior failures only</h3><span className="hub-guard-badge">{windowsRetest.retestsPending} pending</span></div>
         <p>This is a second owner-observed check after a reported failure—not engineering sign-off. Retesting is eligible only when we selected the actual Windows Hub server or an actual remote Windows client. Changing the device or original finding resets that check's retest and follow-up.</p>
+        <div className="hub-diagnostics-filters" role="group" aria-label="Filter owner Windows retests">
+          {([
+            { id: "all", label: "All failed checks" },
+            { id: "not_retested", label: "Awaiting retest" },
+            { id: "issue_persists", label: "Issue persists" },
+            { id: "owner_reports_improvement", label: "Reported improvement" }
+          ] as const).map(option => <button type="button" key={option.id} aria-pressed={retestFilter === option.id}
+            onClick={() => setRetestFilter(option.id)}>{option.label} ({failedRetests.filter(check => option.id === "all" || deviceRetests[check.id] === option.id).length})</button>)}
+        </div>
         {deviceFailed === 0 ? <p>No failed on-device observations are available to retest.</p> :
-          DEVICE_CHECKS.filter(check => deviceFindings[check.id] === "observed_fail").map(check =>
+          visibleRetests.length === 0 ? <p role="status">No owner retests in this category. Choose All failed checks to review everything.</p> :
+          visibleRetests.map(check =>
             <div className="hub-theme-retest-item" key={check.id}>
               <strong>{check.title}</strong>
               <label htmlFor={`theme-retest-${check.id}`}>Retest disposition</label>
@@ -316,7 +331,7 @@ export function StandardThemeAcceptancePanel({
           <h4>Owner retest summary · {failedRetests.length - pendingRetests.length}/{failedRetests.length} recorded</h4>
           {failedRetests.length === 0 ? <p>No failed observations to retest. This does not prove Windows acceptance.</p> :
             <ul>{failedRetests.map(check => <li key={check.id}>
-              <a href={`#theme-retest-${check.id}`}>{check.title}</a>: {deviceRetests[check.id] === "not_retested" ? "Owner retest pending" :
+              <a href={`#theme-retest-${check.id}`} onClick={() => setRetestFilter("all")}>{check.title}</a>: {deviceRetests[check.id] === "not_retested" ? "Owner retest pending" :
                 deviceRetests[check.id] === "issue_persists" ? "Owner reports issue persists" : "Owner reports improvement — independent witness pending"}
             </li>)}</ul>}
           <p>These are owner selections only; no engineering fix or physical acceptance is verified.</p>

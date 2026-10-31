@@ -43,6 +43,12 @@ describe("Build 203 accessible guided diagnostics", () => {
     expect(within(comparison).getByRole("link", { name: "Review Hub API manual checks" })).toHaveAttribute("href", "#hub-diagnostic-hub");
     expect(comparison).not.toHaveTextContent("127.0.0.1");
     expect(within(comparison).getByLabelText("Diagnostic sampling sequence")).toHaveTextContent("2 completed on-demand sample(s)");
+    const followupFilter = within(comparison).getByRole("group", { name: "Diagnostic comparison follow-up filter" });
+    fireEvent.click(within(followupFilter).getByRole("button", { name: "Changed only (0)" }));
+    expect(within(followupFilter).getByRole("button", { name: "Changed only (0)" })).toHaveAttribute("aria-pressed", "true");
+    expect(comparison).toHaveTextContent("No changed service classifications");
+    fireEvent.click(within(followupFilter).getByRole("button", { name: "All compared services (5)" }));
+    expect(within(comparison).getAllByRole("link")).toHaveLength(5);
     fireEvent.click(within(comparison).getByRole("button", { name: "Clear comparison (keep latest reading)" }));
     expect(comparison).toHaveTextContent("No earlier snapshot to compare");
     expect(screen.getByRole("region", { name: "Guided service diagnostics readback" })).toHaveTextContent("2 needs attention");
