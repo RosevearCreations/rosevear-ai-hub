@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
+import { StandardThemeAcceptancePanel, OWNER_RETEST_FILTER_KEY } from "./StandardThemeAcceptancePanel";
 import { OWNER_REVIEW_CHECKPOINT_KEY } from "./ownerReviewCheckpoint";
 
-afterEach(() => { cleanup(); sessionStorage.removeItem(OWNER_REVIEW_CHECKPOINT_KEY); });
+afterEach(() => { cleanup(); sessionStorage.removeItem(OWNER_REVIEW_CHECKPOINT_KEY); sessionStorage.removeItem(OWNER_RETEST_FILTER_KEY); });
 
 describe("Build 194 actual Standard theme owner review", () => {
   it("announces unsaved fixed-choice changes and accessible Windows next-action routing", () => {
@@ -33,8 +33,13 @@ describe("Build 194 actual Standard theme owner review", () => {
     expect(screen.getByText("No owner retests in this category. Choose All failed checks to review everything.")).toBeInTheDocument();
     fireEvent.click(within(retestFilters).getByRole("button", { name: "Reported improvement (1)" }));
     expect(screen.getByLabelText("Retest disposition")).toHaveValue("owner_reports_improvement");
+    expect(sessionStorage.getItem(OWNER_RETEST_FILTER_KEY)).toBe("owner_reports_improvement");
     fireEvent.click(within(summary).getByRole("link", { name: "Keyboard & visible focus" }));
     expect(within(retestFilters).getByRole("button", { name: "All failed checks (1)" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(within(retestFilters).getByRole("button", { name: "Reported improvement (1)" }));
+    cleanup();
+    render(<StandardThemeAcceptancePanel role="owner" appearance="high-contrast" density="comfortable" />);
+    expect(screen.getByRole("group", { name: "Filter owner Windows retests" }).querySelector('[aria-pressed="true"]')).toHaveTextContent("Reported improvement");
   });
   it("guides the owner through real workspaces and the next missing screen while preserving findings", () => {
     const onNavigate = vi.fn();

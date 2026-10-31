@@ -41,6 +41,13 @@ const DEVICE_CHECKS = [
 type DeviceCheck = (typeof DEVICE_CHECKS)[number]["id"];
 type DeviceFinding = "not_checked" | "observed_pass" | "observed_fail";
 type RetestFilter = "all" | RetestOutcome;
+export const OWNER_RETEST_FILTER_KEY = "rosevear-hub:owner-retest-filter:208";
+function readRetestFilter(): RetestFilter {
+  try {
+    const value = window.sessionStorage.getItem(OWNER_RETEST_FILTER_KEY);
+    return value === "not_retested" || value === "issue_persists" || value === "owner_reports_improvement" ? value : "all";
+  } catch { return "all"; }
+}
 type DeviceSymptom = "none" | "text_clipped" | "focus_not_visible" | "wrong_destination" | "control_unresponsive" | "source_unclear";
 const DEVICE_SYMPTOMS: { id: DeviceSymptom; label: string }[] = [
   { id: "none", label: "Choose the observed issue" },
@@ -78,7 +85,7 @@ export function StandardThemeAcceptancePanel({
   const [deviceSymptoms, setDeviceSymptoms] = useState<Record<DeviceCheck, DeviceSymptom>>({ ...INITIAL_DEVICE_SYMPTOMS });
   const [deviceRetests, setDeviceRetests] = useState<Record<DeviceCheck, RetestOutcome>>({ ...INITIAL_RETEST });
   const [retestFollowups, setRetestFollowups] = useState<Record<DeviceCheck, FollowupStage>>({ ...INITIAL_RETEST_FOLLOWUP });
-  const [retestFilter, setRetestFilter] = useState<RetestFilter>("all");
+  const [retestFilter, setRetestFilter] = useState<RetestFilter>(readRetestFilter);
   const checkpointStatusRef = useRef<HTMLParagraphElement>(null);
   const [auditBaseline, setAuditBaseline] = useState<WindowsRetestAuditItem[] | null>(null);
   const [hasCheckpoint, setHasCheckpoint] = useState(() => parseOwnerReviewCheckpoint(readOwnerCheckpoint()) !== null);
@@ -128,6 +135,11 @@ export function StandardThemeAcceptancePanel({
   const nextDeviceCheck = DEVICE_CHECKS.find(check => deviceFindings[check.id] === "not_checked");
   const nextFailedCheck = DEVICE_CHECKS.find(check => deviceFindings[check.id] === "observed_fail" && deviceSymptoms[check.id] === "none");
   const nextCompletion = completionSteps.find(step => !step.done);
+  function chooseRetestFilter(filter: RetestFilter) {
+    setRetestFilter(filter);
+    if (!isOwner) return;
+    try { window.sessionStorage.setItem(OWNER_RETEST_FILTER_KEY, filter); } catch { /* Filter still works on screen. */ }
+  }
 
   function saveCheckpoint() {
     if (!isOwner) return;
@@ -233,6 +245,7 @@ export function StandardThemeAcceptancePanel({
       <p aria-label="Saved owner review summary">{savedCheckpoint
         ? `Saved fixed-choice checkpoint: ${savedScreenCount}/5 screens and ${savedDeviceCount}/5 on-device observations. ${checkpointBaseline === null ? "Recover to view those selections; current selections have not been replaced." : checkpointChanged ? "Current selections differ from the saved copy." : "Current selections match the saved copy."}`
         : "No valid saved owner checklist is available in this browser tab."}</p>
+      <p><strong>Owner recovery steps:</strong> Check the saved counts, choose Recover, then review the restored choices. The status message receives keyboard focus after recovery. It is not a Windows acceptance or connection approval.</p>
       <p><strong>Recovery reminder:</strong> Recover replaces the current fixed-choice selections with the last saved ones. Save first if we want to retain recent changes. Clearing a saved checkpoint does not clear what is currently on screen. These are temporary browser-tab notes, not a server backup.</p>
     </section>
     <p className="hub-theme-accessibility-guide"><strong>Keyboard review:</strong> Use Tab to reach each review link and control, Enter to activate a link or button, and arrow keys to change a focused choice. Check that focus remains clearly visible at Standard and High contrast settings. <a href="#hub-theme-device-keyboard">Jump to keyboard observation</a>.</p>
@@ -304,8 +317,9 @@ export function StandardThemeAcceptancePanel({
             { id: "issue_persists", label: "Issue persists" },
             { id: "owner_reports_improvement", label: "Reported improvement" }
           ] as const).map(option => <button type="button" key={option.id} aria-pressed={retestFilter === option.id}
-            onClick={() => setRetestFilter(option.id)}>{option.label} ({failedRetests.filter(check => option.id === "all" || deviceRetests[check.id] === option.id).length})</button>)}
+            onClick={() => chooseRetestFilter(option.id)}>{option.label} ({failedRetests.filter(check => option.id === "all" || deviceRetests[check.id] === option.id).length})</button>)}
         </div>
+        <p aria-label="Windows retest filter persistence">Current view: {retestFilter.replaceAll("_", " ")}. Owner filter choice is remembered in this browser tab only; observations, retests and independent acceptance are unaffected.</p>
         {deviceFailed === 0 ? <p>No failed on-device observations are available to retest.</p> :
           visibleRetests.length === 0 ? <p role="status">No owner retests in this category. Choose All failed checks to review everything.</p> :
           visibleRetests.map(check =>
@@ -331,7 +345,7 @@ export function StandardThemeAcceptancePanel({
           <h4>Owner retest summary · {failedRetests.length - pendingRetests.length}/{failedRetests.length} recorded</h4>
           {failedRetests.length === 0 ? <p>No failed observations to retest. This does not prove Windows acceptance.</p> :
             <ul>{failedRetests.map(check => <li key={check.id}>
-              <a href={`#theme-retest-${check.id}`} onClick={() => setRetestFilter("all")}>{check.title}</a>: {deviceRetests[check.id] === "not_retested" ? "Owner retest pending" :
+              <a href={`#theme-retest-${check.id}`} onClick={() => chooseRetestFilter("all")}>{check.title}</a>: {deviceRetests[check.id] === "not_retested" ? "Owner retest pending" :
                 deviceRetests[check.id] === "issue_persists" ? "Owner reports issue persists" : "Owner reports improvement — independent witness pending"}
             </li>)}</ul>}
           <p>These are owner selections only; no engineering fix or physical acceptance is verified.</p>
