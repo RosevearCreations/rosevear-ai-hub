@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { inspectQl272PublicProvenance, makeQl272ProvenanceHoldReport } from "./ql272ReviewerProvenance";
+import type { Ql272Provenance } from "./ql272ReviewerProvenance";
 import { Ql273OriginGapPanel } from "./Ql273OriginGapPanel";
 
 type PriorQl271 = { status: string; proofB: string | null } | null;
@@ -9,10 +10,12 @@ export function Ql272ReviewerProvenancePanel({ priorQl271 }: { priorQl271: Prior
   const [raw, setRaw] = useState("");
   const [status, setStatus] = useState("NOT_RECEIVED");
   const [report, setReport] = useState("");
+  const [review, setReview] = useState<Ql272Provenance | null>(null);
   function inspect() {
     const claim = inspectQl272PublicProvenance(raw);
     setStatus(claim.status);
     setReport(JSON.stringify(makeQl272ProvenanceHoldReport(claim, priorQl271), null, 2));
+    setReview(claim);
     setRaw("");
   }
   return <details className="hub-connection-evidence ql272-provenance" aria-label="QL-272 reviewer evidence provenance and source recheck">
@@ -22,16 +25,16 @@ export function Ql272ReviewerProvenancePanel({ priorQl271 }: { priorQl271: Prior
     <p>Enter only a <em>sanitized public provenance metadata claim</em>. We compare reported B with the screened QL-271 claim above and flag a reported HTTP 200 against our observed HTTP 404. Digest shape, matching SHAs and a reported independent role do not authenticate the genuine original, signer, reviewer or out-of-band pin. Private evidence stays in the authorized custody channel.</p>
     <label htmlFor="ql272-public-provenance">Public provenance claim JSON (temporary memory only)</label>
     <textarea id="ql272-public-provenance" rows={4} maxLength={4096} value={raw}
-      onChange={event => { setRaw(event.target.value); setStatus("NOT_RECEIVED"); setReport(""); }}
+      onChange={event => { setRaw(event.target.value); setStatus("NOT_RECEIVED"); setReport(""); setReview(null); }}
       placeholder="No private receipts, names, keys, signatures, pin challenges, addresses or endpoints" />
     <div className="hub-connection-actions">
       <button type="button" onClick={inspect}>Screen public provenance &amp; prepare HOLD disposition (offline)</button>
-      <button type="button" onClick={() => { setRaw(""); setStatus("NOT_RECEIVED"); setReport(""); }}>Clear QL-272 memory</button>
+      <button type="button" onClick={() => { setRaw(""); setStatus("NOT_RECEIVED"); setReport(""); setReview(null); }}>Clear QL-272 memory</button>
     </div>
     <p><strong>Provenance intake:</strong> <span aria-label="QL-272 provenance intake status">{status}</span>. This never authorizes a connection, owner TEST window or Windows relay.</p>
     <pre aria-label="QL-272 sanitized provenance exception disposition" style={{ maxHeight: 480 }}>
       {report || "Original Proof-B source and independent custody/pin gates remain HELD. No reviewer claim screened."}
     </pre>
-    <Ql273OriginGapPanel />
+    <Ql273OriginGapPanel priorQl272={review} />
   </details>;
 }

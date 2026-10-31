@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { EMPTY_QL273_GAPS, makeQl273OriginGapDisposition, QL273_GAPS } from "./ql273OriginGap";
 import type { Ql273GapLedger, Ql273GapProgress } from "./ql273OriginGap";
+import { Ql274CustodianReturnPanel } from "./Ql274CustodianReturnPanel";
 
 /** An owner-safe public action checklist; not an upload for signed/private witness material. */
-export function Ql273OriginGapPanel() {
+export function Ql273OriginGapPanel({ priorQl272 = null }: { priorQl272?: { status: string; proofB: string | null } | null }) {
   const [progress, setProgress] = useState<Ql273GapLedger>({ ...EMPTY_QL273_GAPS });
   const [handoff, setHandoff] = useState("");
   const requested = QL273_GAPS.filter(gap => progress[gap.id] !== "not_requested").length;
@@ -32,5 +33,6 @@ export function Ql273OriginGapPanel() {
       <button type="button" onClick={() => { setProgress({ ...EMPTY_QL273_GAPS }); setHandoff(""); }}>Clear QL-273 local notes</button>
     </div>
     <pre aria-label="QL-273 sanitized original proof gap HOLD disposition" style={{ maxHeight: 480 }}>{handoff || "No follow-up report prepared. Original signed Proof-B source, independent reviewer custody and TEST gates remain HELD."}</pre>
+    <Ql274CustodianReturnPanel priorQl272={priorQl272} />
   </details>;
 }
