@@ -13,7 +13,7 @@ describe("QL-274 actual source publication and return reconciliation panel", () 
     expect(screen.getByText(/HTTP 404/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Inspect immutable original" })).toHaveAttribute("href", expect.stringContaining("29e1fbe490c020efd34d598c080a7da72c9bffd5"));
     fireEvent.change(screen.getByLabelText("Public QL-274 custodian-return claim JSON (session only)"), { target: { value: '{"private":"pin"}' } });
-    fireEvent.click(screen.getByRole("button", { name: "Reconcile public return & prepare HOLD report (offline)" }));
+    fireEvent.click(screen.getByRole("button", { name: "Screen public custodian claim & prepare HOLD report (offline)" }));
     expect(screen.getByLabelText("QL-274 return screening status")).toHaveTextContent("REJECTED_UNTRUSTED_OR_MALFORMED");
     const body = screen.getByLabelText("QL-274 sanitized custodian exception disposition").textContent || "";
     expect(body).not.toContain("pin\"");

@@ -24,7 +24,7 @@ export function Ql274CustodianReturnPanel({ priorQl272 }: { priorQl272: PriorQl2
       placeholder="Public metadata only — no private receipts, signer secrets or personal identity"
       onChange={event => { setRaw(event.target.value); setStatus("NOT_RECEIVED"); setReport(""); }} />
     <div className="hub-connection-actions">
-      <button type="button" onClick={inspect}>Reconcile public return &amp; prepare HOLD report (offline)</button>
+      <button type="button" onClick={inspect}>Screen public custodian claim &amp; prepare HOLD report (offline)</button>
       <button type="button" onClick={() => { setRaw(""); setStatus("NOT_RECEIVED"); setReport(""); }}>Clear QL-274 memory</button>
     </div>
     <p><strong>Return screening:</strong> <span aria-label="QL-274 return screening status">{status}</span>. No public claim authorizes a GET, private relay or TEST window.</p>
