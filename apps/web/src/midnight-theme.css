@@ -243,12 +243,21 @@
 .hub-theme-issue button { font-size: .72rem; min-height: 2rem; }
 .hub-connection-evidence.ql270-renewal { background: linear-gradient(135deg, #0b273d, #0b1b35); border-color: #32799a; }
 .hub-connection-evidence.ql270-renewal :is(p,a) { line-height: 1.5; }
+.hub-connection-evidence.ql271-return { border-color: #ad805b; background: linear-gradient(135deg, #13213a, #14263b); }
+.hub-theme-device { margin: 1rem 0; padding: 1rem; border: 1px solid #647ca4; border-radius: .8rem; background: linear-gradient(135deg, #10243e, #112d49); }
+.hub-theme-device > select { display: block; margin: .35rem 0 1rem; max-width: 28rem; width: 100%; }
+.hub-theme-device-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,220px),1fr)); gap: .65rem; }
+.hub-theme-device-check { display: grid; align-content: space-between; gap: .4rem; min-width: 0; padding: .7rem; border: 1px solid #3b5c7d; border-radius: .7rem; background: #0d2138; }
+.hub-theme-device-check small { display: block; margin-top: .35rem; font-size: .74rem; line-height: 1.5; }
+.hub-theme-device-check label { font-size: .75rem; }
+.hub-theme-device-check select { width: 100%; }
 .hub-topnav button:focus-visible, .hub-workspace-shortcut:focus-visible { outline: 2px solid #e6c5ff; outline-offset: 2px; }
 .app-shell[data-theme="high-contrast"] .hub-guard-badge { color: #2b250e; background: #fff1c0; border-color: #5c4f1f; }
 .app-shell[data-theme="high-contrast"] .hub-theme-review-card { color: #172f46; background: #fff; border: 2px solid #2d5171; }
 .app-shell[data-theme="high-contrast"] .hub-theme-review-card :is(strong,small,label) { color: #172f46; }
 .app-shell[data-theme="high-contrast"] .hub-connection-evidence.ql269-inspection { color: #172f46; background: white; border-color: #2d5171; }
-.app-shell[data-theme="high-contrast"] .hub-theme-issues, .app-shell[data-theme="high-contrast"] .ql270-renewal { color: #152d43; background: white; border: 2px solid #2d5171; }
+.app-shell[data-theme="high-contrast"] .hub-theme-issues, .app-shell[data-theme="high-contrast"] .ql270-renewal, .app-shell[data-theme="high-contrast"] .ql271-return, .app-shell[data-theme="high-contrast"] .hub-theme-device { color: #152d43; background: white; border: 2px solid #2d5171; }
+.app-shell[data-theme="high-contrast"] .hub-theme-device-check { color: #152d43; background: white; border-color: #2d5171; }
 .app-shell[data-theme="high-contrast"] .hub-topnav button { color: #fff; }
 
 .app-shell[data-theme="high-contrast"] .content { grid-column: 2; grid-row: 2; }
