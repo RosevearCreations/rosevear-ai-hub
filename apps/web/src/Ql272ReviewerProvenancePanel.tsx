@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { inspectQl272PublicProvenance, makeQl272ProvenanceHoldReport } from "./ql272ReviewerProvenance";
+import { Ql273OriginGapPanel } from "./Ql273OriginGapPanel";
 
 type PriorQl271 = { status: string; proofB: string | null } | null;
 
@@ -31,5 +32,6 @@ export function Ql272ReviewerProvenancePanel({ priorQl271 }: { priorQl271: Prior
     <pre aria-label="QL-272 sanitized provenance exception disposition" style={{ maxHeight: 480 }}>
       {report || "Original Proof-B source and independent custody/pin gates remain HELD. No reviewer claim screened."}
     </pre>
+    <Ql273OriginGapPanel />
   </details>;
 }

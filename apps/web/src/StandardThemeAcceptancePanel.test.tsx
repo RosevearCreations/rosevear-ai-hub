@@ -112,4 +112,25 @@ describe("Build 194 actual Standard theme owner review", () => {
     expect(retest.querySelector("select")).toBeNull();
     expect(screen.getByLabelText("Windows theme retest status")).toHaveTextContent("NO_PRIOR_FAILED_WINDOWS_OBSERVATIONS");
   });
+
+  it("tracks per-check engineering follow-up without accepting a Windows fix or retaining stale device results", () => {
+    render(<StandardThemeAcceptancePanel role="owner" appearance="standard" density="comfortable" />);
+    fireEvent.change(screen.getByLabelText("Where did we personally test the screens?"), { target: { value: "windows_hub_server" } });
+    const checks = Array.from(screen.getByRole("region", { name: "Standard theme on-device field checks" }).querySelectorAll(".hub-theme-device-check select"));
+    fireEvent.change(checks[2], { target: { value: "observed_fail" } });
+    expect(screen.getByLabelText("Windows retest engineering follow-up status")).toHaveTextContent("1 open");
+    fireEvent.change(screen.getByLabelText("Engineering follow-up"), { target: { value: "engineering_review_requested" } });
+    fireEvent.change(screen.getByLabelText("Retest disposition"), { target: { value: "owner_reports_improvement" } });
+    fireEvent.click(screen.getByRole("button", { name: "Prepare local visual-review report" }));
+    let report = JSON.parse(screen.getByLabelText("Build 194 sanitized Standard theme review report").textContent || "{}");
+    expect(report.windowsRetestFollowup.reportedImprovementAwaitingWitness).toBe(1);
+    expect(report.windowsRetestFollowup.items[0].ownerReportedFollowup).toBe("engineering_review_requested");
+    expect(report.windowsRetestFollowup.independentlyWitnessedAcceptance).toBe("NOT_VERIFIED");
+    fireEvent.change(checks[2], { target: { value: "observed_pass" } });
+    fireEvent.click(screen.getByRole("button", { name: "Prepare local visual-review report" }));
+    report = JSON.parse(screen.getByLabelText("Build 194 sanitized Standard theme review report").textContent || "{}");
+    expect(report.windowsRetestFollowup.items).toHaveLength(0);
+    fireEvent.change(screen.getByLabelText("Where did we personally test the screens?"), { target: { value: "other_browser_device" } });
+    expect(screen.queryByLabelText("Engineering follow-up")).not.toBeInTheDocument();
+  });
 });
