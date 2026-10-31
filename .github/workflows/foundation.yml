@@ -113,6 +113,8 @@ jobs:
         run: npm run test -- ql271ProofReturn.test.ts Ql271ProofReturnPanel.test.tsx StandardThemeAcceptancePanel.test.tsx
       - name: Build 197 QL-272 reviewer provenance and physical Windows theme retest HOLD
         run: npm run test -- ql272ReviewerProvenance.test.ts Ql272ReviewerProvenancePanel.test.tsx windowsThemeRetest.test.ts StandardThemeAcceptancePanel.test.tsx
+      - name: Build 198 QL-273 immutable original source origin, custody gaps and Windows follow-up HOLD
+        run: npm run test -- ql273OriginGap.test.ts Ql273OriginGapPanel.test.tsx windowsRetestFollowup.test.ts StandardThemeAcceptancePanel.test.tsx Ql272ReviewerProvenancePanel.test.tsx
       - name: Test
         run: npm run test
       - name: Production build
