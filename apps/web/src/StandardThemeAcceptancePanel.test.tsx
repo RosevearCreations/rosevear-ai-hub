@@ -28,6 +28,13 @@ describe("Build 194 actual Standard theme owner review", () => {
     fireEvent.change(screen.getByLabelText("Retest disposition"), { target: { value: "owner_reports_improvement" } });
     expect(summary).toHaveTextContent("1/1 recorded");
     expect(summary).toHaveTextContent("independent witness pending");
+    const retestFilters = screen.getByRole("group", { name: "Filter owner Windows retests" });
+    fireEvent.click(within(retestFilters).getByRole("button", { name: "Awaiting retest (0)" }));
+    expect(screen.getByText("No owner retests in this category. Choose All failed checks to review everything.")).toBeInTheDocument();
+    fireEvent.click(within(retestFilters).getByRole("button", { name: "Reported improvement (1)" }));
+    expect(screen.getByLabelText("Retest disposition")).toHaveValue("owner_reports_improvement");
+    fireEvent.click(within(summary).getByRole("link", { name: "Keyboard & visible focus" }));
+    expect(within(retestFilters).getByRole("button", { name: "All failed checks (1)" })).toHaveAttribute("aria-pressed", "true");
   });
   it("guides the owner through real workspaces and the next missing screen while preserving findings", () => {
     const onNavigate = vi.fn();
@@ -61,6 +68,7 @@ describe("Build 194 actual Standard theme owner review", () => {
     expect(screen.getByRole("button", { name: "Recover saved review" })).toBeEnabled();
     expect(screen.getAllByRole("combobox", { name: "Review finding" })[0]).toHaveValue("not_checked");
     fireEvent.click(screen.getByRole("button", { name: "Recover saved review" }));
+    expect(screen.getByLabelText("Owner review recovery message")).toHaveFocus();
     expect(screen.getAllByRole("combobox", { name: "Review finding" })[0]).toHaveValue("needs_change");
     expect(document.querySelector("#theme-device-keyboard")).toHaveValue("observed_fail");
     expect(screen.getByLabelText("What went wrong? (fixed, private-data-free choice)")).toHaveValue("focus_not_visible");
