@@ -9,3 +9,5 @@ QL-275 remains **Under Review / deferred**. Integration is **DISCONNECTED/HOLD**
 Validation: `npm run build:208:hub:test`, `npm run web:build`, full web suite and GitHub feature/dev/exact-main workflows.
 
 Next planned: **Build 209 — Diagnostic Triage Priority Readback, Retest View Recovery Controls & Standard Theme Owner Review Completion Follow-Up (QL-275 Deferred).**
+
+The owner-requested 20-build forward queue, **Builds 209–228**, is defined in [`BUILD_QUEUE_209_228.md`](BUILD_QUEUE_209_228.md). These are planned requirements, not source or installed-Windows completion claims.
