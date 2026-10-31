@@ -121,6 +121,8 @@ jobs:
         run: npm run test -- ql275DeferredReview.test.ts Ql275ReviewPanel.test.tsx CommsHubConnectionPanel.test.tsx StandardThemeAcceptancePanel.test.tsx
       - name: Build 201 real System source status, anchor navigation and owner review progress
         run: npm run test -- SystemWorkspaceGuide.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx
+      - name: Build 202 accessible owner review, status detail routing and fixed Windows field findings
+        run: npm run test -- SystemWorkspaceGuide.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx
       - name: Test
         run: npm run test
       - name: Production build
