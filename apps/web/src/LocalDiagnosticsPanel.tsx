@@ -134,6 +134,15 @@ export function summarizeServiceDiagnostics(
   return keys.map((key, index) => diagnose(key, outcomes[index]));
 }
 
+/** Compare only allowlisted classifications, never raw endpoint payloads or secrets. */
+export function compareDiagnosticSnapshots(previous: ServiceDiagnostic[], current: ServiceDiagnostic[]) {
+  return current.map(service => {
+    const before = previous.find(item => item.key === service.key);
+    return { key: service.key, name: service.name, before: before?.state ?? "unknown",
+      after: service.state, change: !before ? "new" : before.state === service.state ? "unchanged" : "changed" };
+  });
+}
+
 /** Read-only, on-demand status. No repair operation or background polling. */
 export function LocalDiagnosticsPanel({
   onNavigate,
@@ -141,10 +150,12 @@ export function LocalDiagnosticsPanel({
   onNavigate: (section: string) => void;
 }) {
   const [snapshot, setSnapshot] = useState<ServiceDiagnostic[] | null>(null);
+  const [previousSnapshot, setPreviousSnapshot] = useState<ServiceDiagnostic[] | null>(null);
   const [filter, setFilter] = useState<DiagnosticFilter>("all");
   const [sampledAt, setSampledAt] = useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
   const request = useRef<AbortController | null>(null);
+  const latestSnapshot = useRef<ServiceDiagnostic[] | null>(null);
 
   const refresh = useCallback(async () => {
     request.current?.abort();
@@ -160,7 +171,10 @@ export function LocalDiagnosticsPanel({
         getGo2RTCStatus(controller.signal),
       ]);
       if (!controller.signal.aborted) {
-        setSnapshot(summarizeServiceDiagnostics(outcomes));
+        setPreviousSnapshot(latestSnapshot.current);
+        const nextSnapshot = summarizeServiceDiagnostics(outcomes);
+        latestSnapshot.current = nextSnapshot;
+        setSnapshot(nextSnapshot);
         setSampledAt(new Date());
       }
     } finally {
@@ -177,6 +191,7 @@ export function LocalDiagnosticsPanel({
   const attention = snapshot?.filter(service => service.state === "attention") ?? [];
   const unknown = snapshot?.filter(service => service.state === "unknown") ?? [];
   const firstFollowup = attention[0] ?? unknown[0] ?? null;
+  const comparison = snapshot && previousSnapshot ? compareDiagnosticSnapshots(previousSnapshot, snapshot) : null;
   const filterOptions: { id: DiagnosticFilter; label: string }[] = [
     { id: "all", label: "All readings" }, { id: "attention", label: "Needs attention" },
     { id: "unknown", label: "Not verified" }, { id: "ready", label: "Available" },
@@ -214,6 +229,16 @@ export function LocalDiagnosticsPanel({
                 {option.label} ({option.id === "all" ? snapshot.length : snapshot.filter(service => service.state === option.id).length})
               </button>)}
             </div>
+          </section>
+          <section className="hub-diagnostics-guide" aria-label="Diagnostic source snapshot comparison">
+            <h3>Compare our last two checks</h3>
+            <p>Only the two most recent readings in this open view are compared. Refresh to take another sample; reloading this page clears the comparison. A changed API reading is not proof of a Windows repair or physical device test.</p>
+            {comparison ? <>
+              <p aria-live="polite">{comparison.filter(item => item.change === "changed").length} changed · {comparison.filter(item => item.change === "unchanged").length} unchanged.</p>
+              <ul>{comparison.map(item => <li key={item.key}>
+                <a href={`#hub-diagnostic-${item.key}`} onClick={() => setFilter("all")}>{item.name}</a>: {descriptions[item.before]} → {descriptions[item.after]} ({item.change})
+              </li>)}</ul>
+            </> : <p>No earlier snapshot to compare. Choose Refresh diagnostics to take a second reading.</p>}
           </section>
           <div className="local-diagnostics-grid">
           {visible.map((service) => (

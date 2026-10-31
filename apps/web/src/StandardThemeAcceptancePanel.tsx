@@ -111,6 +111,9 @@ export function StandardThemeAcceptancePanel({
     { label: "Record follow-up retests for any failed checks", done: windowsContext && windowsRetest.retestsPending === 0, href: "#hub-theme-retest-review" }
   ];
   const completionCount = completionSteps.filter(step => step.done).length;
+  const nextDeviceCheck = DEVICE_CHECKS.find(check => deviceFindings[check.id] === "not_checked");
+  const nextFailedCheck = DEVICE_CHECKS.find(check => deviceFindings[check.id] === "observed_fail" && deviceSymptoms[check.id] === "none");
+  const nextCompletion = completionSteps.find(step => !step.done);
 
   function saveCheckpoint() {
     if (!isOwner) return;
@@ -202,6 +205,7 @@ export function StandardThemeAcceptancePanel({
         <button type="button" disabled={!isOwner || !hasCheckpoint} onClick={clearCheckpoint}>Clear saved checkpoint</button>
       </div>
       <p aria-live="polite" aria-label="Owner review recovery message">{checkpointMessage}</p>
+      <p><strong>Recovery reminder:</strong> Recover replaces the current fixed-choice selections with the last saved ones. Save first if we want to retain recent changes. Clearing a saved checkpoint does not clear what is currently on screen. These are temporary browser-tab notes, not a server backup.</p>
     </section>
     <p className="hub-theme-accessibility-guide"><strong>Keyboard review:</strong> Use Tab to reach each review link and control, Enter to activate a link or button, and arrow keys to change a focused choice. Check that focus remains clearly visible at Standard and High contrast settings. <a href="#hub-theme-device-keyboard">Jump to keyboard observation</a>.</p>
     <div className="hub-theme-review-next" role="region" aria-label="Next unreviewed owner screen">
@@ -211,6 +215,13 @@ export function StandardThemeAcceptancePanel({
         {nextUnchecked ? `Open next screen: ${nextUnchecked.title}` : "All screens reviewed"}
       </button>
     </div>
+    <nav className="hub-theme-review-next" aria-label="Windows review next action">
+      <strong>Next Windows worksheet action:</strong> {nextCompletion ? nextCompletion.label : "All local worksheet steps are marked complete."}
+      {nextCompletion && <a href={nextCompletion.href}>Go to this step</a>}
+      {nextDeviceCheck && deviceContext !== "not_checked" && <a href={`#hub-theme-device-${nextDeviceCheck.id}`}>Next unchecked device observation: {nextDeviceCheck.title}</a>}
+      {nextFailedCheck && <a href={`#hub-theme-device-${nextFailedCheck.id}`}>Classify failure: {nextFailedCheck.title}</a>}
+      <p>These links navigate this review only. Actual Windows acceptance remains unverified.</p>
+    </nav>
     <div id="hub-theme-device-review" className="hub-theme-device" role="region" aria-label="Standard theme on-device field checks">
       <div className="hub-evidence-title"><h3>On-device acceptance · actual Hub screen</h3><span className="hub-guard-badge">{deviceCompleted}/{DEVICE_CHECKS.length} owner observations</span></div>
       <p>These checks must be performed <strong>on the real Windows Hub or a real connected client</strong>. Choose where you tested; we do not read machine identity, use device telemetry, or treat a simulated browser test or source CI as physical acceptance. This is an owner-reported, browser-session-only worksheet.</p>
