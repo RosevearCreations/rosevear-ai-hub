@@ -25,6 +25,16 @@ describe("Build 113 installed evidence panel", () => {
     expect(getHubVersion).toHaveBeenCalledTimes(1);
     expect(getReleaseObservability).toHaveBeenCalledTimes(1);
     expect(screen.getByText(/different release recorded/)).toBeTruthy();
+    expect(screen.getByRole("region", { name: "Build 211 release-to-device drift review" })).toHaveTextContent("Review the original updater journal");
+    const reboot = screen.getByRole("checkbox", { name: /reviewed startup after a Windows reboot/ });
+    const rollback = screen.getByRole("checkbox", { name: /reviewed our original manual rollback/ });
+    fireEvent.click(reboot);
+    fireEvent.click(rollback);
+    expect(reboot).toBeChecked();
+    expect(rollback).toBeChecked();
+    fireEvent.change(screen.getByRole("textbox", { name: "Expected main commit SHA" }), { target: { value: "c".repeat(40) } });
+    expect(reboot).not.toBeChecked();
+    expect(rollback).not.toBeChecked();
     expect(screen.getByText(/FIELD ADOPTION HOLD/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: /^(restart|install app|apply update|restore)/i })).toBeNull();
   });
