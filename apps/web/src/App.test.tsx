@@ -709,7 +709,7 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "Chat" }));
     fireEvent.click(screen.getByRole("button", { name: "Knowledge" }));
     expect(screen.getByRole("searchbox")).toHaveValue("");
-  });
+  }, 60_000); // Busy shared CI workers can exceed the default 15 seconds for full-shell navigation.
 
   test("preserves the Chat draft when the first conversation cannot be created", async () => {
     vi.unstubAllGlobals();

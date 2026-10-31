@@ -111,6 +111,8 @@ jobs:
         run: npm run test -- ql270HubRenewal.test.ts Ql270CustodyRenewalPanel.test.tsx StandardThemeAcceptancePanel.test.tsx
       - name: Build 196 QL-271 original-return HOLD, independent reviewer claims and on-device owner review
         run: npm run test -- ql271ProofReturn.test.ts Ql271ProofReturnPanel.test.tsx StandardThemeAcceptancePanel.test.tsx
+      - name: Build 197 QL-272 reviewer provenance and physical Windows theme retest HOLD
+        run: npm run test -- ql272ReviewerProvenance.test.ts Ql272ReviewerProvenancePanel.test.tsx windowsThemeRetest.test.ts StandardThemeAcceptancePanel.test.tsx
       - name: Test
         run: npm run test
       - name: Production build

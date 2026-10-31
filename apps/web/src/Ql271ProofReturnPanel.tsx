@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { inspectQl271Return, makeQl271HoldDisposition } from "./ql271ProofReturn";
+import type { Ql271Return } from "./ql271ProofReturn";
+import { Ql272ReviewerProvenancePanel } from "./Ql272ReviewerProvenancePanel";
 
 type PriorQl270 = { status: string; proofB: string | null } | null;
 
@@ -8,10 +10,12 @@ export function Ql271ProofReturnPanel({ priorQl270 }: { priorQl270: PriorQl270 }
   const [raw, setRaw] = useState("");
   const [status, setStatus] = useState("NOT_RECEIVED");
   const [report, setReport] = useState("");
+  const [review, setReview] = useState<Ql271Return | null>(null);
   function inspect() {
     const claim = inspectQl271Return(raw);
     setStatus(claim.status);
     setReport(JSON.stringify(makeQl271HoldDisposition(claim, priorQl270), null, 2));
+    setReview(claim);
     setRaw("");
   }
   return <section className="hub-connection-evidence ql271-return" aria-label="QL-271 original proof return and independent reviewer disposition">
@@ -24,15 +28,16 @@ export function Ql271ProofReturnPanel({ priorQl270 }: { priorQl270: PriorQl270 }
     <p>A reviewer may supply only the <em>public sanitized return metadata</em> defined in the QL-271 handoff. Its HOLD / REVIEW_PENDING disposition remains an unverified report until the original signed file, true ancestry, pinned identity and private reviewer custody are verified independently. No keys, signatures, personal names, addresses, challenges or relay secrets belong here.</p>
     <label htmlFor="ql271-return-input">Sanitized public review return JSON (temporary browser memory)</label>
     <textarea id="ql271-return-input" maxLength={4096} rows={4} value={raw}
-      onChange={event => { setRaw(event.target.value); setReport(""); setStatus("NOT_RECEIVED"); }}
+      onChange={event => { setRaw(event.target.value); setReport(""); setStatus("NOT_RECEIVED"); setReview(null); }}
       placeholder="Public claim only; private signer/pin evidence must stay out of the application" />
     <div className="hub-connection-actions">
       <button type="button" onClick={inspect}>Screen public original-return claim (offline)</button>
-      <button type="button" onClick={() => { setRaw(""); setReport(""); setStatus("NOT_RECEIVED"); }}>Clear QL-271 memory</button>
+      <button type="button" onClick={() => { setRaw(""); setReport(""); setStatus("NOT_RECEIVED"); setReview(null); }}>Clear QL-271 memory</button>
     </div>
     <p><strong>Reviewer intake:</strong> <span aria-label="QL-271 public reviewer intake status">{status}</span>. No connection, independent approval or conditional GET schedule is created.</p>
     <pre aria-label="QL-271 sanitized reviewer HOLD disposition" style={{ maxHeight: 480 }}>
       {report || "No reviewer public return inspected. Original signed source and private evidence gates remain HELD."}
     </pre>
+    <Ql272ReviewerProvenancePanel priorQl271={review} />
   </section>;
 }

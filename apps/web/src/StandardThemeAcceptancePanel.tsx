@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ShellDensity, ShellTheme } from "./CommandShell";
+import { makeWindowsThemeRetestDisposition, type RetestOutcome } from "./windowsThemeRetest";
 
 const REVIEW_AREAS = [
   { id: "front_end", title: "Front end & navigation", detail: "Home, module navigation, sign-in and small-screen readability", target: "Home" },
@@ -35,6 +36,9 @@ type DeviceContext = "not_checked" | "windows_hub_server" | "remote_windows_clie
 const INITIAL_DEVICE: Record<DeviceCheck, DeviceFinding> = {
   navigation: "not_checked", resize: "not_checked", keyboard: "not_checked", data: "not_checked", refresh: "not_checked"
 };
+const INITIAL_RETEST: Record<DeviceCheck, RetestOutcome> = {
+  navigation: "not_retested", resize: "not_retested", keyboard: "not_retested", data: "not_retested", refresh: "not_retested"
+};
 
 /** A session-scoped owner visual checklist, NEVER an integration release decision. */
 export function StandardThemeAcceptancePanel({
@@ -47,6 +51,7 @@ export function StandardThemeAcceptancePanel({
   const [handoff, setHandoff] = useState("");
   const [deviceContext, setDeviceContext] = useState<DeviceContext>("not_checked");
   const [deviceFindings, setDeviceFindings] = useState<Record<DeviceCheck, DeviceFinding>>({ ...INITIAL_DEVICE });
+  const [deviceRetests, setDeviceRetests] = useState<Record<DeviceCheck, RetestOutcome>>({ ...INITIAL_RETEST });
   const isOwner = role === "owner";
   const done = REVIEW_AREAS.filter(area => findings[area.id] !== "not_checked").length;
   const changesNeeded = REVIEW_AREAS.filter(area => findings[area.id] === "needs_change").length;
@@ -56,6 +61,10 @@ export function StandardThemeAcceptancePanel({
   const deviceFailed = DEVICE_CHECKS.filter(check => deviceFindings[check.id] === "observed_fail").length;
   const deviceResult = deviceContext === "not_checked" || deviceCompleted !== DEVICE_CHECKS.length ? "ON_DEVICE_WALKTHROUGH_INCOMPLETE" :
     deviceFailed > 0 ? "OWNER_REPORTED_DEVICE_ISSUES" : "OWNER_REPORTED_DEVICE_CHECKS_PASS_UNVERIFIED";
+  const windowsRetest = makeWindowsThemeRetestDisposition(deviceContext, DEVICE_CHECKS.map(check => ({
+    id: check.id, observation: deviceFindings[check.id], retest: deviceRetests[check.id]
+  })));
+  const windowsContext = deviceContext === "windows_hub_server" || deviceContext === "remote_windows_client";
 
   function makeHandoff() {
     if (!isOwner) return;
@@ -72,6 +81,7 @@ export function StandardThemeAcceptancePanel({
       onDevice: { context: deviceContext, completed: deviceCompleted, failed: deviceFailed,
         outcome: deviceResult, checks: DEVICE_CHECKS.map(check => ({ check: check.id, finding: deviceFindings[check.id] })),
         actualWindowsMachineIdentity: "NOT_COLLECTED", independentlyWitnessedPhysicalAcceptance: "NOT_VERIFIED" },
+      windowsThemeRetest: windowsRetest,
       savedToBackend: false,
       independentlyWitnessedOwnerAcceptance: "NOT_VERIFIED",
       integrationTestAuthorization: "NOT_GIVEN",
@@ -83,7 +93,7 @@ export function StandardThemeAcceptancePanel({
 
   return <section className="panel hub-theme-review" aria-labelledby="theme-owner-acceptance-title">
     <div className="hub-evidence-title">
-      <div><p className="eyebrow">Build 196 · Standard theme real-screen and on-device walkthrough</p><h2 id="theme-owner-acceptance-title">Standard Theme Owner Acceptance</h2></div>
+      <div><p className="eyebrow">Build 197 · Standard theme on-device observation &amp; retest</p><h2 id="theme-owner-acceptance-title">Standard Theme Owner Acceptance</h2></div>
       <span className="hub-guard-badge">{done}/{REVIEW_AREAS.length} screens reviewed</span>
     </div>
     <div className="hub-theme-device" role="region" aria-label="Standard theme on-device field checks">
@@ -91,7 +101,7 @@ export function StandardThemeAcceptancePanel({
       <p>These checks must be performed <strong>on the real Windows Hub or a real connected client</strong>. Choose where you tested; we do not read machine identity, use device telemetry, or treat a simulated browser test or source CI as physical acceptance. This is an owner-reported, browser-session-only worksheet.</p>
       <label htmlFor="theme-device-context">Where did we personally test the screens?</label>
       <select id="theme-device-context" disabled={!isOwner} value={deviceContext}
-        onChange={event => { setDeviceContext(event.target.value as DeviceContext); setDeviceFindings({ ...INITIAL_DEVICE }); setHandoff(""); }}>
+        onChange={event => { setDeviceContext(event.target.value as DeviceContext); setDeviceFindings({ ...INITIAL_DEVICE }); setDeviceRetests({ ...INITIAL_RETEST }); setHandoff(""); }}>
         <option value="not_checked">Not tested on a device</option>
         <option value="windows_hub_server">Windows Hub server (owner-reported)</option>
         <option value="remote_windows_client">Remote Windows Hub client (owner-reported)</option>
@@ -103,7 +113,8 @@ export function StandardThemeAcceptancePanel({
           <label htmlFor={`theme-device-${check.id}`}>Observed result</label>
           <select id={`theme-device-${check.id}`} disabled={!isOwner || deviceContext === "not_checked"}
             value={deviceFindings[check.id]} onChange={event => {
-              setDeviceFindings(current => ({ ...current, [check.id]: event.target.value as DeviceFinding })); setHandoff("");
+              setDeviceFindings(current => ({ ...current, [check.id]: event.target.value as DeviceFinding }));
+              setDeviceRetests(current => ({ ...current, [check.id]: "not_retested" })); setHandoff("");
             }}>
             <option value="not_checked">Not checked</option>
             <option value="observed_pass">Personally observed: passes</option>
@@ -112,6 +123,23 @@ export function StandardThemeAcceptancePanel({
         </div>)}
       </div>
       <p><strong>On-device result:</strong> <span aria-label="Standard theme on-device review status">{deviceResult}</span>. Independent Windows witnessing and installation acceptance remain NOT VERIFIED, even if every owner observation passes.</p>
+      <div className="hub-theme-retest" role="region" aria-label="Windows theme retest disposition">
+        <div className="hub-evidence-title"><h3>Windows theme retest · prior failures only</h3><span className="hub-guard-badge">{windowsRetest.retestsPending} pending</span></div>
+        <p>This is a second owner-observed check after a reported failure—not engineering sign-off. Retesting is eligible only when we selected the actual Windows Hub server or an actual remote Windows client. Changing the device or original finding resets that check's retest.</p>
+        {deviceFailed === 0 ? <p>No failed on-device observations are available to retest.</p> :
+          DEVICE_CHECKS.filter(check => deviceFindings[check.id] === "observed_fail").map(check =>
+            <div className="hub-theme-retest-item" key={check.id}>
+              <strong>{check.title}</strong>
+              <label htmlFor={`theme-retest-${check.id}`}>Retest disposition</label>
+              <select id={`theme-retest-${check.id}`} value={deviceRetests[check.id]} disabled={!isOwner || !windowsContext}
+                onChange={event => { setDeviceRetests(current => ({ ...current, [check.id]: event.target.value as RetestOutcome })); setHandoff(""); }}>
+                <option value="not_retested">Not retested</option>
+                <option value="issue_persists">Personally retested: issue persists</option>
+                <option value="owner_reports_improvement">Personally retested: looks improved (unverified)</option>
+              </select>
+            </div>)}
+        <p><strong>Windows retest outcome:</strong> <span aria-label="Windows theme retest status">{windowsRetest.outcome}</span>. Independent Windows witness and real installation acceptance remain NOT VERIFIED.</p>
+      </div>
     </div>
     <p>Review the <strong>actual application screens</strong> with our new midnight Standard theme. Use each card's Open workspace shortcut; your findings now survive these in-app navigation changes. They remain only in this browser session and cannot authorize connections.</p>
     <p><strong>Current view:</strong> {appearance === "standard" ? "Standard (midnight)" : "High contrast"} · {density} density. Change these in the sidebar to check readability before recording findings.</p>
@@ -158,7 +186,7 @@ export function StandardThemeAcceptancePanel({
     <p><strong>Visual review status:</strong> <span aria-label="Standard theme owner review status">{result}</span>. {changesNeeded > 0 ? `${changesNeeded} area(s) need attention.` : "No issues marked so far."}</p>
     <div className="hub-connection-actions">
       <button type="button" disabled={!isOwner} onClick={makeHandoff}>Prepare local visual-review report</button>
-      <button type="button" disabled={!isOwner} onClick={() => { setFindings({ ...INITIAL }); setIssues({ ...INITIAL_ISSUES }); setFollowups({ ...INITIAL_FOLLOWUPS }); setDeviceContext("not_checked"); setDeviceFindings({ ...INITIAL_DEVICE }); setHandoff(""); }}>Reset this session's review</button>
+      <button type="button" disabled={!isOwner} onClick={() => { setFindings({ ...INITIAL }); setIssues({ ...INITIAL_ISSUES }); setFollowups({ ...INITIAL_FOLLOWUPS }); setDeviceContext("not_checked"); setDeviceFindings({ ...INITIAL_DEVICE }); setDeviceRetests({ ...INITIAL_RETEST }); setHandoff(""); }}>Reset this session's review</button>
     </div>
     <pre aria-label="Build 194 sanitized Standard theme review report">{handoff || "No owner visual-review report prepared. External pilot authorization is unrelated and remains HELD."}</pre>
   </section>;
