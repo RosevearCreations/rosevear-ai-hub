@@ -33,4 +33,13 @@ describe("Build 203 accessible guided diagnostics", () => {
     expect(document.querySelectorAll(".local-diagnostic-card")).toHaveLength(5);
     expect(navigate).not.toHaveBeenCalled();
   });
+  it("compares only the two latest sanitized service classifications after an explicit refresh", async () => {
+    render(<LocalDiagnosticsPanel onNavigate={vi.fn()} />);
+    const comparison = await screen.findByRole("region", { name: "Diagnostic source snapshot comparison" });
+    expect(comparison).toHaveTextContent("No earlier snapshot to compare");
+    fireEvent.click(screen.getByRole("button", { name: "Refresh diagnostics" }));
+    expect(await within(comparison).findByText(/0 changed · 5 unchanged/)).toBeInTheDocument();
+    expect(comparison).toHaveTextContent("Hub API: Available → Available (unchanged)");
+    expect(comparison).not.toHaveTextContent("127.0.0.1");
+  });
 });
