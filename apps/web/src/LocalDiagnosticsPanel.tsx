@@ -143,6 +143,15 @@ export function compareDiagnosticSnapshots(previous: ServiceDiagnostic[], curren
   });
 }
 
+/** Owner-facing priority only; an API classification change is not a verified repair. */
+export function classifyDiagnosticChange(before: DiagnosticState, after: DiagnosticState) {
+  if (before === after) return "No classification change";
+  if (after === "attention") return "Needs manual inspection";
+  if (after === "unknown") return "Status not verified — inspect the source";
+  if (after === "ready") return "API now responds — verify the actual service";
+  return "Optional or unconfigured — confirm expected setup";
+}
+
 /** Read-only, on-demand status. No repair operation or background polling. */
 export function LocalDiagnosticsPanel({
   onNavigate,
@@ -242,6 +251,14 @@ export function LocalDiagnosticsPanel({
             {comparison ? <>
               <p aria-live="polite">{comparison.filter(item => item.change === "changed").length} changed · {comparison.filter(item => item.change === "unchanged").length} unchanged.</p>
               {changedServices.length > 0 && <p><strong>Manual follow-up:</strong> A changed API classification needs confirmation on the real Hub. Select a service below to review its safe manual checks; no repair is triggered.</p>}
+              <section aria-label="Owner diagnostic exception triage">
+                <h4>Changed source follow-up · {changedServices.length} to review</h4>
+                {changedServices.length === 0 ? <p>No changed classifications require a comparison follow-up in this sample.</p> :
+                  <ul>{changedServices.map(item => <li key={item.key}>
+                    <a href={`#hub-diagnostic-${item.key}`} onClick={() => setFilter("all")}>{item.name}</a> — {classifyDiagnosticChange(item.before, item.after)}
+                  </li>)}</ul>}
+                <p>These are safe inspection suggestions only. They do not record an incident, authorize a repair, or prove a device is functioning.</p>
+              </section>
               <div className="hub-diagnostics-filters" role="group" aria-label="Diagnostic comparison follow-up filter">
                 <button type="button" aria-pressed={!comparisonChangesOnly} onClick={() => setComparisonChangesOnly(false)}>All compared services ({comparison.length})</button>
                 <button type="button" aria-pressed={comparisonChangesOnly} onClick={() => setComparisonChangesOnly(true)}>Changed only ({changedServices.length})</button>
