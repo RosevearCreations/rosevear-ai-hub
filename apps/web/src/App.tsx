@@ -18,6 +18,7 @@ import { AuthView } from "./AuthView";
 import { CameraView } from "./CameraView";
 import { CardHelp, CommandPalette, type ShellDensity, type ShellTheme } from "./CommandShell";
 import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
+import { SystemWorkspaceGuide } from "./SystemWorkspaceGuide";
 import { HubNavIcon } from "./HubNavIcon";
 import { BusinessView } from "./BusinessView";
 import { ChatView } from "./ChatView";
@@ -347,8 +348,10 @@ export function App() {
           <SystemHealth health={health} />
         </header>}
         {section === "System" && <HubVitalCards health={health} ollama={ollama} />}
+        {section === "System" && <SystemWorkspaceGuide backend={health.kind} ollama={ollama.kind}
+          models={ollama.kind === "online" ? ollama.data.model_count : null} canAdminister={canAdminister} />}
         {/* Keep the supervised trial mounted while reviewing linked modules; it only stores session data and never polls. */}
-        {canAdminister && <div hidden={section !== "System"}>
+        {canAdminister && <div id="hub-system-owner-review" hidden={section !== "System"}>
           <OwnerFieldTrialWorkbench active={section === "System"} onNavigate={(target) => setSection(target as Section)} />
         </div>}
         {/* Keep the owner visual findings mounted while opening each real destination screen. */}
@@ -391,16 +394,16 @@ export function App() {
           <UsersView currentUser={user} />
         ) : section === "System" ? (
           <>
-            {canAdminister && <LocalDiagnosticsPanel onNavigate={(target) => setSection(target as Section)} />}
+            {canAdminister && <div id="hub-system-diagnostics"><LocalDiagnosticsPanel onNavigate={(target) => setSection(target as Section)} /></div>}
             {canAdminister && <PostRebootAcceptancePanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <StartupRecoveryConsole onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <FieldRecoverySummaryPanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <ReleaseAcceptancePanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <ReleaseObservabilityPanel />}
             {canAdminister && <InstalledHubAdoptionPanel />}
-            {canAdminister && <IntegrationHealthPanel />}
+            {canAdminister && <div id="hub-system-connection"><IntegrationHealthPanel /></div>}
             {canAdminister && <RestartAppsPanel />}
-            <RemoteAccessPanel />
+            <div id="hub-system-remote"><RemoteAccessPanel /></div>
             {canAdminister && <ResourceBudgetPanel />}
           </>
         ) : (

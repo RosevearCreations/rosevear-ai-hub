@@ -49,6 +49,7 @@
     "integration:ql272:hub:test": "npm --workspace apps/web run test -- ql272ReviewerProvenance.test.ts Ql272ReviewerProvenancePanel.test.tsx windowsThemeRetest.test.ts StandardThemeAcceptancePanel.test.tsx App.test.tsx",
     "integration:ql273:hub:test": "npm --workspace apps/web run test -- ql273OriginGap.test.ts Ql273OriginGapPanel.test.tsx windowsRetestFollowup.test.ts StandardThemeAcceptancePanel.test.tsx Ql272ReviewerProvenancePanel.test.tsx App.test.tsx",
     "integration:ql274:hub:test": "npm --workspace apps/web run test -- ql274CustodianReturn.test.ts Ql274CustodianReturnPanel.test.tsx windowsOwnerRetestAudit.test.ts StandardThemeAcceptancePanel.test.tsx Ql273OriginGapPanel.test.tsx Ql272ReviewerProvenancePanel.test.tsx App.test.tsx",
-    "integration:ql275:hub:test": "npm --workspace apps/web run test -- ql275DeferredReview.test.ts Ql275ReviewPanel.test.tsx CommsHubConnectionPanel.test.tsx StandardThemeAcceptancePanel.test.tsx App.test.tsx"
+    "integration:ql275:hub:test": "npm --workspace apps/web run test -- ql275DeferredReview.test.ts Ql275ReviewPanel.test.tsx CommsHubConnectionPanel.test.tsx StandardThemeAcceptancePanel.test.tsx App.test.tsx",
+    "build:201:hub:test": "npm --workspace apps/web run test -- SystemWorkspaceGuide.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx CommsHubConnectionPanel.test.tsx"
   }
 }

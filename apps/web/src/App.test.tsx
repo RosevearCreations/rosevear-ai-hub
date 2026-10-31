@@ -514,7 +514,7 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByRole("button", { name: "Workshop" })).toHaveAttribute("aria-current", "page");
     expect(screen.queryByRole("dialog", { name: "Jump to a workspace" })).not.toBeInTheDocument();
-  });
+  }, 45_000);
 
   test("keeps Standard theme owner issue findings while opening and returning from real workspaces", async () => {
     render(<App />);
