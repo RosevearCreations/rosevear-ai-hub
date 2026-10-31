@@ -34,6 +34,11 @@ describe("Build 194 actual Standard theme owner review", () => {
     fireEvent.click(within(retestFilters).getByRole("button", { name: "Reported improvement (1)" }));
     expect(screen.getByLabelText("Retest disposition")).toHaveValue("owner_reports_improvement");
     expect(sessionStorage.getItem(OWNER_RETEST_FILTER_KEY)).toBe("owner_reports_improvement");
+    fireEvent.click(screen.getByRole("button", { name: "Clear saved retest view (show all)" }));
+    expect(sessionStorage.getItem(OWNER_RETEST_FILTER_KEY)).toBeNull();
+    expect(within(retestFilters).getByRole("button", { name: "All failed checks (1)" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByLabelText("Retest disposition")).toHaveValue("owner_reports_improvement");
+    fireEvent.click(within(retestFilters).getByRole("button", { name: "Reported improvement (1)" }));
     fireEvent.click(within(summary).getByRole("link", { name: "Keyboard & visible focus" }));
     expect(within(retestFilters).getByRole("button", { name: "All failed checks (1)" })).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(within(retestFilters).getByRole("button", { name: "Reported improvement (1)" }));
@@ -154,6 +159,7 @@ describe("Build 194 actual Standard theme owner review", () => {
     render(<StandardThemeAcceptancePanel role="administrator" appearance="high-contrast" density="compact" />);
     expect(screen.getByRole("note")).toHaveTextContent("Administrator view only");
     expect(screen.getByRole("button", { name: "Prepare local visual-review report" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Clear saved retest view (show all)" })).toBeDisabled();
     expect(screen.getAllByRole("combobox", { name: "Review finding" })).toHaveLength(5);
     screen.getAllByRole("combobox", { name: "Review finding" }).forEach(select => expect(select).toBeDisabled());
   });

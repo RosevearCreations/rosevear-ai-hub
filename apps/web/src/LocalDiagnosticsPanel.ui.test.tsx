@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import { LocalDiagnosticsPanel, classifyDiagnosticChange } from "./LocalDiagnosticsPanel";
+import { LocalDiagnosticsPanel, classifyDiagnosticChange, diagnosticTriagePriority } from "./LocalDiagnosticsPanel";
 
 vi.mock("./api", () => ({
   getHealth: vi.fn(async () => ({ status: "ok" })),
@@ -18,6 +18,13 @@ describe("Build 203 accessible guided diagnostics", () => {
     expect(classifyDiagnosticChange("attention", "unknown")).toContain("not verified");
     expect(classifyDiagnosticChange("attention", "ready")).toContain("verify the actual service");
     expect(classifyDiagnosticChange("ready", "ready")).toBe("No classification change");
+  });
+  it("orders follow-up priorities by observed classification without assuming an actual repair", () => {
+    expect(diagnosticTriagePriority("ready", "attention").rank).toBe(1);
+    expect(diagnosticTriagePriority("ready", "unknown").rank).toBe(2);
+    expect(diagnosticTriagePriority("ready", "optional").rank).toBe(3);
+    expect(diagnosticTriagePriority("attention", "ready").rank).toBe(4);
+    expect(diagnosticTriagePriority("attention", "ready").label).toContain("verify reported recovery");
   });
   it("shows source-scoped priorities and filters last sampled results without executing repair actions", async () => {
     const navigate = vi.fn();
@@ -54,6 +61,7 @@ describe("Build 203 accessible guided diagnostics", () => {
     expect(within(followupFilter).getByRole("button", { name: "Changed only (0)" })).toHaveAttribute("aria-pressed", "true");
     expect(comparison).toHaveTextContent("No changed service classifications");
     expect(within(comparison).getByRole("region", { name: "Owner diagnostic exception triage" })).toHaveTextContent("0 to review");
+    expect(within(comparison).getByRole("region", { name: "Owner diagnostic exception triage" })).toHaveTextContent("Last sample:");
     fireEvent.click(within(followupFilter).getByRole("button", { name: "All compared services (5)" }));
     expect(within(comparison).getAllByRole("link")).toHaveLength(5);
     fireEvent.click(within(comparison).getByRole("button", { name: "Clear comparison (keep latest reading)" }));

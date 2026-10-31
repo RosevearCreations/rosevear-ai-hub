@@ -152,6 +152,15 @@ export function classifyDiagnosticChange(before: DiagnosticState, after: Diagnos
   return "Optional or unconfigured — confirm expected setup";
 }
 
+/** Stable, explicit triage order. Unknown readings never assert a service outage. */
+export function diagnosticTriagePriority(before: DiagnosticState, after: DiagnosticState) {
+  if (after === "attention") return { rank: 1, label: "Priority 1 · inspect unavailable service" };
+  if (after === "unknown") return { rank: 2, label: "Priority 2 · verify status source" };
+  if (after === "optional") return { rank: 3, label: "Priority 3 · confirm intended configuration" };
+  if (before !== "ready") return { rank: 4, label: "Priority 4 · verify reported recovery" };
+  return { rank: 5, label: "Priority 5 · review source change" };
+}
+
 /** Read-only, on-demand status. No repair operation or background polling. */
 export function LocalDiagnosticsPanel({
   onNavigate,
@@ -204,7 +213,8 @@ export function LocalDiagnosticsPanel({
   const unknown = snapshot?.filter(service => service.state === "unknown") ?? [];
   const firstFollowup = attention[0] ?? unknown[0] ?? null;
   const comparison = snapshot && previousSnapshot ? compareDiagnosticSnapshots(previousSnapshot, snapshot) : null;
-  const changedServices = comparison?.filter(item => item.change === "changed") ?? [];
+  const changedServices = (comparison?.filter(item => item.change === "changed") ?? [])
+    .sort((a, b) => diagnosticTriagePriority(a.before, a.after).rank - diagnosticTriagePriority(b.before, b.after).rank);
   const comparedRows = comparisonChangesOnly ? changedServices : comparison ?? [];
   const filterOptions: { id: DiagnosticFilter; label: string }[] = [
     { id: "all", label: "All readings" }, { id: "attention", label: "Needs attention" },
@@ -253,9 +263,10 @@ export function LocalDiagnosticsPanel({
               {changedServices.length > 0 && <p><strong>Manual follow-up:</strong> A changed API classification needs confirmation on the real Hub. Select a service below to review its safe manual checks; no repair is triggered.</p>}
               <section aria-label="Owner diagnostic exception triage">
                 <h4>Changed source follow-up · {changedServices.length} to review</h4>
+                <p>Priority uses only the latest two API classifications: needs attention first, unverified second, optional configuration third, reported recovery fourth. Equal priorities retain source order. Last sample: {sampledAt?.toLocaleString() ?? "not sampled"}. No historical incident or device outcome is inferred.</p>
                 {changedServices.length === 0 ? <p>No changed classifications require a comparison follow-up in this sample.</p> :
                   <ul>{changedServices.map(item => <li key={item.key}>
-                    <a href={`#hub-diagnostic-${item.key}`} onClick={() => setFilter("all")}>{item.name}</a> — {classifyDiagnosticChange(item.before, item.after)}
+                    <strong>{diagnosticTriagePriority(item.before, item.after).label}</strong> · <a href={`#hub-diagnostic-${item.key}`} onClick={() => setFilter("all")}>{item.name}</a> — {descriptions[item.before]} → {descriptions[item.after]}. {classifyDiagnosticChange(item.before, item.after)}
                   </li>)}</ul>}
                 <p>These are safe inspection suggestions only. They do not record an incident, authorize a repair, or prove a device is functioning.</p>
               </section>
