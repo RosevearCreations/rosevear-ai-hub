@@ -152,6 +152,7 @@ export function LocalDiagnosticsPanel({
   const [snapshot, setSnapshot] = useState<ServiceDiagnostic[] | null>(null);
   const [previousSnapshot, setPreviousSnapshot] = useState<ServiceDiagnostic[] | null>(null);
   const [filter, setFilter] = useState<DiagnosticFilter>("all");
+  const [comparisonChangesOnly, setComparisonChangesOnly] = useState(false);
   const [sampledAt, setSampledAt] = useState<Date | null>(null);
   const [sampleCount, setSampleCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -195,6 +196,7 @@ export function LocalDiagnosticsPanel({
   const firstFollowup = attention[0] ?? unknown[0] ?? null;
   const comparison = snapshot && previousSnapshot ? compareDiagnosticSnapshots(previousSnapshot, snapshot) : null;
   const changedServices = comparison?.filter(item => item.change === "changed") ?? [];
+  const comparedRows = comparisonChangesOnly ? changedServices : comparison ?? [];
   const filterOptions: { id: DiagnosticFilter; label: string }[] = [
     { id: "all", label: "All readings" }, { id: "attention", label: "Needs attention" },
     { id: "unknown", label: "Not verified" }, { id: "ready", label: "Available" },
@@ -240,10 +242,15 @@ export function LocalDiagnosticsPanel({
             {comparison ? <>
               <p aria-live="polite">{comparison.filter(item => item.change === "changed").length} changed · {comparison.filter(item => item.change === "unchanged").length} unchanged.</p>
               {changedServices.length > 0 && <p><strong>Manual follow-up:</strong> A changed API classification needs confirmation on the real Hub. Select a service below to review its safe manual checks; no repair is triggered.</p>}
-              <ul>{comparison.map(item => <li key={item.key}>
+              <div className="hub-diagnostics-filters" role="group" aria-label="Diagnostic comparison follow-up filter">
+                <button type="button" aria-pressed={!comparisonChangesOnly} onClick={() => setComparisonChangesOnly(false)}>All compared services ({comparison.length})</button>
+                <button type="button" aria-pressed={comparisonChangesOnly} onClick={() => setComparisonChangesOnly(true)}>Changed only ({changedServices.length})</button>
+              </div>
+              {comparedRows.length === 0 && <p role="status">No changed service classifications in these two samples. Choose All compared services to review the full list.</p>}
+              <ul>{comparedRows.map(item => <li key={item.key}>
                 <a href={`#hub-diagnostic-${item.key}`} onClick={() => setFilter("all")}>Review {item.name} manual checks</a>: {descriptions[item.before]} → {descriptions[item.after]} ({item.change})
               </li>)}</ul>
-              <button type="button" onClick={() => setPreviousSnapshot(null)}>Clear comparison (keep latest reading)</button>
+              <button type="button" onClick={() => { setPreviousSnapshot(null); setComparisonChangesOnly(false); }}>Clear comparison (keep latest reading)</button>
             </> : <p>No earlier snapshot to compare. Choose Refresh diagnostics to take a second reading.</p>}
           </section>
           <div className="local-diagnostics-grid">
