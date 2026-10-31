@@ -81,6 +81,7 @@ export function StandardThemeAcceptancePanel({
   }));
   const windowsRetestAudit = makeWindowsOwnerRetestAudit(deviceContext, auditBaseline, auditCurrent);
   const ql275FollowupReview = makeQl275OwnerFollowupReview(windowsRetestAudit);
+  const nextUnchecked = REVIEW_AREAS.find(area => findings[area.id] === "not_checked");
 
   function makeHandoff() {
     if (!isOwner) return;
@@ -112,10 +113,23 @@ export function StandardThemeAcceptancePanel({
 
   return <section className="panel hub-theme-review" aria-labelledby="theme-owner-acceptance-title">
     <div className="hub-evidence-title">
-      <div><p className="eyebrow">Build 200 · Standard theme on-device review</p><h2 id="theme-owner-acceptance-title">Standard Theme Owner Acceptance</h2></div>
+      <div><p className="eyebrow">Build 201 · Standard theme review usability</p><h2 id="theme-owner-acceptance-title">Standard Theme Owner Acceptance</h2></div>
       <span className="hub-guard-badge">{done}/{REVIEW_AREAS.length} screens reviewed</span>
     </div>
-    <div className="hub-theme-device" role="region" aria-label="Standard theme on-device field checks">
+    <nav className="hub-theme-review-jumps" aria-label="Owner theme review steps">
+      <a href="#hub-theme-screen-review">1 · Screen review ({done}/{REVIEW_AREAS.length})</a>
+      <a href="#hub-theme-device-review">2 · On-device checks ({deviceCompleted}/{DEVICE_CHECKS.length})</a>
+      <a href="#hub-theme-retest-review">3 · Windows retest ({windowsRetest.retestsPending} pending)</a>
+      <a href="#hub-theme-issue-review">4 · Visual issues ({changesNeeded} open)</a>
+    </nav>
+    <div className="hub-theme-review-next" role="region" aria-label="Next unreviewed owner screen">
+      <p><strong>Next screen:</strong> {nextUnchecked ? `${nextUnchecked.title} — ${nextUnchecked.detail}` : "All five areas have local findings."} Open a real workspace, look at its actual information, return to System and record the result below. No findings are sent to a server.</p>
+      <button type="button" disabled={!isOwner || !nextUnchecked || !onNavigate}
+        onClick={() => { if (nextUnchecked) onNavigate?.(nextUnchecked.target); }}>
+        {nextUnchecked ? `Open next screen: ${nextUnchecked.title}` : "All screens reviewed"}
+      </button>
+    </div>
+    <div id="hub-theme-device-review" className="hub-theme-device" role="region" aria-label="Standard theme on-device field checks">
       <div className="hub-evidence-title"><h3>On-device acceptance · actual Hub screen</h3><span className="hub-guard-badge">{deviceCompleted}/{DEVICE_CHECKS.length} owner observations</span></div>
       <p>These checks must be performed <strong>on the real Windows Hub or a real connected client</strong>. Choose where you tested; we do not read machine identity, use device telemetry, or treat a simulated browser test or source CI as physical acceptance. This is an owner-reported, browser-session-only worksheet.</p>
       <label htmlFor="theme-device-context">Where did we personally test the screens?</label>
@@ -144,7 +158,7 @@ export function StandardThemeAcceptancePanel({
         </div>)}
       </div>
       <p><strong>On-device result:</strong> <span aria-label="Standard theme on-device review status">{deviceResult}</span>. Independent Windows witnessing and installation acceptance remain NOT VERIFIED, even if every owner observation passes.</p>
-      <div className="hub-theme-retest" role="region" aria-label="Windows theme retest disposition">
+      <div id="hub-theme-retest-review" className="hub-theme-retest" role="region" aria-label="Windows theme retest disposition">
         <div className="hub-evidence-title"><h3>Windows theme retest · prior failures only</h3><span className="hub-guard-badge">{windowsRetest.retestsPending} pending</span></div>
         <p>This is a second owner-observed check after a reported failure—not engineering sign-off. Retesting is eligible only when we selected the actual Windows Hub server or an actual remote Windows client. Changing the device or original finding resets that check's retest and follow-up.</p>
         {deviceFailed === 0 ? <p>No failed on-device observations are available to retest.</p> :
@@ -190,7 +204,7 @@ export function StandardThemeAcceptancePanel({
     <p>Review the <strong>actual application screens</strong> with our new midnight Standard theme. Use each card's Open workspace shortcut; your findings now survive these in-app navigation changes. They remain only in this browser session and cannot authorize connections.</p>
     <p><strong>Current view:</strong> {appearance === "standard" ? "Standard (midnight)" : "High contrast"} · {density} density. Change these in the sidebar to check readability before recording findings.</p>
     {!isOwner && <p role="note">Administrator view only. A signed owner acceptance cannot be inferred from an administrator session.</p>}
-    <div className="hub-theme-review-grid">
+    <div id="hub-theme-screen-review" className="hub-theme-review-grid">
       {REVIEW_AREAS.map(area => <div className="hub-theme-review-card" key={area.id}>
         <div><strong>{area.title}</strong><small>{area.detail}</small></div>
         <button type="button" className="hub-workspace-shortcut" onClick={() => onNavigate?.(area.target)}
@@ -210,7 +224,7 @@ export function StandardThemeAcceptancePanel({
         </select>
       </div>)}
     </div>
-    <div className="hub-theme-issues" role="region" aria-label="Standard theme visual issue follow-up queue">
+    <div id="hub-theme-issue-review" className="hub-theme-issues" role="region" aria-label="Standard theme visual issue follow-up queue">
       <div className="hub-evidence-title"><h3>Screen issue follow-up</h3><span className="hub-guard-badge">{changesNeeded} open visual findings</span></div>
       {changesNeeded === 0 ? <p>No screens are marked as needing a change. This is a local review state, not independent acceptance.</p> :
         REVIEW_AREAS.filter(area => findings[area.id] === "needs_change").map(area =>

@@ -119,6 +119,8 @@ jobs:
         run: npm run test -- ql274CustodianReturn.test.ts Ql274CustodianReturnPanel.test.tsx windowsOwnerRetestAudit.test.ts StandardThemeAcceptancePanel.test.tsx Ql273OriginGapPanel.test.tsx Ql272ReviewerProvenancePanel.test.tsx
       - name: Build 200 QL-275 owner-deferred Under Review status and Windows follow-up safety
         run: npm run test -- ql275DeferredReview.test.ts Ql275ReviewPanel.test.tsx CommsHubConnectionPanel.test.tsx StandardThemeAcceptancePanel.test.tsx
+      - name: Build 201 real System source status, anchor navigation and owner review progress
+        run: npm run test -- SystemWorkspaceGuide.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx
       - name: Test
         run: npm run test
       - name: Production build

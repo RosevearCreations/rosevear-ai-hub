@@ -5,6 +5,23 @@ import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
 afterEach(cleanup);
 
 describe("Build 194 actual Standard theme owner review", () => {
+  it("guides the owner through real workspaces and the next missing screen while preserving findings", () => {
+    const onNavigate = vi.fn();
+    render(<StandardThemeAcceptancePanel role="owner" appearance="standard" density="comfortable" onNavigate={onNavigate} />);
+    const steps = screen.getByRole("navigation", { name: "Owner theme review steps" });
+    expect(Array.from(steps.querySelectorAll("a")).map(link => link.getAttribute("href")))
+      .toEqual(["#hub-theme-screen-review", "#hub-theme-device-review", "#hub-theme-retest-review", "#hub-theme-issue-review"]);
+    fireEvent.click(screen.getByRole("button", { name: "Open next screen: Front end & navigation" }));
+    expect(onNavigate).toHaveBeenCalledWith("Home");
+    const selects = screen.getAllByRole("combobox", { name: "Review finding" });
+    fireEvent.change(selects[0], { target: { value: "acceptable" } });
+    expect(screen.getByRole("button", { name: "Open next screen: I.T. & connections" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Open next screen: I.T. & connections" }));
+    expect(onNavigate).toHaveBeenLastCalledWith("System");
+    selects.slice(1).forEach(select => fireEvent.change(select, { target: { value: "acceptable" } }));
+    expect(screen.getByRole("button", { name: "All screens reviewed" })).toBeDisabled();
+    expect(screen.getByLabelText("Standard theme owner review status")).toHaveTextContent("ALL_AREAS_MARKED_ACCEPTABLE_LOCALLY");
+  });
   it("starts unreviewed and exports only explicitly marked, session-only visual feedback", () => {
     render(<StandardThemeAcceptancePanel role="owner" appearance="standard" density="comfortable" />);
     expect(screen.getByLabelText("Standard theme owner review status")).toHaveTextContent("INCOMPLETE_OWNER_SCREEN_REVIEW");
