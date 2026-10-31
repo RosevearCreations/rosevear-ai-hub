@@ -516,6 +516,20 @@ describe("App", () => {
     expect(screen.queryByRole("dialog", { name: "Jump to a workspace" })).not.toBeInTheDocument();
   });
 
+  test("keeps Standard theme owner issue findings while opening and returning from real workspaces", async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument());
+    expect(screen.getByRole("navigation", { name: "Command shortcuts" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Jump to System workspace" }));
+    const findings = screen.getAllByRole("combobox", { name: "Review finding" });
+    fireEvent.change(findings[2], { target: { value: "needs_change" } });
+    fireEvent.click(screen.getByRole("button", { name: "Open Management workspaces workspace for review" }));
+    expect(screen.getByRole("button", { name: "Business" })).toHaveAttribute("aria-current", "page");
+    fireEvent.click(screen.getByRole("button", { name: "Jump to System workspace" }));
+    expect(screen.getAllByRole("combobox", { name: "Review finding" })[2]).toHaveValue("needs_change");
+    expect(screen.getByLabelText("Standard theme owner review status")).toHaveTextContent("INCOMPLETE_OWNER_SCREEN_REVIEW");
+  }, 45_000);
+
   test("shows owner field trial only to administrative roles, not read-only users", async () => {
     render(<App />);
     await waitFor(() => expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument());
