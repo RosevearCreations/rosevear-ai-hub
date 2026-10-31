@@ -259,6 +259,15 @@ export function App() {
           <span className="hub-topbar-chip hub-topbar-held">Comms integration · HOLD</span>
           <span className="hub-topbar-chip">Private relay · OFF</span>
         </div>
+        <nav className="hub-topnav" aria-label="Command shortcuts">
+          {(["Home", "Devices", "Cameras", "Business", "System"] as const).map(target =>
+            <button type="button" key={target} aria-label={`Jump to ${target} workspace`}
+              aria-current={section === target ? "page" : undefined}
+              className={section === target ? "hub-topnav-active" : undefined}
+              onClick={() => { setSection(target); setKnowledgeQuestion(""); }}>
+              <HubNavIcon section={target} /><span>{target}</span>
+            </button>)}
+        </nav>
         <div className="hub-topbar-account"><span><strong>{user.username}</strong> · {roleLabel(user)}</span>
           <button type="button" onClick={() => void signOut()}>Sign out</button></div>
       </header>
@@ -342,6 +351,11 @@ export function App() {
         {canAdminister && <div hidden={section !== "System"}>
           <OwnerFieldTrialWorkbench active={section === "System"} onNavigate={(target) => setSection(target as Section)} />
         </div>}
+        {/* Keep the owner visual findings mounted while opening each real destination screen. */}
+        {canAdminister && <div hidden={section !== "System"}>
+          <StandardThemeAcceptancePanel role={user.role as "owner" | "administrator"}
+            appearance={appearance} density={density} onNavigate={target => setSection(target)} />
+        </div>}
         {section === "Chat" ? (
           <ChatView onAskWithCitations={(question) => {
             setKnowledgeQuestion(question);
@@ -377,7 +391,6 @@ export function App() {
           <UsersView currentUser={user} />
         ) : section === "System" ? (
           <>
-            {canAdminister && <StandardThemeAcceptancePanel role={user.role as "owner" | "administrator"} appearance={appearance} density={density} />}
             {canAdminister && <LocalDiagnosticsPanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <PostRebootAcceptancePanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <StartupRecoveryConsole onNavigate={(target) => setSection(target as Section)} />}
