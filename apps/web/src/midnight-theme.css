@@ -286,6 +286,17 @@
 .hub-windows-audit-change { border-left: 3px solid #bb92ff; padding: .4rem .7rem; margin: .5rem 0; overflow-wrap: anywhere; }
 .app-shell[data-theme="high-contrast"] .ql274-custodian, .app-shell[data-theme="high-contrast"] .hub-windows-audit { color: #152d43; background: white; border: 2px solid #2d5171; }
 .app-shell[data-theme="high-contrast"] .ql274-custodian summary { color: #152d43; }
+.hub-ql275-review, .hub-ql275-windows { border: 1px solid #6d85ba; border-radius: .85rem; padding: 1rem; margin: .8rem 0 1rem; background: linear-gradient(135deg, #192d50, #1e2245); }
+.hub-ql275-review h3, .hub-ql275-windows h3 { margin: .1rem 0; font-size: 1.05rem; }
+.hub-ql275-badge { display: inline-flex; align-items: center; color: #f9e9ff; background: #493365; border: 1px solid #c19ddc; padding: .35rem .75rem; border-radius: 999px; font-size: .85rem; font-weight: 700; white-space: nowrap; }
+.hub-ql275-detail { margin: .75rem 0; border-top: 1px solid #6a7ca7; padding-top: .75rem; overflow-wrap: anywhere; }
+.hub-ql275-detail summary { cursor: pointer; font-weight: 700; }
+.hub-ql275-detail summary:focus-visible { outline: 2px solid #e0bcff; outline-offset: 3px; }
+.hub-ql275-safety { padding: .6rem .8rem; border-left: 3px solid #b6a3e3; background: #111f38; overflow-wrap: anywhere; }
+.app-shell[data-theme="high-contrast"] .hub-ql275-review, .app-shell[data-theme="high-contrast"] .hub-ql275-windows { color: #152d43; background: #fff; border: 2px solid #2d5171; }
+.app-shell[data-theme="high-contrast"] .hub-ql275-review :is(h3,p,summary,.eyebrow), .app-shell[data-theme="high-contrast"] .hub-ql275-windows :is(h3,p) { color: #152d43; }
+.app-shell[data-theme="high-contrast"] .hub-ql275-safety { color: #152d43; background: #eef4ff; }
+.app-shell[data-theme="high-contrast"] .hub-ql275-badge { color: #211035; background: #f2defc; border-color: #47206c; }
 .app-shell[data-theme="high-contrast"] .hub-topnav button { color: #fff; }
 
 .app-shell[data-theme="high-contrast"] .content { grid-column: 2; grid-row: 2; }

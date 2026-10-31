@@ -3,6 +3,7 @@ import type { ShellDensity, ShellTheme } from "./CommandShell";
 import { makeWindowsThemeRetestDisposition, type RetestOutcome } from "./windowsThemeRetest";
 import { makeWindowsRetestFollowup, type FollowupStage } from "./windowsRetestFollowup";
 import { makeWindowsOwnerRetestAudit, type WindowsRetestAuditItem } from "./windowsOwnerRetestAudit";
+import { makeQl275OwnerFollowupReview } from "./ql275DeferredReview";
 
 const REVIEW_AREAS = [
   { id: "front_end", title: "Front end & navigation", detail: "Home, module navigation, sign-in and small-screen readability", target: "Home" },
@@ -79,6 +80,7 @@ export function StandardThemeAcceptancePanel({
     check: item.check, retest: item.retest, ownerReportedFollowup: item.ownerReportedFollowup
   }));
   const windowsRetestAudit = makeWindowsOwnerRetestAudit(deviceContext, auditBaseline, auditCurrent);
+  const ql275FollowupReview = makeQl275OwnerFollowupReview(windowsRetestAudit);
 
   function makeHandoff() {
     if (!isOwner) return;
@@ -98,6 +100,7 @@ export function StandardThemeAcceptancePanel({
       windowsThemeRetest: windowsRetest,
       windowsRetestFollowup: windowsFollowup,
       windowsOwnerRetestAudit: windowsRetestAudit,
+      ql275DeferredOwnerFollowupReview: ql275FollowupReview,
       savedToBackend: false,
       independentlyWitnessedOwnerAcceptance: "NOT_VERIFIED",
       integrationTestAuthorization: "NOT_GIVEN",
@@ -109,7 +112,7 @@ export function StandardThemeAcceptancePanel({
 
   return <section className="panel hub-theme-review" aria-labelledby="theme-owner-acceptance-title">
     <div className="hub-evidence-title">
-      <div><p className="eyebrow">Build 199 · Standard theme on-device retest audit</p><h2 id="theme-owner-acceptance-title">Standard Theme Owner Acceptance</h2></div>
+      <div><p className="eyebrow">Build 200 · Standard theme on-device review</p><h2 id="theme-owner-acceptance-title">Standard Theme Owner Acceptance</h2></div>
       <span className="hub-guard-badge">{done}/{REVIEW_AREAS.length} screens reviewed</span>
     </div>
     <div className="hub-theme-device" role="region" aria-label="Standard theme on-device field checks">
@@ -177,6 +180,10 @@ export function StandardThemeAcceptancePanel({
           <p><strong>Owner retest audit:</strong> <span aria-label="Windows owner retest audit status">{windowsRetestAudit.auditStatus}</span> · {windowsRetestAudit.changedChecks} changed check(s) · 0 independently witnessed.</p>
           {windowsRetestAudit.transitions.filter(item => item.transition !== "UNCHANGED").map(item =>
             <p key={item.check} className="hub-windows-audit-change"><strong>{item.check}:</strong> {item.transition.replaceAll("_", " ")} — reported retest {item.previousRetest.replaceAll("_", " ")} → {item.currentRetest.replaceAll("_", " ")}</p>)}
+        </div>
+        <div className="hub-ql275-windows" role="region" aria-label="QL-275 deferred Windows owner follow-up review">
+          <div className="hub-evidence-title"><h3>Build 200 · Windows follow-up</h3><span className="hub-ql275-badge">Under Review</span></div>
+          <p>QL-275 follow-up is paused until requested again. The current local Windows checklist has <strong>{ql275FollowupReview.ownerReportedChanges} owner-reported change(s)</strong> and {ql275FollowupReview.reportedImprovementsAwaitingIndependentWitness} reported improvement(s) still without an independent witness. No signed device acceptance, engineering fix or backend receipt is inferred.</p>
         </div>
       </div>
     </div>
