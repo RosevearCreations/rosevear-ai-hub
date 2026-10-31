@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ShellDensity, ShellTheme } from "./CommandShell";
 import { makeWindowsThemeRetestDisposition, type RetestOutcome } from "./windowsThemeRetest";
 import { makeWindowsRetestFollowup, type FollowupStage } from "./windowsRetestFollowup";
+import { makeWindowsOwnerRetestAudit, type WindowsRetestAuditItem } from "./windowsOwnerRetestAudit";
 
 const REVIEW_AREAS = [
   { id: "front_end", title: "Front end & navigation", detail: "Home, module navigation, sign-in and small-screen readability", target: "Home" },
@@ -57,6 +58,7 @@ export function StandardThemeAcceptancePanel({
   const [deviceFindings, setDeviceFindings] = useState<Record<DeviceCheck, DeviceFinding>>({ ...INITIAL_DEVICE });
   const [deviceRetests, setDeviceRetests] = useState<Record<DeviceCheck, RetestOutcome>>({ ...INITIAL_RETEST });
   const [retestFollowups, setRetestFollowups] = useState<Record<DeviceCheck, FollowupStage>>({ ...INITIAL_RETEST_FOLLOWUP });
+  const [auditBaseline, setAuditBaseline] = useState<WindowsRetestAuditItem[] | null>(null);
   const isOwner = role === "owner";
   const done = REVIEW_AREAS.filter(area => findings[area.id] !== "not_checked").length;
   const changesNeeded = REVIEW_AREAS.filter(area => findings[area.id] === "needs_change").length;
@@ -73,6 +75,10 @@ export function StandardThemeAcceptancePanel({
   const windowsFollowup = makeWindowsRetestFollowup(deviceContext, DEVICE_CHECKS.map(check => ({
     id: check.id, observation: deviceFindings[check.id], retest: deviceRetests[check.id], stage: retestFollowups[check.id]
   })));
+  const auditCurrent: WindowsRetestAuditItem[] = windowsFollowup.items.map(item => ({
+    check: item.check, retest: item.retest, ownerReportedFollowup: item.ownerReportedFollowup
+  }));
+  const windowsRetestAudit = makeWindowsOwnerRetestAudit(deviceContext, auditBaseline, auditCurrent);
 
   function makeHandoff() {
     if (!isOwner) return;
@@ -91,6 +97,7 @@ export function StandardThemeAcceptancePanel({
         actualWindowsMachineIdentity: "NOT_COLLECTED", independentlyWitnessedPhysicalAcceptance: "NOT_VERIFIED" },
       windowsThemeRetest: windowsRetest,
       windowsRetestFollowup: windowsFollowup,
+      windowsOwnerRetestAudit: windowsRetestAudit,
       savedToBackend: false,
       independentlyWitnessedOwnerAcceptance: "NOT_VERIFIED",
       integrationTestAuthorization: "NOT_GIVEN",
@@ -102,7 +109,7 @@ export function StandardThemeAcceptancePanel({
 
   return <section className="panel hub-theme-review" aria-labelledby="theme-owner-acceptance-title">
     <div className="hub-evidence-title">
-      <div><p className="eyebrow">Build 198 · Standard theme on-device observation &amp; retest follow-up</p><h2 id="theme-owner-acceptance-title">Standard Theme Owner Acceptance</h2></div>
+      <div><p className="eyebrow">Build 199 · Standard theme on-device retest audit</p><h2 id="theme-owner-acceptance-title">Standard Theme Owner Acceptance</h2></div>
       <span className="hub-guard-badge">{done}/{REVIEW_AREAS.length} screens reviewed</span>
     </div>
     <div className="hub-theme-device" role="region" aria-label="Standard theme on-device field checks">
@@ -110,7 +117,7 @@ export function StandardThemeAcceptancePanel({
       <p>These checks must be performed <strong>on the real Windows Hub or a real connected client</strong>. Choose where you tested; we do not read machine identity, use device telemetry, or treat a simulated browser test or source CI as physical acceptance. This is an owner-reported, browser-session-only worksheet.</p>
       <label htmlFor="theme-device-context">Where did we personally test the screens?</label>
       <select id="theme-device-context" disabled={!isOwner} value={deviceContext}
-        onChange={event => { setDeviceContext(event.target.value as DeviceContext); setDeviceFindings({ ...INITIAL_DEVICE }); setDeviceRetests({ ...INITIAL_RETEST }); setRetestFollowups({ ...INITIAL_RETEST_FOLLOWUP }); setHandoff(""); }}>
+        onChange={event => { setDeviceContext(event.target.value as DeviceContext); setDeviceFindings({ ...INITIAL_DEVICE }); setDeviceRetests({ ...INITIAL_RETEST }); setRetestFollowups({ ...INITIAL_RETEST_FOLLOWUP }); setAuditBaseline(null); setHandoff(""); }}>
         <option value="not_checked">Not tested on a device</option>
         <option value="windows_hub_server">Windows Hub server (owner-reported)</option>
         <option value="remote_windows_client">Remote Windows Hub client (owner-reported)</option>
@@ -125,6 +132,7 @@ export function StandardThemeAcceptancePanel({
               setDeviceFindings(current => ({ ...current, [check.id]: event.target.value as DeviceFinding }));
               setDeviceRetests(current => ({ ...current, [check.id]: "not_retested" })); setHandoff("");
               setRetestFollowups(current => ({ ...current, [check.id]: "not_requested" }));
+              setAuditBaseline(null);
             }}>
             <option value="not_checked">Not checked</option>
             <option value="observed_pass">Personally observed: passes</option>
@@ -157,6 +165,19 @@ export function StandardThemeAcceptancePanel({
             </div>)}
         <p><strong>Windows retest outcome:</strong> <span aria-label="Windows theme retest status">{windowsRetest.outcome}</span>. Independent Windows witness and real installation acceptance remain NOT VERIFIED.</p>
         <p><strong>Build 198 follow-up:</strong> <span aria-label="Windows retest engineering follow-up status">{windowsFollowup.openFollowups} open or awaiting owner retest · {windowsFollowup.reportedImprovementAwaitingWitness} reported improvements awaiting independent witness</span>. These notes do not open engineering tickets or prove an installed fix.</p>
+        <div className="hub-windows-audit" role="region" aria-label="Build 199 Windows owner retest follow-up audit">
+          <h3>Owner retest change audit</h3>
+          <p>Capture a local starting snapshot after personally inspecting failed checks on Windows. Change a retest or follow-up above to compare what changed. This is temporary browser memory, not a backend audit receipt, engineering acceptance or independent field witness. Original failures or device changes clear the old snapshot.</p>
+          <div className="hub-connection-actions">
+            <button type="button" disabled={!isOwner || !windowsContext || auditCurrent.length === 0}
+              onClick={() => { setAuditBaseline(auditCurrent); setHandoff(""); }}>Capture owner retest baseline (local)</button>
+            <button type="button" disabled={!isOwner || auditBaseline === null}
+              onClick={() => { setAuditBaseline(null); setHandoff(""); }}>Clear owner retest baseline</button>
+          </div>
+          <p><strong>Owner retest audit:</strong> <span aria-label="Windows owner retest audit status">{windowsRetestAudit.auditStatus}</span> · {windowsRetestAudit.changedChecks} changed check(s) · 0 independently witnessed.</p>
+          {windowsRetestAudit.transitions.filter(item => item.transition !== "UNCHANGED").map(item =>
+            <p key={item.check} className="hub-windows-audit-change"><strong>{item.check}:</strong> {item.transition.replaceAll("_", " ")} — reported retest {item.previousRetest.replaceAll("_", " ")} → {item.currentRetest.replaceAll("_", " ")}</p>)}
+        </div>
       </div>
     </div>
     <p>Review the <strong>actual application screens</strong> with our new midnight Standard theme. Use each card's Open workspace shortcut; your findings now survive these in-app navigation changes. They remain only in this browser session and cannot authorize connections.</p>
@@ -204,7 +225,7 @@ export function StandardThemeAcceptancePanel({
     <p><strong>Visual review status:</strong> <span aria-label="Standard theme owner review status">{result}</span>. {changesNeeded > 0 ? `${changesNeeded} area(s) need attention.` : "No issues marked so far."}</p>
     <div className="hub-connection-actions">
       <button type="button" disabled={!isOwner} onClick={makeHandoff}>Prepare local visual-review report</button>
-      <button type="button" disabled={!isOwner} onClick={() => { setFindings({ ...INITIAL }); setIssues({ ...INITIAL_ISSUES }); setFollowups({ ...INITIAL_FOLLOWUPS }); setDeviceContext("not_checked"); setDeviceFindings({ ...INITIAL_DEVICE }); setDeviceRetests({ ...INITIAL_RETEST }); setRetestFollowups({ ...INITIAL_RETEST_FOLLOWUP }); setHandoff(""); }}>Reset this session's review</button>
+      <button type="button" disabled={!isOwner} onClick={() => { setFindings({ ...INITIAL }); setIssues({ ...INITIAL_ISSUES }); setFollowups({ ...INITIAL_FOLLOWUPS }); setDeviceContext("not_checked"); setDeviceFindings({ ...INITIAL_DEVICE }); setDeviceRetests({ ...INITIAL_RETEST }); setRetestFollowups({ ...INITIAL_RETEST_FOLLOWUP }); setAuditBaseline(null); setHandoff(""); }}>Reset this session's review</button>
     </div>
     <pre aria-label="Build 194 sanitized Standard theme review report">{handoff || "No owner visual-review report prepared. External pilot authorization is unrelated and remains HELD."}</pre>
   </section>;

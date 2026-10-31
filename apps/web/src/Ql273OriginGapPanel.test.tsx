@@ -10,7 +10,7 @@ describe("QL-273 actual System I.T. independent origin gap panel", () => {
     const details = screen.getByRole("group", { name: "QL-273 original proof origin and independent custody gap follow-up" });
     expect(details).not.toHaveAttribute("open");
     fireEvent.click(screen.getByText(/QL-273 · Original Proof-B origin/));
-    expect(screen.getByText(/HTTP 404/)).toBeInTheDocument();
+    expect(screen.getAllByText(/HTTP 404/).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole("link", { name: "Open exact original path" })).toHaveAttribute("href", expect.stringContaining("11861c13801b395d9be7f8a661fe7ebf8bc25fd5"));
     expect(screen.getAllByRole("combobox", { name: "Private-channel follow-up status" })).toHaveLength(5);
     fireEvent.change(screen.getAllByRole("combobox", { name: "Private-channel follow-up status" })[0], { target: { value: "owner_reports_return_received" } });
