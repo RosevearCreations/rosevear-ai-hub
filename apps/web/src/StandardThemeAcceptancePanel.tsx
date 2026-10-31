@@ -4,6 +4,11 @@ import { makeWindowsThemeRetestDisposition, type RetestOutcome } from "./windows
 import { makeWindowsRetestFollowup, type FollowupStage } from "./windowsRetestFollowup";
 import { makeWindowsOwnerRetestAudit, type WindowsRetestAuditItem } from "./windowsOwnerRetestAudit";
 import { makeQl275OwnerFollowupReview } from "./ql275DeferredReview";
+import { encodeOwnerReviewCheckpoint, OWNER_REVIEW_CHECKPOINT_KEY, parseOwnerReviewCheckpoint } from "./ownerReviewCheckpoint";
+
+function readOwnerCheckpoint(): string | null {
+  try { return window.sessionStorage.getItem(OWNER_REVIEW_CHECKPOINT_KEY); } catch { return null; }
+}
 
 const REVIEW_AREAS = [
   { id: "front_end", title: "Front end & navigation", detail: "Home, module navigation, sign-in and small-screen readability", target: "Home" },
@@ -73,6 +78,8 @@ export function StandardThemeAcceptancePanel({
   const [deviceRetests, setDeviceRetests] = useState<Record<DeviceCheck, RetestOutcome>>({ ...INITIAL_RETEST });
   const [retestFollowups, setRetestFollowups] = useState<Record<DeviceCheck, FollowupStage>>({ ...INITIAL_RETEST_FOLLOWUP });
   const [auditBaseline, setAuditBaseline] = useState<WindowsRetestAuditItem[] | null>(null);
+  const [hasCheckpoint, setHasCheckpoint] = useState(() => parseOwnerReviewCheckpoint(readOwnerCheckpoint()) !== null);
+  const [checkpointMessage, setCheckpointMessage] = useState("No owner review checkpoint restored in this view.");
   const isOwner = role === "owner";
   const done = REVIEW_AREAS.filter(area => findings[area.id] !== "not_checked").length;
   const changesNeeded = REVIEW_AREAS.filter(area => findings[area.id] === "needs_change").length;
@@ -95,6 +102,55 @@ export function StandardThemeAcceptancePanel({
   const windowsRetestAudit = makeWindowsOwnerRetestAudit(deviceContext, auditBaseline, auditCurrent);
   const ql275FollowupReview = makeQl275OwnerFollowupReview(windowsRetestAudit);
   const nextUnchecked = REVIEW_AREAS.find(area => findings[area.id] === "not_checked");
+  const symptomsMissing = DEVICE_CHECKS.filter(check => deviceFindings[check.id] === "observed_fail" && deviceSymptoms[check.id] === "none").length;
+  const completionSteps = [
+    { label: "Review all five application areas", done: done === REVIEW_AREAS.length, href: "#hub-theme-screen-review" },
+    { label: "Choose an actual Windows Hub or Windows client", done: windowsContext, href: "#theme-device-context" },
+    { label: "Record the five real-device observations", done: deviceCompleted === DEVICE_CHECKS.length, href: "#hub-theme-device-review" },
+    { label: "Classify every observed failure with a safe symptom", done: symptomsMissing === 0, href: "#hub-theme-device-review" },
+    { label: "Record follow-up retests for any failed checks", done: windowsContext && windowsRetest.retestsPending === 0, href: "#hub-theme-retest-review" }
+  ];
+  const completionCount = completionSteps.filter(step => step.done).length;
+
+  function saveCheckpoint() {
+    if (!isOwner) return;
+    try {
+      window.sessionStorage.setItem(OWNER_REVIEW_CHECKPOINT_KEY, encodeOwnerReviewCheckpoint({
+        findings, issues, followups, deviceContext, deviceFindings, deviceSymptoms, deviceRetests, retestFollowups
+      }));
+      setHasCheckpoint(true);
+      setCheckpointMessage("Owner checklist checkpoint saved in this browser tab. Later changes require saving again.");
+    } catch {
+      setCheckpointMessage("This browser blocked local session storage. Nothing was saved.");
+    }
+  }
+
+  function restoreCheckpoint() {
+    if (!isOwner) return;
+    const checkpoint = parseOwnerReviewCheckpoint(readOwnerCheckpoint());
+    if (!checkpoint) {
+      setHasCheckpoint(false);
+      setCheckpointMessage("No valid fixed-choice checkpoint is available. Current findings were left unchanged.");
+      return;
+    }
+    setFindings({ ...checkpoint.findings });
+    setIssues({ ...checkpoint.issues });
+    setFollowups({ ...checkpoint.followups });
+    setDeviceContext(checkpoint.deviceContext);
+    setDeviceFindings({ ...checkpoint.deviceFindings });
+    setDeviceSymptoms({ ...checkpoint.deviceSymptoms });
+    setDeviceRetests({ ...checkpoint.deviceRetests });
+    setRetestFollowups({ ...checkpoint.retestFollowups });
+    setAuditBaseline(null);
+    setHandoff("");
+    setCheckpointMessage("Fixed-choice findings recovered. Live Windows status, independent acceptance and old baseline audit were not restored.");
+  }
+
+  function clearCheckpoint() {
+    try { window.sessionStorage.removeItem(OWNER_REVIEW_CHECKPOINT_KEY); } catch { /* No stored checkpoint to clear. */ }
+    setHasCheckpoint(false);
+    setCheckpointMessage("Saved browser-tab checkpoint cleared. Current on-screen findings are unchanged.");
+  }
 
   function makeHandoff() {
     if (!isOwner) return;
@@ -135,7 +191,18 @@ export function StandardThemeAcceptancePanel({
       <a href="#hub-theme-device-review">2 · On-device checks ({deviceCompleted}/{DEVICE_CHECKS.length})</a>
       <a href="#hub-theme-retest-review">3 · Windows retest ({windowsRetest.retestsPending} pending)</a>
       <a href="#hub-theme-issue-review">4 · Visual issues ({changesNeeded} open)</a>
+      <a href="#hub-theme-completion-review">5 · Completion ({completionCount}/{completionSteps.length})</a>
     </nav>
+    <section className="hub-owner-recovery" aria-label="Owner review recovery controls">
+      <h3>Recover our review after a reload</h3>
+      <p>Save only our fixed-choice screen findings and Windows observations in this browser tab's temporary session storage. We must choose Save again after changes. No credentials, free-text notes, owner signature, private witness evidence, backend record or real device state are saved.</p>
+      <div className="hub-connection-actions">
+        <button type="button" disabled={!isOwner} onClick={saveCheckpoint}>Save local review checkpoint</button>
+        <button type="button" disabled={!isOwner || !hasCheckpoint} onClick={restoreCheckpoint}>Recover saved review</button>
+        <button type="button" disabled={!isOwner || !hasCheckpoint} onClick={clearCheckpoint}>Clear saved checkpoint</button>
+      </div>
+      <p aria-live="polite" aria-label="Owner review recovery message">{checkpointMessage}</p>
+    </section>
     <p className="hub-theme-accessibility-guide"><strong>Keyboard review:</strong> Use Tab to reach each review link and control, Enter to activate a link or button, and arrow keys to change a focused choice. Check that focus remains clearly visible at Standard and High contrast settings. <a href="#hub-theme-device-keyboard">Jump to keyboard observation</a>.</p>
     <div className="hub-theme-review-next" role="region" aria-label="Next unreviewed owner screen">
       <p><strong>Next screen:</strong> {nextUnchecked ? `${nextUnchecked.title} — ${nextUnchecked.detail}` : "All five areas have local findings."} Open a real workspace, look at its actual information, return to System and record the result below. No findings are sent to a server.</p>
@@ -273,10 +340,20 @@ export function StandardThemeAcceptancePanel({
               onClick={() => { setFollowups(current => ({ ...current, [area.id]: "local_retest_recorded" })); setHandoff(""); }}>Record visual retest (not a code fix)</button>
           </div>)}
     </div>
+    <section id="hub-theme-completion-review" className="hub-theme-completion" aria-label="Owner Windows review completion">
+      <h3>Owner worksheet completion · {completionCount}/{completionSteps.length}</h3>
+      <p aria-live="polite">{completionCount === completionSteps.length
+        ? "All local worksheet steps were recorded. Any unresolved issue remains open; independent Windows acceptance is NOT VERIFIED."
+        : "Some worksheet steps still need an owner observation. Open the linked step to complete only what we personally checked."}</p>
+      <ol>{completionSteps.map(step => <li key={step.label}>
+        <a href={step.href}>{step.label}</a> — <strong>{step.done ? "Recorded" : "Not complete"}</strong>
+      </li>)}</ol>
+      <p>QL-275 is Under Review, not approved. This checklist cannot sign off an installed Windows release or enable any cross-application connection.</p>
+    </section>
     <p><strong>Visual review status:</strong> <span aria-label="Standard theme owner review status">{result}</span>. {changesNeeded > 0 ? `${changesNeeded} area(s) need attention.` : "No issues marked so far."}</p>
     <div className="hub-connection-actions">
       <button type="button" disabled={!isOwner} onClick={makeHandoff}>Prepare local visual-review report</button>
-      <button type="button" disabled={!isOwner} onClick={() => { setFindings({ ...INITIAL }); setIssues({ ...INITIAL_ISSUES }); setFollowups({ ...INITIAL_FOLLOWUPS }); setDeviceContext("not_checked"); setDeviceFindings({ ...INITIAL_DEVICE }); setDeviceSymptoms({ ...INITIAL_DEVICE_SYMPTOMS }); setDeviceRetests({ ...INITIAL_RETEST }); setRetestFollowups({ ...INITIAL_RETEST_FOLLOWUP }); setAuditBaseline(null); setHandoff(""); }}>Reset this session's review</button>
+      <button type="button" disabled={!isOwner} onClick={() => { setFindings({ ...INITIAL }); setIssues({ ...INITIAL_ISSUES }); setFollowups({ ...INITIAL_FOLLOWUPS }); setDeviceContext("not_checked"); setDeviceFindings({ ...INITIAL_DEVICE }); setDeviceSymptoms({ ...INITIAL_DEVICE_SYMPTOMS }); setDeviceRetests({ ...INITIAL_RETEST }); setRetestFollowups({ ...INITIAL_RETEST_FOLLOWUP }); setAuditBaseline(null); setHandoff(""); clearCheckpoint(); setCheckpointMessage("On-screen review reset and saved checkpoint cleared."); }}>Reset this session's review</button>
     </div>
     <pre aria-label="Build 194 sanitized Standard theme review report">{handoff || "No owner visual-review report prepared. External pilot authorization is unrelated and remains HELD."}</pre>
   </section>;

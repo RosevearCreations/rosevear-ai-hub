@@ -1260,12 +1260,19 @@ Implementation and release gates: `docs/BUILD_179_EXCEPTION_RENEWAL_QL252.md` an
 - keep QL-275 owner-deferred UNDER REVIEW and its underlying integration safety gate DISCONNECTED/HOLD with no authenticated GET or private relay; see `docs/BUILD_201_WINDOWS_REVIEW_NAVIGATION_SYSTEM_STATUS.md`.
 - exact `main` merge `81b2aa449714539c28fd6f8ee4716075c78d3850`, final five-job source workflow `41170540099` GREEN. This is source/desktop build verification, **not physical Windows device acceptance**.
 
-### Build 202 — Owner Review Accessibility Follow-Up, System Status Detail Routing & Windows Field Finding Clarity (QL-275 Deferred · implementation in review)
+### Build 202 — Owner Review Accessibility Follow-Up, System Status Detail Routing & Windows Field Finding Clarity (QL-275 Deferred · PROMOTED / main source CI GREEN)
 - expandable status evidence definitions and role-safe detail links to actual Diagnostics and I.T. safeguards; no background probes, status fabrication or privileged actions.
 - real keyboard review guidance, direct keyboard-field anchor and visible focus in Standard and High contrast variants.
 - fixed-category failed on-device observations with linked owner finding summary, reliable reset on changed context and versioned session-only report; no personal secrets or unverified independent Windows acceptance.
 - QL-275 project stays **Under Review / deferred**, while connection security remains **DISCONNECTED/HOLD**; see `docs/BUILD_202_OWNER_ACCESSIBILITY_STATUS_ROUTING_WINDOWS_FINDINGS.md`.
+- exact `main` merge `422fa64f0d0220ee4ddf33ba0bb27ab617ab122d`, final five-job source workflow `41206751533` GREEN. Does not establish physical Windows installation acceptance.
 
-**Next Build 203 (proposed) — Guided Diagnostics Readback, Owner Finding Recovery & Accessible Windows Review Completion (QL-275 Deferred).**
+### Build 203 — Guided Diagnostics Readback, Owner Finding Recovery & Accessible Windows Review Completion (QL-275 Deferred · implementation in review)
+- add last-sampled, source-aware Local Diagnostics summary, attention/not-verified counts, safe suggested manual inspection and accessible local-state filter buttons. No repair or external probe.
+- make owner-controlled, browser-tab-only checkpoint recovery for allowlisted fixed-choice Standard Theme findings and Windows retest stages; reject invalid/stale data and clear old audit baseline on restore. No secrets, private signatures or server writes.
+- add a five-step accessible Windows owner worksheet completion readback with direct links to missing fields; local completion never constitutes physical Windows acceptance, an engineering fix or a cross-app integration release.
+- preserve **QL-275 Under Review / owner deferred** and separate **DISCONNECTED/HOLD** connection security; see `docs/BUILD_203_DIAGNOSTICS_RECOVERY_WINDOWS_COMPLETION.md`.
 
-**Queue policy:** Builds 138–201 promoted to source `main`; Build 202 follows reviewed `dev` / `main` CI. QL-275 is explicitly parked UNDER REVIEW; actual integration security still blocks activation. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+**Next Build 204 (proposed) — Diagnostics Source Snapshot Comparison, Owner Recovery Clarity & Windows Review Navigation Assurance (QL-275 Deferred).**
+
+**Queue policy:** Builds 138–202 promoted to source `main`; Build 203 follows reviewed `dev` / `main` CI. QL-275 is explicitly parked UNDER REVIEW; actual integration security still blocks activation. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.

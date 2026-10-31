@@ -9,6 +9,7 @@ import {
 } from "./api";
 
 export type DiagnosticState = "ready" | "attention" | "optional" | "unknown";
+type DiagnosticFilter = "all" | DiagnosticState;
 export type ServiceDiagnostic = {
   key: "hub" | "ollama" | "home-assistant" | "mqtt" | "go2rtc";
   name: string;
@@ -140,6 +141,7 @@ export function LocalDiagnosticsPanel({
   onNavigate: (section: string) => void;
 }) {
   const [snapshot, setSnapshot] = useState<ServiceDiagnostic[] | null>(null);
+  const [filter, setFilter] = useState<DiagnosticFilter>("all");
   const [sampledAt, setSampledAt] = useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
   const request = useRef<AbortController | null>(null);
@@ -171,6 +173,16 @@ export function LocalDiagnosticsPanel({
     return () => request.current?.abort();
   }, [refresh]);
 
+  const visible = snapshot?.filter(service => filter === "all" || service.state === filter) ?? [];
+  const attention = snapshot?.filter(service => service.state === "attention") ?? [];
+  const unknown = snapshot?.filter(service => service.state === "unknown") ?? [];
+  const firstFollowup = attention[0] ?? unknown[0] ?? null;
+  const filterOptions: { id: DiagnosticFilter; label: string }[] = [
+    { id: "all", label: "All readings" }, { id: "attention", label: "Needs attention" },
+    { id: "unknown", label: "Not verified" }, { id: "ready", label: "Available" },
+    { id: "optional", label: "Not configured" },
+  ];
+
   return (
     <section className="panel local-diagnostics" aria-label="Local service diagnostics">
       <div className="operations-toolbar">
@@ -189,9 +201,23 @@ export function LocalDiagnosticsPanel({
       <p>Checks read existing endpoints. Unavailable or permission-denied results are marked
         Not verified, not presumed offline. Status is not a camera playback or physical-device test.</p>
       {snapshot && (
-        <div className="local-diagnostics-grid">
-          {snapshot.map((service) => (
-            <article className="local-diagnostic-card" key={service.key}>
+        <>
+          <section className="hub-diagnostics-guide" aria-label="Guided service diagnostics readback">
+            <h3>What needs our attention?</h3>
+            <p aria-live="polite"><strong>{attention.length} needs attention</strong> · {unknown.length} not verified · {snapshot.length} service readings from the most recent check.</p>
+            <p>{firstFollowup
+              ? <><strong>Start with {firstFollowup.name}:</strong> {firstFollowup.detail} Open its guided checks below; this is a suggested manual inspection, not an automatic diagnosis or repair.</>
+              : "No service is currently classified as needing attention or unverified by this API sample. Devices, cameras and Windows services still require separate real checks."}</p>
+            <div className="hub-diagnostics-filters" role="group" aria-label="Filter diagnostic service readings">
+              {filterOptions.map(option => <button type="button" key={option.id}
+                aria-pressed={filter === option.id} onClick={() => setFilter(option.id)}>
+                {option.label} ({option.id === "all" ? snapshot.length : snapshot.filter(service => service.state === option.id).length})
+              </button>)}
+            </div>
+          </section>
+          <div className="local-diagnostics-grid">
+          {visible.map((service) => (
+            <article id={`hub-diagnostic-${service.key}`} className="local-diagnostic-card" key={service.key}>
               <div className="operations-toolbar">
                 <h3>{service.name}</h3>
                 <strong className={`operations-state operations-${service.state}`}>
@@ -211,7 +237,9 @@ export function LocalDiagnosticsPanel({
               </details>
             </article>
           ))}
-        </div>
+          {visible.length === 0 && <p role="status">No services in this category for the last sampled result. Choose All readings to return.</p>}
+          </div>
+        </>
       )}
       <small>Windows commands are instructions to run manually on the Hub computer, not
         buttons. Confirm a port's owner before starting any service. Never copy passwords,

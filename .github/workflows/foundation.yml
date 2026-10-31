@@ -123,6 +123,8 @@ jobs:
         run: npm run test -- SystemWorkspaceGuide.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx
       - name: Build 202 accessible owner review, status detail routing and fixed Windows field findings
         run: npm run test -- SystemWorkspaceGuide.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx
+      - name: Build 203 guided diagnostics, safe owner recovery and Windows worksheet completion
+        run: npm run test -- ownerReviewCheckpoint.test.ts LocalDiagnosticsPanel.ui.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx
       - name: Test
         run: npm run test
       - name: Production build
