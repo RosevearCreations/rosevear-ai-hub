@@ -80,6 +80,7 @@ export function StandardThemeAcceptancePanel({
   const [auditBaseline, setAuditBaseline] = useState<WindowsRetestAuditItem[] | null>(null);
   const [hasCheckpoint, setHasCheckpoint] = useState(() => parseOwnerReviewCheckpoint(readOwnerCheckpoint()) !== null);
   const [checkpointMessage, setCheckpointMessage] = useState("No owner review checkpoint restored in this view.");
+  const [checkpointBaseline, setCheckpointBaseline] = useState<string | null>(null);
   const isOwner = role === "owner";
   const done = REVIEW_AREAS.filter(area => findings[area.id] !== "not_checked").length;
   const changesNeeded = REVIEW_AREAS.filter(area => findings[area.id] === "needs_change").length;
@@ -111,6 +112,10 @@ export function StandardThemeAcceptancePanel({
     { label: "Record follow-up retests for any failed checks", done: windowsContext && windowsRetest.retestsPending === 0, href: "#hub-theme-retest-review" }
   ];
   const completionCount = completionSteps.filter(step => step.done).length;
+  const currentCheckpoint = encodeOwnerReviewCheckpoint({
+    findings, issues, followups, deviceContext, deviceFindings, deviceSymptoms, deviceRetests, retestFollowups
+  });
+  const checkpointChanged = checkpointBaseline !== null && checkpointBaseline !== currentCheckpoint;
   const nextDeviceCheck = DEVICE_CHECKS.find(check => deviceFindings[check.id] === "not_checked");
   const nextFailedCheck = DEVICE_CHECKS.find(check => deviceFindings[check.id] === "observed_fail" && deviceSymptoms[check.id] === "none");
   const nextCompletion = completionSteps.find(step => !step.done);
@@ -118,9 +123,8 @@ export function StandardThemeAcceptancePanel({
   function saveCheckpoint() {
     if (!isOwner) return;
     try {
-      window.sessionStorage.setItem(OWNER_REVIEW_CHECKPOINT_KEY, encodeOwnerReviewCheckpoint({
-        findings, issues, followups, deviceContext, deviceFindings, deviceSymptoms, deviceRetests, retestFollowups
-      }));
+      window.sessionStorage.setItem(OWNER_REVIEW_CHECKPOINT_KEY, currentCheckpoint);
+      setCheckpointBaseline(currentCheckpoint);
       setHasCheckpoint(true);
       setCheckpointMessage("Owner checklist checkpoint saved in this browser tab. Later changes require saving again.");
     } catch {
@@ -144,6 +148,7 @@ export function StandardThemeAcceptancePanel({
     setDeviceSymptoms({ ...checkpoint.deviceSymptoms });
     setDeviceRetests({ ...checkpoint.deviceRetests });
     setRetestFollowups({ ...checkpoint.retestFollowups });
+    setCheckpointBaseline(encodeOwnerReviewCheckpoint(checkpoint));
     setAuditBaseline(null);
     setHandoff("");
     setCheckpointMessage("Fixed-choice findings recovered. Live Windows status, independent acceptance and old baseline audit were not restored.");
@@ -152,6 +157,7 @@ export function StandardThemeAcceptancePanel({
   function clearCheckpoint() {
     try { window.sessionStorage.removeItem(OWNER_REVIEW_CHECKPOINT_KEY); } catch { /* No stored checkpoint to clear. */ }
     setHasCheckpoint(false);
+    setCheckpointBaseline(null);
     setCheckpointMessage("Saved browser-tab checkpoint cleared. Current on-screen findings are unchanged.");
   }
 
@@ -205,6 +211,11 @@ export function StandardThemeAcceptancePanel({
         <button type="button" disabled={!isOwner || !hasCheckpoint} onClick={clearCheckpoint}>Clear saved checkpoint</button>
       </div>
       <p aria-live="polite" aria-label="Owner review recovery message">{checkpointMessage}</p>
+      <p role="status" aria-label="Local checkpoint change status">{checkpointChanged
+        ? "Unsaved changes since the last save or recovery. Save again to keep these fixed-choice findings."
+        : checkpointBaseline ? "Current fixed-choice findings match the saved checkpoint."
+          : hasCheckpoint ? "A checkpoint is available but has not been recovered into this view."
+            : "No saved checkpoint is currently active."}</p>
       <p><strong>Recovery reminder:</strong> Recover replaces the current fixed-choice selections with the last saved ones. Save first if we want to retain recent changes. Clearing a saved checkpoint does not clear what is currently on screen. These are temporary browser-tab notes, not a server backup.</p>
     </section>
     <p className="hub-theme-accessibility-guide"><strong>Keyboard review:</strong> Use Tab to reach each review link and control, Enter to activate a link or button, and arrow keys to change a focused choice. Check that focus remains clearly visible at Standard and High contrast settings. <a href="#hub-theme-device-keyboard">Jump to keyboard observation</a>.</p>

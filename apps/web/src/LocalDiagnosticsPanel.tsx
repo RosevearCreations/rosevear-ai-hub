@@ -192,6 +192,7 @@ export function LocalDiagnosticsPanel({
   const unknown = snapshot?.filter(service => service.state === "unknown") ?? [];
   const firstFollowup = attention[0] ?? unknown[0] ?? null;
   const comparison = snapshot && previousSnapshot ? compareDiagnosticSnapshots(previousSnapshot, snapshot) : null;
+  const changedServices = comparison?.filter(item => item.change === "changed") ?? [];
   const filterOptions: { id: DiagnosticFilter; label: string }[] = [
     { id: "all", label: "All readings" }, { id: "attention", label: "Needs attention" },
     { id: "unknown", label: "Not verified" }, { id: "ready", label: "Available" },
@@ -235,8 +236,9 @@ export function LocalDiagnosticsPanel({
             <p>Only the two most recent readings in this open view are compared. Refresh to take another sample; reloading this page clears the comparison. A changed API reading is not proof of a Windows repair or physical device test.</p>
             {comparison ? <>
               <p aria-live="polite">{comparison.filter(item => item.change === "changed").length} changed · {comparison.filter(item => item.change === "unchanged").length} unchanged.</p>
+              {changedServices.length > 0 && <p><strong>Manual follow-up:</strong> A changed API classification needs confirmation on the real Hub. Select a service below to review its safe manual checks; no repair is triggered.</p>}
               <ul>{comparison.map(item => <li key={item.key}>
-                <a href={`#hub-diagnostic-${item.key}`} onClick={() => setFilter("all")}>{item.name}</a>: {descriptions[item.before]} → {descriptions[item.after]} ({item.change})
+                <a href={`#hub-diagnostic-${item.key}`} onClick={() => setFilter("all")}>Review {item.name} manual checks</a>: {descriptions[item.before]} → {descriptions[item.after]} ({item.change})
               </li>)}</ul>
             </> : <p>No earlier snapshot to compare. Choose Refresh diagnostics to take a second reading.</p>}
           </section>
