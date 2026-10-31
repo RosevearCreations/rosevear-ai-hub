@@ -1,12 +1,12 @@
 # Rosevear AI Hub — Next 20 Builds (209–228)
 
-**Planning baseline:** Build 208 source promoted to `main` and exact-main CI GREEN. This is a **future requirements queue**, not a claim that any of the following features have been implemented or accepted on the Windows host.
+**Planning baseline:** Build 209 source promoted to `main` and exact-main CI GREEN. Build 210 is the next implementation. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
 
 **Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use the Standard theme consistently, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
 
 ## Owner experience, diagnostics and Windows reliability
 
-### Build 209 — Diagnostic Triage Priority Readback, Retest View Recovery Controls & Standard Theme Owner Review Completion Follow-Up
+### Build 209 — Diagnostic Triage Priority Readback, Retest View Recovery Controls & Standard Theme Owner Review Completion Follow-Up (SOURCE PROMOTED)
 - Rank *observed* service changes by explicit, explainable severity and freshness; show source, last sample and suggested **manual** next step without inventing failures.
 - Add an owner-only Clear Saved View and reset-to-All recovery control for Windows retest filters; preserve review observations and audit boundaries.
 - Summarize unfinished Standard theme review items with direct links, keyboard focus and a printable owner follow-up checklist.
@@ -121,4 +121,4 @@
 4. QL-275 remains **Under Review / owner-deferred**; six-app integration is **DISCONNECTED/HOLD**, private relay **OFF**, authenticated gateway GETs **0**, and no owner TEST permission is inferred. Removing the word HELD from the *project work queue* does not remove technical security restrictions.
 5. First-party password/document Vault remains **SECURITY HOLD (0/6 independently verified)** until separate owner authorization and independent cryptographic/security acceptance. Physical Windows and camera acceptance are never equated to GitHub CI.
 
-**Queue count after Build 208: 20 planned builds (209–228).**
+**Queue tracking:** 20 defined builds (209–228); Build 209 source promoted. Build 210 underway; 19 were outstanding after Build 209.

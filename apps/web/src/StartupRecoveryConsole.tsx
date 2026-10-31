@@ -6,7 +6,7 @@ import {
 } from "./api";
 import {
   assessStartup, buildStartupSnapshot, createStartupReceipt, parseWindowsStartupEvidence,
-  runtimeLabels, runtimeOrder, taskLabels,
+  runtimeLabels, runtimeOrder, startupDependencyReadback, taskLabels,
   type StartupSnapshot, type WindowsStartupEvidence, type WindowsTask,
 } from "./startupRecoveryModel";
 
@@ -43,6 +43,7 @@ export function StartupRecoveryConsole({ onNavigate }: { onNavigate: (section: s
   useEffect(() => () => controller.current?.abort(), []);
 
   const assessment = assessStartup(current, baseline, windows, manual);
+  const dependencies = startupDependencyReadback(current);
 
   async function inspect(kind: "baseline" | "current") {
     controller.current?.abort();
@@ -131,6 +132,17 @@ export function StartupRecoveryConsole({ onNavigate }: { onNavigate: (section: s
           <li>For a planned Windows reboot, capture a baseline, use the approved local procedure, capture a later snapshot, compare and complete actual manual checks. Preserve any failures as HOLD.</li>
         </ol>
       </details>
+
+      <section aria-label="Windows startup dependency map" className="hub-diagnostics-guide">
+        <h3>Startup dependency map · safe readback</h3>
+        <p>Follow this order when investigating a partial Windows startup. Only Home Assistant, MQTT, Ollama and the Hub backend have API classifications here. Windows tasks, web client, Caddy and Tailscale are <strong>not independently verified</strong> by this panel. An API response cannot prove a process started at boot.</p>
+        <ol>{dependencies.map(item => <li key={item.id}>
+          <strong>{item.name}</strong> — {item.state.replaceAll("_", " ")}.
+          <p>Depends on: {item.dependsOn}. Source: {item.source}.</p>
+          <details><summary>Manual recovery inspection for {item.name}</summary><p>{item.manualCheck}</p></details>
+        </li>)}</ol>
+        <p><strong>Safety:</strong> Start with the original task and VM identity, check each dependency and its logs, then capture another read-only snapshot. Never start duplicate services, create a second VM, change firewall rules or presume a recovery was successful. Physical Windows acceptance remains HOLD.</p>
+      </section>
 
       <div className="startup-console-actions">
         <button type="button" disabled={busy} onClick={() => void inspect("baseline")}>1 · Capture before Windows maintenance</button>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  assessStartup, buildStartupSnapshot, createStartupReceipt, parseWindowsStartupEvidence,
+  assessStartup, buildStartupSnapshot, createStartupReceipt, parseWindowsStartupEvidence, startupDependencyReadback,
   type StartupSnapshot,
 } from "./startupRecoveryModel";
 
@@ -24,6 +24,18 @@ const settled = <T>(value: T): PromiseFulfilledResult<T> => ({ status: "fulfille
 const rejected = (): PromiseRejectedResult => ({ status: "rejected", reason: new Error("secret url password=hidden") });
 
 describe("Build 146 read-only recovery classification", () => {
+  it("Build 210 maps only observed dependency states and keeps Windows/HTTPS unknown", () => {
+    const before = startupDependencyReadback(null);
+    expect(before).toHaveLength(8);
+    expect(before.every(item => item.state === "unverified")).toBe(true);
+    const after = startupDependencyReadback(good);
+    expect(after.find(item => item.id === "backend")?.state).toBe("available");
+    expect(after.find(item => item.id === "ha")?.state).toBe("available");
+    for (const key of ["windows", "web", "caddy", "tailscale"]) {
+      expect(after.find(item => item.id === key)?.state).toBe("unverified");
+    }
+    expect(after.map(item => item.id)).toEqual(["windows", "ha", "mqtt", "ollama", "backend", "web", "caddy", "tailscale"]);
+  });
   it("strictly accepts fresh, classified, bounded Windows task evidence", () => {
     expect(parseWindowsStartupEvidence(JSON.stringify(valid), now).tasks.server.state).toBe("enabled");
     for (const extra of [{ ...valid, server: "secret" }, { ...valid, tasks: { ...valid.tasks, server: { ...valid.tasks.server, path: "C:\\Secret" } } }, { ...valid, observedAt: "2026-10-23T12:00:00.000Z" }, { ...valid, observedAt: "2026-10-26T12:00:00.000Z" }]) {
