@@ -53,6 +53,7 @@
     "build:201:hub:test": "npm --workspace apps/web run test -- SystemWorkspaceGuide.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx CommsHubConnectionPanel.test.tsx",
     "build:202:hub:test": "npm --workspace apps/web run test -- SystemWorkspaceGuide.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx CommsHubConnectionPanel.test.tsx",
     "build:203:hub:test": "npm --workspace apps/web run test -- ownerReviewCheckpoint.test.ts LocalDiagnosticsPanel.ui.test.tsx StandardThemeAcceptancePanel.test.tsx SystemWorkspaceGuide.test.tsx Ql275ReviewPanel.test.tsx",
-    "build:204:hub:test": "npm --workspace apps/web run test -- LocalDiagnosticsPanel.ui.test.tsx StandardThemeAcceptancePanel.test.tsx SystemWorkspaceGuide.test.tsx ownerReviewCheckpoint.test.ts"
+    "build:204:hub:test": "npm --workspace apps/web run test -- LocalDiagnosticsPanel.ui.test.tsx StandardThemeAcceptancePanel.test.tsx SystemWorkspaceGuide.test.tsx ownerReviewCheckpoint.test.ts",
+    "build:205:hub:test": "npm --workspace apps/web run test -- LocalDiagnosticsPanel.ui.test.tsx StandardThemeAcceptancePanel.test.tsx SystemWorkspaceGuide.test.tsx ownerReviewCheckpoint.test.ts"
   }
 }

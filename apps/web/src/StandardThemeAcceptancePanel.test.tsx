@@ -6,6 +6,17 @@ import { OWNER_REVIEW_CHECKPOINT_KEY } from "./ownerReviewCheckpoint";
 afterEach(() => { cleanup(); sessionStorage.removeItem(OWNER_REVIEW_CHECKPOINT_KEY); });
 
 describe("Build 194 actual Standard theme owner review", () => {
+  it("announces unsaved fixed-choice changes and accessible Windows next-action routing", () => {
+    render(<StandardThemeAcceptancePanel role="owner" appearance="high-contrast" density="comfortable" />);
+    expect(screen.getByRole("navigation", { name: "Windows review next action" })).toHaveTextContent("Review all five application areas");
+    fireEvent.click(screen.getByRole("button", { name: "Save local review checkpoint" }));
+    expect(screen.getByRole("status", { name: "Local checkpoint change status" })).toHaveTextContent("match the saved checkpoint");
+    fireEvent.change(screen.getAllByRole("combobox", { name: "Review finding" })[0], { target: { value: "acceptable" } });
+    expect(screen.getByRole("status", { name: "Local checkpoint change status" })).toHaveTextContent("Unsaved changes");
+    fireEvent.click(screen.getByRole("button", { name: "Save local review checkpoint" }));
+    expect(screen.getByRole("status", { name: "Local checkpoint change status" })).toHaveTextContent("match the saved checkpoint");
+    expect(screen.getByRole("navigation", { name: "Windows review next action" }).querySelector("a[href='#hub-theme-screen-review']")).toBeInTheDocument();
+  });
   it("guides the owner through real workspaces and the next missing screen while preserving findings", () => {
     const onNavigate = vi.fn();
     render(<StandardThemeAcceptancePanel role="owner" appearance="standard" density="comfortable" onNavigate={onNavigate} />);

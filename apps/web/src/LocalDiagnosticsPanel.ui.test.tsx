@@ -39,7 +39,8 @@ describe("Build 203 accessible guided diagnostics", () => {
     expect(comparison).toHaveTextContent("No earlier snapshot to compare");
     fireEvent.click(screen.getByRole("button", { name: "Refresh diagnostics" }));
     expect(await within(comparison).findByText(/0 changed · 5 unchanged/)).toBeInTheDocument();
-    expect(comparison).toHaveTextContent("Hub API: Available → Available (unchanged)");
+    expect(comparison).toHaveTextContent("Available → Available (unchanged)");
+    expect(within(comparison).getByRole("link", { name: "Review Hub API manual checks" })).toHaveAttribute("href", "#hub-diagnostic-hub");
     expect(comparison).not.toHaveTextContent("127.0.0.1");
   });
 });
