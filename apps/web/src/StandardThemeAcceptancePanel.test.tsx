@@ -22,6 +22,32 @@ describe("Build 194 actual Standard theme owner review", () => {
     expect(screen.getByRole("button", { name: "All screens reviewed" })).toBeDisabled();
     expect(screen.getByLabelText("Standard theme owner review status")).toHaveTextContent("ALL_AREAS_MARKED_ACCEPTABLE_LOCALLY");
   });
+  it("supports keyboard review routing and fixed, non-sensitive Windows failure descriptions", () => {
+    render(<StandardThemeAcceptancePanel role="owner" appearance="high-contrast" density="comfortable" />);
+    expect(screen.getByRole("link", { name: "Jump to keyboard observation" })).toHaveAttribute("href", "#hub-theme-device-keyboard");
+    expect(document.querySelector("#hub-theme-device-keyboard")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Where did we personally test the screens?"), { target: { value: "windows_hub_server" } });
+    const keyboardCheck = document.querySelector<HTMLSelectElement>("#theme-device-keyboard");
+    expect(keyboardCheck).toBeInTheDocument();
+    fireEvent.change(keyboardCheck!, { target: { value: "observed_fail" } });
+    const symptom = screen.getByLabelText("What went wrong? (fixed, private-data-free choice)");
+    expect(symptom).toHaveValue("none");
+    fireEvent.change(symptom, { target: { value: "focus_not_visible" } });
+    const summary = screen.getByRole("region", { name: "Owner-reported Windows field findings" });
+    expect(summary).toHaveTextContent("Keyboard & visible focus");
+    expect(summary).toHaveTextContent("Keyboard focus not visible");
+    fireEvent.click(screen.getByRole("button", { name: "Prepare local visual-review report" }));
+    let report = JSON.parse(screen.getByLabelText("Build 194 sanitized Standard theme review report").textContent || "{}");
+    expect(report.schema).toBe("rosevear.build202.standard-theme-session-issue-review.v2");
+    expect(report.onDevice.checks[2]).toEqual({ check: "keyboard", finding: "observed_fail", symptom: "focus_not_visible" });
+    expect(report.independentlyWitnessedOwnerAcceptance).toBe("NOT_VERIFIED");
+    fireEvent.change(keyboardCheck!, { target: { value: "observed_pass" } });
+    expect(screen.queryByLabelText("What went wrong? (fixed, private-data-free choice)")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Prepare local visual-review report" }));
+    report = JSON.parse(screen.getByLabelText("Build 194 sanitized Standard theme review report").textContent || "{}");
+    expect(report.onDevice.checks[2].symptom).toBe("none");
+    expect(report.integration).toBe("DISCONNECTED / HOLD");
+  });
   it("starts unreviewed and exports only explicitly marked, session-only visual feedback", () => {
     render(<StandardThemeAcceptancePanel role="owner" appearance="standard" density="comfortable" />);
     expect(screen.getByLabelText("Standard theme owner review status")).toHaveTextContent("INCOMPLETE_OWNER_SCREEN_REVIEW");

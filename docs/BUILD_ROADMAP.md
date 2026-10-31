@@ -1253,12 +1253,19 @@ Implementation and release gates: `docs/BUILD_179_EXCEPTION_RENEWAL_QL252.md` an
 - the **project status** changed to Under Review, but the **connection security gate** remains DISCONNECTED/HOLD, private relay OFF, authenticated gateway GETs zero and owner TEST permission NOT GIVEN. Tests and CI enforce that distinction.
 - docs: `docs/BUILD_200_QL275_DEFERRED_REVIEW_AND_WINDOWS_FOLLOWUP.md` and `docs/integration/QL275_HUB_BUILD200_REVIEW.md`.
 
-### Build 201 — Windows Standard Theme Review Usability, Owner Navigation Clarity & System Status Simplification (QL-275 Deferred · implementation in review)
+### Build 201 — Windows Standard Theme Review Usability, Owner Navigation Clarity & System Status Simplification (QL-275 Deferred · PROMOTED / main source CI GREEN)
 - replace opaque System status interpretation with an actual on-screen four-source readback that distinguishes current backend/Ollama API responses from fixed connection/relay security policy; do not imply a device, VM, camera or Windows process was independently checked
 - add in-page System shortcuts to actual owner review, diagnostics, I.T./connections and remote access sections; omit privileged links for household/read-only users, and keep navigation non-mutating
 - provide four direct review anchors and a working next-unreviewed workspace action on the existing Windows Standard Theme owner checklist; preserve the session's findings across normal workspace navigation and never infer signed owner/device acceptance
 - keep QL-275 owner-deferred UNDER REVIEW and its underlying integration safety gate DISCONNECTED/HOLD with no authenticated GET or private relay; see `docs/BUILD_201_WINDOWS_REVIEW_NAVIGATION_SYSTEM_STATUS.md`.
+- exact `main` merge `81b2aa449714539c28fd6f8ee4716075c78d3850`, final five-job source workflow `41170540099` GREEN. This is source/desktop build verification, **not physical Windows device acceptance**.
 
-**Next Build 202 (proposed) — Owner Review Accessibility Follow-Up, System Status Detail Routing & Windows Field Finding Clarity (QL-275 Deferred).**
+### Build 202 — Owner Review Accessibility Follow-Up, System Status Detail Routing & Windows Field Finding Clarity (QL-275 Deferred · implementation in review)
+- expandable status evidence definitions and role-safe detail links to actual Diagnostics and I.T. safeguards; no background probes, status fabrication or privileged actions.
+- real keyboard review guidance, direct keyboard-field anchor and visible focus in Standard and High contrast variants.
+- fixed-category failed on-device observations with linked owner finding summary, reliable reset on changed context and versioned session-only report; no personal secrets or unverified independent Windows acceptance.
+- QL-275 project stays **Under Review / deferred**, while connection security remains **DISCONNECTED/HOLD**; see `docs/BUILD_202_OWNER_ACCESSIBILITY_STATUS_ROUTING_WINDOWS_FINDINGS.md`.
 
-**Queue policy:** Builds 138–200 promoted to source `main`; Build 201 follows reviewed `dev` / `main` CI. QL-275 is explicitly parked UNDER REVIEW; actual integration security still blocks activation. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
+**Next Build 203 (proposed) — Guided Diagnostics Readback, Owner Finding Recovery & Accessible Windows Review Completion (QL-275 Deferred).**
+
+**Queue policy:** Builds 138–201 promoted to source `main`; Build 202 follows reviewed `dev` / `main` CI. QL-275 is explicitly parked UNDER REVIEW; actual integration security still blocks activation. Keep physical field acceptance separate from CI, honor free-tier limits, and leave the independent first-party password/document Vault at **0 / 6 verified · SECURITY HOLD** until separately authorized security work occurs. AI Data Platform Integration Contract v1 starts with gateway-approved read-only identity/health/capability negotiation, not broad data access or commands.
