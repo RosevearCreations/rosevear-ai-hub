@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
 import { OWNER_REVIEW_CHECKPOINT_KEY } from "./ownerReviewCheckpoint";
 
@@ -16,6 +16,18 @@ describe("Build 194 actual Standard theme owner review", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save local review checkpoint" }));
     expect(screen.getByRole("status", { name: "Local checkpoint change status" })).toHaveTextContent("match the saved checkpoint");
     expect(screen.getByRole("navigation", { name: "Windows review next action" }).querySelector("a[href='#hub-theme-screen-review']")).toBeInTheDocument();
+    expect(screen.getByLabelText("Saved owner review summary")).toHaveTextContent("1/5 screens and 0/5 on-device observations");
+  });
+  it("summarizes owner-reported retests with keyboard-accessible links and no independent acceptance claim", () => {
+    render(<StandardThemeAcceptancePanel role="owner" appearance="high-contrast" density="comfortable" />);
+    fireEvent.change(screen.getByLabelText("Where did we personally test the screens?"), { target: { value: "windows_hub_server" } });
+    fireEvent.change(document.querySelector("#theme-device-keyboard")!, { target: { value: "observed_fail" } });
+    const summary = screen.getByRole("region", { name: "Accessible Windows retest summary" });
+    expect(summary).toHaveTextContent("0/1 recorded");
+    expect(within(summary).getByRole("link", { name: "Keyboard & visible focus" })).toHaveAttribute("href", "#theme-retest-keyboard");
+    fireEvent.change(screen.getByLabelText("Retest disposition"), { target: { value: "owner_reports_improvement" } });
+    expect(summary).toHaveTextContent("1/1 recorded");
+    expect(summary).toHaveTextContent("independent witness pending");
   });
   it("guides the owner through real workspaces and the next missing screen while preserving findings", () => {
     const onNavigate = vi.fn();
