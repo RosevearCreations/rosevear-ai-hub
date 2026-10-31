@@ -153,6 +153,7 @@ export function LocalDiagnosticsPanel({
   const [previousSnapshot, setPreviousSnapshot] = useState<ServiceDiagnostic[] | null>(null);
   const [filter, setFilter] = useState<DiagnosticFilter>("all");
   const [sampledAt, setSampledAt] = useState<Date | null>(null);
+  const [sampleCount, setSampleCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const request = useRef<AbortController | null>(null);
   const latestSnapshot = useRef<ServiceDiagnostic[] | null>(null);
@@ -176,6 +177,7 @@ export function LocalDiagnosticsPanel({
         latestSnapshot.current = nextSnapshot;
         setSnapshot(nextSnapshot);
         setSampledAt(new Date());
+        setSampleCount(count => count + 1);
       }
     } finally {
       if (request.current === controller) setLoading(false);
@@ -234,12 +236,14 @@ export function LocalDiagnosticsPanel({
           <section className="hub-diagnostics-guide" aria-label="Diagnostic source snapshot comparison">
             <h3>Compare our last two checks</h3>
             <p>Only the two most recent readings in this open view are compared. Refresh to take another sample; reloading this page clears the comparison. A changed API reading is not proof of a Windows repair or physical device test.</p>
+            <p aria-label="Diagnostic sampling sequence">{sampleCount} completed on-demand sample(s) in this view. Interrupted requests are not counted.</p>
             {comparison ? <>
               <p aria-live="polite">{comparison.filter(item => item.change === "changed").length} changed · {comparison.filter(item => item.change === "unchanged").length} unchanged.</p>
               {changedServices.length > 0 && <p><strong>Manual follow-up:</strong> A changed API classification needs confirmation on the real Hub. Select a service below to review its safe manual checks; no repair is triggered.</p>}
               <ul>{comparison.map(item => <li key={item.key}>
                 <a href={`#hub-diagnostic-${item.key}`} onClick={() => setFilter("all")}>Review {item.name} manual checks</a>: {descriptions[item.before]} → {descriptions[item.after]} ({item.change})
               </li>)}</ul>
+              <button type="button" onClick={() => setPreviousSnapshot(null)}>Clear comparison (keep latest reading)</button>
             </> : <p>No earlier snapshot to compare. Choose Refresh diagnostics to take a second reading.</p>}
           </section>
           <div className="local-diagnostics-grid">

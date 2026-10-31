@@ -81,6 +81,7 @@ export function StandardThemeAcceptancePanel({
   const [hasCheckpoint, setHasCheckpoint] = useState(() => parseOwnerReviewCheckpoint(readOwnerCheckpoint()) !== null);
   const [checkpointMessage, setCheckpointMessage] = useState("No owner review checkpoint restored in this view.");
   const [checkpointBaseline, setCheckpointBaseline] = useState<string | null>(null);
+  const [savedCheckpoint, setSavedCheckpoint] = useState(() => parseOwnerReviewCheckpoint(readOwnerCheckpoint()));
   const isOwner = role === "owner";
   const done = REVIEW_AREAS.filter(area => findings[area.id] !== "not_checked").length;
   const changesNeeded = REVIEW_AREAS.filter(area => findings[area.id] === "needs_change").length;
@@ -116,6 +117,10 @@ export function StandardThemeAcceptancePanel({
     findings, issues, followups, deviceContext, deviceFindings, deviceSymptoms, deviceRetests, retestFollowups
   });
   const checkpointChanged = checkpointBaseline !== null && checkpointBaseline !== currentCheckpoint;
+  const savedScreenCount = savedCheckpoint ? REVIEW_AREAS.filter(area => savedCheckpoint.findings[area.id] !== "not_checked").length : 0;
+  const savedDeviceCount = savedCheckpoint ? DEVICE_CHECKS.filter(check => savedCheckpoint.deviceFindings[check.id] !== "not_checked").length : 0;
+  const failedRetests = DEVICE_CHECKS.filter(check => deviceFindings[check.id] === "observed_fail");
+  const pendingRetests = failedRetests.filter(check => deviceRetests[check.id] === "not_retested");
   const nextDeviceCheck = DEVICE_CHECKS.find(check => deviceFindings[check.id] === "not_checked");
   const nextFailedCheck = DEVICE_CHECKS.find(check => deviceFindings[check.id] === "observed_fail" && deviceSymptoms[check.id] === "none");
   const nextCompletion = completionSteps.find(step => !step.done);
@@ -125,6 +130,7 @@ export function StandardThemeAcceptancePanel({
     try {
       window.sessionStorage.setItem(OWNER_REVIEW_CHECKPOINT_KEY, currentCheckpoint);
       setCheckpointBaseline(currentCheckpoint);
+      setSavedCheckpoint(parseOwnerReviewCheckpoint(currentCheckpoint));
       setHasCheckpoint(true);
       setCheckpointMessage("Owner checklist checkpoint saved in this browser tab. Later changes require saving again.");
     } catch {
@@ -137,6 +143,7 @@ export function StandardThemeAcceptancePanel({
     const checkpoint = parseOwnerReviewCheckpoint(readOwnerCheckpoint());
     if (!checkpoint) {
       setHasCheckpoint(false);
+      setSavedCheckpoint(null);
       setCheckpointMessage("No valid fixed-choice checkpoint is available. Current findings were left unchanged.");
       return;
     }
@@ -148,6 +155,7 @@ export function StandardThemeAcceptancePanel({
     setDeviceSymptoms({ ...checkpoint.deviceSymptoms });
     setDeviceRetests({ ...checkpoint.deviceRetests });
     setRetestFollowups({ ...checkpoint.retestFollowups });
+    setSavedCheckpoint(checkpoint);
     setCheckpointBaseline(encodeOwnerReviewCheckpoint(checkpoint));
     setAuditBaseline(null);
     setHandoff("");
@@ -157,6 +165,7 @@ export function StandardThemeAcceptancePanel({
   function clearCheckpoint() {
     try { window.sessionStorage.removeItem(OWNER_REVIEW_CHECKPOINT_KEY); } catch { /* No stored checkpoint to clear. */ }
     setHasCheckpoint(false);
+    setSavedCheckpoint(null);
     setCheckpointBaseline(null);
     setCheckpointMessage("Saved browser-tab checkpoint cleared. Current on-screen findings are unchanged.");
   }
@@ -216,6 +225,9 @@ export function StandardThemeAcceptancePanel({
         : checkpointBaseline ? "Current fixed-choice findings match the saved checkpoint."
           : hasCheckpoint ? "A checkpoint is available but has not been recovered into this view."
             : "No saved checkpoint is currently active."}</p>
+      <p aria-label="Saved owner review summary">{savedCheckpoint
+        ? `Saved fixed-choice checkpoint: ${savedScreenCount}/5 screens and ${savedDeviceCount}/5 on-device observations. ${checkpointBaseline === null ? "Recover to view those selections; current selections have not been replaced." : checkpointChanged ? "Current selections differ from the saved copy." : "Current selections match the saved copy."}`
+        : "No valid saved owner checklist is available in this browser tab."}</p>
       <p><strong>Recovery reminder:</strong> Recover replaces the current fixed-choice selections with the last saved ones. Save first if we want to retain recent changes. Clearing a saved checkpoint does not clear what is currently on screen. These are temporary browser-tab notes, not a server backup.</p>
     </section>
     <p className="hub-theme-accessibility-guide"><strong>Keyboard review:</strong> Use Tab to reach each review link and control, Enter to activate a link or button, and arrow keys to change a focused choice. Check that focus remains clearly visible at Standard and High contrast settings. <a href="#hub-theme-device-keyboard">Jump to keyboard observation</a>.</p>
@@ -300,6 +312,15 @@ export function StandardThemeAcceptancePanel({
               </select>
             </div>)}
         <p><strong>Windows retest outcome:</strong> <span aria-label="Windows theme retest status">{windowsRetest.outcome}</span>. Independent Windows witness and real installation acceptance remain NOT VERIFIED.</p>
+        <section className="hub-device-findings-summary" aria-label="Accessible Windows retest summary">
+          <h4>Owner retest summary · {failedRetests.length - pendingRetests.length}/{failedRetests.length} recorded</h4>
+          {failedRetests.length === 0 ? <p>No failed observations to retest. This does not prove Windows acceptance.</p> :
+            <ul>{failedRetests.map(check => <li key={check.id}>
+              <a href={`#theme-retest-${check.id}`}>{check.title}</a>: {deviceRetests[check.id] === "not_retested" ? "Owner retest pending" :
+                deviceRetests[check.id] === "issue_persists" ? "Owner reports issue persists" : "Owner reports improvement — independent witness pending"}
+            </li>)}</ul>}
+          <p>These are owner selections only; no engineering fix or physical acceptance is verified.</p>
+        </section>
         <p><strong>Build 198 follow-up:</strong> <span aria-label="Windows retest engineering follow-up status">{windowsFollowup.openFollowups} open or awaiting owner retest · {windowsFollowup.reportedImprovementAwaitingWitness} reported improvements awaiting independent witness</span>. These notes do not open engineering tickets or prove an installed fix.</p>
         <div className="hub-windows-audit" role="region" aria-label="Build 199 Windows owner retest follow-up audit">
           <h3>Owner retest change audit</h3>
