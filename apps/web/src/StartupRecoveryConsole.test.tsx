@@ -37,6 +37,13 @@ describe("Build 146 Windows operations UI", () => {
     expect(document.body.textContent).not.toContain("secret token");
     expect(document.body.textContent).not.toContain("secret url");
     expect(screen.queryByRole("button", { name: /^restart|^stop|^repair|^reboot|^install/i })).toBeNull();
+    const dependencies = screen.getByRole("region", { name: "Windows startup dependency map" });
+    expect(dependencies).toHaveTextContent("Caddy private HTTPS — unverified");
+    expect(dependencies).toHaveTextContent("Tailscale access — unverified");
+    expect(dependencies).toHaveTextContent("Hub backend — available");
+    expect(dependencies).toHaveTextContent("Home Assistant VM — available");
+    expect(dependencies.querySelectorAll("li")).toHaveLength(8);
+    expect(dependencies).not.toHaveTextContent("secret broker");
   });
 
   it("rejects hostile imported task JSON without rendering sensitive fields and clears it", async () => {

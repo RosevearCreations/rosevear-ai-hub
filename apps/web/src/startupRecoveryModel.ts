@@ -38,6 +38,26 @@ export const taskLabels: Record<WindowsTask, string> = {
   recovery: "Rosevear AI Hub Recovery (managed task)",
 };
 
+export type StartupDependency = {
+  id: string; name: string; dependsOn: string; state: RuntimeState;
+  source: string; manualCheck: string;
+};
+
+/** Dependencies and safely observed API classifications, never Windows process assertions. */
+export function startupDependencyReadback(snapshot: StartupSnapshot | null): StartupDependency[] {
+  const observed = (key: RuntimeKey): RuntimeState => snapshot?.runtime[key] ?? "unverified";
+  return [
+    { id: "windows", name: "Windows startup tasks", dependsOn: "Windows sign-in / configured tasks", state: "unverified", source: "Local task report only", manualCheck: "Inspect the existing Rosevear AI Server Startup task and task history; check for duplicate processes. Do not add a second scheduled task." },
+    { id: "ha", name: "Home Assistant VM", dependsOn: "Existing VirtualBox VM", state: observed("home_assistant"), source: "Home Assistant API through Hub, not a VM probe", manualCheck: "Check the original VM identity, power state and Home Assistant UI locally; never create a replacement VM from this screen." },
+    { id: "mqtt", name: "Mosquitto / MQTT", dependsOn: "Broker and permitted network path (often Home Assistant)", state: observed("mqtt"), source: "Hub MQTT connection response", manualCheck: "Inspect the existing broker and HA MQTT integration logs without publishing, resetting retained topics or exposing credentials." },
+    { id: "ollama", name: "Ollama", dependsOn: "Windows local AI runtime", state: observed("ollama"), source: "Hub Ollama API response", manualCheck: "Check the installed Ollama process and model list locally; do not download models or start duplicates automatically." },
+    { id: "backend", name: "Hub backend", dependsOn: "Windows process and local API listener", state: observed("hub"), source: "Hub health endpoint", manualCheck: "Inspect the existing Hub task, logs and port 8765 owner; use scripts/hub-recovery.ps1 -CheckOnly for inspection only." },
+    { id: "web", name: "Hub web client", dependsOn: "Hub backend and existing web/desktop listener", state: "unverified", source: "Not independently tested by the API snapshot", manualCheck: "On the Windows host, verify the configured web or desktop client and private URL; a visible page does not prove backend startup." },
+    { id: "caddy", name: "Caddy private HTTPS", dependsOn: "Existing Caddy configuration and Hub listener", state: "unverified", source: "No direct Caddy process or certificate check", manualCheck: "Inspect Caddy's configured listener, certificate and local service logs; test HTTPS only from an authorized client." },
+    { id: "tailscale", name: "Tailscale access", dependsOn: "Existing tailnet identity and private HTTPS route", state: "unverified", source: "No direct Tailscale or remote-client check", manualCheck: "Inspect the already-authorized Tailscale client and signed-in private HTTPS access; do not expose LAN ports or modify access rules." },
+  ];
+}
+
 const keys: WindowsTask[] = ["server", "hub", "recovery"];
 const states: WindowsTaskState[] = ["enabled", "disabled", "missing", "unverified"];
 const runs: WindowsRunState[] = ["success_recorded", "failure_recorded", "never_recorded", "unverified"];

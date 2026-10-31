@@ -58,6 +58,7 @@
     "build:206:hub:test": "npm --workspace apps/web run test -- LocalDiagnosticsPanel.ui.test.tsx StandardThemeAcceptancePanel.test.tsx SystemWorkspaceGuide.test.tsx ownerReviewCheckpoint.test.ts",
     "build:207:hub:test": "npm --workspace apps/web run test -- LocalDiagnosticsPanel.ui.test.tsx StandardThemeAcceptancePanel.test.tsx SystemWorkspaceGuide.test.tsx ownerReviewCheckpoint.test.ts",
     "build:208:hub:test": "npm --workspace apps/web run test -- LocalDiagnosticsPanel.ui.test.tsx StandardThemeAcceptancePanel.test.tsx SystemWorkspaceGuide.test.tsx ownerReviewCheckpoint.test.ts",
-    "build:209:hub:test": "npm --workspace apps/web run test -- LocalDiagnosticsPanel.ui.test.tsx StandardThemeAcceptancePanel.test.tsx SystemWorkspaceGuide.test.tsx ownerReviewCheckpoint.test.ts"
+    "build:209:hub:test": "npm --workspace apps/web run test -- LocalDiagnosticsPanel.ui.test.tsx StandardThemeAcceptancePanel.test.tsx SystemWorkspaceGuide.test.tsx ownerReviewCheckpoint.test.ts",
+    "build:210:hub:test": "npm --workspace apps/web run test -- startupRecoveryModel.test.ts StartupRecoveryConsole.test.tsx"
   }
 }
