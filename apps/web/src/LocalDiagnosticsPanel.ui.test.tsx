@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import { LocalDiagnosticsPanel } from "./LocalDiagnosticsPanel";
+import { LocalDiagnosticsPanel, classifyDiagnosticChange } from "./LocalDiagnosticsPanel";
 
 vi.mock("./api", () => ({
   getHealth: vi.fn(async () => ({ status: "ok" })),
@@ -13,6 +13,12 @@ vi.mock("./api", () => ({
 afterEach(cleanup);
 
 describe("Build 203 accessible guided diagnostics", () => {
+  it("classifies only sanitized source-state transitions for manual owner follow-up", () => {
+    expect(classifyDiagnosticChange("ready", "attention")).toBe("Needs manual inspection");
+    expect(classifyDiagnosticChange("attention", "unknown")).toContain("not verified");
+    expect(classifyDiagnosticChange("attention", "ready")).toContain("verify the actual service");
+    expect(classifyDiagnosticChange("ready", "ready")).toBe("No classification change");
+  });
   it("shows source-scoped priorities and filters last sampled results without executing repair actions", async () => {
     const navigate = vi.fn();
     render(<LocalDiagnosticsPanel onNavigate={navigate} />);
@@ -47,6 +53,7 @@ describe("Build 203 accessible guided diagnostics", () => {
     fireEvent.click(within(followupFilter).getByRole("button", { name: "Changed only (0)" }));
     expect(within(followupFilter).getByRole("button", { name: "Changed only (0)" })).toHaveAttribute("aria-pressed", "true");
     expect(comparison).toHaveTextContent("No changed service classifications");
+    expect(within(comparison).getByRole("region", { name: "Owner diagnostic exception triage" })).toHaveTextContent("0 to review");
     fireEvent.click(within(followupFilter).getByRole("button", { name: "All compared services (5)" }));
     expect(within(comparison).getAllByRole("link")).toHaveLength(5);
     fireEvent.click(within(comparison).getByRole("button", { name: "Clear comparison (keep latest reading)" }));
