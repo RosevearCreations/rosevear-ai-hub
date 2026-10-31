@@ -2,6 +2,7 @@ import { useState } from "react";
 import { inspectQl267HubDecision, makeQl267HubSafeHandoff } from "./ql267HubEvidence";
 import { inspectQl268PublicMetadata, makeQl268HubHoldAudit, type Ql268Screening } from "./ql268HubAudit";
 import { Ql269ConnectionReview } from "./Ql269ConnectionReview";
+import { Ql275ReviewPanel } from "./Ql275ReviewPanel";
 
 /** QL-265 local UI; Build 192 / QL-267 adds safe in-memory status return and export. */
 export function CommsHubConnectionPanel() {
@@ -93,6 +94,7 @@ export function CommsHubConnectionPanel() {
   }
   return <section className="panel" aria-labelledby="ql265-comms-hub-title">
     <h2 id="ql265-comms-hub-title">I.T. · Rosevear Comms Hub connection</h2>
+    <Ql275ReviewPanel />
     <p><strong>DISCONNECTED / HOLD.</strong> This panel is deliberately local. It does not inspect or expose cameras, Home Assistant, MQTT, vault contents, IP addresses, private tunnel details or signer material.</p>
     <p>Source: <code>RosevearCreations/rosevear-ai-hub</code> · Original signed proof: <code>docs/integration/ql246-source-proof.json</code> not independently verified.</p>
     <p><strong>QL-264 private custody decision: HOLD.</strong> We have no independently authenticated original custodian, witness or reviewer decision. Signed source-proof B and the separate owner TEST-only authorization remain unavailable. A local check or a public self-report cannot unlock the remote connection.</p>

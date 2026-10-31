@@ -150,6 +150,11 @@ describe("Build 194 actual Standard theme owner review", () => {
     expect(report.windowsOwnerRetestAudit.changedChecks).toBe(1);
     expect(report.windowsOwnerRetestAudit.reportedImprovementsStillUnwitnessed).toBe(1);
     expect(report.windowsOwnerRetestAudit.physicalWindowsInstallationVerified).toBe(false);
+    expect(report.ql275DeferredOwnerFollowupReview.trackingStatus).toBe("UNDER_REVIEW");
+    expect(report.ql275DeferredOwnerFollowupReview.ownerReportedChanges).toBe(1);
+    expect(report.ql275DeferredOwnerFollowupReview.actualWindowsDeviceAcceptance).toBe("NOT_VERIFIED");
+    expect(report.ql275DeferredOwnerFollowupReview.activationEligible).toBe(false);
+    expect(screen.getByRole("region", { name: "QL-275 deferred Windows owner follow-up review" })).toHaveTextContent("Under Review");
     fireEvent.change(checks[0], { target: { value: "observed_pass" } });
     expect(screen.getByLabelText("Windows owner retest audit status")).toHaveTextContent("OWNER_BASELINE_NOT_RECORDED");
     expect(screen.getByRole("button", { name: "Clear owner retest baseline" })).toBeDisabled();
