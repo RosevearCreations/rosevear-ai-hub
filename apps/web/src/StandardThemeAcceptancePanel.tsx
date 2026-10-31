@@ -140,6 +140,11 @@ export function StandardThemeAcceptancePanel({
     if (!isOwner) return;
     try { window.sessionStorage.setItem(OWNER_RETEST_FILTER_KEY, filter); } catch { /* Filter still works on screen. */ }
   }
+  function clearSavedRetestView() {
+    if (!isOwner) return;
+    setRetestFilter("all");
+    try { window.sessionStorage.removeItem(OWNER_RETEST_FILTER_KEY); } catch { /* View still resets. */ }
+  }
 
   function saveCheckpoint() {
     if (!isOwner) return;
@@ -320,6 +325,8 @@ export function StandardThemeAcceptancePanel({
             onClick={() => chooseRetestFilter(option.id)}>{option.label} ({failedRetests.filter(check => option.id === "all" || deviceRetests[check.id] === option.id).length})</button>)}
         </div>
         <p aria-label="Windows retest filter persistence">Current view: {retestFilter.replaceAll("_", " ")}. Owner filter choice is remembered in this browser tab only; observations, retests and independent acceptance are unaffected.</p>
+        <button type="button" disabled={!isOwner} onClick={clearSavedRetestView}>Clear saved retest view (show all)</button>
+        <p>Clearing this view preference does not reset failed observations, retest dispositions, saved checkpoints or the owner audit baseline.</p>
         {deviceFailed === 0 ? <p>No failed on-device observations are available to retest.</p> :
           visibleRetests.length === 0 ? <p role="status">No owner retests in this category. Choose All failed checks to review everything.</p> :
           visibleRetests.map(check =>
@@ -420,6 +427,14 @@ export function StandardThemeAcceptancePanel({
       <ol>{completionSteps.map(step => <li key={step.label}>
         <a href={step.href}>{step.label}</a> — <strong>{step.done ? "Recorded" : "Not complete"}</strong>
       </li>)}</ol>
+      <section aria-label="Owner review completion follow-up">
+        <h4>Next owner review actions · {completionSteps.length - completionCount} unfinished</h4>
+        {nextCompletion ? <p><strong>Start here:</strong> <a href={nextCompletion.href}>{nextCompletion.label}</a>. Record only what was personally observed; return here to review the remaining steps.</p> :
+          <p>No unfinished worksheet steps in this local view. Review open findings separately; this is not an independent Windows sign-off.</p>}
+        <ul>{completionSteps.filter(step => !step.done).map(step =>
+          <li key={step.label}><a href={step.href}>{step.label}</a> — owner observation still needed</li>)}</ul>
+        <p>{changesNeeded} screen finding(s) request changes · {pendingRetests.length} failed Windows check(s) await an owner retest. <a href="#hub-theme-issue-review">Review screen issues</a> · <a href="#hub-theme-retest-review">Review Windows retests</a>.</p>
+      </section>
       <p>QL-275 is Under Review, not approved. This checklist cannot sign off an installed Windows release or enable any cross-application connection.</p>
     </section>
     <p><strong>Visual review status:</strong> <span aria-label="Standard theme owner review status">{result}</span>. {changesNeeded > 0 ? `${changesNeeded} area(s) need attention.` : "No issues marked so far."}</p>
