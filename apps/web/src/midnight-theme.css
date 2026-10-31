@@ -336,6 +336,24 @@
 .app-shell[data-theme="high-contrast"] .hub-theme-accessibility-guide :is(p,strong), .app-shell[data-theme="high-contrast"] .hub-device-findings-summary :is(h4,p,li) { color: #152d43; }
 .app-shell[data-theme="high-contrast"] .hub-topnav button { color: #fff; }
 
+/* Build 203: filterable status readback and explicit, local-only owner recovery. */
+.hub-diagnostics-guide, .hub-owner-recovery, .hub-theme-completion { margin: .85rem 0; padding: clamp(.75rem, 1.6vw, 1.1rem); background: #112642; border: 1px solid #5577a1; border-radius: .8rem; color: #ebf4ff; }
+.hub-diagnostics-guide h3, .hub-owner-recovery h3, .hub-theme-completion h3 { margin: 0 0 .5rem; font-size: 1.08rem; }
+.hub-diagnostics-guide p, .hub-owner-recovery p, .hub-theme-completion p { line-height: 1.5; margin: .5rem 0; }
+.hub-diagnostics-filters { display: flex; flex-wrap: wrap; gap: .5rem; margin: .75rem 0 0; }
+.hub-diagnostics-filters button { min-height: 2.45rem; padding: .4rem .7rem; border: 1px solid #8b77bd; border-radius: .55rem; color: #f0e4ff; background: #2b234e; cursor: pointer; }
+.hub-diagnostics-filters button[aria-pressed="true"] { color: #15273c; background: #e5d1ff; border-color: #e5d1ff; font-weight: 750; }
+.hub-diagnostics-filters button:focus-visible, .hub-owner-recovery button:focus-visible, .hub-theme-completion a:focus-visible { outline: 3px solid #e9caff; outline-offset: 3px; }
+.hub-theme-completion ol { padding-left: 1.4rem; margin: .65rem 0; }
+.hub-theme-completion li { padding: .25rem 0; line-height: 1.45; }
+.hub-theme-completion a { color: #eed1ff; text-underline-offset: .2rem; }
+.hub-theme-completion, .hub-owner-recovery, .local-diagnostic-card { scroll-margin-top: 5rem; }
+.app-shell[data-theme="high-contrast"] :is(.hub-diagnostics-guide,.hub-owner-recovery,.hub-theme-completion) { background: #fff; border: 2px solid #2d5171; color: #142c3d; }
+.app-shell[data-theme="high-contrast"] :is(.hub-diagnostics-guide,.hub-owner-recovery,.hub-theme-completion) :is(h3,p,li,strong) { color: #142c3d; }
+.app-shell[data-theme="high-contrast"] .hub-diagnostics-filters button { background: #fff; color: #25113f; border: 2px solid #54287c; }
+.app-shell[data-theme="high-contrast"] .hub-diagnostics-filters button[aria-pressed="true"] { background: #e3d1ff; color: #25113f; }
+.app-shell[data-theme="high-contrast"] .hub-theme-completion a { color: #542168; }
+
 .app-shell[data-theme="high-contrast"] .content { grid-column: 2; grid-row: 2; }
 .app-shell[data-theme="high-contrast"] .hub-hero { background: #fff; color: #142c3d; border: 2px solid #143f67; }
 .app-shell[data-theme="high-contrast"] .hub-hero :is(p,strong,.eyebrow) { color: #142c3d; }
