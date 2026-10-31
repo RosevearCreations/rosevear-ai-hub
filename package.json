@@ -45,6 +45,7 @@
     "integration:ql268:hub:test": "npm --workspace apps/web run test -- ql268HubAudit.test.ts CommsHubConnectionPanel.test.tsx App.test.tsx",
     "integration:ql269:hub:test": "npm --workspace apps/web run test -- ql269HubReview.test.ts Ql269ConnectionReview.test.tsx StandardThemeAcceptancePanel.test.tsx CommsHubConnectionPanel.test.tsx App.test.tsx",
     "integration:ql270:hub:test": "npm --workspace apps/web run test -- ql270HubRenewal.test.ts Ql270CustodyRenewalPanel.test.tsx StandardThemeAcceptancePanel.test.tsx Ql269ConnectionReview.test.tsx App.test.tsx",
-    "integration:ql271:hub:test": "npm --workspace apps/web run test -- ql271ProofReturn.test.ts Ql271ProofReturnPanel.test.tsx Ql270CustodyRenewalPanel.test.tsx StandardThemeAcceptancePanel.test.tsx App.test.tsx"
+    "integration:ql271:hub:test": "npm --workspace apps/web run test -- ql271ProofReturn.test.ts Ql271ProofReturnPanel.test.tsx Ql270CustodyRenewalPanel.test.tsx StandardThemeAcceptancePanel.test.tsx App.test.tsx",
+    "integration:ql272:hub:test": "npm --workspace apps/web run test -- ql272ReviewerProvenance.test.ts Ql272ReviewerProvenancePanel.test.tsx windowsThemeRetest.test.ts StandardThemeAcceptancePanel.test.tsx App.test.tsx"
   }
 }
