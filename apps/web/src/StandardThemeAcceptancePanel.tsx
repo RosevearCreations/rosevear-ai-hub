@@ -22,6 +22,19 @@ const INITIAL_ISSUES: Record<Area, IssueCategory> = {
 const INITIAL_FOLLOWUPS: Record<Area, Followup> = {
   front_end: "none", it: "none", management: "none", statistics: "none", status: "none"
 };
+const DEVICE_CHECKS = [
+  { id: "navigation", title: "Actual workspace navigation", detail: "Home, System, Business and Audit shortcuts reach the correct screen" },
+  { id: "resize", title: "Window resizing & zoom", detail: "At narrow and enlarged browser sizes, controls and labels are readable" },
+  { id: "keyboard", title: "Keyboard & visible focus", detail: "Use Tab, Enter and Escape; no essential action requires a mouse" },
+  { id: "data", title: "Real data and empty/error states", detail: "Live status shows its source, with no invented healthy or connected counts" },
+  { id: "refresh", title: "Reload and connectivity recovery", detail: "Record what happens after refreshing the page and reconnecting" }
+] as const;
+type DeviceCheck = (typeof DEVICE_CHECKS)[number]["id"];
+type DeviceFinding = "not_checked" | "observed_pass" | "observed_fail";
+type DeviceContext = "not_checked" | "windows_hub_server" | "remote_windows_client" | "other_browser_device";
+const INITIAL_DEVICE: Record<DeviceCheck, DeviceFinding> = {
+  navigation: "not_checked", resize: "not_checked", keyboard: "not_checked", data: "not_checked", refresh: "not_checked"
+};
 
 /** A session-scoped owner visual checklist, NEVER an integration release decision. */
 export function StandardThemeAcceptancePanel({
@@ -32,11 +45,17 @@ export function StandardThemeAcceptancePanel({
   const [issues, setIssues] = useState<Record<Area, IssueCategory>>({ ...INITIAL_ISSUES });
   const [followups, setFollowups] = useState<Record<Area, Followup>>({ ...INITIAL_FOLLOWUPS });
   const [handoff, setHandoff] = useState("");
+  const [deviceContext, setDeviceContext] = useState<DeviceContext>("not_checked");
+  const [deviceFindings, setDeviceFindings] = useState<Record<DeviceCheck, DeviceFinding>>({ ...INITIAL_DEVICE });
   const isOwner = role === "owner";
   const done = REVIEW_AREAS.filter(area => findings[area.id] !== "not_checked").length;
   const changesNeeded = REVIEW_AREAS.filter(area => findings[area.id] === "needs_change").length;
   const result = done < REVIEW_AREAS.length ? "INCOMPLETE_OWNER_SCREEN_REVIEW" :
     changesNeeded > 0 ? "CHANGES_REQUESTED_IN_LOCAL_REVIEW" : "ALL_AREAS_MARKED_ACCEPTABLE_LOCALLY";
+  const deviceCompleted = DEVICE_CHECKS.filter(check => deviceFindings[check.id] !== "not_checked").length;
+  const deviceFailed = DEVICE_CHECKS.filter(check => deviceFindings[check.id] === "observed_fail").length;
+  const deviceResult = deviceContext === "not_checked" || deviceCompleted !== DEVICE_CHECKS.length ? "ON_DEVICE_WALKTHROUGH_INCOMPLETE" :
+    deviceFailed > 0 ? "OWNER_REPORTED_DEVICE_ISSUES" : "OWNER_REPORTED_DEVICE_CHECKS_PASS_UNVERIFIED";
 
   function makeHandoff() {
     if (!isOwner) return;
@@ -50,6 +69,9 @@ export function StandardThemeAcceptancePanel({
         issueCategory: findings[area.id] === "needs_change" ? issues[area.id] : "none",
         followup: findings[area.id] === "needs_change" ? followups[area.id] : "none" })),
       engineeringFixVerified: false,
+      onDevice: { context: deviceContext, completed: deviceCompleted, failed: deviceFailed,
+        outcome: deviceResult, checks: DEVICE_CHECKS.map(check => ({ check: check.id, finding: deviceFindings[check.id] })),
+        actualWindowsMachineIdentity: "NOT_COLLECTED", independentlyWitnessedPhysicalAcceptance: "NOT_VERIFIED" },
       savedToBackend: false,
       independentlyWitnessedOwnerAcceptance: "NOT_VERIFIED",
       integrationTestAuthorization: "NOT_GIVEN",
@@ -61,8 +83,35 @@ export function StandardThemeAcceptancePanel({
 
   return <section className="panel hub-theme-review" aria-labelledby="theme-owner-acceptance-title">
     <div className="hub-evidence-title">
-      <div><p className="eyebrow">Build 195 · Standard theme real-screen walkthrough</p><h2 id="theme-owner-acceptance-title">Standard Theme Owner Acceptance</h2></div>
+      <div><p className="eyebrow">Build 196 · Standard theme real-screen and on-device walkthrough</p><h2 id="theme-owner-acceptance-title">Standard Theme Owner Acceptance</h2></div>
       <span className="hub-guard-badge">{done}/{REVIEW_AREAS.length} screens reviewed</span>
+    </div>
+    <div className="hub-theme-device" role="region" aria-label="Standard theme on-device field checks">
+      <div className="hub-evidence-title"><h3>On-device acceptance · actual Hub screen</h3><span className="hub-guard-badge">{deviceCompleted}/{DEVICE_CHECKS.length} owner observations</span></div>
+      <p>These checks must be performed <strong>on the real Windows Hub or a real connected client</strong>. Choose where you tested; we do not read machine identity, use device telemetry, or treat a simulated browser test or source CI as physical acceptance. This is an owner-reported, browser-session-only worksheet.</p>
+      <label htmlFor="theme-device-context">Where did we personally test the screens?</label>
+      <select id="theme-device-context" disabled={!isOwner} value={deviceContext}
+        onChange={event => { setDeviceContext(event.target.value as DeviceContext); setDeviceFindings({ ...INITIAL_DEVICE }); setHandoff(""); }}>
+        <option value="not_checked">Not tested on a device</option>
+        <option value="windows_hub_server">Windows Hub server (owner-reported)</option>
+        <option value="remote_windows_client">Remote Windows Hub client (owner-reported)</option>
+        <option value="other_browser_device">Other actual browser device (owner-reported)</option>
+      </select>
+      <div className="hub-theme-device-grid">
+        {DEVICE_CHECKS.map(check => <div className="hub-theme-device-check" key={check.id}>
+          <div><strong>{check.title}</strong><small>{check.detail}</small></div>
+          <label htmlFor={`theme-device-${check.id}`}>Observed result</label>
+          <select id={`theme-device-${check.id}`} disabled={!isOwner || deviceContext === "not_checked"}
+            value={deviceFindings[check.id]} onChange={event => {
+              setDeviceFindings(current => ({ ...current, [check.id]: event.target.value as DeviceFinding })); setHandoff("");
+            }}>
+            <option value="not_checked">Not checked</option>
+            <option value="observed_pass">Personally observed: passes</option>
+            <option value="observed_fail">Personally observed: fails</option>
+          </select>
+        </div>)}
+      </div>
+      <p><strong>On-device result:</strong> <span aria-label="Standard theme on-device review status">{deviceResult}</span>. Independent Windows witnessing and installation acceptance remain NOT VERIFIED, even if every owner observation passes.</p>
     </div>
     <p>Review the <strong>actual application screens</strong> with our new midnight Standard theme. Use each card's Open workspace shortcut; your findings now survive these in-app navigation changes. They remain only in this browser session and cannot authorize connections.</p>
     <p><strong>Current view:</strong> {appearance === "standard" ? "Standard (midnight)" : "High contrast"} · {density} density. Change these in the sidebar to check readability before recording findings.</p>
@@ -109,7 +158,7 @@ export function StandardThemeAcceptancePanel({
     <p><strong>Visual review status:</strong> <span aria-label="Standard theme owner review status">{result}</span>. {changesNeeded > 0 ? `${changesNeeded} area(s) need attention.` : "No issues marked so far."}</p>
     <div className="hub-connection-actions">
       <button type="button" disabled={!isOwner} onClick={makeHandoff}>Prepare local visual-review report</button>
-      <button type="button" disabled={!isOwner} onClick={() => { setFindings({ ...INITIAL }); setIssues({ ...INITIAL_ISSUES }); setFollowups({ ...INITIAL_FOLLOWUPS }); setHandoff(""); }}>Reset this session's review</button>
+      <button type="button" disabled={!isOwner} onClick={() => { setFindings({ ...INITIAL }); setIssues({ ...INITIAL_ISSUES }); setFollowups({ ...INITIAL_FOLLOWUPS }); setDeviceContext("not_checked"); setDeviceFindings({ ...INITIAL_DEVICE }); setHandoff(""); }}>Reset this session's review</button>
     </div>
     <pre aria-label="Build 194 sanitized Standard theme review report">{handoff || "No owner visual-review report prepared. External pilot authorization is unrelated and remains HELD."}</pre>
   </section>;

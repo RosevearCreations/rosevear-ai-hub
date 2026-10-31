@@ -56,4 +56,33 @@ describe("Build 194 actual Standard theme owner review", () => {
     expect(report.integrationTestAuthorization).toBe("NOT_GIVEN");
     expect(report.result).toBe("INCOMPLETE_OWNER_SCREEN_REVIEW");
   });
+
+  it("keeps physical on-device observations separate from code CI and independent Windows acceptance", () => {
+    render(<StandardThemeAcceptancePanel role="owner" appearance="standard" density="compact" />);
+    const device = screen.getByRole("region", { name: "Standard theme on-device field checks" });
+    const checks = Array.from(device.querySelectorAll("select")).slice(1);
+    expect(checks).toHaveLength(5);
+    checks.forEach(check => expect(check).toBeDisabled());
+    expect(screen.getByLabelText("Standard theme on-device review status")).toHaveTextContent("ON_DEVICE_WALKTHROUGH_INCOMPLETE");
+    fireEvent.change(screen.getByLabelText("Where did we personally test the screens?"), { target: { value: "remote_windows_client" } });
+    checks.forEach(check => fireEvent.change(check, { target: { value: "observed_pass" } }));
+    expect(screen.getByLabelText("Standard theme on-device review status")).toHaveTextContent("OWNER_REPORTED_DEVICE_CHECKS_PASS_UNVERIFIED");
+    fireEvent.click(screen.getByRole("button", { name: "Prepare local visual-review report" }));
+    let report = JSON.parse(screen.getByLabelText("Build 194 sanitized Standard theme review report").textContent || "{}");
+    expect(report.onDevice.context).toBe("remote_windows_client");
+    expect(report.onDevice.independentlyWitnessedPhysicalAcceptance).toBe("NOT_VERIFIED");
+    expect(report.onDevice.actualWindowsMachineIdentity).toBe("NOT_COLLECTED");
+    fireEvent.change(checks[3], { target: { value: "observed_fail" } });
+    expect(screen.getByLabelText("Standard theme on-device review status")).toHaveTextContent("OWNER_REPORTED_DEVICE_ISSUES");
+    expect(screen.getByLabelText("Build 194 sanitized Standard theme review report")).not.toHaveTextContent('"onDevice"');
+    fireEvent.click(screen.getByRole("button", { name: "Reset this session's review" }));
+    expect(screen.getByLabelText("Standard theme on-device review status")).toHaveTextContent("ON_DEVICE_WALKTHROUGH_INCOMPLETE");
+    expect(checks[0]).toBeDisabled();
+  });
+
+  it("never allows an administrator to attest to physical owner observations", () => {
+    render(<StandardThemeAcceptancePanel role="administrator" appearance="standard" density="comfortable" />);
+    const region = screen.getByRole("region", { name: "Standard theme on-device field checks" });
+    Array.from(region.querySelectorAll("select")).forEach(select => expect(select).toBeDisabled());
+  });
 });
