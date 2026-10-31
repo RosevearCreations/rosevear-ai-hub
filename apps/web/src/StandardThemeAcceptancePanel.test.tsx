@@ -133,4 +133,25 @@ describe("Build 194 actual Standard theme owner review", () => {
     fireEvent.change(screen.getByLabelText("Where did we personally test the screens?"), { target: { value: "other_browser_device" } });
     expect(screen.queryByLabelText("Engineering follow-up")).not.toBeInTheDocument();
   });
+
+  it("captures a local owner Windows retest baseline and audits subsequent changes without acceptance", () => {
+    render(<StandardThemeAcceptancePanel role="owner" appearance="standard" density="comfortable" />);
+    expect(screen.getByRole("button", { name: "Capture owner retest baseline (local)" })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("Where did we personally test the screens?"), { target: { value: "remote_windows_client" } });
+    const checks = Array.from(screen.getByRole("region", { name: "Standard theme on-device field checks" }).querySelectorAll(".hub-theme-device-check select"));
+    fireEvent.change(checks[0], { target: { value: "observed_fail" } });
+    fireEvent.click(screen.getByRole("button", { name: "Capture owner retest baseline (local)" }));
+    expect(screen.getByLabelText("Windows owner retest audit status")).toHaveTextContent("OWNER_RETEST_SNAPSHOT_UNCHANGED");
+    fireEvent.change(screen.getByLabelText("Retest disposition"), { target: { value: "owner_reports_improvement" } });
+    fireEvent.change(screen.getByLabelText("Engineering follow-up"), { target: { value: "owner_retest_ready_reported" } });
+    expect(screen.getByLabelText("Windows owner retest audit status")).toHaveTextContent("OWNER_RETEST_CHANGES_RECORDED_UNVERIFIED");
+    fireEvent.click(screen.getByRole("button", { name: "Prepare local visual-review report" }));
+    const report = JSON.parse(screen.getByLabelText("Build 194 sanitized Standard theme review report").textContent || "{}");
+    expect(report.windowsOwnerRetestAudit.changedChecks).toBe(1);
+    expect(report.windowsOwnerRetestAudit.reportedImprovementsStillUnwitnessed).toBe(1);
+    expect(report.windowsOwnerRetestAudit.physicalWindowsInstallationVerified).toBe(false);
+    fireEvent.change(checks[0], { target: { value: "observed_pass" } });
+    expect(screen.getByLabelText("Windows owner retest audit status")).toHaveTextContent("OWNER_BASELINE_NOT_RECORDED");
+    expect(screen.getByRole("button", { name: "Clear owner retest baseline" })).toBeDisabled();
+  });
 });
