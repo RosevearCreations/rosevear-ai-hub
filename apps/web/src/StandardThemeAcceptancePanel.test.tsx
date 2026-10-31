@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
+import { OWNER_REVIEW_CHECKPOINT_KEY } from "./ownerReviewCheckpoint";
 
-afterEach(cleanup);
+afterEach(() => { cleanup(); sessionStorage.removeItem(OWNER_REVIEW_CHECKPOINT_KEY); });
 
 describe("Build 194 actual Standard theme owner review", () => {
   it("guides the owner through real workspaces and the next missing screen while preserving findings", () => {
@@ -10,7 +11,7 @@ describe("Build 194 actual Standard theme owner review", () => {
     render(<StandardThemeAcceptancePanel role="owner" appearance="standard" density="comfortable" onNavigate={onNavigate} />);
     const steps = screen.getByRole("navigation", { name: "Owner theme review steps" });
     expect(Array.from(steps.querySelectorAll("a")).map(link => link.getAttribute("href")))
-      .toEqual(["#hub-theme-screen-review", "#hub-theme-device-review", "#hub-theme-retest-review", "#hub-theme-issue-review"]);
+      .toEqual(["#hub-theme-screen-review", "#hub-theme-device-review", "#hub-theme-retest-review", "#hub-theme-issue-review", "#hub-theme-completion-review"]);
     fireEvent.click(screen.getByRole("button", { name: "Open next screen: Front end & navigation" }));
     expect(onNavigate).toHaveBeenCalledWith("Home");
     const selects = screen.getAllByRole("combobox", { name: "Review finding" });
@@ -21,6 +22,47 @@ describe("Build 194 actual Standard theme owner review", () => {
     selects.slice(1).forEach(select => fireEvent.change(select, { target: { value: "acceptable" } }));
     expect(screen.getByRole("button", { name: "All screens reviewed" })).toBeDisabled();
     expect(screen.getByLabelText("Standard theme owner review status")).toHaveTextContent("ALL_AREAS_MARKED_ACCEPTABLE_LOCALLY");
+  });
+  it("saves and recovers only fixed owner findings from browser-tab storage after a re-mount", () => {
+    render(<StandardThemeAcceptancePanel role="owner" appearance="standard" density="comfortable" />);
+    expect(screen.getByRole("button", { name: "Recover saved review" })).toBeDisabled();
+    fireEvent.change(screen.getAllByRole("combobox", { name: "Review finding" })[0], { target: { value: "needs_change" } });
+    fireEvent.change(screen.getByLabelText("Where did we personally test the screens?"), { target: { value: "windows_hub_server" } });
+    fireEvent.change(document.querySelector("#theme-device-keyboard")!, { target: { value: "observed_fail" } });
+    fireEvent.change(screen.getByLabelText("What went wrong? (fixed, private-data-free choice)"), { target: { value: "focus_not_visible" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save local review checkpoint" }));
+    expect(screen.getByLabelText("Owner review recovery message")).toHaveTextContent("saved in this browser tab");
+    expect(sessionStorage.getItem(OWNER_REVIEW_CHECKPOINT_KEY)).not.toContain("integrationTestAuthorization");
+    cleanup();
+    render(<StandardThemeAcceptancePanel role="owner" appearance="standard" density="comfortable" />);
+    expect(screen.getByRole("button", { name: "Recover saved review" })).toBeEnabled();
+    expect(screen.getAllByRole("combobox", { name: "Review finding" })[0]).toHaveValue("not_checked");
+    fireEvent.click(screen.getByRole("button", { name: "Recover saved review" }));
+    expect(screen.getAllByRole("combobox", { name: "Review finding" })[0]).toHaveValue("needs_change");
+    expect(document.querySelector("#theme-device-keyboard")).toHaveValue("observed_fail");
+    expect(screen.getByLabelText("What went wrong? (fixed, private-data-free choice)")).toHaveValue("focus_not_visible");
+    expect(screen.getByLabelText("Windows owner retest audit status")).toHaveTextContent("OWNER_BASELINE_NOT_RECORDED");
+    fireEvent.click(screen.getByRole("button", { name: "Reset this session's review" }));
+    expect(sessionStorage.getItem(OWNER_REVIEW_CHECKPOINT_KEY)).toBeNull();
+  });
+
+  it("keeps local Windows worksheet completion separate from any independent installation acceptance", () => {
+    render(<StandardThemeAcceptancePanel role="owner" appearance="standard" density="comfortable" />);
+    const completion = screen.getByRole("region", { name: "Owner Windows review completion" });
+    expect(completion).toHaveTextContent("Owner worksheet completion · 1/5");
+    screen.getAllByRole("combobox", { name: "Review finding" }).forEach(select => fireEvent.change(select, { target: { value: "acceptable" } }));
+    fireEvent.change(screen.getByLabelText("Where did we personally test the screens?"), { target: { value: "remote_windows_client" } });
+    const checks = Array.from(screen.getByRole("region", { name: "Standard theme on-device field checks" }).querySelectorAll<HTMLSelectElement>(".hub-theme-device-check select"));
+    checks.forEach(select => fireEvent.change(select, { target: { value: "observed_pass" } }));
+    expect(completion).toHaveTextContent("Owner worksheet completion · 5/5");
+    expect(completion).toHaveTextContent("independent Windows acceptance is NOT VERIFIED");
+    fireEvent.change(checks[2], { target: { value: "observed_fail" } });
+    expect(completion).toHaveTextContent("Owner worksheet completion · 3/5");
+    fireEvent.change(screen.getByLabelText("What went wrong? (fixed, private-data-free choice)"), { target: { value: "focus_not_visible" } });
+    expect(completion).toHaveTextContent("Owner worksheet completion · 4/5");
+    fireEvent.change(screen.getByLabelText("Retest disposition"), { target: { value: "issue_persists" } });
+    expect(completion).toHaveTextContent("Owner worksheet completion · 5/5");
+    expect(completion).toHaveTextContent("Any unresolved issue remains open");
   });
   it("supports keyboard review routing and fixed, non-sensitive Windows failure descriptions", () => {
     render(<StandardThemeAcceptancePanel role="owner" appearance="high-contrast" density="comfortable" />);

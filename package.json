@@ -51,6 +51,7 @@
     "integration:ql274:hub:test": "npm --workspace apps/web run test -- ql274CustodianReturn.test.ts Ql274CustodianReturnPanel.test.tsx windowsOwnerRetestAudit.test.ts StandardThemeAcceptancePanel.test.tsx Ql273OriginGapPanel.test.tsx Ql272ReviewerProvenancePanel.test.tsx App.test.tsx",
     "integration:ql275:hub:test": "npm --workspace apps/web run test -- ql275DeferredReview.test.ts Ql275ReviewPanel.test.tsx CommsHubConnectionPanel.test.tsx StandardThemeAcceptancePanel.test.tsx App.test.tsx",
     "build:201:hub:test": "npm --workspace apps/web run test -- SystemWorkspaceGuide.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx CommsHubConnectionPanel.test.tsx",
-    "build:202:hub:test": "npm --workspace apps/web run test -- SystemWorkspaceGuide.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx CommsHubConnectionPanel.test.tsx"
+    "build:202:hub:test": "npm --workspace apps/web run test -- SystemWorkspaceGuide.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx CommsHubConnectionPanel.test.tsx",
+    "build:203:hub:test": "npm --workspace apps/web run test -- ownerReviewCheckpoint.test.ts LocalDiagnosticsPanel.ui.test.tsx StandardThemeAcceptancePanel.test.tsx SystemWorkspaceGuide.test.tsx Ql275ReviewPanel.test.tsx"
   }
 }
