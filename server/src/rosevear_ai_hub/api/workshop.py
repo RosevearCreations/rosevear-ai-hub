@@ -106,8 +106,14 @@ def _station_for_project(db: Session, station_id: int | None, project_key: str) 
 
 
 def _validate_accessories(values: list[str] | None) -> None:
-    if values is not None and (any(not value.strip() or len(value) > 120 for value in values) or len(set(values)) != len(values)):
-        raise HTTPException(status_code=422, detail="Accessories must be distinct nonempty labels up to 120 characters.")
+    if values is not None and (
+        any(not value.strip() or len(value) > 120 for value in values)
+        or len(set(values)) != len(values)
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail="Accessories must be distinct nonempty labels up to 120 characters.",
+        )
 
 
 @router.get("/stations", response_model=list[StationOut])

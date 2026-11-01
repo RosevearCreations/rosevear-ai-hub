@@ -118,7 +118,9 @@ def test_maintenance_360_search_due_calendar_and_aware_timezone(tmp_path):
         assert db.get(WorkshopEquipment, second).readiness_status == "unverified"
         assert db.scalar(select(WorkshopMaintenancePlan)).revision == 1
 
-    custom = client.put(base, json={**plan_body(revision=1, due="2030-11-10T12:00:00Z"), "reminder_days": 30})
+    custom = client.put(
+        base, json={**plan_body(revision=1, due="2030-11-10T12:00:00Z"), "reminder_days": 30}
+    )
     assert custom.status_code == 200
     assert custom.json()["reminder_days"] == 30
 
@@ -284,7 +286,10 @@ def test_build_217_manual_identity_validation_and_export_source(tmp_path):
     assert result.status_code == 200, result.text
     assert result.json()["model_reference"] == "3018 Pro"
     assert result.json()["accessories_json"] == ["Clamp kit", "Dust shoe"]
-    assert client.patch(endpoint, json={"accessories_json": ["Duplicate", "Duplicate"]}).status_code == 422
+    assert (
+        client.patch(endpoint, json={"accessories_json": ["Duplicate", "Duplicate"]}).status_code
+        == 422
+    )
     assert client.patch(endpoint, json={"accessories_json": [""]}).status_code == 422
     overview = client.get("/api/v1/workshop/maintenance/overview").json()
     assert overview["items"][0]["model_reference"] == "3018 Pro"
