@@ -1,0 +1,9 @@
+# Build 218 — Workshop Jobs, Material Use & Project Evidence
+
+The Workshop page now includes an authenticated, local-only job ledger for jewelry, 3D printing, CNC, laser, casting, sublimation and other manual projects. Owners/Administrators can create and revise jobs, link an existing equipment record, track percentage/status, estimated and actual minutes, and maintain up to 30 bill-of-materials lines with separate estimated and actual quantities. Units are explicit and fixed per line (`piece`, `g`, `kg`, `ml`, `l`, `mm`, `cm`, `m`); no automatic unit conversion, inventory deduction, invoicing or accounting occurs.
+
+Job edits use an expected revision and reject stale submissions (HTTP 409). Archiving is reversible using the “Show archived workshop jobs” filter. Photo evidence (up to five images per job, at most 2 MiB each; PNG/JPEG/WebP signature checked) is stored as private bytes in the local Hub database via migration `0028`, served only under authenticated `/api/v1/workshop/jobs` routes with `no-store` response handling. There is no public gallery, AI indexing or third-party sync. Owner/Administrator may remove photo bytes after confirmation; that deletion is permanent.
+
+Manual job records and photo evidence are **not** equipment safety approval or permission to run CNC, lasers, furnaces or other hazardous machines. The existing workshop safety holds and separate approval paths remain unchanged. QL-275 stays Deferred/Under Review with private integrations disconnected and relay OFF. Installed Windows acceptance requires a separate owner field check.
+
+Acceptance includes material precision, invalid unit rejection, revision conflicts, reversible archival, authenticated image retrieval, size/signature limits, local migration, owner-only writes, accessible compact forms and complete feature/dev/main CI.
