@@ -1,6 +1,6 @@
 # Rosevear AI Hub — Next 20 Builds (209–228)
 
-**Planning baseline:** Builds 209–214 source promoted to `main` and exact-main CI GREEN. Build 215 is the current implementation. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
+**Planning baseline:** Builds 209–215 source promoted to `main` and exact-main CI GREEN. Build 216 is the current implementation. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
 
 **Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use the Standard theme consistently, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
 
@@ -37,7 +37,7 @@
 - Correlate offline feeds with source-specific owner troubleshooting; avoid auto-loading private streams for low-privilege users.
 - **Accept:** role isolation, unsupported-provider cases, error and timeout recovery, and actual Windows/network field sign-off separated from source CI.
 
-### Build 215 — MQTT and X10 Legacy Device Bridging Feasibility
+### Build 215 — MQTT and X10 Legacy Device Bridging Feasibility (SOURCE PROMOTED)
 - Add read-only MQTT topic discovery, identity mapping suggestions and a compatibility inventory for legacy X10 hardware, pan/tilt mounts and motion sensors.
 - Explain the required X10 interface/bridge and proposed Meross/HA rule path, with a preview-only event-to-action diagram.
 - **Accept:** no MQTT publish, HA action or physical device trigger until hardware, scope, safe stopping and owner permission are independently verified.
@@ -115,10 +115,10 @@
 
 ## Delivery and safety rules for every build
 
-1. Build numbers 209–228 are **planned, unimplemented**. Complete in numerical order unless the owners explicitly reprioritize. Update this document and `BUILD_ROADMAP.md` as requirements evolve.
+1. Build numbers 209–228 are the agreed queue; completed builds are labeled **SOURCE PROMOTED**. Continue in numerical order unless the owners explicitly reprioritize. Update this document and `BUILD_ROADMAP.md` as requirements evolve.
 2. Feature branch → reviewed `dev` merge and checks → reviewed `main` promotion → **exact-main** required CI green. Record PRs, SHA, workflow and outstanding on-device tests. Never claim Production GREEN without evidence.
 3. No breaking changes to working screens, no fabricated real-world measurements, no hidden credentials, no background actuation, no unpaid provider dependencies without owner approval. Keep free-tier constraints visible.
 4. QL-275 remains **Under Review / owner-deferred**; six-app integration is **DISCONNECTED/HOLD**, private relay **OFF**, authenticated gateway GETs **0**, and no owner TEST permission is inferred. Removing the word HELD from the *project work queue* does not remove technical security restrictions.
 5. First-party password/document Vault remains **SECURITY HOLD (0/6 independently verified)** until separate owner authorization and independent cryptographic/security acceptance. Physical Windows and camera acceptance are never equated to GitHub CI.
 
-**Queue tracking:** 20 defined builds (209–228); Builds 209–211 source promoted. Build 212 underway; 17 were outstanding after Build 211.
+**Queue tracking:** 20 defined builds (209–228); Builds 209–215 source promoted. Build 216 underway; 13 remain in the queue (216–228).
