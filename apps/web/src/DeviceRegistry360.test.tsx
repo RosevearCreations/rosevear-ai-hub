@@ -48,6 +48,10 @@ describe("Build 139 Device 360 operator screen", () => {
     const results = await screen.findByRole("region", { name: "Device registry results" });
     await waitFor(() => expect(within(results).getAllByRole("button")).toHaveLength(3));
     expect(screen.getByText(/3 of 3 source identities/)).toBeInTheDocument();
+    const reconciliation = screen.getByRole("region", { name: "Build 212 Home Assistant to Hub reconciliation" });
+    expect(reconciliation).toHaveTextContent("1 HA device IDs · 1 HA entity IDs");
+    expect(reconciliation).toHaveTextContent("possible cross-source name matches");
+    expect(reconciliation).not.toHaveTextContent("PRIVATE_STREAM");
     fireEvent.click(within(results).getByRole("button", { name: /Hall Monitor.*Camera/i }));
     expect(screen.getByRole("region", { name: "Selected source identity" })).toHaveTextContent("camera:7".split(":")[1]);
     expect(container.textContent).not.toMatch(/PRIVATE_HOST|PRIVATE_STREAM|PRIVATE_ERROR/);
