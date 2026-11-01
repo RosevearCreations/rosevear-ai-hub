@@ -19,6 +19,25 @@ export type RegistryItem = DeviceRegistryIdentity & {
 
 export const registryKey = ({ source, source_id }: DeviceRegistryIdentity): string => `${source}:${source_id}`;
 
+/** Source-identity reconciliation; a Hub annotation is not a second physical device. */
+export function summarizeHAInventoryReconciliation(items: RegistryItem[], reviews: DeviceRegistryReviews,
+  haAvailable: boolean, now = new Date()) {
+  const haItems = items.filter(item => item.source === "ha_device" || item.source === "ha_entity");
+  const missing = haAvailable ? haItems.filter(item => item.state === "missing") : [];
+  const stale = haAvailable ? haItems.filter(item => item.state !== "missing" && item.lastObservedAt !== null &&
+    Number.isFinite(Date.parse(item.lastObservedAt)) && now.getTime() - Date.parse(item.lastObservedAt) > 24 * 60 * 60_000) : [];
+  const unknown = haAvailable ? haItems.filter(item => item.state === "unknown") : [];
+  const reviewedHA = reviews.annotations.filter(note => note.source === "ha_device" || note.source === "ha_entity");
+  const reviewedMissing = haAvailable ? reviewedHA.filter(note => !haItems.some(item => item.source === note.source &&
+    item.source_id === note.source_id && item.state !== "missing")) : [];
+  const duplicateCandidates = haAvailable ? suggestRegistryMatches(items, reviews).filter(s =>
+    s.left.source.startsWith("ha_") || s.right.source.startsWith("ha_")) : [];
+  return { status: haAvailable ? "HA_REGISTRY_READ_AVAILABLE" as const : "HA_REGISTRY_UNVERIFIED" as const,
+    haDevices: haAvailable ? haItems.filter(item => item.source === "ha_device").length : null,
+    haEntities: haAvailable ? haItems.filter(item => item.source === "ha_entity").length : null,
+    reviewedHA: reviewedHA.length, missing, stale, unknown, reviewedMissing, duplicateCandidates };
+}
+
 const identity = (source: DeviceRegistrySource, source_id: string): DeviceRegistryIdentity => ({ source, source_id });
 
 function validTimestamp(value: string | null | undefined): string | null {

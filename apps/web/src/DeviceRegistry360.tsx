@@ -8,7 +8,7 @@ import {
   type DeviceRegistrySource, type HomeAssistantBrowserResponse,
   type HomeAssistantControlPolicy,
 } from "./api";
-import { compileRegistry, registryKey, suggestRegistryMatches } from "./registryIdentityModel";
+import { compileRegistry, registryKey, suggestRegistryMatches, summarizeHAInventoryReconciliation } from "./registryIdentityModel";
 
 const emptyReviews: DeviceRegistryReviews = { annotations: [], matches: [] };
 const sourceNames: Record<DeviceRegistrySource, string> = {
@@ -68,6 +68,8 @@ export function DeviceRegistry360({ role, browser, policy, onRefreshInventory }:
   const entries = useMemo(() => compileRegistry(browser, cameras, cameraHealth, policy, reviews),
     [browser, cameras, cameraHealth, policy, reviews]);
   const suggestions = useMemo(() => suggestRegistryMatches(entries, reviews), [entries, reviews]);
+  const haReconciliation = useMemo(() => summarizeHAInventoryReconciliation(entries, reviews, browser !== null, checkedAt ?? new Date()),
+    [entries, reviews, browser, checkedAt]);
   const rooms = useMemo(() => Array.from(new Set(entries.map((item) => item.room))).sort(), [entries]);
   const visible = entries.filter((item) => {
     if (sourceFilter !== "all" && item.source !== sourceFilter) return false;
@@ -177,6 +179,20 @@ export function DeviceRegistry360({ role, browser, policy, onRefreshInventory }:
         <span>{sourceNames[source]}</span>
       </div>)}
     </div>
+    <section aria-label="Build 212 Home Assistant to Hub reconciliation" className="hub-diagnostics-guide">
+      <h3>Home Assistant → Hub identity reconciliation</h3>
+      <p>HA registry: <strong>{haReconciliation.status.replaceAll("_", " ")}</strong> · Hub owner-reviewed HA references: {reviewsVerified ? haReconciliation.reviewedHA : "unverified"}. A saved Hub annotation is a label for an HA source ID, not a second device or proof of a working connection.</p>
+      {browser === null ? <p role="status">HA registry unavailable: current HA device/entity counts and missing identities are unknown. Do not conclude that Home Assistant is empty or that the Hub deleted devices.</p> : <>
+        <p>{haReconciliation.haDevices} HA device IDs · {haReconciliation.haEntities} HA entity IDs · {haReconciliation.missing.length} reviewed IDs absent · {haReconciliation.unknown.length} unverified states · {haReconciliation.stale.length} source observations older than 24 hours · {haReconciliation.duplicateCandidates.length} possible cross-source name matches.</p>
+        {haReconciliation.missing.length > 0 && <ul>{haReconciliation.missing.slice(0, 20).map(item => <li key={item.key}>
+          <strong>{item.source_id}</strong> — reviewed Hub reference missing from the current HA registry. <a href="#device-recovery-workbench">Compare private historical inventory</a>; verify HA integration and device identity before re-adding anything.
+        </li>)}</ul>}
+        {haReconciliation.stale.length > 0 && <p>Older observations need a fresh check in Home Assistant. Their age is not proof that devices are offline.</p>}
+        {haReconciliation.duplicateCandidates.length > 0 && <p>Possible duplicate labels need individual owner review below; none are automatically merged or paired.</p>}
+        {haReconciliation.missing.length === 0 && <p>No previously annotated HA identities are absent from this current registry reading. Unreviewed historical devices may still be missing; use the private recovery baseline for comparison.</p>}
+      </>}
+      <p>When HA shows a device but the Hub does not, inspect the exact source ID, room and integration, the authenticated HA registry response, the Hub's role/filter settings, and the last observation time. Refresh both views; never infer a physical recovery from a green API status.</p>
+    </section>
     <div className="device-registry-filters" aria-label="Device registry filters">
       <label>Search identity or room<input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Name, provider ID or room…" /></label>
       <label>Source<select value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value as DeviceRegistrySource | "all")}>
