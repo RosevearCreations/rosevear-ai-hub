@@ -89,6 +89,7 @@ def test_maintenance_360_search_due_calendar_and_aware_timezone(tmp_path):
     assert created.status_code == 200, created.text
     assert created.json()["next_due_at"] == "2025-03-09T07:30:00+00:00"
     assert created.json()["revision"] == 1
+    assert created.json()["reminder_days"] == 7
     assert client.get(base).json()["checklist"] == ["Review guards", "Check ventilation"]
 
     overview = client.get("/api/v1/workshop/maintenance/overview").json()
@@ -117,6 +118,10 @@ def test_maintenance_360_search_due_calendar_and_aware_timezone(tmp_path):
         assert db.get(WorkshopEquipment, second).readiness_status == "unverified"
         assert db.scalar(select(WorkshopMaintenancePlan)).revision == 1
 
+    custom = client.put(base, json={**plan_body(revision=1, due="2030-11-10T12:00:00Z"), "reminder_days": 30})
+    assert custom.status_code == 200
+    assert custom.json()["reminder_days"] == 30
+
 
 def test_plan_revision_validation_and_legacy_due_conflict(tmp_path):
     client, _sessions = setup_client(tmp_path)
@@ -125,6 +130,7 @@ def test_plan_revision_validation_and_legacy_due_conflict(tmp_path):
     invalids = [
         plan_body(due="2026-11-04T08:00:00"),  # zone unspecified
         {**plan_body(), "interval_days": 0},
+        {**plan_body(), "reminder_days": 366},
         {**plan_body(), "checklist": ["Review guards", "Review guards"]},
         {**plan_body(), "parts_refs": ["", "SKU"]},
         {**plan_body(), "checklist": []},
@@ -260,3 +266,27 @@ def test_migration_0026_preserves_workshop_records(tmp_path, monkeypatch):
         "workshop_maintenance_plans",
         "workshop_maintenance_events",
     }.issubset(tables)
+    assert {"model_reference", "accessories_json"}.issubset(
+        {column["name"] for column in inspect(engine).get_columns("workshop_equipment")}
+    )
+    assert "reminder_days" in {
+        column["name"] for column in inspect(engine).get_columns("workshop_maintenance_plans")
+    }
+
+
+def test_build_217_manual_identity_validation_and_export_source(tmp_path):
+    client, _sessions = setup_client(tmp_path)
+    eid = equipment(client, name="CNC 3018")
+    endpoint = f"/api/v1/workshop/equipment/{eid}"
+    result = client.patch(endpoint, json={
+        "model_reference": "3018 Pro", "accessories_json": ["Clamp kit", "Dust shoe"],
+    })
+    assert result.status_code == 200, result.text
+    assert result.json()["model_reference"] == "3018 Pro"
+    assert result.json()["accessories_json"] == ["Clamp kit", "Dust shoe"]
+    assert client.patch(endpoint, json={"accessories_json": ["Duplicate", "Duplicate"]}).status_code == 422
+    assert client.patch(endpoint, json={"accessories_json": [""]}).status_code == 422
+    overview = client.get("/api/v1/workshop/maintenance/overview").json()
+    assert overview["items"][0]["model_reference"] == "3018 Pro"
+    assert overview["items"][0]["accessories"] == ["Clamp kit", "Dust shoe"]
+    assert overview["automatic_equipment_control"] is False

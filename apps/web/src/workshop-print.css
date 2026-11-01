@@ -1,0 +1,7 @@
+@media print {
+  body:has(.workshop-print-checklist) * { visibility: hidden !important; }
+  body:has(.workshop-print-checklist) .workshop-print-checklist,
+  body:has(.workshop-print-checklist) .workshop-print-checklist * { visibility: visible !important; }
+  .workshop-print-checklist { position: absolute; top: 0; left: 0; width: 100%; color: #000; background: #fff; }
+  .workshop-print-checklist .workshop-print-action { display: none !important; }
+}

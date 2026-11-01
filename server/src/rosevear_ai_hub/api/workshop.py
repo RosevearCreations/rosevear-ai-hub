@@ -57,6 +57,8 @@ class EquipmentCreate(BaseModel):
     station_id: int | None = None
     name: str = Field(min_length=1, max_length=160)
     equipment_type: str = Field(min_length=1, max_length=80)
+    model_reference: str = Field(default="", max_length=160)
+    accessories_json: list[str] = Field(default_factory=list, max_length=20)
     activity_type: Activity = "general"
     maintenance_due_at: datetime | None = None
     notes: str = Field(default="", max_length=500)
@@ -67,6 +69,8 @@ class EquipmentUpdate(BaseModel):
     station_id: int | None = None
     maintenance_due_at: datetime | None = None
     notes: str | None = Field(default=None, max_length=500)
+    model_reference: str | None = Field(default=None, max_length=160)
+    accessories_json: list[str] | None = Field(default=None, max_length=20)
     disabled: bool | None = None
 
 
@@ -99,6 +103,11 @@ def _station_for_project(db: Session, station_id: int | None, project_key: str) 
     station = db.get(WorkshopStation, station_id)
     if station is None or station.disabled or station.project_key != project_key:
         raise HTTPException(status_code=422, detail="Select an active workstation in this project.")
+
+
+def _validate_accessories(values: list[str] | None) -> None:
+    if values is not None and (any(not value.strip() or len(value) > 120 for value in values) or len(set(values)) != len(values)):
+        raise HTTPException(status_code=422, detail="Accessories must be distinct nonempty labels up to 120 characters.")
 
 
 @router.get("/stations", response_model=list[StationOut])
@@ -143,6 +152,7 @@ def list_equipment(db: Database, limit: int = Query(default=200, ge=1, le=200)):
 
 @router.post("/equipment", response_model=EquipmentOut, status_code=201)
 def create_equipment(body: EquipmentCreate, actor: Maintainer, db: Database):
+    _validate_accessories(body.accessories_json)
     _station_for_project(db, body.station_id, body.project_key)
     item = WorkshopEquipment(**body.model_dump(), readiness_status="unverified")
     db.add(item)
@@ -173,6 +183,7 @@ def update_equipment(
     if item is None:
         raise HTTPException(status_code=404, detail="Equipment not found.")
     data = body.model_dump(exclude_unset=True)
+    _validate_accessories(data.get("accessories_json"))
     if (
         "maintenance_due_at" in data
         and db.scalar(

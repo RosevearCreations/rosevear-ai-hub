@@ -65,6 +65,7 @@
     "build:213:hub:test": "npm --workspace apps/web run test -- cameraConnectionDiagnostics.test.ts ServerCameraInventory.build213.test.tsx",
     "build:214:hub:test": "npm --workspace apps/web run test -- cameraWallHealthReview.test.ts CameraWallV2.test.tsx",
     "build:215:hub:test": "npm --workspace apps/web run test -- X10BridgeFeasibility.test.tsx MQTTView.test.tsx",
-    "build:216:hub:test": "npm --workspace apps/web run test -- homeOperationsRoomsModel.test.ts HomeOperationsRoomsPanel.test.tsx"
+    "build:216:hub:test": "npm --workspace apps/web run test -- homeOperationsRoomsModel.test.ts HomeOperationsRoomsPanel.test.tsx",
+    "build:217:hub:test": "npm --workspace apps/web run test -- workshopBuild217.test.ts WorkshopMaintenancePlanner.test.tsx"
   }
 }

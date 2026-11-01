@@ -556,6 +556,8 @@ class WorkshopEquipment(TimestampMixin, Base):
     )
     name: Mapped[str] = mapped_column(String(160), nullable=False)
     equipment_type: Mapped[str] = mapped_column(String(80), nullable=False)
+    model_reference: Mapped[str] = mapped_column(String(160), nullable=False, default="")
+    accessories_json: Mapped[Any] = mapped_column(JSON, nullable=False, default=list)
     activity_type: Mapped[str] = mapped_column(String(32), nullable=False)
     readiness_status: Mapped[str] = mapped_column(
         String(24), nullable=False, default="unverified", index=True
@@ -602,6 +604,7 @@ class WorkshopMaintenancePlan(TimestampMixin, Base):
         index=True,
     )
     interval_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    reminder_days: Mapped[int] = mapped_column(Integer, nullable=False, default=7)
     next_due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     assigned_user_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True

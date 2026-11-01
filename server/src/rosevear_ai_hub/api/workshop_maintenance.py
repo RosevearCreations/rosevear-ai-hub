@@ -51,6 +51,7 @@ class PlanInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
     expected_revision: int = Field(ge=0)
     interval_days: int = Field(ge=1, le=3650)
+    reminder_days: int = Field(default=7, ge=0, le=365)
     next_due_at: datetime
     assigned_user_id: int | None = None
     checklist: list[str] = Field(min_length=1, max_length=12)
@@ -103,6 +104,7 @@ def _plan_out(plan: WorkshopMaintenancePlan) -> dict:
         "equipment_id": plan.equipment_id,
         "revision": plan.revision,
         "interval_days": plan.interval_days,
+        "reminder_days": plan.reminder_days,
         "next_due_at": _as_iso(plan.next_due_at),
         "assigned_user_id": plan.assigned_user_id,
         "checklist": plan.checklist_json,
@@ -125,7 +127,7 @@ def _due_state(
         return "unplanned", False
     if overdue:
         return "overdue", True
-    if _utc(date) <= now + timedelta(days=7):
+    if _utc(date) <= now + timedelta(days=plan.reminder_days if plan else 7):
         return "due_soon", False
     return "scheduled", False
 
@@ -182,6 +184,8 @@ def maintenance_overview(
                 "name": item.name,
                 "project_key": item.project_key,
                 "equipment_type": item.equipment_type,
+                "model_reference": item.model_reference,
+                "accessories": item.accessories_json,
                 "activity_type": item.activity_type,
                 "station_name": station,
                 "readiness_status": item.readiness_status,
@@ -240,6 +244,7 @@ def save_maintenance_plan(equipment_id: int, body: PlanInput, actor: Maintainer,
         plan = WorkshopMaintenancePlan(
             equipment_id=equipment.id,
             interval_days=body.interval_days,
+            reminder_days=body.reminder_days,
             next_due_at=body.next_due_at,
             assigned_user_id=body.assigned_user_id,
             checklist_json=body.checklist,
@@ -263,6 +268,7 @@ def save_maintenance_plan(equipment_id: int, body: PlanInput, actor: Maintainer,
             )
             .values(
                 interval_days=body.interval_days,
+                reminder_days=body.reminder_days,
                 next_due_at=body.next_due_at,
                 assigned_user_id=body.assigned_user_id,
                 checklist_json=body.checklist,
