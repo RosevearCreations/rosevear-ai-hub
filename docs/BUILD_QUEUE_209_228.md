@@ -1,6 +1,6 @@
 # Rosevear AI Hub — Next 20 Builds (209–228)
 
-**Planning baseline:** Builds 209–212 source promoted to `main` and exact-main CI GREEN. Build 213 is the current implementation. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
+**Planning baseline:** Builds 209–213 source promoted to `main` and exact-main CI GREEN. Build 214 is the current implementation. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
 
 **Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use the Standard theme consistently, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
 
@@ -27,7 +27,7 @@
 - Provide a guided owner review of why devices can be green in HA yet absent in Hub; allow reversible local annotations, never auto-adopt or merge.
 - **Accept:** empty/partial inventory cases and non-mutating provider adapters covered by tests.
 
-### Build 213 — Camera Inventory Compatibility & Connection Diagnostics
+### Build 213 — Camera Inventory Compatibility & Connection Diagnostics (SOURCE PROMOTED)
 - Build camera-source cards for Blink, littlelf, Nooie, Netvue, Bell/Alarm.com and SkyBell with explicit capability/unsupported/unknown labels.
 - Track whether each camera has a *verified permitted* local path, cloud-only limitation or separate credential/owner authorization need; no implied universal camera support.
 - **Accept:** no unauthorized stream scraping, credential display or speculative camera control.
