@@ -1,6 +1,6 @@
 # Rosevear AI Hub — Next 20 Builds (209–228)
 
-**Planning baseline:** Builds 209–213 source promoted to `main` and exact-main CI GREEN. Build 214 is the current implementation. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
+**Planning baseline:** Builds 209–214 source promoted to `main` and exact-main CI GREEN. Build 215 is the current implementation. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
 
 **Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use the Standard theme consistently, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
 
@@ -32,7 +32,7 @@
 - Track whether each camera has a *verified permitted* local path, cloud-only limitation or separate credential/owner authorization need; no implied universal camera support.
 - **Accept:** no unauthorized stream scraping, credential display or speculative camera control.
 
-### Build 214 — Private Camera Wall Health, Playback & Evidence Follow-Up
+### Build 214 — Private Camera Wall Health, Playback & Evidence Follow-Up (SOURCE PROMOTED)
 - Improve room/group camera wall, last-good frame metadata, privacy masking and manual playback acceptance records for supported feeds.
 - Correlate offline feeds with source-specific owner troubleshooting; avoid auto-loading private streams for low-privilege users.
 - **Accept:** role isolation, unsupported-provider cases, error and timeout recovery, and actual Windows/network field sign-off separated from source CI.
