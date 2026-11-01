@@ -280,9 +280,13 @@ def test_build_217_manual_identity_validation_and_export_source(tmp_path):
     client, _sessions = setup_client(tmp_path)
     eid = equipment(client, name="CNC 3018")
     endpoint = f"/api/v1/workshop/equipment/{eid}"
-    result = client.patch(endpoint, json={
-        "model_reference": "3018 Pro", "accessories_json": ["Clamp kit", "Dust shoe"],
-    })
+    result = client.patch(
+        endpoint,
+        json={
+            "model_reference": "3018 Pro",
+            "accessories_json": ["Clamp kit", "Dust shoe"],
+        },
+    )
     assert result.status_code == 200, result.text
     assert result.json()["model_reference"] == "3018 Pro"
     assert result.json()["accessories_json"] == ["Clamp kit", "Dust shoe"]
