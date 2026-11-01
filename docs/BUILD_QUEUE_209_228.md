@@ -1,6 +1,6 @@
 # Rosevear AI Hub — Next 20 Builds (209–228)
 
-**Planning baseline:** Builds 209–211 source promoted to `main` and exact-main CI GREEN. Build 212 is the next implementation. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
+**Planning baseline:** Builds 209–212 source promoted to `main` and exact-main CI GREEN. Build 213 is the current implementation. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
 
 **Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use the Standard theme consistently, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
 
@@ -22,7 +22,7 @@
 - Introduce an owner-entered installation/reboot retest receipt and a clear mismatch or rollback follow-up.
 - **Accept:** no assumption that successful GitHub CI means the Windows machine has updated.
 
-### Build 212 — Home Assistant Device Inventory Reconciliation & Missing-Device Workbench
+### Build 212 — Home Assistant Device Inventory Reconciliation & Missing-Device Workbench (SOURCE PROMOTED)
 - List HA-present, Hub-present, missing, duplicate and stale identities with source timestamps, areas and integration names.
 - Provide a guided owner review of why devices can be green in HA yet absent in Hub; allow reversible local annotations, never auto-adopt or merge.
 - **Accept:** empty/partial inventory cases and non-mutating provider adapters covered by tests.
