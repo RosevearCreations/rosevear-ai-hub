@@ -16,10 +16,10 @@ describe("Build 216 owner room review", () => {
     const freshFixture = { ...fixture, entities: fixture.entities.map(entity => entity.entity_id === "light.hall"
       ? { ...entity, last_updated: new Date().toISOString() } : entity) };
     render(<HomeOperationsRoomsPanel browser={freshFixture} policy={policy} role="owner" />);
-    const fresh = screen.getByRole("checkbox", { name: "Draft Hall lamp" });
+    const fresh = screen.getByRole("button", { name: "Include Hall lamp in planning-only draft" });
     expect(fresh).not.toBeDisabled();
-    expect(screen.getByRole("checkbox", { name: "Draft Kiln" })).toBeDisabled();
-    expect(screen.getByRole("checkbox", { name: "Draft Unknown lamp" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Include Kiln in planning-only draft" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Include Unknown lamp in planning-only draft" })).toBeDisabled();
     fireEvent.click(fresh);
     expect(screen.getByRole("region", { name: "Owner scene approval boundary" })).toHaveTextContent("1/4 safe candidates");
     fireEvent.click(screen.getByRole("button", { name: "Clear draft and safe-stop" }));

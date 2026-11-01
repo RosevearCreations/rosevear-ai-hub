@@ -30,9 +30,11 @@ export function HomeOperationsRoomsPanel({ browser, policy, role }: {
         <ul>{room.items.map(item => <li key={item.entityId}>
           <strong>{item.label}</strong> · {item.domain} · {item.state} · {item.status === "current" ? "recent HA observation" : item.status === "stale" ? "stale observation — recheck" : "state/timestamp unverified"}
           {item.actionEligible ? " · allowlisted candidate" : " · not allowlisted"}
-          {canPlan && <label> <input type="checkbox" aria-label={`Draft ${item.label}`} checked={selected.includes(item.entityId)}
+          {canPlan && <button type="button" aria-pressed={selected.includes(item.entityId)}
             disabled={!item.actionEligible || item.status !== "current" || (selected.length >= 4 && !selected.includes(item.entityId))}
-            onChange={event => setDraft(old => event.target.checked ? [...old, item.entityId] : old.filter(id => id !== item.entityId))} /> Include in planning-only draft</label>}
+            onClick={() => setDraft(old => old.includes(item.entityId) ? old.filter(id => id !== item.entityId) : [...old, item.entityId])}>
+            {selected.includes(item.entityId) ? "Remove" : "Include"} {item.label} in planning-only draft
+          </button>}
         </li>)}</ul>
       </section>)}
     </>}
