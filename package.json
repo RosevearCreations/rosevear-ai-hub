@@ -62,6 +62,7 @@
     "build:210:hub:test": "npm --workspace apps/web run test -- startupRecoveryModel.test.ts StartupRecoveryConsole.test.tsx",
     "build:211:hub:test": "npm --workspace apps/web run test -- installedHubAdoption.test.ts InstalledHubAdoptionPanel.test.tsx",
     "build:212:hub:test": "npm --workspace apps/web run test -- registryIdentityModel.test.ts DeviceRegistry360.test.tsx",
-    "build:213:hub:test": "npm --workspace apps/web run test -- cameraConnectionDiagnostics.test.ts ServerCameraInventory.build213.test.tsx"
+    "build:213:hub:test": "npm --workspace apps/web run test -- cameraConnectionDiagnostics.test.ts ServerCameraInventory.build213.test.tsx",
+    "build:214:hub:test": "npm --workspace apps/web run test -- cameraWallHealthReview.test.ts CameraWallV2.test.tsx"
   }
 }

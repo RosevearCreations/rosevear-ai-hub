@@ -6,6 +6,7 @@ import {
   type DeviceRegistryAnnotation, type Go2RTCStatus,
 } from "./api";
 import { assessPrivatePlayback } from "./cameraPlaybackReview";
+import { cameraWallHealthReview } from "./cameraWallHealthReview";
 
 const defaults: CameraWallPreferences = { favorite_camera_ids: [], compact: false, revision: 0 };
 const healthNames: Record<string, string> = {
@@ -33,6 +34,8 @@ export function CameraWallV2({ cameras, dashboard, transport, userId }: {
   const [compact, setCompact] = useState(false);
   const [preferencesVerified, setPreferencesVerified] = useState(false);
   const [favoriteOnly, setFavoriteOnly] = useState(false);
+  const [attentionOnly, setAttentionOnly] = useState(false);
+  const [followUps, setFollowUps] = useState<number[]>([]);
   const [roomFilter, setRoomFilter] = useState("all");
   const [activeId, setActiveId] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
@@ -49,6 +52,8 @@ export function CameraWallV2({ cameras, dashboard, transport, userId }: {
     setActiveId(null);
     setRoomFilter("all");
     setFavoriteOnly(false);
+    setAttentionOnly(false);
+    setFollowUps([]);
     void getDeviceRegistryReviews(controller.signal).then((result) => {
       if (!controller.signal.aborted) {
         setAnnotations(result.annotations);
@@ -81,7 +86,9 @@ export function CameraWallV2({ cameras, dashboard, transport, userId }: {
     }
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [cameras, annotations, roomsVerified]);
-  const visible = groups.map(([room, entries]) => [room, entries.filter((camera) => !favoriteOnly || favorites.includes(camera.id))] as const)
+  const visible = groups.map(([room, entries]) => [room, entries.filter((camera) =>
+    (!favoriteOnly || favorites.includes(camera.id)) &&
+    (!attentionOnly || cameraWallHealthReview(healthById.get(camera.id), Date.now(), dashboard?.stale_after_seconds ?? 300).attention))] as const)
     .filter(([room, entries]) => (roomFilter === "all" || room === roomFilter) && entries.length > 0);
   const active = cameras.find((camera) => camera.id === activeId);
   const activeHealth = active ? healthById.get(active.id) : undefined;
@@ -124,6 +131,7 @@ export function CameraWallV2({ cameras, dashboard, transport, userId }: {
         <p className="eyebrow">Build 141 · Private camera wall</p>
         <h2>Room and site camera groups</h2>
         <p>Camera health is an observation, not proof of moving video. Only one deliberately selected private stream can open.</p>
+        <p>Build 214 · Health and playback follow-up is read-only. Last-good frames are unverified unless separately provided by a trusted source.</p>
       </div>
       <details className="camera-acceptance-help">
         <summary><span aria-hidden="true">ⓘ</span> Camera wall help</summary>
@@ -144,6 +152,7 @@ export function CameraWallV2({ cameras, dashboard, transport, userId }: {
         </select>
       </label>
       <label className="camera-wall-check"><input type="checkbox" checked={favoriteOnly} onChange={(e) => { setFavoriteOnly(e.target.checked); setActiveId(null); }} /> Favorites only</label>
+      <label className="camera-wall-check"><input type="checkbox" checked={attentionOnly} onChange={(e) => { setAttentionOnly(e.target.checked); setActiveId(null); }} /> Needs attention only</label>
       <label className="camera-wall-check"><input type="checkbox" checked={compact} onChange={(e) => setCompact(e.target.checked)} /> Compact cards</label>
       <button type="button" disabled={!preferencesVerified || busy || (saved.compact === compact && JSON.stringify(saved.favorite_camera_ids) === JSON.stringify(favorites))} onClick={() => void saveLayout()}>
         {busy ? "Saving…" : "Save private layout"}
@@ -152,6 +161,11 @@ export function CameraWallV2({ cameras, dashboard, transport, userId }: {
     {!roomsVerified && <p className="camera-wall-caution">Room annotations unavailable or loading; camera identities remain separate and unassigned.</p>}
     {!preferencesVerified && <p className="camera-wall-caution">Personal layout not yet verified; saved preferences are unavailable.</p>}
     {notice && <p role="status">{notice}</p>}
+    <section aria-label="Private camera owner follow-up summary">
+      <h3>Owner follow-up · {followUps.length} flagged this session</h3>
+      <p>Flags are private to this open view and are not saved as an acceptance receipt. Use Field playback acceptance for durable owner evidence; no still images or streams are captured here.</p>
+      {followUps.length > 0 && <button type="button" onClick={() => setFollowUps([])}>Clear session follow-ups</button>}
+    </section>
     {cameras.length === 0 ? <p>No approved registered cameras yet. Review discovery first; no streams have started.</p> : visible.length === 0 ? <p>No cameras match this view. Clear Favorites only or choose All groups.</p> : null}
     {visible.map(([room, entries]) => <section key={room} className="camera-wall-group" aria-label={`${room} camera group`}>
       <h3>{room} <small>({entries.length})</small></h3>
@@ -159,6 +173,7 @@ export function CameraWallV2({ cameras, dashboard, transport, userId }: {
         {entries.map((camera) => {
           const health = healthById.get(camera.id);
           const playback = assessPrivatePlayback(camera, health, safeTransport, window.location.hostname, dashboard?.stale_after_seconds ?? 300);
+          const review = cameraWallHealthReview(health, Date.now(), dashboard?.stale_after_seconds ?? 300);
           const isActive = camera.id === activeId && activeReady;
           return <article key={camera.id} className="camera-wall-card">
             <div className="camera-wall-card-title">
@@ -170,6 +185,9 @@ export function CameraWallV2({ cameras, dashboard, transport, userId }: {
             <div className="camera-wall-still" aria-label="Still preview unavailable">Still image unavailable — no snapshot has been requested</div>
             <p>{!camera.enabled ? "Registry disabled" : playback.ready ? "Private preview eligible" : playback.reason}</p>
             <p className="camera-wall-observed">Last probe: {health?.last_probe_at ? new Date(health.last_probe_at).toLocaleString() : "Never"}</p>
+            <p className="camera-wall-observed">{review.status} · {review.probe}</p>
+            <p className="camera-wall-observed">Last-good frame: {review.lastGood}</p>
+            <p>{review.next}</p>
             <div className="camera-wall-card-actions">
               <button type="button" disabled={!playback.ready} aria-pressed={isActive}
                 onClick={() => setActiveId((id) => id === camera.id ? null : camera.id)}>
@@ -179,6 +197,10 @@ export function CameraWallV2({ cameras, dashboard, transport, userId }: {
                 aria-pressed={favorites.includes(camera.id)}
                 onClick={() => setFavorites((old) => old.includes(camera.id) ? old.filter((id) => id !== camera.id) : [...old, camera.id])}>
                 {favorites.includes(camera.id) ? "★ Saved favorite" : "☆ Favorite"}
+              </button>
+              <button type="button" aria-pressed={followUps.includes(camera.id)}
+                onClick={() => setFollowUps((old) => old.includes(camera.id) ? old.filter((id) => id !== camera.id) : [...old, camera.id])}>
+                {followUps.includes(camera.id) ? "Remove follow-up flag" : "Flag for manual follow-up"}
               </button>
             </div>
           </article>;

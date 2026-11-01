@@ -112,4 +112,19 @@ describe("Build 141 private Camera Wall", () => {
     await waitFor(() => expect(document.querySelectorAll("iframe")).toHaveLength(0));
     expect(screen.getByRole("button", { name: "Start private preview" })).toBeDisabled();
   });
+  test("Build 214 filters problem cameras and flags follow-ups without network writes or private frames", async () => {
+    const writes = mockPreferences();
+    render(<CameraWallV2 cameras={[camera(1), camera(2)]} dashboard={dashboard("failed")} transport={transport} userId={1} />);
+    await screen.findByRole("region", { name: "Hall camera group" });
+    fireEvent.click(screen.getByLabelText("Needs attention only"));
+    expect(screen.queryByRole("region", { name: "Hall camera group" })).not.toBeInTheDocument();
+    const attention = screen.getByRole("region", { name: "Unassigned cameras camera group" });
+    expect(attention).toHaveTextContent("Last-good frame: No verified last-good frame metadata");
+    fireEvent.click(within(attention).getByRole("button", { name: "Flag for manual follow-up" }));
+    expect(screen.getByRole("region", { name: "Private camera owner follow-up summary" })).toHaveTextContent("1 flagged this session");
+    expect(writes()).toBe(0);
+    expect(document.querySelectorAll("iframe, img")).toHaveLength(0);
+    fireEvent.click(screen.getByRole("button", { name: "Clear session follow-ups" }));
+    expect(screen.getByRole("region", { name: "Private camera owner follow-up summary" })).toHaveTextContent("0 flagged this session");
+  });
 });
