@@ -131,6 +131,7 @@ describe("MQTTView", () => {
     expect(screen.queryByRole("button", { name: "Subscribe" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Preview — do not publish" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Preview possible match" })).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Build 215 MQTT and X10 feasibility workbench" })).toHaveTextContent("Topic observation unavailable");
   });
   test("changing exact topic or payload revokes a previously approved preview", async () => {
     render(<MQTTView currentUser={owner} />);
