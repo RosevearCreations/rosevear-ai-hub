@@ -1,6 +1,6 @@
 # Rosevear AI Hub — Next 20 Builds (209–228)
 
-**Planning baseline:** Builds 209–215 source promoted to `main` and exact-main CI GREEN. Build 216 is the current implementation. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
+**Planning baseline:** Builds 209–216 source promoted to `main` and exact-main CI GREEN. Build 217 is the current implementation. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
 
 **Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use the Standard theme consistently, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
 
@@ -121,4 +121,4 @@
 4. QL-275 remains **Under Review / owner-deferred**; six-app integration is **DISCONNECTED/HOLD**, private relay **OFF**, authenticated gateway GETs **0**, and no owner TEST permission is inferred. Removing the word HELD from the *project work queue* does not remove technical security restrictions.
 5. First-party password/document Vault remains **SECURITY HOLD (0/6 independently verified)** until separate owner authorization and independent cryptographic/security acceptance. Physical Windows and camera acceptance are never equated to GitHub CI.
 
-**Queue tracking:** 20 defined builds (209–228); Builds 209–215 source promoted. Build 216 underway; 13 remain in the queue (216–228).
+**Queue tracking:** 20 defined builds (209–228); Builds 209–216 source promoted. Build 217 underway; 12 remain in the queue (217–228).
