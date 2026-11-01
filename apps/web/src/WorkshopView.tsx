@@ -18,6 +18,7 @@ import {
 } from "./api";
 import { WorkshopMaintenancePlanner } from "./WorkshopMaintenancePlanner";
 import { WorkshopJobsPanel } from "./WorkshopJobsPanel";
+import { MaintenanceActionBoard } from "./MaintenanceActionBoard";
 
 const ACTIVITY_OPTIONS: WorkshopActivity[] = [
   "general", "laser", "cnc", "forge", "electrical", "chemical", "other",
@@ -288,6 +289,7 @@ export function WorkshopView({ role = "read_only" }: { role?: AuthUser["role"] }
       )}
       <WorkshopMaintenancePlanner role={role} onChanged={refresh} />
       <WorkshopJobsPanel role={role} />
+      <MaintenanceActionBoard role={role} />
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
     </div>
