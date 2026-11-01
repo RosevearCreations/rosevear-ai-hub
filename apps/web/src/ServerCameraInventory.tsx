@@ -4,6 +4,7 @@ import { CameraInventoryImport } from "./CameraInventoryImport";
 import { CameraRuntimeAcceptance } from "./CameraRuntimeAcceptance";
 import { CameraOwnerReconciliationPanel } from "./CameraOwnerReconciliationPanel";
 import { CameraImportFieldAcceptance } from "./CameraImportFieldAcceptance";
+import { CAMERA_SOURCES, cameraConnectionReadback, cameraSourceReadback } from "./cameraConnectionDiagnostics";
 
 import {
   approveServerCameraPlan,
@@ -57,6 +58,20 @@ export function ServerCameraInventory({
       <h2>Build 074 — Shared camera model inventory</h2>
       <p>Owner-reviewed plans are saved to the local Hub database with actor-bound audit records.
         Approval does not connect to Alexa, register a camera or activate video.</p>
+      <section aria-label="Build 213 camera source compatibility and connection diagnostics">
+        <h3>Camera source compatibility and connection diagnostics</h3>
+        <p>These are inventory and authorization checkpoints, <strong>not live camera health checks</strong>.
+          Brand alone never proves RTSP, ONVIF, cloud API access or a working feed. No device is probed here.</p>
+        <ul>{CAMERA_SOURCES.map((source) => (
+          <li key={source.brand}>
+            <strong>{source.brand === "Alarm.com" ? "Bell / Alarm.com" : source.brand}</strong>: {cameraSourceReadback(source.brand, items)}
+            <span> {source.next}</span>
+          </li>
+        ))}</ul>
+        <p>Before connection: verify model capability, permitted local or cloud-only route, account authority,
+          required separate credentials, and Windows playback. Do not enter tokens, passwords or stream URLs in notes.
+          Alexa-only viewing does not grant a Hub feed.</p>
+      </section>
       {canAdminister ? (
         <div className="camera-discovery-choice">
           <label>Brand <select value={brand} disabled={busy} onChange={(event) => setBrand(event.target.value)}>
@@ -94,6 +109,7 @@ export function ServerCameraInventory({
           <li key={item.id}>
             <strong>{item.brand} — {item.model}</strong>{" "}
             <span>{item.method}, revision {item.revision}, {item.approved_at ? "plan approved" : "not approved"}</span>
+            <p>{cameraConnectionReadback(item).label}. {cameraConnectionReadback(item).next}</p>
             {canAdminister ? <button type="button" disabled={busy || !!item.approved_at ||
                 item.method === "unverified" || item.method === "unsupported" || item.evidence.trim().length < 8}
               onClick={() => void run(async () => {
