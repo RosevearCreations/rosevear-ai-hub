@@ -4,7 +4,7 @@ import type {
   CameraDashboard, CameraRecord, DeviceRegistryReviews,
   HomeAssistantBrowserResponse, HomeAssistantControlPolicy,
 } from "./api";
-import { compileRegistry, suggestRegistryMatches } from "./registryIdentityModel";
+import { compileRegistry, suggestRegistryMatches, summarizeHAInventoryReconciliation } from "./registryIdentityModel";
 
 const browser: HomeAssistantBrowserResponse = {
   area_count: 1, device_count: 1, domain_count: 1, entity_count: 2,
@@ -37,6 +37,19 @@ const policy = { candidates: [{ entity_id: "sensor.hall", allowed: true, blocked
 const emptyReviews: DeviceRegistryReviews = { annotations: [], matches: [] };
 
 describe("Build 139 Device 360 source boundaries", () => {
+  it("Build 212 preserves missing reviewed IDs only when the HA registry was read", () => {
+    const reviews: DeviceRegistryReviews = { annotations: [{ source: "ha_device", source_id: "old-provider-id", alias: "Prior Hall Monitor",
+      room_label: "Living room", disposition: "needs_investigation", revision: 1, reviewed_at: "2026-10-25T10:00:00Z" }], matches: [] };
+    const items = compileRegistry(browser, [camera], cameraHealth, null, reviews);
+    const result = summarizeHAInventoryReconciliation(items, reviews, true, new Date("2026-10-27T10:00:00Z"));
+    expect(result.missing.map(item => item.source_id)).toEqual(["old-provider-id"]);
+    expect(result.stale.map(item => item.key)).toContain("ha_entity:sensor.hall");
+    expect(result.duplicateCandidates).toHaveLength(2);
+    const offline = summarizeHAInventoryReconciliation(compileRegistry(null, null, null, null, reviews), reviews, false);
+    expect(offline.status).toBe("HA_REGISTRY_UNVERIFIED");
+    expect(offline.haDevices).toBeNull();
+    expect(offline.missing).toHaveLength(0);
+  });
   it("keeps HA device, HA entity and camera identities separate with source-linked timestamps", () => {
     const items = compileRegistry(browser, [camera], cameraHealth, policy, emptyReviews);
     expect(items.map((item) => item.key)).toEqual([
