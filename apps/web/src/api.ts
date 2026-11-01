@@ -2452,6 +2452,8 @@ export interface WorkshopEquipment {
   station_id: number | null;
   name: string;
   equipment_type: string;
+  model_reference?: string;
+  accessories_json?: string[];
   activity_type: WorkshopActivity;
   readiness_status: WorkshopReadiness;
   maintenance_due_at: string | null;
@@ -2495,9 +2497,14 @@ export function getWorkshopEquipment(signal?: AbortSignal) {
 }
 export function createWorkshopEquipment(input: {
   project_key: string; station_id: number | null; name: string; equipment_type: string;
-  activity_type: WorkshopActivity; notes: string;
+  activity_type: WorkshopActivity; notes: string; model_reference?: string; accessories_json?: string[];
 }) {
   return authJson<WorkshopEquipment>("POST", "/api/v1/workshop/equipment", input);
+}
+export function updateWorkshopEquipment(equipmentId: number, input: {
+  model_reference: string; accessories_json: string[];
+}): Promise<WorkshopEquipment> {
+  return authJson<WorkshopEquipment>("PATCH", `/api/v1/workshop/equipment/${equipmentId}`, input);
 }
 export function getWorkshopSummary(signal?: AbortSignal) {
   return authJson<WorkshopSummary>("GET", "/api/v1/workshop/readiness", undefined, signal);
@@ -2520,6 +2527,7 @@ export interface WorkshopMaintenancePlan {
   equipment_id: number;
   revision: number;
   interval_days: number;
+  reminder_days?: number;
   next_due_at: string;
   assigned_user_id: number | null;
   checklist: string[];
@@ -2532,6 +2540,8 @@ export interface WorkshopMaintenanceRow {
   name: string;
   project_key: string;
   equipment_type: string;
+  model_reference?: string;
+  accessories?: string[];
   activity_type: WorkshopActivity;
   station_name: string;
   readiness_status: WorkshopReadiness;
@@ -2571,7 +2581,7 @@ export function getWorkshopMaintenanceEvents(equipmentId: number): Promise<Works
   return authJson<WorkshopMaintenanceEvent[]>("GET", `/api/v1/workshop/equipment/${equipmentId}/maintenance-events`);
 }
 export function saveWorkshopMaintenancePlan(equipmentId: number, input: {
-  expected_revision: number; interval_days: number; next_due_at: string;
+  expected_revision: number; interval_days: number; reminder_days: number; next_due_at: string;
   assigned_user_id: number | null; checklist: string[]; parts_refs: string[]; notes: string;
 }): Promise<WorkshopMaintenancePlan> {
   return authJson<WorkshopMaintenancePlan>("PUT", `/api/v1/workshop/equipment/${equipmentId}/maintenance`, input);

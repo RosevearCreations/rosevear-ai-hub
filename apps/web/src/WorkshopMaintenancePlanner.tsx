@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import "./workshop-print.css";
 
 import {
   getUsers, getWorkshopMaintenanceEvents, getWorkshopMaintenanceOverview,
   recordWorkshopMaintenanceEvent, saveWorkshopMaintenancePlan,
+  updateWorkshopEquipment,
   type AuthUser, type WorkshopMaintenanceDue, type WorkshopMaintenanceEvent,
   type WorkshopMaintenanceOutcome, type WorkshopMaintenanceOverview,
   type WorkshopMaintenanceRow,
@@ -32,6 +34,20 @@ function splitLines(value: string): string[] {
   return value.split("\n").map((line) => line.trim()).filter(Boolean);
 }
 
+export function buildWorkshopExport(rows: WorkshopMaintenanceRow[], asOf: string): string {
+  return JSON.stringify({ schema: "rosevear-workshop-manual-v1", exported_at: asOf,
+    scope: "manual_records_only", automatic_equipment_control: false,
+    records: rows.map((row) => ({ ...row, safety_certification: false })) }, null, 2);
+}
+
+function downloadManualExport(content: string) {
+  const url = URL.createObjectURL(new Blob([content], { type: "application/json" }));
+  const link = document.createElement("a");
+  link.href = url; link.download = "workshop-maintenance-manual.json";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export function WorkshopMaintenancePlanner({ role, onChanged }: {
   role: AuthUser["role"];
   onChanged?: () => void | Promise<void>;
@@ -45,6 +61,9 @@ export function WorkshopMaintenancePlanner({ role, onChanged }: {
   const [project, setProject] = useState("all");
   const [state, setState] = useState<WorkshopMaintenanceDue | "all">("all");
   const [interval, setInterval] = useState("90");
+  const [reminderDays, setReminderDays] = useState("7");
+  const [modelReference, setModelReference] = useState("");
+  const [accessories, setAccessories] = useState("");
   const [dueLocal, setDueLocal] = useState(localDateTimeInput(null));
   const [assignee, setAssignee] = useState("");
   const [checklist, setChecklist] = useState("Inspect guards");
@@ -90,6 +109,9 @@ export function WorkshopMaintenancePlanner({ role, onChanged }: {
     setSelectedId(row.equipment_id);
     setRevision(row.plan?.revision || 0);
     setInterval(String(row.plan?.interval_days || 90));
+    setReminderDays(String(row.plan?.reminder_days ?? 7));
+    setModelReference(row.model_reference || "");
+    setAccessories((row.accessories || []).join("\n"));
     setDueLocal(localDateTimeInput(row.plan?.next_due_at || row.legacy_due_at));
     setAssignee(row.plan?.assigned_user_id ? String(row.plan.assigned_user_id) : "");
     setChecklist((row.plan?.checklist || ["Inspect guards"]).join("\n"));
@@ -117,7 +139,7 @@ export function WorkshopMaintenancePlanner({ role, onChanged }: {
     setBusy(true); setError("");
     try {
       const saved = await saveWorkshopMaintenancePlan(selectedId, {
-        expected_revision: revision, interval_days: Number(interval), next_due_at: date.toISOString(),
+        expected_revision: revision, interval_days: Number(interval), reminder_days: Number(reminderDays), next_due_at: date.toISOString(),
         assigned_user_id: assignee ? Number(assignee) : null, checklist: checks,
         parts_refs: splitLines(parts), notes,
       });
@@ -126,6 +148,18 @@ export function WorkshopMaintenancePlanner({ role, onChanged }: {
       await onChanged?.();
       setNotice("Manual maintenance plan saved and audited. It is not equipment clearance.");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Plan rejected. Refresh to review current revision."); }
+    finally { setBusy(false); }
+  }
+
+  async function submitRegistry(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!canManage || !selectedId || busy) return;
+    setBusy(true); setError("");
+    try {
+      await updateWorkshopEquipment(selectedId, { model_reference: modelReference.trim(), accessories_json: splitLines(accessories) });
+      await refresh(); await onChanged?.();
+      setNotice("Manual model and accessory record saved. No equipment connection was made.");
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Registry update failed."); }
     finally { setBusy(false); }
   }
 
@@ -153,7 +187,7 @@ export function WorkshopMaintenancePlanner({ role, onChanged }: {
   }
 
   return <section className="panel workshop-maintenance-planner" aria-label="Workshop maintenance planning">
-    <h2>Build 145 — Equipment 360 &amp; preventive maintenance</h2>
+    <h2>Build 217 — Workshop equipment registry &amp; maintenance calendar</h2>
     <p>Local-only schedules, manual assignments and service evidence. Every machine remains subject to a separate independent safety review.</p>
     <details><summary><span aria-hidden="true">ⓘ</span> Maintenance planning help</summary>
       <ol>
@@ -161,6 +195,8 @@ export function WorkshopMaintenancePlanner({ role, onChanged }: {
         <li>Owner/Administrator may assign an active household operator and record maintenance evidence manually.</li>
         <li>A complete checklist updates the next due date. A service-needed or unsafe observation never clears a safety hold or restarts equipment.</li>
         <li>Maintenance status is not a regulatory inspection, certification, or permission to run a laser, CNC, forge or electrical tool.</li>
+        <li>Reminder windows are owner-set on-screen due-soon indicators; the Hub does not send background alerts or control machinery.</li>
+        <li>Export downloads the currently loaded manual record set, not an automatic backup. Print the selected checklist for a separate paper review.</li>
       </ol>
     </details>
     <p role="note">Showing the first {data?.counts_limited_to_first || 200} source equipment records at most; {data?.overdue_count ?? "—"} overdue among those loaded.</p>
@@ -179,12 +215,13 @@ export function WorkshopMaintenancePlanner({ role, onChanged }: {
         </select>
       </label>
       <button type="button" disabled={busy} onClick={() => void refresh().catch(() => setError("Maintenance refresh failed."))}>Refresh maintenance</button>
+      <button type="button" disabled={!data} onClick={() => data && downloadManualExport(buildWorkshopExport(data.items, data.as_of))}>Export manual registry JSON</button>
     </div>
     <h3>Maintenance due-date calendar &amp; equipment detail</h3>
     <div className="workshop-items">
       {rows.map((row) => <article className="workshop-item" key={row.equipment_id}>
         <h4>{row.name}</h4>
-        <small>{row.project_key} · {row.station_name} · {row.activity_type}</small>
+        <small>{row.project_key} · {row.station_name} · {row.activity_type} · Model: {row.model_reference || "Not recorded"}</small>
         <p><strong>{row.due_state.replaceAll("_", " ")}</strong>{row.is_overdue ? " · Overdue" : ""} · Due {maintenanceDate(row.plan?.next_due_at || row.legacy_due_at)}</p>
         <p>Safety observation: {row.readiness_status.replaceAll("_", " ")}; {row.next_safe_check}</p>
         <small>Assigned operator: {row.plan?.assigned_user_id ?? "Not assigned"} · Last inspection: {maintenanceDate(row.last_inspected_at)}</small>
@@ -197,10 +234,23 @@ export function WorkshopMaintenancePlanner({ role, onChanged }: {
       <p>{chosen.next_safe_check}</p>
       {!canManage && <p>Only Owner/Administrator can edit plans or record maintenance. Viewing history is allowed.</p>}
       {canManage && <>
+        <form className="workshop-form" onSubmit={(event) => void submitRegistry(event)}>
+          <h4>Manual equipment identity</h4>
+          <label>Make / model or serial reference (optional)
+            <input maxLength={160} value={modelReference} onChange={(event) => setModelReference(event.target.value)} />
+          </label>
+          <label>Accessories (one distinct label per line, maximum 20)
+            <textarea value={accessories} onChange={(event) => setAccessories(event.target.value)} />
+          </label>
+          <button type="submit" disabled={busy}>Save equipment identity</button>
+        </form>
         <form className="workshop-form" onSubmit={(event) => void submitPlan(event)}>
           <h4>Owner-reviewed service plan</h4>
           <label>Repeat interval (days, 1–3650)
             <input type="number" min={1} max={3650} required value={interval} onChange={(event) => setInterval(event.target.value)} />
+          </label>
+          <label>Owner reminder lead time (days, 0–365)
+            <input type="number" min={0} max={365} required value={reminderDays} onChange={(event) => setReminderDays(event.target.value)} />
           </label>
           <label>Next maintenance due (local date and time)
             <input type="datetime-local" required value={dueLocal} onChange={(event) => setDueLocal(event.target.value)} />
@@ -252,6 +302,14 @@ export function WorkshopMaintenancePlanner({ role, onChanged }: {
           </button>
         </form>}
       </>}
+      <section className="workshop-print-checklist" aria-label="Printable equipment safety checklist">
+        <h4>Paper review checklist — {chosen.name}</h4>
+        <p>Location: {chosen.station_name} · Model: {chosen.model_reference || "Not recorded"} · Due: {maintenanceDate(chosen.plan?.next_due_at || chosen.legacy_due_at)}</p>
+        <p>Reviewer: __________________ · Date: __________________</p>
+        <ul>{requiredChecklist.map((item) => <li key={item}>☐ {item}</li>)}</ul>
+        <p>Separate authorized safety sign-off required. This paper checklist does not certify operation.</p>
+        <button type="button" className="workshop-print-action" onClick={() => window.print()}>Print checklist</button>
+      </section>
       <h4>Append-only maintenance history</h4>
       {history.length === 0 && <p>No manual service events recorded for this equipment.</p>}
       <ol>{history.map((event) => <li key={event.id}>
