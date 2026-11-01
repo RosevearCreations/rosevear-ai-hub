@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { X10BridgeFeasibility } from "./X10BridgeFeasibility";
 
 import {
   getDeviceRegistryReviews,
@@ -187,6 +188,8 @@ export function MQTTView({ currentUser }: { currentUser: AuthUser }) {
       </details>
 
       {actionMessage ? <p className="runtime-status" role="status">{actionMessage}</p> : null}
+      <X10BridgeFeasibility mqttAvailable={loadState.status.available}
+        observedTopics={canReview && loadState.explorer ? topicRows.length : null} canReview={canReview} />
 
       <section className="dashboard-grid" aria-label="MQTT status">
         <article className="panel">
