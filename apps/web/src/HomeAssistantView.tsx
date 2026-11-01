@@ -18,6 +18,7 @@ import { DeviceDiscoveryInbox } from "./DeviceDiscoveryInbox";
 import { DeviceRegistry360 } from "./DeviceRegistry360";
 import { HomeAssistantDiscoveryPanel } from "./HomeAssistantDiscoveryPanel";
 import { SceneDraftWorkbench } from "./SceneDraftWorkbench";
+import { HomeOperationsRoomsPanel } from "./HomeOperationsRoomsPanel";
 
 type LoadState =
   | { kind: "loading" }
@@ -186,6 +187,7 @@ export function HomeAssistantView({ currentUser }: { currentUser: AuthUser }) {
         onRefreshInventory={() => refresh()} />
       <DeviceCameraRecoveryPanel />
       {currentUser.role === "owner" && <HomeAssistantDiscoveryPanel />}
+      <HomeOperationsRoomsPanel browser={browser} policy={policy} role={currentUser.role} />
 
       {loadState.kind === "loading" ? (
         <section className="panel" role="status">Checking Home Assistant…</section>
