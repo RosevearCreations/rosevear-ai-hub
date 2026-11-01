@@ -10,6 +10,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
+    LargeBinary,
     String,
     Text,
     UniqueConstraint,
@@ -587,6 +588,43 @@ class WorkshopInspection(Base):
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     checked_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.current_timestamp(), nullable=False
+    )
+
+
+class WorkshopJob(TimestampMixin, Base):
+    """Manual project progress and material estimates, without machine or inventory authority."""
+
+    __tablename__ = "workshop_jobs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    category: Mapped[str] = mapped_column(String(32), nullable=False)
+    equipment_id: Mapped[int | None] = mapped_column(
+        ForeignKey("workshop_equipment.id", ondelete="SET NULL"), nullable=True
+    )
+    status: Mapped[str] = mapped_column(String(24), nullable=False, default="planned")
+    progress_percent: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    estimated_minutes: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    actual_minutes: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    materials_json: Mapped[Any] = mapped_column(JSON, nullable=False, default=list)
+    notes: Mapped[str] = mapped_column(String(2000), nullable=False, default="")
+    archived: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+
+class WorkshopJobPhoto(Base):
+    """Locally stored private photo bytes, fetched only after authentication."""
+
+    __tablename__ = "workshop_job_photos"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    job_id: Mapped[int] = mapped_column(
+        ForeignKey("workshop_jobs.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    mime_type: Mapped[str] = mapped_column(String(24), nullable=False)
+    photo_bytes: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    uploaded_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.current_timestamp(), nullable=False
     )
 

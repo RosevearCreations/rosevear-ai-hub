@@ -44,6 +44,7 @@ from rosevear_ai_hub.api.tools import router as tools_router
 from rosevear_ai_hub.api.tts import router as tts_router
 from rosevear_ai_hub.api.voice import router as voice_router
 from rosevear_ai_hub.api.workshop import router as workshop_router
+from rosevear_ai_hub.api.workshop_jobs import router as workshop_jobs_router
 from rosevear_ai_hub.api.workshop_maintenance import router as workshop_maintenance_router
 from rosevear_ai_hub.auth import require_authenticated, require_roles
 from rosevear_ai_hub.auth import router as auth_router
@@ -141,6 +142,7 @@ def create_app() -> FastAPI:
     application.include_router(device_registry_router)
     application.include_router(device_discovery_router)
     application.include_router(workshop_router, dependencies=[Depends(require_authenticated)])
+    application.include_router(workshop_jobs_router, dependencies=[Depends(require_authenticated)])
     application.include_router(
         workshop_maintenance_router, dependencies=[Depends(require_authenticated)]
     )

@@ -2594,6 +2594,49 @@ export function recordWorkshopMaintenanceEvent(equipmentId: number, input: {
   return authJson<WorkshopMaintenanceEvent>("POST", `/api/v1/workshop/equipment/${equipmentId}/maintenance-events`, input);
 }
 
+// Build 218: local manual workshop jobs; all edits require Owner/Administrator.
+export type WorkshopJobCategory = "jewelry" | "3d_print" | "cnc" | "laser" | "casting" | "sublimation" | "other";
+export type WorkshopJobStatus = "planned" | "active" | "paused" | "completed";
+export type WorkshopMaterialUnit = "piece" | "g" | "kg" | "ml" | "l" | "mm" | "cm" | "m";
+export interface WorkshopJobMaterial {
+  name: string; unit: WorkshopMaterialUnit; estimated: string; actual: string;
+}
+export interface WorkshopJobInput {
+  title: string; category: WorkshopJobCategory; equipment_id: number | null;
+  status: WorkshopJobStatus; progress_percent: number;
+  estimated_minutes: number; actual_minutes: number;
+  materials: WorkshopJobMaterial[]; notes: string; archived: boolean;
+}
+export interface WorkshopJob extends WorkshopJobInput {
+  id: number; revision: number;
+  photos: { id: number; mime_type: string }[];
+  scope: "private_local_manual"; inventory_deducted: false; equipment_control: false;
+}
+export function getWorkshopJobs(includeArchived = false): Promise<WorkshopJob[]> {
+  return authJson<WorkshopJob[]>("GET", `/api/v1/workshop/jobs?include_archived=${includeArchived}`);
+}
+export function createWorkshopJob(body: WorkshopJobInput): Promise<WorkshopJob> {
+  return authJson<WorkshopJob>("POST", "/api/v1/workshop/jobs", body);
+}
+export function updateWorkshopJob(id: number, body: WorkshopJobInput & { expected_revision: number }): Promise<WorkshopJob> {
+  return authJson<WorkshopJob>("PUT", `/api/v1/workshop/jobs/${id}`, body);
+}
+export async function uploadWorkshopJobPhoto(id: number, file: File): Promise<{ id: number; mime_type: string }> {
+  const data = new FormData(); data.append("photo", file);
+  const path = `/api/v1/workshop/jobs/${id}/photos`;
+  const response = await fetch(API_BASE_URL + path, { method: "POST", credentials: "include", body: data });
+  if (!response.ok) { reportAuthFailure(response, path); throw new Error(`Photo upload failed (${response.status})`); }
+  return response.json() as Promise<{ id: number; mime_type: string }>;
+}
+export function workshopJobPhotoUrl(id: number, photoId: number): string {
+  return `${API_BASE_URL}/api/v1/workshop/jobs/${id}/photos/${photoId}`;
+}
+export async function deleteWorkshopJobPhoto(id: number, photoId: number): Promise<void> {
+  const path = `/api/v1/workshop/jobs/${id}/photos/${photoId}`;
+  const response = await fetch(API_BASE_URL + path, { method: "DELETE", credentials: "include" });
+  if (!response.ok) { reportAuthFailure(response, path); throw new Error(`Photo removal failed (${response.status})`); }
+}
+
 
 export function getReleaseObservability(signal?: AbortSignal): Promise<ReleaseObservabilityResponse> {
   return getJson<ReleaseObservabilityResponse>("/api/v1/system/release-observability", signal);
