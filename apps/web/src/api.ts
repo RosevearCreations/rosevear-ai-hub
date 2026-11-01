@@ -2637,6 +2637,54 @@ export async function deleteWorkshopJobPhoto(id: number, photoId: number): Promi
   if (!response.ok) { reportAuthFailure(response, path); throw new Error(`Photo removal failed (${response.status})`); }
 }
 
+// Build 219: owner-reviewed task overlay. Source records never mutate from board decisions.
+export type MaintenanceSourceKind = "household" | "workshop_manual" | "workshop_equipment" | "device" | "camera";
+export type MaintenanceActionStatus = "open" | "deferred" | "closed";
+export interface MaintenanceActionDecision {
+  expected_revision: number;
+  assigned_user_id: number | null;
+  due_at: string | null;
+  status: MaintenanceActionStatus;
+  acknowledged: boolean;
+  decision_reason: string;
+}
+export interface MaintenanceActionRow extends MaintenanceActionDecision {
+  source_kind: MaintenanceSourceKind;
+  source_id: string;
+  title: string;
+  source_state: string;
+  source_stale: boolean;
+  hazard_unresolved: boolean;
+  source_due_at: string | null;
+  revision: number;
+  manually_reviewed: boolean;
+}
+export interface MaintenanceActionBoard {
+  as_of: string; items: MaintenanceActionRow[];
+  source_scope: "bounded_local_records_only"; source_limit_each: number;
+  automatic_closure: false; equipment_control: false;
+}
+export function getMaintenanceActions(): Promise<MaintenanceActionBoard> {
+  return authJson<MaintenanceActionBoard>("GET", "/api/v1/maintenance-actions");
+}
+export function saveMaintenanceAction(row: Pick<MaintenanceActionRow, "source_kind" | "source_id">, decision: MaintenanceActionDecision): Promise<MaintenanceActionRow> {
+  return authJson<MaintenanceActionRow>("PUT", `/api/v1/maintenance-actions/${row.source_kind}/${encodeURIComponent(row.source_id)}`, decision);
+}
+export function createManualMaintenanceAction(input: MaintenanceActionDecision & {
+  source_kind: "household" | "workshop_manual"; title: string;
+}): Promise<MaintenanceActionRow> {
+  return authJson<MaintenanceActionRow>("POST", "/api/v1/maintenance-actions/manual", input);
+}
+export async function exportMaintenanceActionCsv(): Promise<void> {
+  const path = "/api/v1/maintenance-actions/export.csv";
+  const response = await fetch(API_BASE_URL + path, { credentials: "include" });
+  if (!response.ok) { reportAuthFailure(response, path); throw new Error(`Action export failed (${response.status})`); }
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a"); link.href = url; link.download = "maintenance-actions.csv";
+  link.click(); URL.revokeObjectURL(url);
+}
+
 
 export function getReleaseObservability(signal?: AbortSignal): Promise<ReleaseObservabilityResponse> {
   return getJson<ReleaseObservabilityResponse>("/api/v1/system/release-observability", signal);

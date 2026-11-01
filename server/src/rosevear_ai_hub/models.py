@@ -629,6 +629,28 @@ class WorkshopJobPhoto(Base):
     )
 
 
+class MaintenanceAction(TimestampMixin, Base):
+    """Owner task overlay; never changes source equipment/device/camera readiness."""
+
+    __tablename__ = "maintenance_actions"
+    __table_args__ = (
+        UniqueConstraint("source_kind", "source_id", name="uq_maintenance_action_source"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source_kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    source_id: Mapped[str] = mapped_column(String(300), nullable=False)
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    assigned_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="open")
+    acknowledged: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    decision_reason: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+
 class WorkshopMaintenancePlan(TimestampMixin, Base):
     """Owner-maintained schedule and checklist; never equipment permission."""
 
