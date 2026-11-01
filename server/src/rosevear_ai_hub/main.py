@@ -32,6 +32,7 @@ from rosevear_ai_hub.api.integration_v1 import router as integration_v1_router
 from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.knowledge_reviews import router as knowledge_reviews_router
+from rosevear_ai_hub.api.maintenance_actions import router as maintenance_actions_router
 from rosevear_ai_hub.api.mqtt import router as mqtt_router
 from rosevear_ai_hub.api.notifications import router as notifications_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
@@ -143,6 +144,9 @@ def create_app() -> FastAPI:
     application.include_router(device_discovery_router)
     application.include_router(workshop_router, dependencies=[Depends(require_authenticated)])
     application.include_router(workshop_jobs_router, dependencies=[Depends(require_authenticated)])
+    application.include_router(
+        maintenance_actions_router, dependencies=[Depends(require_authenticated)]
+    )
     application.include_router(
         workshop_maintenance_router, dependencies=[Depends(require_authenticated)]
     )
