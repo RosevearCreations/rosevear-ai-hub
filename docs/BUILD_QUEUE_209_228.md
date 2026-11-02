@@ -1,6 +1,6 @@
 # Rosevear AI Hub — Next 20 Builds (209–228)
 
-**Planning baseline:** Builds 209–227 source promoted to `main` and exact-main CI GREEN. Build 228 is the current implementation. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
+**Planning baseline:** Builds 209–228 source promoted to `main` and exact-main CI GREEN. Build 229 is the current owner-authorized follow-up. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
 
 **Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use the Standard theme consistently, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
 
@@ -108,17 +108,23 @@
 - Expose which original evidence is missing and what an owner must separately authorize; retain disconnected default and avoid private proof uploads.
 - **Accept:** no live GETs or relay activation, no false independent verification. **QL-275 remains Under Review unless explicitly resumed by owner.**
 
-### Build 228 — Windows Owner Field Acceptance, Regression Matrix & Next Roadmap
+### Build 228 — Windows Owner Field Acceptance, Regression Matrix & Next Roadmap (SOURCE PROMOTED)
 - Provide a repeatable installed-Windows walkthrough covering startup, HA inventory, representative supported camera, MQTT, Standard theme, keyboard usability, role guards, backup/rollback and resource usage.
 - Record actual owner observations separately from CI and identify blockers, completed follow-ups and the next evidence-backed roadmap.
 - **Accept:** reproducible source tests plus distinct authentic owner field results; never mark hardware, cameras, vault or integration GREEN solely because source CI is GREEN.
 
+### Build 229 — Windows Owner Finding Triage & Source-Matched Repair Planning (OWNER-AUTHORIZED FOLLOW-UP)
+- Add a safe Build 228 handoff importer and an owner-only planning panel with source-linked observation identities, owner priority, reproduced/blocked state, local retest reference and disposition.
+- Show missing evidence, source changes and unapproved repair proposals explicitly. Do not invent installed failures or use CI to populate device observations. Export locally for owner review.
+- **Accept:** source import/schema regression tests, stale-source invalidation, no network/device activation or automatic repair; no repair scoping without real Windows owner evidence.
+- **Current factual baseline:** no authentic Build 228 Windows field observations supplied; source-backed repair queue starts empty. See `docs/BUILD-229-WINDOWS-FINDING-TRIAGE.md`.
+
 ## Delivery and safety rules for every build
 
-1. Build numbers 209–228 are the agreed queue; completed builds are labeled **SOURCE PROMOTED**. Continue in numerical order unless the owners explicitly reprioritize. Update this document and `BUILD_ROADMAP.md` as requirements evolve.
+1. Build numbers 209–228 were the agreed queue; Build 229 is separately authorized. Completed builds are labeled **SOURCE PROMOTED**. Continue only with owner-authorized follow-ups. Update this document as requirements evolve.
 2. Feature branch → reviewed `dev` merge and checks → reviewed `main` promotion → **exact-main** required CI green. Record PRs, SHA, workflow and outstanding on-device tests. Never claim Production GREEN without evidence.
 3. No breaking changes to working screens, no fabricated real-world measurements, no hidden credentials, no background actuation, no unpaid provider dependencies without owner approval. Keep free-tier constraints visible.
 4. QL-275 remains **Under Review / owner-deferred**; six-app integration is **DISCONNECTED/HOLD**, private relay **OFF**, authenticated gateway GETs **0**, and no owner TEST permission is inferred. Removing the word HELD from the *project work queue* does not remove technical security restrictions.
 5. First-party password/document Vault remains **SECURITY HOLD (0/6 independently verified)** until separate owner authorization and independent cryptographic/security acceptance. Physical Windows and camera acceptance are never equated to GitHub CI.
 
-**Queue tracking:** 20 defined builds (209–228); Builds 209–227 source promoted. Build 228 is the current candidate. Proposed follow-ups 229–231 depend on authentic owner Windows field evidence in `docs/BUILD-228-WINDOWS-FIELD-ACCEPTANCE.md`; they are not automatically authorized. Independent device, six-app and vault review gates are separate from source promotion.
+**Queue tracking:** 20 originally defined builds (209–228) source promoted; Build 229 separately authorized and in progress. Follow-ups 230–231 remain proposals and must be scoped from real owner findings; no automatic authorization. Independent device, six-app and vault review gates are separate from source promotion.
