@@ -23,6 +23,7 @@ import { SystemConsoleRefresh } from "./SystemConsoleRefresh";
 import { GlobalSearchHelp } from "./GlobalSearchHelp";
 import { OwnerPreferencesPanel } from "./OwnerPreferencesPanel";
 import { BackupRecoveryWorkbench } from "./BackupRecoveryWorkbench";
+import { SecurityReviewPanel } from "./SecurityReviewPanel";
 import { HubNavIcon } from "./HubNavIcon";
 import { BusinessView } from "./BusinessView";
 import { ChatView } from "./ChatView";
@@ -416,6 +417,7 @@ export function App() {
             <div id="hub-system-remote"><RemoteAccessPanel /></div>
             {canAdminister && <div id="hub-system-resources"><ResourceBudgetPanel /><LocalModelHealthPanel /></div>}
             {canAdminister && <BackupRecoveryWorkbench />}
+            {canAdminister && <SecurityReviewPanel />}
             {canAdminister && <OwnerPreferencesPanel ownerId={user.id} density={density} theme={appearance}
               onApply={(view) => { setDensity(view.density); setAppearance(view.theme); setSection(view.startSection); }} />}
           </>

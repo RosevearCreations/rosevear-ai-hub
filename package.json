@@ -73,6 +73,7 @@
     "build:221:hub:test": "npm --workspace apps/web run test -- SystemConsoleRefresh.test.tsx SystemWorkspaceGuide.test.tsx",
     "build:222:hub:test": "npm --workspace apps/web run test -- GlobalSearchHelp.test.tsx",
     "build:223:hub:test": "npm --workspace apps/web run test -- OwnerPreferencesPanel.test.tsx ownerPreferences.test.ts",
-    "build:224:hub:test": "npm --workspace apps/web run test -- BackupRecoveryWorkbench.test.tsx"
+    "build:224:hub:test": "npm --workspace apps/web run test -- BackupRecoveryWorkbench.test.tsx",
+    "build:225:hub:test": "npm --workspace apps/web run test -- SecurityReviewPanel.test.tsx"
   }
 }

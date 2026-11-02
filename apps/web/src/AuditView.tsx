@@ -119,6 +119,8 @@ export function AuditView() {
             Review who performed an action, which tool was involved, the sanitized inputs,
             outcome, confirmation evidence, and timestamp.
           </p>
+          <p><a href="/api/v1/audit/review-export.csv?limit=200" download="hub-audit-review-redacted.csv">Download redacted audit review CSV (latest 200 metadata rows)</a></p>
+          <p className="lede">Export omits account names, object IDs, tool arguments, results and credentials. Treat the local file as private audit evidence.</p>
         </div>
       </header>
 
