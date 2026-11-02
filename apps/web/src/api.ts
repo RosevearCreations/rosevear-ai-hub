@@ -427,6 +427,28 @@ export interface GlobalSearchRecord {
   source: string;
 }
 
+export interface BackupInventoryResponse {
+  sampled_at_utc: string;
+  source: "local_private_recovery_directory_names_only";
+  expected_directory: string;
+  directory_state: "not_found" | "unsafe_symlink" | "unavailable" | "present";
+  archive_count: number | null;
+  latest_archive_modified_utc: string | null;
+  evidence_file_count: number | null;
+  latest_evidence_modified_utc: string | null;
+  archive_integrity: "not_checked";
+  last_verified_restore: null;
+  off_machine_copy: "not_verified";
+  retention_policy: "not_configured_by_this_workbench";
+  automatic_backup_or_restore: false;
+  included_source_families: string[];
+  excluded: string[];
+}
+
+export function getBackupInventory(signal?: AbortSignal): Promise<BackupInventoryResponse> {
+  return getJson<BackupInventoryResponse>("/api/v1/system/backup-inventory", signal);
+}
+
 export interface GlobalSearchResponse {
   query: string;
   scope: "owner_local_saved_records";
