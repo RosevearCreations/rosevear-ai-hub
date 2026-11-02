@@ -59,7 +59,8 @@ export function summarizeWindowsTriage(draft: WindowsFieldDraft, scope: WindowsF
       else if (plan.decision === "defer") gate = "on_hold";
       else if (plan.decision === "retest_only") gate = "retest_only";
       else if (plan.decision === "investigate") gate = "investigation_review";
-      else if (plan.reproduction !== "reproduced" || safeWindowsFieldReference(plan.reproductionReference).length < 4)
+      else if (plan.reproduction !== "reproduced" || safeWindowsFieldReference(plan.reproductionReference).length < 4 ||
+        safeWindowsFieldReference(plan.reproductionReference) === row.reference)
         gate = "reproduction_gap";
       else gate = "owner_scope_review";
       return { ...row, plan, gate, linked, action: row.next };

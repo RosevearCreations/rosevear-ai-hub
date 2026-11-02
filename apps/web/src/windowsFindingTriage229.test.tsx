@@ -52,6 +52,7 @@ describe("Build 229 source-matched Windows repair planning", () => {
     const base = { ...defaultTriageEntry, sourceKey: windowsFindingSourceKey(row, scope) };
     expect(summarizeWindowsTriage(source, scope, { startup: { ...base, decision: "repair_proposal" } }).rows[0].gate).toBe("priority_needed");
     expect(summarizeWindowsTriage(source, scope, { startup: { ...base, priority: "p1", decision: "repair_proposal" } }).rows[0].gate).toBe("reproduction_gap");
+    expect(summarizeWindowsTriage(source, scope, { startup: { ...base, priority: "p1", decision: "repair_proposal", reproduction: "reproduced", reproductionReference: "WIN-228-START" } }).rows[0].gate).toBe("reproduction_gap");
     const ready = { ...base, priority: "p1" as const, decision: "repair_proposal" as const, reproduction: "reproduced" as const, reproductionReference: "WIN-229-RETEST" };
     const result = summarizeWindowsTriage(source, scope, { startup: ready });
     expect(result.ownerScoping).toBe(1);
