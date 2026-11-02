@@ -20,6 +20,7 @@ import { CardHelp, CommandPalette, type ShellDensity, type ShellTheme } from "./
 import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
 import { SystemWorkspaceGuide } from "./SystemWorkspaceGuide";
 import { SystemConsoleRefresh } from "./SystemConsoleRefresh";
+import { GlobalSearchHelp } from "./GlobalSearchHelp";
 import { HubNavIcon } from "./HubNavIcon";
 import { BusinessView } from "./BusinessView";
 import { ChatView } from "./ChatView";
@@ -75,6 +76,7 @@ const baseSections = [
   "Business",
   "MQTT",
   "Notifications",
+  "Search & Help",
   "System",
 ] as const;
 type Section =
@@ -362,7 +364,10 @@ export function App() {
           <StandardThemeAcceptancePanel role={user.role as "owner" | "administrator"}
             appearance={appearance} density={density} onNavigate={target => setSection(target)} />
         </div>}
-        {section === "Chat" ? (
+        {section === "Search & Help" ? (
+          <GlobalSearchHelp allowedSections={sections} canAdminister={canAdminister}
+            onNavigate={target => setSection(target as Section)} />
+        ) : section === "Chat" ? (
           <ChatView onAskWithCitations={(question) => {
             setKnowledgeQuestion(question);
             setSection("Knowledge");
