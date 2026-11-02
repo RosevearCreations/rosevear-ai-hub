@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from csv import writer
 from datetime import datetime
+from io import StringIO
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from pydantic import BaseModel
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
@@ -15,6 +17,47 @@ from rosevear_ai_hub.database import get_session
 from rosevear_ai_hub.models import AuditEvent, User
 
 router = APIRouter(prefix="/api/v1/audit", tags=["audit"])
+
+
+def _csv_safe(value: object) -> str:
+    """Prevent spreadsheet formula execution even in attacker-named audit categories."""
+    content = "" if value is None else str(value)[:160]
+    return (
+        "'" + content if content.lstrip().startswith(("=", "+", "-", "@", "\t", "\r")) else content
+    )
+
+
+@router.get("/review-export.csv")
+def audit_review_export(
+    _owner: Annotated[User, Depends(require_roles("owner", "administrator"))],
+    db: Annotated[Session, Depends(get_session)],
+    limit: int = Query(default=100, ge=1, le=200),
+) -> Response:
+    """Bounded metadata-only CSV. No arguments, results, IDs, usernames or credentials."""
+    events = db.scalars(
+        select(AuditEvent).order_by(AuditEvent.created_at.desc(), AuditEvent.id.desc()).limit(limit)
+    ).all()
+    output = StringIO()
+    csv_writer = writer(output)
+    csv_writer.writerow(
+        ("timestamp_utc", "event_type", "object_type", "action", "result_status", "risk_level")
+    )
+    for event in events:
+        csv_writer.writerow(
+            (
+                _csv_safe(event.created_at.isoformat()),
+                _csv_safe(event.event_type),
+                _csv_safe(event.object_type),
+                _csv_safe(event.action),
+                _csv_safe(event.result_status),
+                _csv_safe(event.risk_level),
+            )
+        )
+    return Response(
+        output.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="hub-audit-review-redacted.csv"'},
+    )
 
 
 class AuditActorResponse(BaseModel):

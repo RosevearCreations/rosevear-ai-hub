@@ -449,6 +449,30 @@ export function getBackupInventory(signal?: AbortSignal): Promise<BackupInventor
   return getJson<BackupInventoryResponse>("/api/v1/system/backup-inventory", signal);
 }
 
+export interface SecurityPostureResponse {
+  sampled_at_utc: string;
+  role_counts: Record<string, { total: number; enabled: number }>;
+  active_session_count: number;
+  audit_event_count: number;
+  last_audit_event_utc: string | null;
+  api_bind_scope: "loopback" | "non_loopback_review_required";
+  cookie_secure_configured: boolean;
+  cors_origin_count: number;
+  cors_wildcard_configured: boolean;
+  remote_web_enabled: boolean;
+  session_max_hours: number;
+  reverse_proxy_tls: "not_inspected";
+  tailscale_acl: "not_inspected";
+  firewall: "not_inspected";
+  secret_values_read: false;
+  network_probes_performed: false;
+  findings: string[];
+}
+
+export function getSecurityPosture(signal?: AbortSignal): Promise<SecurityPostureResponse> {
+  return getJson<SecurityPostureResponse>("/api/v1/system/security-posture", signal);
+}
+
 export interface GlobalSearchResponse {
   query: string;
   scope: "owner_local_saved_records";
