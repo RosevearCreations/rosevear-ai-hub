@@ -1,4 +1,5 @@
 import { assessVaultSecurityArchitecture, vaultControls, vaultThreats } from "./vaultSecurityArchitecture";
+import { VaultDecisionGatePanel } from "./VaultDecisionGatePanel";
 import { assessVaultPreparation, vaultPreparationStages } from "./vaultPreparation";
 import { assessVaultMfaReadiness, vaultMfaDenialCases, vaultMfaReviewGates } from "./vaultMfaReadiness";
 import { assessVaultSecurityVerification, vaultVerificationChecks } from "./vaultSecurityVerification";
@@ -62,6 +63,8 @@ export function VaultArchitectureView() {
         <strong>Do not enter real passwords yet.</strong>
         <p>This is the first-party architecture and safety review—not a working vault. Password entry, document uploads, retrieval, sharing, autofill and MFA are disabled. Nothing is installed on the Windows server by this screen.</p>
       </div>
+
+      <VaultDecisionGatePanel />
 
       <section className="panel" id="vault-readiness" tabIndex={-1} aria-label="Build 137 vault security readiness command center">
         <div className="vault-gates-heading">
