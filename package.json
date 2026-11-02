@@ -69,6 +69,7 @@
     "build:217:hub:test": "npm --workspace apps/web run test -- workshopBuild217.test.ts WorkshopMaintenancePlanner.test.tsx",
     "build:218:hub:test": "npm --workspace apps/web run test -- WorkshopJobsPanel.test.tsx",
     "build:219:hub:test": "npm --workspace apps/web run test -- MaintenanceActionBoard.test.tsx",
-    "build:220:hub:test": "npm --workspace apps/web run test -- LocalModelHealthPanel.test.tsx"
+    "build:220:hub:test": "npm --workspace apps/web run test -- LocalModelHealthPanel.test.tsx",
+    "build:221:hub:test": "npm --workspace apps/web run test -- SystemConsoleRefresh.test.tsx SystemWorkspaceGuide.test.tsx"
   }
 }

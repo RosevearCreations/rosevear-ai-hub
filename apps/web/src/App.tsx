@@ -19,6 +19,7 @@ import { CameraView } from "./CameraView";
 import { CardHelp, CommandPalette, type ShellDensity, type ShellTheme } from "./CommandShell";
 import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
 import { SystemWorkspaceGuide } from "./SystemWorkspaceGuide";
+import { SystemConsoleRefresh } from "./SystemConsoleRefresh";
 import { HubNavIcon } from "./HubNavIcon";
 import { BusinessView } from "./BusinessView";
 import { ChatView } from "./ChatView";
@@ -351,6 +352,7 @@ export function App() {
         {section === "System" && <HubVitalCards health={health} ollama={ollama} />}
         {section === "System" && <SystemWorkspaceGuide backend={health.kind} ollama={ollama.kind}
           models={ollama.kind === "online" ? ollama.data.model_count : null} canAdminister={canAdminister} />}
+        {section === "System" && canAdminister && <SystemConsoleRefresh onNavigate={(target) => setSection(target as Section)} />}
         {/* Keep the supervised trial mounted while reviewing linked modules; it only stores session data and never polls. */}
         {canAdminister && <div id="hub-system-owner-review" hidden={section !== "System"}>
           <OwnerFieldTrialWorkbench active={section === "System"} onNavigate={(target) => setSection(target as Section)} />
@@ -399,14 +401,13 @@ export function App() {
             {canAdminister && <PostRebootAcceptancePanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <StartupRecoveryConsole onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <FieldRecoverySummaryPanel onNavigate={(target) => setSection(target as Section)} />}
-            {canAdminister && <ReleaseAcceptancePanel onNavigate={(target) => setSection(target as Section)} />}
+            {canAdminister && <div id="hub-system-release"><ReleaseAcceptancePanel onNavigate={(target) => setSection(target as Section)} /></div>}
             {canAdminister && <ReleaseObservabilityPanel />}
             {canAdminister && <InstalledHubAdoptionPanel />}
             {canAdminister && <div id="hub-system-connection"><IntegrationHealthPanel /></div>}
             {canAdminister && <RestartAppsPanel />}
             <div id="hub-system-remote"><RemoteAccessPanel /></div>
-            {canAdminister && <ResourceBudgetPanel />}
-            {canAdminister && <LocalModelHealthPanel />}
+            {canAdminister && <div id="hub-system-resources"><ResourceBudgetPanel /><LocalModelHealthPanel /></div>}
           </>
         ) : (
           <HomeView
