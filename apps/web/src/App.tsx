@@ -36,6 +36,7 @@ import { PostRebootAcceptancePanel } from "./PostRebootAcceptancePanel";
 import { StartupRecoveryConsole } from "./StartupRecoveryConsole";
 import { FieldRecoverySummaryPanel } from "./FieldRecoverySummaryPanel";
 import { OwnerFieldTrialWorkbench } from "./OwnerFieldTrialWorkbench";
+import { WindowsFieldAcceptance228Panel } from "./WindowsFieldAcceptance228Panel";
 import { VaultArchitectureView } from "./VaultArchitectureView";
 import { IntegrationHealthPanel } from "./IntegrationHealthPanel";
 import { RestartAppsPanel } from "./RestartAppsPanel";
@@ -104,6 +105,7 @@ export function App() {
   const [commandOpen, setCommandOpen] = useState(false);
   const [density, setDensity] = useState<ShellDensity>("comfortable");
   const [appearance, setAppearance] = useState<ShellTheme>("standard");
+  const [windowsFieldReviewVisited, setWindowsFieldReviewVisited] = useState(false);
 
   useEffect(() => setMobileMenuOpen(false), [section]);
 
@@ -140,6 +142,14 @@ export function App() {
 
   const authenticatedUser =
     auth.kind === "ready" && auth.status.authenticated ? auth.status.user : null;
+
+  // Mount the large owner matrix only after System is opened; then preserve its
+  // in-memory observations during navigation to actual device and camera screens.
+  useEffect(() => {
+    if (section === "System" && (authenticatedUser?.role === "owner" || authenticatedUser?.role === "administrator")) {
+      setWindowsFieldReviewVisited(true);
+    }
+  }, [section, authenticatedUser]);
 
   useEffect(() => {
     if (!authenticatedUser) return;
@@ -239,6 +249,7 @@ export function App() {
       setMobileMenuOpen(false);
       setDensity("comfortable");
       setAppearance("standard");
+      setWindowsFieldReviewVisited(false);
       setKnowledgeQuestion("");
       setHealth({ kind: "loading" });
       setOllama({ kind: "loading" });
@@ -358,6 +369,10 @@ export function App() {
         {section === "System" && <SystemWorkspaceGuide backend={health.kind} ollama={ollama.kind}
           models={ollama.kind === "online" ? ollama.data.model_count : null} canAdminister={canAdminister} />}
         {section === "System" && canAdminister && <SystemConsoleRefresh onNavigate={(target) => setSection(target as Section)} />}
+        {/* Preserve on-device owner observations when navigating to a real module; no background probing. */}
+        {canAdminister && (section === "System" || windowsFieldReviewVisited) && <div hidden={section !== "System"}>
+          <WindowsFieldAcceptance228Panel onNavigate={(target) => setSection(target as Section)} />
+        </div>}
         {/* Keep the supervised trial mounted while reviewing linked modules; it only stores session data and never polls. */}
         {canAdminister && <div id="hub-system-owner-review" hidden={section !== "System"}>
           <OwnerFieldTrialWorkbench active={section === "System"} onNavigate={(target) => setSection(target as Section)} />

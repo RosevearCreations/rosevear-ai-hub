@@ -1,0 +1,20 @@
+/* Build 228 — Windows owner field acceptance; readable on laptop and tablet. */
+.windows-field-228 { margin-block: 1.5rem; }
+.windows-field-228-context { display: grid; gap: .85rem; max-width: 54rem; margin-block: 1rem; }
+.windows-field-228-context label { display: grid; gap: .4rem; font-weight: 650; }
+.windows-field-228-context input:not([type="checkbox"]) { width: 100%; max-width: 34rem; min-width: 0; }
+.windows-field-228-context .windows-field-228-witness { display: flex; gap: .6rem; align-items: flex-start; font-weight: 500; }
+.windows-field-228-witness input { flex: 0 0 auto; width: 1.2rem; height: 1.2rem; }
+.windows-field-228-scroll { max-width: 100%; overflow-x: auto; margin-block: 1rem; }
+.windows-field-228 table { width: 100%; border-collapse: collapse; min-width: 48rem; }
+.windows-field-228 th, .windows-field-228 td { text-align: left; vertical-align: top; padding: .8rem; border-bottom: 1px solid #bdc8d1; }
+.windows-field-228 thead { background: #e9f0f5; color: #173448; }
+.windows-field-228 tbody th { width: 39%; }
+.windows-field-228 tbody th small { display: block; margin-block: .55rem; font-weight: 400; line-height: 1.55; }
+.windows-field-228-state { display: inline-block; padding: .3rem .5rem; border-radius: .4rem; background: #e6eefa; color: #193d62; font-size: .85rem; }
+.windows-field-228 td label { display: block; font-weight: 600; margin-bottom: .4rem; }
+.windows-field-228 td select, .windows-field-228 td input, .windows-field-228 > select { width: 100%; min-width: 0; max-width: 18rem; margin-bottom: .6rem; }
+.windows-field-228 td button { white-space: nowrap; }
+.windows-field-228-roadmap { border: 1px solid #b6c9d8; background: #f4f8fc; padding: 1rem; border-radius: .8rem; margin-block: 1rem; }
+.windows-field-228-roadmap li { margin-block: .5rem; line-height: 1.5; }
+.app-shell[data-theme="high-contrast"] .windows-field-228 :is(.windows-field-228-roadmap, .windows-field-228-state, thead) { background: #172f43; color: #fff; border-color: #bfd5e8; }
