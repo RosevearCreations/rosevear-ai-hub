@@ -77,6 +77,7 @@
     "build:225:hub:test": "npm --workspace apps/web run test -- SecurityReviewPanel.test.tsx",
     "build:226:hub:test": "npm --workspace apps/web run test -- VaultDecisionGatePanel.test.tsx VaultArchitectureView.test.tsx vaultSecurityArchitecture.test.ts vaultSecurityVerification.test.ts",
     "build:227:hub:test": "npm --workspace apps/web run test -- SixAppReadinessPanel.test.tsx IntegrationHealthPanel.test.tsx CommsHubConnectionPanel.test.tsx ql275DeferredReview.test.ts",
-    "build:228:hub:test": "npm --workspace apps/web run test -- WindowsFieldAcceptance228Panel.test.tsx BackupRecoveryWorkbench.test.tsx InstalledHubAdoptionPanel.test.tsx SixAppReadinessPanel.test.tsx"
+    "build:228:hub:test": "npm --workspace apps/web run test -- WindowsFieldAcceptance228Panel.test.tsx BackupRecoveryWorkbench.test.tsx InstalledHubAdoptionPanel.test.tsx SixAppReadinessPanel.test.tsx",
+    "build:229:hub:test": "npm --workspace apps/web run test -- windowsFindingTriage229.test.tsx WindowsFieldAcceptance228Panel.test.tsx SixAppReadinessPanel.test.tsx"
   }
 }

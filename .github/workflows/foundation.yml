@@ -127,6 +127,8 @@ jobs:
         run: npm run test -- ownerReviewCheckpoint.test.ts LocalDiagnosticsPanel.ui.test.tsx StandardThemeAcceptancePanel.test.tsx Ql275ReviewPanel.test.tsx
       - name: Build 228 Windows field matrix, owner evidence and security hold regressions
         run: npm run test -- WindowsFieldAcceptance228Panel.test.tsx SixAppReadinessPanel.test.tsx BackupRecoveryWorkbench.test.tsx
+      - name: Build 229 Windows finding source-match, repair proposal and handoff import regressions
+        run: npm run test -- windowsFindingTriage229.test.tsx WindowsFieldAcceptance228Panel.test.tsx SixAppReadinessPanel.test.tsx
       - name: Test
         # Keep resource-heavy App/owner-workbench regressions isolated from other
         # jsdom suites; simultaneous workers caused non-deterministic CI timeouts.

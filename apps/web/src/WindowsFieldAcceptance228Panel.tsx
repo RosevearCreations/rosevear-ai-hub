@@ -8,6 +8,12 @@ import {
   type WindowsFieldBasis, type WindowsFieldCaseId, type WindowsFieldDraft, type WindowsFieldObservation,
   type WindowsFieldOutcome,
 } from "./windowsFieldAcceptance228";
+import {
+  defaultTriageEntry, formatWindowsFindingPlan229, parseWindowsFieldHandoff228,
+  summarizeWindowsTriage, windowsFindingSourceKey, windowsTriageGateLabels,
+  type WindowsTriageDecision, type WindowsTriageDraft, type WindowsTriageEntry,
+  type WindowsTriagePriority, type WindowsTriageReproduction,
+} from "./windowsFindingTriage229";
 
 type ReviewFilter = "all" | "attention" | "passed";
 const outcomeLabels: Record<WindowsFieldOutcome | "needs_evidence", string> = {
@@ -20,11 +26,15 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
   const [installedVersion, setInstalledVersion] = useState("");
   const [physicallyWitnessed, setPhysicallyWitnessed] = useState(false);
   const [draft, setDraft] = useState<WindowsFieldDraft>({});
+  const [triage, setTriage] = useState<WindowsTriageDraft>({});
+  const [handoffInput, setHandoffInput] = useState("");
   const [filter, setFilter] = useState<ReviewFilter>("all");
   const [notice, setNotice] = useState("");
+  const [triageNotice, setTriageNotice] = useState("");
   const scope = { installedVersion, physicallyWitnessed };
   const summary = summarizeWindowsFieldReview(draft, scope);
   const followups = windowsFieldRoadmap(draft, scope);
+  const triageSummary = summarizeWindowsTriage(draft, scope, triage);
   const visible = summary.rows.filter(row => filter === "all" ||
     (filter === "passed" ? row.state === "pass" : row.state !== "pass"));
 
@@ -37,12 +47,43 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
     setNotice("");
   }
 
+  function updateTriage(id: WindowsFieldCaseId, change: Partial<WindowsTriageEntry>) {
+    const row = summary.rows.find(item => item.id === id);
+    if (!row) return;
+    setTriage(current => ({ ...current, [id]: {
+      ...defaultTriageEntry, ...current[id], ...change,
+      // Updating a plan is the owner's explicit re-review of this exact source revision.
+      sourceKey: row.evidenceReady ? windowsFindingSourceKey(row, scope) : "",
+    } }));
+    setTriageNotice("");
+  }
+
+  function importHandoff() {
+    const result = parseWindowsFieldHandoff228(handoffInput);
+    if (!result.ok) { setTriageNotice(result.error); return; }
+    setDraft(result.draft);
+    setInstalledVersion(result.scope.installedVersion);
+    setPhysicallyWitnessed(result.scope.physicallyWitnessed);
+    setTriage({});
+    setHandoffInput("");
+    setTriageNotice("Build 228 owner-reported handoff loaded and prior triage reset. Source records remain self-reported and unverified.");
+  }
+
   async function copyHandoff() {
     try {
       await navigator.clipboard.writeText(formatWindowsFieldHandoff(draft, scope));
       setNotice("Owner-reported handoff copied. Save it in a private local review record; this screen does not upload or retain it after reload.");
     } catch {
       setNotice("Clipboard unavailable. The field review remains only in this open browser session.");
+    }
+  }
+
+  async function copyTriage() {
+    try {
+      await navigator.clipboard.writeText(formatWindowsFindingPlan229(draft, scope, triage));
+      setTriageNotice("Build 229 proposed repair plan copied locally. No plan was uploaded, authorized or executed.");
+    } catch {
+      setTriageNotice("Clipboard unavailable. No private plan was uploaded or saved.");
     }
   }
 
@@ -110,5 +151,74 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
     <button type="button" onClick={() => void copyHandoff()}>Copy private owner field handoff</button>
     {notice ? <p role="status">{notice}</p> : null}
     <p><small>Draft results live only in this open browser session. Copy the handoff before closing or reloading. Local source logs, photos, passwords and actual independent reviewer evidence are never uploaded by this panel.</small></p>
+    <section className="windows-triage-229" id="hub-system-triage-229" aria-labelledby="windows-triage-229-title">
+      <header className="hub-search-header"><div>
+        <p className="eyebrow">Build 229 · source-matched owner triage</p>
+        <h2 id="windows-triage-229-title">Finding triage &amp; repair planning</h2>
+      </div><CardHelp title="Source and authorization boundaries">This queue uses only Build 228 owner-reported findings or blockers, matched to their exact observation reference, time, version and case. No reported Windows findings means no repair candidates. Source records and proposed repairs are never treated as independent proof or owner authorization.</CardHelp></header>
+      <p>Prioritize actual observed Windows findings before repairs. The plan is local to this browser session, requires a separate owner scoping decision, and cannot run an update, a device action or a service restart.</p>
+      <div className="windows-triage-229-import">
+        <label htmlFor="windows-229-import">Load a previously copied Build 228 private handoff (optional)</label>
+        <textarea id="windows-229-import" rows={3} maxLength={16000} value={handoffInput}
+          placeholder="Paste the complete, redacted Build 228 handoff here; never paste full logs, passwords or private URLs."
+          onChange={event => setHandoffInput(event.target.value)} />
+        <button type="button" onClick={importHandoff} disabled={!handoffInput.trim()}>Replace current session observations with this handoff</button>
+        <small>Only the recognized Build 228 format is accepted. A successful import resets existing repair triage and clears the pasted text. Imported records are owner-reported, not independently verified.</small>
+      </div>
+      <div className="audit-summary" aria-label="Build 229 source-matched triage totals">
+        <div><span>Reported findings / blockers</span><strong>{triageSummary.candidates}</strong></div>
+        <div><span>Source-linked plans</span><strong>{triageSummary.sourceLinked}</strong></div>
+        <div><span>Source gaps or changes</span><strong>{triageSummary.needsEvidence}</strong></div>
+        <div><span>For owner scoping (not approved)</span><strong>{triageSummary.ownerScoping}</strong></div>
+      </div>
+      <p role="status">{triageSummary.candidates
+        ? `${triageSummary.candidates} owner-reported findings or blockers need triage. No repairs are authorized.`
+        : "No Build 228 Windows findings have been entered. Real owner field evidence is required before prioritizing repairs."}
+        {triageSummary.outstandingPassEvidence ? ` ${triageSummary.outstandingPassEvidence} attempted passes also need evidence.` : ""}</p>
+      {triageSummary.rows.length ? <div className="windows-triage-229-list" aria-label="Build 229 source-matched owner repair queue">
+        {triageSummary.rows.map(row => <article className="windows-triage-229-card" key={row.id}>
+          <div className="windows-triage-229-card-head"><div>
+            <h3>{row.title}</h3>
+            <p><strong>Build 228:</strong> {row.outcome} · source {row.reference || "MISSING"} · {row.recordedAt || "no observed time"}</p>
+            <p><strong>Suggested investigation:</strong> {row.action}</p>
+          </div><span className="windows-field-228-state">{windowsTriageGateLabels[row.gate]}</span></div>
+          <div className="windows-triage-229-fields">
+            <label htmlFor={`windows-229-priority-${row.id}`}>Owner priority
+              <select id={`windows-229-priority-${row.id}`} value={row.plan.priority}
+                onChange={event => updateTriage(row.id, { priority: event.target.value as WindowsTriagePriority })}>
+                <option value="unassigned">Not assigned</option><option value="p0">P0 · Urgent safety/security</option>
+                <option value="p1">P1 · High impact</option><option value="p2">P2 · Moderate</option><option value="p3">P3 · Low</option>
+              </select>
+            </label>
+            <label htmlFor={`windows-229-reproduction-${row.id}`}>Reproduction
+              <select id={`windows-229-reproduction-${row.id}`} value={row.plan.reproduction}
+                onChange={event => updateTriage(row.id, { reproduction: event.target.value as WindowsTriageReproduction })}>
+                <option value="not_attempted">Not attempted</option><option value="reproduced">Observed again on Windows</option>
+                <option value="intermittent">Intermittent</option><option value="not_reproduced">Not reproduced</option>
+              </select>
+            </label>
+            <label htmlFor={`windows-229-repro-ref-${row.id}`}>Separate reproduction reference (safe code)
+              <input id={`windows-229-repro-ref-${row.id}`} value={row.plan.reproductionReference} maxLength={80}
+                placeholder="WIN-229-RETEST" onChange={event => updateTriage(row.id, { reproductionReference: safeWindowsFieldReference(event.target.value) })} />
+            </label>
+            <label htmlFor={`windows-229-decision-${row.id}`}>Proposed disposition
+              <select id={`windows-229-decision-${row.id}`} value={row.plan.decision}
+                onChange={event => updateTriage(row.id, { decision: event.target.value as WindowsTriageDecision })}>
+                <option value="unreviewed">Not reviewed</option><option value="investigate">Investigate source-matched issue</option>
+                <option value="repair_proposal">Propose a repair for owner scoping</option>
+                <option value="retest_only">Request another Windows retest</option><option value="defer">Defer; keep open</option>
+              </select>
+            </label>
+          </div>
+          <p><strong>Gate:</strong> {windowsTriageGateLabels[row.gate]}. {row.gate === "source_changed"
+            ? "The Build 228 observation changed after planning. Recheck the source and update the owner triage fields."
+            : "No repair, production deployment or installed-device acceptance is approved by this plan."}</p>
+          <button type="button" onClick={() => onNavigate(row.section)}>Review {row.section} module</button>
+        </article>)}
+      </div> : <p className="windows-triage-229-empty">Complete the Build 228 on-device matrix above, or import a private owner handoff from that screen. There is no synthetic repair backlog.</p>}
+      <button type="button" onClick={() => void copyTriage()}>Copy private Build 229 proposed repair plan</button>
+      {triageNotice ? <p role="status">{triageNotice}</p> : null}
+      <p><small>Owner-scoping candidate does not mean an authorized fix, source-independent verification or successful retest. Six-app integration remains DISCONNECTED / HOLD, private relay OFF, QL-275 Under Review and vault SECURITY HOLD.</small></p>
+    </section>
   </section>;
 }
