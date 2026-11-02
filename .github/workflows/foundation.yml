@@ -128,7 +128,9 @@ jobs:
       - name: Build 228 Windows field matrix, owner evidence and security hold regressions
         run: npm run test -- WindowsFieldAcceptance228Panel.test.tsx SixAppReadinessPanel.test.tsx BackupRecoveryWorkbench.test.tsx
       - name: Test
-        run: npm run test
+        # Keep resource-heavy App/owner-workbench regressions isolated from other
+        # jsdom suites; simultaneous workers caused non-deterministic CI timeouts.
+        run: npm run test -- --maxWorkers=1
       - name: Production build
         run: npm run build
 
