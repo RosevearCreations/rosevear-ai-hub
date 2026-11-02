@@ -2,7 +2,8 @@
 import {
   WINDOWS_FIELD_SCHEMA, normalizeWindowsObservation, safeWindowsFieldReference,
   safeWindowsInstalledVersion, summarizeWindowsFieldReview, windowsFieldCases,
-  type WindowsFieldCaseId, type WindowsFieldDraft, type WindowsFieldOutcome, type WindowsFieldScope,
+  type WindowsFieldBasis, type WindowsFieldCaseId, type WindowsFieldDraft,
+  type WindowsFieldOutcome, type WindowsFieldScope,
 } from "./windowsFieldAcceptance228";
 
 export type WindowsTriagePriority = "unassigned" | "p0" | "p1" | "p2" | "p3";
@@ -39,7 +40,8 @@ export const windowsTriageGateLabels: Record<WindowsTriageGate, string> = {
 
 /** The key binds a plan to the exact owner-reported observation, not to GitHub CI or a device. */
 export function windowsFindingSourceKey(
-  row: ReturnType<typeof summarizeWindowsFieldReview>["rows"][number], scope: WindowsFieldScope,
+  row: { id: WindowsFieldCaseId; outcome: WindowsFieldOutcome; basis: WindowsFieldBasis; reference: string; recordedAt: string },
+  scope: WindowsFieldScope,
 ): string {
   return [row.id, safeWindowsInstalledVersion(scope.installedVersion), row.outcome,
     row.basis, row.reference, row.recordedAt].join("|");

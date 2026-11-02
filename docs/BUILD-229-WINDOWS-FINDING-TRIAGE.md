@@ -29,7 +29,7 @@ Build 228 passes with missing evidence are separately flagged; they do not becom
 - All state is in-browser for the session. No network import, background probing, storage or device actuation was added. Import never trusts a text handoff as an independent assessor's signature, and the user should never paste addresses, personal data, keys, camera imagery or full logs.
 - The authentic Windows Build 228 observations were **not available in source control or the prior owner handoff** when Build 229 was implemented. Therefore its initial on-screen triage is deliberately **zero findings / zero source-linked repair candidates**. Actual source-matched prioritization starts with owner field evidence; the build does not perform speculative repairs.
 - Independent on-device acceptance, signed source proof, live six-app authorization and vault security are out of scope. Six-app integration stays **DISCONNECTED / HOLD**, private relay **OFF**, QL-275 **UNDER REVIEW / DEFERRED**, and first-party vault **SECURITY HOLD**.
-- Build 230 is only a candidate and must be shaped from genuine Build 229 owner findings; no automatic next repair batch or physical Windows closure is authorized.
+- Build 230 was subsequently owner-authorized **to implement the evidence-linked retest workflow only**. No installed-Windows repair or physical closure is authorized without genuine field findings, an owner-recorded change and fresh retest evidence; see `docs/BUILD-230-INSTALLED-RECOVERY-RETEST.md`.
 
 ## Validation
 

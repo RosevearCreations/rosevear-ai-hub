@@ -14,6 +14,11 @@ import {
   type WindowsTriageDecision, type WindowsTriageDraft, type WindowsTriageEntry,
   type WindowsTriagePriority, type WindowsTriageReproduction,
 } from "./windowsFindingTriage229";
+import {
+  defaultWindowsRetest, formatWindowsRecoveryPacket230, parseWindowsTriageHandoff229,
+  summarizeWindowsRecoveryRetests, windows230ChangeKey, windows230SourceKey, windowsRetestGateLabels,
+  type WindowsRetestCaseId, type WindowsRetestDraft, type WindowsRetestOutcome, type WindowsRetestRecord,
+} from "./windowsRecoveryRetest230";
 
 type ReviewFilter = "all" | "attention" | "passed";
 const outcomeLabels: Record<WindowsFieldOutcome | "needs_evidence", string> = {
@@ -27,14 +32,18 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
   const [physicallyWitnessed, setPhysicallyWitnessed] = useState(false);
   const [draft, setDraft] = useState<WindowsFieldDraft>({});
   const [triage, setTriage] = useState<WindowsTriageDraft>({});
+  const [retests, setRetests] = useState<WindowsRetestDraft>({});
   const [handoffInput, setHandoffInput] = useState("");
+  const [triageInput, setTriageInput] = useState("");
   const [filter, setFilter] = useState<ReviewFilter>("all");
   const [notice, setNotice] = useState("");
   const [triageNotice, setTriageNotice] = useState("");
+  const [retestNotice, setRetestNotice] = useState("");
   const scope = { installedVersion, physicallyWitnessed };
   const summary = summarizeWindowsFieldReview(draft, scope);
   const followups = windowsFieldRoadmap(draft, scope);
   const triageSummary = summarizeWindowsTriage(draft, scope, triage);
+  const retestSummary = summarizeWindowsRecoveryRetests(draft, scope, triage, retests);
   const visible = summary.rows.filter(row => filter === "all" ||
     (filter === "passed" ? row.state === "pass" : row.state !== "pass"));
 
@@ -58,6 +67,41 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
     setTriageNotice("");
   }
 
+  function updateRetest(id: WindowsRetestCaseId, change: Partial<WindowsRetestRecord>) {
+    const row = retestSummary.rows.find(item => item.id === id);
+    if (!row) return;
+    setRetests(current => {
+      const previous = current[id] ?? defaultWindowsRetest;
+      const next: WindowsRetestRecord = { ...previous, ...change,
+        sourceKey: row.gate === "awaiting_229_scope" ? "" : windows230SourceKey(row, scope),
+      };
+      if (change.ownerChangeAttested !== undefined && change.ownerChangeAttested !== previous.ownerChangeAttested) {
+        next.changeRecordedAt = change.ownerChangeAttested ? new Date().toISOString() : "";
+        next.retestRecordedAt = "";
+        next.testedChangeKey = "";
+      }
+      if (change.outcome !== undefined || change.basis !== undefined || change.reference !== undefined ||
+          change.installedVersion !== undefined || change.retestWitnessed === false) {
+        next.retestRecordedAt = "";
+        next.testedChangeKey = "";
+      }
+      return { ...current, [id]: next };
+    });
+    setRetestNotice("");
+  }
+
+  function recordFreshRetest(id: WindowsRetestCaseId) {
+    const row = retestSummary.rows.find(item => item.id === id);
+    if (!row || row.gate === "awaiting_229_scope") return;
+    setRetests(current => {
+      const previous = current[id] ?? defaultWindowsRetest;
+      const next = { ...previous, sourceKey: windows230SourceKey(row, scope),
+        retestRecordedAt: new Date().toISOString() };
+      return { ...current, [id]: { ...next, testedChangeKey: windows230ChangeKey(next) } };
+    });
+    setRetestNotice("A fresh owner-reported retest time was recorded locally. No equipment or service was operated by this screen.");
+  }
+
   function importHandoff() {
     const result = parseWindowsFieldHandoff228(handoffInput);
     if (!result.ok) { setTriageNotice(result.error); return; }
@@ -65,8 +109,18 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
     setInstalledVersion(result.scope.installedVersion);
     setPhysicallyWitnessed(result.scope.physicallyWitnessed);
     setTriage({});
+    setRetests({});
     setHandoffInput("");
     setTriageNotice("Build 228 owner-reported handoff loaded and prior triage reset. Source records remain self-reported and unverified.");
+  }
+
+  function importTriagePlan() {
+    const result = parseWindowsTriageHandoff229(triageInput, draft, scope);
+    if (!result.ok) { setRetestNotice(result.error); return; }
+    setTriage(result.plans);
+    setRetests({});
+    setTriageInput("");
+    setRetestNotice("Build 229 owner plan loaded. Prior retests were reset; no repair, on-device acceptance or closure was inferred.");
   }
 
   async function copyHandoff() {
@@ -84,6 +138,15 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
       setTriageNotice("Build 229 proposed repair plan copied locally. No plan was uploaded, authorized or executed.");
     } catch {
       setTriageNotice("Clipboard unavailable. No private plan was uploaded or saved.");
+    }
+  }
+
+  async function copyRetestPacket() {
+    try {
+      await navigator.clipboard.writeText(formatWindowsRecoveryPacket230(draft, scope, triage, retests));
+      setRetestNotice("Build 230 owner-reported retest packet copied privately. No issue was independently closed or any device controlled.");
+    } catch {
+      setRetestNotice("Clipboard unavailable; the retest packet stays only in this browser session.");
     }
   }
 
@@ -219,6 +282,85 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
       <button type="button" onClick={() => void copyTriage()}>Copy private Build 229 proposed repair plan</button>
       {triageNotice ? <p role="status">{triageNotice}</p> : null}
       <p><small>Owner-scoping candidate does not mean an authorized fix, source-independent verification or successful retest. Six-app integration remains DISCONNECTED / HOLD, private relay OFF, QL-275 Under Review and vault SECURITY HOLD.</small></p>
+    </section>
+    <section className="windows-retest-230" id="hub-system-retest-230" aria-labelledby="windows-retest-230-title">
+      <header className="hub-search-header"><div>
+        <p className="eyebrow">Build 230 · installed recovery &amp; device/camera retest</p>
+        <h2 id="windows-retest-230-title">Retest comparison &amp; owner closure review</h2>
+      </div><CardHelp title="What is and is not closed">Only real Build 228 recovery/device/camera findings with a source-matched Build 229 repair proposal can enter this review. Every fresh on-device retest needs a separate change record, new evidence and safety-boundary review. A reported pass is a candidate packet, not independently verified closure. This screen never operates the Windows host or devices.</CardHelp></header>
+      <p>Compare an owner-observed Windows retest with the original issue before requesting closure. Startup, release, Home Assistant, cameras, MQTT, backup, rollback and resource cases are in scope; theme, keyboard and role reviews stay open for the proposed Build 231.</p>
+      <div className="windows-triage-229-import">
+        <label htmlFor="windows-230-import">Load a previously copied Build 229 private repair plan (optional)</label>
+        <textarea id="windows-230-import" rows={3} maxLength={24000} value={triageInput}
+          onChange={event => setTriageInput(event.target.value)}
+          placeholder="First load the matching Build 228 handoff above, then paste its complete redacted Build 229 owner plan." />
+        <button type="button" onClick={importTriagePlan} disabled={!triageInput.trim()}>Import matching Build 229 plan and reset retests</button>
+        <small>The complete source and computed safety gates must match the active Build 228 observation. Pasted text stays local and is cleared after successful import.</small>
+      </div>
+      <div className="audit-summary" aria-label="Build 230 Windows retest totals">
+        <div><span>Reported recovery/device findings</span><strong>{retestSummary.inScope}</strong></div>
+        <div><span>Ready for owner retest planning</span><strong>{retestSummary.scopingReady}</strong></div>
+        <div><span>Owner closure candidates (unverified)</span><strong>{retestSummary.ownerClosureCandidates}</strong></div>
+        <div><span>Independently closed</span><strong>{retestSummary.issuesClosed}</strong></div>
+      </div>
+      <p role="status">{retestSummary.inScope
+        ? `${retestSummary.inScope} reported Windows recovery or device/camera issues require actual field follow-up. No issue has independent closure.`
+        : "No authentic Build 228/229 Windows recovery or device/camera repair scope is available. No retests or closures are claimed."}</p>
+      {retestSummary.rows.length ? <div className="windows-triage-229-list" aria-label="Build 230 Windows owner retest cases">
+        {retestSummary.rows.map(row => <article className="windows-triage-229-card" key={row.id}>
+          <div className="windows-triage-229-card-head"><div>
+            <h3>{row.title}</h3>
+            <p><strong>Before:</strong> {row.outcome} · Build 228 ref {row.reference || "MISSING"} · Build 229 {row.plan.priority}/{row.plan.decision}</p>
+            <p><strong>Follow-up:</strong> {row.action}</p>
+          </div><span className="windows-field-228-state">{windowsRetestGateLabels[row.gate]}</span></div>
+          <div className="windows-triage-229-fields">
+            <label htmlFor={`windows-230-change-${row.id}`}>Owner-authorized change reference (safe code)
+              <input id={`windows-230-change-${row.id}`} maxLength={80} value={row.retest.changeReference}
+                placeholder="WIN-230-CHANGE" onChange={event => updateRetest(row.id, { changeReference: safeWindowsFieldReference(event.target.value) })} />
+            </label>
+            <label htmlFor={`windows-230-version-${row.id}`}>Installed version/configuration at retest
+              <input id={`windows-230-version-${row.id}`} maxLength={60} value={row.retest.installedVersion}
+                placeholder="Observed Windows release" onChange={event => updateRetest(row.id, { installedVersion: safeWindowsInstalledVersion(event.target.value) })} />
+            </label>
+            <label htmlFor={`windows-230-outcome-${row.id}`}>Fresh on-device outcome
+              <select id={`windows-230-outcome-${row.id}`} value={row.retest.outcome}
+                onChange={event => updateRetest(row.id, { outcome: event.target.value as WindowsRetestOutcome })}>
+                <option value="not_run">Not run</option><option value="pass">Owner-observed pass</option>
+                <option value="still_failing">Still failing</option><option value="blocked">Blocked</option>
+              </select>
+            </label>
+            <label htmlFor={`windows-230-basis-${row.id}`}>Fresh retest evidence basis
+              <select id={`windows-230-basis-${row.id}`} value={row.retest.basis}
+                onChange={event => updateRetest(row.id, { basis: event.target.value as WindowsFieldBasis })}>
+                <option value="none">No fresh evidence</option><option value="direct">Direct Windows observation</option>
+                <option value="local_log">Redacted local log reference</option><option value="supervised_retest">Supervised retest</option>
+              </select>
+            </label>
+            <label htmlFor={`windows-230-reference-${row.id}`}>Distinct fresh retest reference (safe code)
+              <input id={`windows-230-reference-${row.id}`} maxLength={80} value={row.retest.reference}
+                placeholder="WIN-230-RETEST" onChange={event => updateRetest(row.id, { reference: safeWindowsFieldReference(event.target.value) })} />
+            </label>
+          </div>
+          <div className="windows-retest-230-confirmations">
+            <label><input type="checkbox" checked={row.retest.ownerChangeAttested}
+              onChange={event => updateRetest(row.id, { ownerChangeAttested: event.target.checked })} />
+              I witnessed the owner-authorized repair/configuration change on the installed Windows Hub. This is not authorization to perform it.</label>
+            <label><input type="checkbox" checked={row.retest.safetyReviewed}
+              onChange={event => updateRetest(row.id, { safetyReviewed: event.target.checked })} />
+              I reviewed safe stop/rollback and the relevant HA, MQTT, camera or private provider boundaries; no unapproved operation was run.</label>
+            <label><input type="checkbox" checked={row.retest.retestWitnessed}
+              onChange={event => updateRetest(row.id, { retestWitnessed: event.target.checked })} />
+              I am observing this fresh retest on the actual installed Windows device, not in CI or a simulator.</label>
+          </div>
+          <p><small>Owner-reported change time: {row.retest.changeRecordedAt || "not recorded"} · Fresh retest time: {row.retest.retestRecordedAt || "not recorded"}</small></p>
+          <button type="button" onClick={() => recordFreshRetest(row.id)} disabled={row.gate === "awaiting_229_scope"}>Record fresh Windows retest observation</button>
+          <button type="button" onClick={() => onNavigate(row.section)}>Review {row.section} module</button>
+          <p><strong>Gate:</strong> {windowsRetestGateLabels[row.gate]}. Independent acceptance and confirmed issue closure remain outstanding.</p>
+        </article>)}
+      </div> : <p className="windows-triage-229-empty">There is no evidence-based repair scope. Complete Build 228 field acceptance and Build 229 source-matched triage first; a GREEN GitHub build cannot supply Windows observations.</p>}
+      <button type="button" onClick={() => void copyRetestPacket()}>Copy private Build 230 retest comparison packet</button>
+      {retestNotice ? <p role="status">{retestNotice}</p> : null}
+      <p><small>All recorded outcomes remain owner-reported. Zero issues are independently closed; no device is controlled, no restore or restart is executed, and six-app integration, relay, QL-275 and vault holds remain unchanged.</small></p>
     </section>
   </section>;
 }
