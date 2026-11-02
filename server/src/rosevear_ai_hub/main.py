@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from rosevear_ai_hub import __version__
 from rosevear_ai_hub.api.audit import router as audit_router
 from rosevear_ai_hub.api.automations import router as automations_router
+from rosevear_ai_hub.api.backup_inventory import router as backup_inventory_router
 from rosevear_ai_hub.api.business import router as business_router
 from rosevear_ai_hub.api.camera_compatibility import router as camera_compatibility_router
 from rosevear_ai_hub.api.camera_import_assurance import router as camera_import_assurance_router
@@ -127,6 +128,7 @@ def create_app() -> FastAPI:
         )
 
     application.include_router(auth_router)
+    application.include_router(backup_inventory_router)
     application.include_router(global_search_router)
     # QL-243: default-off, nonproduction-only, authenticated GET health metadata.
     application.include_router(integration_v1_router)
