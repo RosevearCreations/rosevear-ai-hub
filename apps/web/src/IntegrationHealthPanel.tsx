@@ -9,6 +9,7 @@ import {
 } from "./api";
 import { IntegrationAcceptancePanel } from "./IntegrationAcceptancePanel";
 import { CommsHubConnectionPanel } from "./CommsHubConnectionPanel";
+import { SixAppReadinessPanel } from "./SixAppReadinessPanel";
 
 type IntegrationState = "online" | "offline" | "not_configured" | "unavailable";
 type Observation = {
@@ -127,6 +128,7 @@ export function IntegrationHealthPanel() {
           </ul>
         </>
       ) : <p>No status requests made in this session.</p>}
+      <SixAppReadinessPanel />
       <IntegrationAcceptancePanel />
       <CommsHubConnectionPanel />
     </section>
