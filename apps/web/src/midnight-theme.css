@@ -298,6 +298,28 @@
 .app-shell[data-theme="high-contrast"] .hub-ql275-safety { color: #152d43; background: #eef4ff; }
 .app-shell[data-theme="high-contrast"] .hub-ql275-badge { color: #211035; background: #f2defc; border-color: #47206c; }
 .hub-system-guide { margin: .85rem 0 1.1rem; border: 1px solid #44658b; border-radius: 1rem; background: linear-gradient(130deg, #10223b, #11172d); padding: clamp(.9rem, 1.5vw, 1.35rem); }
+/* Build 221: source-linked command areas, responsive real tool cards and keyboard-native links. */
+.hub-command-console { margin: 0 0 1.2rem; padding: clamp(.85rem, 2vw, 1.35rem); border: 1px solid #466c95; border-radius: 1rem; background: linear-gradient(135deg, #102b48, #151d38 70%, #241a43); color: #edf6ff; }
+.hub-command-console-heading { display: flex; align-items: start; justify-content: space-between; gap: .8rem; }
+.hub-command-console-heading h2 { margin: .1rem 0 .4rem; font-size: clamp(1.2rem, 2vw, 1.75rem); }
+.hub-command-console-heading p { margin: .25rem 0; line-height: 1.5; color: #c9ddf0; }
+.hub-command-console-tabs { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1rem 0; }
+.hub-command-console-tabs button { min-height: 2.75rem; padding: .5rem 1rem; border-radius: .6rem; border: 1px solid #8c78bb; color: #f2e8ff; background: #30234e; font-weight: 750; cursor: pointer; }
+.hub-command-console-tabs button[aria-pressed="true"] { background: #e5d5ff; color: #1b1432; border-color: #f4e8ff; }
+.hub-command-console-lane-heading { font-size: 1rem; margin: .9rem 0 .65rem; }
+.hub-command-console-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr)); gap: .75rem; }
+.hub-command-console-card { display: flex; flex-direction: column; min-width: 0; gap: .35rem; padding: 1rem; border: 1px solid #4e7699; border-radius: .8rem; background: #0b2037; }
+.hub-command-console-provenance { color: #c0d5f3; font-size: .72rem; font-weight: 700; }
+.hub-command-console-card h4 { color: #fff; margin: .1rem 0; font-size: 1.05rem; }
+.hub-command-console-card p { color: #cfdeec; line-height: 1.45; margin: 0 0 .7rem; flex: 1; font-size: .88rem; }
+.hub-command-console-card :is(a,button) { display: inline-flex; align-items: center; justify-content: center; align-self: start; min-height: 2.5rem; padding: .45rem .8rem; border-radius: .5rem; border: 1px solid #b69bff; background: #33245a; color: #fff; font-weight: 750; font-size: .82rem; text-decoration: none; cursor: pointer; }
+.hub-command-console :is(button,a,summary):focus-visible { outline: 3px solid #ffe09d; outline-offset: 3px; }
+.hub-command-console-note { font-size: .78rem; color: #c9d9ed; margin: .9rem 0 0; }
+#hub-system-release, #hub-system-resources, #hub-system-owner-review { scroll-margin-top: 5rem; }
+.app-shell[data-theme="high-contrast"] .hub-command-console, .app-shell[data-theme="high-contrast"] .hub-command-console-card { background: #fff; color: #172b41; border: 2px solid #294b6a; }
+.app-shell[data-theme="high-contrast"] .hub-command-console :is(h2,h3,h4,p,.hub-command-console-provenance) { color: #172b41; }
+.app-shell[data-theme="high-contrast"] .hub-command-console :is(a,button) { background: #eadaff; color: #21113c; border-color: #492573; }
+.app-shell[data-theme="high-contrast"] .hub-command-console-tabs button[aria-pressed="true"] { background: #2a154a; color: #fff; }
 .hub-system-guide h2 { margin: .1rem 0; font-size: clamp(1.2rem, 2vw, 1.65rem); }
 .hub-system-guide > p { color: #c5d7ed; max-width: 75rem; line-height: 1.45; }
 .hub-system-source-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: .65rem; margin: .85rem 0; }
