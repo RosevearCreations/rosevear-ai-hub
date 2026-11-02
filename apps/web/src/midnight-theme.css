@@ -300,6 +300,24 @@
 .hub-system-guide { margin: .85rem 0 1.1rem; border: 1px solid #44658b; border-radius: 1rem; background: linear-gradient(130deg, #10223b, #11172d); padding: clamp(.9rem, 1.5vw, 1.35rem); }
 /* Build 221: source-linked command areas, responsive real tool cards and keyboard-native links. */
 .hub-command-console { margin: 0 0 1.2rem; padding: clamp(.85rem, 2vw, 1.35rem); border: 1px solid #466c95; border-radius: 1rem; background: linear-gradient(135deg, #102b48, #151d38 70%, #241a43); color: #edf6ff; }
+/* Build 222: local help and explicit owner-only saved record searches. */
+.hub-search-help { display: grid; gap: 1rem; }
+.hub-search-header { display: flex; justify-content: space-between; align-items: start; gap: 1rem; }
+.hub-search-header h1 { margin: .3rem 0; }
+.hub-search-help > input[type="search"] { width: 100%; min-height: 3rem; padding: .65rem .8rem; border: 1px solid #7896c1; border-radius: .65rem; background: #0b1f37; color: #fff; font: inherit; }
+.hub-search-section { min-width: 0; border-top: 1px solid #3e597c; padding-top: .85rem; }
+.hub-search-section h2 { margin: .1rem 0 .65rem; }
+.hub-search-result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 255px), 1fr)); gap: .75rem; }
+.hub-search-result-grid > button, .hub-search-guide { min-width: 0; border: 1px solid #537aa3; border-radius: .7rem; padding: .85rem; background: #10253f; color: #eaf5ff; text-align: left; }
+.hub-search-result-grid > button { display: grid; gap: .4rem; cursor: pointer; }
+.hub-search-result-grid small { color: #c7dcf2; }
+.hub-search-guide h3 { font-size: 1rem; margin: .15rem 0 .4rem; }
+.hub-search-guide ol { padding-left: 1.35rem; line-height: 1.5; font-size: .88rem; }
+.hub-search-section button:not(.hub-search-result-grid > button) { min-height: 2.5rem; padding: .4rem .8rem; background: #34245c; color: #fff; border: 1px solid #ae97e8; border-radius: .5rem; cursor: pointer; }
+.hub-search-section button:disabled { opacity: .65; cursor: not-allowed; }
+.hub-search-help :is(input,button,summary):focus-visible { outline: 3px solid #ffe09d; outline-offset: 3px; }
+.app-shell[data-theme="high-contrast"] .hub-search-help :is(input,.hub-search-guide,.hub-search-result-grid > button) { background: #fff; color: #142b41; border: 2px solid #345879; }
+.app-shell[data-theme="high-contrast"] .hub-search-help :is(small,h3) { color: #193550; }
 .hub-command-console-heading { display: flex; align-items: start; justify-content: space-between; gap: .8rem; }
 .hub-command-console-heading h2 { margin: .1rem 0 .4rem; font-size: clamp(1.2rem, 2vw, 1.75rem); }
 .hub-command-console-heading p { margin: .25rem 0; line-height: 1.5; color: #c9ddf0; }
