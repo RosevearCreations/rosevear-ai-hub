@@ -39,6 +39,7 @@ import { MQTTView } from "./MQTTView";
 import { PwaInstallPanel } from "./PwaInstallPanel";
 import { RemoteAccessPanel } from "./RemoteAccessPanel";
 import { ResourceBudgetPanel } from "./ResourceBudgetPanel";
+import { LocalModelHealthPanel } from "./LocalModelHealthPanel";
 import { NotificationsView } from "./NotificationsView";
 import { OperationsDashboard } from "./OperationsDashboard";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
@@ -405,6 +406,7 @@ export function App() {
             {canAdminister && <RestartAppsPanel />}
             <div id="hub-system-remote"><RemoteAccessPanel /></div>
             {canAdminister && <ResourceBudgetPanel />}
+            {canAdminister && <LocalModelHealthPanel />}
           </>
         ) : (
           <HomeView

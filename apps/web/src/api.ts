@@ -157,6 +157,22 @@ export interface OllamaModelsResponse {
   models: OllamaModel[];
 }
 
+export interface LocalModelHealthBudget {
+  sampled_at_utc: string;
+  inventory_state: "available" | "unavailable";
+  ollama_version: string | null;
+  models: Array<{ name: string; size_bytes: number | null; parameter_size: string | null; quantization: string | null }>;
+  installed_disk_size_sum_bytes: number | null;
+  installed_disk_size_note: string;
+  resident_state: "available" | "unknown";
+  resident_models: Array<{ name: string; resident_size_bytes: number | null; vram_bytes: number | null }>;
+  probe_duration_ms: number;
+  host_budget: ResourceBudgetResponse | null;
+  automatic_downloads: false;
+  automatic_reconfiguration: false;
+  no_background_polling: true;
+}
+
 export interface ProviderStatus {
   key: string;
   display_name: string;
@@ -401,6 +417,10 @@ export function getOllamaStatus(signal?: AbortSignal): Promise<OllamaStatusRespo
 
 export function getOllamaModels(signal?: AbortSignal): Promise<OllamaModelsResponse> {
   return getJson<OllamaModelsResponse>("/api/v1/models/ollama/models", signal);
+}
+
+export function getLocalModelHealthBudget(signal?: AbortSignal): Promise<LocalModelHealthBudget> {
+  return getJson<LocalModelHealthBudget>("/api/v1/models/ollama/health-budget", signal);
 }
 
 export function getProviders(signal?: AbortSignal): Promise<ProviderStatus[]> {
