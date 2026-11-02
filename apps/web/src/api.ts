@@ -419,6 +419,24 @@ export function getOllamaModels(signal?: AbortSignal): Promise<OllamaModelsRespo
   return getJson<OllamaModelsResponse>("/api/v1/models/ollama/models", signal);
 }
 
+export interface GlobalSearchRecord {
+  kind: "device" | "camera" | "equipment" | "maintenance";
+  title: string;
+  detail: string;
+  section: "Devices" | "Cameras" | "Workshop" | "System";
+  source: string;
+}
+
+export interface GlobalSearchResponse {
+  query: string;
+  scope: "owner_local_saved_records";
+  results: GlobalSearchRecord[];
+}
+
+export function getGlobalSearch(query: string, signal?: AbortSignal): Promise<GlobalSearchResponse> {
+  return getJson<GlobalSearchResponse>(`/api/v1/global-search?q=${encodeURIComponent(query)}`, signal);
+}
+
 export function getLocalModelHealthBudget(signal?: AbortSignal): Promise<LocalModelHealthBudget> {
   return getJson<LocalModelHealthBudget>("/api/v1/models/ollama/health-budget", signal);
 }
