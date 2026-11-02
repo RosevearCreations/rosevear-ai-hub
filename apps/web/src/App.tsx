@@ -21,6 +21,7 @@ import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
 import { SystemWorkspaceGuide } from "./SystemWorkspaceGuide";
 import { SystemConsoleRefresh } from "./SystemConsoleRefresh";
 import { GlobalSearchHelp } from "./GlobalSearchHelp";
+import { OwnerPreferencesPanel } from "./OwnerPreferencesPanel";
 import { HubNavIcon } from "./HubNavIcon";
 import { BusinessView } from "./BusinessView";
 import { ChatView } from "./ChatView";
@@ -324,7 +325,7 @@ export function App() {
                 onClick={() => setAppearance(value)}>{value === "standard" ? "Standard" : "High contrast"}</button>
             ))}
           </fieldset>
-          <CardHelp title="Interface controls">Density and contrast change this session's display only. Find screen navigates among already-authorized modules; it cannot execute devices or search private data.</CardHelp>
+          <CardHelp title="Interface controls">Density and contrast change this session's display. Owners can save named display views in System. Find screen navigates among already-authorized modules; it cannot execute devices or search private data.</CardHelp>
         </div>
 
         <PwaInstallPanel />
@@ -413,6 +414,8 @@ export function App() {
             {canAdminister && <RestartAppsPanel />}
             <div id="hub-system-remote"><RemoteAccessPanel /></div>
             {canAdminister && <div id="hub-system-resources"><ResourceBudgetPanel /><LocalModelHealthPanel /></div>}
+            {canAdminister && <OwnerPreferencesPanel ownerId={user.id} density={density} theme={appearance}
+              onApply={(view) => { setDensity(view.density); setAppearance(view.theme); setSection(view.startSection); }} />}
           </>
         ) : (
           <HomeView
