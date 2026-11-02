@@ -88,9 +88,7 @@ def security_posture(
                 else []
             ),
             *(
-                [
-                    "Secure cookie setting is off; verify HTTPS proxy and WebView boundaries."
-                ]
+                ["Secure cookie setting is off; verify HTTPS proxy and WebView boundaries."]
                 if not settings.auth_cookie_secure
                 else []
             ),
