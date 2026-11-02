@@ -71,6 +71,7 @@
     "build:219:hub:test": "npm --workspace apps/web run test -- MaintenanceActionBoard.test.tsx",
     "build:220:hub:test": "npm --workspace apps/web run test -- LocalModelHealthPanel.test.tsx",
     "build:221:hub:test": "npm --workspace apps/web run test -- SystemConsoleRefresh.test.tsx SystemWorkspaceGuide.test.tsx",
-    "build:222:hub:test": "npm --workspace apps/web run test -- GlobalSearchHelp.test.tsx"
+    "build:222:hub:test": "npm --workspace apps/web run test -- GlobalSearchHelp.test.tsx",
+    "build:223:hub:test": "npm --workspace apps/web run test -- OwnerPreferencesPanel.test.tsx ownerPreferences.test.ts"
   }
 }

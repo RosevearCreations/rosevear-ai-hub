@@ -302,6 +302,21 @@
 .hub-command-console { margin: 0 0 1.2rem; padding: clamp(.85rem, 2vw, 1.35rem); border: 1px solid #466c95; border-radius: 1rem; background: linear-gradient(135deg, #102b48, #151d38 70%, #241a43); color: #edf6ff; }
 /* Build 222: local help and explicit owner-only saved record searches. */
 .hub-search-help { display: grid; gap: 1rem; }
+/* Build 223 — owner display-only saved views, bounded import and native keyboard controls. */
+.hub-owner-preferences { display: grid; gap: .75rem; }
+.hub-owner-preferences-editor { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .55rem .8rem; align-items: end; }
+.hub-owner-preferences-editor label { align-self: end; }
+.hub-owner-preferences-editor input, .hub-owner-preferences-editor select, .hub-owner-preferences textarea { width: 100%; min-width: 0; padding: .65rem; border: 1px solid #7197c0; border-radius: .55rem; background: #0d2541; color: #fff; font: inherit; }
+.hub-owner-preferences :is(button) { min-height: 2.5rem; padding: .5rem .8rem; border: 1px solid #a58bdb; border-radius: .55rem; background: #342557; color: #fff; cursor: pointer; }
+.hub-owner-preferences button:disabled { opacity: .6; cursor: not-allowed; }
+.hub-owner-preferences :is(input,select,textarea,button):focus-visible { outline: 3px solid #ffe09d; outline-offset: 3px; }
+.hub-owner-preferences-actions { display: flex; flex-wrap: wrap; gap: .6rem; }
+.hub-owner-view-list { padding-left: 1rem; display: grid; gap: .55rem; }
+.hub-owner-view-list li { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; border: 1px solid #4d7197; border-radius: .6rem; padding: .6rem; }
+.hub-owner-view-list span { color: #c8dcee; flex: 1; }
+@media (max-width: 650px) { .hub-owner-preferences-editor { grid-template-columns: minmax(0, 1fr); } }
+.app-shell[data-theme="high-contrast"] .hub-owner-preferences :is(input,select,textarea) { background: #fff; color: #142b41; border: 2px solid #28496f; }
+.app-shell[data-theme="high-contrast"] .hub-owner-preferences button { background: #271349; color: #fff; }
 .hub-search-header { display: flex; justify-content: space-between; align-items: start; gap: 1rem; }
 .hub-search-header h1 { margin: .3rem 0; }
 .hub-search-help > input[type="search"] { width: 100%; min-height: 3rem; padding: .65rem .8rem; border: 1px solid #7896c1; border-radius: .65rem; background: #0b1f37; color: #fff; font: inherit; }
