@@ -36,6 +36,7 @@ import { PostRebootAcceptancePanel } from "./PostRebootAcceptancePanel";
 import { StartupRecoveryConsole } from "./StartupRecoveryConsole";
 import { FieldRecoverySummaryPanel } from "./FieldRecoverySummaryPanel";
 import { OwnerFieldTrialWorkbench } from "./OwnerFieldTrialWorkbench";
+import { WindowsFieldAcceptance228Panel } from "./WindowsFieldAcceptance228Panel";
 import { VaultArchitectureView } from "./VaultArchitectureView";
 import { IntegrationHealthPanel } from "./IntegrationHealthPanel";
 import { RestartAppsPanel } from "./RestartAppsPanel";
@@ -358,6 +359,10 @@ export function App() {
         {section === "System" && <SystemWorkspaceGuide backend={health.kind} ollama={ollama.kind}
           models={ollama.kind === "online" ? ollama.data.model_count : null} canAdminister={canAdminister} />}
         {section === "System" && canAdminister && <SystemConsoleRefresh onNavigate={(target) => setSection(target as Section)} />}
+        {/* Preserve on-device owner observations when navigating to a real module; no background probing. */}
+        {canAdminister && <div hidden={section !== "System"}>
+          <WindowsFieldAcceptance228Panel onNavigate={(target) => setSection(target as Section)} />
+        </div>}
         {/* Keep the supervised trial mounted while reviewing linked modules; it only stores session data and never polls. */}
         {canAdminister && <div id="hub-system-owner-review" hidden={section !== "System"}>
           <OwnerFieldTrialWorkbench active={section === "System"} onNavigate={(target) => setSection(target as Section)} />
