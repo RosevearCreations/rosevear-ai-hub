@@ -57,6 +57,14 @@ class OllamaClient:
             raise OllamaRequestError("Ollama model-list response was incomplete.")
         return [item for item in models if isinstance(item, dict)]
 
+    async def running_models(self) -> list[dict[str, Any]]:
+        """Read Ollama's resident model list; never loads or generates a model."""
+        payload = await self._get_json("/api/ps")
+        models = payload.get("models")
+        if not isinstance(models, list):
+            raise OllamaRequestError("Ollama resident-model response was incomplete.")
+        return [item for item in models if isinstance(item, dict)]
+
     async def test_model(self, model: str) -> dict[str, Any]:
         request_body = {
             "model": model,
