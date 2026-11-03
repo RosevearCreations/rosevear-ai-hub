@@ -7,15 +7,21 @@ import {
   type AuthStatus,
   type AuthUser,
 } from "./api";
+import type { ShellTheme } from "./CommandShell";
+import { parseShellTheme } from "./shellThemePreference";
 
 export function AuthView({
   status,
   onAuthenticated,
   sessionNotice,
+  theme,
+  onThemeChange,
 }: {
   status: AuthStatus;
   onAuthenticated: (user: AuthUser) => void;
   sessionNotice?: string;
+  theme: ShellTheme;
+  onThemeChange: (theme: ShellTheme) => void;
 }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -53,7 +59,7 @@ export function AuthView({
   }
 
   return (
-    <main className="auth-shell">
+    <main className="auth-shell" data-theme={theme}>
       <section className="auth-card" aria-labelledby="auth-title">
         <div className="brand auth-brand">
           <span className="brand-mark" aria-hidden="true">R</span>
@@ -62,6 +68,15 @@ export function AuthView({
             <small>Private local-first control centre</small>
           </div>
         </div>
+
+        <label className="auth-appearance" htmlFor="auth-display-theme">Display theme
+          <select id="auth-display-theme" value={theme}
+            onChange={event => onThemeChange(parseShellTheme(event.target.value))}>
+            <option value="dark">Dark Mode · low glare</option>
+            <option value="standard">Standard · midnight blue</option>
+            <option value="high-contrast">High contrast · bright</option>
+          </select>
+        </label>
 
         <p className="eyebrow">Build 016</p>
         <h1 id="auth-title">{bootstrap ? "Create the first owner" : "Sign in"}</h1>

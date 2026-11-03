@@ -72,6 +72,15 @@
 .hub-topbar-account { display: flex; align-items: center; gap: .7rem; margin-left: auto; font-size: .82rem; color: #c1d9f3; }
 .hub-topbar-account button { padding: .55rem .8rem; border: 1px solid #9765e8; border-radius: .6rem; color: #e9d5ff; background: #241444; cursor: pointer; }
 .hub-topbar-account button:hover { background: #3a206b; }
+.hub-quick-appearance { display: inline-flex; align-items: center; gap: .45rem; font-size: .77rem; font-weight: 700; color: #cbdcf0; }
+.hub-quick-appearance select {
+  min-height: 2.25rem; max-width: 11rem; padding: .25rem .6rem;
+  border: 1px solid #607c9e; border-radius: .6rem;
+  color: #f0f6ff; background: #17243a; cursor: pointer;
+}
+.hub-topbar :is(button, select):focus-visible, .app-shell .sidebar :is(button, a, summary):focus-visible {
+  outline: 3px solid #efbeff; outline-offset: 3px;
+}
 
 .app-shell .sidebar {
   grid-column: 1;
@@ -471,6 +480,8 @@
   .app-shell .shell-utilities { grid-template-columns: 1fr; }
   .hub-theme-issue { grid-template-columns: minmax(0,1fr); }
   .hub-theme-retest-item { grid-template-columns: minmax(0,1fr); }
+  .hub-topbar-account { flex-wrap: wrap; gap: .5rem; }
+  .hub-quick-appearance { flex: 1 1 10rem; justify-content: flex-start; }
 }
 @media (prefers-reduced-motion: reduce) {
   .app-shell *, .app-shell *::before, .app-shell *::after { scroll-behavior: auto; animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -486,6 +497,30 @@
   --hub-ink: #f1f4fa;
   --hub-muted: #b5c6d8;
   color-scheme: dark;
+}
+.app-shell[data-theme="dark"] .hub-topbar {
+  background: linear-gradient(110deg, #0b111b, #101724 65%, #191526);
+  border-bottom-color: #3c4b5e;
+}
+.app-shell[data-theme="dark"] .hub-topbar-chip { background: #16202b; border-color: #485e73; color: #d7e3f1; }
+.app-shell[data-theme="dark"] .hub-topbar-held { background: #30241b; border-color: #967342; color: #ffe2b0; }
+.app-shell[data-theme="dark"] .hub-topnav button:is(:hover, .hub-topnav-active) {
+  background: #252139; border-color: #a68bd2;
+}
+.app-shell[data-theme="dark"] .sidebar {
+  background: linear-gradient(#0e1723, #080f19);
+  border-right-color: #405267;
+}
+.app-shell[data-theme="dark"] .nav-item:is(:hover, .active) {
+  background: #282237; border-color: #8b73b8;
+}
+.app-shell[data-theme="dark"] .shell-preferences button { background: #1b2838; border-color: #53667d; }
+.app-shell[data-theme="dark"] .shell-preferences button[aria-pressed="true"] {
+  background: #3c2c53; border-color: #b89ae6;
+}
+.app-shell[data-theme="dark"] .hub-hero {
+  background-image: linear-gradient(90deg, rgb(7 12 20 / .97), rgb(12 17 27 / .86) 65%, rgb(12 17 27 / .44)),
+    url('/rosevear-ai-hub-midnight-server.webp');
 }
 .app-shell[data-theme="dark"] .content {
   background: radial-gradient(circle at 78% 4%, #1a1628 0, transparent 25rem),
@@ -528,3 +563,28 @@
   outline: 3px solid #dfacff;
   outline-offset: 3px;
 }
+
+/* Build 235 — keep the owner-selected low-glare appearance across the sign-in
+   boundary. The public form remains local; no credentials are saved in theme state. */
+.auth-shell[data-theme="dark"], .auth-shell[data-theme="standard"] {
+  min-height: 100vh; color-scheme: dark; color: #f0f5fc;
+  background: linear-gradient(145deg, #080d16, #121c2b 55%, #171327);
+}
+.auth-shell[data-theme="standard"] { background: linear-gradient(145deg, #041225, #0b2140 60%, #1a1538); }
+.auth-shell[data-theme="dark"] .auth-card, .auth-shell[data-theme="standard"] .auth-card {
+  background: #121d2b; color: #edf4fc; border: 1px solid #536d89;
+  box-shadow: 0 1rem 3rem rgb(0 0 0 / .25);
+}
+.auth-shell[data-theme="standard"] .auth-card { background: #0e243b; }
+.auth-shell:is([data-theme="dark"], [data-theme="standard"]) :is(h1, .auth-brand strong, .auth-form label, .auth-appearance) { color: #f0f6ff; }
+.auth-shell:is([data-theme="dark"], [data-theme="standard"]) :is(.lede, .auth-footnote, .auth-brand small) { color: #c5d7e8; }
+.auth-shell:is([data-theme="dark"], [data-theme="standard"]) :is(.auth-form input, .auth-appearance select) {
+  color: #f0f6ff; background: #0a1320; border: 1px solid #8298b2;
+}
+.auth-shell:is([data-theme="dark"], [data-theme="standard"]) .auth-error { color: #ffb8b8; }
+.auth-appearance { display: grid; gap: .35rem; max-width: 17rem; margin: -1rem 0 1.5rem; font-size: .83rem; font-weight: 700; }
+.auth-appearance select { min-height: 2.65rem; width: 100%; border-radius: .6rem; padding: .45rem .65rem; cursor: pointer; }
+.auth-shell[data-theme="high-contrast"] { background: #e9f1f8; color: #10283b; }
+.auth-shell[data-theme="high-contrast"] .auth-card { border: 2px solid #153951; }
+.auth-shell[data-theme="high-contrast"] .auth-appearance select { background: #fff; color: #10283b; border: 2px solid #153951; }
+.auth-shell :is(input, select, button):focus-visible { outline: 3px solid #b57bfa; outline-offset: 3px; }
