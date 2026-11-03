@@ -4,6 +4,10 @@
 
 **Do not run a remote restart from this document.** Perform a normal Windows **Start → Power → Restart** only when an owner is physically or privately supervising the host. A recovery HOLD calls for investigation; do not erase a database, recreate a VM, disable firewall/TLS checks or install duplicate startup tasks to make it green.
 
+## Build 240 on-device evidence worksheet (if installed)
+
+In **System → Build 240**, record the actual installed version, backup receipts, original VM and existing task checks. **Copy the code-only JSON handoff privately before reboot**; browser-session evidence will otherwise disappear when the Windows host restarts. After sign-in and one five-minute recovery cycle, import the handoff and record each real service/camera check. This worksheet performs **no reboot, API call, repair, installation or independent acceptance**. See [Build 240 field evidence](BUILD_240_SUPERVISED_WINDOWS_RESTART_FIELD_EVIDENCE.md). If this feature is absent on the actual installed PC, follow the manual checklist below—source-green GitHub code is not installed software.
+
 ## 1 · Before restart — protect our running services
 
 1. Save workshop/business work and stop or postpone active printing, CNC, camera recording, indexing, migration, backups and other jobs requiring uninterrupted uptime. Let the original Home Assistant VM and databases shut down gracefully; no forced power-off.

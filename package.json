@@ -89,6 +89,7 @@
     "build:236:hub:test": "npm --workspace apps/web run test -- windowsAppearanceAcceptance236.test.tsx windowsDarkFinding234.test.tsx shellThemePreference.test.ts --maxWorkers=1",
     "build:237:hub:test": "npm --workspace apps/web run test -- windowsVisualDisposition237.test.tsx windowsAppearanceAcceptance236.test.tsx shellThemePreference.test.ts --maxWorkers=1",
     "build:238:hub:test": "npm --workspace apps/web run test -- windowsReview238.test.tsx windowsVisualDisposition237.test.tsx windowsAppearanceAcceptance236.test.tsx --maxWorkers=1",
-    "build:239:hub:test": "npm --workspace apps/web run test -- windowsReview239.test.tsx windowsReview238.test.tsx windowsVisualDisposition237.test.tsx --maxWorkers=1"
+    "build:239:hub:test": "npm --workspace apps/web run test -- windowsReview239.test.tsx windowsReview238.test.tsx windowsVisualDisposition237.test.tsx --maxWorkers=1",
+    "build:240:hub:test": "npm --workspace apps/web run test -- windowsRestart240.test.tsx windowsReview239.test.tsx --maxWorkers=1"
   }
 }
