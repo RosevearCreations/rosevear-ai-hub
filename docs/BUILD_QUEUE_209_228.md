@@ -1,6 +1,6 @@
 # Rosevear AI Hub — Next 20 Builds (209–228)
 
-**Planning baseline:** Builds 209–236 source promoted to `main` and exact-main CI GREEN. Build 237 is owner-authorized Windows visual finding disposition and conditional UI review **source workflow only**; no actual on-device tests or repairs have been performed. Low-glare Dark Mode shipped in Build 232. Source promotion never certifies installed Windows acceptance.
+**Planning baseline:** Builds 209–236 source promoted to `main` and exact-main CI GREEN. Builds 237–238 are owner-authorized Windows visual disposition and manual review-reply **source workflows only**; no actual on-device tests, independently authenticated reviewer responses or repairs have been performed. Low-glare Dark Mode shipped in Build 232. Source promotion never certifies installed Windows acceptance.
 
 **Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use consistent visual tokens with selectable low-glare Dark Mode, Standard and High contrast, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
 
@@ -169,12 +169,18 @@
 - Require an explicitly acknowledged, later, separately referenced owner decision before a retest/defer/UI-only review **request** is recorded. UI review request readiness requires the same persistent symptom and a matching limited UI category. No repair authorization or implementation is granted.
 - **Accept:** zero default evidence, source/retest/decision staleness and duplicate-reference rejection, same-symptom/viewport rules, no network actions, responsive/native-accessible controls, targeted tests/typecheck/build and exact-main CI. See `docs/BUILD-237-WINDOWS-VISUAL-DISPOSITION.md`.
 
+### Build 238 — Windows UI Review Response Intake, Evidence Reconciliation & Repair Decision HOLD (OWNER AUTHORIZED WORKSHEET ONLY)
+- Show only the current, unchanged Build 237 UI review requests; preserve visible invalidation for stale recorded replies.
+- Permit the owner to record an *actual* unverified external response, more-evidence request or declined review against a fresh, distinct safe receipt code and separate acknowledgment. Link the reply to the original source, retest, decision, installed-version and theme snapshot.
+- Record the local owner timestamp; changed upstream evidence or altered response content invalidates the receipt. Distinguish owner-entered replies from authenticated independent reviews. All original findings remain open and no repairs, installations or provider communications are authorized.
+- **Accept:** no synthetic replies; duplicate, missing, stale, scope and witness tests; keyboard-accessible low-glare manual intake, redacted session-only packet, 5/5 CI on exact main; retain six-app/relay/QL-275/vault holds. See `docs/BUILD-238-WINDOWS-REVIEW-RECONCILIATION.md`.
+
 ## Delivery and safety rules for every build
 
-1. Build numbers 209–228 were the agreed queue; Builds 229–237 were separately authorized. Build 235 implemented two owner-requested interface improvements; Builds 236–237 provide manual owner evidence and review workflows, not repair grants. Continue only with owner-authorized follow-ups. Update this document as requirements evolve.
+1. Build numbers 209–228 were the agreed queue; Builds 229–238 were separately authorized. Build 235 implemented two owner-requested interface improvements; Builds 236–238 provide manual owner evidence and review workflows, not repair grants. Continue only with owner-authorized follow-ups. Update this document as requirements evolve.
 2. Work on the existing `dev` branch → checks and reviewed `main` promotion → **exact-main** required CI green. Retain only `dev` and `main` branches. Record PRs, SHA, workflow and outstanding on-device tests. Never claim Production GREEN without evidence.
 3. No breaking changes to working screens, no fabricated real-world measurements, no hidden credentials, no background actuation, no unpaid provider dependencies without owner approval. Keep free-tier constraints visible.
 4. QL-275 remains **Under Review / owner-deferred**; six-app integration is **DISCONNECTED/HOLD**, private relay **OFF**, authenticated gateway GETs **0**, and no owner TEST permission is inferred. Removing the word HELD from the *project work queue* does not remove technical security restrictions.
 5. First-party password/document Vault remains **SECURITY HOLD (0/6 independently verified)** until separate owner authorization and independent cryptographic/security acceptance. Physical Windows and camera acceptance are never equated to GitHub CI.
 
-**Queue tracking:** 20 originally defined builds (209–228) and Builds 229–236 source promoted to `main`; Build 237 explicitly authorized for owner Windows retest and conditional UI-only review readiness. No actual Build 234/236/237 field-repair batch is authorized: genuine installed-Windows findings, outside authentication and separate owner permission determine future repair work. Independent device, six-app and vault review gates are separate from source promotion.
+**Queue tracking:** 20 originally defined builds (209–228) and Builds 229–236 source promoted to `main`; Builds 237–238 explicitly authorized for owner Windows retest, review request and source-linked response intake. No actual Build 234/236/237/238 field-repair batch is authorized: genuine installed-Windows findings, outside authentication and separate owner permission determine future repair work. Independent device, six-app and vault review gates are separate from source promotion.
