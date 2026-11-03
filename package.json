@@ -85,6 +85,7 @@
     "build:233:hub:test": "npm --workspace apps/web run test -- windowsDarkOwner233.test.tsx windowsIndependentClosure232.test.tsx shellThemePreference.test.ts WindowsFieldAcceptance228Panel.test.tsx",
     "build:234:hub:test": "npm --workspace apps/web run test -- windowsDarkFinding234.test.tsx windowsDarkOwner233.test.tsx windowsIndependentClosure232.test.tsx WindowsFieldAcceptance228Panel.test.tsx",
     "build:235:hub:test": "npm --workspace apps/web run test -- AuthView.session.test.tsx shellThemePreference.test.ts WindowsFieldAcceptance228Panel.test.tsx windowsDarkFinding234.test.tsx --maxWorkers=1",
-    "build:235:app:test": "npm --workspace apps/web run test -- App.test.tsx -t 'switches responsive shell preferences|keeps low-glare Dark Mode through sign-out' --maxWorkers=1"
+    "build:235:app:test": "npm --workspace apps/web run test -- App.test.tsx -t 'switches responsive shell preferences|keeps low-glare Dark Mode through sign-out' --maxWorkers=1",
+    "build:236:hub:test": "npm --workspace apps/web run test -- windowsAppearanceAcceptance236.test.tsx windowsDarkFinding234.test.tsx shellThemePreference.test.ts --maxWorkers=1"
   }
 }
