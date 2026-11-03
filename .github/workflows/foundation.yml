@@ -137,6 +137,8 @@ jobs:
         run: npm run test -- windowsIndependentClosure232.test.tsx shellThemePreference.test.ts ownerPreferences.test.ts OwnerPreferencesPanel.test.tsx windowsOwnerClosure231.test.tsx
       - name: Build 233 installed Windows Dark Mode owner acceptance and source-matched exception follow-up
         run: npm run test -- windowsDarkOwner233.test.tsx windowsIndependentClosure232.test.tsx WindowsFieldAcceptance228Panel.test.tsx shellThemePreference.test.ts
+      - name: Build 234 authentic Dark Mode finding triage, conditional-review authorization and no-repair gates
+        run: npm run test -- windowsDarkFinding234.test.tsx windowsDarkOwner233.test.tsx WindowsFieldAcceptance228Panel.test.tsx
       - name: Test
         # Keep resource-heavy App/owner-workbench regressions isolated from other
         # jsdom suites; simultaneous workers caused non-deterministic CI timeouts.

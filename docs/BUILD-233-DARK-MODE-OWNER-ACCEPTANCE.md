@@ -24,4 +24,4 @@
 
 - `npm run build:233:hub:test` covers initial empty/held truth, version/witness and appearance-gated passes, stale source snapshots, duplicate evidence references, owner authorization, external-validation eligibility, no automatic repair/closure, local forms and redacted packet export.
 - `npm run web:typecheck`, `npm run web:build`, full web tests and five-job GitHub CI must all succeed on `dev`, PR and exact protected `main` before source promotion is marked GREEN.
-- No automatic Build 234 is scheduled. A subsequent fix requires an authentic, source-specific owner finding and a separate repair authorization.
+- Build 234 was separately authorized to add a **Dark Mode finding triage and conditional repair authorization-review worksheet only**. It cannot grant or execute repairs. See `docs/BUILD-234-DARK-MODE-FINDING-TRIAGE.md`.
