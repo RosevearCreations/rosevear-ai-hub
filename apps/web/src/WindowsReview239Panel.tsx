@@ -92,6 +92,7 @@ export function WindowsReview239Panel({ theme, scope, sourceDraft, visualDraft, 
     <p role="status">{summary.responseCandidates === 0
       ? "No eligible current Build 238 reply. Independent verification and repair approval remain unavailable."
       : "Owner-only source and decision intake is available; no external authentication or repair approval."}</p>
+    <p><small>Authenticated outside review: NO. Repairs authorized: NO. Windows installation: NO.</small></p>
     <button type="button" aria-expanded={open} aria-controls="windows-239-workbook"
       onClick={() => setOpen(value => !value)}>
       {open ? "Close Build 239 owner decision worksheet" : "Open Build 239 owner decision worksheet"}
