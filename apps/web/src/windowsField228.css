@@ -114,3 +114,17 @@
 .app-shell[data-theme="dark"] .windows-appearance-236 :is(.windows-triage-229-card, .windows-appearance-236-scope, .windows-appearance-236-followup) { background: #121c29; border-color: #697f9c; color: #f2f6fe; }
 .app-shell[data-theme="high-contrast"] .windows-appearance-236 :is(.windows-triage-229-card, .windows-appearance-236-scope, .windows-appearance-236-followup) { background: #172f43; border: 2px solid #bfd5e8; color: #fff; }
 @media (max-width: 760px) { .windows-appearance-236 .windows-triage-229-fields { grid-template-columns: minmax(0, 1fr); } }
+
+/* Build 237: review-only Windows visual disposition remains low-glare and keyboard accessible. */
+.windows-visual-237 { margin-top: 1.25rem; padding: clamp(.8rem, 2vw, 1.15rem); border: 2px solid #7b89af; border-radius: .85rem; }
+.windows-visual-237 :is(button, input, select):focus-visible { outline: 3px solid #dab0ff; outline-offset: 3px; }
+.windows-visual-237 button { min-height: 2.6rem; margin-block: .45rem; }
+.windows-visual-237-workbook { display: grid; gap: 1rem; margin-top: .85rem; }
+.windows-visual-237 .windows-triage-229-card { min-width: 0; }
+.windows-visual-237 .windows-triage-229-card p { overflow-wrap: anywhere; }
+.windows-visual-237 .windows-appearance-236-check { margin-block: .65rem; }
+.windows-visual-237 .windows-appearance-236-followup label:not(.windows-appearance-236-check) { display: grid; gap: .4rem; max-width: 40rem; }
+.windows-visual-237 .windows-appearance-236-followup button { justify-self: start; }
+.app-shell[data-theme="dark"] .windows-visual-237 :is(.windows-triage-229-card, .windows-appearance-236-followup) { background: #121c29; border-color: #778ca9; color: #f2f6fe; }
+.app-shell[data-theme="high-contrast"] .windows-visual-237 :is(.windows-triage-229-card, .windows-appearance-236-followup) { background: #172f43; border: 2px solid #bfd5e8; color: #fff; }
+@media (max-width: 760px) { .windows-visual-237 .windows-triage-229-fields { grid-template-columns: minmax(0, 1fr); } }
