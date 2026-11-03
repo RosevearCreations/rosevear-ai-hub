@@ -120,7 +120,7 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
         ? "" : windows231SourceKey(row.original, scope, row.prior);
       const next: WindowsClosure231Entry = { ...previous, ...change, sourceKey };
       // Every altered outcome or proof must receive an explicit fresh field timestamp.
-      if (["installedVersion", "outcome", "basis", "firstReference", "secondReference",
+      if (previous.sourceKey !== sourceKey || ["installedVersion", "outcome", "basis", "firstReference", "secondReference",
         "ownerWitnessed", "safetyReviewed"].some(key => key in change)) {
         next.recordedAt = "";
         next.reviewedEvidenceKey = "";
