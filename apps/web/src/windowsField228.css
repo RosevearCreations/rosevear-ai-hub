@@ -75,3 +75,7 @@
 .windows-dark-233 .windows-triage-229-card small { overflow-wrap: anywhere; color: inherit; }
 .app-shell[data-theme="dark"] .windows-dark-233 :is(.windows-triage-229-card, .windows-triage-229-empty) { background: #131d29; color: #f1f6fd; border-color: #60748e; }
 .app-shell[data-theme="high-contrast"] .windows-dark-233 :is(.windows-triage-229-card, .windows-triage-229-empty) { background: #172f43; color: #fff; border: 2px solid #bfd5e8; }
+.windows-dark-233-entry { margin-block: 1.6rem .8rem; padding: 1rem; border: 1px solid #6985a8; border-radius: .85rem; }
+.windows-dark-233-entry p { max-width: 64rem; }
+.windows-dark-233-entry button { min-height: 2.65rem; }
+.app-shell[data-theme="dark"] .windows-dark-233-entry { background: #141e2a; color: #f0f5fd; border-color: #738eab; }

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { WindowsDarkOwner233Panel } from "./WindowsDarkOwner233Panel";
+import { WindowsIndependentClosure232Panel } from "./WindowsIndependentClosure232Panel";
 import { type WindowsFieldDraft } from "./windowsFieldAcceptance228";
 import { defaultTriageEntry, summarizeWindowsTriage, windowsFindingSourceKey, type WindowsTriageDraft } from "./windowsFindingTriage229";
 import { defaultClosure231Entry, summarizeWindowsClosure231, windows231EvidenceKey, windows231SourceKey,
@@ -57,6 +58,15 @@ const exceptions = (entry: Closure233Followup = accepted, upstream = independent
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("Build 233 Windows Dark Mode owner acceptance and independent closure exception follow-up", () => {
+  it("opens the extended field review only when requested, preserving older Windows owner workbench performance", () => {
+    render(<WindowsIndependentClosure232Panel draft={{}} scope={scope} plans={{}} retests={{}} closure231={{}} theme="dark" />);
+    expect(screen.queryByRole("heading", { name: "Dark Mode owner acceptance & verified-closure exception follow-up" })).not.toBeInTheDocument();
+    const open = screen.getByRole("button", { name: "Open Build 233 owner acceptance & exception review" });
+    expect(open).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(open);
+    expect(screen.getByRole("heading", { name: "Dark Mode owner acceptance & verified-closure exception follow-up" })).toBeInTheDocument();
+  });
+
   it("starts with no fabricated Windows observations, repair or verified closure and never fetches data", () => {
     vi.stubGlobal("fetch", vi.fn());
     const appearance = summarizeDarkOwner233("dark", { installedVersion: "", physicallyWitnessed: false }, {});

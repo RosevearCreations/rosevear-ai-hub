@@ -20,6 +20,9 @@ export function WindowsIndependentClosure232Panel({ draft, scope, plans, retests
   retests: WindowsRetestDraft; closure231: WindowsClosure231Draft; theme?: ShellTheme;
 }) {
   const [decisions, setDecisions] = useState<WindowsIndependent232Draft>({});
+  // Mount the lengthy installed-Windows worksheet only when the owner opens it.
+  // This keeps legacy 228–232 evidence entry and its keyboard interactions responsive.
+  const [showBuild233, setShowBuild233] = useState(false);
   const [notice, setNotice] = useState("");
   const result = summarizeWindowsIndependent232(draft, scope, plans, retests, closure231, decisions);
 
@@ -164,7 +167,12 @@ export function WindowsIndependentClosure232Panel({ draft, scope, plans, retests
     <button type="button" onClick={() => void copyPacket()}>Copy private Build 232 reconciliation &amp; owner decision packet</button>
     {notice ? <p role="status">{notice}</p> : null}
     <p><small>Reviewer identity is unverified; no independent field closure or physical Windows acceptance is claimed. Six-app integration DISCONNECTED / HOLD; private relay OFF; QL-275 Under Review; vault SECURITY HOLD.</small></p>
-    <WindowsDarkOwner233Panel theme={theme} field={draft} scope={scope} plans={plans}
-      retests={retests} closure231={closure231} independent232={decisions} />
+    {showBuild233 ? <WindowsDarkOwner233Panel theme={theme} field={draft} scope={scope} plans={plans}
+      retests={retests} closure231={closure231} independent232={decisions} /> : <div className="windows-dark-233-entry">
+      <h3>Build 233 · Dark Mode Windows owner acceptance</h3>
+      <p>When we are ready to check the installed Windows Hub, open the Dark Mode visual checklist and source-matched exception follow-up. Nothing is tested or closed automatically.</p>
+      <button type="button" aria-controls="hub-system-dark-233" aria-expanded={false}
+        onClick={() => setShowBuild233(true)}>Open Build 233 owner acceptance &amp; exception review</button>
+    </div>}
   </section>;
 }
