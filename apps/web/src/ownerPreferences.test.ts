@@ -31,4 +31,13 @@ describe("Build 223 owner display schema and recovery", () => {
     expect(doc.views[0].theme).toBe("high-contrast");
     expect(EMPTY_OWNER_VIEWS(7).views).toEqual([]);
   });
+
+  it("accepts a Dark Mode saved view without weakening the strict owner-only schema", () => {
+    const doc = saveOwnerView(EMPTY_OWNER_VIEWS(7), {
+      name: "Evening dark review", density: "comfortable", theme: "dark", startSection: "System",
+    });
+    expect(parseOwnerPreferences(JSON.stringify(doc), 7).views[0].theme).toBe("dark");
+    expect(() => parseOwnerPreferences(JSON.stringify(doc), 8)).toThrow(/another owner/);
+    expect(() => parseOwnerPreferences(JSON.stringify({ ...doc, token: "private" }), 7)).toThrow(/unexpected/);
+  });
 });

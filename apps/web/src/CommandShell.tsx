@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export type ShellDensity = "comfortable" | "compact";
-export type ShellTheme = "standard" | "high-contrast";
+export type ShellTheme = "standard" | "dark" | "high-contrast";
 
 /** Only the already role-authorized sections supplied by App can be searched. */
 export function filterShellSections(sections: readonly string[], query: string): string[] {

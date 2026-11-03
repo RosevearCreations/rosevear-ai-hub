@@ -1,6 +1,6 @@
 # Rosevear AI Hub — Next 20 Builds (209–228)
 
-**Planning baseline:** Builds 209–230 source promoted to `main` and exact-main CI GREEN. Build 231 is the current separately owner-authorized follow-up. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
+**Planning baseline:** Builds 209–231 source promoted to `main` and exact-main CI GREEN. Build 232 is the current separately owner-authorized follow-up and includes the requested low-glare Dark Mode. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
 
 **Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use the Standard theme consistently, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
 
@@ -126,19 +126,26 @@
 - Record failed and blocked retests as unresolved; keep interface, keyboard and roles for separately authorized Build 231. No automatic Windows action, signed closure or device approval.
 - **Accept:** true zero-evidence baseline, strict source import, stale-plan and stale-retest rejection, owner-only controls, no actuation or false independent closure. See `docs/BUILD-230-INSTALLED-RECOVERY-RETEST.md`.
 
-### Build 231 — Accessibility, Roles, Backup & Resource Closure (OWNER-AUTHORIZED SOURCE FOLLOW-UP)
+### Build 231 — Accessibility, Roles, Backup & Resource Closure (SOURCE PROMOTED)
 - Show only original failed/blocked owner reports with a matching Build 229 source-scoped plan. No genuine on-device findings have been supplied yet; do not create a synthetic repair queue.
 - For **Standard theme**, require two viewport/contrast observations; for **keyboard**, traversal and focus recovery; for **roles**, authorized owner/household deny-by-default checks. Never modify accounts or share credentials.
 - For **backup and resources**, require an owner-witnessed, source-matched successful Build 230 retest candidate first. Require independent archive/isolated disposable restore references or normal/load CPU-memory-disk-local AI sample references, respectively. No live restore or automatic measurement.
 - Separate new observation, two distinct safe evidence references, witness, safety review, installed version and a fresh field timestamp from the Build 228/229/230 records. Changed upstream source or retest invalidates the candidate; failures remain open.
 - **Accept:** empty baseline, source/stale/freshness gates, no hidden network/device actions, owner-only packet export, zero independent closures and unchanged six-app, relay, QL-275 and vault holds. See `docs/BUILD-231-ACCESSIBILITY-ROLES-BACKUP-RESOURCES.md`.
 
+### Build 232 — Independent Windows Owner Evidence Reconciliation & Authorized Closure Decisions (OWNER-AUTHORIZED SOURCE FOLLOW-UP)
+- Require a source-matched Build 228 finding, Build 229 scoping proposal, relevant Build 230 retest, and fresh Build 231 owner packet. No real owner findings exist in the release baseline, so no case may be invented.
+- Collect a distinct *separate reviewer* tracking code, new independent evidence reference, review outcome, provenance basis and explicit fresh timestamp. Invalid, stale, re-used, conflicting and insufficient references must block closure requests.
+- Record an explicit separate owner disposition (retest, defer or closure-review *request*), a new non-reused decision reference, fresh time and separate authorization where needed. A typed reviewer code is **not reviewer authentication** and a closure-review request is **not a verified closure**.
+- Add a visible **Dark Mode** selection for reduced glare, default to Dark Mode when no valid preference exists, remember only the display choice locally and support Dark/Standard/High contrast in saved owner views. Keep all navigation and role checks unchanged.
+- **Accept:** zero independent closures by default and after owner proposals; UI/source freshness tests, no network/actuation, keyboard/contrast controls, retained security holds and exact `main` source CI GREEN. See `docs/BUILD-232-INDEPENDENT-EVIDENCE-DARK-MODE.md`.
+
 ## Delivery and safety rules for every build
 
-1. Build numbers 209–228 were the agreed queue; Builds 229–231 were separately authorized. Completed builds are labeled **SOURCE PROMOTED**. Continue only with owner-authorized follow-ups. Update this document as requirements evolve.
+1. Build numbers 209–228 were the agreed queue; Builds 229–232 were separately authorized. Completed builds are labeled **SOURCE PROMOTED**. Continue only with owner-authorized follow-ups. Update this document as requirements evolve.
 2. Feature branch → reviewed `dev` merge and checks → reviewed `main` promotion → **exact-main** required CI green. Record PRs, SHA, workflow and outstanding on-device tests. Never claim Production GREEN without evidence.
 3. No breaking changes to working screens, no fabricated real-world measurements, no hidden credentials, no background actuation, no unpaid provider dependencies without owner approval. Keep free-tier constraints visible.
 4. QL-275 remains **Under Review / owner-deferred**; six-app integration is **DISCONNECTED/HOLD**, private relay **OFF**, authenticated gateway GETs **0**, and no owner TEST permission is inferred. Removing the word HELD from the *project work queue* does not remove technical security restrictions.
 5. First-party password/document Vault remains **SECURITY HOLD (0/6 independently verified)** until separate owner authorization and independent cryptographic/security acceptance. Physical Windows and camera acceptance are never equated to GitHub CI.
 
-**Queue tracking:** 20 originally defined builds (209–228) source promoted; Builds 229–230 separately authorized and source promoted; Build 231 separately authorized and in progress for its source-review workflow. There is no automatic Build 232: owner findings, independent verification and separate permission determine future work. Independent device, six-app and vault review gates are separate from source promotion.
+**Queue tracking:** 20 originally defined builds (209–228) source promoted; Builds 229–231 separately authorized and source promoted; Build 232 separately authorized and in progress for its independent-review **workflow and Dark Mode**. No automatic Build 233 is queued: genuine field findings, owner acceptance and explicit permission determine future repair or closure work. Independent device, six-app and vault review gates are separate from source promotion.

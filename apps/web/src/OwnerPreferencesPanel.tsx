@@ -62,7 +62,7 @@ export function OwnerPreferencesPanel({ ownerId, density, theme, onApply }: {
       <div><p className="eyebrow">Build 223 · display settings only</p><h2 id="hub-owner-preferences-title">Owner preferences &amp; saved views</h2></div>
       <CardHelp title="Preferences safety">Saved views store only a name, density, contrast and start screen. They belong to this owner on this browser. Imports reject other owners, unknown versions and extra fields. No secrets, credentials, security decisions or acceptance receipts are saved.</CardHelp>
     </header>
-    <p>Save the current Standard/high-contrast theme and interface density with a preferred start screen. Apply a view when needed. This does not change other users' settings or run device actions.</p>
+    <p>Save the current Dark Mode, Standard or High contrast theme and interface density with a preferred start screen. Apply a view when needed. Theme choices affect display only; they never run device actions or grant access.</p>
     <div className="hub-owner-preferences-editor">
       <label htmlFor="hub-view-name">Saved view name</label>
       <input id="hub-view-name" maxLength={48} value={name} onChange={event => setName(event.target.value)} placeholder="e.g. Morning systems review" />

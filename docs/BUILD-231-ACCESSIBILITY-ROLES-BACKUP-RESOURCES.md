@@ -31,7 +31,7 @@ Build 231 does **not** run device tests, retrieve measurements, operate a camera
 - Approval to implement this **dashboard workflow** is not approval to perform a live repair, change roles, open a secret, read camera feeds, test X10/MQTT, run an active restore or ship a changed installed Windows configuration.
 - GitHub `main` Production GREEN establishes **source CI only**, not on-device Windows acceptance or independent closure.
 - Six-app integration remains **DISCONNECTED / HOLD**; private relay **OFF**; QL-275 **UNDER REVIEW / DEFERRED**; first-party vault **SECURITY HOLD**.
-- Next Build 232 is **not automatically queued**. Genuine owner findings, separate scope authorization and independent evidence decide whether repairs or further validation are appropriate.
+- Build 232 was separately authorized as an **independent review and owner-decision workflow**. It does not authorize repairs or certify a field closure without genuine independently authenticated evidence.
 
 ## Source regressions
 
