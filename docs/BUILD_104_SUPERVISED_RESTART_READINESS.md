@@ -1,6 +1,6 @@
 # Build 104 — Supervised Windows Restart Readiness & Task Identity Evidence
 
-Build 104 prepares for a planned, *human-supervised* restart of the Windows test PC.
+Build 104 prepares for a planned, *human-supervised* restart of the Windows test PC. For the current consolidated November 2026 procedure, also see [`WINDOWS_SUPERVISED_RESTART_2026.md`](WINDOWS_SUPERVISED_RESTART_2026.md); this historical Build 104 checklist covers the two managed tasks, not the separate original `Rosevear AI Server Startup` task.
 It adds an independent, read-only inspection for the two Hub runtime tasks
 that Build 081's gateway-specific inspector does not check. It does **not**
 install a task, start a service, modify Home Assistant, change automatic-login
@@ -69,7 +69,7 @@ settings, reboot the PC, or certify successful startup.
    ```
 
 3. Verify the Hub API at `http://127.0.0.1:8765/health` and the local web
-   interface at `http://127.0.0.1:5173/`. Verify private HTTPS on an authorized
+   interface for the **installed launch mode**. Managed releases may serve the built PWA on `http://127.0.0.1:8765/`; legacy Vite development may use `http://127.0.0.1:5173/`. Do not start a duplicate Vite process merely because 5173 is absent. Verify private HTTPS on an authorized
    client independently; test sign-in and client certificate trust.
 4. In VirtualBox, verify Home Assistant VM state and the HA UI/integration.
    Check MQTT connectivity from the existing Hub/HA UI, and check Ollama

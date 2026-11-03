@@ -37,12 +37,12 @@ owner-supervised **FIELD HOLD** until separately observed and recorded.
    in ordinary PowerShell **without starting any services**:
 
    ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\inspect-hub-reboot-readiness.ps1
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\inspect-hub-reboot-readiness.ps1 -LanIPv4 '<Windows-private-LAN-IPv4>'
    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\inspect-hub-startup-readiness.ps1
    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\inspect-hub-ha-mqtt-readiness.ps1
    ```
 
-   These scripts report classifications, not automatic fixes. If a script is
+   Replace the gateway placeholder with the **current private LAN IPv4 of the Windows PC**; it is a mandatory parameter. The authoritative consolidated checklist is [`WINDOWS_SUPERVISED_RESTART_2026.md`](WINDOWS_SUPERVISED_RESTART_2026.md). These scripts report classifications, not automatic fixes. If a script is
    not installed in the actual Windows checkout, stop that check; do not
    download an unverified script from a message.
 

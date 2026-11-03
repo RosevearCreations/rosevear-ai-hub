@@ -140,3 +140,16 @@
 .app-shell[data-theme="dark"] .windows-review-238 .windows-triage-229-card { background: #121c29; border-color: #778ca9; color: #f2f6fe; }
 .app-shell[data-theme="high-contrast"] .windows-review-238 .windows-triage-229-card { background: #172f43; border: 2px solid #bfd5e8; color: #fff; }
 @media (max-width: 760px) { .windows-review-238 .windows-triage-229-fields { grid-template-columns: minmax(0, 1fr); } }
+
+/* Build 239: keyboard-accessible owner provenance/decision worksheet, low glare. */
+.windows-review-239 { margin-top: 1.25rem; padding: clamp(.8rem, 2vw, 1.15rem); border: 2px solid #7e89b1; border-radius: .85rem; }
+.windows-review-239-workbook { display: grid; gap: 1rem; margin-top: .85rem; }
+.windows-review-239 :is(button, input, select):focus-visible { outline: 3px solid #dab0ff; outline-offset: 3px; }
+.windows-review-239 button { min-height: 2.6rem; margin-block: .45rem; }
+.windows-review-239 .windows-triage-229-card { min-width: 0; }
+.windows-review-239 .windows-triage-229-card p { overflow-wrap: anywhere; }
+.windows-review-239 .windows-appearance-236-check { margin-block: .65rem; }
+.windows-review-239 .windows-appearance-236-followup label:not(.windows-appearance-236-check) { display: grid; gap: .4rem; max-width: 40rem; }
+.app-shell[data-theme="dark"] .windows-review-239 :is(.windows-triage-229-card, .windows-appearance-236-followup) { background: #121c29; border-color: #7e92b0; color: #f2f6fe; }
+.app-shell[data-theme="high-contrast"] .windows-review-239 :is(.windows-triage-229-card, .windows-appearance-236-followup) { background: #172f43; border: 2px solid #bfd5e8; color: #fff; }
+@media (max-width: 760px) { .windows-review-239 .windows-triage-229-fields { grid-template-columns: minmax(0, 1fr); } }
