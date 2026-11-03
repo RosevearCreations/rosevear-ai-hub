@@ -1,8 +1,8 @@
 # Rosevear AI Hub — Next 20 Builds (209–228)
 
-**Planning baseline:** Builds 209–231 source promoted to `main` and exact-main CI GREEN. Build 232 is the current separately owner-authorized follow-up and includes the requested low-glare Dark Mode. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
+**Planning baseline:** Builds 209–232 source promoted to `main` and exact-main CI GREEN. Build 233 is the current separately owner-authorized field acceptance and exception-follow-up source change. The requested low-glare Dark Mode shipped in Build 232. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
 
-**Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use the Standard theme consistently, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
+**Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use consistent visual tokens with selectable low-glare Dark Mode, Standard and High contrast, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
 
 ## Owner experience, diagnostics and Windows reliability
 
@@ -140,12 +140,18 @@
 - Add a visible **Dark Mode** selection for reduced glare, default to Dark Mode when no valid preference exists, remember only the display choice locally and support Dark/Standard/High contrast in saved owner views. Keep all navigation and role checks unchanged.
 - **Accept:** zero independent closures by default and after owner proposals; UI/source freshness tests, no network/actuation, keyboard/contrast controls, retained security holds and exact `main` source CI GREEN. See `docs/BUILD-232-INDEPENDENT-EVIDENCE-DARK-MODE.md`.
 
+### Build 233 — Windows Dark Mode Owner Acceptance & Verified Closure Exception Follow-Up (SEPARATELY AUTHORIZED SOURCE WORK)
+- Add a field-specific low-glare acceptance worksheet for actual installed Windows owner observations: bright/white panels, status clarity, forms, keyboard/200% zoom and tablet layout. Record exact installed version, witness, sanitized reference, observation basis and fresh owner timestamp. Passes are owner-reported only, never certified by CI.
+- Bind each exceptional follow-up to the original Build 228 finding, Build 229 triage, Build 230 retest where required, Build 231 owner packet and precise Build 232 reviewer/owner decision snapshot. Any source revision invalidates the old follow-up.
+- Allow a separate, safe owner decision to request source evidence, retest, defer or (only for eligible Build 232 closure-review requests) seek outside validation. Require a new distinct receipt code, explicit limited authorization and a fresh record. No typed reference authenticates an external reviewer or independently verifies closure.
+- **Accept:** no synthetic owner findings on the live screen, zero verified closures, zero automatically authorized repairs, readable Dark Mode owner form/keyboard interactions, exact evidence snapshots, no network or device operation, private packet export and retained six-app/relay/QL-275/vault holds. See `docs/BUILD-233-DARK-MODE-OWNER-ACCEPTANCE.md`.
+
 ## Delivery and safety rules for every build
 
-1. Build numbers 209–228 were the agreed queue; Builds 229–232 were separately authorized. Completed builds are labeled **SOURCE PROMOTED**. Continue only with owner-authorized follow-ups. Update this document as requirements evolve.
+1. Build numbers 209–228 were the agreed queue; Builds 229–233 were separately authorized. Completed builds are labeled **SOURCE PROMOTED**. Continue only with owner-authorized follow-ups. Update this document as requirements evolve.
 2. Feature branch → reviewed `dev` merge and checks → reviewed `main` promotion → **exact-main** required CI green. Record PRs, SHA, workflow and outstanding on-device tests. Never claim Production GREEN without evidence.
 3. No breaking changes to working screens, no fabricated real-world measurements, no hidden credentials, no background actuation, no unpaid provider dependencies without owner approval. Keep free-tier constraints visible.
 4. QL-275 remains **Under Review / owner-deferred**; six-app integration is **DISCONNECTED/HOLD**, private relay **OFF**, authenticated gateway GETs **0**, and no owner TEST permission is inferred. Removing the word HELD from the *project work queue* does not remove technical security restrictions.
 5. First-party password/document Vault remains **SECURITY HOLD (0/6 independently verified)** until separate owner authorization and independent cryptographic/security acceptance. Physical Windows and camera acceptance are never equated to GitHub CI.
 
-**Queue tracking:** 20 originally defined builds (209–228) source promoted; Builds 229–231 separately authorized and source promoted; Build 232 separately authorized and in progress for its independent-review **workflow and Dark Mode**. No automatic Build 233 is queued: genuine field findings, owner acceptance and explicit permission determine future repair or closure work. Independent device, six-app and vault review gates are separate from source promotion.
+**Queue tracking:** 20 originally defined builds (209–228) and Builds 229–232 source promoted to `main`; Build 233 separately authorized for a Dark Mode owner acceptance worksheet and **source-linked exception follow-up only**. No automatic Build 234 or repair batch is queued: genuine field findings, outside authentication and separate owner permission determine future work. Independent device, six-app and vault review gates are separate from source promotion.
