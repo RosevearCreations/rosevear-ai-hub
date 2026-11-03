@@ -1,4 +1,7 @@
-# Windows Test Server Update
+# Windows Test Server Update — historical Build 030 guidance
+
+> **SUPERSEDED / DO NOT RUN FOR CURRENT RELEASES.** The Build 030 instructions below describe a now-obsolete migration, version and deployment process. For current installation/rollback follow [Windows release slots](WINDOWS_RELEASE_SLOTS.md), and for a simple planned **restart without upgrading** follow [the November 2026 supervised restart checklist](WINDOWS_SUPERVISED_RESTART_2026.md). Do not automatically apply old Alembic revisions, upgrade the live database or run an outdated installer to prepare for a restart.
+
 
 This procedure updates the test PC only after a release has already reached a verified GREEN main.
 It is not a production deployment mechanism and it must not be run against an unverified candidate

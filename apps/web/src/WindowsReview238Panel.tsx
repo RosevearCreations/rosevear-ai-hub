@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CardHelp, type ShellTheme } from "./CommandShell";
+import { WindowsReview239Panel } from "./WindowsReview239Panel";
 import { safeWindowsFieldReference } from "./windowsFieldAcceptance228";
 import type { Appearance236Draft, Appearance236Scope } from "./windowsAppearanceAcceptance236";
 import type { Visual237Draft } from "./windowsVisualDisposition237";
@@ -114,5 +115,7 @@ export function WindowsReview238Panel({ theme, scope, sourceDraft, visualDraft }
         Six apps DISCONNECTED / HOLD; private relay OFF; QL-275 Under Review; vault SECURITY HOLD.</small></p>
     </div>}
     {notice && <p role="status">{notice}</p>}
+    <WindowsReview239Panel theme={theme} scope={scope} sourceDraft={sourceDraft}
+      visualDraft={visualDraft} reviewDraft={draft} />
   </section>;
 }
