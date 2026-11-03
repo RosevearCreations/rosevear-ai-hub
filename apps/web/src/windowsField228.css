@@ -153,3 +153,16 @@
 .app-shell[data-theme="dark"] .windows-review-239 :is(.windows-triage-229-card, .windows-appearance-236-followup) { background: #121c29; border-color: #7e92b0; color: #f2f6fe; }
 .app-shell[data-theme="high-contrast"] .windows-review-239 :is(.windows-triage-229-card, .windows-appearance-236-followup) { background: #172f43; border: 2px solid #bfd5e8; color: #fff; }
 @media (max-width: 760px) { .windows-review-239 .windows-triage-229-fields { grid-template-columns: minmax(0, 1fr); } }
+
+/* Build 240: owner-only supervised restart evidence, responsive low-glare field cards. */
+.windows-restart-240 { margin-top: 1.25rem; padding: clamp(.8rem, 2vw, 1.15rem); border: 2px solid #789dba; border-radius: .85rem; }
+.windows-restart-240-workbook { display: grid; gap: 1rem; margin-top: .9rem; }
+.windows-restart-240 :is(button, input, select, textarea):focus-visible { outline: 3px solid #dab0ff; outline-offset: 3px; }
+.windows-restart-240 button { min-height: 2.6rem; margin-block: .45rem; }
+.windows-restart-240 .windows-triage-229-card { min-width: 0; overflow-wrap: anywhere; }
+.windows-restart-240 .windows-appearance-236-check { margin-block: .55rem; }
+.windows-restart-240 .windows-appearance-236-followup label { display: grid; gap: .4rem; max-width: 44rem; }
+.windows-restart-240 textarea { width: 100%; min-width: 0; resize: vertical; }
+.app-shell[data-theme="dark"] .windows-restart-240 :is(.windows-triage-229-card, .windows-appearance-236-followup) { background: #121c29; border-color: #789dba; color: #f2f6fe; }
+.app-shell[data-theme="high-contrast"] .windows-restart-240 :is(.windows-triage-229-card, .windows-appearance-236-followup) { background: #172f43; border: 2px solid #bfd5e8; color: #fff; }
+@media (max-width: 760px) { .windows-restart-240 .windows-triage-229-fields { grid-template-columns: minmax(0, 1fr); } }

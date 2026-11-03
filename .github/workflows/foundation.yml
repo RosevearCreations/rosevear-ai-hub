@@ -30,6 +30,7 @@ jobs:
           test -f docs/DECISIONS_TO_MAKE.md
           test -f docs/BUILD_STATUS.md
           test -f docs/WINDOWS_SUPERVISED_RESTART_2026.md
+          test -f docs/BUILD_240_SUPERVISED_WINDOWS_RESTART_FIELD_EVIDENCE.md
           test -f docs/DESKTOP_RUNTIME.md
           test -f docs/OLLAMA_SETUP.md
       - name: QL-252 public source-proof publication must remain fail-closed without original witness authorization
@@ -152,6 +153,8 @@ jobs:
         run: npm run test -- windowsReview238.test.tsx windowsVisualDisposition237.test.tsx --maxWorkers=1
       - name: Build 239 Windows source provenance, owner decision and no-repair gates
         run: npm run test -- windowsReview239.test.tsx windowsReview238.test.tsx --maxWorkers=1
+      - name: Build 240 owner-supervised restart evidence, dependency ordering and no-action gates
+        run: npm run test -- windowsRestart240.test.tsx windowsReview239.test.tsx --maxWorkers=1
       - name: Test
         # Keep resource-heavy App/owner-workbench regressions isolated from other
         # jsdom suites; simultaneous workers caused non-deterministic CI timeouts.
