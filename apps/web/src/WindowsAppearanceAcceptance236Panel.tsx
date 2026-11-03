@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CardHelp, type ShellTheme } from "./CommandShell";
 import { safeWindowsFieldReference, safeWindowsInstalledVersion } from "./windowsFieldAcceptance228";
+import { WindowsVisualDisposition237Panel } from "./WindowsVisualDisposition237Panel";
 import {
   appearance236Cases, appearance236FollowupKey, appearance236GateLabels,
   appearance236ObservationKey, defaultAppearance236Entry, formatAppearance236Packet,
@@ -164,5 +165,6 @@ export function WindowsAppearanceAcceptance236Panel({ theme, onNavigate }: {
       <p><small>Sanitized code-only observations stay in this browser session. Six-app DISCONNECTED / HOLD; private relay OFF; QL-275 Under Review; vault SECURITY HOLD; authenticated gateway GETs zero. Do not put private device IDs, addresses, photos, credentials or full logs in references.</small></p>
     </div>}
     {notice && <p role="status">{notice}</p>}
+    <WindowsVisualDisposition237Panel theme={theme} scope={scope} sourceDraft={draft} />
   </section>;
 }
