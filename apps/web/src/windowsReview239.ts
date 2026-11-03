@@ -87,13 +87,24 @@ export function summarizeReview239(theme: ShellTheme, scope: Appearance236Scope,
   sourceDraft: Appearance236Draft, visualDraft: Visual237Draft,
   reviewDraft: Review238Draft, draft: Review239Draft) {
   const source = summarizeReview238(theme, scope, sourceDraft, visualDraft, reviewDraft);
-  const refs = source.rows.flatMap(row => [
+  // A later rollback or owner decision may duplicate an existing provenance
+  // code. Report the defect at that later gate, without making an earlier
+  // source-of-evidence receipt appear retroactively invalid.
+  const priorRefs = source.rows.flatMap(row => [
     row.sourceEntry.reference, row.sourceEntry.followupReference,
     row.visualRow.entry.retestReference, row.visualRow.entry.decisionReference,
     row.entry.reference,
-    draft[row.id]?.sourceReference, draft[row.id]?.rollbackReference,
-    draft[row.id]?.decisionReference,
   ]).filter(Boolean);
+  const sourceRefs = [
+    ...priorRefs, ...source.rows.map(row => draft[row.id]?.sourceReference).filter(Boolean),
+  ];
+  const refs = [
+    ...sourceRefs,
+    ...source.rows.flatMap(row => [
+      draft[row.id]?.rollbackReference, draft[row.id]?.decisionReference,
+    ]).filter(Boolean),
+  ];
+  const sourceCount = (value: string) => sourceRefs.filter(ref => ref === value).length;
   const count = (value: string) => refs.filter(ref => ref === value).length;
   const rows = source.rows.map(row => {
     const entry = draft[row.id] ?? defaultReview239Entry;
@@ -112,7 +123,7 @@ export function summarizeReview239(theme: ShellTheme, scope: Appearance236Scope,
     if (!eligible) gate = "response_not_eligible";
     else if (entry.source === "not_recorded") gate = "source_not_recorded";
     else if (!validCode(entry.sourceReference)) gate = "source_reference_gap";
-    else if (count(entry.sourceReference) !== 1) gate = "source_duplicate";
+    else if (sourceCount(entry.sourceReference) !== 1) gate = "source_duplicate";
     else if (!entry.sourceAcknowledged) gate = "source_witness_gap";
     else if (!sourceFresh) gate = "source_stale";
     else if (entry.decision === "pending") gate = "decision_pending";
