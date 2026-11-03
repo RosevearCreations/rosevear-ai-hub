@@ -17,6 +17,7 @@ import { AuditView } from "./AuditView";
 import { AuthView } from "./AuthView";
 import { CameraView } from "./CameraView";
 import { CardHelp, CommandPalette, type ShellDensity, type ShellTheme } from "./CommandShell";
+import { loadShellTheme, saveShellTheme } from "./shellThemePreference";
 import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
 import { SystemWorkspaceGuide } from "./SystemWorkspaceGuide";
 import { SystemConsoleRefresh } from "./SystemConsoleRefresh";
@@ -104,10 +105,11 @@ export function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [density, setDensity] = useState<ShellDensity>("comfortable");
-  const [appearance, setAppearance] = useState<ShellTheme>("standard");
+  const [appearance, setAppearance] = useState<ShellTheme>(loadShellTheme);
   const [windowsFieldReviewVisited, setWindowsFieldReviewVisited] = useState(false);
 
   useEffect(() => setMobileMenuOpen(false), [section]);
+  useEffect(() => { saveShellTheme(appearance); }, [appearance]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -332,13 +334,13 @@ export function App() {
             ))}
           </fieldset>
           <fieldset className="shell-preferences">
-            <legend>Display contrast</legend>
-            {(["standard", "high-contrast"] as const).map(value => (
+            <legend>Display theme</legend>
+            {(["dark", "standard", "high-contrast"] as const).map(value => (
               <button type="button" key={value} aria-pressed={appearance === value}
-                onClick={() => setAppearance(value)}>{value === "standard" ? "Standard" : "High contrast"}</button>
+                onClick={() => setAppearance(value)}>{value === "dark" ? "Dark Mode" : value === "standard" ? "Standard" : "High contrast"}</button>
             ))}
           </fieldset>
-          <CardHelp title="Interface controls">Density and contrast change this session's display. Owners can save named display views in System. Find screen navigates among already-authorized modules; it cannot execute devices or search private data.</CardHelp>
+          <CardHelp title="Interface controls">Dark Mode uses a softer near-black background and is the default to reduce glare; Standard is midnight-blue and High contrast is a brighter high-contrast alternative. The selected theme is remembered on this browser without storing credentials. Owners can also save named display views in System. Find screen only navigates authorized modules and cannot control devices.</CardHelp>
         </div>
 
         <PwaInstallPanel />

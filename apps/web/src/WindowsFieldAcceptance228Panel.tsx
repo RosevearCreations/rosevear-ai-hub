@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { CardHelp } from "./CommandShell";
+import { WindowsIndependentClosure232Panel } from "./WindowsIndependentClosure232Panel";
 import "./windowsField228.css";
 import {
   formatWindowsFieldHandoff, safeWindowsFieldReference, safeWindowsInstalledVersion,
@@ -486,5 +487,7 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
       {closureNotice ? <p role="status">{closureNotice}</p> : null}
       <p><small>Zero issues independently closed. No automatic remediation, production role change, private restore, vault activation, six-app connection or relay enablement. QL-275 stays Under Review.</small></p>
     </section>
+    <WindowsIndependentClosure232Panel draft={draft} scope={scope} plans={triage}
+      retests={retests} closure231={closure231} />
   </section>;
 }

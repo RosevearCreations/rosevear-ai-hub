@@ -38,7 +38,7 @@ export function parseOwnerPreferences(raw: string, ownerId: number): OwnerPrefer
     if (!exactKeys(item, ["name", "density", "theme", "startSection"]) ||
       typeof item.name !== "string" || item.name.trim().length < 1 || item.name.length > 48 ||
       !["comfortable", "compact"].includes(String(item.density)) ||
-      !["standard", "high-contrast"].includes(String(item.theme)) ||
+      !["standard", "dark", "high-contrast"].includes(String(item.theme)) ||
       !sections.includes(item.startSection as typeof sections[number])) {
       throw new Error("Saved view includes unsupported values.");
     }

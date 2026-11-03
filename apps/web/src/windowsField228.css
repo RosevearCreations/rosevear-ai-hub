@@ -54,3 +54,13 @@
 .windows-closure-231 button:focus-visible, .windows-closure-231 :is(input, select):focus-visible { outline: 3px solid #db8938; outline-offset: 2px; }
 .windows-closure-231 .windows-triage-229-card p small { color: inherit; overflow-wrap: anywhere; }
 .app-shell[data-theme="high-contrast"] .windows-closure-231 :is(.windows-triage-229-card, .windows-triage-229-empty) { background: #172f43; color: #fff; border-color: #bfd5e8; }
+
+/* Build 232: entirely passive, keyboard-accessible independent reference and owner decision review. */
+.windows-independent-232 { margin-block: 2rem 1rem; padding-block: 1.5rem; border-top: 3px solid #9980c7; }
+.windows-independent-232-confirmations { display: grid; gap: .85rem; margin: 1rem 0; max-width: 65rem; }
+.windows-independent-232-confirmations label { display: flex; gap: .65rem; align-items: flex-start; line-height: 1.6; }
+.windows-independent-232-confirmations input { flex: 0 0 auto; margin-top: .22rem; width: 1.2rem; height: 1.2rem; }
+.windows-independent-232 button { margin-inline-end: .6rem; margin-block-end: .55rem; }
+.windows-independent-232 :is(input,select,button):focus-visible { outline: 3px solid #f0c27a; outline-offset: 3px; }
+.windows-independent-232 .windows-triage-229-card small { overflow-wrap: anywhere; color: inherit; }
+.app-shell[data-theme="high-contrast"] .windows-independent-232 :is(.windows-triage-229-card,.windows-triage-229-empty) { background: #172f43; color: #fff; border: 2px solid #bfd5e8; }

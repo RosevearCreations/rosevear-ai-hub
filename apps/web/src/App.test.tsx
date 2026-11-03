@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 
 import { App } from "./App";
 import { HUB_AUTH_REQUIRED_EVENT } from "./api";
+import { SHELL_THEME_STORAGE_KEY } from "./shellThemePreference";
 
 function providerPayload(available = true) {
   return [
@@ -448,6 +449,7 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
 
 describe("App", () => {
   beforeEach(() => {
+    localStorage.removeItem(SHELL_THEME_STORAGE_KEY);
     installFetchMock();
   });
 
@@ -500,11 +502,16 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Close menu" })).toHaveAttribute("aria-expanded", "true");
 
     fireEvent.click(screen.getByRole("button", { name: "Compact" }));
-    fireEvent.click(screen.getByRole("button", { name: "High contrast" }));
     const shell = document.querySelector(".app-shell");
+    expect(shell).toHaveAttribute("data-theme", "dark");
+    expect(screen.getByRole("button", { name: "Dark Mode" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "High contrast" }));
     expect(shell).toHaveAttribute("data-density", "compact");
     expect(shell).toHaveAttribute("data-theme", "high-contrast");
     expect(screen.getByRole("button", { name: "Compact" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Dark Mode" }));
+    expect(shell).toHaveAttribute("data-theme", "dark");
+    expect(localStorage.getItem(SHELL_THEME_STORAGE_KEY)).toBe("dark");
 
     fireEvent.keyDown(window, { key: "k", ctrlKey: true });
     const finder = screen.getByRole("dialog", { name: "Jump to a workspace" });
