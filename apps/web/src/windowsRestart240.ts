@@ -1,5 +1,5 @@
 /** Build 240: supervised Windows restart evidence. No host, task or network actions. */
-import { safeWindowsFieldReference, safeWindowsInstalledVersion } from "./windowsFieldAcceptance228";
+import { safeWindowsInstalledVersion } from "./windowsFieldAcceptance228";
 
 export const restart240Dependencies = [
   { id: "tasks", title: "Existing Task Scheduler startup / recovery", next: "Inspect the existing task names, triggers and last results. Do not register duplicate tasks." },
@@ -61,6 +61,10 @@ const safeTime = (s: unknown) => typeof s === "string" && validTime(s) ? s.slice
 const safeSnapshot = (s: unknown) => typeof s === "string" ? s.slice(0, 5000) : "";
 const safeVersion = (s: unknown) => typeof s === "string" && !/[:/@\\?&#=]/.test(s)
   ? safeWindowsInstalledVersion(s) : "";
+// A pasted URL or path is rejected, not transformed into a code that might
+// accidentally retain private hostname, token or file-path fragments.
+const safeImportCode = (s: unknown) => typeof s === "string" && /^[A-Za-z0-9_-]{0,80}$/.test(s)
+  ? s : "";
 
 export function preflight240Key(entry: Restart240Preflight): string {
   return JSON.stringify({ version: safeWindowsInstalledVersion(entry.installedVersion),
@@ -167,23 +171,23 @@ export function importRestart240Handoff(raw: string): Restart240Draft {
     observations[dep.id] = {
       status: validStatus.has(v.status as Restart240Status) ? v.status as Restart240Status : "not_checked",
       source: validSource.has(v.source as Restart240Source) ? v.source as Restart240Source : "none",
-      reference: safeWindowsFieldReference(typeof v.reference === "string" ? v.reference : ""),
+      reference: safeImportCode(v.reference),
       recordedAt: safeTime(v.recordedAt), snapshotKey: safeSnapshot(v.snapshotKey),
     };
   }
   const normalized: Restart240Draft = {
     preflight: {
       installedVersion: safeVersion(pi.installedVersion),
-      hubBackupReference: safeWindowsFieldReference(typeof pi.hubBackupReference === "string" ? pi.hubBackupReference : ""),
-      haBackupReference: safeWindowsFieldReference(typeof pi.haBackupReference === "string" ? pi.haBackupReference : ""),
-      baselineReference: safeWindowsFieldReference(typeof pi.baselineReference === "string" ? pi.baselineReference : ""),
+      hubBackupReference: safeImportCode(pi.hubBackupReference),
+      haBackupReference: safeImportCode(pi.haBackupReference),
+      baselineReference: safeImportCode(pi.baselineReference),
       workPaused: pi.workPaused === true, tasksInspected: pi.tasksInspected === true,
       originalVmReviewed: pi.originalVmReviewed === true,
       recordedAt: safeTime(pi.recordedAt), snapshotKey: safeSnapshot(pi.snapshotKey),
     },
     reboot: {
       witnessed: ri.witnessed === true, signInObserved: ri.signInObserved === true,
-      reference: safeWindowsFieldReference(typeof ri.reference === "string" ? ri.reference : ""),
+      reference: safeImportCode(ri.reference),
       waitedMinutes: typeof ri.waitedMinutes === "number" && Number.isFinite(ri.waitedMinutes)
         ? Math.min(1440, Math.max(0, ri.waitedMinutes)) : 0,
       recordedAt: safeTime(ri.recordedAt), snapshotKey: safeSnapshot(ri.snapshotKey),

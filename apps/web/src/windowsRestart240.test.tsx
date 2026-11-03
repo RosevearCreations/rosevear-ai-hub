@@ -114,7 +114,9 @@ describe("Build 240 supervised Windows restart field evidence and recovery HOLD"
     bad.preflight.snapshotKey = "PRIVATE-DO-NOT-ECHO";
     bad.untrustedToken = "PRIVATE-CREDENTIAL";
     const imported = importRestart240Handoff(JSON.stringify(bad));
-    expect(JSON.stringify(imported)).not.toContain("http");
+    expect(imported.preflight.installedVersion).toBe("");
+    expect(imported.preflight.hubBackupReference).toBe("");
+    expect(JSON.stringify(imported)).not.toContain("http://");
     expect(JSON.stringify(imported)).not.toContain("PRIVATE-DO-NOT-ECHO");
     expect(JSON.stringify(imported)).not.toContain("PRIVATE-CREDENTIAL");
     expect(summarizeRestart240(imported).preflightGate).toBe("scope_missing");
