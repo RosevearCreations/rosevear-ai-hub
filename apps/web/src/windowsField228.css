@@ -35,3 +35,12 @@
 .windows-triage-229-fields :is(input, select) { min-width: 0; width: 100%; font: inherit; }
 .windows-triage-229-empty { padding: 1rem; border-inline-start: .3rem solid #527596; background: #f4f8fc; }
 .app-shell[data-theme="high-contrast"] .windows-triage-229 :is(.windows-triage-229-import, .windows-triage-229-empty, .windows-triage-229-card) { background: #172f43; color: #fff; border-color: #bfd5e8; }
+
+/* Build 230: preserve legible owner retest checks and distinct gate states on Windows/tablet. */
+.windows-retest-230 { margin-block: 2rem 1rem; padding-block: 1.5rem; border-top: 2px solid #b8cbd8; }
+.windows-retest-230-confirmations { display: grid; gap: .7rem; max-width: 65rem; margin-block: 1rem; }
+.windows-retest-230-confirmations label { display: flex; align-items: flex-start; gap: .6rem; line-height: 1.5; }
+.windows-retest-230-confirmations input { flex: 0 0 auto; margin-top: .2rem; width: 1.2rem; height: 1.2rem; }
+.windows-retest-230 .windows-triage-229-card button { margin-inline-end: .6rem; margin-block-end: .55rem; }
+.windows-retest-230 .windows-triage-229-card p small { color: inherit; overflow-wrap: anywhere; }
+.app-shell[data-theme="high-contrast"] .windows-retest-230 :is(.windows-triage-229-import, .windows-triage-229-empty, .windows-triage-229-card) { background: #172f43; color: #fff; border-color: #bfd5e8; }
