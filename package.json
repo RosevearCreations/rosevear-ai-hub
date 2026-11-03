@@ -79,6 +79,7 @@
     "build:227:hub:test": "npm --workspace apps/web run test -- SixAppReadinessPanel.test.tsx IntegrationHealthPanel.test.tsx CommsHubConnectionPanel.test.tsx ql275DeferredReview.test.ts",
     "build:228:hub:test": "npm --workspace apps/web run test -- WindowsFieldAcceptance228Panel.test.tsx BackupRecoveryWorkbench.test.tsx InstalledHubAdoptionPanel.test.tsx SixAppReadinessPanel.test.tsx",
     "build:229:hub:test": "npm --workspace apps/web run test -- windowsFindingTriage229.test.tsx WindowsFieldAcceptance228Panel.test.tsx SixAppReadinessPanel.test.tsx",
-    "build:230:hub:test": "npm --workspace apps/web run test -- windowsRecoveryRetest230.test.tsx windowsFindingTriage229.test.tsx WindowsFieldAcceptance228Panel.test.tsx SixAppReadinessPanel.test.tsx"
+    "build:230:hub:test": "npm --workspace apps/web run test -- windowsRecoveryRetest230.test.tsx windowsFindingTriage229.test.tsx WindowsFieldAcceptance228Panel.test.tsx SixAppReadinessPanel.test.tsx",
+    "build:231:hub:test": "npm --workspace apps/web run test -- windowsOwnerClosure231.test.tsx windowsRecoveryRetest230.test.tsx windowsFindingTriage229.test.tsx WindowsFieldAcceptance228Panel.test.tsx SixAppReadinessPanel.test.tsx"
   }
 }

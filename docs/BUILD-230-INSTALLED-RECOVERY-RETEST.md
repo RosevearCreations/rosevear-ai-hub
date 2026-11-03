@@ -26,7 +26,7 @@ Standard theme, keyboard and role-security issues are not silently closed by Bui
 - The screen is local-session-only and never probes a Windows service, controls a camera, publishes MQTT, restarts Home Assistant or changes backup/restore state. It never uploads credentials, images, logs or packet content. Evidence fields accept only short safe local reference codes.
 - `main` source CI GREEN means the tested application code was promoted; **it does not mean the Windows mini-server was installed, repaired, independently witnessed or accepted**.
 - Six-app integrations remain **DISCONNECTED / HOLD**, private relay **OFF**, QL-275 **UNDER REVIEW / DEFERRED**, and first-party vault **SECURITY HOLD**.
-- Owner choice to build this *workflow* does not authorize physical changes, cross-app connections, a new vault, or a future Build 231.
+- Owner choice to build this *workflow* does not authorize physical changes, cross-app connections or a new vault. Build 231 was separately authorized as an owner review workflow only; its repair scope still requires genuine findings and separate approval.
 
 ## Source verification
 
