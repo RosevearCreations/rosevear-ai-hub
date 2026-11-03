@@ -79,3 +79,19 @@
 .windows-dark-233-entry p { max-width: 64rem; }
 .windows-dark-233-entry button { min-height: 2.65rem; }
 .app-shell[data-theme="dark"] .windows-dark-233-entry { background: #141e2a; color: #f0f5fd; border-color: #738eab; }
+
+/* Build 234: read-only source-bound triage and separately authorized conditional *review*, never repair execution. */
+.windows-dark-finding-234 { margin-block: 2rem 1rem; padding-block: 1.5rem; border-top: 3px solid #9aa6d9; }
+.windows-dark-234-entry { margin-block: 1.6rem .8rem; padding: 1rem; border: 1px solid #6985a8; border-radius: .85rem; }
+.windows-dark-234-entry p { max-width: 64rem; }
+.windows-dark-234-entry button { min-height: 2.65rem; }
+.windows-dark-234-confirmations { display: grid; gap: .8rem; margin-block: 1rem; max-width: 65rem; }
+.windows-dark-234-confirmations label { display: flex; align-items: flex-start; gap: .7rem; line-height: 1.55; }
+.windows-dark-234-confirmations input { flex: 0 0 auto; margin-top: .2rem; width: 1.2rem; height: 1.2rem; }
+.windows-dark-finding-234 button { min-height: 2.6rem; margin-inline-end: .65rem; margin-block-end: .6rem; }
+.windows-dark-finding-234 :is(button, input, select):focus-visible { outline: 3px solid #d7adff; outline-offset: 3px; }
+.windows-dark-finding-234 .windows-triage-229-card small { color: inherit; overflow-wrap: anywhere; }
+.app-shell[data-theme="dark"] :is(.windows-dark-234-entry, .windows-dark-finding-234 .windows-triage-229-card,
+  .windows-dark-finding-234 .windows-triage-229-empty) { background: #131d29; color: #f1f6fd; border-color: #7089a8; }
+.app-shell[data-theme="high-contrast"] :is(.windows-dark-234-entry, .windows-dark-finding-234 .windows-triage-229-card,
+  .windows-dark-finding-234 .windows-triage-229-empty) { background: #172f43; color: #fff; border: 2px solid #bfd5e8; }

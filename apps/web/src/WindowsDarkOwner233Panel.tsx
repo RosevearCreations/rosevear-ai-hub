@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { WindowsDarkFinding234Panel } from "./WindowsDarkFinding234Panel";
 import { CardHelp, type ShellTheme } from "./CommandShell";
 import { safeWindowsFieldReference, safeWindowsInstalledVersion,
   type WindowsFieldDraft, type WindowsFieldScope } from "./windowsFieldAcceptance228";
@@ -21,6 +22,7 @@ export function WindowsDarkOwner233Panel({ theme, field, scope, plans, retests, 
 }) {
   const [visual, setVisual] = useState<Dark233Draft>({});
   const [followups, setFollowups] = useState<Closure233Draft>({});
+  const [showBuild234, setShowBuild234] = useState(false);
   const [notice, setNotice] = useState("");
   const appearance = summarizeDarkOwner233(theme, scope, visual);
   const exceptions = summarizeClosureExceptions233(field, scope, plans, retests, closure231, independent232, followups);
@@ -168,5 +170,12 @@ export function WindowsDarkOwner233Panel({ theme, field, scope, plans, retests, 
     <button type="button" onClick={() => void copyPacket()}>Copy private Build 233 acceptance and exception packet</button>
     {notice ? <p role="status">{notice}</p> : null}
     <p><small>Local browser-session metadata only; do not paste credentials, IPs, camera content or full logs. Six-app DISCONNECTED / HOLD, private relay OFF, QL-275 Under Review, vault SECURITY HOLD. No device, backup, role or live repair operation occurs here.</small></p>
+    {showBuild234 ? <WindowsDarkFinding234Panel theme={theme} scope={scope} visual={visual} /> :
+      <div className="windows-dark-234-entry">
+        <h3>Build 234 · Dark Mode finding triage</h3>
+        <p>Open the optional owner repair-review worksheet only when we have a real installed-Windows Dark Mode finding or blocked check. No repair will be executed or authorized automatically.</p>
+        <button type="button" aria-controls="hub-system-dark-234" aria-expanded={false}
+          onClick={() => setShowBuild234(true)}>Open Build 234 finding triage &amp; conditional authorization review</button>
+      </div>}
   </section>;
 }

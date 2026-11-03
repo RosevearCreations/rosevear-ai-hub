@@ -82,6 +82,7 @@
     "build:230:hub:test": "npm --workspace apps/web run test -- windowsRecoveryRetest230.test.tsx windowsFindingTriage229.test.tsx WindowsFieldAcceptance228Panel.test.tsx SixAppReadinessPanel.test.tsx",
     "build:231:hub:test": "npm --workspace apps/web run test -- windowsOwnerClosure231.test.tsx windowsRecoveryRetest230.test.tsx windowsFindingTriage229.test.tsx WindowsFieldAcceptance228Panel.test.tsx SixAppReadinessPanel.test.tsx",
     "build:232:hub:test": "npm --workspace apps/web run test -- windowsIndependentClosure232.test.tsx shellThemePreference.test.ts ownerPreferences.test.ts OwnerPreferencesPanel.test.tsx windowsOwnerClosure231.test.tsx WindowsFieldAcceptance228Panel.test.tsx",
-    "build:233:hub:test": "npm --workspace apps/web run test -- windowsDarkOwner233.test.tsx windowsIndependentClosure232.test.tsx shellThemePreference.test.ts WindowsFieldAcceptance228Panel.test.tsx"
+    "build:233:hub:test": "npm --workspace apps/web run test -- windowsDarkOwner233.test.tsx windowsIndependentClosure232.test.tsx shellThemePreference.test.ts WindowsFieldAcceptance228Panel.test.tsx",
+    "build:234:hub:test": "npm --workspace apps/web run test -- windowsDarkFinding234.test.tsx windowsDarkOwner233.test.tsx windowsIndependentClosure232.test.tsx WindowsFieldAcceptance228Panel.test.tsx"
   }
 }
