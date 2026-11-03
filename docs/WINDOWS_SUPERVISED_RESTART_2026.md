@@ -65,6 +65,13 @@ In **System → Build 240**, record the actual installed version, backup receipt
 6. **Cameras and inventory:** inspect Hub registered cameras against the previous list and open each required authorized stream long enough to see **moving video**. An online go2rtc API or HA count alone does not establish a working camera.
 7. **Owner comparison:** if the installed System page has **Post-reboot acceptance runbook**, import the private baseline and capture after. Compare identities, service states and actual installed version; record missing/changed devices and task results. An owner self-check is not independent Windows acceptance.
 
+## 3A · Reconcile genuine findings in Build 241 (if installed)
+
+- In **System → Build 240**, copy the code-only after-restart JSON owner handoff to private storage. Open **System → Build 241** and import that exact saved handoff. Missing witnessed restart/sign-in or the five-minute recovery cycle stays HOLD.
+- Distinguish an owner-observed failed/partial/not-configured result from untested, stale or duplicate evidence. A self-report is not an independently authenticated Windows check.
+- For each genuine exception, record a separate safe source code and request **defer**, real on-device retest, independent verification, or a **conditional exact-dependency repair authorization REVIEW**. Only source-linked failed/partial results can request a repair review, with a matching scope and distinct rollback reference; no request authorizes or performs repair.
+- Copy the redacted Build 241 report privately. If the installed Hub does not have Build 241, continue the manual checks; GitHub source GREEN does not install it.
+
 ## 4 · If something did not recover
 
 - **Stop and record the first failing dependency** (task, schema, VM, HA, MQTT, Ollama, API, built web, private HTTPS or camera). Check Task Scheduler history and the existing Hub recovery log before manual intervention.

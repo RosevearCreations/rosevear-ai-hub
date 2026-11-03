@@ -155,6 +155,8 @@ jobs:
         run: npm run test -- windowsReview239.test.tsx windowsReview238.test.tsx --maxWorkers=1
       - name: Build 240 owner-supervised restart evidence, dependency ordering and no-action gates
         run: npm run test -- windowsRestart240.test.tsx windowsReview239.test.tsx --maxWorkers=1
+      - name: Build 241 restart exception provenance, conditional repair REVIEW and no-action gates
+        run: npm run build:241:hub:test
       - name: Test
         # Keep resource-heavy App/owner-workbench regressions isolated from other
         # jsdom suites; simultaneous workers caused non-deterministic CI timeouts.
