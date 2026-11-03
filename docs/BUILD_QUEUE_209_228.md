@@ -1,8 +1,8 @@
 # Rosevear AI Hub — Next 20 Builds (209–228)
 
-**Planning baseline:** Builds 209–231 source promoted to `main` and exact-main CI GREEN. Build 232 is the current separately owner-authorized follow-up and includes the requested low-glare Dark Mode. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
+**Planning baseline:** Builds 209–232 source promoted to `main` and exact-main CI GREEN. Build 233 is the current separately owner-authorized field acceptance and exception-follow-up source change. The requested low-glare Dark Mode shipped in Build 232. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
 
-**Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use the Standard theme consistently, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
+**Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use consistent visual tokens with selectable low-glare Dark Mode, Standard and High contrast, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
 
 ## Owner experience, diagnostics and Windows reliability
 
