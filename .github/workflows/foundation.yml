@@ -143,6 +143,8 @@ jobs:
         run: npm run test -- AuthView.session.test.tsx shellThemePreference.test.ts --maxWorkers=1
       - name: Build 235 application shell appearance and sign-out regressions
         run: npm run test -- App.test.tsx -t 'switches responsive shell preferences|keeps low-glare Dark Mode through sign-out' --maxWorkers=1
+      - name: Build 236 Windows owner appearance evidence and no-repair gates
+        run: npm run test -- windowsAppearanceAcceptance236.test.tsx windowsDarkFinding234.test.tsx --maxWorkers=1
       - name: Test
         # Keep resource-heavy App/owner-workbench regressions isolated from other
         # jsdom suites; simultaneous workers caused non-deterministic CI timeouts.

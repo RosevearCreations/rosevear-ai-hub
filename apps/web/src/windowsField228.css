@@ -95,3 +95,22 @@
   .windows-dark-finding-234 .windows-triage-229-empty) { background: #131d29; color: #f1f6fd; border-color: #7089a8; }
 .app-shell[data-theme="high-contrast"] :is(.windows-dark-234-entry, .windows-dark-finding-234 .windows-triage-229-card,
   .windows-dark-finding-234 .windows-triage-229-empty) { background: #172f43; color: #fff; border: 2px solid #bfd5e8; }
+
+/* Build 236 — owner-only installed-Windows visual acceptance. No background activity. */
+.windows-appearance-236 { margin-block: 1.5rem; padding: clamp(.85rem, 2vw, 1.25rem); border: 2px solid #687fa5; border-radius: .95rem; }
+.windows-appearance-236 :is(button, input, select):focus-visible { outline: 3px solid #dab0ff; outline-offset: 3px; }
+.windows-appearance-236 button { min-height: 2.6rem; margin-block: .5rem; }
+.windows-appearance-236-scope { display: grid; gap: .7rem; margin: 1rem 0; padding: 1rem; border: 1px solid #6b84a2; border-radius: .7rem; }
+.windows-appearance-236-scope > label:not(.windows-appearance-236-check), .windows-appearance-236-followup > label:not(.windows-appearance-236-check) { display: grid; gap: .4rem; max-width: 36rem; }
+.windows-appearance-236-scope input:not([type="checkbox"]), .windows-appearance-236-followup input:not([type="checkbox"]) { max-width: 100%; }
+.windows-appearance-236-check { display: flex; align-items: flex-start; gap: .65rem; line-height: 1.5; }
+.windows-appearance-236-check input { flex: 0 0 auto; width: 1.2rem; height: 1.2rem; margin-top: .2rem; }
+.windows-appearance-236-grid { display: grid; gap: 1rem; }
+.windows-appearance-236-grid .windows-triage-229-card { min-width: 0; }
+.windows-appearance-236-grid .windows-triage-229-card p { overflow-wrap: anywhere; }
+.windows-appearance-236-followup { display: grid; gap: .6rem; margin-top: .85rem; padding: .9rem; border: 1px solid #6d819f; border-radius: .7rem; }
+.windows-appearance-236-followup h4 { margin: 0; }
+.windows-appearance-236-followup button { justify-self: start; }
+.app-shell[data-theme="dark"] .windows-appearance-236 :is(.windows-triage-229-card, .windows-appearance-236-scope, .windows-appearance-236-followup) { background: #121c29; border-color: #697f9c; color: #f2f6fe; }
+.app-shell[data-theme="high-contrast"] .windows-appearance-236 :is(.windows-triage-229-card, .windows-appearance-236-scope, .windows-appearance-236-followup) { background: #172f43; border: 2px solid #bfd5e8; color: #fff; }
+@media (max-width: 760px) { .windows-appearance-236 .windows-triage-229-fields { grid-template-columns: minmax(0, 1fr); } }
