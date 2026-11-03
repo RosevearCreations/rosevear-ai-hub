@@ -34,4 +34,4 @@ Navigate to **System → Windows field acceptance & regression matrix → Window
 
 - `npm run build:232:hub:test` exercises empty/no-network defaults, upstream identity and freshness, independent reviewer and owner-decision separation, blocked/conflicting evidence, typed-code safety, Dark Mode storage and strict saved-view parsing.
 - `npm run web:typecheck`, `npm run web:build`, full web tests and five GitHub Actions jobs on `dev`, PR and exact protected `main` are required for source promotion.
-- No automatic Build 233 is authorized. Field findings and separately approved owner priorities determine any next change.
+- Build 233 was separately owner-authorized for Windows Dark Mode field acceptance and source-linked follow-up *tracking*, not to execute repairs or authenticate an independent field closure. See `docs/BUILD-233-DARK-MODE-OWNER-ACCEPTANCE.md`.

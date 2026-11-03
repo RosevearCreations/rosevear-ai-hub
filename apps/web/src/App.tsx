@@ -373,7 +373,7 @@ export function App() {
         {section === "System" && canAdminister && <SystemConsoleRefresh onNavigate={(target) => setSection(target as Section)} />}
         {/* Preserve on-device owner observations when navigating to a real module; no background probing. */}
         {canAdminister && (section === "System" || windowsFieldReviewVisited) && <div hidden={section !== "System"}>
-          <WindowsFieldAcceptance228Panel onNavigate={(target) => setSection(target as Section)} />
+          <WindowsFieldAcceptance228Panel appearance={appearance} onNavigate={(target) => setSection(target as Section)} />
         </div>}
         {/* Keep the supervised trial mounted while reviewing linked modules; it only stores session data and never polls. */}
         {canAdminister && <div id="hub-system-owner-review" hidden={section !== "System"}>

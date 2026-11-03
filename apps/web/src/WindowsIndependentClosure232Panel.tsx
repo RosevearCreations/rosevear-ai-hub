@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { CardHelp } from "./CommandShell";
+import { WindowsDarkOwner233Panel } from "./WindowsDarkOwner233Panel";
+import { type ShellTheme } from "./CommandShell";
 import {
   safeWindowsFieldReference, type WindowsFieldDraft, type WindowsFieldScope,
 } from "./windowsFieldAcceptance228";
@@ -13,9 +15,9 @@ import {
   type WindowsIndependent232Outcome, type WindowsOwner232Decision,
 } from "./windowsIndependentClosure232";
 
-export function WindowsIndependentClosure232Panel({ draft, scope, plans, retests, closure231 }: {
+export function WindowsIndependentClosure232Panel({ draft, scope, plans, retests, closure231, theme = "dark" }: {
   draft: WindowsFieldDraft; scope: WindowsFieldScope; plans: WindowsTriageDraft;
-  retests: WindowsRetestDraft; closure231: WindowsClosure231Draft;
+  retests: WindowsRetestDraft; closure231: WindowsClosure231Draft; theme?: ShellTheme;
 }) {
   const [decisions, setDecisions] = useState<WindowsIndependent232Draft>({});
   const [notice, setNotice] = useState("");
@@ -162,5 +164,7 @@ export function WindowsIndependentClosure232Panel({ draft, scope, plans, retests
     <button type="button" onClick={() => void copyPacket()}>Copy private Build 232 reconciliation &amp; owner decision packet</button>
     {notice ? <p role="status">{notice}</p> : null}
     <p><small>Reviewer identity is unverified; no independent field closure or physical Windows acceptance is claimed. Six-app integration DISCONNECTED / HOLD; private relay OFF; QL-275 Under Review; vault SECURITY HOLD.</small></p>
+    <WindowsDarkOwner233Panel theme={theme} field={draft} scope={scope} plans={plans}
+      retests={retests} closure231={closure231} independent232={decisions} />
   </section>;
 }
