@@ -1,6 +1,6 @@
 # Rosevear AI Hub — Next 20 Builds (209–228)
 
-**Planning baseline:** Builds 209–233 source promoted to `main` and exact-main CI GREEN. Build 234 is the current separately owner-authorized Dark Mode finding triage and conditional *review* source change. Low-glare Dark Mode shipped in Build 232. This remains a requirements queue; source promotion never certifies installed Windows acceptance.
+**Planning baseline:** Builds 209–234 source promoted to `main` and exact-main CI GREEN. Build 235 is owner-authorized source-only Dark Mode correction and general interface polish; it does not authorize actual field repairs. Low-glare Dark Mode shipped in Build 232. Source promotion never certifies installed Windows acceptance.
 
 **Priority:** Make the installed Windows Hub useful and reliable for the owners first; improve discoverability and real device/camera diagnostics; then develop safe workshop, operations and security features. Keep existing working screens and data. Every screen should use consistent visual tokens with selectable low-glare Dark Mode, Standard and High contrast, respond well on laptop/tablet and offer contextual ⓘ help, accessible keyboard operation and plain-language statuses.
 
@@ -152,12 +152,17 @@
 - Provide simple owner retest/defer decisions without implying a repair plan or execution permission. Export a redacted, session-local packet for an independently reviewed future authorization process.
 - **Accept:** no synthetic findings, no false outside reviewer authentication, no actual repair authorization or execution (always 0), freshness and duplicate-reference rejection, no provider/device/network action, readable low-glare UI, lazy mounting to protect earlier Windows review performance and retained six-app/relay/QL-275/vault holds. See `docs/BUILD-234-DARK-MODE-FINDING-TRIAGE.md`.
 
+### Build 235 — Dark Mode Usability Corrections & General Interface Polish (OWNER AUTHORIZED, SOURCE ONLY)
+- Correct the source-observed sign-out reset to Standard and apply low-glare appearance to sign-in/loading/error screens. Preserve the local display preference without persisting credentials or protected content.
+- Add an accessible top-bar theme selector and refine lower-glare navigation/hero surfaces, focus visibility and narrow-screen layout. Retain Standard and High contrast options.
+- **Accept:** regression tests for pre-login theme switching, sign-out persistence, existing Build 234 owner evidence/authorization HOLD gates, accessible native inputs, typecheck, build and exact-main CI. No installed Windows or physical-device acceptance claims. See `docs/BUILD-235-LOW-GLARE-INTERFACE-POLISH.md`.
+
 ## Delivery and safety rules for every build
 
-1. Build numbers 209–228 were the agreed queue; Builds 229–234 were separately authorized. Completed builds are labeled **SOURCE PROMOTED**. Continue only with owner-authorized follow-ups. Update this document as requirements evolve.
+1. Build numbers 209–228 were the agreed queue; Builds 229–235 were separately authorized, with Build 235 limited to the two owner-requested interface improvements. Continue only with owner-authorized follow-ups. Update this document as requirements evolve.
 2. Feature branch → reviewed `dev` merge and checks → reviewed `main` promotion → **exact-main** required CI green. Record PRs, SHA, workflow and outstanding on-device tests. Never claim Production GREEN without evidence.
 3. No breaking changes to working screens, no fabricated real-world measurements, no hidden credentials, no background actuation, no unpaid provider dependencies without owner approval. Keep free-tier constraints visible.
 4. QL-275 remains **Under Review / owner-deferred**; six-app integration is **DISCONNECTED/HOLD**, private relay **OFF**, authenticated gateway GETs **0**, and no owner TEST permission is inferred. Removing the word HELD from the *project work queue* does not remove technical security restrictions.
 5. First-party password/document Vault remains **SECURITY HOLD (0/6 independently verified)** until separate owner authorization and independent cryptographic/security acceptance. Physical Windows and camera acceptance are never equated to GitHub CI.
 
-**Queue tracking:** 20 originally defined builds (209–228) and Builds 229–233 source promoted to `main`; Build 234 separately authorized for a Dark Mode source-bound owner finding triage and conditional *review-request workflow only*. No automatic Build 235 or actual repair batch is queued: genuine installed-Windows findings, outside authentication and separate owner permission determine future work. Independent device, six-app and vault review gates are separate from source promotion.
+**Queue tracking:** 20 originally defined builds (209–228) and Builds 229–234 source promoted to `main`; Build 235 explicitly authorized by the owner for source-observed Dark Mode usability corrections and general UI polish only. No actual Build 234 field-repair batch is authorized: genuine installed-Windows findings, outside authentication and separate owner permission determine future repair work. Independent device, six-app and vault review gates are separate from source promotion.

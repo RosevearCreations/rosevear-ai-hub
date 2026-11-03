@@ -17,7 +17,7 @@ import { AuditView } from "./AuditView";
 import { AuthView } from "./AuthView";
 import { CameraView } from "./CameraView";
 import { CardHelp, CommandPalette, type ShellDensity, type ShellTheme } from "./CommandShell";
-import { loadShellTheme, saveShellTheme } from "./shellThemePreference";
+import { loadShellTheme, parseShellTheme, saveShellTheme } from "./shellThemePreference";
 import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
 import { SystemWorkspaceGuide } from "./SystemWorkspaceGuide";
 import { SystemConsoleRefresh } from "./SystemConsoleRefresh";
@@ -193,7 +193,7 @@ export function App() {
 
   if (auth.kind === "loading") {
     return (
-      <main className="auth-shell">
+      <main className="auth-shell" data-theme={appearance}>
         <section className="auth-card" role="status">
           <p className="eyebrow">Rosevear AI Hub</p>
           <h1>Checking local account…</h1>
@@ -204,7 +204,7 @@ export function App() {
 
   if (auth.kind === "error") {
     return (
-      <main className="auth-shell">
+      <main className="auth-shell" data-theme={appearance}>
         <section className="auth-card">
           <p className="eyebrow">Rosevear AI Hub</p>
           <h1>Backend unavailable</h1>
@@ -221,6 +221,8 @@ export function App() {
   if (!auth.status.authenticated || !auth.status.user) {
     return (
       <AuthView
+          theme={appearance}
+          onThemeChange={setAppearance}
           sessionNotice={sessionExpired
             ? "Your Hub session was not accepted. Sign in again to restore protected features. Your saved data has not been changed."
             : undefined}
@@ -250,7 +252,8 @@ export function App() {
       setCommandOpen(false);
       setMobileMenuOpen(false);
       setDensity("comfortable");
-      setAppearance("standard");
+      // The display theme is not an account secret. Keep the low-glare choice
+      // after sign-out so the next local sign-in does not flash a bright theme.
       setWindowsFieldReviewVisited(false);
       setKnowledgeQuestion("");
       setHealth({ kind: "loading" });
@@ -290,6 +293,14 @@ export function App() {
             </button>)}
         </nav>
         <div className="hub-topbar-account"><span><strong>{user.username}</strong> · {roleLabel(user)}</span>
+          <label className="hub-quick-appearance" htmlFor="hub-topbar-theme">Appearance
+            <select id="hub-topbar-theme" aria-label="Quick display theme" value={appearance}
+              onChange={event => setAppearance(parseShellTheme(event.target.value))}>
+              <option value="dark">Dark Mode</option>
+              <option value="standard">Standard</option>
+              <option value="high-contrast">High contrast</option>
+            </select>
+          </label>
           <button type="button" onClick={() => void signOut()}>Sign out</button></div>
       </header>
       <aside className="sidebar">
@@ -340,7 +351,7 @@ export function App() {
                 onClick={() => setAppearance(value)}>{value === "dark" ? "Dark Mode" : value === "standard" ? "Standard" : "High contrast"}</button>
             ))}
           </fieldset>
-          <CardHelp title="Interface controls">Dark Mode uses a softer near-black background and is the default to reduce glare; Standard is midnight-blue and High contrast is a brighter high-contrast alternative. The selected theme is remembered on this browser without storing credentials. Owners can also save named display views in System. Find screen only navigates authorized modules and cannot control devices.</CardHelp>
+          <CardHelp title="Interface controls">Change appearance here, in the top bar, or at sign-in. Dark Mode uses a softer near-black background and is the default to reduce glare; Standard is midnight-blue and High contrast is a brighter high-contrast alternative. The selected theme is remembered on this browser, including after sign-out, without storing credentials. Owners can also save named display views in System. Find screen only navigates authorized modules and cannot control devices.</CardHelp>
         </div>
 
         <PwaInstallPanel />

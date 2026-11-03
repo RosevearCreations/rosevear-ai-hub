@@ -28,7 +28,7 @@ describe("Hub login cookie acceptance", () => {
     vi.mocked(login).mockResolvedValue(owner);
     vi.mocked(getAuthStatus).mockResolvedValue(status);
     const onAuthenticated = vi.fn();
-    render(<AuthView status={status} onAuthenticated={onAuthenticated} />);
+    render(<AuthView status={status} onAuthenticated={onAuthenticated} theme="dark" onThemeChange={vi.fn()} />);
     submit();
     expect(await screen.findByRole("alert")).toHaveTextContent("session cookie was not retained");
     expect(onAuthenticated).not.toHaveBeenCalled();
@@ -39,8 +39,16 @@ describe("Hub login cookie acceptance", () => {
       bootstrap_required: false, authenticated: true, user: owner,
     });
     const onAuthenticated = vi.fn();
-    render(<AuthView status={status} onAuthenticated={onAuthenticated} />);
+    render(<AuthView status={status} onAuthenticated={onAuthenticated} theme="dark" onThemeChange={vi.fn()} />);
     submit();
     await waitFor(() => expect(onAuthenticated).toHaveBeenCalledWith(owner));
+  });
+  it("offers low-glare appearance before login without submitting credentials", () => {
+    const onThemeChange = vi.fn();
+    render(<AuthView status={status} onAuthenticated={vi.fn()} theme="dark" onThemeChange={onThemeChange} />);
+    expect(document.querySelector(".auth-shell")).toHaveAttribute("data-theme", "dark");
+    fireEvent.change(screen.getByLabelText("Display theme"), { target: { value: "high-contrast" } });
+    expect(onThemeChange).toHaveBeenCalledWith("high-contrast");
+    expect(login).not.toHaveBeenCalled();
   });
 });

@@ -54,6 +54,10 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
         };
       }
 
+      if (url.endsWith("/api/v1/auth/logout")) {
+        return { ok: true, json: async () => ({ ok: true, message: "Signed out" }) };
+      }
+
       if (url.endsWith("/api/v1/confirmations/confirmation-1/approve")) {
         return {
           ok: true,
@@ -505,6 +509,10 @@ describe("App", () => {
     const shell = document.querySelector(".app-shell");
     expect(shell).toHaveAttribute("data-theme", "dark");
     expect(screen.getByRole("button", { name: "Dark Mode" })).toHaveAttribute("aria-pressed", "true");
+    const quickTheme = screen.getByRole("combobox", { name: "Quick display theme" });
+    expect(quickTheme).toHaveValue("dark");
+    fireEvent.change(quickTheme, { target: { value: "standard" } });
+    expect(shell).toHaveAttribute("data-theme", "standard");
     fireEvent.click(screen.getByRole("button", { name: "High contrast" }));
     expect(shell).toHaveAttribute("data-density", "compact");
     expect(shell).toHaveAttribute("data-theme", "high-contrast");
@@ -522,6 +530,21 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Workshop" })).toHaveAttribute("aria-current", "page");
     expect(screen.queryByRole("dialog", { name: "Jump to a workspace" })).not.toBeInTheDocument();
   }, 45_000);
+
+  test("keeps low-glare Dark Mode through sign-out and lets us choose appearance before login", async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument());
+    fireEvent.change(screen.getByRole("combobox", { name: "Quick display theme" }), { target: { value: "standard" } });
+    fireEvent.click(screen.getByRole("button", { name: "Dark Mode" }));
+    expect(localStorage.getItem(SHELL_THEME_STORAGE_KEY)).toBe("dark");
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument());
+    expect(document.querySelector(".auth-shell")).toHaveAttribute("data-theme", "dark");
+    expect(screen.getByLabelText("Display theme")).toHaveValue("dark");
+    fireEvent.change(screen.getByLabelText("Display theme"), { target: { value: "high-contrast" } });
+    expect(document.querySelector(".auth-shell")).toHaveAttribute("data-theme", "high-contrast");
+    expect(localStorage.getItem(SHELL_THEME_STORAGE_KEY)).toBe("high-contrast");
+  });
 
   test("keeps Standard theme owner issue findings while opening and returning from real workspaces", async () => {
     render(<App />);
