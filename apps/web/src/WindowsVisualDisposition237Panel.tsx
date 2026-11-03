@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CardHelp, type ShellTheme } from "./CommandShell";
+import { WindowsReview238Panel } from "./WindowsReview238Panel";
 import { safeWindowsFieldReference } from "./windowsFieldAcceptance228";
 import type { Appearance236Draft, Appearance236Scope, Appearance236Symptom,
   Appearance236Viewport } from "./windowsAppearanceAcceptance236";
@@ -167,5 +168,6 @@ export function WindowsVisualDisposition237Panel({ theme, scope, sourceDraft }: 
       <p><small>All evidence is code-only and session-private. Six apps DISCONNECTED / HOLD, relay OFF, QL-275 Under Review, vault SECURITY HOLD. Do not enter names, addresses, IPs, private URLs, logs, device IDs or credentials.</small></p>
     </div>}
     {notice && <p role="status">{notice}</p>}
+    <WindowsReview238Panel theme={theme} scope={scope} sourceDraft={sourceDraft} visualDraft={draft} />
   </section>;
 }

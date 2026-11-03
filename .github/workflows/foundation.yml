@@ -147,6 +147,8 @@ jobs:
         run: npm run test -- windowsAppearanceAcceptance236.test.tsx windowsDarkFinding234.test.tsx --maxWorkers=1
       - name: Build 237 Windows visual disposition source and repair-readiness gates
         run: npm run test -- windowsVisualDisposition237.test.tsx windowsAppearanceAcceptance236.test.tsx --maxWorkers=1
+      - name: Build 238 Windows owner review reply evidence and repair HOLD gates
+        run: npm run test -- windowsReview238.test.tsx windowsVisualDisposition237.test.tsx --maxWorkers=1
       - name: Test
         # Keep resource-heavy App/owner-workbench regressions isolated from other
         # jsdom suites; simultaneous workers caused non-deterministic CI timeouts.
