@@ -40,6 +40,7 @@ import { OwnerFieldTrialWorkbench } from "./OwnerFieldTrialWorkbench";
 import { WindowsFieldAcceptance228Panel } from "./WindowsFieldAcceptance228Panel";
 import { WindowsAppearanceAcceptance236Panel } from "./WindowsAppearanceAcceptance236Panel";
 import { WindowsRestart240Panel } from "./WindowsRestart240Panel";
+import { WindowsRestart241Panel } from "./WindowsRestart241Panel";
 import { VaultArchitectureView } from "./VaultArchitectureView";
 import { IntegrationHealthPanel } from "./IntegrationHealthPanel";
 import { RestartAppsPanel } from "./RestartAppsPanel";
@@ -390,6 +391,7 @@ export function App() {
           <WindowsAppearanceAcceptance236Panel theme={appearance}
             onNavigate={(target) => setSection(target)} />
           <WindowsRestart240Panel />
+          <WindowsRestart241Panel />
         </div>}
         {/* Keep the supervised trial mounted while reviewing linked modules; it only stores session data and never polls. */}
         {canAdminister && <div id="hub-system-owner-review" hidden={section !== "System"}>
