@@ -44,3 +44,13 @@
 .windows-retest-230 .windows-triage-229-card button { margin-inline-end: .6rem; margin-block-end: .55rem; }
 .windows-retest-230 .windows-triage-229-card p small { color: inherit; overflow-wrap: anywhere; }
 .app-shell[data-theme="high-contrast"] .windows-retest-230 :is(.windows-triage-229-import, .windows-triage-229-empty, .windows-triage-229-card) { background: #172f43; color: #fff; border-color: #bfd5e8; }
+
+/* Build 231: accessible owner-only review cards, no automated closure actions. */
+.windows-closure-231 { margin-block: 2rem 1rem; padding-block: 1.5rem; border-top: 3px solid #6688ad; }
+.windows-closure-231-confirmations { display: grid; gap: .8rem; max-width: 64rem; margin-block: 1rem; }
+.windows-closure-231-confirmations label { display: flex; gap: .6rem; align-items: flex-start; line-height: 1.55; }
+.windows-closure-231-confirmations input { flex: 0 0 auto; margin-top: .2rem; width: 1.2rem; height: 1.2rem; }
+.windows-closure-231 button { margin-inline-end: .6rem; margin-block-end: .55rem; }
+.windows-closure-231 button:focus-visible, .windows-closure-231 :is(input, select):focus-visible { outline: 3px solid #db8938; outline-offset: 2px; }
+.windows-closure-231 .windows-triage-229-card p small { color: inherit; overflow-wrap: anywhere; }
+.app-shell[data-theme="high-contrast"] .windows-closure-231 :is(.windows-triage-229-card, .windows-triage-229-empty) { background: #172f43; color: #fff; border-color: #bfd5e8; }

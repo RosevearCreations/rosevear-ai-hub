@@ -19,6 +19,12 @@ import {
   summarizeWindowsRecoveryRetests, windows230ChangeKey, windows230SourceKey, windowsRetestGateLabels,
   type WindowsRetestCaseId, type WindowsRetestDraft, type WindowsRetestOutcome, type WindowsRetestRecord,
 } from "./windowsRecoveryRetest230";
+import {
+  defaultClosure231Entry, formatWindowsClosure231Packet, summarizeWindowsClosure231,
+  windows231EvidenceKey, windows231SourceKey, windowsClosure231Labels,
+  type WindowsClosure231Draft, type WindowsClosure231Entry, type WindowsClosure231Id,
+  type WindowsClosure231Outcome,
+} from "./windowsOwnerClosure231";
 
 type ReviewFilter = "all" | "attention" | "passed";
 const outcomeLabels: Record<WindowsFieldOutcome | "needs_evidence", string> = {
@@ -33,17 +39,20 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
   const [draft, setDraft] = useState<WindowsFieldDraft>({});
   const [triage, setTriage] = useState<WindowsTriageDraft>({});
   const [retests, setRetests] = useState<WindowsRetestDraft>({});
+  const [closure231, setClosure231] = useState<WindowsClosure231Draft>({});
   const [handoffInput, setHandoffInput] = useState("");
   const [triageInput, setTriageInput] = useState("");
   const [filter, setFilter] = useState<ReviewFilter>("all");
   const [notice, setNotice] = useState("");
   const [triageNotice, setTriageNotice] = useState("");
   const [retestNotice, setRetestNotice] = useState("");
+  const [closureNotice, setClosureNotice] = useState("");
   const scope = { installedVersion, physicallyWitnessed };
   const summary = summarizeWindowsFieldReview(draft, scope);
   const followups = windowsFieldRoadmap(draft, scope);
   const triageSummary = summarizeWindowsTriage(draft, scope, triage);
   const retestSummary = summarizeWindowsRecoveryRetests(draft, scope, triage, retests);
+  const closureSummary = summarizeWindowsClosure231(draft, scope, triage, retests, closure231);
   const visible = summary.rows.filter(row => filter === "all" ||
     (filter === "passed" ? row.state === "pass" : row.state !== "pass"));
 
@@ -102,6 +111,37 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
     setRetestNotice("A fresh owner-reported retest time was recorded locally. No equipment or service was operated by this screen.");
   }
 
+  function updateClosure231(id: WindowsClosure231Id, change: Partial<WindowsClosure231Entry>) {
+    const row = closureSummary.rows.find(item => item.id === id);
+    if (!row) return;
+    setClosure231(current => {
+      const previous = current[id] ?? defaultClosure231Entry;
+      const sourceKey = row.gate === "awaiting_229_scope" || row.gate === "awaiting_230_retest"
+        ? "" : windows231SourceKey(row.original, scope, row.prior);
+      const next: WindowsClosure231Entry = { ...previous, ...change, sourceKey };
+      // Every altered outcome or proof must receive an explicit fresh field timestamp.
+      if (previous.sourceKey !== sourceKey || ["installedVersion", "outcome", "basis", "firstReference", "secondReference",
+        "ownerWitnessed", "safetyReviewed"].some(key => key in change)) {
+        next.recordedAt = "";
+        next.reviewedEvidenceKey = "";
+      }
+      return { ...current, [id]: next };
+    });
+    setClosureNotice("");
+  }
+
+  function recordClosure231(id: WindowsClosure231Id) {
+    const row = closureSummary.rows.find(item => item.id === id);
+    if (!row || row.gate === "awaiting_229_scope" || row.gate === "awaiting_230_retest") return;
+    setClosure231(current => {
+      const previous = current[id] ?? defaultClosure231Entry;
+      const next = { ...previous, sourceKey: windows231SourceKey(row.original, scope, row.prior),
+        recordedAt: new Date().toISOString() };
+      return { ...current, [id]: { ...next, reviewedEvidenceKey: windows231EvidenceKey(next) } };
+    });
+    setClosureNotice("The Windows observation timestamp was recorded locally. This does not close any issue, change access or authorize a repair.");
+  }
+
   function importHandoff() {
     const result = parseWindowsFieldHandoff228(handoffInput);
     if (!result.ok) { setTriageNotice(result.error); return; }
@@ -110,6 +150,7 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
     setPhysicallyWitnessed(result.scope.physicallyWitnessed);
     setTriage({});
     setRetests({});
+    setClosure231({});
     setHandoffInput("");
     setTriageNotice("Build 228 owner-reported handoff loaded and prior triage reset. Source records remain self-reported and unverified.");
   }
@@ -119,6 +160,7 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
     if (!result.ok) { setRetestNotice(result.error); return; }
     setTriage(result.plans);
     setRetests({});
+    setClosure231({});
     setTriageInput("");
     setRetestNotice("Build 229 owner plan loaded. Prior retests were reset; no repair, on-device acceptance or closure was inferred.");
   }
@@ -147,6 +189,15 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
       setRetestNotice("Build 230 owner-reported retest packet copied privately. No issue was independently closed or any device controlled.");
     } catch {
       setRetestNotice("Clipboard unavailable; the retest packet stays only in this browser session.");
+    }
+  }
+
+  async function copyClosure231() {
+    try {
+      await navigator.clipboard.writeText(formatWindowsClosure231Packet(draft, scope, triage, retests, closure231));
+      setClosureNotice("Owner-only Build 231 review packet copied. No independent issue closure, authorization or uploaded evidence is implied.");
+    } catch {
+      setClosureNotice("Clipboard unavailable. This private review is held only in the current browser session.");
     }
   }
 
@@ -361,6 +412,79 @@ export function WindowsFieldAcceptance228Panel({ onNavigate }: { onNavigate: (se
       <button type="button" onClick={() => void copyRetestPacket()}>Copy private Build 230 retest comparison packet</button>
       {retestNotice ? <p role="status">{retestNotice}</p> : null}
       <p><small>All recorded outcomes remain owner-reported. Zero issues are independently closed; no device is controlled, no restore or restart is executed, and six-app integration, relay, QL-275 and vault holds remain unchanged.</small></p>
+    </section>
+    <section className="windows-closure-231" id="hub-system-closure-231" aria-labelledby="windows-closure-231-title">
+      <header className="hub-search-header"><div>
+        <p className="eyebrow">Build 231 · owner-source closure review</p>
+        <h2 id="windows-closure-231-title">Accessibility, roles, backup &amp; resource closure</h2>
+      </div><CardHelp title="Separate authorization and proof requirements">Only actual failed/blocked Build 228 observations and a matching Build 229 owner-scoped plan enter this queue. Backup and resources also need a fresh, source-matched Build 230 candidate. Every check requires two distinct Windows evidence references and a fresh owner timestamp. Even a reported pass remains a private owner review packet: independent verification and a separately authorized repair/closure are still required.</CardHelp></header>
+      <p>Review Standard theme, keyboard focus, owner/household role isolation, encrypted backups with isolated restore, and measurable CPU/memory/disk/local AI pressure on the installed Windows Hub. This screen is read-and-record only: no account changes, restore, device actions, service restarts or new integrations.</p>
+      <div className="audit-summary" aria-label="Build 231 owner closure totals">
+        <div><span>Authentic owner-reported findings</span><strong>{closureSummary.scopedFindings}</strong></div>
+        <div><span>Prior source/retest gaps</span><strong>{closureSummary.needsEarlierSource}</strong></div>
+        <div><span>Owner packets ready (unverified)</span><strong>{closureSummary.ownerPacketsReady}</strong></div>
+        <div><span>Independently closed</span><strong>{closureSummary.independentClosures}</strong></div>
+      </div>
+      <p role="status">{closureSummary.scopedFindings
+        ? `${closureSummary.scopedFindings} owner-reported findings have a Build 228 source. Their Build 229/230 gates and fresh Windows evidence must be reviewed before any separate closure request.`
+        : "No authentic installed-Windows accessibility, role, backup or resource findings are in scope. No repair, closure or production field acceptance is claimed."}</p>
+      {closureSummary.rows.length ? <div className="windows-triage-229-list" aria-label="Build 231 source-linked Windows closure reviews">
+        {closureSummary.rows.map(row => <article className="windows-triage-229-card" key={row.id}>
+          <div className="windows-triage-229-card-head"><div>
+            <h3>{row.label}</h3>
+            <p><strong>Original Windows finding:</strong> {row.original.outcome} · Build 228 {row.original.reference || "MISSING"} · Build 229 {row.original.plan.priority}/{row.original.plan.decision}</p>
+            {(row.id === "backup" || row.id === "resources") ? <p><strong>Required Build 230 retest:</strong> {row.prior ? windowsRetestGateLabels[row.prior.gate] : "Not recorded"}</p> : null}
+            <p>{row.guidance}</p>
+          </div><span className="windows-field-228-state">{windowsClosure231Labels[row.gate]}</span></div>
+          <div className="windows-triage-229-fields">
+            <label htmlFor={`windows-231-version-${row.id}`}>Installed Windows version observed for this check
+              <input id={`windows-231-version-${row.id}`} maxLength={60} value={row.entry.installedVersion}
+                placeholder="Exact installed release identifier" onChange={event => updateClosure231(row.id, { installedVersion: safeWindowsInstalledVersion(event.target.value) })} />
+            </label>
+            <label htmlFor={`windows-231-outcome-${row.id}`}>Fresh owner outcome
+              <select id={`windows-231-outcome-${row.id}`} value={row.entry.outcome}
+                onChange={event => updateClosure231(row.id, { outcome: event.target.value as WindowsClosure231Outcome })}>
+                <option value="not_run">Not run</option><option value="pass">Owner-observed pass (not independently closed)</option>
+                <option value="still_failing">Still failing</option><option value="blocked">Blocked</option>
+              </select>
+            </label>
+            <label htmlFor={`windows-231-basis-${row.id}`}>Observed evidence basis
+              <select id={`windows-231-basis-${row.id}`} value={row.entry.basis}
+                onChange={event => updateClosure231(row.id, { basis: event.target.value as WindowsFieldBasis })}>
+                <option value="none">Not observed</option><option value="direct">Direct installed-Windows observation</option>
+                <option value="local_log">Redacted local log reference</option><option value="supervised_retest">Supervised field retest</option>
+              </select>
+            </label>
+            <label htmlFor={`windows-231-first-${row.id}`}>{row.first} (safe code)
+              <input id={`windows-231-first-${row.id}`} maxLength={80} value={row.entry.firstReference}
+                placeholder="WIN-231-A" onChange={event => updateClosure231(row.id, { firstReference: safeWindowsFieldReference(event.target.value) })} />
+            </label>
+            <label htmlFor={`windows-231-second-${row.id}`}>{row.second} (safe code)
+              <input id={`windows-231-second-${row.id}`} maxLength={80} value={row.entry.secondReference}
+                placeholder="WIN-231-B" onChange={event => updateClosure231(row.id, { secondReference: safeWindowsFieldReference(event.target.value) })} />
+            </label>
+            <label htmlFor={`windows-231-reviewer-${row.id}`}>Independent reviewer reference (optional; not verified)
+              <input id={`windows-231-reviewer-${row.id}`} maxLength={80} value={row.entry.reviewerReference}
+                placeholder="Only a safe tracking code" onChange={event => updateClosure231(row.id, { reviewerReference: safeWindowsFieldReference(event.target.value) })} />
+            </label>
+          </div>
+          <div className="windows-closure-231-confirmations">
+            <label><input type="checkbox" checked={row.entry.ownerWitnessed}
+              onChange={event => updateClosure231(row.id, { ownerWitnessed: event.target.checked })} />
+              I observed this exact check on our installed Windows Hub, not in a browser simulator or CI.</label>
+            <label><input type="checkbox" checked={row.entry.safetyReviewed}
+              onChange={event => updateClosure231(row.id, { safetyReviewed: event.target.checked })} />
+              I reviewed the applicable safety, permission, backup isolation and provider boundaries; no unapproved action was run.</label>
+          </div>
+          <p><small>Build 231 fresh field observation: {row.entry.recordedAt || "not recorded"} · Gate: {windowsClosure231Labels[row.gate]}. Even a ready packet requires independent review and a separate owner closure decision.</small></p>
+          <button type="button" disabled={row.gate === "awaiting_229_scope" || row.gate === "awaiting_230_retest"}
+            onClick={() => recordClosure231(row.id)}>Record fresh Build 231 Windows check</button>
+          <button type="button" onClick={() => onNavigate(row.original.section)}>Review {row.original.section} module</button>
+        </article>)}
+      </div> : <p className="windows-triage-229-empty">Start with authentic owner observations in Build 228 and source-linked Build 229 triage above. A GitHub GREEN check, missing measurements or prior owner pass cannot create a Build 231 closure.</p>}
+      <button type="button" onClick={() => void copyClosure231()}>Copy private Build 231 owner review packet</button>
+      {closureNotice ? <p role="status">{closureNotice}</p> : null}
+      <p><small>Zero issues independently closed. No automatic remediation, production role change, private restore, vault activation, six-app connection or relay enablement. QL-275 stays Under Review.</small></p>
     </section>
   </section>;
 }
