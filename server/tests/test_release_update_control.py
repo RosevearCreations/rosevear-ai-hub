@@ -27,7 +27,7 @@ def state(tmp_path, monkeypatch, *, task="configured", recovery="enabled", windo
         json.dumps({"state": "ADOPTED", "release": A, "detail": "DO_NOT_SHARE"})
     )
     key = tmp_path / "logs" / "private-recovery" / "backup-key.dpapi"
-    key.parent.mkdir(parents=True)
+    key.parent.mkdir(parents=True, exist_ok=True)
     key.write_text("not a real key - fixture")
     (tmp_path / "scripts").mkdir(exist_ok=True)
     (tmp_path / "scripts" / "hub-auto-update.ps1").write_text("fixture")
