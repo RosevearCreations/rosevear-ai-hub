@@ -57,6 +57,7 @@ import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
 import { HubUpdatePanel, HubUpdateRefreshObserver } from "./HubUpdatePanel";
+import { ClientRestartControl } from "./ClientRestartControl";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
 import { UsersView } from "./UsersView";
@@ -316,6 +317,7 @@ export function App() {
           </button>
           {canAdminister && <button type="button" className="hub-update-top-button"
             onClick={() => setSection("System")}>Update Hub</button>}
+          <ClientRestartControl />
           <button type="button" onClick={() => void signOut()}>Sign out</button></div>
       </header>
       <aside className="sidebar">

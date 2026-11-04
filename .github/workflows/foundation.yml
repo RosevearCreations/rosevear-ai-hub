@@ -161,6 +161,8 @@ jobs:
         run: npm run test -- windowsRestart242.test.tsx windowsRestart241.test.tsx windowsRestart240.test.tsx --maxWorkers=1
       - name: Build 242 real client Dark Mode controls and modern shell regression
         run: npm run test -- App.test.tsx -t 'switches responsive shell preferences|keeps low-glare Dark Mode' --maxWorkers=1
+      - name: Build 245 owner-confirmed client restart, offline retention and update-control regressions
+        run: npm run test -- ClientRestartControl.test.tsx HubUpdatePanel.test.tsx --maxWorkers=1
       - name: Test
         # Keep resource-heavy App/owner-workbench regressions isolated from other
         # jsdom suites; simultaneous workers caused non-deterministic CI timeouts.

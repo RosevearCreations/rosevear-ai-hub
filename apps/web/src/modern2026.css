@@ -326,6 +326,15 @@
   box-shadow: 0 6px 20px rgb(24 10 78 / .24);
 }
 .app-shell .hub-update-top-button:hover { filter: brightness(1.11); }
+.app-shell .hub-client-restart { position: relative; }
+.app-shell .hub-restart-top-button { min-height: 2.5rem; border: 1px solid #89b9be; border-radius: .75rem; padding: .6rem .9rem; background: linear-gradient(135deg,#136f79,#394b96); color: white; font-weight: 700; cursor: pointer; }
+.app-shell .hub-restart-top-button:hover { filter: brightness(1.12); }
+.app-shell .hub-restart-top-button:focus-visible { outline: 3px solid #eedbff; outline-offset: 3px; }
+.app-shell .hub-restart-confirm { position: absolute; z-index: 100; right: 0; top: calc(100% + .65rem); width: min(24rem,85vw); padding: 1rem; border: 1px solid #86a8d2; border-radius: 1rem; box-shadow: 0 16px 38px #0005; background: #17243d; color: #fff; }
+.app-shell .hub-restart-confirm p { line-height: 1.5; margin: .6rem 0; }
+.app-shell .hub-restart-confirm-actions { display: flex; flex-wrap: wrap; gap: .6rem; }
+.app-shell .hub-restart-confirm-actions button { min-height: 2.6rem; padding: .55rem .75rem; border-radius: .6rem; border: 1px solid #9aaed1; }
+.app-shell .hub-restart-confirm-actions button:first-child { background: #a4e0d8; color: #102235; font-weight: 700; }
 .app-shell .hub-update-top-button:focus-visible { outline: 3px solid #eedbff; outline-offset: 3px; }
 .app-shell .hub-update-operator { border: 1px solid #6f67af; overflow-wrap: anywhere; }
 .app-shell .hub-update-heading { display: flex; justify-content: space-between; align-items: start; gap: 1rem; }
