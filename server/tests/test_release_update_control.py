@@ -144,34 +144,47 @@ def test_endpoint_auth_role_origin_consent_and_hold(tmp_path, monkeypatch):
     url = "/api/v1/system/update-control"
     assert client.get(url).status_code == 401
     assert client.post(url + "/request", json={}).status_code == 401
-    assert client.post(
-        "/api/v1/auth/bootstrap",
-        json={"username": "owner", "password": "owner-very-secret-123"},
-    ).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/bootstrap",
+            json={"username": "owner", "password": "owner-very-secret-123"},
+        ).status_code
+        == 201
+    )
 
     monkeypatch.setattr(control, "inspect_update", lambda root: {"blockers": []})
     called = []
-    monkeypatch.setattr(
-        control, "launch_enrolled_update", lambda: called.append(True) or True
+    monkeypatch.setattr(control, "launch_enrolled_update", lambda: called.append(True) or True)
+    assert (
+        client.post(
+            url + "/request", json={"consent": True, "confirmation": "START VERIFIED UPDATE"}
+        ).status_code
+        == 403
     )
-    assert client.post(
-        url + "/request", json={"consent": True, "confirmation": "START VERIFIED UPDATE"}
-    ).status_code == 403
     monkeypatch.setattr(control, "validate_local_operator", lambda req: None)
-    assert client.post(
-        url + "/request", json={"consent": False, "confirmation": "START VERIFIED UPDATE"}
-    ).status_code == 422
-    assert client.post(
-        url + "/request", json={"consent": True, "confirmation": "NOT VERIFIED"}
-    ).status_code == 422
+    assert (
+        client.post(
+            url + "/request", json={"consent": False, "confirmation": "START VERIFIED UPDATE"}
+        ).status_code
+        == 422
+    )
+    assert (
+        client.post(
+            url + "/request", json={"consent": True, "confirmation": "NOT VERIFIED"}
+        ).status_code
+        == 422
+    )
     assert called == []
 
     monkeypatch.setattr(
         control, "inspect_update", lambda root: {"blockers": ["release_task_not_enrolled"]}
     )
-    assert client.post(
-        url + "/request", json={"consent": True, "confirmation": "START VERIFIED UPDATE"}
-    ).status_code == 409
+    assert (
+        client.post(
+            url + "/request", json={"consent": True, "confirmation": "START VERIFIED UPDATE"}
+        ).status_code
+        == 409
+    )
     assert called == []
     monkeypatch.setattr(control, "inspect_update", lambda root: {"blockers": []})
     response = client.post(
@@ -192,12 +205,18 @@ def test_endpoint_auth_role_origin_consent_and_hold(tmp_path, monkeypatch):
     )
     assert added.status_code == 201
     client.post("/api/v1/auth/logout")
-    assert client.post(
-        "/api/v1/auth/login",
-        json={"username": "family", "password": "family-very-secret-123"},
-    ).status_code == 200
+    assert (
+        client.post(
+            "/api/v1/auth/login",
+            json={"username": "family", "password": "family-very-secret-123"},
+        ).status_code
+        == 200
+    )
     assert client.get(url).status_code == 403
-    assert client.post(
-        url + "/request", json={"consent": True, "confirmation": "START VERIFIED UPDATE"}
-    ).status_code == 403
+    assert (
+        client.post(
+            url + "/request", json={"consent": True, "confirmation": "START VERIFIED UPDATE"}
+        ).status_code
+        == 403
+    )
     assert called == [True]
