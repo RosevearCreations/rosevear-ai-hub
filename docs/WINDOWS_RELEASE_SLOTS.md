@@ -143,3 +143,32 @@ as a rehearsal. Keep the original master encryption key and configuration safe.
 The backup archive and DPAPI key on this computer are not protection against
 complete disk loss or a compromised Windows account. An off-machine archive and
 independent passphrase/master-key escrow remain required operational safeguards.
+
+## Build 243: self-service Update Hub button and automatic client reload
+
+An approved, already-running Windows Hub (owner/admin account) now shows **Update Hub**
+in the top-right header and at **System → Update Hub**. The panel checks the existing
+Windows adoption task, Recovery task, DPAPI backup key, release journal and managed
+active pointer. A local Windows operator can acknowledge and choose **Install approved
+update**. This launches **only the existing, already-enrolled**
+`Rosevear AI Hub Release Adoption` Scheduled Task. It never changes task registration,
+Windows credentials, VM, cameras, MQTT, Ollama or the private relay. The independent
+release controller still requires exact GREEN main, tested isolated package, safe
+same-schema rollback, verified backup, known listener identities and a valid retained
+fallback. It declines migration or unreviewed controller changes. Task start does
+**not** equal successful installation. The client watches local status and reloads
+network-first **once**, automatically, after an adopted commit differs from its source.
+
+**First activation cannot be done from an older browser.** If the running app still
+looks white/old and lacks the Update Hub button, the real machine is still serving
+old UI assets. This repository update cannot reach it across GitHub. An authorized
+Windows operator must complete the *one-time supervised bootstrap and managed-slot
+activation described above*, keeping a known-good backup and original VM. The button
+then handles subsequent eligible updates. Do **not** use the legacy generic updater,
+delete data, kill a listener by PID alone, duplicate tasks, bypass schema gates, or
+run a blind PowerShell download command just to see new CSS.
+
+The control is restricted to the authenticated owner/administrator; the **request**
+is further limited to same-Windows-host browser origins and a loopback connection,
+with explicit consent. A remote tailnet or LAN browser may view release status but
+cannot trigger a process switch.

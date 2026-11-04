@@ -40,6 +40,7 @@ from rosevear_ai_hub.api.notifications import router as notifications_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
 from rosevear_ai_hub.api.providers import router as providers_router
+from rosevear_ai_hub.api.release_update_control import router as release_update_control_router
 from rosevear_ai_hub.api.resources import router as resources_router
 from rosevear_ai_hub.api.secrets import router as secrets_router
 from rosevear_ai_hub.api.security_posture import router as security_posture_router
@@ -136,6 +137,10 @@ def create_app() -> FastAPI:
     application.include_router(integration_v1_router)
     application.include_router(
         resources_router,
+        dependencies=[Depends(require_roles("owner", "administrator"))],
+    )
+    application.include_router(
+        release_update_control_router,
         dependencies=[Depends(require_roles("owner", "administrator"))],
     )
     application.include_router(cameras_router)

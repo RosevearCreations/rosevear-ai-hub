@@ -313,3 +313,36 @@
 @media (prefers-reduced-motion: reduce) {
   .app-shell :is(button,input,select,textarea,.nav-item) { transition: none !important; transform: none !important; }
 }
+
+/* Build 243: installed Windows update controls, modern interactive hierarchy. */
+.app-shell .hub-update-top-button {
+  min-height: 2.8rem;
+  border-radius: .78rem;
+  background: linear-gradient(120deg,#7354d4,#2e6f96);
+  border: 1px solid #b4a0fa;
+  color: #fff;
+  font-weight: 800;
+  padding: .6rem 1.05rem;
+  box-shadow: 0 6px 20px rgb(24 10 78 / .24);
+}
+.app-shell .hub-update-top-button:hover { filter: brightness(1.11); }
+.app-shell .hub-update-top-button:focus-visible { outline: 3px solid #eedbff; outline-offset: 3px; }
+.app-shell .hub-update-operator { border: 1px solid #6f67af; overflow-wrap: anywhere; }
+.app-shell .hub-update-heading { display: flex; justify-content: space-between; align-items: start; gap: 1rem; }
+.app-shell .hub-update-heading h2 { margin: .25rem 0 .7rem; }
+.app-shell .hub-update-stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(10rem,1fr)); gap: .7rem; margin: 1rem 0; }
+.app-shell .hub-update-stats > div { background: rgb(63 84 134 / .15); border: 1px solid #566584; border-radius: .9rem; padding: .85rem; display: grid; gap: .3rem; min-width: 0; }
+.app-shell .hub-update-stats span { font-size: .78rem; opacity: .82; }
+.app-shell .hub-update-stats strong { font-size: .94rem; overflow-wrap: anywhere; }
+.app-shell .hub-update-blockers { padding-inline-start: 1.35rem; }
+.app-shell .hub-update-blockers li { padding-block: .22rem; }
+.app-shell .hub-update-actions { display: grid; gap: .8rem; justify-items: start; }
+.app-shell .hub-update-actions button { min-height: 2.95rem; }
+.app-shell .hub-update-consent { display: flex; align-items: flex-start; gap: .8rem; max-width: 55rem; }
+.app-shell .hub-update-consent input { flex: 0 0 auto; margin-top: .28rem; width: 1.1rem; height: 1.1rem; }
+.app-shell[data-theme="high-contrast"] .hub-update-stats > div { border: 2px solid currentColor; }
+@media (max-width: 700px) {
+  .app-shell .hub-update-top-button { padding: .5rem .65rem; font-size: .82rem; }
+  .app-shell .hub-update-stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (prefers-reduced-motion:reduce) { .app-shell .hub-update-top-button { transition: none; } }
