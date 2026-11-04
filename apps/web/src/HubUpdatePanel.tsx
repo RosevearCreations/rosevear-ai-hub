@@ -79,6 +79,10 @@ export function HubUpdatePanel() {
     <p>We can update the client from here <strong>after</strong> the Windows release
       task has been enrolled and a recoverable baseline verified. This panel cannot
       appear in a browser still running the old frontend.</p>
+    <p><strong>Need a client restart?</strong> Use <strong>Restart Client</strong> in the top bar.
+      It checks the local web server and reloads this window without Ctrl+F5. A restart
+      cannot replace the old 0.0.57 files or restart a Windows service; first install
+      the approved release through the supervised workflow.</p>
     <div className="hub-update-stats">
       <div><span>Browser build</span><strong>{browserBuild.sha?.slice(0, 12) ?? "Unverified"}</strong></div>
       <div><span>Active managed release</span><strong>{status?.active_release?.slice(0, 12) ?? "Not installed / unknown"}</strong></div>
