@@ -513,6 +513,14 @@ describe("App", () => {
     expect(quickTheme).toHaveValue("dark");
     fireEvent.change(quickTheme, { target: { value: "standard" } });
     expect(shell).toHaveAttribute("data-theme", "standard");
+    const darkToggle = screen.getByRole("button", { name: "Switch to Dark Mode" });
+    expect(darkToggle).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(darkToggle);
+    expect(shell).toHaveAttribute("data-theme", "dark");
+    expect(screen.getByRole("button", { name: "Switch to Midnight Blue theme" }))
+      .toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Switch to Midnight Blue theme" }));
+    expect(shell).toHaveAttribute("data-theme", "standard");
     fireEvent.click(screen.getByRole("button", { name: "High contrast" }));
     expect(shell).toHaveAttribute("data-density", "compact");
     expect(shell).toHaveAttribute("data-theme", "high-contrast");
@@ -544,6 +552,9 @@ describe("App", () => {
     fireEvent.change(screen.getByLabelText("Display theme"), { target: { value: "high-contrast" } });
     expect(document.querySelector(".auth-shell")).toHaveAttribute("data-theme", "high-contrast");
     expect(localStorage.getItem(SHELL_THEME_STORAGE_KEY)).toBe("high-contrast");
+    fireEvent.click(screen.getByRole("button", { name: "Turn on Dark Mode" }));
+    expect(document.querySelector(".auth-shell")).toHaveAttribute("data-theme", "dark");
+    expect(localStorage.getItem(SHELL_THEME_STORAGE_KEY)).toBe("dark");
   });
 
   test("keeps Standard theme owner issue findings while opening and returning from real workspaces", async () => {

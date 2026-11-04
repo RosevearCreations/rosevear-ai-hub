@@ -91,6 +91,8 @@
     "build:238:hub:test": "npm --workspace apps/web run test -- windowsReview238.test.tsx windowsVisualDisposition237.test.tsx windowsAppearanceAcceptance236.test.tsx --maxWorkers=1",
     "build:239:hub:test": "npm --workspace apps/web run test -- windowsReview239.test.tsx windowsReview238.test.tsx windowsVisualDisposition237.test.tsx --maxWorkers=1",
     "build:240:hub:test": "npm --workspace apps/web run test -- windowsRestart240.test.tsx windowsReview239.test.tsx --maxWorkers=1",
-    "build:241:hub:test": "npm --workspace apps/web run test -- windowsRestart241.test.tsx windowsRestart240.test.tsx --maxWorkers=1"
+    "build:241:hub:test": "npm --workspace apps/web run test -- windowsRestart241.test.tsx windowsRestart240.test.tsx --maxWorkers=1",
+    "build:242:hub:test": "npm --workspace apps/web run test -- windowsRestart242.test.tsx windowsRestart241.test.tsx windowsRestart240.test.tsx --maxWorkers=1",
+    "build:242:appearance:test": "npm --workspace apps/web run test -- App.test.tsx -t 'switches responsive shell preferences|keeps low-glare Dark Mode' --maxWorkers=1"
   }
 }
