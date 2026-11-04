@@ -56,6 +56,7 @@ import { OperationsDashboard } from "./OperationsDashboard";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
+import { HubUpdatePanel, HubUpdateRefreshObserver } from "./HubUpdatePanel";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
 import { UsersView } from "./UsersView";
@@ -271,6 +272,7 @@ export function App() {
 
   return (
     <div className="app-shell" data-density={density} data-theme={appearance}>
+      {canAdminister && <HubUpdateRefreshObserver />}
       <a className="skip-link" href="#main-content">
         Skip to main content
       </a>
@@ -312,6 +314,8 @@ export function App() {
             <span aria-hidden="true">☾</span>
             <span>{appearance === "dark" ? "Dark on" : "Dark Mode"}</span>
           </button>
+          {canAdminister && <button type="button" className="hub-update-top-button"
+            onClick={() => setSection("System")}>Update Hub</button>}
           <button type="button" onClick={() => void signOut()}>Sign out</button></div>
       </header>
       <aside className="sidebar">
@@ -389,6 +393,7 @@ export function App() {
           </div>
           <SystemHealth health={health} />
         </header>}
+        {section === "System" && canAdminister && <HubUpdatePanel />}
         {section === "System" && <HubVitalCards health={health} ollama={ollama} />}
         {section === "System" && <SystemWorkspaceGuide backend={health.kind} ollama={ollama.kind}
           models={ollama.kind === "online" ? ollama.data.model_count : null} canAdminister={canAdminister} />}

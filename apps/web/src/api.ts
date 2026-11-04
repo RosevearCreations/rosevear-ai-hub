@@ -2934,3 +2934,34 @@ export interface CameraOwnerReconciliation {
 export function getCameraOwnerReconciliation(): Promise<CameraOwnerReconciliation> {
   return authJson("GET", "/api/v1/camera-import-reconciliation");
 }
+
+/** The installed Windows release task is never inferred from a GitHub commit. */
+export interface HubUpdateControl {
+  state: "ready_to_request" | "setup_or_review_required";
+  blockers: string[];
+  adoption_task: "configured" | "not_installed" | "disabled" | "mismatch" | "unavailable";
+  recovery_task: "enabled" | "disabled" | "mismatch" | "unavailable";
+  adoption_state: string;
+  active_release: string | null;
+  last_attempted_release: string | null;
+  journal_state: "activating" | "committed" | "rolled_back" | "unverified";
+  update_running: boolean;
+  install_verified: false;
+  release_request_sent: false;
+  host_action_performed_by_read: false;
+}
+
+export function getHubUpdateControl(signal?: AbortSignal): Promise<HubUpdateControl> {
+  return authJson("GET", "/api/v1/system/update-control", undefined, signal);
+}
+
+export function requestHubUpdate(): Promise<{
+  state: "task_start_requested";
+  installation_complete: false;
+  restart_verified: false;
+  rollback_verified: false;
+}> {
+  return authJson("POST", "/api/v1/system/update-control/request", {
+    consent: true, confirmation: "START VERIFIED UPDATE",
+  });
+}
