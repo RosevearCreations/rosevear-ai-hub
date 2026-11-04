@@ -58,6 +58,7 @@ import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
 import { HubUpdatePanel, HubUpdateRefreshObserver } from "./HubUpdatePanel";
 import { ClientRestartControl } from "./ClientRestartControl";
+import { WindowsFirstActivation246Panel } from "./WindowsFirstActivation246Panel";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
 import { UsersView } from "./UsersView";
@@ -396,6 +397,7 @@ export function App() {
           <SystemHealth health={health} />
         </header>}
         {section === "System" && canAdminister && <HubUpdatePanel />}
+        {section === "System" && canAdminister && <WindowsFirstActivation246Panel />}
         {section === "System" && <HubVitalCards health={health} ollama={ollama} />}
         {section === "System" && <SystemWorkspaceGuide backend={health.kind} ollama={ollama.kind}
           models={ollama.kind === "online" ? ollama.data.model_count : null} canAdminister={canAdminister} />}

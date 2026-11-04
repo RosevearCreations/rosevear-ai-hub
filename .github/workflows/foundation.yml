@@ -163,6 +163,8 @@ jobs:
         run: npm run test -- App.test.tsx -t 'switches responsive shell preferences|keeps low-glare Dark Mode' --maxWorkers=1
       - name: Build 245 owner-confirmed client restart, offline retention and update-control regressions
         run: npm run test -- ClientRestartControl.test.tsx HubUpdatePanel.test.tsx --maxWorkers=1
+      - name: Build 246 Windows first activation, field receipt and no-host-action regressions
+        run: npm run test -- WindowsFirstActivation246Panel.test.tsx windowsFirstActivation246.test.ts --maxWorkers=1
       - name: Test
         # Keep resource-heavy App/owner-workbench regressions isolated from other
         # jsdom suites; simultaneous workers caused non-deterministic CI timeouts.
