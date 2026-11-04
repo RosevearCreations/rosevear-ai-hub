@@ -336,6 +336,9 @@
 .app-shell .hub-update-stats strong { font-size: .94rem; overflow-wrap: anywhere; }
 .app-shell .hub-update-blockers { padding-inline-start: 1.35rem; }
 .app-shell .hub-update-blockers li { padding-block: .22rem; }
+.app-shell .hub-update-next-step { width: 100%; border: 1px solid #8175c3; border-left: 4px solid #bfa4ff; border-radius: .9rem; background: rgb(108 83 176 / .13); padding: 1rem; margin: 1rem 0; }
+.app-shell .hub-update-next-step p { margin: .45rem 0; line-height: 1.55; }
+.app-shell .hub-update-next-step small { opacity: .83; }
 .app-shell .hub-update-actions { display: grid; gap: .8rem; justify-items: start; }
 .app-shell .hub-update-actions button { min-height: 2.95rem; }
 .app-shell .hub-update-consent { display: flex; align-items: flex-start; gap: .8rem; max-width: 55rem; }

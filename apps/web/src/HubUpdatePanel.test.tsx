@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { HubUpdatePanel } from "./HubUpdatePanel";
-import { hubUpdateBlockerLabel, shouldReloadHub } from "./hubUpdateModel";
+import { hubUpdateBlockerLabel, hubUpdateNextStep, shouldReloadHub } from "./hubUpdateModel";
 
 const api = vi.hoisted(() => ({
   getHubUpdateControl: vi.fn(),
@@ -26,6 +26,11 @@ beforeEach(() => {
 afterEach(() => cleanup());
 
 describe("Build 243 — owner-guided installed update", () => {
+  it("Build 244 keeps blocked and failed releases in supervised recovery", () => {
+    expect(hubUpdateNextStep(["release_task_not_enrolled"], "HOLD")).toContain("one-time supervised");
+    expect(hubUpdateNextStep([], "ROLLBACK_FAILED")).toContain("Stop here");
+    expect(hubUpdateNextStep(["unknown_gate"], "HOLD")).toContain("not safe to bypass");
+  });
   it("compares exact source commits and avoids automatic refresh loops", () => {
     const a = "a".repeat(40);
     const b = "b".repeat(40);
@@ -46,6 +51,7 @@ describe("Build 243 — owner-guided installed update", () => {
     });
     render(<HubUpdatePanel />);
     expect(await screen.findByText(/one-time supervised enrollment/i)).toBeTruthy();
+    expect(screen.getByRole("complementary", { name: "Recommended next action" }).textContent).toContain("supervised release-slot bootstrap");
     expect(screen.getByRole("button", { name: "Install approved update" }).hasAttribute("disabled")).toBe(true);
     expect(api.requestHubUpdate).not.toHaveBeenCalled();
     expect(hubUpdateBlockerLabel("random-secrets")).toContain("local setup");
