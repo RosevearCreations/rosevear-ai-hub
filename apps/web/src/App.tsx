@@ -288,7 +288,7 @@ export function App() {
         </div>
         <div className="hub-topbar-detail" aria-label="Hub safeguards">
           <span className="hub-topbar-chip"><span className="hub-chip-dot" /> Local-first</span>
-          <span className="hub-topbar-chip hub-topbar-held">Comms integration · HOLD</span>
+          <a className="hub-topbar-chip hub-topbar-held" href="https://rosevear-comms-hub.devilndovelive.workers.dev/" target="_blank" rel="noopener noreferrer" title="Open the six-app public connection centre; private Windows relay remains OFF">Comms integration · HOLD · open Hub</a>
           <span className="hub-topbar-chip">Private relay · OFF</span>
         </div>
         <nav className="hub-topnav" aria-label="Command shortcuts">
