@@ -14,6 +14,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict
+
 from rosevear_ai_hub.auth import require_roles
 from rosevear_ai_hub.models import User
 from rosevear_ai_hub.release_observability import safe_document, safe_sha, task_evidence
@@ -54,7 +55,17 @@ def inspect_update(root: Path) -> dict:
     adoption = status.get("state")
     adoption = (
         adoption
-        if adoption in {"CURRENT", "READY", "HOLD", "ADOPTED", "FAILED", "ROLLED_BACK", "ROLLBACK_FAILED", "STAGED"}
+        if adoption
+        in {
+            "CURRENT",
+            "READY",
+            "HOLD",
+            "ADOPTED",
+            "FAILED",
+            "ROLLED_BACK",
+            "ROLLBACK_FAILED",
+            "STAGED",
+        }
         else "UNVERIFIED"
     )
     blockers = []
@@ -82,7 +93,9 @@ def inspect_update(root: Path) -> dict:
         "adoption_state": adoption,
         "active_release": active_sha,
         "last_attempted_release": attempted_sha,
-        "journal_state": phase if phase in {"activating", "committed", "rolled_back"} else "unverified",
+        "journal_state": (
+            phase if phase in {"activating", "committed", "rolled_back"} else "unverified"
+        ),
         "update_running": phase == "activating",
         "install_verified": False,
         "release_request_sent": False,
@@ -155,5 +168,8 @@ def request_managed_update(
         "installation_complete": False,
         "restart_verified": False,
         "rollback_verified": False,
-        "next_step": "Read local release status; controller retains all GREEN, backup and rollback checks.",
+        "next_step": (
+            "Read local release status; controller retains all GREEN, "
+            "backup and rollback checks."
+        ),
     }
