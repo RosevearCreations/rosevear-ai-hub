@@ -169,7 +169,6 @@ def request_managed_update(
         "restart_verified": False,
         "rollback_verified": False,
         "next_step": (
-            "Read local release status; controller retains all GREEN, "
-            "backup and rollback checks."
+            "Read local release status; controller retains all GREEN, backup and rollback checks."
         ),
     }
