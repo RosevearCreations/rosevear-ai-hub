@@ -59,7 +59,7 @@ const time = (s: string): boolean => !!s && Number.isFinite(Date.parse(s));
 const validId = (s: Restart242Entry["repairScope"]) =>
   s === "unselected" || restart240Dependencies.some(x => x.id === s);
 
-type SourceRow = ReturnType<typeof summarizeRestart241>["rows"][number];
+type SourceRow = Pick<ReturnType<typeof summarizeRestart241>["rows"][number], "id" | "originalGate" | "original" | "decisionGate" | "entry">;
 export function retest242Key(src: Restart242Handoff, row: SourceRow, entry: Restart242Entry) {
   return JSON.stringify({
     p: src.restart240.preflight.snapshotKey, q: src.restart240.reboot.snapshotKey,
