@@ -3,6 +3,7 @@ import { getHubUpdateControl, getHubVersion, type HubUpdateControl, type HubVers
 import { browserBuild } from "./installedHubAdoption";
 import { assessFirstActivation246, type FirstActivationChecks } from "./windowsFirstActivation246";
 import { importActivation246Receipt, reconcileActivation247, type ActivationReceipt247 } from "./windowsActivation247";
+import { WindowsProcess248Panel } from "./WindowsProcess248Panel";
 
 const initialChecks: FirstActivationChecks = {
   backupRestored: false, migrationSucceeded: false, backendRestarted: false,
@@ -130,5 +131,6 @@ export function WindowsFirstActivation246Panel() {
       <ul>{outcome247.exceptions.map(exception => <li key={exception}>{exception}</li>)}</ul>
       <p><small>No process is stopped, no recovery is executed, and no exception is automatically closed. Confirm the process executable, command line and startup task on the Windows host using the supervised recovery runbook.</small></p>
     </section>
+    <WindowsProcess248Panel sourceAligned={outcome247.source_alignment === "REPORTED_MATCH"} />
   </section>;
 }
