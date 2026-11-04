@@ -165,6 +165,8 @@ jobs:
         run: npm run test -- ClientRestartControl.test.tsx HubUpdatePanel.test.tsx --maxWorkers=1
       - name: Build 246 Windows first activation, field receipt and no-host-action regressions
         run: npm run test -- WindowsFirstActivation246Panel.test.tsx windowsFirstActivation246.test.ts windowsActivation247.test.ts --maxWorkers=1
+      - name: Build 248 Windows process identity, startup task and no-closure regressions
+        run: npm run test -- windowsProcess248.test.ts WindowsFirstActivation246Panel.test.tsx --maxWorkers=1
       - name: Test
         # Keep resource-heavy App/owner-workbench regressions isolated from other
         # jsdom suites; simultaneous workers caused non-deterministic CI timeouts.
@@ -210,7 +212,7 @@ jobs:
           $releaseAlertErrors = $null
           [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'scripts/Send-Hub-Release-Alert.ps1'), [ref]$releaseAlertTokens, [ref]$releaseAlertErrors) | Out-Null
           foreach ($parseError in @($releaseAlertErrors)) { $allErrors += $parseError.ToString() }
-          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/hub-recovery-mode.ps1', 'scripts/test-hub-recovery-mode.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/install-hub-startup-task.ps1', 'scripts/enable-tailscale-serve.ps1', 'scripts/configure-lan-https.ps1', 'scripts/check-production-readiness.ps1', 'scripts/update-rosevear-ai-hub.ps1', 'scripts/restart-hub-backend.ps1', 'scripts/update-hub-backend.ps1', 'scripts/hub-backend-identity.ps1', 'scripts/test-hub-backend-identity.ps1', 'scripts/hub-release-policy.ps1', 'scripts/test-hub-release-policy.ps1', 'scripts/hub-auto-update.ps1', 'scripts/install-hub-auto-update.ps1', 'scripts/restart-hub-web.ps1', 'scripts/inspect-hub-lan.ps1', 'scripts/inspect-hub-release-tasks.ps1')) {
+          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/hub-recovery-mode.ps1', 'scripts/test-hub-recovery-mode.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/install-hub-startup-task.ps1', 'scripts/enable-tailscale-serve.ps1', 'scripts/configure-lan-https.ps1', 'scripts/check-production-readiness.ps1', 'scripts/update-rosevear-ai-hub.ps1', 'scripts/restart-hub-backend.ps1', 'scripts/update-hub-backend.ps1', 'scripts/hub-backend-identity.ps1', 'scripts/test-hub-backend-identity.ps1', 'scripts/hub-release-policy.ps1', 'scripts/test-hub-release-policy.ps1', 'scripts/hub-auto-update.ps1', 'scripts/install-hub-auto-update.ps1', 'scripts/restart-hub-web.ps1', 'scripts/inspect-hub-lan.ps1', 'scripts/inspect-hub-release-tasks.ps1', 'scripts/inspect-hub-process-248.ps1')) {
             $tokens = $null
             $parseErrors = $null
             [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$parseErrors) | Out-Null
