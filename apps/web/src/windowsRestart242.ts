@@ -79,7 +79,8 @@ export function decision242Key(entry: Restart242Entry) {
     acknowledged: entry.requestOnlyAcknowledged,
   });
 }
-function knownRefs(src: Restart242Handoff | null, entries: Restart242Entries): string[] {
+function knownRefs(src: Restart242Handoff | null, entries: Restart242Entries,
+  phase: "retest" | "decision" | "rollback"): string[] {
   if (!src) return [];
   const p = src.restart240;
   return [
@@ -91,15 +92,18 @@ function knownRefs(src: Restart242Handoff | null, entries: Restart242Entries): s
       return [
         b240?.reference ?? "", b241?.sourceReference ?? "",
         b241?.decisionReference ?? "", b241?.rollbackReference ?? "",
-        b242?.retestReference ?? "", b242?.ownerDecisionReference ?? "",
-        b242?.rollbackReference ?? "",
+        b242?.retestReference ?? "",
+        phase !== "retest" ? b242?.ownerDecisionReference ?? "" : "",
+        phase === "rollback" ? b242?.rollbackReference ?? "" : "",
       ];
     }),
   ].filter(Boolean);
 }
 export function summarizeRestart242(src: Restart242Handoff | null, entries: Restart242Entries) {
   const review = src ? summarizeRestart241(src.restart240, src.entries) : null;
-  const refs = knownRefs(src, entries);
+  const retestRefs = knownRefs(src, entries, "retest");
+  const decisionRefs = knownRefs(src, entries, "decision");
+  const rollbackRefs = knownRefs(src, entries, "rollback");
   const firstUnresolved = review?.firstUnresolved ?? null;
   const rows = (review?.rows ?? []).map(row => {
     const entry = { ...emptyRestart242Entry, ...entries[row.id] };
@@ -112,7 +116,7 @@ export function summarizeRestart242(src: Restart242Handoff | null, entries: Rest
       !statuses.has(entry.status) || entry.status === "not_observed" ? "await_actual_retest" :
       !bases.has(entry.basis) || entry.basis === "none" ? "source_missing" :
       !code(entry.retestReference) ? "reference_missing" :
-      refs.filter(x => x === entry.retestReference).length !== 1 ? "reference_duplicate" :
+      retestRefs.filter(x => x === entry.retestReference).length !== 1 ? "reference_duplicate" :
       !entry.ownerWitnessed ? "owner_witness_missing" :
       !time(entry.retestAt) || Date.parse(entry.retestAt) <= Date.parse(row.entry.decisionAt) ||
       entry.retestKey !== retest242Key(src, row, entry) ? "retest_stale" :
@@ -126,7 +130,7 @@ export function summarizeRestart242(src: Restart242Handoff | null, entries: Rest
       gate = !dispositions.has(entry.disposition) || entry.disposition === "pending"
         ? "decision_pending" :
         !code(entry.ownerDecisionReference) ? "decision_reference_missing" :
-        refs.filter(x => x === entry.ownerDecisionReference).length !== 1
+        decisionRefs.filter(x => x === entry.ownerDecisionReference).length !== 1
           ? "decision_reference_duplicate" :
         !entry.requestOnlyAcknowledged ? "decision_ack_missing" :
         !time(entry.decisionAt) || Date.parse(entry.decisionAt) <= Date.parse(entry.retestAt) ||
@@ -136,7 +140,7 @@ export function summarizeRestart242(src: Restart242Handoff | null, entries: Rest
         entry.disposition === "request_repair_review" &&
           (!validId(entry.repairScope) || entry.repairScope !== row.id) ? "scope_mismatch" :
         entry.disposition === "request_repair_review" &&
-          (!code(entry.rollbackReference) || refs.filter(x => x === entry.rollbackReference).length !== 1)
+          (!code(entry.rollbackReference) || rollbackRefs.filter(x => x === entry.rollbackReference).length !== 1)
           ? "rollback_missing" :
         entry.disposition === "defer" ? "deferred_under_review" :
         entry.disposition === "request_retest" ? "more_retest_requested" :
