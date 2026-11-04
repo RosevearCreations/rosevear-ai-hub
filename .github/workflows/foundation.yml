@@ -157,6 +157,10 @@ jobs:
         run: npm run test -- windowsRestart240.test.tsx windowsReview239.test.tsx --maxWorkers=1
       - name: Build 241 restart exception provenance, conditional repair REVIEW and no-action gates
         run: npm run test -- windowsRestart241.test.tsx windowsRestart240.test.tsx --maxWorkers=1
+      - name: Build 242 original first-failure retest, source decision custody and no-repair gates
+        run: npm run test -- windowsRestart242.test.tsx windowsRestart241.test.tsx windowsRestart240.test.tsx --maxWorkers=1
+      - name: Build 242 real client Dark Mode controls and modern shell regression
+        run: npm run test -- App.test.tsx -t 'switches responsive shell preferences|keeps low-glare Dark Mode' --maxWorkers=1
       - name: Test
         # Keep resource-heavy App/owner-workbench regressions isolated from other
         # jsdom suites; simultaneous workers caused non-deterministic CI timeouts.

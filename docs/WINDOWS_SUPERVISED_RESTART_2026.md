@@ -72,6 +72,13 @@ In **System → Build 240**, record the actual installed version, backup receipt
 - For each genuine exception, record a separate safe source code and request **defer**, real on-device retest, independent verification, or a **conditional exact-dependency repair authorization REVIEW**. Only source-linked failed/partial results can request a repair review, with a matching scope and distinct rollback reference; no request authorizes or performs repair.
 - Copy the redacted Build 241 report privately. If the installed Hub does not have Build 241, continue the manual checks; GitHub source GREEN does not install it.
 
+## 3B · Build 242: first-failure retest and repair-review handoff (if installed)
+
+- On the real Windows PC, preserve the privately saved Build 240 handoff and use **System → Build 241 → Copy Build 241 code-only JSON handoff for Build 242** after inspecting the actual source and recording a separate request. Paste only that safe JSON into **System → Build 242**.
+- Do not skip earlier unresolved dependencies. Build 242 allows an owner retest only for the **first unresolved** startup dependency with a source-linked Build 241 request. Later failed systems remain HOLD until upstream checks are actually completed.
+- Record a *new* owner-observed result, source, unique receipt and witness. A working report is **owner-reported**, not an independently certified recovery. The repair-review request requires a genuine fresh failed or partial retest, an exact matching scope, and a separate rollback-plan reference.
+- All Build 242 outputs are **requests or redacted copies**, never repair approval, host action or external authentication. If Build 242 is not installed on the Windows host, continue using the manual checklist rather than claiming the GitHub source update installed it.
+
 ## 4 · If something did not recover
 
 - **Stop and record the first failing dependency** (task, schema, VM, HA, MQTT, Ollama, API, built web, private HTTPS or camera). Check Task Scheduler history and the existing Hub recovery log before manual intervention.

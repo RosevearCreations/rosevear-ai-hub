@@ -3,7 +3,7 @@ import { CardHelp } from "./CommandShell";
 import { safeWindowsFieldReference } from "./windowsFieldAcceptance228";
 import { importRestart240Handoff, summarizeRestart240, type Restart240Draft } from "./windowsRestart240";
 import {
-  decision241Key, emptyRestart241Entry, formatRestart241Packet,
+  decision241Key, emptyRestart241Entry, exportRestart241Handoff, formatRestart241Packet,
   restart241GateLabels, source241Key, summarizeRestart241,
   type Restart241Decision, type Restart241Entries, type Restart241Entry,
   type Restart241Source,
@@ -225,6 +225,15 @@ export function WindowsRestart241Panel() {
           </div>}
         </article>)}
       </div>
+      <button type="button" disabled={!source}
+        onClick={() => { if (source) {
+          void navigator.clipboard.writeText(exportRestart241Handoff(source, entries)).then(
+            () => setNotice("Private Build 241 code-only JSON copied for Build 242. Nothing was uploaded."),
+            () => setNotice("Clipboard unavailable; no data was sent or saved automatically."),
+          );
+        } }}>
+        Copy Build 241 code-only JSON handoff for Build 242
+      </button>
       <button type="button" onClick={() => void copyPacket()}>
         Copy redacted Build 241 review and first-failure packet</button>
       <p><small>Do not paste usernames, addresses, URLs, IPs, camera identifiers, raw logs,

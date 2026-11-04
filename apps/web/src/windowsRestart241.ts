@@ -1,6 +1,6 @@
 /** Build 241: owner-only reconciliation of a genuine Build 240 restart report. No host actions. */
 import {
-  restart240Dependencies, summarizeRestart240,
+  restart240Dependencies, summarizeRestart240, exportRestart240Handoff, importRestart240Handoff,
   type Restart240DependencyId, type Restart240Draft,
 } from "./windowsRestart240";
 
@@ -189,4 +189,86 @@ export function formatRestart241Packet(draft: Restart240Draft | null, entries: R
     "Six apps DISCONNECTED/HOLD; private relay OFF; QL-275 UNDER REVIEW; vault SECURITY HOLD.",
     "No IP, URL, provider name, camera ID, raw log, credentials or private message is included.",
   ].join("\n");
+}
+
+
+/** Private, code-only, versioned Build 241 handoff for Build 242.
+ * This is a self-reported decision chain, NOT authenticated evidence or repair authority.
+ */
+export const restart241HandoffSchema = "rosevear-hub-restart-review-241/v1" as const;
+const safeHandoffCode = (value: unknown): string =>
+  typeof value === "string" && /^[A-Za-z0-9_-]{0,80}$/.test(value) ? value : "";
+const safeHandoffTime = (value: unknown): string =>
+  typeof value === "string" && value.length <= 40 && validTime(value) ? value : "";
+const isEntryScope = (value: unknown): value is Restart241Entry["scope"] =>
+  value === "unselected" || restart240Dependencies.some(dep => dep.id === value);
+
+export function exportRestart241Handoff(source: Restart240Draft, entries: Restart241Entries): string {
+  const cleanSource = JSON.parse(exportRestart240Handoff(source)) as unknown;
+  const safeEntries: Record<string, unknown> = {};
+  for (const dep of restart240Dependencies) {
+    const v = { ...emptyRestart241Entry, ...entries[dep.id] };
+    safeEntries[dep.id] = {
+      source: sourceChoices.has(v.source) ? v.source : "none",
+      sourceReference: safeHandoffCode(v.sourceReference),
+      acknowledged: v.acknowledged === true,
+      sourceAt: safeHandoffTime(v.sourceAt),
+      sourceKey: typeof v.sourceKey === "string" && v.sourceKey.length <= 5000 ? v.sourceKey : "",
+      decision: decisions.has(v.decision) ? v.decision : "pending",
+      scope: isEntryScope(v.scope) ? v.scope : "unselected",
+      rollbackReference: safeHandoffCode(v.rollbackReference),
+      decisionReference: safeHandoffCode(v.decisionReference),
+      decisionAcknowledged: v.decisionAcknowledged === true,
+      decisionAt: safeHandoffTime(v.decisionAt),
+      decisionKey: typeof v.decisionKey === "string" && v.decisionKey.length <= 5000 ? v.decisionKey : "",
+    };
+  }
+  return JSON.stringify({ schema: restart241HandoffSchema, restart240: cleanSource,
+    entries: safeEntries }, null, 2);
+}
+
+export function importRestart241Handoff(raw: string): {
+  restart240: Restart240Draft; entries: Restart241Entries;
+} {
+  if (raw.length > 40000) throw new Error("Build 241 handoff size limit");
+  const parsed: unknown = JSON.parse(raw);
+  if (!parsed || typeof parsed !== "object" ||
+    (parsed as { schema?: unknown }).schema !== restart241HandoffSchema)
+    throw new Error("Build 241 handoff schema mismatch");
+  const root = parsed as Record<string, unknown>;
+  if (!root.restart240 || typeof root.restart240 !== "object")
+    throw new Error("Missing original Build 240 source");
+  const restart240 = importRestart240Handoff(JSON.stringify(root.restart240));
+  if (summarizeRestart240(restart240).rebootGate !== "reboot_recorded")
+    throw new Error("Real owner restart evidence missing");
+  const rawEntries = root.entries && typeof root.entries === "object" && !Array.isArray(root.entries)
+    ? root.entries as Record<string, unknown> : {};
+  const entries: Restart241Entries = {};
+  for (const dep of restart240Dependencies) {
+    const rawEntry = rawEntries[dep.id];
+    const v = rawEntry && typeof rawEntry === "object" && !Array.isArray(rawEntry)
+      ? rawEntry as Record<string, unknown> : {};
+    const e: Restart241Entry = {
+      source: sourceChoices.has(v.source as Restart241Source)
+        ? v.source as Restart241Source : "none",
+      sourceReference: safeHandoffCode(v.sourceReference),
+      acknowledged: v.acknowledged === true,
+      sourceAt: safeHandoffTime(v.sourceAt),
+      sourceKey: "",
+      decision: decisions.has(v.decision as Restart241Decision)
+        ? v.decision as Restart241Decision : "pending",
+      scope: isEntryScope(v.scope) ? v.scope : "unselected",
+      rollbackReference: safeHandoffCode(v.rollbackReference),
+      decisionReference: safeHandoffCode(v.decisionReference),
+      decisionAcknowledged: v.decisionAcknowledged === true,
+      decisionAt: safeHandoffTime(v.decisionAt), decisionKey: "",
+    };
+    const row = summarizeRestart241(restart240, {}).rows.find(x => x.id === dep.id);
+    if (row && v.sourceKey === source241Key(restart240, row, e))
+      e.sourceKey = source241Key(restart240, row, e);
+    if (v.decisionKey === decision241Key(e))
+      e.decisionKey = decision241Key(e);
+    entries[dep.id] = e;
+  }
+  return { restart240, entries };
 }

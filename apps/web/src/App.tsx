@@ -41,6 +41,7 @@ import { WindowsFieldAcceptance228Panel } from "./WindowsFieldAcceptance228Panel
 import { WindowsAppearanceAcceptance236Panel } from "./WindowsAppearanceAcceptance236Panel";
 import { WindowsRestart240Panel } from "./WindowsRestart240Panel";
 import { WindowsRestart241Panel } from "./WindowsRestart241Panel";
+import { WindowsRestart242Panel } from "./WindowsRestart242Panel";
 import { VaultArchitectureView } from "./VaultArchitectureView";
 import { IntegrationHealthPanel } from "./IntegrationHealthPanel";
 import { RestartAppsPanel } from "./RestartAppsPanel";
@@ -304,6 +305,13 @@ export function App() {
               <option value="high-contrast">High contrast</option>
             </select>
           </label>
+          <button type="button" className="hub-theme-toggle"
+            aria-pressed={appearance === "dark"}
+            aria-label={appearance === "dark" ? "Switch to Midnight Blue theme" : "Switch to Dark Mode"}
+            onClick={() => setAppearance(appearance === "dark" ? "standard" : "dark")}>
+            <span aria-hidden="true">☾</span>
+            <span>{appearance === "dark" ? "Dark on" : "Dark Mode"}</span>
+          </button>
           <button type="button" onClick={() => void signOut()}>Sign out</button></div>
       </header>
       <aside className="sidebar">
@@ -392,6 +400,7 @@ export function App() {
             onNavigate={(target) => setSection(target)} />
           <WindowsRestart240Panel />
           <WindowsRestart241Panel />
+          <WindowsRestart242Panel />
         </div>}
         {/* Keep the supervised trial mounted while reviewing linked modules; it only stores session data and never polls. */}
         {canAdminister && <div id="hub-system-owner-review" hidden={section !== "System"}>

@@ -77,8 +77,13 @@ export function AuthView({
             <option value="high-contrast">High contrast · bright</option>
           </select>
         </label>
+        <button type="button" className="auth-theme-shortcut" aria-pressed={theme === "dark"}
+          onClick={() => onThemeChange(theme === "dark" ? "standard" : "dark")}>
+          <span aria-hidden="true">☾</span>
+          {theme === "dark" ? "Dark Mode on · switch to Midnight Blue" : "Turn on Dark Mode"}
+        </button>
 
-        <p className="eyebrow">Build 016</p>
+        <p className="eyebrow">Local sign-in</p>
         <h1 id="auth-title">{bootstrap ? "Create the first owner" : "Sign in"}</h1>
         <p className="lede">
           {bootstrap
