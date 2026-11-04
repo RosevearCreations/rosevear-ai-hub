@@ -2,6 +2,7 @@ import { useState } from "react";
 import { getHubUpdateControl, getHubVersion, type HubUpdateControl, type HubVersionResponse } from "./api";
 import { browserBuild } from "./installedHubAdoption";
 import { assessFirstActivation246, type FirstActivationChecks } from "./windowsFirstActivation246";
+import { importActivation246Receipt, reconcileActivation247, type ActivationReceipt247 } from "./windowsActivation247";
 
 const initialChecks: FirstActivationChecks = {
   backupRestored: false, migrationSucceeded: false, backendRestarted: false,
@@ -25,12 +26,27 @@ export function WindowsFirstActivation246Panel() {
   const [checks, setChecks] = useState<FirstActivationChecks>(initialChecks);
   const [loading, setLoading] = useState(false);
   const [observed, setObserved] = useState(false);
+  const [imported247, setImported247] = useState<ActivationReceipt247 | null>(null);
+  const [importError247, setImportError247] = useState("");
+  const [process247, setProcess247] = useState<"not_checked" | "same_release_claimed" | "stale_or_different" | "unknown">("not_checked");
   const review = assessFirstActivation246(target, browserBuild.sha, release, backend, checks);
+  const outcome247 = reconcileActivation247(target.trim().toLowerCase(), browserBuild.sha, release?.active_release ?? null, imported247, process247);
+
+  async function importReceipt247(file?: File) {
+    setImported247(null);
+    setImportError247("");
+    setProcess247("not_checked");
+    if (!file) return;
+    if (file.size > 32768) { setImportError247("Receipt exceeds the 32 KB import limit."); return; }
+    try { setImported247(importActivation246Receipt(await file.text(), new Date().toISOString())); }
+    catch (error) { setImportError247(error instanceof Error ? error.message : "Receipt could not be imported."); }
+  }
 
   async function refresh() {
     setLoading(true);
     setObserved(false);
     setChecks(initialChecks);
+    setProcess247("not_checked");
     const [releaseResult, backendResult] = await Promise.allSettled([
       getHubUpdateControl(), getHubVersion(),
     ]);
@@ -94,5 +110,25 @@ export function WindowsFirstActivation246Panel() {
     </aside>
     <button type="button" onClick={download} disabled={!observed}>Download redacted owner field receipt</button>
     <p><small>This receipt is owner self-report only. It is not independent production installation proof.</small></p>
+    <section className="hub-activation-247" aria-label="Build 247 Windows activation outcome import">
+      <h3>Build 247 — Windows activation outcome &amp; process reconciliation</h3>
+      <p>Import a Build 246 receipt from this computer. Only a small summary is retained in this screen; file contents are never uploaded. Compare it with a fresh local status read above.</p>
+      <label>Import previous owner receipt (JSON, maximum 32 KB)
+        <input type="file" accept="application/json,.json" onChange={event => void importReceipt247(event.target.files?.[0])} />
+      </label>
+      {importError247 && <p role="alert">{importError247}</p>}
+      <p>Imported observations: {imported247 ? `${imported247.owner_checks_recorded} of 6; previous SHA ${imported247.approved_main_reference?.slice(0, 12) ?? "unknown"}` : "None"}</p>
+      <label>Running Windows backend process (owner-observed, not independently verified)
+        <select value={process247} onChange={event => setProcess247(event.target.value as typeof process247)}>
+          <option value="not_checked">Not inspected</option>
+          <option value="same_release_claimed">Owner inspected and reports same release</option>
+          <option value="stale_or_different">Old or different process observed</option>
+          <option value="unknown">Process identity uncertain</option>
+        </select>
+      </label>
+      <p><strong>{outcome247.disposition.replaceAll("_", " ")}</strong> — Source: {outcome247.source_alignment.replaceAll("_", " ")}</p>
+      <ul>{outcome247.exceptions.map(exception => <li key={exception}>{exception}</li>)}</ul>
+      <p><small>No process is stopped, no recovery is executed, and no exception is automatically closed. Confirm the process executable, command line and startup task on the Windows host using the supervised recovery runbook.</small></p>
+    </section>
   </section>;
 }
