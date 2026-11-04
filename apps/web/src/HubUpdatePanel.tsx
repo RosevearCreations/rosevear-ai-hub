@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getHubUpdateControl, requestHubUpdate, type HubUpdateControl } from "./api";
 import { browserBuild } from "./installedHubAdoption";
-import { hubUpdateBlockerLabel, HUB_UPDATE_RELOAD_KEY, shouldReloadHub } from "./hubUpdateModel";
+import { hubUpdateBlockerLabel, hubUpdateNextStep, HUB_UPDATE_RELOAD_KEY, shouldReloadHub } from "./hubUpdateModel";
 import { CardHelp } from "./CommandShell";
 
 function autoRefreshIfInstalled(status: HubUpdateControl) {
@@ -93,6 +93,11 @@ export function HubUpdatePanel() {
     {!!status?.blockers.length && <ul className="hub-update-blockers">
       {status.blockers.map(blocker => <li key={blocker}>{hubUpdateBlockerLabel(blocker)}</li>)}
     </ul>}
+    {status && <aside className="hub-update-next-step" aria-label="Recommended next action">
+      <strong>Next safe step</strong>
+      <p>{hubUpdateNextStep(status.blockers, status.adoption_state)}</p>
+      <small>Read-only guidance · no Windows task or service is changed by viewing this panel.</small>
+    </aside>}
     <div className="hub-update-actions">
       <button type="button" disabled={loading} onClick={() => {
         setLoading(true); void check().finally(() => setLoading(false));
