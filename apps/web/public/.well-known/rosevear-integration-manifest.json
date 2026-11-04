@@ -1,0 +1,23 @@
+{
+  "schema": "rosevear.integration.discovery.v1",
+  "manifest_version": "1.0.0",
+  "source_id": "rosevear-ai-hub",
+  "source_app_id": "rosevear-ai-hub",
+  "source_role": "local_support",
+  "repository": "RosevearCreations/rosevear-ai-hub",
+  "source_revision": "ql333-discovery-v1",
+  "issuer": "rosevear-ai-hub",
+  "audience": "rosevear-master",
+  "tenant_boundary": "no_customer_tenant",
+  "legacy_integration_v1": {
+    "app_id": "rosevear-ai-hub",
+    "method": "GET",
+    "allowed_paths": ["/api/integration/v1/health", "/api/integration/v1/capabilities"],
+    "authorization": "source_owned_required"
+  },
+  "transport": {"origin": null, "manifest_path": "/.well-known/rosevear-integration-manifest.json", "redirects": "DENY"},
+  "requested_scope": "public_nonsecret_discovery_only",
+  "failure_behavior": "HOLD_AND_QUARANTINE",
+  "signature": {"algorithm": "Ed25519", "key_id": null, "value": null, "state": "AWAITING_INDEPENDENT_SOURCE_SIGNER"},
+  "connection_state": "DISCONNECTED / HOLD"
+}
