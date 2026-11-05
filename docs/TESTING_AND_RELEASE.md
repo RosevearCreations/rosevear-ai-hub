@@ -45,6 +45,13 @@ A build may reach main only when:
 - rollback path is known
 - no critical regression remains
 
+Build 252 consolidates overlapping web test invocations into one complete
+Vitest run while retaining all five independently reported CI jobs and both
+`dev`/`main` push and PR event gates. See
+[`BUILD_252_CI_CONSOLIDATION.md`](BUILD_252_CI_CONSOLIDATION.md).
+The source-level contract test cannot by itself attest protected branch
+settings, final remote workflow results, or the installed Windows machine.
+
 ## Versioning
 Before MVP: Build number + commit SHA.  
 After stable MVP: semantic versioning.
