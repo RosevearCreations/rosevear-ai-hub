@@ -10,6 +10,7 @@ const webPackage = JSON.parse(readFileSync(path.join(repositoryRoot, "apps/web/p
 // This is a source-level contract check, not a replacement for GitHub's
 // independent event- and platform-level required check enforcement.
 for (const expected of [
+  "branches: [main]",
   "branches: [main, dev]",
   "  docs-foundation:",
   "  backend:",
@@ -27,13 +28,26 @@ for (const expected of [
   "run: ./scripts/test-hub-release-policy.ps1",
   "scripts/inspect-hub-artifact-251.ps1",
   "scripts/inspect-hub-mapping-253.ps1",
+  "  ci-budget:",
+  "needs: [docs-foundation, backend, web, backup-windows, desktop-windows]",
+  "run: node scripts/ci-run-budget-254.mjs",
+  "run: node scripts/ci-run-budget-254.test.mjs",
   "if-no-files-found: error",
 ]) {
   assert.ok(workflow.includes(expected), `Required verification missing: ${expected}`);
 }
 
-assert.match(workflow, /on:\s*\n\s*push:\s*\n\s*branches:\s*\[main, dev\]\s*\n\s*pull_request:\s*\n\s*branches:\s*\[main, dev\]/);
+assert.match(workflow, /on:\s*\n\s*push:\s*\n(?:\s*#.*\n)*\s*branches:\s*\[main\]\s*\n\s*pull_request:\s*\n\s*branches:\s*\[main, dev\]/);
+assert.match(workflow, /cancel-in-progress: \$\{\{ github\.event_name == 'pull_request' \}\}/,
+  "Only superseded PRs may be canceled, never the exact production main push");
+assert.match(workflow, /permissions:\s*\n\s*contents: read\s*\n\s*actions: read/,
+  "CI telemetry must use read-only GitHub permissions");
+assert.match(workflow, /  ci-budget:\s*\n(?:.*\n)*?\s*if: \$\{\{ always\(\) \}\}/,
+  "Gate budget summary must run even if another job fails");
 assert.equal((workflow.match(/^  (?:docs-foundation|backend|web|backup-windows|desktop-windows):$/gm) ?? []).length, 5);
+assert.equal((workflow.match(/^  ci-budget:$/gm) ?? []).length, 1);
+assert.doesNotMatch(workflow, /workflow_run:|workflow_dispatch:/,
+  "Build 254 must not create a duplicate verifier event");
 assert.equal((workflow.match(/run: npm run test -- --maxWorkers=1/g) ?? []).length, 1,
   "Run the complete web suite exactly once, without redundant selected spec invocations");
 assert.equal(webPackage.scripts.test, "vitest run", "The full suite must discover all specs by default");
@@ -41,4 +55,4 @@ assert.doesNotMatch(workflow, /continue-on-error:\s*true|--passWithNoTests|\|\|\
 assert.ok(workflow.indexOf("run: npm run test -- --maxWorkers=1") < workflow.indexOf("run: npm run build"),
   "A successful web suite must precede production build");
 
-console.log("Build 252: five independent CI job gates and one full web suite preserved");
+console.log("Build 254: five independent gates, main push witness, PR checks and event de-duplication preserved");
