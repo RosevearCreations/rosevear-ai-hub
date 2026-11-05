@@ -52,6 +52,8 @@ jobs:
         run: node scripts/ql338-private-relay.test.mjs
       - name: QL-339A disabled Windows agent registration, local-only probe and rollback tests
         run: node --test scripts/ql339a-relay-agent.test.mjs scripts/ql339a-relay-task.test.mjs
+      - name: QL-339B owner-encrypted device signer and signed TEST packet HOLD regressions
+        run: node --test scripts/ql339b-windows-signer.test.mjs
       - name: QL-256 real source-CI and redacted signer-custody readiness regressions
         run: npm run integration:ql256:hub:test
       - name: QL-256 witness public signature candidate cryptography and fail-closed regressions
@@ -152,6 +154,8 @@ jobs:
           node-version: "22"
       - name: QL-339A Windows Node agent and disabled task safety tests
         run: node --test scripts/ql339a-relay-agent.test.mjs scripts/ql339a-relay-task.test.mjs
+      - name: QL-339B Windows signing CLI safety tests
+        run: node --test scripts/ql339b-windows-signer.test.mjs
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
