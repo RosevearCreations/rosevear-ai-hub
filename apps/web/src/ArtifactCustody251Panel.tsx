@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { importArtifact251, mapArtifact251, type Artifact251 } from "./artifactCustody251";
+import { MappingWitness253Panel } from "./MappingWitness253Panel";
 
-export function ArtifactCustody251Panel({ expectedSha, signedArtifactSha256, signerCandidateVerified }: {
+export function ArtifactCustody251Panel({ expectedSha, signedArtifactSha256, signerCandidateVerified,
+  signedReceiptSignerKey, signedReceiptObservedAt, signerPin }: {
   expectedSha: string; signedArtifactSha256: string | null; signerCandidateVerified: boolean;
+  signedReceiptSignerKey: string | null; signedReceiptObservedAt: string | null; signerPin: string;
 }) {
   const [artifact, setArtifact] = useState<Artifact251 | null>(null);
   const [error, setError] = useState("");
@@ -27,5 +30,8 @@ export function ArtifactCustody251Panel({ expectedSha, signedArtifactSha256, sig
     <p><strong>Supervised recovery receipt custody:</strong> HOLD — review only, no Windows changes.</p>
     <ul>{review.findings.map(finding => <li key={finding}>{finding}</li>)}</ul>
     <p><small>Importing evidence cannot enroll a key, execute a task, restart a process or close owner acceptance. The running Windows process and scheduled task must be independently witnessed.</small></p>
+    <MappingWitness253Panel expectedSha={expectedSha} signedReceiptArtifactSha256={signedArtifactSha256}
+      signedReceiptSignerKey={signedReceiptSignerKey} signedReceiptVerified={signerCandidateVerified}
+      signedReceiptObservedAt={signedReceiptObservedAt} signerPin={signerPin} />
   </section>;
 }
