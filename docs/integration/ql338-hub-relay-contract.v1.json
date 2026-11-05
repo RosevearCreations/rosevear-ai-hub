@@ -1,0 +1,48 @@
+{
+  "schema": "rosevear.integration.ql338.hub-relay-contract.v1",
+  "build": "QL-338",
+  "source": "rosevear-ai-hub",
+  "consumer": "rosevear-comms-hub",
+  "source_role": "private_windows_local_support",
+  "transport": {
+    "mode": "OUTBOUND_ONLY",
+    "allowed_environment": "TEST",
+    "private_tls_origin_pin_required": true,
+    "tailnet_or_private_acl_negative_witness_required": true,
+    "redirects": "DENY",
+    "public_inbound_port": false,
+    "service_installation": "NOT_AUTHORIZED"
+  },
+  "request": {
+    "schema": "rosevear.hub.relay.request.v1",
+    "methods": ["GET"],
+    "paths": ["/health", "/capabilities"],
+    "device_control": false,
+    "camera_streaming": false,
+    "home_automation": false,
+    "owner_and_source_owner_test_grants": "REQUIRED_SEPARATELY"
+  },
+  "heartbeat": {
+    "schema": "rosevear.hub.relay.heartbeat.v1",
+    "signature": "Ed25519",
+    "key_custody": "INDEPENDENT_EXTERNAL_PRIVATE",
+    "max_expiry_ms": 120000,
+    "audience": "rosevear-comms-hub:nonproduction",
+    "payload": "metadata_only_no_customer_or_device_data",
+    "record_state": "HOLD"
+  },
+  "offline": {
+    "encryption": "AES-256-GCM",
+    "key_source": "OWNER_CONTROLLED_WINDOWS_KEY_STORE_REQUIRED",
+    "persistent_directory": "OWNER_SELECTED_RESTRICTED_ACL_REQUIRED",
+    "queue_capacity": 100,
+    "max_ttl_ms": 86400000,
+    "max_attempts": 5,
+    "circuit_open_after_failures": 3,
+    "automatic_network_dispatch": false
+  },
+  "connection_state": "DISCONNECTED / HOLD",
+  "runtime_activation": "NOT_INSTALLED_OR_AUTHORIZED",
+  "real_signed_test_receipt": "NOT_AVAILABLE",
+  "owner_supervised_on_device_witness": "NOT_AVAILABLE"
+}
