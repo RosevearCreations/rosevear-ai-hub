@@ -2,7 +2,7 @@ import { useState } from "react";
 import { assessWindowsProcess248, parseWindowsProcess248, type WindowsProcess248 } from "./windowsProcess248";
 import { WindowsRelease249Panel } from "./WindowsRelease249Panel";
 
-export function WindowsProcess248Panel({ sourceAligned }: { sourceAligned: boolean }) {
+export function WindowsProcess248Panel({ sourceAligned, expectedSha }: { sourceAligned: boolean; expectedSha: string }) {
   const [evidence, setEvidence] = useState<WindowsProcess248 | null>(null);
   const [importError, setImportError] = useState("");
   const assessment = assessWindowsProcess248(evidence, new Date().toISOString(), sourceAligned);
@@ -34,6 +34,6 @@ export function WindowsProcess248Panel({ sourceAligned }: { sourceAligned: boole
     <p><strong>{assessment.disposition.replaceAll("_", " ")}</strong></p>
     <ul>{assessment.findings.map(finding => <li key={finding}>{finding}</li>)}</ul>
     <p><small>Owner-imported evidence cannot authorize closure or prove the running process uses the promoted main commit. No host action occurs here.</small></p>
-    <WindowsRelease249Panel sourceAligned={sourceAligned} />
+    <WindowsRelease249Panel sourceAligned={sourceAligned} expectedSha={expectedSha} />
   </section>;
 }

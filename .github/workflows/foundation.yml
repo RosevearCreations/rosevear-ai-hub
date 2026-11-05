@@ -169,6 +169,8 @@ jobs:
         run: npm run test -- windowsProcess248.test.ts WindowsFirstActivation246Panel.test.tsx --maxWorkers=1
       - name: Build 249 independent path, recovery task and reboot acceptance HOLD regressions
         run: npm run test -- windowsRelease249.test.ts windowsProcess248.test.ts --maxWorkers=1
+      - name: Build 250 signed release candidate, custody pin and no-host-action decision regressions
+        run: npm run test -- signedRelease250.test.ts windowsRelease249.test.ts --maxWorkers=1
       - name: Test
         # Keep resource-heavy App/owner-workbench regressions isolated from other
         # jsdom suites; simultaneous workers caused non-deterministic CI timeouts.

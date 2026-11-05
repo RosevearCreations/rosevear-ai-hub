@@ -131,6 +131,6 @@ export function WindowsFirstActivation246Panel() {
       <ul>{outcome247.exceptions.map(exception => <li key={exception}>{exception}</li>)}</ul>
       <p><small>No process is stopped, no recovery is executed, and no exception is automatically closed. Confirm the process executable, command line and startup task on the Windows host using the supervised recovery runbook.</small></p>
     </section>
-    <WindowsProcess248Panel sourceAligned={outcome247.source_alignment === "REPORTED_MATCH"} />
+    <WindowsProcess248Panel sourceAligned={outcome247.source_alignment === "REPORTED_MATCH"} expectedSha={target.trim().toLowerCase()} />
   </section>;
 }
