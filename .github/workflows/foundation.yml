@@ -48,6 +48,8 @@ jobs:
         run: node scripts/ql253-hub-provenance-readiness.test.mjs
       - name: QL-254 synthetic private relay rollback and source registry HOLD regressions
         run: node scripts/ql254-hub-provenance-relay.test.mjs
+      - name: QL-338 signed read-only device origin, encrypted offline queue and relay OFF regressions
+        run: node scripts/ql338-private-relay.test.mjs
       - name: QL-256 real source-CI and redacted signer-custody readiness regressions
         run: npm run integration:ql256:hub:test
       - name: QL-256 witness public signature candidate cryptography and fail-closed regressions
@@ -160,7 +162,7 @@ jobs:
           $releaseAlertErrors = $null
           [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'scripts/Send-Hub-Release-Alert.ps1'), [ref]$releaseAlertTokens, [ref]$releaseAlertErrors) | Out-Null
           foreach ($parseError in @($releaseAlertErrors)) { $allErrors += $parseError.ToString() }
-          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/hub-recovery-mode.ps1', 'scripts/test-hub-recovery-mode.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/install-hub-startup-task.ps1', 'scripts/enable-tailscale-serve.ps1', 'scripts/configure-lan-https.ps1', 'scripts/check-production-readiness.ps1', 'scripts/update-rosevear-ai-hub.ps1', 'scripts/restart-hub-backend.ps1', 'scripts/update-hub-backend.ps1', 'scripts/hub-backend-identity.ps1', 'scripts/test-hub-backend-identity.ps1', 'scripts/hub-release-policy.ps1', 'scripts/test-hub-release-policy.ps1', 'scripts/hub-auto-update.ps1', 'scripts/install-hub-auto-update.ps1', 'scripts/restart-hub-web.ps1', 'scripts/inspect-hub-lan.ps1', 'scripts/inspect-hub-release-tasks.ps1', 'scripts/inspect-hub-process-248.ps1', 'scripts/inspect-hub-process-249.ps1', 'scripts/inspect-hub-artifact-251.ps1', 'scripts/inspect-hub-mapping-253.ps1')) {
+          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/hub-recovery-mode.ps1', 'scripts/test-hub-recovery-mode.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/install-hub-startup-task.ps1', 'scripts/enable-tailscale-serve.ps1', 'scripts/configure-lan-https.ps1', 'scripts/check-production-readiness.ps1', 'scripts/update-rosevear-ai-hub.ps1', 'scripts/restart-hub-backend.ps1', 'scripts/update-hub-backend.ps1', 'scripts/hub-backend-identity.ps1', 'scripts/test-hub-backend-identity.ps1', 'scripts/hub-release-policy.ps1', 'scripts/test-hub-release-policy.ps1', 'scripts/hub-auto-update.ps1', 'scripts/install-hub-auto-update.ps1', 'scripts/restart-hub-web.ps1', 'scripts/inspect-hub-lan.ps1', 'scripts/inspect-hub-release-tasks.ps1', 'scripts/inspect-hub-process-248.ps1', 'scripts/inspect-hub-process-249.ps1', 'scripts/inspect-hub-artifact-251.ps1', 'scripts/inspect-hub-mapping-253.ps1', 'scripts/inspect-ql338-hub-readiness.ps1')) {
             $tokens = $null
             $parseErrors = $null
             [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$parseErrors) | Out-Null
