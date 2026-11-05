@@ -47,6 +47,8 @@ It is intentionally **not just another chatbot**. The Hub is designed to let us:
 
 Start here:
 
+For the Comms Hub integration specifically, use the [QL-339A Windows relay owner-supervised preparation guide](docs/integration/QL339A_WINDOWS_RELAY_SUPERVISED_INSTALL.md). The private relay is still **OFF** until genuine owner authorization and secure peer enrollment occur.
+
 1. [Source of Truth](docs/SOURCE_OF_TRUTH.md)
 2. [Architecture](docs/ARCHITECTURE.md)
 3. [Build Roadmap](docs/BUILD_ROADMAP.md)
