@@ -33,12 +33,13 @@ export function inspectHubFieldReadiness(evidence={}){
     {missing,connectionState:'DISCONNECTED / HOLD',installationAuthorized:false});
 }
 
-const FIELDS=['schemaVersion','issuer','deviceId','workloadId','environment','sequence',
+const FIELDS=['schemaVersion','issuer','audience','deviceId','workloadId','environment','sequence',
   'nonce','sessionId','issuedAt','expiresAt','capabilities','queueDepth','relayMode'];
 /** Exact, metadata-only heartbeat. Signing key never belongs in source or a browser. */
 export function inspectHeartbeatEnvelope(e,now=Date.now()){
   if(!keys(e,FIELDS))return decision('DENY_HEARTBEAT_SCHEMA');
   if(e.schemaVersion!==HUB_RELAY_SCHEMA||e.issuer!=='rosevear-ai-hub'||
+    e.audience!=='rosevear-comms-hub:nonproduction'||
     !ID.test(e.deviceId??'')||!ID.test(e.workloadId??'')||e.environment!=='TEST'||
     !Number.isSafeInteger(e.sequence)||e.sequence<1||
     !NONCE.test(e.nonce??'')||!UUID.test(e.sessionId??'')||

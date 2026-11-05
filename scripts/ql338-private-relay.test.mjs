@@ -30,13 +30,15 @@ test('QL-338 no approval means Windows relay remains OFF even with source softwa
 });
 
 test('QL-338 exact metadata heartbeat has no personal payload or device command',()=>{
-  const e={schemaVersion:HUB_RELAY_SCHEMA,issuer:'rosevear-ai-hub',deviceId:'hub-windows-owner-1',
+  const e={schemaVersion:HUB_RELAY_SCHEMA,issuer:'rosevear-ai-hub',
+    audience:'rosevear-comms-hub:nonproduction',deviceId:'hub-windows-owner-1',
     workloadId:'hub-probe',environment:'TEST',sequence:1,nonce:request.nonce,
     sessionId:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',issuedAt:request.issuedAt,
     expiresAt:'2026-11-05T15:01:30.000Z',capabilities:['health.read','capabilities.read'],
     queueDepth:0,relayMode:'OUTBOUND_ONLY'};
   assert.equal(inspectHeartbeatEnvelope(e,now).status,'SCHEMA_VALID_TEST_ONLY');
   assert.match(inspectHeartbeatEnvelope({...e,capabilities:['camera.read']},now).status,/DENY/);
+  assert.match(inspectHeartbeatEnvelope({...e,audience:'some-other-consumer'},now).status,/DENY/);
   assert.match(inspectHeartbeatEnvelope({...e,liveDeviceCommand:'unlock'},now).status,/DENY/);
   assert.equal(inspectHeartbeatEnvelope({...e,expiresAt:'2026-11-05T14:59:00.000Z'},now).status,
     'HOLD_EXPIRED_HEARTBEAT');
