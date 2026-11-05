@@ -47,6 +47,8 @@ export function SignedRelease250Panel({expectedSha, recoveryAction}: {expectedSh
     </label>
     <p><small>Signature verification is mathematical only; no signed receipt has been automatically issued. No Windows process, scheduled task, backup or database is changed. Release activation and post-reboot closure remain unverified until independently witnessed on the actual machine.</small></p>
     <ArtifactCustody251Panel expectedSha={expectedSha} signedArtifactSha256={receipt?.artifact_sha256 ?? null}
-      signerCandidateVerified={signatureState === "SIGNED_SOURCE_CANDIDATE_ONLY"} />
+      signerCandidateVerified={signatureState === "SIGNED_SOURCE_CANDIDATE_ONLY"}
+      signedReceiptSignerKey={receipt?.signer_public_key_raw_base64 ?? null}
+      signedReceiptObservedAt={receipt?.observed_at ?? null} signerPin={pin} />
   </section>;
 }

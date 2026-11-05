@@ -151,7 +151,7 @@ jobs:
           $releaseAlertErrors = $null
           [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'scripts/Send-Hub-Release-Alert.ps1'), [ref]$releaseAlertTokens, [ref]$releaseAlertErrors) | Out-Null
           foreach ($parseError in @($releaseAlertErrors)) { $allErrors += $parseError.ToString() }
-          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/hub-recovery-mode.ps1', 'scripts/test-hub-recovery-mode.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/install-hub-startup-task.ps1', 'scripts/enable-tailscale-serve.ps1', 'scripts/configure-lan-https.ps1', 'scripts/check-production-readiness.ps1', 'scripts/update-rosevear-ai-hub.ps1', 'scripts/restart-hub-backend.ps1', 'scripts/update-hub-backend.ps1', 'scripts/hub-backend-identity.ps1', 'scripts/test-hub-backend-identity.ps1', 'scripts/hub-release-policy.ps1', 'scripts/test-hub-release-policy.ps1', 'scripts/hub-auto-update.ps1', 'scripts/install-hub-auto-update.ps1', 'scripts/restart-hub-web.ps1', 'scripts/inspect-hub-lan.ps1', 'scripts/inspect-hub-release-tasks.ps1', 'scripts/inspect-hub-process-248.ps1', 'scripts/inspect-hub-process-249.ps1', 'scripts/inspect-hub-artifact-251.ps1')) {
+          foreach ($file in @('scripts/hub-recovery.ps1', 'scripts/hub-recovery-mode.ps1', 'scripts/test-hub-recovery-mode.ps1', 'scripts/install-hub-recovery-task.ps1', 'scripts/install-hub-startup-task.ps1', 'scripts/enable-tailscale-serve.ps1', 'scripts/configure-lan-https.ps1', 'scripts/check-production-readiness.ps1', 'scripts/update-rosevear-ai-hub.ps1', 'scripts/restart-hub-backend.ps1', 'scripts/update-hub-backend.ps1', 'scripts/hub-backend-identity.ps1', 'scripts/test-hub-backend-identity.ps1', 'scripts/hub-release-policy.ps1', 'scripts/test-hub-release-policy.ps1', 'scripts/hub-auto-update.ps1', 'scripts/install-hub-auto-update.ps1', 'scripts/restart-hub-web.ps1', 'scripts/inspect-hub-lan.ps1', 'scripts/inspect-hub-release-tasks.ps1', 'scripts/inspect-hub-process-248.ps1', 'scripts/inspect-hub-process-249.ps1', 'scripts/inspect-hub-artifact-251.ps1', 'scripts/inspect-hub-mapping-253.ps1')) {
             $tokens = $null
             $parseErrors = $null
             [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$parseErrors) | Out-Null
@@ -212,6 +212,16 @@ jobs:
           }
           foreach ($forbidden in @('New-NetFirewallRule', 'Set-NetFirewallAddressFilter', 'Remove-NetFirewallRule', 'Start-Process', 'Stop-Process', 'Register-ScheduledTask', 'Unregister-ScheduledTask')) {
             if ($source.Contains($forbidden)) { throw "Build 079 inspector must be read only: $forbidden" }
+          }
+      - name: Guard Build 253 mapping inspector against host mutations and raw data export
+        shell: pwsh
+        run: |
+          $source = Get-Content -LiteralPath 'scripts/inspect-hub-mapping-253.ps1' -Raw
+          foreach ($required in @('on_device_read_only', 'witness_verified = $false', 'process_attested = $false', 'changes_made = $false', 'inspect-hub-artifact-251.ps1', 'inspect-hub-process-249.ps1')) {
+            if (-not $source.Contains($required)) { throw "Missing Build 253 trust guard: $required" }
+          }
+          foreach ($forbidden in @('Start-Process ', 'Stop-Process ', 'Register-ScheduledTask ', 'Set-ScheduledTask ', 'Unregister-ScheduledTask ', 'Invoke-RestMethod ', 'Invoke-WebRequest ', 'Start-VM ', 'Stop-VM ', 'Set-Content ', 'Out-File ')) {
+            if ($source -match "(?m)^\s*[^#\r\n]*\b$([regex]::Escape($forbidden.Trim()))\b") { throw "Build 253 inspector cannot mutate host: $forbidden" }
           }
       - name: Validate Build 080 private LAN recovery guards
         shell: pwsh
