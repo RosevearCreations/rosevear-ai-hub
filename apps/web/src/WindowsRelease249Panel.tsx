@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { assessWindowsRelease249, parseWindowsRelease249, type WindowsRelease249 } from "./windowsRelease249";
+import { SignedRelease250Panel } from "./SignedRelease250Panel";
 
-export function WindowsRelease249Panel({ sourceAligned }: {sourceAligned: boolean}) {
+export function WindowsRelease249Panel({ sourceAligned, expectedSha }: {sourceAligned: boolean; expectedSha: string}) {
   const [evidence, setEvidence] = useState<WindowsRelease249 | null>(null);
   const [error, setError] = useState("");
   const [ownerReboot, setOwnerReboot] = useState(false);
@@ -31,5 +32,6 @@ export function WindowsRelease249Panel({ sourceAligned }: {sourceAligned: boolea
     <p><strong>{result.state.replaceAll("_", " ")}</strong></p>
     <ul>{result.findings.map(finding => <li key={finding}>{finding}</li>)}</ul>
     <p><small>Classification only. No automatic task repair, process termination, updater, migration or final acceptance occurs.</small></p>
+    <SignedRelease250Panel expectedSha={expectedSha} recoveryAction={evidence?.recovery_task.action ?? null} />
   </section>;
 }
