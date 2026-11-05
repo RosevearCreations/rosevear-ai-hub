@@ -26,6 +26,7 @@ for (const expected of [
   "run: python -m rosevear_ai_hub.disaster_recovery synthetic",
   "run: ./scripts/test-hub-release-policy.ps1",
   "scripts/inspect-hub-artifact-251.ps1",
+  "scripts/inspect-hub-mapping-253.ps1",
   "if-no-files-found: error",
 ]) {
   assert.ok(workflow.includes(expected), `Required verification missing: ${expected}`);
