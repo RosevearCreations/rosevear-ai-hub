@@ -45,4 +45,21 @@ const overBudget = summarizeRun254({ ...input, queueBudgetSeconds: 1, wallBudget
 assert.equal(overBudget.warnings.length, 2,
   "Queue/wall budget overruns must be visible but not replace gate truth");
 
+const retryStarted = "2026-11-05T06:15:00Z";
+const retryInput = {
+  ...input,
+  run: { ...run, run_attempt: 2 },
+  jobs: jobs.map(job => ({...job,run_attempt:2,
+    created_at: job.name === "web" ? started : retryStarted })),
+};
+const retry = summarizeRun254(retryInput);
+assert.equal(retry.gateRows.filter(job => job.retainedFromPriorAttempt).length, 4);
+assert.equal(retry.maxQueueSeconds, 9);
+assert.match(retry.markdown,/Successful jobs retained across a retry: \*\*4\*\*/);
+assert.throws(() => summarizeRun254({ ...retryInput, run: { ...run, run_attempt: 1 } }),
+  /outside a verified retry/);
+assert.throws(() => summarizeRun254({ ...retryInput, jobs: retryInput.jobs.map(job =>
+  job.name === "backend" ? {...job,run_attempt:1} : job) }),
+  /outside a verified retry/);
+
 console.log("Build 254: event scope, all five protected gates, and queue budgets fail closed");
