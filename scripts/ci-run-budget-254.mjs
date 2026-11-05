@@ -26,6 +26,24 @@ function positiveBudget(value, label) {
   return parsed;
 }
 
+/** GitHub re-stamps created_at on retained successful jobs when re-running failed jobs.
+ * Keep the original run creation as a conservative queue lower bound; never manufacture
+ * a zero duration or accept a missing required-gate result. */
+function queueOrigin(run, job, name) {
+  if (!job.created_at) return { at: run.created_at, retained: false };
+  const created = Date.parse(job.created_at);
+  const started = Date.parse(job.started_at);
+  if (Number.isFinite(created) && Number.isFinite(started) && created <= started) {
+    return { at: job.created_at, retained: false };
+  }
+  assert.ok(Number.isInteger(run.run_attempt) && run.run_attempt >= 2 &&
+    Number.isInteger(job.run_attempt) && job.run_attempt === run.run_attempt,
+    `Invalid ${name} queue origin outside a verified retry`);
+  assert.ok(Number.isFinite(started) && started >= Date.parse(run.created_at),
+    `Missing or invalid original ${name} retry timestamp`);
+  return { at: run.created_at, retained: true };
+}
+
 export function summarizeRun254({ run, jobs, requiredResults, eventName, ref, baseRef,
   queueBudgetSeconds = 300, wallBudgetSeconds = 900 }) {
   assert.ok(run && Array.isArray(jobs) && requiredResults && typeof requiredResults === "object",
@@ -46,11 +64,13 @@ export function summarizeRun254({ run, jobs, requiredResults, eventName, ref, ba
     const job = matches[0];
     assert.equal(job.status, "completed", `Required gate ${name} is incomplete`);
     assert.equal(job.conclusion, "success", `Required gate ${name} failed`);
-    const queueSeconds = secondsBetween(job.created_at || run.created_at, job.started_at,
+    const origin = queueOrigin(run, job, name);
+    const queueSeconds = secondsBetween(origin.at, job.started_at,
       `${name} queue`);
     const runtimeSeconds = secondsBetween(job.started_at, job.completed_at,
       `${name} runtime`);
-    return { name, queueSeconds, runtimeSeconds, completedAt: job.completed_at };
+    return { name, queueSeconds, runtimeSeconds, completedAt: job.completed_at,
+      retainedFromPriorAttempt: origin.retained };
   });
   const lastGateEnd = gateRows.map(item => item.completedAt).sort().at(-1);
   const wallSeconds = secondsBetween(run.created_at, lastGateEnd, "Run wall time");
@@ -68,6 +88,7 @@ export function summarizeRun254({ run, jobs, requiredResults, eventName, ref, ba
     `- Required checks: **${gateRows.length}/${REQUIRED_GATES_254.length} SUCCESS**`,
     `- Longest queue: **${maxQueueSeconds}s** (budget ${queueBudget}s)`,
     `- Required-gate wall time: **${wallSeconds}s** (budget ${wallBudget}s)`,
+    `- Successful jobs retained across a retry: **${gateRows.filter(row => row.retainedFromPriorAttempt).length}**; their queue time uses the original run creation as a conservative upper bound`,
     `- Budget warnings: ${warnings.length ? warnings.join("; ") : "none"}`,
     "",
     "| Required gate | Queue seconds | Runtime seconds |",

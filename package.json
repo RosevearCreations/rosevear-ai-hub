@@ -7,6 +7,10 @@
     "apps/desktop"
   ],
   "scripts": {
+    "relay:ql339a:inspect": "node scripts/ql339a-relay-agent.mjs --inspect",
+    "relay:ql339a:probe-local": "node scripts/ql339a-relay-agent.mjs --probe-local",
+    "relay:ql339a:plan": "node scripts/ql339a-relay-task.mjs --plan",
+    "relay:ql339a:test": "node --test scripts/ql339a-relay-agent.test.mjs scripts/ql339a-relay-task.test.mjs",
     "web:dev": "npm --workspace apps/web run dev",
     "web:build": "npm --workspace apps/web run build",
     "web:test": "npm --workspace apps/web run test",
