@@ -76,6 +76,8 @@ jobs:
         run: node scripts/ci-foundation-contract.test.mjs
       - name: Build 254 promotion event and budget contract regressions
         run: node scripts/ci-run-budget-254.test.mjs
+      - name: Build 255 historical SLA and Windows HOLD handoff regressions
+        run: node scripts/ci-trend-255.test.mjs
 
   backend:
     runs-on: ubuntu-latest
@@ -242,6 +244,21 @@ jobs:
           foreach ($forbidden in @('Start-Process ', 'Stop-Process ', 'Register-ScheduledTask ', 'Set-ScheduledTask ', 'Unregister-ScheduledTask ', 'Invoke-RestMethod ', 'Invoke-WebRequest ', 'Start-VM ', 'Stop-VM ', 'Set-Content ', 'Out-File ')) {
             if ($source -match "(?m)^\s*[^#\r\n]*\b$([regex]::Escape($forbidden.Trim()))\b") { throw "Build 253 inspector cannot mutate host: $forbidden" }
           }
+      - name: Parse Build 255 Windows evidence handoff and enforce read-only contract
+        shell: pwsh
+        run: |
+          $file = 'scripts/inspect-hub-release-255.ps1'
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null
+          if (@($errors).Count -gt 0) { throw ($errors -join '; ') }
+          $source = Get-Content -LiteralPath $file -Raw
+          foreach ($required in @('DISCONNECTED / HOLD', 'installed_release_attested = $false', 'changed_anything = $false', '--probe-local', '--inspect')) {
+            if (-not $source.Contains($required)) { throw "Missing Build 255 evidence HOLD guard: $required" }
+          }
+          foreach ($forbidden in @('Start-Process', 'Stop-Process', 'Register-ScheduledTask', 'Start-ScheduledTask', '--send-once', '--enroll')) {
+            if ($source.Contains($forbidden)) { throw "Unsafe Build 255 handoff: $forbidden" }
+          }
       - name: Validate Build 080 private LAN recovery guards
         shell: pwsh
         run: ./scripts/test-hub-lan-recovery.ps1
@@ -303,3 +320,7 @@ jobs:
           CI_QUEUE_BUDGET_SECONDS: "300"
           CI_WALL_BUDGET_SECONDS: "900"
         run: node scripts/ci-run-budget-254.mjs
+      - name: Build 255 post-consolidation queue and runtime trend readback
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/ci-trend-255.mjs
