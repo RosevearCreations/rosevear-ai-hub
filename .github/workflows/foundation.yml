@@ -78,6 +78,8 @@ jobs:
         run: node scripts/ci-run-budget-254.test.mjs
       - name: Build 255 historical SLA and Windows HOLD handoff regressions
         run: node scripts/ci-trend-255.test.mjs
+      - name: Build 256 signed Windows process evidence and receiver-HOLD contract
+        run: node scripts/build-256-contract.test.mjs
 
   backend:
     runs-on: ubuntu-latest
@@ -259,6 +261,15 @@ jobs:
           foreach ($forbidden in @('Start-Process', 'Stop-Process', 'Register-ScheduledTask', 'Start-ScheduledTask', '--send-once', '--enroll')) {
             if ($source.Contains($forbidden)) { throw "Unsafe Build 255 handoff: $forbidden" }
           }
+      - name: Parse Build 256 Windows process observer and preserve immutable HOLD flags
+        shell: pwsh
+        run: |
+          $file = 'scripts/inspect-hub-process-256.ps1'
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null
+          if (@($errors).Count -gt 0) { throw ($errors -join '; ') }
+          node scripts/build-256-contract.test.mjs
       - name: Validate Build 080 private LAN recovery guards
         shell: pwsh
         run: ./scripts/test-hub-lan-recovery.ps1
