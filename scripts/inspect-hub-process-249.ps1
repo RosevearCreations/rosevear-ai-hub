@@ -37,7 +37,12 @@ function Get-RecoveryTaskIdentity() {
         $args = [string]$actions[0].Arguments
         # Only classify script path inside checkout; do not serialize arguments, including passwords.
         $expectedScript = Join-Path $PSScriptRoot 'hub-recovery.ps1'
-        if ($exe -ieq 'powershell.exe' -and $args.Contains($expectedScript)) { $actionStatus = 'expected_script_reported' }
+        # Windows paths are case-insensitive. Ree's observed task has one valid
+        # PowerShell action with the expected path differing only in casing.
+        if ($exe -ieq 'powershell.exe' -and
+            $args.IndexOf($expectedScript, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            $actionStatus = 'expected_script_reported'
+        }
         else { $actionStatus = 'drift_or_unknown' }
     }
     $run = 'unverified'

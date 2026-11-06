@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ProcessChain257Panel } from "./ProcessChain257Panel";
 import {
   parseProcessObservation256, parseProcessWitness256, reviewSignedProcess256,
   type SignedProcessWitness256, type WindowsProcessObservation256,
@@ -79,5 +80,6 @@ export function ProcessEvidence256Panel({expectedSha, originalSignerKey}: {
       <li>The remote receiver must remain OFF until separately authorized, signed and tested within a bounded TEST scope.</li>
     </ul>
     <p><small>All evidence stays in this browser. This review never connects a relay, modifies a task, restarts Windows services or authorizes customer/device communications.</small></p>
+    <ProcessChain257Panel expectedSha={expectedSha} trustedIssuerKey={originalSignerKey} />
   </section>;
 }
