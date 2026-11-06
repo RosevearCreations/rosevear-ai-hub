@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ProcessEvidence256Panel } from "./ProcessEvidence256Panel";
 import {
   assessSupervisedProcessReview253, parseArtifactKindManifest253, parseIndependentWitness253,
   parseWindowsMappingObservation253, verifyArtifactKindManifest253, verifyIndependentWitness253,
@@ -127,5 +128,7 @@ export function MappingWitness253Panel({expectedSha, signedReceiptArtifactSha256
     </label>
     <ul>{result.findings.map(finding => <li key={finding}>{finding}</li>)}</ul>
     <p><small>All imported material is reviewed locally in this browser. Even a complete signature candidate cannot enroll a signer, attest a running binary, authorize recovery, edit tasks, restart services or close production installation acceptance. A witness must be a different independently authenticated key custodian.</small></p>
+    <ProcessEvidence256Panel expectedSha={expectedSha}
+      originalSignerKey={manifestVerified ? signedReceiptSignerKey : null} />
   </section>;
 }
