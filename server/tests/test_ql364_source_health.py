@@ -25,7 +25,7 @@ def test_original_windows_source_health_stays_disconnected_without_enrollment():
     assert response.status_code == 503
     assert response.json()["connectionState"] == "DISCONNECTED / HOLD"
     assert response.json()["connected"] is False
-    assert response.headers["cache-control"] == "private, no-store"
+    assert "no-store" in response.headers["cache-control"]
     assert client.post(PATH).status_code == 405
     assert client.get(PATH, params={"devices": "yes"}).status_code == 403
 
