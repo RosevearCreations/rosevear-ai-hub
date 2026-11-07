@@ -2,6 +2,7 @@ import {useEffect,useState} from "react";
 import {parseReceiverAudit266,parseNonceClosure266,parseOwnerTransition266,
   reviewOriginalAudit266,type ReceiverAudit266,type NonceClosure266,type OwnerTransition266} from "./commsAudit266";
 import type {PriorProof264,PrivateGet265,Shutdown265,CrossDeviceAcceptance265} from "./commsReceipt265";
+import {CommsTruth267Panel} from "./CommsTruth267Panel";
 
 type Review=Awaited<ReturnType<typeof reviewOriginalAudit266>>;
 export function CommsAudit266Panel({prior,get,shutdown,acceptance}: {
@@ -86,5 +87,7 @@ export function CommsAudit266Panel({prior,get,shutdown,acceptance}: {
       performs no replay GET, changes no Windows recovery task, stores no private credentials,
       and never enables app-to-app communication or device/customer actions.
       One GET and a consumed nonce remain the strict bounds.</small></p>
+    <CommsTruth267Panel prior={prior} get={get} shutdown={shutdown} acceptance={acceptance}
+      audit={audit} closure={closure} decision={owners} />
   </section>;
 }

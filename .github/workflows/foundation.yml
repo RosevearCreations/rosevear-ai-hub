@@ -100,6 +100,8 @@ jobs:
         run: node scripts/build-265-contract.test.mjs
       - name: Build 266 original private receiver audit, nonce replay closure and owner-governed candidate HOLD contract
         run: node scripts/build-266-contract.test.mjs
+      - name: Build 267 original source-of-truth, independent owner trust and read-only trial HOLD contract
+        run: node scripts/build-267-contract.test.mjs
 
   backend:
     runs-on: ubuntu-latest
