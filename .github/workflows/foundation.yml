@@ -96,6 +96,8 @@ jobs:
         run: node scripts/build-263-contract.test.mjs
       - name: Build 264 original Windows runtime authority, witnessed decision and scoped Comms TEST HOLD contract
         run: node scripts/build-264-contract.test.mjs
+      - name: Build 265 original private Comms GET, shutdown and independent owner receipt HOLD contract
+        run: node scripts/build-265-contract.test.mjs
 
   backend:
     runs-on: ubuntu-latest
