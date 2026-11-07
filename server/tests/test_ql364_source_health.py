@@ -15,6 +15,8 @@ from rosevear_ai_hub.api.ql364_source_health import (
     canonical,
     digest,
     source_health,
+    valid_intent,
+    valid_source_origin,
 )
 from rosevear_ai_hub.main import app
 
@@ -28,6 +30,77 @@ def test_original_windows_source_health_stays_disconnected_without_enrollment():
     assert "no-store" in response.headers["cache-control"]
     assert client.post(PATH).status_code == 405
     assert client.get(PATH, params={"devices": "yes"}).status_code == 403
+
+
+def test_ql365d_source_origin_must_be_canonical_private_https():
+    for allowed in (
+        "https://original.example",
+        "https://original.example:8443",
+        "https://[2001:db8::1]:8443",
+    ):
+        assert valid_source_origin(allowed)
+    for denied in (
+        "http://original.example",
+        "https://user:secret@original.example",
+        "https://original.example:443",
+        "https://original.example/",
+        "https://original.example/path",
+        "https://original.example?next=1",
+        "https://original.example#fragment",
+        "https://ORIGINAL.example",
+        "https://original.example:0",
+        "https://original.example:bad",
+        "https://bücher.example",
+    ):
+        assert not valid_source_origin(denied), denied
+
+
+def test_ql365d_one_get_intent_rejects_changed_shell_scope_and_expiry():
+    now = 1794052800000
+    issued = datetime.fromtimestamp((now - 1000) / 1000, UTC)
+    request = {
+        "schema": REQUEST_SCHEMA,
+        "kind": "ONE_PRIVATE_HEALTH_GET_INTENT",
+        "archiveId": "local-synthetic-test-only",
+        "handoffSha256": "a" * 64,
+        "sourceId": SOURCE_ID,
+        "repository": "rosevear-ai-hub",
+        "operationId": "12345678-1234-4123-8123-123456789012",
+        "sourceCommitSha": "b" * 40,
+        "manifestSha256": "c" * 64,
+        "sourceOrigin": "https://original.example",
+        "environment": "TEST",
+        "method": "GET",
+        "path": PATH,
+        "customerDataAllowed": False,
+        "deviceActionsAllowed": False,
+        "persistentConnectionAllowed": False,
+        "issuedAt": issued.isoformat(timespec="milliseconds").replace("+00:00", "Z"),
+        "expiresAt": (issued + timedelta(seconds=30))
+        .isoformat(timespec="milliseconds")
+        .replace("+00:00", "Z"),
+    }
+    assert valid_intent(request, now)
+    failures = (
+        {"sourceId": "rosiedazzlers"},
+        {"repository": "yw"},
+        {"sourceCommitSha": "not-a-commit"},
+        {"sourceOrigin": "https://user:secret@original.example"},
+        {"environment": "production"},
+        {"method": "POST"},
+        {"path": "/api/integration/v1/health"},
+        {"customerDataAllowed": True},
+        {"deviceActionsAllowed": True},
+        {"persistentConnectionAllowed": True},
+        {
+            "expiresAt": (issued + timedelta(minutes=5))
+            .isoformat(timespec="milliseconds")
+            .replace("+00:00", "Z")
+        },
+        {"extraTenantId": "camp-rosevear"},
+    )
+    for change in failures:
+        assert not valid_intent({**request, **change}, now), change
 
 
 def test_synthetic_original_approval_signer_claim_and_replay_contract():
@@ -122,6 +195,17 @@ def test_synthetic_original_approval_signer_claim_and_replay_contract():
     response = asyncio.run(execute())
     assert response.status_code == 200
     payload = json.loads(response.body)
+    assert set(payload) == {"schema", "health", "receipt"}
+    assert set(payload["health"]) == {
+        "schema",
+        "sourceId",
+        "operationId",
+        "health",
+        "connected",
+        "customerDataAllowed",
+        "deviceActions",
+    }
+    assert set(payload["receipt"]) == {"schema", "payload", "signature", "keyId"}
     assert payload["health"]["connected"] is False
     assert payload["health"]["deviceActions"] is False
     assert payload["receipt"]["payload"]["receiptSha256"] == digest(payload["health"])
