@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 
 import { App } from "./App";
 import { HUB_AUTH_REQUIRED_EVENT } from "./api";
@@ -559,16 +559,25 @@ describe("App", () => {
 
   test("keeps Standard theme owner issue findings while opening and returning from real workspaces", async () => {
     render(<App />);
-    await waitFor(() => expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument());
-    expect(screen.getByRole("navigation", { name: "Command shortcuts" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Jump to System workspace" }));
-    const findings = screen.getAllByRole("combobox", { name: "Review finding" });
+    const primaryNav = await waitFor(() => {
+      const nav = document.querySelector<HTMLElement>("#hub-primary-nav");
+      expect(nav).toBeInTheDocument();
+      return nav!;
+    });
+    const commandNav = document.querySelector<HTMLElement>('nav[aria-label="Command shortcuts"]');
+    expect(commandNav).toBeInTheDocument();
+    const shortcuts = within(commandNav!);
+    fireEvent.click(shortcuts.getByRole("button", { name: "Jump to System workspace" }));
+    const themeReview = document.querySelector<HTMLElement>("#hub-theme-screen-review");
+    expect(themeReview).toBeInTheDocument();
+    const findings = within(themeReview!).getAllByRole("combobox", { name: "Review finding" });
     fireEvent.change(findings[2], { target: { value: "needs_change" } });
-    fireEvent.click(screen.getByRole("button", { name: "Open Management workspaces workspace for review" }));
-    expect(screen.getByRole("button", { name: "Business" })).toHaveAttribute("aria-current", "page");
-    fireEvent.click(screen.getByRole("button", { name: "Jump to System workspace" }));
-    expect(screen.getAllByRole("combobox", { name: "Review finding" })[2]).toHaveValue("needs_change");
-    expect(screen.getByLabelText("Standard theme owner review status")).toHaveTextContent("INCOMPLETE_OWNER_SCREEN_REVIEW");
+    fireEvent.click(within(themeReview!).getByRole("button", { name: "Open Management workspaces workspace for review" }));
+    expect(within(primaryNav).getByRole("button", { name: "Business" })).toHaveAttribute("aria-current", "page");
+    fireEvent.click(shortcuts.getByRole("button", { name: "Jump to System workspace" }));
+    expect(within(themeReview!).getAllByRole("combobox", { name: "Review finding" })[2]).toHaveValue("needs_change");
+    expect(within(themeReview!.parentElement!).getByLabelText("Standard theme owner review status"))
+      .toHaveTextContent("INCOMPLETE_OWNER_SCREEN_REVIEW");
   }, 45_000);
 
   test("shows owner field trial only to administrative roles, not read-only users", async () => {
@@ -587,20 +596,43 @@ describe("App", () => {
 
   test("retains the private owner trial ledger while navigating to an inspected workspace and back", async () => {
     render(<App />);
-    await waitFor(() => expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument());
-    fireEvent.click(screen.getByRole("button", { name: "System" }));
-    expect(screen.getByText("FIELD ACCEPTANCE: HOLD")).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("Finding category"), { target: { value: "offline" } });
-    fireEvent.change(screen.getByLabelText("Next-action owner"), { target: { value: "household_owner" } });
-    fireEvent.click(screen.getByLabelText(/I personally completed this safe check/));
-    fireEvent.click(screen.getByRole("button", { name: /Record witnessed outcome/ }));
-    expect(screen.getByText(/Follow-up acknowledgement pending/)).toBeInTheDocument();
+    const primaryNav = await waitFor(() => {
+      const nav = document.querySelector<HTMLElement>("#hub-primary-nav");
+      expect(nav).toBeInTheDocument();
+      return nav!;
+    });
+    const ownerReview = document.querySelector<HTMLElement>("#hub-system-owner-review");
+    expect(ownerReview).toBeInTheDocument();
+    const trial = within(ownerReview!);
+    const navigation = within(primaryNav);
+    fireEvent.click(navigation.getByRole("button", { name: "System" }));
+    expect(trial.getByText("FIELD ACCEPTANCE: HOLD")).toBeInTheDocument();
+    const controls = ownerReview!.querySelector<HTMLElement>(".owner-trial-controls");
+    expect(controls).toBeInTheDocument();
+    const selects = controls!.querySelectorAll<HTMLSelectElement>("select");
+    expect(selects).toHaveLength(3);
+    expect(selects[1].closest("label")).toHaveTextContent("Finding category");
+    expect(selects[2].closest("label")).toHaveTextContent("Next-action owner");
+    fireEvent.change(selects[1], { target: { value: "offline" } });
+    fireEvent.change(selects[2], { target: { value: "household_owner" } });
+    const witnessedCheckbox = ownerReview!.querySelector<HTMLInputElement>(
+      '.owner-trial-controls + label.owner-trial-check input[type="checkbox"]',
+    );
+    expect(witnessedCheckbox).toBeInTheDocument();
+    expect(witnessedCheckbox!.closest("label")).toHaveTextContent("I personally completed this safe check");
+    fireEvent.click(witnessedCheckbox!);
+    const recordButton = ownerReview!.querySelector<HTMLButtonElement>(".owner-trial-check + button.primary-button");
+    expect(recordButton).toHaveTextContent("Record witnessed outcome (no device action)");
+    fireEvent.click(recordButton!);
+    expect(trial.getByText(/Follow-up acknowledgement pending/)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Open Home for this check" }));
-    expect(screen.getByRole("heading", { name: "Home" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "System" }));
-    expect(screen.getByText(/Follow-up acknowledgement pending/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/I personally completed this safe check/)).not.toBeChecked();
+    const homeButton = ownerReview!.querySelector<HTMLButtonElement>(".owner-trial-instruction + button");
+    expect(homeButton).toHaveTextContent("Open Home for this check");
+    fireEvent.click(homeButton!);
+    expect(document.querySelector("#main-content h1")).toHaveTextContent("Home");
+    fireEvent.click(navigation.getByRole("button", { name: "System" }));
+    expect(trial.getByText(/Follow-up acknowledgement pending/)).toBeInTheDocument();
+    expect(witnessedCheckbox).not.toBeChecked();
   }, 120_000); // Shared CI runners can take longer to mount the full multi-workspace owner ledger.
 
   test("opens the exact-action confirmation queue and records approval", async () => {
