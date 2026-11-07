@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ProcessChain257Panel } from "./ProcessChain257Panel";
 import { ProcessIdentity258Panel } from "./ProcessIdentity258Panel";
+import { LauncherCustody259Panel } from "./LauncherCustody259Panel";
 import {
   parseProcessObservation256, parseProcessWitness256, reviewSignedProcess256,
   type SignedProcessWitness256, type WindowsProcessObservation256,
@@ -83,5 +84,6 @@ export function ProcessEvidence256Panel({expectedSha, originalSignerKey}: {
     <p><small>All evidence stays in this browser. This review never connects a relay, modifies a task, restarts Windows services or authorizes customer/device communications.</small></p>
     <ProcessChain257Panel expectedSha={expectedSha} trustedIssuerKey={originalSignerKey} />
     <ProcessIdentity258Panel expectedSha={expectedSha} trustedOriginalKey={originalSignerKey} />
+    <LauncherCustody259Panel expectedSha={expectedSha} trustedOriginalKey={originalSignerKey} />
   </section>;
 }

@@ -84,6 +84,8 @@ jobs:
         run: node scripts/build-257-contract.test.mjs
       - name: Build 258 privilege-aware Windows identity and signed TEST HOLD contract
         run: node scripts/build-258-contract.test.mjs
+      - name: Build 259 original Windows launcher and independent offline TEST witness HOLD contract
+        run: node scripts/build-259-contract.test.mjs
 
   backend:
     runs-on: ubuntu-latest
@@ -297,6 +299,22 @@ jobs:
               $observed.changed_anything -ne $false -or $observed.remote_requests -ne 0 -or
               $observed.process_attested -ne $false -or $observed.comms_connected -ne $false) {
             throw 'Build 258 Windows observer breached its read-only HOLD contract'
+          }
+      - name: Parse and smoke-test Build 259 original Windows launcher custody observer
+        shell: pwsh
+        run: |
+          $file = 'scripts/inspect-hub-launcher-259.ps1'
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null
+          if (@($errors).Count -gt 0) { throw ($errors -join '; ') }
+          node scripts/build-259-contract.test.mjs
+          $observed = & (Resolve-Path $file).Path | ConvertFrom-Json
+          if ($observed.schema -ne 'rosevear-windows-launcher-custody-259/v1' -or
+              $observed.changed_anything -ne $false -or $observed.remote_requests -ne 0 -or
+              $observed.restart_authorized -ne $false -or $observed.challenge_executed -ne $false -or
+              $observed.test_authorized -ne $false -or $observed.comms_connected -ne $false) {
+            throw 'Build 259 Windows launcher observer breached read-only TEST HOLD contract'
           }
       - name: Validate Build 080 private LAN recovery guards
         shell: pwsh
