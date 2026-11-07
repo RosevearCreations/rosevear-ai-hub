@@ -115,6 +115,10 @@ const acceptanceFields=(x:CrossDeviceAcceptance265)=>[x.schema,x.release_sha,x.g
   x.decision,x.connection_state];
 export const canonicalAcceptance265=(x:CrossDeviceAcceptance265,role:"owner"|"independent_witness")=>
   [...acceptanceFields(x),role,""].join("\n");
+// Immutable full signed post-TEST acceptance anchor for later independent audits.
+export const canonicalSignedAcceptance265=(x:CrossDeviceAcceptance265)=>[...acceptanceFields(x),
+  ...(["owner","independent_witness"] as const)
+    .flatMap(r=>[r,x[r].public_key_raw_base64,x[r].signature_base64]),""].join("\n");
 export function parseAcceptance265(source:string):CrossDeviceAcceptance265 {
   const x=parse(source);
   if(!exactKeys(x,["schema","release_sha","get_receipt_sha256","shutdown_receipt_sha256",
