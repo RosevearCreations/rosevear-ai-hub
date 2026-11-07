@@ -89,11 +89,39 @@ def timestamp(value: Any) -> int | None:
         return None
 
 
+def valid_source_origin(value: Any) -> bool:
+    """Match the canonical HTTPS origin accepted by the private QL-363 verifier."""
+    if not isinstance(value, str) or len(value) > 250 or not value.isascii():
+        return False
+    try:
+        origin = urlsplit(value)
+        host = origin.hostname
+        if (
+            origin.scheme != "https"
+            or not host
+            or origin.username is not None
+            or origin.password is not None
+            or origin.path
+            or origin.query
+            or origin.fragment
+        ):
+            return False
+        port = origin.port
+        if port == 0:
+            return False
+        canonical_host = f"[{host}]" if ":" in host else host
+        canonical = f"https://{canonical_host}"
+        if port not in (None, 443):
+            canonical += f":{port}"
+        return value == canonical
+    except ValueError:
+        return False
+
+
 def valid_intent(v: Any, now: int) -> bool:
     if not isinstance(v, dict) or set(v) != REQUEST_FIELDS:
         return False
     start, end = timestamp(v.get("issuedAt")), timestamp(v.get("expiresAt"))
-    origin = urlsplit(v.get("sourceOrigin", "")) if isinstance(v.get("sourceOrigin"), str) else None
     return (
         v.get("schema") == REQUEST_SCHEMA
         and v.get("kind") == "ONE_PRIVATE_HEALTH_GET_INTENT"
@@ -115,12 +143,7 @@ def valid_intent(v: Any, now: int) -> bool:
         is not None
         and isinstance(v.get("archiveId"), str)
         and 0 < len(v["archiveId"]) < 160
-        and origin is not None
-        and origin.scheme == "https"
-        and bool(origin.netloc)
-        and not origin.path
-        and not origin.query
-        and not origin.fragment
+        and valid_source_origin(v.get("sourceOrigin"))
         and start is not None
         and end is not None
         and start <= now + 5000
