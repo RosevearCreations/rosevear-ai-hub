@@ -13,7 +13,7 @@ describe("Build 266 independent Comms audit offline panel",()=>{
     expect(container.textContent).toContain("NONCE REPLAY HOLD");
     expect(container.textContent).toContain("OWNER DECISION HOLD");
     expect(container.textContent).toContain("DISCONNECTED / HOLD");
-    expect(container.querySelectorAll('input[type="file"]')).toHaveLength(6);
+    expect(container.querySelectorAll('input[type="file"]')).toHaveLength(8);
     expect(container.textContent).toContain("ORIGINAL SOURCE HOLD");
     expect(container.textContent).toContain("INDEPENDENT TRUST HOLD");
     expect(container.textContent).toContain("TRIAL AUTHORIZATION HOLD");

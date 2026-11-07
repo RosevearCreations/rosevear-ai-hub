@@ -3,6 +3,7 @@ import {parseOriginalSource267,parseIndependentTrust267,parseOwnerTrial267,revie
   type OriginalSourceTruth267,type IndependentTrust267,type OwnerTrial267} from "./commsTruth267";
 import type {PriorProof264,PrivateGet265,Shutdown265,CrossDeviceAcceptance265} from "./commsReceipt265";
 import type {ReceiverAudit266,NonceClosure266,OwnerTransition266} from "./commsAudit266";
+import {CommsTrial268Panel} from "./CommsTrial268Panel";
 
 type Review=Awaited<ReturnType<typeof reviewOriginalTruth267>>;
 type Props={prior:PriorProof264|null;get:PrivateGet265|null;shutdown:Shutdown265|null;
@@ -79,5 +80,8 @@ export function CommsTruth267Panel({prior,get,shutdown,acceptance,audit,closure,
     <p><small>Zero remote requests. No replay GET, automatic receiver activation, credential handling,
       source writes, customer messages or device actions. Receiver OFF, credentials REVOKED,
       nonce CONSUMED; connection DISCONNECTED / HOLD even after valid mathematical signatures.</small></p>
+    <CommsTrial268Panel prior={prior} get={get} shutdown={shutdown} acceptance={acceptance}
+      audit={audit} closure={closure} decision={decision} source={source} witness={witness}
+      trial={trial} />
   </section>;
 }
