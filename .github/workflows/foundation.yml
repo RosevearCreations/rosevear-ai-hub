@@ -92,6 +92,8 @@ jobs:
         run: node scripts/build-261-contract.test.mjs
       - name: Build 262 Dark Mode contrast, client source and read-only runtime HOLD contract
         run: node scripts/build-262-contract.test.mjs
+      - name: Build 263 original Windows launcher, distinct signed restart candidate and Comms TEST HOLD contract
+        run: node scripts/build-263-contract.test.mjs
 
   backend:
     runs-on: ubuntu-latest
@@ -380,6 +382,27 @@ jobs:
               $observed.test_authorized -ne $false -or $observed.challenge_executed -ne $false -or
               $observed.receiver_activated -ne $false -or $observed.comms_connected -ne $false) {
             throw 'Build 262 Windows source/receiver gate must remain read-only HOLD'
+          }
+      - name: Parse and smoke-test Build 263 Windows original launcher with no restart or Comms authorization
+        shell: pwsh
+        run: |
+          $file = 'scripts/inspect-hub-launcher-263.ps1'
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null
+          if (@($errors).Count -gt 0) { throw ($errors -join '; ') }
+          node scripts/build-263-contract.test.mjs
+          $observed = & (Resolve-Path $file).Path | ConvertFrom-Json
+          if ($observed.schema -ne 'rosevear-windows-original-launcher-custody-263/v1' -or
+              $observed.stage -ne 'before' -or $observed.changed_anything -ne $false -or
+              $observed.remote_requests -ne 0 -or
+              $observed.original_launcher_custody_attested -ne $false -or
+              $observed.supervised_restart_attested -ne $false -or
+              $observed.independently_signed_runtime_accepted -ne $false -or
+              $observed.test_authorized -ne $false -or
+              $observed.challenge_executed -ne $false -or
+              $observed.receiver_activated -ne $false -or $observed.comms_connected -ne $false) {
+            throw 'Build 263 original Windows evidence must remain read-only and receiver OFF'
           }
       - name: Validate Build 080 private LAN recovery guards
         shell: pwsh
