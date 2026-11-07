@@ -3,6 +3,7 @@ import { ProcessChain257Panel } from "./ProcessChain257Panel";
 import { ProcessIdentity258Panel } from "./ProcessIdentity258Panel";
 import { LauncherCustody259Panel } from "./LauncherCustody259Panel";
 import { SupervisedRuntime260Panel } from "./SupervisedRuntime260Panel";
+import { InstalledSource261Panel } from "./InstalledSource261Panel";
 import {
   parseProcessObservation256, parseProcessWitness256, reviewSignedProcess256,
   type SignedProcessWitness256, type WindowsProcessObservation256,
@@ -87,5 +88,6 @@ export function ProcessEvidence256Panel({expectedSha, originalSignerKey}: {
     <ProcessIdentity258Panel expectedSha={expectedSha} trustedOriginalKey={originalSignerKey} />
     <LauncherCustody259Panel expectedSha={expectedSha} trustedOriginalKey={originalSignerKey} />
     <SupervisedRuntime260Panel expectedSha={expectedSha} trustedOriginalKey={originalSignerKey} />
+    <InstalledSource261Panel expectedSha={expectedSha} trustedIssuerKey={originalSignerKey} />
   </section>;
 }

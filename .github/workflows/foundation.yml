@@ -88,6 +88,8 @@ jobs:
         run: node scripts/build-259-contract.test.mjs
       - name: Build 260 supervised Windows release and independent runtime TEST HOLD contract
         run: node scripts/build-260-contract.test.mjs
+      - name: Build 261 original issuer installed-source and supervised restart TEST HOLD contract
+        run: node scripts/build-261-contract.test.mjs
 
   backend:
     runs-on: ubuntu-latest
@@ -335,6 +337,27 @@ jobs:
               $observed.supervised_restart_performed_attested -ne $false -or
               $observed.test_authorized -ne $false -or $observed.comms_connected -ne $false) {
             throw 'Build 260 Windows read-only runtime observer breached supervised TEST HOLD contract'
+          }
+      - name: Parse and smoke-test Build 261 Windows original launcher template and source map
+        shell: pwsh
+        run: |
+          $file = 'scripts/inspect-hub-installed-261.ps1'
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null
+          if (@($errors).Count -gt 0) { throw ($errors -join '; ') }
+          node scripts/build-261-contract.test.mjs
+          $observed = & (Resolve-Path $file).Path | ConvertFrom-Json
+          if ($observed.schema -ne 'rosevear-windows-installed-source-map-261/v1' -or
+              $observed.stage -ne 'before' -or
+              $observed.artifact_mapping_status -ne 'checkout_artifacts_only' -or
+              $observed.changed_anything -ne $false -or $observed.remote_requests -ne 0 -or
+              $observed.original_installed_source_verified -ne $false -or
+              $observed.supervised_restart_receipt_verified -ne $false -or
+              $observed.independent_witness_verified -ne $false -or
+              $observed.test_authorized -ne $false -or $observed.challenge_executed -ne $false -or
+              $observed.receiver_activated -ne $false -or $observed.comms_connected -ne $false) {
+            throw 'Build 261 Windows observer breached original custody or receiver-OFF contract'
           }
       - name: Validate Build 080 private LAN recovery guards
         shell: pwsh
