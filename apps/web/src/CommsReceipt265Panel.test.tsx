@@ -11,7 +11,8 @@ describe("Build 265 first Comms TEST evidence panel",()=>{
     expect(button.disabled).toBe(true);
     expect(container.textContent).toContain("DISCONNECTED / HOLD");
     expect(container.textContent).toContain("INDEPENDENT ACCEPTANCE HOLD");
-    expect(container.querySelectorAll('input[type="file"]')).toHaveLength(3);
+    // Three original Build 265 receipts plus three read-only Build 266 audit records.
+    expect(container.querySelectorAll('input[type="file"]')).toHaveLength(6);
     expect(container.querySelector('button[type="submit"]')).toBeNull();
   });
 });

@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {parseAcceptance265,parsePrivateGet265,parseShutdown265,reviewCommsReceipt265,
   type PriorProof264,type PrivateGet265,type Shutdown265,type CrossDeviceAcceptance265} from "./commsReceipt265";
+import {CommsAudit266Panel} from "./CommsAudit266Panel";
 
 type Review=Awaited<ReturnType<typeof reviewCommsReceipt265>>;
 export function CommsReceipt265Panel({prior}: {prior:PriorProof264|null}) {
@@ -70,5 +71,6 @@ export function CommsReceipt265Panel({prior}: {prior:PriorProof264|null}) {
     <p><small>This panel only verifies uploaded bytes locally. It never sends a GET, activates
       the receiver, modifies Windows recovery, stores private keys, or sends customer/device commands.
       Signed candidate files do not by themselves change the real connection state.</small></p>
+    <CommsAudit266Panel prior={prior} get={get} shutdown={shutdown} acceptance={owners} />
   </section>;
 }
