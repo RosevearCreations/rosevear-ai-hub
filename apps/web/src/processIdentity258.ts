@@ -157,7 +157,7 @@ async function sha256(data: Uint8Array) {
 export const digestIdentity258 = (x: InstalledIdentity258) =>
   sha256(new TextEncoder().encode(canonicalIdentity258(x)));
 
-async function verifySignature(key64: string, signature64: string, canonical: string, pinnedHash: string) {
+export async function verifyPinnedEd25519Signature258(key64: string, signature64: string, canonical: string, pinnedHash: string) {
   try {
     const keyData = Uint8Array.from(atob(key64), c => c.charCodeAt(0));
     const signature = Uint8Array.from(atob(signature64), c => c.charCodeAt(0));
@@ -194,9 +194,9 @@ export async function reviewIdentity258(observation: InstalledIdentity258 | null
   if (issuerKeyMatched && trustedOriginalPublicKey) try {
     issuerPin = await sha256(Uint8Array.from(atob(trustedOriginalPublicKey), c => c.charCodeAt(0)));
   } catch { /* No authenticated key. */ }
-  const issuerSignature = Boolean(issuer && issuerKeyMatched && await verifySignature(
+  const issuerSignature = Boolean(issuer && issuerKeyMatched && await verifyPinnedEd25519Signature258(
     issuer.issuer_public_key_raw_base64, issuer.signature_base64, canonicalIssuer258(issuer), issuerPin));
-  const receiverSignature = Boolean(receiver && independent && await verifySignature(
+  const receiverSignature = Boolean(receiver && independent && await verifyPinnedEd25519Signature258(
     receiver.independent_public_key_raw_base64, receiver.signature_base64,
     canonicalReceiverOff258(receiver), independentReceiverPin));
   const issuerReceiptAccepted = exactRelease && exactObservation && freshness && issuerSignature;
