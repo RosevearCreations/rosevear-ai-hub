@@ -104,6 +104,8 @@ jobs:
         run: node scripts/build-267-contract.test.mjs
       - name: Build 268 original private receiver authenticated readback, independent trial grant and one-GET HOLD contract
         run: node scripts/build-268-contract.test.mjs
+      - name: QL-365D original local-support source manifest and private one-GET HOLD attachment
+        run: node --test scripts/ql365d-source-attachment.test.mjs
 
   backend:
     runs-on: ubuntu-latest

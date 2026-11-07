@@ -5,7 +5,7 @@
   "source_app_id": "rosevear-ai-hub",
   "source_role": "local_support",
   "repository": "RosevearCreations/rosevear-ai-hub",
-  "source_revision": "ql333-discovery-v1",
+  "source_revision": "be99d882d6b75310b948911a81b2dcb5f3a3629e",
   "issuer": "rosevear-ai-hub",
   "audience": "rosevear-master",
   "tenant_boundary": "no_customer_tenant",
