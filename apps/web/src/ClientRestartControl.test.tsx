@@ -6,6 +6,16 @@ beforeEach(() => vi.stubGlobal("fetch", vi.fn()));
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("Build 245 — owner-visible client restart", () => {
+  it("offers a read-only local source check without restarting anything", async () => {
+    vi.mocked(fetch).mockResolvedValue({ ok: false, status: 404 } as Response);
+    render(<ClientRestartControl />);
+    fireEvent.click(screen.getByRole("button", { name: "Restart Client" }));
+    fireEvent.click(screen.getByRole("button", { name: "Verify served client code" }));
+    await waitFor(() => expect(screen.getByRole("status").textContent).toContain("remains on HOLD"));
+    expect(fetch).toHaveBeenCalledWith("/src/clientReadiness262.ts", {
+      cache: "no-store", credentials: "same-origin", redirect: "error",
+    });
+  });
   it("requires an explicit second click; cancel is a no-op", () => {
     render(<ClientRestartControl />);
     fireEvent.click(screen.getByRole("button", { name: "Restart Client" }));

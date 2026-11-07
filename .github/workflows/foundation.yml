@@ -90,6 +90,8 @@ jobs:
         run: node scripts/build-260-contract.test.mjs
       - name: Build 261 original issuer installed-source and supervised restart TEST HOLD contract
         run: node scripts/build-261-contract.test.mjs
+      - name: Build 262 Dark Mode contrast, client source and read-only runtime HOLD contract
+        run: node scripts/build-262-contract.test.mjs
 
   backend:
     runs-on: ubuntu-latest
@@ -358,6 +360,26 @@ jobs:
               $observed.test_authorized -ne $false -or $observed.challenge_executed -ne $false -or
               $observed.receiver_activated -ne $false -or $observed.comms_connected -ne $false) {
             throw 'Build 261 Windows observer breached original custody or receiver-OFF contract'
+          }
+      - name: Parse and smoke-test Build 262 Windows runtime closure without altering recovery
+        shell: pwsh
+        run: |
+          $file = 'scripts/inspect-hub-closure-262.ps1'
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null
+          if (@($errors).Count -gt 0) { throw ($errors -join '; ') }
+          node scripts/build-262-contract.test.mjs
+          $observed = & (Resolve-Path $file).Path | ConvertFrom-Json
+          if ($observed.schema -ne 'rosevear-windows-runtime-closure-262/v1' -or
+              $observed.stage -ne 'before' -or $observed.changed_anything -ne $false -or
+              $observed.remote_requests -ne 0 -or
+              $observed.recovery_success_is_process_proof -ne $false -or
+              $observed.original_installed_source_verified -ne $false -or
+              $observed.supervised_restart_receipt_verified -ne $false -or
+              $observed.test_authorized -ne $false -or $observed.challenge_executed -ne $false -or
+              $observed.receiver_activated -ne $false -or $observed.comms_connected -ne $false) {
+            throw 'Build 262 Windows source/receiver gate must remain read-only HOLD'
           }
       - name: Validate Build 080 private LAN recovery guards
         shell: pwsh
