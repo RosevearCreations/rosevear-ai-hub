@@ -3,6 +3,7 @@ import {parseLauncherObservation263,parseSignedRuntime263,
   type LauncherObservation263,type SignedRuntime263} from "./launcherAcceptance263";
 import {parseFieldDecision264,parseTestRequest264,parseWindowsField264,reviewRuntimeAuthority264,
   type FieldDecision264,type TestRequest264,type WindowsField264} from "./runtimeAuthority264";
+import {CommsReceipt265Panel} from "./CommsReceipt265Panel";
 
 type Review = Awaited<ReturnType<typeof reviewRuntimeAuthority264>>;
 const isHash = (value: string) => /^[a-f0-9]{64}$/.test(value);
@@ -26,6 +27,18 @@ export function RuntimeAuthority264Panel({expectedSha,trustedIssuerKey}: {
     && Date.now() <= Date.parse(test?.expires_at ?? ""));
   const ready = Boolean(before && after && runtime && field && test && trustedIssuerKey
     && Object.values(pins).every(value => isHash(value.trim().toLowerCase())));
+  // Build 265 is an archival review: revalidate the old request against the
+  // claimed original GET timestamp, even if its permission window has expired.
+  // Supplying inputs is not acceptance or authority to run a new GET.
+  const previousEvidence = ready && before && after && runtime && field && test && trustedIssuerKey ? {
+      before,fieldObservation:after,runtime,fieldDecision:field,testRequest:test,
+      expectedRelease:expectedSha,trustedOriginalKey:trustedIssuerKey,
+      signerPins:{issuer:pins.issuer.trim().toLowerCase(),owner:pins.owner.trim().toLowerCase(),
+        independent_witness:pins.independent_witness.trim().toLowerCase()},
+      receiverSignerPin:pins.receiver_operator.trim().toLowerCase(),
+      receiverTlsPin:pins.receiver_tls.trim().toLowerCase(),
+      stopPlanPin:pins.stop_plan.trim().toLowerCase(),hostPin:pins.host.trim().toLowerCase(),
+    } : null;
 
   async function load<T>(file: File | undefined, parser:(s:string)=>T, update:(x:T)=>void) {
     setError("");setReview(null);
@@ -113,5 +126,6 @@ export function RuntimeAuthority264Panel({expectedSha,trustedIssuerKey}: {
     <p><small>Uploaded files and independently entered fingerprints stay in this browser.
       Even a signed request does not establish original human identity, prove that the private
       receiver is online, authorize network traffic, or execute a challenge. All operations remain HOLD.</small></p>
+    <CommsReceipt265Panel prior={previousEvidence} />
   </section>;
 }
