@@ -102,6 +102,8 @@ jobs:
         run: node scripts/build-266-contract.test.mjs
       - name: Build 267 original source-of-truth, independent owner trust and read-only trial HOLD contract
         run: node scripts/build-267-contract.test.mjs
+      - name: Build 268 original private receiver authenticated readback, independent trial grant and one-GET HOLD contract
+        run: node scripts/build-268-contract.test.mjs
 
   backend:
     runs-on: ubuntu-latest

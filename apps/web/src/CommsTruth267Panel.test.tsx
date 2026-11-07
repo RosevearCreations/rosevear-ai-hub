@@ -10,7 +10,8 @@ describe("Build 267 offline original private trust panel",()=>{
     expect(screen.getByRole("region",{name:/Build 267 original receiver source-of-truth/i})).toBeTruthy();
     const button=screen.getByRole("button",{name:/Verify private source, independent trust/i}) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
-    expect(container.querySelectorAll('input[type="file"]')).toHaveLength(3);
+    expect(container.querySelectorAll('input[type="file"]')).toHaveLength(5);
+    expect(container.textContent).toContain("ORIGINAL AUTHENTICATION HOLD");
     expect(container.textContent).toContain("ORIGINAL SOURCE HOLD");
     expect(container.textContent).toContain("INDEPENDENT TRUST HOLD");
     expect(container.textContent).toContain("TRIAL AUTHORIZATION HOLD");

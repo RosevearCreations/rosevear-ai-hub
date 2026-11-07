@@ -120,6 +120,10 @@ const trialFields=(x:OwnerTrial267)=>[x.schema,x.release_sha,x.source_readback_s
   String(x.max_requests),String(x.test_authorized),x.receiver_state,x.connection_state];
 export const canonicalOwnerTrial267=(x:OwnerTrial267,role:"owner"|"independent_witness")=>
   [...trialFields(x),role,""].join("\n");
+export const canonicalSignedOwnerTrial267=(x:OwnerTrial267)=>[...trialFields(x),
+  "owner",x.owner.public_key_raw_base64,x.owner.signature_base64,
+  "independent_witness",x.independent_witness.public_key_raw_base64,
+  x.independent_witness.signature_base64,""].join("\n");
 export function parseOwnerTrial267(source:string):OwnerTrial267 {
   const x=record(source),hash=["source_readback_sha256","independent_readback_sha256",
     "owner_transition_266_sha256","source_enrollment_sha256","nonce_tombstone_sha256"];
