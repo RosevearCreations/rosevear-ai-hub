@@ -3,6 +3,10 @@ import {LAUNCH_OBSERVATION_263,SIGNED_RUNTIME_263,canonicalSignedRuntime263,
 import {FIELD_DECISION_264,FIELD_OBSERVATION_264,PRIVATE_TEST_264,canonicalField264,
   canonicalFieldReceipt264,canonicalRuntimeReceipt264,canonicalTest264,digestFieldObservation264,
   type FieldDecision264,type TestRequest264,type WindowsField264} from "./runtimeAuthority264";
+import {PRIVATE_GET_265,SHUTDOWN_265,OWNER_ACCEPTANCE_265,canonicalSignedRequest265,
+  canonicalPrivateGet265,canonicalSignedGet265,canonicalShutdown265,
+  canonicalSignedShutdown265,canonicalAcceptance265,
+  type PrivateGet265,type Shutdown265,type CrossDeviceAcceptance265} from "./commsReceipt265";
 
 const release = "a".repeat(40),host = "b".repeat(64),action = "c".repeat(64);
 const tls = "d".repeat(64),stop = "e".repeat(64);
@@ -82,4 +86,41 @@ export async function fixture() {
     receiverSignerPin:keys.receiver_operator.pin,receiverTlsPin:tls,stopPlanPin:stop,
     hostPin:host,now:"2026-11-07T03:20:00Z"};
   return {args,keys,field,test,observation};
+}
+
+// Test-only synthetic receipts: never export private keys or use these as field authority.
+export async function signedCommsFixture265() {
+  const prior=await fixture();
+  const {testRequest,expectedRelease,receiverSignerPin,receiverTlsPin,stopPlanPin,hostPin}=prior.args;
+  const sign=async (r:typeof allRoles[number],message:string)=>asBase64(new Uint8Array(
+    await crypto.subtle.sign("Ed25519",prior.keys[r].pair.privateKey,new TextEncoder().encode(message))));
+  const get:PrivateGet265={schema:PRIVATE_GET_265,source_system:"rosevear-ai-hub",
+    target:"rosevear-comms-hub",release_sha:expectedRelease,
+    signed_request_sha256:await hash(canonicalSignedRequest265(testRequest)),
+    challenge_nonce:testRequest.challenge_nonce,method:"GET",path:testRequest.path,
+    http_status:200,response_body_sha256:"4".repeat(64),audit_record_sha256:"5".repeat(64),
+    nonce_ledger_sha256:"6".repeat(64),receiver_signer_pin_sha256:receiverSignerPin,
+    receiver_tls_pin_sha256:receiverTlsPin,received_at:"2026-11-07T03:20:00Z",
+    receiver_operator:{public_key_raw_base64:prior.keys.receiver_operator.publicKey,signature_base64:""}};
+  get.receiver_operator.signature_base64=await sign("receiver_operator",canonicalPrivateGet265(get));
+  const shutdown:Shutdown265={schema:SHUTDOWN_265,signed_request_sha256:get.signed_request_sha256,
+    get_receipt_sha256:await hash(canonicalSignedGet265(get)),nonce_ledger_sha256:get.nonce_ledger_sha256,
+    stop_plan_sha256:stopPlanPin,receiver_state_after:"OFF",credentials_state:"REVOKED",
+    nonce_state:"CONSUMED",audit_state:"DURABLE",shutdown_at:"2026-11-07T03:21:00Z",
+    independent_checked_at:"2026-11-07T03:22:00Z",
+    receiver_operator:{public_key_raw_base64:prior.keys.receiver_operator.publicKey,signature_base64:""},
+    independent_witness:{public_key_raw_base64:prior.keys.independent_witness.publicKey,signature_base64:""}};
+  shutdown.receiver_operator.signature_base64=await sign("receiver_operator",canonicalShutdown265(shutdown,"receiver_operator"));
+  shutdown.independent_witness.signature_base64=await sign("independent_witness",canonicalShutdown265(shutdown,"independent_witness"));
+  const acceptance:CrossDeviceAcceptance265={schema:OWNER_ACCEPTANCE_265,release_sha:expectedRelease,
+    get_receipt_sha256:shutdown.get_receipt_sha256,
+    shutdown_receipt_sha256:await hash(canonicalSignedShutdown265(shutdown)),
+    original_host_candidate_sha256:hostPin,signed_at:"2026-11-07T03:23:00Z",
+    expires_at:"2026-11-08T03:00:00Z",decision:"ACCEPT_SIGNED_TEST_EVIDENCE_FOR_REVIEW_ONLY",
+    connection_state:"DISCONNECTED / HOLD",
+    owner:{public_key_raw_base64:prior.keys.owner.publicKey,signature_base64:""},
+    independent_witness:{public_key_raw_base64:prior.keys.independent_witness.publicKey,signature_base64:""}};
+  acceptance.owner.signature_base64=await sign("owner",canonicalAcceptance265(acceptance,"owner"));
+  acceptance.independent_witness.signature_base64=await sign("independent_witness",canonicalAcceptance265(acceptance,"independent_witness"));
+  return {prior:prior.args,keys:prior.keys,get,shutdown,acceptance,sign};
 }

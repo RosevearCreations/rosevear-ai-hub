@@ -13,7 +13,7 @@ describe("Build 264 offline field acceptance UI",()=>{
     expect(container.textContent).toContain("OFF / NOT AUTHORIZED");
     expect(container.textContent).toContain("Customer/device actions");
     expect(container.querySelector('button[type="submit"]')).toBeNull();
-    // Five original Build 264 uploads plus three optional Build 265 post-TEST receipts.
-    expect(container.querySelectorAll('input[type="file"]')).toHaveLength(8);
+    // Five Build 264, three Build 265 and three Build 266 private evidence receipts.
+    expect(container.querySelectorAll('input[type="file"]')).toHaveLength(11);
   });
 });
