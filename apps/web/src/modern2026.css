@@ -374,3 +374,43 @@
   .app-shell .hub-update-stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @media (prefers-reduced-motion:reduce) { .app-shell .hub-update-top-button { transition: none; } }
+
+/* Build 262 — nested Home Operations must respect the dark/standard shell.
+   Explicit foregrounds override the shell's generic heading selector; high
+   contrast remains on its independent palette. */
+.app-shell:is([data-theme="dark"],[data-theme="standard"]) .content .home-operations-hub {
+  color: #eef5ff;
+  background: linear-gradient(145deg,#121e31,#18273c 55%,#19253b);
+  border-color: #577491;
+}
+.app-shell:is([data-theme="dark"],[data-theme="standard"]) .content .home-operations-hub :is(h3,h4,h5,p,summary,label) { color: #eef5ff; }
+.app-shell:is([data-theme="dark"],[data-theme="standard"]) .content .home-operations-hub .home-ops-eyebrow { color: #b4e3f3; }
+.app-shell:is([data-theme="dark"],[data-theme="standard"]) .content .home-operations-hub :is(.home-ops-health-card small,.home-ops-room-grid small,.home-ops-footnote) { color: #c1d3e7; }
+.app-shell:is([data-theme="dark"],[data-theme="standard"]) .content .home-operations-hub :is(.home-ops-help,.home-ops-health-card,.home-ops-route-grid button,.home-ops-room-grid article) {
+  color: #eef5ff;
+  background: #1e3149;
+  border-color: #64809e;
+}
+.app-shell:is([data-theme="dark"],[data-theme="standard"]) .content .home-operations-hub .home-ops-observation {
+  color: #eef5ff;
+  background: #233a52;
+  border-left-color: #8fdcf0;
+}
+.app-shell:is([data-theme="dark"],[data-theme="standard"]) .content .home-operations-hub :is(.home-ops-routes,.home-ops-rooms) { border-top-color: #64809e; }
+.app-shell:is([data-theme="dark"],[data-theme="standard"]) .content .home-operations-hub :is(.home-ops-contexts button,.home-ops-room-toolbar select) {
+  color: #eef5ff;
+  background: #263e59;
+  border: 1px solid #7f9bb8;
+}
+.app-shell:is([data-theme="dark"],[data-theme="standard"]) .content .home-operations-hub .home-ops-contexts button[aria-pressed="true"] {
+  background: #493879;
+  border-color: #d1b5ff;
+  color: #fff;
+}
+.app-shell:is([data-theme="dark"],[data-theme="standard"]) .content .home-operations-hub :is(button,select,summary):focus-visible {
+  outline: 3px solid #edc9ff;
+  outline-offset: 3px;
+}
+.app-shell .hub-restart-confirm .hub-source-probe-262 { border-top: 1px solid #819bbb; margin-top: .85rem; padding-top: .75rem; }
+.app-shell .hub-restart-confirm .hub-source-probe-262 button { color: #102235; background: #a4e0d8; border-radius: .6rem; padding: .55rem .75rem; border: 1px solid #a4e0d8; font-weight: 700; }
+.app-shell .hub-restart-confirm .hub-source-probe-262 p { color: #edf5ff; overflow-wrap: anywhere; }
