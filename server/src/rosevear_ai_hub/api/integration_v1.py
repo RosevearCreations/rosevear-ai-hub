@@ -16,6 +16,8 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 
+from .ql364_source_health import source_health
+
 router = APIRouter(prefix="/api/integration/v1", include_in_schema=False)
 
 _HEADERS = (
@@ -222,6 +224,15 @@ async def integration_capabilities(request: Request):
         },
         headers=_PUBLIC_METADATA_HEADERS,
     )
+
+
+@router.api_route(
+    "/shell/health", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]
+)
+async def integration_ql364_source_owned_health(request: Request):
+    # Requires separately enrolled original-host callbacks. None are presently
+    # installed; never substitute the legacy integration-v1 HMAC credential.
+    return await source_health(request)
 
 
 @router.api_route(
