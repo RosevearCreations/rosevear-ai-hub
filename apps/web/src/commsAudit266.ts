@@ -132,6 +132,10 @@ const transitionFields=(x:OwnerTransition266)=>[x.schema,x.release_sha,x.audit_r
   x.source_enrollment_sha256,x.signed_at,x.expires_at,x.decision,x.connection_state];
 export const canonicalOwnerTransition266=(x:OwnerTransition266,signer:"owner"|"independent_witness")=>
   [...transitionFields(x),signer,""].join("\n");
+export const canonicalSignedOwnerTransition266=(x:OwnerTransition266)=>[...transitionFields(x),
+  "owner",x.owner.public_key_raw_base64,x.owner.signature_base64,
+  "independent_witness",x.independent_witness.public_key_raw_base64,
+  x.independent_witness.signature_base64,""].join("\n");
 export function parseOwnerTransition266(source:string):OwnerTransition266 {
   const x=parse(source);
   if(!keys(x,["schema","release_sha","audit_readback_sha256","nonce_closure_sha256",
