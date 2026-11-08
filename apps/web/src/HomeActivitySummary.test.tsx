@@ -101,4 +101,67 @@ describe("Build 274 Home activity and alerts", () => {
     fireEvent.click(within(section).getAllByRole("button", { name: "Open Search & Help" })[0]);
     expect(onNavigate).toHaveBeenCalledExactlyOnceWith("Search & Help");
   });
+
+  test("Build 276 previews bounded inbox source context and restores Home alert focus without writes", async () => {
+    vi.mocked(getNotifications).mockResolvedValue({ notifications: [
+      { ...notifications[0], message: "Water level needs a visual review.", source_type: "automation",
+        source_id: "secret-cabinet-controller" }, notifications[1],
+    ], total: 2, limit: 10, offset: 0 } as never);
+    const onNavigate = vi.fn();
+    render(<HomeActivitySummary health={healthy} role="owner" allowed={["Home", "Notifications"]} onNavigate={onNavigate} />);
+    const followups = screen.getByRole("region", { name: "Priority follow-ups" });
+    const trigger = await within(followups).findByRole("button", { name: "Preview details for Pump check" });
+    fireEvent.click(trigger);
+    const preview = within(followups).getByRole("region", { name: "Alert detail preview" });
+    await waitFor(() => expect(preview).toHaveFocus());
+    expect(preview).toHaveTextContent("Local notification inbox");
+    expect(preview).toHaveTextContent("Notification #1");
+    expect(preview).toHaveTextContent("automation");
+    expect(preview).toHaveTextContent("Water level needs a visual review.");
+    expect(preview).toHaveTextContent("not independently verified device activity");
+    expect(preview).not.toHaveTextContent("secret-cabinet-controller");
+    expect(getNotifications).toHaveBeenCalledTimes(1);
+    expect(getNotificationSummary).toHaveBeenCalledTimes(1);
+    expect(onNavigate).not.toHaveBeenCalled();
+    fireEvent.click(within(preview).getByRole("button", { name: "Return to Home alerts" }));
+    expect(within(followups).queryByRole("region", { name: "Alert detail preview" })).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
+
+  test("Build 276 hides restricted notification content and closes stale previews on filter or refresh", async () => {
+    vi.mocked(getNotifications).mockResolvedValue({ notifications: [
+      { ...notifications[0], message: "Restricted internal message", source_type: "automation" }, notifications[1],
+    ], total: 2, limit: 10, offset: 0 } as never);
+    const onNavigate = vi.fn();
+    render(<HomeActivitySummary health={healthy} role="read_only" allowed={["Home"]} onNavigate={onNavigate} />);
+    const followups = screen.getByRole("region", { name: "Priority follow-ups" });
+    fireEvent.click(await within(followups).findByRole("button", { name: "Preview details for Pump check" }));
+    const preview = within(followups).getByRole("region", { name: "Alert detail preview" });
+    expect(preview).toHaveTextContent("Restricted to notification inbox access");
+    expect(preview).toHaveTextContent("Additional notification content is available only");
+    expect(preview).not.toHaveTextContent("Restricted internal message");
+    expect(preview).not.toHaveTextContent("Notification #1");
+    expect(within(preview).queryByRole("button", { name: /Open Notifications/ })).not.toBeInTheDocument();
+    const filter = within(followups).getByRole("combobox", { name: "Show follow-ups" });
+    fireEvent.change(filter, { target: { value: "urgent" } });
+    expect(within(followups).queryByRole("region", { name: "Alert detail preview" })).not.toBeInTheDocument();
+    fireEvent.click(within(followups).getByRole("button", { name: "Preview details for System attention" }));
+    expect(within(followups).getByRole("region", { name: "Alert detail preview" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Refresh activity" }));
+    expect(within(followups).queryByRole("region", { name: "Alert detail preview" })).not.toBeInTheDocument();
+    expect(onNavigate).not.toHaveBeenCalled();
+    expect(getNotifications).toHaveBeenCalledTimes(2);
+  });
+
+  test("Build 276 identifies current health observations as unverified, not as inbox events", async () => {
+    render(<HomeActivitySummary health={{ backend: "offline", localAi: "online", modelCount: 2 }}
+      role="read_only" allowed={["Home", "Search & Help"]} onNavigate={vi.fn()} />);
+    const trigger = screen.getByRole("button", { name: "Preview details for Local Hub needs review" });
+    fireEvent.click(trigger);
+    const preview = screen.getByRole("region", { name: "Alert detail preview" });
+    expect(preview).toHaveTextContent("Current Hub backend health request");
+    expect(preview).toHaveTextContent("No recorded event ID");
+    expect(preview).toHaveTextContent("not a recorded event or proof of overall system health");
+    expect(within(preview).getByRole("button", { name: "Open Search & Help to review source" })).toBeInTheDocument();
+  });
 });

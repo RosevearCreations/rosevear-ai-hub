@@ -2,7 +2,8 @@ import { describe, expect, test } from "vitest";
 
 import type { HubNotification, NotificationSummary } from "./api";
 import {
-  buildHomeActivityAlerts, filterHomeActivityAlerts, recentHomeNotifications, validHomeActivityResponse,
+  buildHomeActivityAlerts, filterHomeActivityAlerts, homeAlertSourceContext,
+  recentHomeNotifications, validHomeActivityResponse,
   type ActivityHistory,
 } from "./homeActivityModel";
 
@@ -101,5 +102,39 @@ describe("Build 274 Home activity model", () => {
     });
     expect(all).toHaveLength(8);
     expect(filterHomeActivityAlerts(all, "unread")).toHaveLength(8);
+  });
+
+  test("Build 276 preserves bounded inbox provenance without treating records as verified events", () => {
+    const alerts = buildHomeActivityAlerts({
+      health: { backend: "online", localAi: "online", modelCount: 1 }, history,
+      role: "owner", allowed: ["Home", "Notifications"],
+    });
+    expect(alerts[0].record).toMatchObject({ notificationId: 2, message: "Local only", reportedSourceType: "test" });
+    expect(homeAlertSourceContext(alerts[0])).toMatchObject({
+      label: "Local notification inbox", reference: "Notification #2", reportedSourceType: "test",
+      recordedAt: "2026-11-08T12:00:00Z",
+    });
+    expect(homeAlertSourceContext(alerts[0]).explanation).toContain("not independently verified");
+    expect(history.kind).toBe("ready");
+    if (history.kind === "ready") expect(history.notifications[0].message).toBe("Local only");
+  });
+
+  test("Build 276 rejects unsafe source metadata, oversized message and false event timestamps", () => {
+    const invalid = { ...note(3, "warning"), source_type: "https://private.invalid/path",
+      source_id: "private-device-token", message: "x".repeat(1201), created_at: "invalid timestamp" };
+    const alerts = buildHomeActivityAlerts({
+      health: { backend: "offline", localAi: "online", modelCount: 1 },
+      history: { ...history, notifications: [invalid] }, role: "read_only", allowed: ["Home"],
+    });
+    const inbox = alerts.find(item => item.source === "notification");
+    expect(inbox?.record).toMatchObject({ message: null, reportedSourceType: null });
+    expect(inbox?.destination).toBeNull();
+    expect(inbox && homeAlertSourceContext(inbox)).toMatchObject({ recordedAt: null, reportedSourceType: null });
+    expect(JSON.stringify(inbox)).not.toContain("private-device-token");
+    const observation = alerts.find(item => item.key === "backend");
+    expect(observation && homeAlertSourceContext(observation)).toMatchObject({
+      label: "Current Hub backend health request", recordedAt: null, reference: null,
+    });
+    expect(observation && homeAlertSourceContext(observation).explanation).toContain("not a recorded event");
   });
 });

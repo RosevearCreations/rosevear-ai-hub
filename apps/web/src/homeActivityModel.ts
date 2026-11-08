@@ -18,9 +18,46 @@ export type ActivityAlert = {
   priority: "urgent" | "warning" | "verify" | "setup";
   source: "notification" | "observation";
   unread: boolean | null;
+  record: {
+    notificationId: number;
+    createdAt: string;
+    reportedSourceType: string | null;
+    message: string | null;
+  } | null;
   destination: string | null;
   actionLabel: string | null;
 };
+
+export type HomeAlertSourceContext = {
+  label: string;
+  reference: string | null;
+  recordedAt: string | null;
+  reportedSourceType: string | null;
+  explanation: string;
+};
+
+/** Provenance is deliberately descriptive: neither an inbox row nor a health probe certifies a device event. */
+export function homeAlertSourceContext(item: ActivityAlert): HomeAlertSourceContext {
+  if (item.source === "notification" && item.record) return {
+    label: "Local notification inbox",
+    reference: `Notification #${item.record.notificationId}`,
+    recordedAt: Number.isFinite(Date.parse(item.record.createdAt)) ? item.record.createdAt : null,
+    reportedSourceType: item.record.reportedSourceType,
+    explanation: "This is an inbox record from the most recent local sample, not independently verified device activity.",
+  };
+  const label = item.key === "backend" ? "Current Hub backend health request"
+    : item.key === "ai" ? "Current local AI health request" : "Local notification history request";
+  return {
+    label, reference: null, recordedAt: null, reportedSourceType: null,
+    explanation: "This is a current availability observation, not a recorded event or proof of overall system health.",
+  };
+}
+
+/** Only bounded, printable metadata from an already validated inbox row may enter the preview. */
+function boundedNotificationText(value: unknown, limit: number): string | null {
+  return typeof value === "string" && value.trim().length > 0 && value.length <= limit &&
+    !/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(value) ? value.trim() : null;
+}
 
 export type HomeAlertFilter = "all" | "urgent" | "warning" | "unread" | "verify" | "setup";
 
@@ -74,8 +111,9 @@ export function buildHomeActivityAlerts(input: {
   const reviewLabel = admin ? "Open System" : "Open Search & Help";
   const alert = (key: string, title: string, detail: string, priority: ActivityAlert["priority"],
     destination: string | null, actionLabel: string,
-    source: ActivityAlert["source"] = "observation", unread: boolean | null = null): ActivityAlert => ({
-    key, title, detail, priority, source, unread, destination, actionLabel: destination ? actionLabel : null,
+    source: ActivityAlert["source"] = "observation", unread: boolean | null = null,
+    record: ActivityAlert["record"] = null): ActivityAlert => ({
+    key, title, detail, priority, source, unread, record, destination, actionLabel: destination ? actionLabel : null,
   });
 
   const alerts: ActivityAlert[] = [];
@@ -112,7 +150,12 @@ export function buildHomeActivityAlerts(input: {
     for (const item of priorityNotifications) alerts.push(alert(`notification-${item.id}`,
       item.title, `${item.severity === "urgent" ? "Urgent" : "Warning"} local notification · ${item.unread ? "unread" : "read"}.`,
       item.severity === "urgent" ? "urgent" : "warning", canUse("Notifications"), "Open Notifications",
-      "notification", item.unread));
+      "notification", item.unread, {
+        notificationId: item.id, createdAt: item.created_at,
+        reportedSourceType: typeof item.source_type === "string" && /^[a-zA-Z][a-zA-Z0-9_-]{0,47}$/.test(item.source_type)
+          ? item.source_type : null,
+        message: boundedNotificationText(item.message, 1200),
+      }));
   }
   const priority = { urgent: 0, warning: 1, verify: 2, setup: 3 } as const;
   return alerts.sort((a, b) => priority[a.priority] - priority[b.priority]);
