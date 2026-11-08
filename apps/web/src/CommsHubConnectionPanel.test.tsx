@@ -5,6 +5,15 @@ import { CommsHubConnectionPanel } from "./CommsHubConnectionPanel";
 afterEach(cleanup);
 
 describe("Build 191 / QL-264 private decision and reversible TEST-only preview", () => {
+  it("keeps superseded QL-275 worksheet behind an optional archive while actual Comms HOLD stays visible", () => {
+    render(<CommsHubConnectionPanel />);
+    const toggle = screen.getByText("Historical QL-275 owner review (optional reference)");
+    expect(toggle.closest("details")).not.toHaveAttribute("open");
+    expect(screen.getByText(/QL-264 private custody decision: HOLD/)).toBeInTheDocument();
+    fireEvent.click(toggle);
+    expect(toggle.closest("details")).toHaveAttribute("open");
+    expect(screen.getByRole("region", { name: "QL-275 deferred review status" })).toBeInTheDocument();
+  });
   it("shows independent HOLD before any local check", () => {
     render(<CommsHubConnectionPanel />);
     expect(screen.getByText(/QL-264 private custody decision: HOLD/)).toBeInTheDocument();
