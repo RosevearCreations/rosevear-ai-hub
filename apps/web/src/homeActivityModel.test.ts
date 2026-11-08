@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import type { HubNotification, NotificationSummary } from "./api";
 import {
   buildHomeActivityAlerts, filterHomeActivityAlerts, homeAlertSourceContext,
-  recentHomeNotifications, validHomeActivityResponse,
+  recentHomeNotifications, searchHomeActivityAlerts, validHomeActivityResponse, validHomeNotificationPage,
   type ActivityHistory,
 } from "./homeActivityModel";
 
@@ -136,5 +136,34 @@ describe("Build 274 Home activity model", () => {
       label: "Current Hub backend health request", recordedAt: null, reference: null,
     });
     expect(observation && homeAlertSourceContext(observation).explanation).toContain("not a recorded event");
+  });
+
+  test("Build 277 combines local search and named source filters without changing alert records", () => {
+    const alerts = buildHomeActivityAlerts({
+      health: { backend: "offline", localAi: "online", modelCount: 0 }, history,
+      role: "read_only", allowed: ["Home"],
+    });
+    expect(searchHomeActivityAlerts(alerts, "LOCAL NOTICE 2", "notification").map(item => item.key))
+      .toEqual(["notification-2"]);
+    expect(searchHomeActivityAlerts(alerts, "  local hub  ", "backend").map(item => item.key))
+      .toEqual(["backend"]);
+    expect(searchHomeActivityAlerts(alerts, "Ollama", "ai").map(item => item.key)).toEqual(["ai"]);
+    expect(searchHomeActivityAlerts(alerts, "Local only", "notification")).toEqual([]);
+    expect(searchHomeActivityAlerts(alerts, "", "history")).toEqual([]);
+    expect(searchHomeActivityAlerts(alerts, "", "all")).toEqual(alerts);
+    expect(alerts.find(item => item.key === "notification-2")?.destination).toBeNull();
+  });
+
+  test("Build 277 fails closed on unusable paging metadata, inconsistent offsets and oversized rows", () => {
+    const page = { notifications: [note(1, "warning")], total: 12, limit: 10, offset: 10 };
+    expect(validHomeNotificationPage(page, 10, 10)).toBe(true);
+    expect(validHomeNotificationPage({ ...page, offset: 0 }, 10, 10)).toBe(false);
+    expect(validHomeNotificationPage({ ...page, total: -1 }, 10, 10)).toBe(false);
+    expect(validHomeNotificationPage({ ...page, total: Number.POSITIVE_INFINITY }, 10, 10)).toBe(false);
+    expect(validHomeNotificationPage({ ...page, limit: 100 }, 10, 10)).toBe(false);
+    expect(validHomeNotificationPage({ ...page, total: 10 }, 10, 10)).toBe(false);
+    expect(validHomeNotificationPage({ ...page, notifications: [] }, 10, 10)).toBe(false);
+    expect(validHomeNotificationPage({ ...page, notifications: Array.from({ length: 11 }, () => note(1, "warning")) }, 10, 10)).toBe(false);
+    expect(validHomeNotificationPage({ notifications: [], total: 0, limit: 10, offset: 0 }, 10, 0)).toBe(true);
   });
 });
