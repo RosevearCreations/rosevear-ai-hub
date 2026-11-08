@@ -558,6 +558,7 @@
   border-color: #5d7392;
 }
 .app-shell[data-theme="dark"] .command-dialog :is(h2, label, p, small, strong) { color: #e8f2fc; }
+.app-shell[data-theme="dark"] .command-result-hint { color: #c4d5e8; }
 .app-shell[data-theme="dark"] .command-dialog :is(button, input):focus-visible,
 .app-shell[data-theme="dark"] .content :is(button, input, select, textarea, a):focus-visible {
   outline: 3px solid #dfacff;

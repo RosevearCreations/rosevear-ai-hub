@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { filterShellSections, workspaceFinderHint } from "./workspaceFinderModel";
+
+export { filterShellSections } from "./workspaceFinderModel";
 
 export type ShellDensity = "comfortable" | "compact";
 export type ShellTheme = "standard" | "dark" | "high-contrast";
-
-/** Only the already role-authorized sections supplied by App can be searched. */
-export function filterShellSections(sections: readonly string[], query: string): string[] {
-  const term = query.trim().toLocaleLowerCase();
-  return sections.filter(section => section.toLocaleLowerCase().includes(term));
-}
 
 export function CommandPalette({
   open, sections, current, onOpen, onClose, onChoose,
@@ -22,6 +19,7 @@ export function CommandPalette({
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const resultRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const previousFocus = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -94,14 +92,33 @@ export function CommandPalette({
             }
             if (event.key === "ArrowDown") {
               event.preventDefault();
-              dialogRef.current?.querySelector<HTMLButtonElement>(".command-results button")?.focus();
+              resultRefs.current[0]?.focus();
             }
-          }} placeholder="Search Home, Cameras, Workshop…" autoComplete="off" />
+            if (event.key === "ArrowUp") {
+              event.preventDefault();
+              resultRefs.current[matches.length - 1]?.focus();
+            }
+          }} placeholder="Try lights, backup, projects, or cameras…" autoComplete="off"
+          aria-describedby="hub-command-search-hint" />
+        <p id="hub-command-search-hint" className="command-help-note">Search by screen name or task. Use ↑ ↓ to move, Enter to open.</p>
+        <p role="status" className="command-result-count">{matches.length} available {matches.length === 1 ? "screen" : "screens"}</p>
         <div className="command-results" aria-label="Available workspace results">
-          {matches.length ? matches.map(section => (
-            <button type="button" key={section} aria-current={current === section ? "page" : undefined}
+          {matches.length ? matches.map((section, index) => (
+            <button type="button" key={section} ref={node => { resultRefs.current[index] = node; }}
+              aria-label={`${section} ${section === current ? "Current screen" : "Open screen"}`}
+              aria-describedby={`hub-command-result-hint-${index}`}
+              aria-current={current === section ? "page" : undefined}
+              onKeyDown={event => {
+                if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+                event.preventDefault();
+                const next = event.key === "Home" ? 0 : event.key === "End" ? matches.length - 1 :
+                  event.key === "ArrowDown" ? (index + 1) % matches.length :
+                  (index + matches.length - 1) % matches.length;
+                resultRefs.current[next]?.focus();
+              }}
               onClick={() => { onChoose(section); onClose(); }}>
-              <span>{section}</span><small>{section === current ? "Current screen" : "Open screen"}</small>
+              <span>{section}<span id={`hub-command-result-hint-${index}`} className="command-result-hint">{workspaceFinderHint(section)}</span></span>
+              <small>{section === current ? "Current screen" : "Open screen"}</small>
             </button>
           )) : <p role="status">No available screens match that name. No permissions have changed.</p>}
         </div>

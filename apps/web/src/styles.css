@@ -3594,6 +3594,9 @@ h1 {
 .command-results { display: grid; gap: .3rem; min-height: 5rem; max-height: 18rem; overflow-y: auto; }
 .command-results button { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .45rem; align-items: center; min-height: 2.8rem; padding: .7rem .8rem; border: 1px solid #a2bac7; border-radius: .5rem; background: #f5f9fb; color: #173d53; text-align: left; cursor: pointer; font-weight: 750; }
 .command-results button:hover, .command-results button[aria-current="page"] { border-color: #215b72; background: #dcecf2; }
+.command-results button:focus-visible { border-color: #174d79; background: #dcecf2; }
+.command-result-hint { display: block; margin-top: .2rem; color: #385369; font-size: .78rem; font-weight: 400; }
+.command-result-count { margin: 0; font-size: .82rem; color: #385369; }
 .command-results small, .command-help-note { color: #385369; font-weight: 400; }
 .command-help-note { font-size: .85rem; margin: .2rem 0; }
 .content :is(input, select, textarea, table) { max-width: 100%; }
