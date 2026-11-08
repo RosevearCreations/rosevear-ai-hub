@@ -539,6 +539,23 @@ describe("App", () => {
     expect(screen.queryByRole("dialog", { name: "Jump to a workspace" })).not.toBeInTheDocument();
   }, 45_000);
 
+  test("navigates back, forward and home without replaying screen actions", async () => {
+    render(<App />);
+    const primary = await screen.findByRole("navigation", { name: "Primary navigation" });
+    fireEvent.click(within(primary).getByRole("button", { name: "Cameras" }));
+    fireEvent.click(within(primary).getByRole("button", { name: "Business" }));
+    expect(within(primary).getByRole("button", { name: "Business" })).toHaveAttribute("aria-current", "page");
+    fireEvent.click(screen.getByRole("button", { name: "Back to Cameras" }));
+    expect(within(primary).getByRole("button", { name: "Cameras" })).toHaveAttribute("aria-current", "page");
+    fireEvent.click(screen.getByRole("button", { name: "Forward to Business" }));
+    expect(within(primary).getByRole("button", { name: "Business" })).toHaveAttribute("aria-current", "page");
+    fireEvent.click(screen.getByRole("button", { name: "Return to Home workspace" }));
+    expect(within(primary).getByRole("button", { name: "Home" })).toHaveAttribute("aria-current", "page");
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Workspace history" })).not.toBeInTheDocument();
+  }, 45_000);
+
   test("keeps low-glare Dark Mode through sign-out and lets us choose appearance before login", async () => {
     render(<App />);
     await waitFor(() => expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument());

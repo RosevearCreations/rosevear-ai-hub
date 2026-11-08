@@ -59,6 +59,12 @@ import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
 import { HubUpdatePanel, HubUpdateRefreshObserver } from "./HubUpdatePanel";
 import { ClientRestartControl } from "./ClientRestartControl";
 import { WorkspaceQuickAccess } from "./WorkspaceQuickAccess";
+import { WorkspaceHistoryControls } from "./WorkspaceHistoryControls";
+import {
+  backWorkspaceNavigation, forwardWorkspaceNavigation, newWorkspaceNavigationHistory,
+  sanitizeWorkspaceNavigationHistory, visitWorkspaceNavigation,
+  type WorkspaceNavigationHistory,
+} from "./workspaceNavigationHistory";
 import { WindowsFirstActivation246Panel } from "./WindowsFirstActivation246Panel";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
@@ -107,7 +113,8 @@ export function App() {
   const [sessionExpired, setSessionExpired] = useState(false);
   const [health, setHealth] = useState<HealthState>({ kind: "loading" });
   const [ollama, setOllama] = useState<OllamaState>({ kind: "loading" });
-  const [section, setSection] = useState<Section>("Home");
+  const [navigation, setNavigation] = useState<WorkspaceNavigationHistory<Section>>(
+    () => newWorkspaceNavigationHistory<Section>("Home"));
   const [knowledgeQuestion, setKnowledgeQuestion] = useState("");
   const [hubVersion, setHubVersion] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -115,6 +122,28 @@ export function App() {
   const [density, setDensity] = useState<ShellDensity>("comfortable");
   const [appearance, setAppearance] = useState<ShellTheme>(loadShellTheme);
   const [windowsFieldReviewVisited, setWindowsFieldReviewVisited] = useState(false);
+
+  const authenticatedUser = auth.kind === "ready" && auth.status.authenticated ? auth.status.user : null;
+  const allowedSections: Section[] = authenticatedUser &&
+    (authenticatedUser.role === "owner" || authenticatedUser.role === "administrator")
+    ? [...baseSections, "Workshop", "Automations", "Confirmations", "Audit", "Secrets", "Tools", "Users"]
+    : authenticatedUser ? [...baseSections] : ["Home"];
+  const safeNavigation = sanitizeWorkspaceNavigationHistory(navigation, allowedSections);
+  const section = safeNavigation.current;
+
+  function setSection(destination: Section) {
+    setNavigation(previous => visitWorkspaceNavigation(previous, destination, allowedSections));
+  }
+
+  function historyStep(direction: "back" | "forward") {
+    setKnowledgeQuestion("");
+    setMobileMenuOpen(false);
+    setNavigation(previous => direction === "back"
+      ? backWorkspaceNavigation(previous, allowedSections)
+      : forwardWorkspaceNavigation(previous, allowedSections));
+  }
+
+  function resetNavigation() { setNavigation(newWorkspaceNavigationHistory<Section>("Home")); }
 
   useEffect(() => setMobileMenuOpen(false), [section]);
   useEffect(() => { saveShellTheme(appearance); }, [appearance]);
@@ -143,15 +172,12 @@ export function App() {
         kind: "ready",
         status: { bootstrap_required: false, authenticated: false, user: null },
       });
-      setSection("Home");
+      resetNavigation();
       setCommandOpen(false);
     };
     window.addEventListener(HUB_AUTH_REQUIRED_EVENT, onExpired);
     return () => window.removeEventListener(HUB_AUTH_REQUIRED_EVENT, onExpired);
   }, []);
-
-  const authenticatedUser =
-    auth.kind === "ready" && auth.status.authenticated ? auth.status.user : null;
 
   // Mount the large owner matrix only after System is opened; then preserve its
   // in-memory observations during navigation to actual device and camera screens.
@@ -237,6 +263,7 @@ export function App() {
           status={auth.status}
           onAuthenticated={(user) => {
             setSessionExpired(false);
+            resetNavigation();
             setAuth({
               kind: "ready",
               status: { bootstrap_required: false, authenticated: true, user },
@@ -248,15 +275,13 @@ export function App() {
 
   const user = auth.status.user;
   const canAdminister = user.role === "owner" || user.role === "administrator";
-  const sections: Section[] = canAdminister
-    ? [...baseSections, "Workshop", "Automations", "Confirmations", "Audit", "Secrets", "Tools", "Users"]
-    : [...baseSections];
+  const sections = allowedSections;
 
   async function signOut() {
     try {
       await logout();
     } finally {
-      setSection("Home");
+      resetNavigation();
       setCommandOpen(false);
       setMobileMenuOpen(false);
       setDensity("comfortable");
@@ -389,6 +414,9 @@ export function App() {
           <span>Rosevear AI Hub</span><span aria-hidden="true">/</span><strong>{section}</strong>
           <button type="button" onClick={() => setCommandOpen(true)}>Jump to another screen</button>
         </div>
+        <WorkspaceHistoryControls history={safeNavigation} allowed={sections}
+          onBack={() => historyStep("back")} onForward={() => historyStep("forward")}
+          onHome={() => { setKnowledgeQuestion(""); setSection("Home"); }} />
         <div className="hub-hero" aria-label="Rosevear AI Hub workspace banner">
           <p className="eyebrow">Rosevear operations / {section}</p>
           <strong>Our private command centre</strong>
