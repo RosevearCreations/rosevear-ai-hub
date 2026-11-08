@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import type { HubNotification, NotificationSummary } from "./api";
 import {
-  buildHomeActivityAlerts, recentHomeNotifications, validHomeActivityResponse,
+  buildHomeActivityAlerts, filterHomeActivityAlerts, recentHomeNotifications, validHomeActivityResponse,
   type ActivityHistory,
 } from "./homeActivityModel";
 
@@ -75,5 +75,31 @@ describe("Build 274 Home activity model", () => {
     const health = { backend: "online" as const, localAi: "online" as const, modelCount: 1 };
     expect(buildHomeActivityAlerts({ health, history: { kind: "loading" }, role: "owner", allowed: [] })[0].key).toBe("history");
     expect(buildHomeActivityAlerts({ health, history: { kind: "error" }, role: "owner", allowed: [] })[0].key).toBe("history");
+  });
+
+  test("filters priority alerts without changing original order, full counts or authorization", () => {
+    const all = buildHomeActivityAlerts({
+      health: { backend: "offline", localAi: "online", modelCount: 0 }, history,
+      role: "read_only", allowed: ["Home", "Notifications", "Search & Help"],
+    });
+    expect(all.map(item => item.priority)).toEqual(["urgent", "warning", "warning", "setup"]);
+    expect(filterHomeActivityAlerts(all, "all")).toEqual(all);
+    expect(filterHomeActivityAlerts(all, "urgent").map(item => item.key)).toEqual(["notification-2"]);
+    expect(filterHomeActivityAlerts(all, "warning")).toHaveLength(2);
+    expect(filterHomeActivityAlerts(all, "unread").map(item => item.key)).toEqual(["notification-1"]);
+    expect(filterHomeActivityAlerts(all, "verify")).toHaveLength(0);
+    expect(filterHomeActivityAlerts(all, "setup").map(item => item.key)).toEqual(["ai"]);
+    expect(all).toHaveLength(4);
+    expect(filterHomeActivityAlerts(all, "warning")[0].destination).toBe("Search & Help");
+  });
+
+  test("does not truncate the underlying sampled alerts before filtering", () => {
+    const many = Array.from({ length: 8 }, (_, i) => note(i + 1, "warning"));
+    const all = buildHomeActivityAlerts({
+      health: { backend: "online", localAi: "online", modelCount: 1 },
+      history: { ...history, notifications: many }, role: "owner", allowed: ["Notifications"],
+    });
+    expect(all).toHaveLength(8);
+    expect(filterHomeActivityAlerts(all, "unread")).toHaveLength(8);
   });
 });

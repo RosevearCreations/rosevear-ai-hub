@@ -64,4 +64,41 @@ describe("Build 274 Home activity and alerts", () => {
     expect(await screen.findByText(/History unavailable/)).toBeInTheDocument();
     expect(screen.queryByText(/No priority issues were identified/)).not.toBeInTheDocument();
   });
+
+  test("filters urgent, warning and unread triage locally without acknowledging or refetching", async () => {
+    const onNavigate = vi.fn();
+    render(<HomeActivitySummary health={healthy} role="owner" allowed={["Notifications"]} onNavigate={onNavigate} />);
+    const section = await screen.findByRole("region", { name: "Priority follow-ups" });
+    await waitFor(() => expect(within(section).getAllByRole("listitem")).toHaveLength(2));
+    const selector = within(section).getByRole("combobox", { name: "Show follow-ups" });
+    fireEvent.change(selector, { target: { value: "urgent" } });
+    expect(within(section).getAllByRole("listitem")).toHaveLength(1);
+    expect(within(section).getByRole("listitem")).toHaveTextContent("System attention");
+    fireEvent.change(selector, { target: { value: "unread" } });
+    expect(within(section).getByRole("listitem")).toHaveTextContent("Pump check");
+    fireEvent.change(selector, { target: { value: "verify" } });
+    expect(within(section).queryByRole("listitem")).not.toBeInTheDocument();
+    expect(within(section).getByText(/No follow-ups match this filter/)).toBeInTheDocument();
+    expect(within(section).getByText(/2 total in this sampled view/)).toBeInTheDocument();
+    expect(screen.getByLabelText("Local notification counts")).toHaveTextContent("Unread 1");
+    fireEvent.click(within(section).getByRole("button", { name: "Show all alerts" }));
+    expect(within(section).getAllByRole("listitem")).toHaveLength(2);
+    expect(getNotifications).toHaveBeenCalledTimes(1);
+    expect(getNotificationSummary).toHaveBeenCalledTimes(1);
+    expect(onNavigate).not.toHaveBeenCalled();
+  });
+
+  test("retains only allowed navigation after filtering a read-only user's alerts", async () => {
+    const onNavigate = vi.fn();
+    render(<HomeActivitySummary health={{ backend: "offline", localAi: "offline", modelCount: null }}
+      role="read_only" allowed={["Home", "Search & Help"]} onNavigate={onNavigate} />);
+    const section = await screen.findByRole("region", { name: "Priority follow-ups" });
+    await waitFor(() => expect(within(section).getAllByRole("listitem").length).toBeGreaterThan(1));
+    fireEvent.change(within(section).getByRole("combobox", { name: "Show follow-ups" }), { target: { value: "urgent" } });
+    expect(within(section).getByRole("listitem")).toHaveTextContent("System attention");
+    expect(within(section).queryByRole("button", { name: "Open Notifications" })).not.toBeInTheDocument();
+    fireEvent.click(within(section).getByRole("button", { name: "Show all alerts" }));
+    fireEvent.click(within(section).getAllByRole("button", { name: "Open Search & Help" })[0]);
+    expect(onNavigate).toHaveBeenCalledExactlyOnceWith("Search & Help");
+  });
 });

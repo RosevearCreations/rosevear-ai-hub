@@ -16,9 +16,20 @@ export type ActivityAlert = {
   title: string;
   detail: string;
   priority: "urgent" | "warning" | "verify" | "setup";
+  source: "notification" | "observation";
+  unread: boolean | null;
   destination: string | null;
   actionLabel: string | null;
 };
+
+export type HomeAlertFilter = "all" | "urgent" | "warning" | "unread" | "verify" | "setup";
+
+/** Filtering only affects this on-screen preview; no read/ack state is stored. */
+export function filterHomeActivityAlerts(alerts: readonly ActivityAlert[], filter: HomeAlertFilter): ActivityAlert[] {
+  if (filter === "all") return [...alerts];
+  if (filter === "unread") return alerts.filter(item => item.source === "notification" && item.unread === true);
+  return alerts.filter(item => item.priority === filter);
+}
 
 const severityRank = { urgent: 0, warning: 1, info: 2 } as const;
 
@@ -62,8 +73,9 @@ export function buildHomeActivityAlerts(input: {
   const reviewRoute = canUse(admin ? "System" : "Search & Help");
   const reviewLabel = admin ? "Open System" : "Open Search & Help";
   const alert = (key: string, title: string, detail: string, priority: ActivityAlert["priority"],
-    destination: string | null, actionLabel: string): ActivityAlert => ({
-    key, title, detail, priority, destination, actionLabel: destination ? actionLabel : null,
+    destination: string | null, actionLabel: string,
+    source: ActivityAlert["source"] = "observation", unread: boolean | null = null): ActivityAlert => ({
+    key, title, detail, priority, source, unread, destination, actionLabel: destination ? actionLabel : null,
   });
 
   const alerts: ActivityAlert[] = [];
@@ -96,10 +108,11 @@ export function buildHomeActivityAlerts(input: {
   if (history.kind === "ready") {
     const priorityNotifications = history.notifications.filter(item => item.severity !== "info")
       .sort((a, b) => severityRank[a.severity] - severityRank[b.severity] || Number(b.unread) - Number(a.unread)
-        || Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 3);
+        || Date.parse(b.created_at) - Date.parse(a.created_at));
     for (const item of priorityNotifications) alerts.push(alert(`notification-${item.id}`,
       item.title, `${item.severity === "urgent" ? "Urgent" : "Warning"} local notification · ${item.unread ? "unread" : "read"}.`,
-      item.severity === "urgent" ? "urgent" : "warning", canUse("Notifications"), "Open Notifications"));
+      item.severity === "urgent" ? "urgent" : "warning", canUse("Notifications"), "Open Notifications",
+      "notification", item.unread));
   }
   const priority = { urgent: 0, warning: 1, verify: 2, setup: 3 } as const;
   return alerts.sort((a, b) => priority[a.priority] - priority[b.priority]);
