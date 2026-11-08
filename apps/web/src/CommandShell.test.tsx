@@ -23,6 +23,14 @@ describe("Build 147 command shell", () => {
     expect(filterShellSections(["Home", "Cameras"], "  ")).toEqual(["Home", "Cameras"]);
   });
 
+  it("finds task aliases while ranking screen-name matches first and never elevating roles", () => {
+    expect(filterShellSections(["Home", "Devices", "System"], "hOmE")).toEqual(["Home", "Devices"]);
+    expect(filterShellSections(["Home", "Devices", "System"], "lights")).toEqual(["Devices"]);
+    expect(filterShellSections(["Home", "System"], "backup")).toEqual(["System"]);
+    expect(filterShellSections(["Home", "System"], "credentials")).toEqual([]);
+    expect(filterShellSections(["Home", "Knowledge", "Cameras"], "video")).toEqual(["Cameras"]);
+  });
+
   it("opens with Ctrl+K, focuses the search and navigates only explicitly", () => {
     render(<Harness />);
     fireEvent.keyDown(window, { key: "k", ctrlKey: true });
@@ -60,6 +68,38 @@ describe("Build 147 command shell", () => {
     fireEvent.change(screen.getByRole("textbox", { name: /Search our available screens/ }), { target: { value: "Workshop" } });
     expect(screen.getByText(/No available screens match/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Workshop Open screen/ })).not.toBeInTheDocument();
+  });
+
+  it("moves through results using arrows, Home and End and opens only selected navigation", () => {
+    render(<Harness sections={["Home", "Cameras", "Workshop", "System"]} />);
+    fireEvent.click(screen.getByRole("button", { name: "Show workspace finder" }));
+    const search = screen.getByRole("textbox", { name: /Search our available screens/ });
+    fireEvent.keyDown(search, { key: "ArrowUp" });
+    expect(screen.getByRole("button", { name: "System Open screen" })).toHaveFocus();
+    fireEvent.keyDown(document.activeElement!, { key: "Home" });
+    expect(screen.getByRole("button", { name: "Home Current screen" })).toHaveFocus();
+    fireEvent.keyDown(document.activeElement!, { key: "ArrowUp" });
+    expect(screen.getByRole("button", { name: "System Open screen" })).toHaveFocus();
+    fireEvent.keyDown(document.activeElement!, { key: "ArrowDown" });
+    expect(screen.getByRole("button", { name: "Home Current screen" })).toHaveFocus();
+    fireEvent.keyDown(document.activeElement!, { key: "End" });
+    fireEvent.click(document.activeElement!);
+    expect(screen.getByTestId("current-workspace")).toHaveTextContent("System");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("filters task terms without exposing the restricted target in the keyboard list", () => {
+    render(<Harness sections={["Home", "Devices", "Cameras"]} />);
+    fireEvent.click(screen.getByRole("button", { name: "Show workspace finder" }));
+    const search = screen.getByRole("textbox", { name: /Search our available screens/ });
+    fireEvent.change(search, { target: { value: "permissions" } });
+    expect(screen.getByText(/No available screens match/)).toBeInTheDocument();
+    fireEvent.keyDown(search, { key: "ArrowDown" });
+    expect(search).toHaveFocus();
+    fireEvent.change(search, { target: { value: "lights" } });
+    expect(screen.getByText("1 available screen")).toBeInTheDocument();
+    fireEvent.keyDown(search, { key: "Enter" });
+    expect(screen.getByTestId("current-workspace")).toHaveTextContent("Devices");
   });
 
   it("card information expands via native keyboard-friendly details only", () => {
