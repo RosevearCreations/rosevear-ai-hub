@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-li
 import { App } from "./App";
 import { HUB_AUTH_REQUIRED_EVENT } from "./api";
 import { SHELL_THEME_STORAGE_KEY } from "./shellThemePreference";
+import { clearHomeLayout } from "./homeLayoutPreference";
 
 function providerPayload(available = true) {
   return [
@@ -454,6 +455,7 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
 describe("App", () => {
   beforeEach(() => {
     localStorage.removeItem(SHELL_THEME_STORAGE_KEY);
+    clearHomeLayout(1);
     installFetchMock();
   });
 
@@ -506,6 +508,21 @@ describe("App", () => {
     expect(within(primary).getByRole("button", { name: "Workshop" })).toHaveAttribute("aria-current", "page");
     fireEvent.click(within(primary).getByRole("button", { name: "Home" }));
     expect(screen.getByRole("region", { name: "What should we do next?" })).toBeInTheDocument();
+  });
+
+  test("Home layout changes persist on return without hiding essential status or changing permissions", async () => {
+    render(<App />);
+    const primary = await screen.findByRole("navigation", { name: "Primary navigation" });
+    await screen.findByRole("region", { name: "Arrange our Home widgets" });
+    fireEvent.click(screen.getByRole("button", { name: "Hide Start guide" }));
+    expect(screen.queryByRole("region", { name: "What should we do next?" })).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Rosevear AI Hub source status cards" })).toHaveTextContent("HOLD");
+    fireEvent.click(within(primary).getByRole("button", { name: "Knowledge" }));
+    fireEvent.click(within(primary).getByRole("button", { name: "Home" }));
+    expect(screen.queryByRole("region", { name: "What should we do next?" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Reset Home layout" }));
+    expect(screen.getByRole("region", { name: "What should we do next?" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Rosevear AI Hub source status cards" })).toHaveTextContent("OFF");
   });
 
   test("read-only Home guidance does not offer workshop or administrative next actions", async () => {
