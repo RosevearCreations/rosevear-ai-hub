@@ -3,10 +3,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getNotifications, getNotificationSummary, type AuthRole } from "./api";
 import {
   buildHomeActivityAlerts, filterHomeActivityAlerts, homeAlertSourceContext, recentHomeNotifications,
-  validHomeActivityResponse,
-  type ActivityHealth, type ActivityHistory, type HomeAlertFilter,
+  searchHomeActivityAlerts, validHomeActivityResponse, validHomeNotificationPage,
+  type ActivityHealth, type ActivityHistory, type HomeAlertFilter, type HomeAlertSourceFilter,
 } from "./homeActivityModel";
 import "./homeActivitySummary.css";
+
+const notificationPageSize = 10;
 
 export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
   health: ActivityHealth;
@@ -16,12 +18,15 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
 }) {
   const [history, setHistory] = useState<ActivityHistory>({ kind: "loading" });
   const [alertFilter, setAlertFilter] = useState<HomeAlertFilter>("all");
+  const [sourceFilter, setSourceFilter] = useState<HomeAlertSourceFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [pageOffset, setPageOffset] = useState(0);
   const [selectedAlertKey, setSelectedAlertKey] = useState<string | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
   const previewRef = useRef<HTMLElement | null>(null);
   const previewTriggerRef = useRef<HTMLButtonElement | null>(null);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (offset: number) => {
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -29,28 +34,32 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
     setHistory({ kind: "loading" });
     try {
       const [list, summary] = await Promise.all([
-        getNotifications({ status: "all", limit: 10, signal: controller.signal }),
+        getNotifications({ status: "all", limit: notificationPageSize, offset, signal: controller.signal }),
         getNotificationSummary(controller.signal),
       ]);
       if (controller.signal.aborted) return;
-      if (!validHomeActivityResponse(list, summary)) {
+      if (!validHomeActivityResponse(list, summary) || !validHomeNotificationPage(list, notificationPageSize, offset)) {
         setHistory({ kind: "error" });
         return;
       }
-      setHistory({ kind: "ready", notifications: list.notifications, summary, checkedAt: new Date() });
+      setHistory({ kind: "ready", notifications: list.notifications, summary, checkedAt: new Date(),
+        page: { total: list.total, limit: list.limit, offset: list.offset } });
     } catch {
       if (!controller.signal.aborted) setHistory({ kind: "error" });
     }
   }, []);
 
   useEffect(() => {
-    void refresh();
+    void refresh(pageOffset);
     return () => controllerRef.current?.abort();
-  }, [refresh]);
+  }, [refresh, pageOffset]);
 
   const alerts = buildHomeActivityAlerts({ health, history, role, allowed });
-  const filteredAlerts = filterHomeActivityAlerts(alerts, alertFilter);
-  const previewAlerts = filteredAlerts.slice(0, 6);
+  const filteredAlerts = searchHomeActivityAlerts(filterHomeActivityAlerts(alerts, alertFilter), searchQuery, sourceFilter);
+  const previewAlerts = filteredAlerts;
+  const page = history.kind === "ready" && history.page?.offset === pageOffset ? history.page : null;
+  const pageNumber = page ? Math.floor(page.offset / notificationPageSize) + 1 : Math.floor(pageOffset / notificationPageSize) + 1;
+  const totalPages = page ? Math.max(1, Math.ceil(page.total / notificationPageSize)) : null;
   const selectedAlert = previewAlerts.find(item => item.key === selectedAlertKey) ?? null;
   const sourceContext = selectedAlert ? homeAlertSourceContext(selectedAlert) : null;
   const canSeeInboxDetail = selectedAlert?.source !== "notification" || allowed.includes("Notifications");
@@ -77,7 +86,7 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
         <h2 id="home-activity-title">Activity and priority alerts</h2>
         <p>Actual local inbox entries and current service observations. No repairs, acknowledgements or messages are sent here.</p>
       </div>
-      <button type="button" disabled={history.kind === "loading"} onClick={() => void refresh()}>
+      <button type="button" disabled={history.kind === "loading"} onClick={() => void refresh(pageOffset)}>
         {history.kind === "loading" ? "Checking activity…" : "Refresh activity"}
       </button>
     </header>
@@ -100,17 +109,32 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
             <option value="verify">Needs verification</option>
             <option value="setup">Setup guidance</option>
           </select>
-          <button type="button" disabled={alertFilter === "all"}
-            onClick={() => { setAlertFilter("all"); setSelectedAlertKey(null); }}>Show all alerts</button>
+          <label htmlFor="home-alert-source">Source
+            <select id="home-alert-source" value={sourceFilter}
+              onChange={event => { setSourceFilter(event.target.value as HomeAlertSourceFilter); setSelectedAlertKey(null); }}>
+              <option value="all">All sources</option>
+              <option value="notification">Local inbox entries</option>
+              <option value="backend">Hub backend observation</option>
+              <option value="ai">Local AI observation</option>
+              <option value="history">Inbox availability observation</option>
+            </select>
+          </label>
+          <label htmlFor="home-alert-search">Search loaded page
+            <input id="home-alert-search" type="search" maxLength={120} value={searchQuery}
+              placeholder="Alert title or summary" onChange={event => { setSearchQuery(event.target.value); setSelectedAlertKey(null); }} />
+          </label>
+          <button type="button" disabled={alertFilter === "all" && sourceFilter === "all" && !searchQuery}
+            onClick={() => { setAlertFilter("all"); setSourceFilter("all"); setSearchQuery(""); setSelectedAlertKey(null); }}>Show all alerts</button>
         </div>
         <p className="home-activity-filter-count" role="status">
           Showing {previewAlerts.length} of {filteredAlerts.length} matching follow-ups; {alerts.length} total in this sampled view.
+          Search and source filters apply only to this loaded inbox page and current health observations, not the entire inbox.
           Filters never mark anything reviewed or change the full notification counts.
         </p>
-        {alerts.length === 0 && alertFilter === "all"
+        {alerts.length === 0 && alertFilter === "all" && sourceFilter === "all" && !searchQuery && pageOffset === 0
           ? <p className="home-activity-empty">No priority issues were identified from these limited readings. This does not certify device health or all activity.</p>
           : previewAlerts.length === 0
-            ? <p className="home-activity-empty">No follow-ups match this filter. Other priorities may still need attention; choose Show all alerts to restore the full list.</p>
+            ? <p className="home-activity-empty">No follow-ups match this filter on the loaded page. Other pages and priorities may still need attention; choose Show all alerts or move between pages.</p>
           : <ol className="home-activity-list">
             {previewAlerts.map(item => <li key={item.key} className={`home-activity-alert home-activity-${item.priority}`}>
               <span className="home-activity-priority">{item.priority}</span>
@@ -127,6 +151,20 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
                 : <small>No follow-up route is available to this account.</small>}
             </li>)}
           </ol>}
+        <nav className="home-activity-paging" aria-label="Notification follow-up pages">
+          <p role="status">{page ? `Inbox page ${pageNumber}${pageNumber <= (totalPages ?? 1) ? ` of ${totalPages}` : ` (now beyond the last available page ${totalPages})`} · ${page.total} total inbox entries (including informational entries).`
+            : `Inbox page ${pageNumber} · total pages not verified.`} Live health observations may appear on every page.</p>
+          <div>
+            <button type="button" disabled={history.kind === "loading" || pageOffset === 0}
+              onClick={() => { setSelectedAlertKey(null); setPageOffset(Math.max(0, pageOffset - notificationPageSize)); }}>
+              Previous inbox page
+            </button>
+            <button type="button" disabled={!page || history.kind !== "ready" || pageOffset + notificationPageSize >= page.total}
+              onClick={() => { setSelectedAlertKey(null); setPageOffset(pageOffset + notificationPageSize); }}>
+              Next inbox page
+            </button>
+          </div>
+        </nav>
         {selectedAlert && sourceContext && <section id="home-alert-detail-preview" ref={previewRef}
           className="home-alert-detail-preview" aria-label="Alert detail preview" tabIndex={-1}>
           <h4>Alert details: {selectedAlert.title}</h4>
@@ -156,9 +194,10 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
       </section>
       <section aria-label="Recent local notification activity">
         <h3>Recent local notifications</h3>
+        <p className="home-activity-filter-count">Only the current loaded inbox page is shown here.</p>
         {history.kind === "loading" ? <p>Checking the local notification inbox…</p>
           : history.kind === "error" ? <p role="status">History unavailable. No claim is made about the presence or absence of alerts.</p>
-            : recent.length === 0 ? <p className="home-activity-empty">No notifications returned by the local inbox. Other Hub activity may exist.</p>
+            : recent.length === 0 ? <p className="home-activity-empty">No notifications returned by the local inbox on this page. Other pages or Hub activity may exist.</p>
               : <ol className="home-activity-list">
                 {recent.map(item => <li key={item.id}>
                   <span className="home-activity-priority">{item.severity}{item.unread ? " · unread" : ""}</span>

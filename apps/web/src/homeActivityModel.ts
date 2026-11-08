@@ -9,7 +9,8 @@ export type ActivityHealth = {
 export type ActivityHistory =
   | { kind: "loading" }
   | { kind: "error" }
-  | { kind: "ready"; notifications: HubNotification[]; summary: NotificationSummary; checkedAt: Date };
+  | { kind: "ready"; notifications: HubNotification[]; summary: NotificationSummary; checkedAt: Date;
+      page?: { total: number; limit: number; offset: number } };
 
 export type ActivityAlert = {
   key: string;
@@ -60,6 +61,27 @@ function boundedNotificationText(value: unknown, limit: number): string | null {
 }
 
 export type HomeAlertFilter = "all" | "urgent" | "warning" | "unread" | "verify" | "setup";
+export type HomeAlertSourceFilter = "all" | "notification" | "backend" | "ai" | "history";
+
+/** Search and source filters are intentionally limited to the fetched page and current health observations. */
+export function searchHomeActivityAlerts(alerts: readonly ActivityAlert[], query: string,
+  sourceFilter: HomeAlertSourceFilter): ActivityAlert[] {
+  const term = query.trim().toLocaleLowerCase();
+  return alerts.filter(item => {
+    if (sourceFilter === "notification" && item.source !== "notification") return false;
+    if (sourceFilter !== "all" && sourceFilter !== "notification" && item.key !== sourceFilter) return false;
+    return !term || item.title.toLocaleLowerCase().includes(term) || item.detail.toLocaleLowerCase().includes(term);
+  });
+}
+
+/** Verify the server's paging contract before displaying pages or trusting next/previous controls. */
+export function validHomeNotificationPage(list: NotificationListResponse, limit: number, offset: number): boolean {
+  return Number.isSafeInteger(list.total) && list.total >= 0 && list.limit === limit && list.offset === offset &&
+    Number.isSafeInteger(list.offset) && list.offset >= 0 &&
+    Array.isArray(list.notifications) && list.notifications.length <= limit &&
+    (offset >= list.total || list.notifications.length > 0) &&
+    list.notifications.length <= Math.max(0, list.total - offset);
+}
 
 /** Filtering only affects this on-screen preview; no read/ack state is stored. */
 export function filterHomeActivityAlerts(alerts: readonly ActivityAlert[], filter: HomeAlertFilter): ActivityAlert[] {
