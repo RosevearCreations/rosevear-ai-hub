@@ -46,6 +46,16 @@
 .home-alert-detail-preview dd { margin: 0; }
 .home-alert-detail-caution { color: var(--shell-muted, #385369); }
 .home-alert-detail-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: .6rem 0; }
+.home-follow-up-journal, .home-follow-up-editor { margin: .7rem 0; padding: .7rem; border: 1px solid var(--shell-border, #8199a9); border-radius: .55rem; background: var(--shell-selected, #fff); }
+.home-follow-up-journal h4, .home-follow-up-editor h5 { margin: 0 0 .45rem; }
+.home-follow-up-journal > p, .home-follow-up-editor > p { font-size: .8rem; line-height: 1.45; color: var(--shell-muted, #385369); }
+.home-follow-up-journal ol, .home-follow-up-editor ol { display: grid; gap: .4rem; padding: 0; list-style: none; }
+.home-follow-up-journal li, .home-follow-up-editor li { display: grid; gap: .25rem; overflow-wrap: anywhere; border-left: 3px solid var(--shell-accent, #476e87); padding: .45rem .6rem; background: var(--shell-paper, #f4f8fb); border-radius: .35rem; }
+.home-follow-up-journal li button { justify-self: start; }
+.home-follow-up-journal small, .home-follow-up-editor small { display: block; color: var(--shell-muted, #385369); }
+.home-follow-up-editor label { display: grid; gap: .25rem; margin: .55rem 0; font-size: .85rem; font-weight: 700; }
+.home-follow-up-editor :is(select, textarea) { box-sizing: border-box; width: 100%; max-width: 28rem; padding: .55rem; border: 1px solid var(--shell-border, #8199a9); border-radius: .45rem; background: var(--shell-paper, #fff); color: var(--shell-ink, #173d52); }
+.home-follow-up-editor :is(select, textarea):focus-visible { outline: 3px solid var(--shell-accent, #c38a0d); outline-offset: 2px; }
 @media (max-width: 480px) { .home-alert-detail-preview dl { grid-template-columns: 1fr; } .home-alert-detail-preview dd { margin-bottom: .45rem; } }
 .home-activity-empty { padding: .7rem; border: 1px dashed var(--shell-border, #8199a9); border-radius: .45rem; }
 .home-activity-caution { margin: .85rem 0 0; font-size: .8rem; color: var(--shell-muted, #385369); }
