@@ -61,6 +61,7 @@ import { ClientRestartControl } from "./ClientRestartControl";
 import { WorkspaceQuickAccess } from "./WorkspaceQuickAccess";
 import { WorkspaceHistoryControls } from "./WorkspaceHistoryControls";
 import { HomeStartGuide } from "./HomeStartGuide";
+import { HomeActivitySummary } from "./HomeActivitySummary";
 import { HomeLayoutCustomizer } from "./HomeLayoutCustomizer";
 import { hasLocalAiModel } from "./homeStartGuideModel";
 import {
@@ -589,6 +590,13 @@ function HomeView({
       </header>
 
       <HubVitalCards health={health} ollama={ollama} />
+
+      <HomeActivitySummary role={role} allowed={allowedSections} onNavigate={onNavigate}
+        health={{
+          backend: health.kind,
+          localAi: ollama.kind,
+          modelCount: ollama.kind === "online" ? ollama.data.model_count : null,
+        }} />
 
       <HomeLayoutCustomizer key={accountId} accountId={accountId} role={role} widgets={{
         guide: <HomeStartGuide status={{
