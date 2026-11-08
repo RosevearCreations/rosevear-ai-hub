@@ -61,6 +61,7 @@ import { ClientRestartControl } from "./ClientRestartControl";
 import { WorkspaceQuickAccess } from "./WorkspaceQuickAccess";
 import { WorkspaceHistoryControls } from "./WorkspaceHistoryControls";
 import { HomeStartGuide } from "./HomeStartGuide";
+import { HomeLayoutCustomizer } from "./HomeLayoutCustomizer";
 import { hasLocalAiModel } from "./homeStartGuideModel";
 import {
   backWorkspaceNavigation, forwardWorkspaceNavigation, newWorkspaceNavigationHistory,
@@ -516,6 +517,7 @@ export function App() {
           <HomeView
             version={hubVersion}
             role={user.role}
+            accountId={user.id}
             allowedSections={sections}
             onNavigate={(target) => setSection(target as Section)}
             health={health}
@@ -546,6 +548,7 @@ function roleLabel(user: AuthUser): string {
 function HomeView({
   version,
   role,
+  accountId,
   allowedSections,
   onNavigate,
   health,
@@ -559,6 +562,7 @@ function HomeView({
 }: {
   version: string | null;
   role: AuthUser["role"];
+  accountId: number;
   allowedSections: readonly Section[];
   onNavigate: (target: string) => void;
   health: HealthState;
@@ -586,32 +590,33 @@ function HomeView({
 
       <HubVitalCards health={health} ollama={ollama} />
 
-      <HomeStartGuide status={{
-        role,
-        backend: health.kind,
-        localAi: ollama.kind,
-        modelCount: ollama.kind === "online" ? ollama.data.model_count : null,
-      }} allowed={allowedSections} onNavigate={onNavigate} />
-
-      <OperationsDashboard role={role} onNavigate={onNavigate} />
-      <section className="dashboard-grid" aria-label="Local AI and knowledge shortcuts">
-        <article className="panel">
-          <CardHelp title="Local AI status">Ollama is a local model service. An available API reading does not prove any Windows startup task or model inference succeeded.</CardHelp>
-          <h2>Local AI</h2>
-          <OllamaHealth ollama={ollama} />
-          <p>Local chat uses the configured models and profiles.</p>
-          <button type="button" disabled={ollama.kind !== "online" || !hasLocalAiModel(ollama.data.model_count)}
-            onClick={onOpenChat}>Open chat</button>
-          {(ollama.kind !== "online" || !hasLocalAiModel(ollama.data.model_count)) &&
-            <small>Chat is not ready; review the local AI guidance above first.</small>}
-        </article>
-        <article className="panel">
-          <CardHelp title="Knowledge collections">Open Knowledge to search our local collections and inspect citations. This navigation does not upload files or use external providers.</CardHelp>
-          <h2>Knowledge</h2>
-          <p>Explore local collections and grounded sources.</p>
-          <button type="button" onClick={onOpenKnowledge}>Open knowledge</button>
-        </article>
-      </section>
+      <HomeLayoutCustomizer key={accountId} accountId={accountId} role={role} widgets={{
+        guide: <HomeStartGuide status={{
+          role,
+          backend: health.kind,
+          localAi: ollama.kind,
+          modelCount: ollama.kind === "online" ? ollama.data.model_count : null,
+        }} allowed={allowedSections} onNavigate={onNavigate} />,
+        operations: <OperationsDashboard role={role} onNavigate={onNavigate} />,
+        shortcuts: <section className="dashboard-grid" aria-label="Local AI and knowledge shortcuts">
+          <article className="panel">
+            <CardHelp title="Local AI status">Ollama is a local model service. An available API reading does not prove any Windows startup task or model inference succeeded.</CardHelp>
+            <h2>Local AI</h2>
+            <OllamaHealth ollama={ollama} />
+            <p>Local chat uses the configured models and profiles.</p>
+            <button type="button" disabled={ollama.kind !== "online" || !hasLocalAiModel(ollama.data.model_count)}
+              onClick={onOpenChat}>Open chat</button>
+            {(ollama.kind !== "online" || !hasLocalAiModel(ollama.data.model_count)) &&
+              <small>Chat is not ready; review the local AI guidance above first.</small>}
+          </article>
+          <article className="panel">
+            <CardHelp title="Knowledge collections">Open Knowledge to search our local collections and inspect citations. This navigation does not upload files or use external providers.</CardHelp>
+            <h2>Knowledge</h2>
+            <p>Explore local collections and grounded sources.</p>
+            <button type="button" onClick={onOpenKnowledge}>Open knowledge</button>
+          </article>
+        </section>,
+      }} />
     </>
   );
 }

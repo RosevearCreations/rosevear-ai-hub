@@ -1,0 +1,18 @@
+.home-layout-customizer { margin-block: 1rem; }
+.home-layout-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: .9rem 1rem; border: 1px solid var(--shell-border, #8199a9); border-radius: .85rem; background: var(--shell-paper, #f4f8fb); color: var(--shell-ink, #173d52); }
+.home-layout-heading h2 { margin: .2rem 0; font-size: clamp(1.15rem, 1.8vw, 1.4rem); }
+.home-layout-heading p { margin: .3rem 0; }
+.home-layout-heading small { display: block; color: var(--shell-muted, #3a586b); }
+.home-layout-reset, .home-layout-actions button { min-height: 2.5rem; padding: .42rem .65rem; border: 1px solid var(--shell-accent, #476e87); border-radius: .5rem; background: var(--shell-selected, #fff); color: var(--shell-ink, #173d52); font-weight: 700; cursor: pointer; }
+.home-layout-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: .55rem; padding-block: .75rem .25rem; }
+.home-layout-control { display: flex; flex-direction: column; gap: .35rem; padding: .7rem; border: 1px solid var(--shell-border, #8199a9); border-radius: .65rem; background: var(--shell-paper, #f4f8fb); color: var(--shell-ink, #173d52); }
+.home-layout-control > span { color: var(--shell-muted, #3a586b); font-size: .8rem; }
+.home-layout-actions { display: flex; flex-wrap: wrap; gap: .3rem; }
+.home-layout-actions button { flex: 1 1 auto; font-size: .8rem; }
+.home-layout-actions button:disabled { opacity: .55; cursor: not-allowed; }
+.home-layout-actions button:focus-visible, .home-layout-reset:focus-visible { outline: 3px solid var(--shell-accent, #c38a0d); outline-offset: 2px; }
+.home-layout-save-message { padding: .25rem .5rem; color: var(--shell-muted, #385369); font-size: .85rem; }
+.home-layout-widget { min-width: 0; }
+.home-layout-empty { padding: 1.2rem; border: 1px dashed var(--shell-border, #8199a9); border-radius: .8rem; background: var(--shell-paper, #f4f8fb); color: var(--shell-ink, #173d52); }
+.home-layout-empty h3 { margin: 0 0 .4rem; }
+.home-layout-empty p { margin: 0; }
