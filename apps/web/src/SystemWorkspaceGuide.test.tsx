@@ -9,7 +9,7 @@ describe("Build 201 system source status and owner navigation", () => {
     const statuses = summarizeSystemSignals("online", "offline", null);
     expect(statuses[0]).toMatchObject({ value: "Responding", source: "Session load · Hub health API" });
     expect(statuses[1]).toMatchObject({ value: "Unavailable", source: "Session load · Ollama status API" });
-    expect(statuses[2]).toMatchObject({ value: "Disconnected", source: "Security gate · not a live probe" });
+    expect(statuses[2]).toMatchObject({ value: "Disconnected / HOLD", source: "Security gate · not a live probe" });
     expect(statuses[3]).toMatchObject({ value: "Not authorized", source: "Release policy · not a Windows process probe" });
     expect(summarizeSystemSignals("loading", "online", 0)[1].detail).toContain("0 model(s) reported");
     expect(summarizeSystemSignals("offline", "loading", null)[0].detail).toContain("Health request failed");
@@ -18,7 +18,10 @@ describe("Build 201 system source status and owner navigation", () => {
   it("shows functional in-page System anchors for owner without external actions", () => {
     render(<SystemWorkspaceGuide backend="online" ollama="online" models={2} canAdminister />);
     const region = screen.getByRole("region", { name: "System source status and navigation" });
-    expect(region).toHaveTextContent("QL-275 · Under Review");
+    expect(region).toHaveTextContent("Comms · DISCONNECTED / HOLD");
+    expect(within(screen.getByRole("region", { name: "Current checks and historical reviews" })).getAllByRole("listitem"))
+      .toHaveLength(3);
+    expect(region).toHaveTextContent("older Windows appearance/restart worksheets do not block ordinary navigation");
     expect(screen.getByRole("article", { name: "Hub backend source status" })).toHaveTextContent("Responding");
     const nav = screen.getByRole("navigation", { name: "System page quick navigation" });
     const hrefs = Array.from(nav.querySelectorAll("a")).map(a => a.getAttribute("href"));

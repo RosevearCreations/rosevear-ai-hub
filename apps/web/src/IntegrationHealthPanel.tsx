@@ -128,7 +128,11 @@ export function IntegrationHealthPanel() {
           </ul>
         </>
       ) : <p>No status requests made in this session.</p>}
-      <SixAppReadinessPanel />
+      <details className="hub-historical-checks">
+        <summary>Historical six-app QL-275 contract checklist (optional reference)</summary>
+        <p>This fixed offline checklist records an older planning phase. It is not a current prerequisite or proof of today's connection state. Review authenticated Comms evidence in the connection panel below.</p>
+        <SixAppReadinessPanel />
+      </details>
       <IntegrationAcceptancePanel />
       <CommsHubConnectionPanel />
     </section>

@@ -21,6 +21,15 @@ vi.mock("./api", () => ({
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe("Build 067 manual integration evidence", () => {
+  it("archives the historical six-app planning checklist without hiding live manual health checks", () => {
+    render(<IntegrationHealthPanel />);
+    const toggle = screen.getByText("Historical six-app QL-275 contract checklist (optional reference)");
+    expect(toggle.closest("details")).not.toHaveAttribute("open");
+    expect(screen.getByRole("button", { name: "Check integration health" })).toBeEnabled();
+    fireEvent.click(toggle);
+    expect(toggle.closest("details")).toHaveAttribute("open");
+    expect(screen.getByText("Six-app integration contract & readiness")).toBeInTheDocument();
+  });
   it("does not perform a service request or remediation on mount", () => {
     render(<IntegrationHealthPanel />);
     expect(screen.getByText(/No status requests made/)).toBeInTheDocument();

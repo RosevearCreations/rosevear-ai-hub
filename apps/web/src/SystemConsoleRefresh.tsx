@@ -9,16 +9,16 @@ type ConsoleDestination = { title: string; description: string; source: string; 
 export const consoleDestinations: Record<ConsoleLane, ConsoleDestination[]> = {
   System: [
     { title: "Local diagnostics", description: "Review source-labelled health, stale readings and guided recovery.", source: "System · existing diagnostics", anchor: "hub-system-diagnostics" },
-    { title: "Installed release review", description: "Compare installed-device evidence with the source release before owner sign-off.", source: "System · release acceptance", anchor: "hub-system-release" },
+    { title: "Installed release review", description: "Check the actual Windows installation when deploying or changing its startup; this is not a gate for ordinary Home navigation.", source: "System · release acceptance", anchor: "hub-system-release" },
     { title: "Resource & local AI budget", description: "Request memory, storage and Ollama inventory snapshots on demand.", source: "System · owner-only measurements", anchor: "hub-system-resources" },
   ],
   "I.T.": [
-    { title: "Connections & safeguards", description: "Inspect source access boundaries; QL-275 remains under review.", source: "I.T. · integration panel", anchor: "hub-system-connection" },
+    { title: "Connections & safeguards", description: "Inspect the current DISCONNECTED / HOLD boundary and real authentication evidence; older QL-275 tracking is historical.", source: "I.T. · integration panel", anchor: "hub-system-connection" },
     { title: "Remote access", description: "Inspect private tailnet guidance without changing connections.", source: "I.T. · remote access panel", anchor: "hub-system-remote" },
     { title: "Access and audit", description: "Open the authorized audit workspace for real recorded events.", source: "I.T. · audit workspace", section: "Audit" },
   ],
   Management: [
-    { title: "Owner review & findings", description: "Return to real theme findings and owner acceptance steps.", source: "Management · owner review", anchor: "hub-system-owner-review" },
+    { title: "Owner review & findings", description: "Review earlier theme and owner-acceptance worksheets when relevant; these are not general release prerequisites.", source: "Management · owner review", anchor: "hub-system-owner-review" },
     { title: "Approvals queue", description: "Review real pending confirmations, without executing them here.", source: "Management · confirmations workspace", section: "Confirmations" },
     { title: "Team access", description: "Manage authenticated local accounts in the existing user screen.", source: "Management · users workspace", section: "Users" },
     { title: "Workshop operations", description: "Open equipment, work and maintenance records.", source: "Management · workshop workspace", section: "Workshop" },
@@ -56,7 +56,7 @@ export function SystemConsoleRefresh({ onNavigate }: { onNavigate: (section: str
           </article>
         ))}
       </div>
-      <p className="hub-command-console-note">No demo statistics. QL-275 remains under review; this console grants no integration or relay permissions.</p>
+      <p className="hub-command-console-note">No demo statistics or legacy checklist gates. Historical reviews remain available for reference; Comms remains DISCONNECTED / HOLD and this console grants no integration or relay permissions.</p>
     </section>
   );
 }
