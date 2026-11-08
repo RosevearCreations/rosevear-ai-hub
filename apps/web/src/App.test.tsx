@@ -496,6 +496,27 @@ describe("App", () => {
     });
   });
 
+  test("Home gives role-aware next actions and keeps an unconfigured chat shortcut disabled", async () => {
+    render(<App />);
+    const primary = await screen.findByRole("navigation", { name: "Primary navigation" });
+    const guide = await screen.findByRole("region", { name: "What should we do next?" });
+    await waitFor(() => expect(within(guide).getByRole("heading", { name: "No local AI model installed" })).toBeInTheDocument());
+    expect(screen.getByRole("button", { name: /^Open chat$/ })).toBeDisabled();
+    fireEvent.click(within(guide).getByRole("button", { name: "Open Workshop" }));
+    expect(within(primary).getByRole("button", { name: "Workshop" })).toHaveAttribute("aria-current", "page");
+    fireEvent.click(within(primary).getByRole("button", { name: "Home" }));
+    expect(screen.getByRole("region", { name: "What should we do next?" })).toBeInTheDocument();
+  });
+
+  test("read-only Home guidance does not offer workshop or administrative next actions", async () => {
+    installFetchMock({ role: "read_only" });
+    render(<App />);
+    const guide = await screen.findByRole("region", { name: "What should we do next?" });
+    expect(within(guide).getByRole("button", { name: "Open Knowledge" })).toBeInTheDocument();
+    expect(within(guide).queryByRole("button", { name: "Open Workshop" })).not.toBeInTheDocument();
+    expect(within(guide).queryByRole("button", { name: "Review System" })).not.toBeInTheDocument();
+  });
+
   test("switches responsive shell preferences and searches only authenticated workspaces", async () => {
     render(<App />);
     await waitFor(() => expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument());
