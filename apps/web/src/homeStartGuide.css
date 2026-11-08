@@ -1,0 +1,13 @@
+.home-start-guide { margin: 1rem 0 1.2rem; padding: clamp(.8rem, 1.4vw, 1.1rem); border: 1px solid var(--shell-border, #56778b); border-radius: .9rem; background: var(--shell-paper, #f4f8fb); color: var(--shell-ink, #173d52); }
+.home-start-guide header h2 { margin: .2rem 0; font-size: clamp(1.18rem, 1.8vw, 1.5rem); }
+.home-start-guide header p { margin: .3rem 0 .8rem; color: var(--shell-muted, #385369); }
+.home-start-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: .65rem; }
+.home-start-card { display: flex; flex-direction: column; gap: .4rem; min-width: 0; padding: .85rem; border: 1px solid var(--shell-border, #8ca2b2); border-left: 4px solid var(--shell-accent, #476e87); border-radius: .65rem; background: var(--shell-selected, #fff); }
+.home-start-attention { border-left-color: #d28d25; }
+.home-start-checking { border-left-color: #7a86a0; }
+.home-start-state { font-size: .73rem; font-weight: 800; letter-spacing: .025em; text-transform: uppercase; }
+.home-start-card h3, .home-start-card p { margin: 0; }
+.home-start-card p { flex: 1; font-size: .85rem; line-height: 1.4; }
+.home-start-card button { align-self: start; min-height: 2.6rem; padding: .4rem .75rem; border: 1px solid var(--shell-accent, #476e87); border-radius: .5rem; background: var(--shell-paper, #eaf4f8); color: var(--shell-ink, #173d52); font-weight: 750; cursor: pointer; }
+.home-start-card button:focus-visible { outline: 3px solid var(--shell-accent, #c38a0d); outline-offset: 2px; }
+.home-start-card small { font-size: .77rem; }
