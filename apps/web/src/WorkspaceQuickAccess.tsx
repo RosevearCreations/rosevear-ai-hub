@@ -3,7 +3,7 @@ import {
   loadWorkspaceShortcuts, MAX_PINNED_WORKSPACES, saveWorkspaceShortcuts,
   sanitizeWorkspaceShortcuts, toggleWorkspacePin, visitWorkspace,
   type WorkspaceShortcuts,
-} from "./workspaceQuickAccess";
+} from "./workspaceShortcutModel";
 
 type Props = {
   userId: number;

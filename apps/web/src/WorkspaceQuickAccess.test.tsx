@@ -4,7 +4,7 @@ import { WorkspaceQuickAccess } from "./WorkspaceQuickAccess";
 import {
   loadWorkspaceShortcuts, MAX_PINNED_WORKSPACES, saveWorkspaceShortcuts,
   toggleWorkspacePin, visitWorkspace, workspaceShortcutsKey,
-} from "./workspaceQuickAccess";
+} from "./workspaceShortcutModel";
 
 const all = ["Home", "Chat", "System", "Devices", "Cameras", "Secrets", "Workshop", "Business"];
 
