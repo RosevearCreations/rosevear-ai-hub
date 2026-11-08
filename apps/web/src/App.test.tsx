@@ -471,6 +471,8 @@ describe("App", () => {
   beforeEach(() => {
     localStorage.removeItem(SHELL_THEME_STORAGE_KEY);
     clearHomeLayout(1);
+    sessionStorage.removeItem("rosevear-ai-hub:alert-review:v1:1:session");
+    localStorage.removeItem("rosevear-ai-hub:alert-review:v1:1:views");
     installFetchMock();
   });
 

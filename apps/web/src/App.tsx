@@ -599,7 +599,7 @@ function HomeView({
 
       <HubVitalCards health={health} ollama={ollama} />
 
-      <HomeActivitySummary role={role} allowed={allowedSections} onNavigate={onNavigate}
+      <HomeActivitySummary key={`alert-review-${accountId}`} accountId={accountId} role={role} allowed={allowedSections} onNavigate={onNavigate}
         health={{
           backend: health.kind,
           localAi: ollama.kind,
