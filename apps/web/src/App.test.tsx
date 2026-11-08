@@ -28,7 +28,7 @@ function providerPayload(available = true) {
   ];
 }
 
-function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?: boolean; withModel?: boolean; role?: "owner" | "read_only" }) {
+function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?: boolean; withModel?: boolean; withNotification?: boolean; role?: "owner" | "read_only" }) {
   const providerAvailable = options?.providerAvailable ?? true;
   const modelFailure = options?.modelFailure ?? false;
   const withModel = options?.withModel ?? false;
@@ -57,6 +57,21 @@ function installFetchMock(options?: { providerAvailable?: boolean; modelFailure?
 
       if (url.endsWith("/api/v1/auth/logout")) {
         return { ok: true, json: async () => ({ ok: true, message: "Signed out" }) };
+      }
+
+      if (url.includes("/api/v1/notifications?")) {
+        const notifications = options?.withNotification
+          ? [{ id: 8, audience: "household", title: "Local camera review", message: "Open Cameras",
+            severity: "warning", source_type: "local", source_id: null, created_by_user_id: null,
+            created_at: "2026-11-08T12:00:00Z", read_at: null, dismissed_at: null, unread: true }]
+          : [];
+        return { ok: true, json: async () => ({ notifications, total: notifications.length, limit: 10, offset: 0 }) };
+      }
+
+      if (url.endsWith("/api/v1/notifications/summary")) {
+        return { ok: true, json: async () => ({ total: options?.withNotification ? 1 : 0,
+          unread: options?.withNotification ? 1 : 0, info: 0, warning: options?.withNotification ? 1 : 0,
+          urgent: 0, newest_at: options?.withNotification ? "2026-11-08T12:00:00Z" : null }) };
       }
 
       if (url.endsWith("/api/v1/confirmations/confirmation-1/approve")) {
@@ -523,6 +538,19 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "Reset Home layout" }));
     expect(screen.getByRole("region", { name: "What should we do next?" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Rosevear AI Hub source status cards" })).toHaveTextContent("OFF");
+  });
+
+  test("Home activity shows a real local alert with safe navigation while preserving Comms HOLD", async () => {
+    installFetchMock({ withNotification: true });
+    render(<App />);
+    const panel = await screen.findByRole("region", { name: "Activity and priority alerts" });
+    expect(await within(within(panel).getByRole("region", { name: "Priority follow-ups" }))
+      .findByText("Local camera review")).toBeInTheDocument();
+    expect(within(panel).getByText(/Comms attachment remains HOLD/)).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Rosevear AI Hub source status cards" })).toHaveTextContent("HOLD");
+    fireEvent.click(within(panel).getByRole("button", { name: "Open notification inbox" }));
+    expect(within(screen.getByRole("navigation", { name: "Primary navigation" }))
+      .getByRole("button", { name: "Notifications" })).toHaveAttribute("aria-current", "page");
   });
 
   test("read-only Home guidance does not offer workshop or administrative next actions", async () => {
