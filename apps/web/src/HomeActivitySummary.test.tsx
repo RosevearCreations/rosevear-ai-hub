@@ -241,4 +241,86 @@ describe("Build 274 Home activity and alerts", () => {
     expect(screen.queryByText("confidential-source")).not.toBeInTheDocument();
     expect(within(followups).queryByRole("button", { name: "Open Notifications" })).not.toBeInTheDocument();
   });
+
+  test("Build 279 saves personal review views, keeps filters through paging and restores an alert bookmark on return", async () => {
+    localStorage.clear(); sessionStorage.clear();
+    const firstPage = Array.from({ length: 10 }, (_, i) => ({ ...notifications[0], id: i + 1,
+      title: `Pump ${i + 1} review` }));
+    const secondPage = [{ ...notifications[1], id: 11, title: "Garage warning", severity: "warning" }];
+    vi.mocked(getNotifications).mockImplementation(async options => ({
+      notifications: options?.offset === 10 ? secondPage : firstPage, total: 11, limit: 10,
+      offset: options?.offset ?? 0,
+    }) as never);
+    vi.mocked(getNotificationSummary).mockResolvedValue({ ...summary, total: 11, unread: 10, urgent: 0, warning: 11 });
+    const onNavigate = vi.fn();
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={7}
+      allowed={["Home", "Notifications"]} onNavigate={onNavigate} />);
+    const followups = screen.getByRole("region", { name: "Priority follow-ups" });
+    await within(followups).findByRole("button", { name: "Preview details for Pump 1 review" });
+    fireEvent.change(within(followups).getByRole("combobox", { name: "Source" }), { target: { value: "notification" } });
+    fireEvent.change(within(followups).getByRole("combobox", { name: "Show follow-ups" }), { target: { value: "warning" } });
+    fireEvent.change(within(followups).getByRole("searchbox", { name: "Search loaded page" }), { target: { value: "Pump" } });
+    fireEvent.change(within(followups).getByRole("textbox", { name: "View name" }), { target: { value: "Daily alerts" } });
+    fireEvent.click(within(followups).getByRole("button", { name: "Save current alert filters" }));
+    expect(within(followups).getByRole("combobox", { name: "Saved views" })).toHaveValue("view-1");
+    fireEvent.click(within(followups).getByRole("button", { name: "Next inbox page" }));
+    await screen.findByText(/Inbox page 2 of 2/);
+    expect(within(followups).getByRole("searchbox", { name: "Search loaded page" })).toHaveValue("Pump");
+    fireEvent.click(within(followups).getByRole("button", { name: "Show all alerts" }));
+    fireEvent.click(await within(followups).findByRole("button", { name: "Preview details for Garage warning" }));
+    fireEvent.click(within(followups).getByRole("button", { name: "Bookmark for later review" }));
+    expect(within(followups).getByRole("navigation", { name: "Saved alert bookmarks" })).toHaveTextContent("notification #11");
+    expect(within(followups).getByRole("button", { name: "Remove review bookmark" })).toHaveAttribute("aria-pressed", "true");
+    cleanup();
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={7}
+      allowed={["Home", "Notifications"]} onNavigate={onNavigate} />);
+    await screen.findByText(/Inbox page 2 of 2/);
+    expect(screen.getByRole("region", { name: "Alert detail preview" })).toHaveTextContent("Notification #11");
+    expect(screen.getByRole("combobox", { name: "Saved views" })).toHaveValue("");
+    fireEvent.change(screen.getByRole("combobox", { name: "Saved views" }), { target: { value: "view-1" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply saved view" }));
+    expect(screen.getByRole("searchbox", { name: "Search loaded page" })).toHaveValue("Pump");
+    expect(screen.queryByRole("region", { name: "Alert detail preview" })).not.toBeInTheDocument();
+    expect(onNavigate).not.toHaveBeenCalled();
+  });
+
+  test("Build 279 keeps bookmarks read-only and scoped to authenticated account", async () => {
+    localStorage.clear(); sessionStorage.clear();
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={9}
+      allowed={["Home", "Notifications"]} onNavigate={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Preview details for Pump check" }));
+    fireEvent.click(screen.getByRole("button", { name: "Bookmark for later review" }));
+    expect(screen.getByRole("navigation", { name: "Saved alert bookmarks" })).toHaveTextContent("notification #1");
+    cleanup();
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={10}
+      allowed={["Home", "Notifications"]} onNavigate={vi.fn()} />);
+    await screen.findByText(/Last inbox check:/);
+    expect(screen.getByRole("navigation", { name: "Saved alert bookmarks" })).toHaveTextContent("No alert bookmarks saved");
+    cleanup();
+    render(<HomeActivitySummary health={healthy} role="read_only" accountId={9}
+      allowed={["Home"]} onNavigate={vi.fn()} />);
+    await screen.findByText(/Last inbox check:/);
+    expect(screen.getByRole("navigation", { name: "Saved alert bookmarks" })).toHaveTextContent("require access to the notification inbox");
+    expect(screen.queryByRole("button", { name: /Go to notification #1/ })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Preview details for Pump check" }));
+    expect(screen.queryByRole("button", { name: "Bookmark for later review" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Open Notifications" })).not.toBeInTheDocument();
+  });
+
+  test("Build 279 never treats a moved or missing bookmarked notification as reviewed", async () => {
+    localStorage.clear(); sessionStorage.clear();
+    localStorage.setItem("rosevear-ai-hub:alert-review:v1:12:views", JSON.stringify({
+      version: 1, views: [], bookmarks: [{ notificationId: 99, pageOffset: 10 }],
+    }));
+    vi.mocked(getNotifications).mockImplementation(async options => ({
+      notifications: [notifications[0]], total: 11, limit: 10, offset: options?.offset ?? 0,
+    }) as never);
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={12}
+      allowed={["Home", "Notifications"]} onNavigate={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Go to notification #99, page 2" }));
+    await screen.findByText(/Inbox page 2 of 2/);
+    expect(screen.getByText(/previously selected alert is not available/)).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Alert detail preview" })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Local notification counts")).toHaveTextContent("Unread 1");
+  });
 });
