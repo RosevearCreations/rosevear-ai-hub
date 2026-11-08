@@ -569,6 +569,27 @@ describe("App", () => {
     expect(screen.getByRole("region", { name: "Rosevear AI Hub source status cards" })).toHaveTextContent("HOLD");
   });
 
+  test("Build 276 previews an inbox source, navigates only to its allowed screen, and returns safely Home", async () => {
+    installFetchMock({ withNotification: true });
+    render(<App />);
+    const panel = await screen.findByRole("region", { name: "Activity and priority alerts" });
+    const followups = within(panel).getByRole("region", { name: "Priority follow-ups" });
+    const trigger = await within(followups).findByRole("button", { name: "Preview details for Local camera review" });
+    fireEvent.click(trigger);
+    const preview = within(followups).getByRole("region", { name: "Alert detail preview" });
+    expect(preview).toHaveTextContent("Notification #8");
+    expect(preview).toHaveTextContent("Open Cameras");
+    expect(within(panel).getByLabelText("Local notification counts")).toHaveTextContent("Unread 1");
+    fireEvent.click(within(preview).getByRole("button", { name: "Open Notifications to review source" }));
+    expect(within(screen.getByRole("navigation", { name: "Primary navigation" }))
+      .getByRole("button", { name: "Notifications" })).toHaveAttribute("aria-current", "page");
+    fireEvent.click(screen.getByRole("button", { name: "Return to Home workspace" }));
+    expect(within(screen.getByRole("navigation", { name: "Primary navigation" }))
+      .getByRole("button", { name: "Home" })).toHaveAttribute("aria-current", "page");
+    expect(await screen.findByRole("region", { name: "Activity and priority alerts" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Rosevear AI Hub source status cards" })).toHaveTextContent("HOLD");
+  });
+
   test("read-only Home guidance does not offer workshop or administrative next actions", async () => {
     installFetchMock({ role: "read_only" });
     render(<App />);

@@ -25,5 +25,15 @@
 .home-activity-priority { font-size: .72rem; font-weight: 800; text-transform: uppercase; }
 .home-activity-list small { color: var(--shell-muted, #385369); }
 .home-activity-list button { align-self: start; }
+.home-alert-detail-preview { margin-top: .7rem; padding: .75rem; border: 2px solid var(--shell-accent, #476e87); border-radius: .65rem; background: var(--shell-selected, #fff); overflow-wrap: anywhere; }
+.home-alert-detail-preview:focus-visible { outline: 3px solid var(--shell-accent, #c38a0d); outline-offset: 2px; }
+.home-alert-detail-preview h4 { margin: 0 0 .5rem; font-size: 1rem; }
+.home-alert-detail-preview p { margin: .45rem 0; line-height: 1.45; }
+.home-alert-detail-preview dl { display: grid; grid-template-columns: minmax(8rem, 0.6fr) minmax(0, 1fr); gap: .35rem .65rem; margin: .75rem 0; }
+.home-alert-detail-preview dt { font-weight: 700; }
+.home-alert-detail-preview dd { margin: 0; }
+.home-alert-detail-caution { color: var(--shell-muted, #385369); }
+.home-alert-detail-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: .6rem 0; }
+@media (max-width: 480px) { .home-alert-detail-preview dl { grid-template-columns: 1fr; } .home-alert-detail-preview dd { margin-bottom: .45rem; } }
 .home-activity-empty { padding: .7rem; border: 1px dashed var(--shell-border, #8199a9); border-radius: .45rem; }
 .home-activity-caution { margin: .85rem 0 0; font-size: .8rem; color: var(--shell-muted, #385369); }
