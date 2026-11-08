@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getNotifications, getNotificationSummary, type AuthRole } from "./api";
 import {
-  buildHomeActivityAlerts, filterHomeActivityAlerts, recentHomeNotifications, validHomeActivityResponse,
+  buildHomeActivityAlerts, filterHomeActivityAlerts, homeAlertSourceContext, recentHomeNotifications,
+  validHomeActivityResponse,
   type ActivityHealth, type ActivityHistory, type HomeAlertFilter,
 } from "./homeActivityModel";
 import "./homeActivitySummary.css";
@@ -15,12 +16,16 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
 }) {
   const [history, setHistory] = useState<ActivityHistory>({ kind: "loading" });
   const [alertFilter, setAlertFilter] = useState<HomeAlertFilter>("all");
+  const [selectedAlertKey, setSelectedAlertKey] = useState<string | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
+  const previewRef = useRef<HTMLElement | null>(null);
+  const previewTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   const refresh = useCallback(async () => {
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
+    setSelectedAlertKey(null);
     setHistory({ kind: "loading" });
     try {
       const [list, summary] = await Promise.all([
@@ -46,8 +51,25 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
   const alerts = buildHomeActivityAlerts({ health, history, role, allowed });
   const filteredAlerts = filterHomeActivityAlerts(alerts, alertFilter);
   const previewAlerts = filteredAlerts.slice(0, 6);
+  const selectedAlert = previewAlerts.find(item => item.key === selectedAlertKey) ?? null;
+  const sourceContext = selectedAlert ? homeAlertSourceContext(selectedAlert) : null;
+  const canSeeInboxDetail = selectedAlert?.source !== "notification" || allowed.includes("Notifications");
   const recent = history.kind === "ready" ? recentHomeNotifications(history.notifications) : [];
   const canOpenNotifications = allowed.includes("Notifications");
+
+  useEffect(() => {
+    if (selectedAlert) previewRef.current?.focus();
+  }, [selectedAlert?.key]);
+
+  const closePreview = () => {
+    setSelectedAlertKey(null);
+    previewTriggerRef.current?.focus();
+  };
+
+  const openAllowedRoute = (destination: string | null) => {
+    if (destination && allowed.includes(destination)) onNavigate(destination);
+  };
+
   return <section className="home-activity-summary" aria-labelledby="home-activity-title">
     <header className="home-activity-heading">
       <div>
@@ -70,7 +92,7 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
         <div className="home-activity-triage" role="group" aria-label="Priority alert filters">
           <label htmlFor="home-alert-filter">Show follow-ups</label>
           <select id="home-alert-filter" value={alertFilter}
-            onChange={event => setAlertFilter(event.target.value as HomeAlertFilter)}>
+            onChange={event => { setAlertFilter(event.target.value as HomeAlertFilter); setSelectedAlertKey(null); }}>
             <option value="all">All priorities</option>
             <option value="urgent">Urgent only</option>
             <option value="warning">Warnings only</option>
@@ -78,7 +100,8 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
             <option value="verify">Needs verification</option>
             <option value="setup">Setup guidance</option>
           </select>
-          <button type="button" disabled={alertFilter === "all"} onClick={() => setAlertFilter("all")}>Show all alerts</button>
+          <button type="button" disabled={alertFilter === "all"}
+            onClick={() => { setAlertFilter("all"); setSelectedAlertKey(null); }}>Show all alerts</button>
         </div>
         <p className="home-activity-filter-count" role="status">
           Showing {previewAlerts.length} of {filteredAlerts.length} matching follow-ups; {alerts.length} total in this sampled view.
@@ -93,11 +116,43 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
               <span className="home-activity-priority">{item.priority}</span>
               <strong>{item.title}</strong>
               <p>{item.detail}</p>
+              <button type="button" aria-expanded={selectedAlert?.key === item.key}
+                aria-controls={selectedAlert?.key === item.key ? "home-alert-detail-preview" : undefined}
+                onClick={event => {
+                  if (selectedAlertKey === item.key) closePreview();
+                  else { previewTriggerRef.current = event.currentTarget; setSelectedAlertKey(item.key); }
+                }}>Preview details for {item.title}</button>
               {item.destination && item.actionLabel
-                ? <button type="button" onClick={() => onNavigate(item.destination!)}>{item.actionLabel}</button>
+                ? <button type="button" onClick={() => openAllowedRoute(item.destination)}>{item.actionLabel}</button>
                 : <small>No follow-up route is available to this account.</small>}
             </li>)}
           </ol>}
+        {selectedAlert && sourceContext && <section id="home-alert-detail-preview" ref={previewRef}
+          className="home-alert-detail-preview" aria-label="Alert detail preview" tabIndex={-1}>
+          <h4>Alert details: {selectedAlert.title}</h4>
+          <p><strong>Priority:</strong> {selectedAlert.priority}{selectedAlert.unread === null ? "" : selectedAlert.unread ? " · unread" : " · read"}</p>
+          <p><strong>What we know:</strong> {selectedAlert.detail}</p>
+          <dl>
+            <dt>Source</dt><dd>{sourceContext.label}</dd>
+            <dt>Record reference</dt><dd>{canSeeInboxDetail ? sourceContext.reference ?? "No recorded event ID" : "Restricted to notification inbox access"}</dd>
+            <dt>Recorded time</dt><dd>{canSeeInboxDetail && sourceContext.recordedAt
+              ? new Date(sourceContext.recordedAt).toLocaleString() : "Not available in this view"}</dd>
+            <dt>Reported source category</dt><dd>{canSeeInboxDetail ? sourceContext.reportedSourceType ?? "Not verified" : "Restricted"}</dd>
+          </dl>
+          {selectedAlert.source === "notification" && (canSeeInboxDetail
+            ? <p><strong>Inbox message:</strong> {selectedAlert.record?.message ?? "Message not available in this bounded preview; review the inbox if permitted."}</p>
+            : <p>Additional notification content is available only to accounts authorized for the notification inbox.</p>)}
+          <p className="home-alert-detail-caution">{sourceContext.explanation} Previewing does not mark a notification read or verify an alert.</p>
+          <div className="home-alert-detail-actions">
+            {selectedAlert.destination && allowed.includes(selectedAlert.destination) && selectedAlert.actionLabel
+              ? <button type="button" onClick={() => openAllowedRoute(selectedAlert.destination)}>
+                {selectedAlert.actionLabel} to review source
+              </button>
+              : <small>No permitted source screen is available for this account.</small>}
+            <button type="button" onClick={closePreview}>Return to Home alerts</button>
+          </div>
+          <small>After opening a source screen, use the shell's Return to Home workspace control to come back. Navigation never acknowledges an alert.</small>
+        </section>}
       </section>
       <section aria-label="Recent local notification activity">
         <h3>Recent local notifications</h3>
