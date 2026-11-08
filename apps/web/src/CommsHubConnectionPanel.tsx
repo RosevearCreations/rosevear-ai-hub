@@ -94,7 +94,11 @@ export function CommsHubConnectionPanel() {
   }
   return <section className="panel" aria-labelledby="ql265-comms-hub-title">
     <h2 id="ql265-comms-hub-title">I.T. · Rosevear Comms Hub connection</h2>
-    <Ql275ReviewPanel />
+    <details className="hub-historical-checks">
+      <summary>Historical QL-275 owner review (optional reference)</summary>
+      <p>This earlier review worksheet is retained for traceability. It is not the current connection decision or a prerequisite for ordinary application use.</p>
+      <Ql275ReviewPanel />
+    </details>
     <p><strong>DISCONNECTED / HOLD.</strong> This panel is deliberately local. It does not inspect or expose cameras, Home Assistant, MQTT, vault contents, IP addresses, private tunnel details or signer material.</p>
     <p>Source: <code>RosevearCreations/rosevear-ai-hub</code> · Original signed proof: <code>docs/integration/ql246-source-proof.json</code> not independently verified.</p>
     <p><strong>QL-264 private custody decision: HOLD.</strong> We have no independently authenticated original custodian, witness or reviewer decision. Signed source-proof B and the separate owner TEST-only authorization remain unavailable. A local check or a public self-report cannot unlock the remote connection.</p>

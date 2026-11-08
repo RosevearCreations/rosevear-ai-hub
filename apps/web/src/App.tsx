@@ -444,12 +444,16 @@ export function App() {
         {section === "System" && canAdminister && <SystemConsoleRefresh onNavigate={(target) => setSection(target as Section)} />}
         {/* Preserve on-device owner observations when navigating to a real module; no background probing. */}
         {canAdminister && (section === "System" || windowsFieldReviewVisited) && <div hidden={section !== "System"}>
-          <WindowsFieldAcceptance228Panel appearance={appearance} onNavigate={(target) => setSection(target as Section)} />
-          <WindowsAppearanceAcceptance236Panel theme={appearance}
-            onNavigate={(target) => setSection(target)} />
-          <WindowsRestart240Panel />
-          <WindowsRestart241Panel />
-          <WindowsRestart242Panel />
+          <details className="hub-historical-checks">
+            <summary>Historical Windows owner worksheets (optional reference)</summary>
+            <p>These Build 228–242 appearance and supervised-restart worksheets are not prerequisites for ordinary Hub use or source release. Open them only when reviewing that earlier field evidence or preparing an actual Windows reboot; genuine backup, startup-task and VM checks still apply to a real reboot.</p>
+            <WindowsFieldAcceptance228Panel appearance={appearance} onNavigate={(target) => setSection(target as Section)} />
+            <WindowsAppearanceAcceptance236Panel theme={appearance}
+              onNavigate={(target) => setSection(target)} />
+            <WindowsRestart240Panel />
+            <WindowsRestart241Panel />
+            <WindowsRestart242Panel />
+          </details>
         </div>}
         {/* Keep the supervised trial mounted while reviewing linked modules; it only stores session data and never polls. */}
         {canAdminister && <div id="hub-system-owner-review" hidden={section !== "System"}>
@@ -457,8 +461,12 @@ export function App() {
         </div>}
         {/* Keep the owner visual findings mounted while opening each real destination screen. */}
         {canAdminister && <div hidden={section !== "System"}>
-          <StandardThemeAcceptancePanel role={user.role as "owner" | "administrator"}
-            appearance={appearance} density={density} onNavigate={target => setSection(target)} />
+          <details className="hub-historical-checks">
+            <summary>Historical Build 200 theme acceptance and findings (optional reference)</summary>
+            <p>These original theme-review findings remain available, but their historical Under Review label is not a current source-release or ordinary Home-use prerequisite. New appearance issues should be recorded against the current installed version.</p>
+            <StandardThemeAcceptancePanel role={user.role as "owner" | "administrator"}
+              appearance={appearance} density={density} onNavigate={target => setSection(target)} />
+          </details>
         </div>}
         {section === "Search & Help" ? (
           <GlobalSearchHelp allowedSections={sections} canAdminister={canAdminister}

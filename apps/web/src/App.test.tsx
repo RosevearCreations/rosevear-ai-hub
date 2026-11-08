@@ -688,6 +688,9 @@ describe("App", () => {
     expect(commandNav).toBeInTheDocument();
     const shortcuts = within(commandNav!);
     fireEvent.click(shortcuts.getByRole("button", { name: "Jump to System workspace" }));
+    const historicalThemeReview = screen.getByText("Historical Build 200 theme acceptance and findings (optional reference)").closest("details");
+    expect(historicalThemeReview).not.toHaveAttribute("open");
+    fireEvent.click(within(historicalThemeReview!).getByText("Historical Build 200 theme acceptance and findings (optional reference)"));
     const themeReview = document.querySelector<HTMLElement>("#hub-theme-screen-review");
     expect(themeReview).toBeInTheDocument();
     const findings = within(themeReview!).getAllByRole("combobox", { name: "Review finding" });

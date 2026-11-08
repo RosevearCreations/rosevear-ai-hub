@@ -17,8 +17,8 @@ export function summarizeSystemSignals(backend: Signal, ollama: Signal, models: 
       detail: ollama === "online" ? `Status API replied${models !== null ? `; ${models} model(s) reported` : ""}. Chat readiness is separate.`
         : ollama === "loading" ? "Waiting for Ollama's response." : "AI status request failed; inspect the local service."
     },
-    { id: "connection", title: "Comms integration", value: "Disconnected", source: "Security gate · not a live probe",
-      detail: "QL-275 is Under Review; signed Proof-B and independent authorization are still unverified." },
+    { id: "connection", title: "Comms integration", value: "Disconnected / HOLD", source: "Security gate · not a live probe",
+      detail: "Actual authenticated source/owner approval and a live signed receipt are required before claiming a connection. Older QL-275 worksheets are historical reference, not today's activation decision." },
     { id: "relay", title: "Private relay", value: "Not authorized", source: "Release policy · not a Windows process probe",
       detail: "This screen has not inspected or started the private relay." }
   ] as const;
@@ -32,7 +32,7 @@ export function SystemWorkspaceGuide({ backend, ollama, models, canAdminister }:
   return <section id="hub-system-overview" className="hub-system-guide" aria-label="System source status and navigation">
     <div className="hub-evidence-title">
       <div><p className="eyebrow">Source-labelled system guide</p><h2>System at a glance</h2></div>
-      <span className="hub-ql275-badge" aria-label="QL-275 project review status">QL-275 · Under Review</span>
+      <span className="hub-ql275-badge" aria-label="Current Comms activation status">Comms · DISCONNECTED / HOLD</span>
     </div>
     <p>The first two readings come from existing APIs <strong>when this Hub session loads</strong>; they are not continuous monitoring. Connection and relay indicators describe <strong>access safeguards</strong>, not a scan of the Windows computer. A responding API never proves our cameras, devices or startup tasks work.</p>
     <div className="hub-system-source-grid">
@@ -53,6 +53,15 @@ export function SystemWorkspaceGuide({ backend, ollama, models, canAdminister }:
         </article>;
       })}
     </div>
+    <section className="hub-system-current-gates" aria-label="Current checks and historical reviews">
+      <h3>What still needs verification?</h3>
+      <ul>
+        <li><strong>Source release:</strong> confirm the current protected GitHub <code>main</code> checks; a green release does not mean it was installed on the Windows host.</li>
+        <li><strong>Actual Windows installation:</strong> verify the installed version, original process identity, startup/recovery task and backup or VM state before changing the real machine.</li>
+        <li><strong>Comms activation:</strong> keep the connection on HOLD until real authenticated owner approval and signed connection evidence exist.</li>
+      </ul>
+      <p><strong>Historical reference only:</strong> QL-275 review tracking and older Windows appearance/restart worksheets do not block ordinary navigation or the current application release. Reuse their safety steps only when actually performing the corresponding Windows change.</p>
+    </section>
     <nav className="hub-system-jumps" aria-label="System page quick navigation">
       <a href="#hub-system-overview">Status overview</a>
       {canAdminister && <a href="#hub-theme-screen-review">Theme owner review</a>}
