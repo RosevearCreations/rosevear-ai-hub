@@ -51,6 +51,8 @@ fix/ql365d-ai-hub-attachment
 
 The remaining **48 non-protected heads** contained at least one commit not yet reachable from both branches at the updated snapshot. This group must be re-evaluated after subsequent promotions and individually reviewed for unique work; do **not** delete such heads merely to meet an arbitrary two-branch count. A feature branch confirmed merged to `dev` but not `main` is not yet eligible.
 
+**Cleanup outcome:** Following a separate action-time owner confirmation, all 30 listed merged branch names were removed through the authenticated GitHub branches interface. Each displayed GitHub's **Deleted / Restore** state after the action; the browser's refreshed branch list retained `dev` and `main`. An independent remote-head count confirmed **50 remaining heads** immediately after cleanup (the two protected branches plus 48 branches with unique history), before this Build 278 release branch was published. No original audit evidence or commits were intentionally erased. The repository's two-branch target remains open until unique work is safely reconciled.
+
 ### Safe cleanup procedure
 
 - Refresh `dev` and `main`, inspect the complete remote branch inventory, and re-evaluate `git merge-base --is-ancestor` against **both** heads immediately before deletion.
