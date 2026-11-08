@@ -6,22 +6,37 @@ import {
   searchHomeActivityAlerts, validHomeActivityResponse, validHomeNotificationPage,
   type ActivityHealth, type ActivityHistory, type HomeAlertFilter, type HomeAlertSourceFilter,
 } from "./homeActivityModel";
+import {
+  MAX_ALERT_BOOKMARKS, MAX_SAVED_ALERT_VIEWS, loadAlertReviewPreferences, loadAlertReviewSession,
+  saveAlertReviewPreferences, saveAlertReviewSession, saveNamedAlertView, safeAlertViewName,
+  toggleAlertBookmark,
+} from "./alertReviewPreferences";
 import "./homeActivitySummary.css";
 
 const notificationPageSize = 10;
+function browserStorage(kind: "localStorage" | "sessionStorage"): Storage | null {
+  try { return window[kind]; } catch { return null; }
+}
 
-export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
+export function HomeActivitySummary({ health, role, allowed, onNavigate, accountId }: {
   health: ActivityHealth;
   role: AuthRole;
   allowed: readonly string[];
   onNavigate: (section: string) => void;
+  accountId?: number;
 }) {
+  const ownerId = accountId ?? 0;
+  const [restoredSession] = useState(() => loadAlertReviewSession(browserStorage("sessionStorage"), ownerId));
+  const [preferences, setPreferences] = useState(() => loadAlertReviewPreferences(browserStorage("localStorage"), ownerId));
   const [history, setHistory] = useState<ActivityHistory>({ kind: "loading" });
-  const [alertFilter, setAlertFilter] = useState<HomeAlertFilter>("all");
-  const [sourceFilter, setSourceFilter] = useState<HomeAlertSourceFilter>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [pageOffset, setPageOffset] = useState(0);
-  const [selectedAlertKey, setSelectedAlertKey] = useState<string | null>(null);
+  const [alertFilter, setAlertFilter] = useState<HomeAlertFilter>(restoredSession.filter);
+  const [sourceFilter, setSourceFilter] = useState<HomeAlertSourceFilter>(restoredSession.source);
+  const [searchQuery, setSearchQuery] = useState(restoredSession.query);
+  const [pageOffset, setPageOffset] = useState(restoredSession.pageOffset);
+  const [selectedAlertKey, setSelectedAlertKey] = useState<string | null>(restoredSession.selectedKey);
+  const [savedViewName, setSavedViewName] = useState("");
+  const [selectedViewId, setSelectedViewId] = useState("");
+  const [savedViewNotice, setSavedViewNotice] = useState("");
   const controllerRef = useRef<AbortController | null>(null);
   const previewRef = useRef<HTMLElement | null>(null);
   const previewTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -30,7 +45,6 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
-    setSelectedAlertKey(null);
     setHistory({ kind: "loading" });
     try {
       const [list, summary] = await Promise.all([
@@ -54,6 +68,13 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
     return () => controllerRef.current?.abort();
   }, [refresh, pageOffset]);
 
+  useEffect(() => {
+    saveAlertReviewSession(browserStorage("sessionStorage"), ownerId, {
+      filter: alertFilter, source: sourceFilter, query: searchQuery, pageOffset,
+      selectedKey: selectedAlertKey?.startsWith("notification-") ? selectedAlertKey : null,
+    });
+  }, [ownerId, alertFilter, sourceFilter, searchQuery, pageOffset, selectedAlertKey]);
+
   const alerts = buildHomeActivityAlerts({ health, history, role, allowed });
   const filteredAlerts = searchHomeActivityAlerts(filterHomeActivityAlerts(alerts, alertFilter), searchQuery, sourceFilter);
   const previewAlerts = filteredAlerts;
@@ -65,6 +86,10 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
   const canSeeInboxDetail = selectedAlert?.source !== "notification" || allowed.includes("Notifications");
   const recent = history.kind === "ready" ? recentHomeNotifications(history.notifications) : [];
   const canOpenNotifications = allowed.includes("Notifications");
+  const activeSavedView = preferences.views.find(view => view.id === selectedViewId) ?? null;
+  const selectedBookmarkId = selectedAlert?.source === "notification" ? selectedAlert.record?.notificationId : null;
+  const selectedBookmarked = preferences.bookmarks.some(item => item.notificationId === selectedBookmarkId);
+  const restoredAlertMissing = !!page && !!selectedAlertKey && !selectedAlert;
 
   useEffect(() => {
     if (selectedAlert) previewRef.current?.focus();
@@ -79,6 +104,27 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
     if (destination && allowed.includes(destination)) onNavigate(destination);
   };
 
+  const saveCurrentView = () => {
+    const name = safeAlertViewName(savedViewName);
+    if (!name) { setSavedViewNotice("Choose a name of 1–40 characters without credentials or links."); return; }
+    const next = saveNamedAlertView(preferences, name, { filter: alertFilter, source: sourceFilter, query: searchQuery });
+    if (!next) { setSavedViewNotice(`Up to ${MAX_SAVED_ALERT_VIEWS} named views can be saved. Remove one first.`); return; }
+    const stored = saveAlertReviewPreferences(browserStorage("localStorage"), ownerId, next);
+    setPreferences(next);
+    setSelectedViewId(next.views.find(view => view.name.toLocaleLowerCase() === name.toLocaleLowerCase())?.id ?? "");
+    setSavedViewNotice(stored ? `Saved “${name}” on this browser for this account.`
+      : "Browser storage was unavailable; this view will be lost when Home closes.");
+  };
+
+  const changeBookmark = (notificationId: number) => {
+    const next = toggleAlertBookmark(preferences, notificationId, pageOffset);
+    if (next === preferences) { setSavedViewNotice(`Only ${MAX_ALERT_BOOKMARKS} bookmarks may be kept. Remove one first.`); return; }
+    const stored = saveAlertReviewPreferences(browserStorage("localStorage"), ownerId, next);
+    setPreferences(next);
+    setSavedViewNotice(stored ? "Personal alert bookmark updated. Inbox status was not changed."
+      : "Bookmark changed only in this Home session; browser storage is unavailable.");
+  };
+
   return <section className="home-activity-summary" aria-labelledby="home-activity-title">
     <header className="home-activity-heading">
       <div>
@@ -86,7 +132,7 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
         <h2 id="home-activity-title">Activity and priority alerts</h2>
         <p>Actual local inbox entries and current service observations. No repairs, acknowledgements or messages are sent here.</p>
       </div>
-      <button type="button" disabled={history.kind === "loading"} onClick={() => void refresh(pageOffset)}>
+      <button type="button" disabled={history.kind === "loading"} onClick={() => { setSelectedAlertKey(null); void refresh(pageOffset); }}>
         {history.kind === "loading" ? "Checking activity…" : "Refresh activity"}
       </button>
     </header>
@@ -126,6 +172,43 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
           <button type="button" disabled={alertFilter === "all" && sourceFilter === "all" && !searchQuery}
             onClick={() => { setAlertFilter("all"); setSourceFilter("all"); setSearchQuery(""); setSelectedAlertKey(null); }}>Show all alerts</button>
         </div>
+        <section className="home-alert-review-tools" aria-label="Saved alert review views">
+          <h4>My alert review views</h4>
+          <p>Save priority, source and search filters for this signed-in account on this browser. Do not include passwords or private details in names or searches. Views do not save inbox messages, prove an alert was handled, or search beyond the loaded page.</p>
+          <div className="home-alert-review-controls">
+            <label htmlFor="home-alert-view-name">View name
+              <input id="home-alert-view-name" maxLength={40} value={savedViewName}
+                placeholder="e.g. Morning warnings" onChange={event => setSavedViewName(event.target.value)} />
+            </label>
+            <button type="button" disabled={!accountId} onClick={saveCurrentView}>Save current alert filters</button>
+            <label htmlFor="home-alert-saved-view">Saved views
+              <select id="home-alert-saved-view" value={selectedViewId}
+                onChange={event => setSelectedViewId(event.target.value)}>
+                <option value="">Choose a saved view</option>
+                {preferences.views.map(view => <option key={view.id} value={view.id}>{view.name}</option>)}
+              </select>
+            </label>
+            <button type="button" disabled={!activeSavedView} onClick={() => {
+              if (!activeSavedView) return;
+              setAlertFilter(activeSavedView.filter);
+              setSourceFilter(activeSavedView.source);
+              setSearchQuery(activeSavedView.query);
+              setSelectedAlertKey(null);
+              setSavedViewNotice(`Applied “${activeSavedView.name}” to the currently loaded page. Other inbox pages are not searched.`);
+            }}>Apply saved view</button>
+            <button type="button" disabled={!activeSavedView} onClick={() => {
+              if (!activeSavedView) return;
+              const next = { ...preferences, views: preferences.views.filter(view => view.id !== activeSavedView.id) };
+              const stored = saveAlertReviewPreferences(browserStorage("localStorage"), ownerId, next);
+              setPreferences(next); setSelectedViewId("");
+              setSavedViewNotice(stored ? "Saved view removed from this account on this browser."
+                : "Saved view removed for this session only.");
+            }}>Remove saved view</button>
+          </div>
+          <p role="status">{savedViewNotice || (accountId
+            ? `${preferences.views.length} of ${MAX_SAVED_ALERT_VIEWS} views saved locally. No inbox changes.`
+            : "Account identity unavailable; persistent alert views are disabled.")}</p>
+        </section>
         <p className="home-activity-filter-count" role="status">
           Showing {previewAlerts.length} of {filteredAlerts.length} matching follow-ups; {alerts.length} total in this sampled view.
           Search and source filters apply only to this loaded inbox page and current health observations, not the entire inbox.
@@ -165,6 +248,24 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
             </button>
           </div>
         </nav>
+        <nav className="home-alert-bookmarks" aria-label="Saved alert bookmarks">
+          <h4>Review bookmarks</h4>
+          <p>Bookmarks remember only notification numbers and sampled page positions, not alert text. They do not mark messages read or completed.</p>
+          {!canOpenNotifications ? <p>Saved notification bookmarks require access to the notification inbox.</p>
+            : preferences.bookmarks.length === 0 ? <p>No alert bookmarks saved for this account.</p> :
+            <ul>{preferences.bookmarks.map(item => <li key={item.notificationId}>
+              <button type="button" onClick={() => {
+                setAlertFilter("all"); setSourceFilter("notification"); setSearchQuery("");
+                setPageOffset(item.pageOffset); setSelectedAlertKey(`notification-${item.notificationId}`);
+                setSavedViewNotice(`Looking for notification #${item.notificationId} on saved page ${item.pageOffset / notificationPageSize + 1}.`);
+              }}>Go to notification #{item.notificationId}, page {item.pageOffset / notificationPageSize + 1}</button>
+              <button type="button" onClick={() => changeBookmark(item.notificationId)}
+                aria-label={`Remove bookmark for notification #${item.notificationId}`}>Remove</button>
+            </li>)}</ul>}
+        </nav>
+        {restoredAlertMissing && <p className="home-activity-empty" role="status">
+          The previously selected alert is not available in this loaded page or filter. It may have moved or been removed; no review is assumed.
+        </p>}
         {selectedAlert && sourceContext && <section id="home-alert-detail-preview" ref={previewRef}
           className="home-alert-detail-preview" aria-label="Alert detail preview" tabIndex={-1}>
           <h4>Alert details: {selectedAlert.title}</h4>
@@ -182,6 +283,11 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
             : <p>Additional notification content is available only to accounts authorized for the notification inbox.</p>)}
           <p className="home-alert-detail-caution">{sourceContext.explanation} Previewing does not mark a notification read or verify an alert.</p>
           <div className="home-alert-detail-actions">
+            {selectedAlert.source === "notification" && selectedBookmarkId && canOpenNotifications && accountId
+              ? <button type="button" aria-pressed={selectedBookmarked}
+                onClick={() => changeBookmark(selectedBookmarkId)}>
+                {selectedBookmarked ? "Remove review bookmark" : "Bookmark for later review"}
+              </button> : null}
             {selectedAlert.destination && allowed.includes(selectedAlert.destination) && selectedAlert.actionLabel
               ? <button type="button" onClick={() => openAllowedRoute(selectedAlert.destination)}>
                 {selectedAlert.actionLabel} to review source
@@ -189,7 +295,7 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
               : <small>No permitted source screen is available for this account.</small>}
             <button type="button" onClick={closePreview}>Return to Home alerts</button>
           </div>
-          <small>After opening a source screen, use the shell's Return to Home workspace control to come back. Navigation never acknowledges an alert.</small>
+          <small>After opening a source screen, use the shell's Return to Home workspace control to come back. This browser tab remembers the selected page, filters and available preview for this account; navigation never acknowledges an alert.</small>
         </section>}
       </section>
       <section aria-label="Recent local notification activity">
