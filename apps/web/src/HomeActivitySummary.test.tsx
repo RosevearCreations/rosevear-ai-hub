@@ -164,4 +164,81 @@ describe("Build 274 Home activity and alerts", () => {
     expect(preview).toHaveTextContent("not a recorded event or proof of overall system health");
     expect(within(preview).getByRole("button", { name: "Open Search & Help to review source" })).toBeInTheDocument();
   });
+
+  test("Build 277 searches and filters the loaded page without changing verified counts or touching inbox state", async () => {
+    const firstPage = Array.from({ length: 10 }, (_, i) => ({
+      ...notifications[0], id: i + 1, title: `Pump ${i + 1} review`, created_at: `2026-11-08T12:${String(i).padStart(2, "0")}:00Z`,
+    }));
+    const lastPage = [{ ...notifications[1], id: 11, title: "Garage review" },
+      { ...notifications[0], id: 12, title: "Garden review" }];
+    vi.mocked(getNotifications).mockImplementation(async options => ({
+      notifications: options?.offset === 10 ? lastPage : firstPage, total: 12, limit: 10, offset: options?.offset ?? 0,
+    }) as never);
+    vi.mocked(getNotificationSummary).mockResolvedValue({ ...summary, total: 12, unread: 8, urgent: 2, warning: 10 });
+    const onNavigate = vi.fn();
+    render(<HomeActivitySummary health={healthy} role="owner" allowed={["Home", "Notifications"]} onNavigate={onNavigate} />);
+    const followups = screen.getByRole("region", { name: "Priority follow-ups" });
+    await waitFor(() => expect(within(followups).getAllByRole("listitem")).toHaveLength(10));
+    expect(screen.getByRole("navigation", { name: "Notification follow-up pages" })).toHaveTextContent("Inbox page 1 of 2");
+    expect(screen.getByLabelText("Local notification counts")).toHaveTextContent("Unread 8");
+    expect(screen.getByRole("button", { name: "Previous inbox page" })).toBeDisabled();
+    fireEvent.change(within(followups).getByRole("searchbox", { name: "Search loaded page" }), { target: { value: "PUMP 2" } });
+    expect(within(followups).getAllByRole("listitem")).toHaveLength(1);
+    expect(within(followups).getByRole("listitem")).toHaveTextContent("Pump 2 review");
+    fireEvent.change(within(followups).getByRole("combobox", { name: "Source" }), { target: { value: "backend" } });
+    expect(within(followups).queryByRole("listitem")).not.toBeInTheDocument();
+    expect(within(followups).getByText(/Other pages and priorities may still need attention/)).toBeInTheDocument();
+    expect(getNotifications).toHaveBeenCalledTimes(1);
+    fireEvent.click(within(followups).getByRole("button", { name: "Show all alerts" }));
+    expect(within(followups).getAllByRole("listitem")).toHaveLength(10);
+    fireEvent.click(screen.getByRole("button", { name: "Next inbox page" }));
+    await waitFor(() => expect(screen.getByRole("navigation", { name: "Notification follow-up pages" })).toHaveTextContent("Inbox page 2 of 2"));
+    expect(within(followups).getAllByRole("listitem")).toHaveLength(2);
+    expect(within(followups).queryByText("Pump 2 review")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Next inbox page" })).toBeDisabled();
+    expect(screen.getByLabelText("Local notification counts")).toHaveTextContent("Unread 8");
+    fireEvent.click(within(followups).getByRole("button", { name: "Preview details for Garage review" }));
+    expect(within(followups).getByRole("region", { name: "Alert detail preview" })).toHaveTextContent("Notification #11");
+    fireEvent.click(screen.getByRole("button", { name: "Previous inbox page" }));
+    await waitFor(() => expect(screen.getByRole("navigation", { name: "Notification follow-up pages" })).toHaveTextContent("Inbox page 1 of 2"));
+    expect(within(followups).queryByRole("region", { name: "Alert detail preview" })).not.toBeInTheDocument();
+    expect(getNotifications).toHaveBeenCalledTimes(3);
+    expect(getNotificationSummary).toHaveBeenCalledTimes(3);
+    expect(onNavigate).not.toHaveBeenCalled();
+  });
+
+  test("Build 277 treats a malformed later page as unavailable, never as a clean inbox", async () => {
+    vi.mocked(getNotifications).mockImplementation(async options => options?.offset === 10
+      ? ({ notifications: [], total: 12, limit: 10, offset: 0 } as never)
+      : ({ notifications: [notifications[0]], total: 12, limit: 10, offset: 0 } as never));
+    render(<HomeActivitySummary health={healthy} role="read_only" allowed={["Home"]} onNavigate={vi.fn()} />);
+    await screen.findByText(/Inbox page 1 of 2/);
+    fireEvent.click(screen.getByRole("button", { name: "Next inbox page" }));
+    expect(await screen.findByText(/History unavailable/)).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Notification follow-up pages" })).toHaveTextContent("total pages not verified");
+    expect(screen.getByRole("button", { name: "Next inbox page" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Previous inbox page" })).toBeEnabled();
+    expect(screen.getByLabelText("Local notification counts")).toHaveTextContent("Not verified");
+    expect(screen.queryByText(/No priority issues were identified/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Previous inbox page" }));
+    await screen.findByText(/Inbox page 1 of 2/);
+    expect(screen.getByLabelText("Local notification counts")).toHaveTextContent("Unread 1");
+  });
+
+  test("Build 277 limits source search to alert summaries and preserves restricted content and safe routes", async () => {
+    vi.mocked(getNotifications).mockResolvedValue({ notifications: [{ ...notifications[0],
+      message: "private-garage-code", source_type: "camera", source_id: "confidential-source" }], total: 1, limit: 10, offset: 0 } as never);
+    render(<HomeActivitySummary health={{ backend: "offline", localAi: "online", modelCount: 2 }} role="read_only"
+      allowed={["Home", "Search & Help"]} onNavigate={vi.fn()} />);
+    const followups = screen.getByRole("region", { name: "Priority follow-ups" });
+    await within(followups).findByRole("button", { name: "Preview details for Pump check" });
+    fireEvent.change(within(followups).getByRole("searchbox", { name: "Search loaded page" }), { target: { value: "private-garage-code" } });
+    expect(within(followups).queryByRole("listitem")).not.toBeInTheDocument();
+    fireEvent.change(within(followups).getByRole("searchbox", { name: "Search loaded page" }), { target: { value: "Local Hub" } });
+    fireEvent.change(within(followups).getByRole("combobox", { name: "Source" }), { target: { value: "backend" } });
+    expect(within(followups).getByRole("listitem")).toHaveTextContent("Local Hub needs review");
+    expect(screen.queryByText("private-garage-code")).not.toBeInTheDocument();
+    expect(screen.queryByText("confidential-source")).not.toBeInTheDocument();
+    expect(within(followups).queryByRole("button", { name: "Open Notifications" })).not.toBeInTheDocument();
+  });
 });
