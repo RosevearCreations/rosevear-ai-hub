@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getNotifications, getNotificationSummary, type AuthRole } from "./api";
 import {
-  buildHomeActivityAlerts, recentHomeNotifications, validHomeActivityResponse,
-  type ActivityHealth, type ActivityHistory,
+  buildHomeActivityAlerts, filterHomeActivityAlerts, recentHomeNotifications, validHomeActivityResponse,
+  type ActivityHealth, type ActivityHistory, type HomeAlertFilter,
 } from "./homeActivityModel";
 import "./homeActivitySummary.css";
 
@@ -14,6 +14,7 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
   onNavigate: (section: string) => void;
 }) {
   const [history, setHistory] = useState<ActivityHistory>({ kind: "loading" });
+  const [alertFilter, setAlertFilter] = useState<HomeAlertFilter>("all");
   const controllerRef = useRef<AbortController | null>(null);
 
   const refresh = useCallback(async () => {
@@ -43,6 +44,8 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
   }, [refresh]);
 
   const alerts = buildHomeActivityAlerts({ health, history, role, allowed });
+  const filteredAlerts = filterHomeActivityAlerts(alerts, alertFilter);
+  const previewAlerts = filteredAlerts.slice(0, 6);
   const recent = history.kind === "ready" ? recentHomeNotifications(history.notifications) : [];
   const canOpenNotifications = allowed.includes("Notifications");
   return <section className="home-activity-summary" aria-labelledby="home-activity-title">
@@ -64,10 +67,29 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate }: {
     <div className="home-activity-columns">
       <section aria-label="Priority follow-ups">
         <h3>What needs attention?</h3>
-        {alerts.length === 0
+        <div className="home-activity-triage" role="group" aria-label="Priority alert filters">
+          <label htmlFor="home-alert-filter">Show follow-ups</label>
+          <select id="home-alert-filter" value={alertFilter}
+            onChange={event => setAlertFilter(event.target.value as HomeAlertFilter)}>
+            <option value="all">All priorities</option>
+            <option value="urgent">Urgent only</option>
+            <option value="warning">Warnings only</option>
+            <option value="unread">Unread notifications</option>
+            <option value="verify">Needs verification</option>
+            <option value="setup">Setup guidance</option>
+          </select>
+          <button type="button" disabled={alertFilter === "all"} onClick={() => setAlertFilter("all")}>Show all alerts</button>
+        </div>
+        <p className="home-activity-filter-count" role="status">
+          Showing {previewAlerts.length} of {filteredAlerts.length} matching follow-ups; {alerts.length} total in this sampled view.
+          Filters never mark anything reviewed or change the full notification counts.
+        </p>
+        {alerts.length === 0 && alertFilter === "all"
           ? <p className="home-activity-empty">No priority issues were identified from these limited readings. This does not certify device health or all activity.</p>
+          : previewAlerts.length === 0
+            ? <p className="home-activity-empty">No follow-ups match this filter. Other priorities may still need attention; choose Show all alerts to restore the full list.</p>
           : <ol className="home-activity-list">
-            {alerts.slice(0, 6).map(item => <li key={item.key} className={`home-activity-alert home-activity-${item.priority}`}>
+            {previewAlerts.map(item => <li key={item.key} className={`home-activity-alert home-activity-${item.priority}`}>
               <span className="home-activity-priority">{item.priority}</span>
               <strong>{item.title}</strong>
               <p>{item.detail}</p>

@@ -553,6 +553,22 @@ describe("App", () => {
       .getByRole("button", { name: "Notifications" })).toHaveAttribute("aria-current", "page");
   });
 
+  test("Home alert filtering does not clear the real notification counts or alter access", async () => {
+    installFetchMock({ withNotification: true, role: "read_only" });
+    render(<App />);
+    const panel = await screen.findByRole("region", { name: "Activity and priority alerts" });
+    const followups = within(panel).getByRole("region", { name: "Priority follow-ups" });
+    await within(followups).findByText("Local camera review");
+    const selector = within(followups).getByRole("combobox", { name: "Show follow-ups" });
+    fireEvent.change(selector, { target: { value: "urgent" } });
+    expect(within(followups).getByText(/No follow-ups match this filter/)).toBeInTheDocument();
+    expect(within(panel).getByLabelText("Local notification counts")).toHaveTextContent("Unread 1");
+    fireEvent.click(within(followups).getByRole("button", { name: "Show all alerts" }));
+    expect(within(followups).getByText("Local camera review")).toBeInTheDocument();
+    expect(within(followups).queryByRole("button", { name: "Open System" })).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Rosevear AI Hub source status cards" })).toHaveTextContent("HOLD");
+  });
+
   test("read-only Home guidance does not offer workshop or administrative next actions", async () => {
     installFetchMock({ role: "read_only" });
     render(<App />);
