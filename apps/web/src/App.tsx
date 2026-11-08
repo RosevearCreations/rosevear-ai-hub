@@ -58,6 +58,7 @@ import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
 import { HubUpdatePanel, HubUpdateRefreshObserver } from "./HubUpdatePanel";
 import { ClientRestartControl } from "./ClientRestartControl";
+import { WorkspaceQuickAccess } from "./WorkspaceQuickAccess";
 import { WindowsFirstActivation246Panel } from "./WindowsFirstActivation246Panel";
 import { SecretsView } from "./SecretsView";
 import { ToolsView } from "./ToolsView";
@@ -350,6 +351,13 @@ export function App() {
             ))}
           </ul>
         </nav>
+
+        <WorkspaceQuickAccess key={user.id} userId={user.id} sections={sections} current={section}
+          onNavigate={(target) => {
+            setKnowledgeQuestion("");
+            setSection(target as Section);
+            setMobileMenuOpen(false);
+          }} />
 
         <div className="shell-utilities">
           <button className="shell-find-button" type="button" onClick={() => setCommandOpen(true)}>

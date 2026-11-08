@@ -3540,6 +3540,19 @@ h1 {
 .app-shell .account-card button { min-height: 2.7rem; }
 .mobile-nav-toggle { display: none; min-height: 2.75rem; padding: .55rem .7rem; background: var(--shell-selected); color: var(--shell-ink); border: 1px solid var(--shell-accent); border-radius: .55rem; font-weight: 700; cursor: pointer; }
 .shell-utilities { display: grid; gap: .75rem; padding: .85rem 0; margin: .85rem 0; border-top: 1px solid var(--shell-border); border-bottom: 1px solid var(--shell-border); }
+.app-shell .workspace-quick-access { display: grid; gap: .55rem; padding: .85rem .65rem; margin-top: .7rem; border: 1px solid var(--shell-border); border-radius: .85rem; background: var(--shell-paper); color: var(--shell-ink); }
+.workspace-shortcuts-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .2rem .5rem; }
+.workspace-shortcuts-heading strong { font-size: .9rem; }
+.workspace-shortcuts-heading span, .workspace-shortcuts-label, .workspace-shortcuts-help { color: var(--shell-muted); font-size: .73rem; }
+.workspace-shortcuts-label { display: block; margin-bottom: .3rem; font-weight: 750; letter-spacing: .03em; text-transform: uppercase; }
+.workspace-shortcuts-list { display: flex; flex-wrap: wrap; gap: .35rem; }
+.workspace-shortcuts-list button { border: 1px solid var(--shell-border); border-radius: 99px; padding: .35rem .6rem; min-height: 2.4rem; background: var(--shell-selected); color: var(--shell-ink); cursor: pointer; font-size: .78rem; font-weight: 700; }
+.workspace-shortcuts-list button[aria-current="page"] { border: 2px solid var(--shell-accent); }
+.workspace-pin-button, .workspace-shortcuts-clear { width: 100%; min-height: 2.5rem; border: 1px solid var(--shell-accent); border-radius: .6rem; background: var(--shell-selected); color: var(--shell-ink); cursor: pointer; font-weight: 750; font-size: .78rem; }
+.workspace-pin-button span { font-size: 1.15rem; margin-right: .35rem; }
+.workspace-pin-button:disabled { opacity: .7; cursor: not-allowed; }
+.workspace-shortcuts-clear { border-color: var(--shell-border); background: var(--shell-paper); font-weight: 600; }
+.workspace-quick-access :is(button):focus-visible { outline: 3px solid var(--shell-accent); outline-offset: 2px; }
 .shell-find-button { display: flex; justify-content: space-between; align-items: center; gap: .5rem; width: 100%; min-height: 2.75rem; padding: .5rem .75rem; border: 1px solid var(--shell-accent); border-radius: .55rem; background: var(--shell-selected); color: var(--shell-ink); font-weight: 750; cursor: pointer; }
 .shell-find-button kbd { font-size: .72rem; font-weight: 600; border: 1px solid var(--shell-border); border-radius: .3rem; padding: .15rem .3rem; background: var(--shell-paper); }
 .shell-preferences { display: flex; flex-wrap: wrap; min-width: 0; gap: .3rem; padding: 0; margin: 0; border: 0; }
