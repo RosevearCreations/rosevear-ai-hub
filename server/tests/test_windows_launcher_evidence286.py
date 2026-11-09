@@ -85,9 +85,7 @@ def test_candidate_matching_is_never_binary_proof(tmp_path, monkeypatch):
     monkeypatch.setattr(
         launcher.subprocess,
         "run",
-        lambda *_args, **_kwargs: SimpleNamespace(
-            returncode=0, stdout=json.dumps(changed)
-        ),
+        lambda *_args, **_kwargs: SimpleNamespace(returncode=0, stdout=json.dumps(changed)),
     )
     assert (
         launcher.collect_windows_launcher_evidence(tmp_path)["candidate_comparison"]
