@@ -15,6 +15,10 @@ import {
   appendFollowUpEntry, followUpOutcomeLabel, loadFollowUpJournal, MAX_FOLLOW_UP_ENTRIES,
   MAX_FOLLOW_UP_NOTE_LENGTH, saveFollowUpJournal, safeFollowUpNote, type LocalFollowUpOutcome,
 } from "./alertFollowUpJournal";
+import {
+  buildFollowUpQueue, filterFollowUpQueue, followUpQueueAgeLabel,
+  type FollowUpQueueAgeFilter, type FollowUpQueuePriorityFilter, type FollowUpQueueStatusFilter,
+} from "./alertFollowUpQueue";
 import "./homeActivitySummary.css";
 
 const notificationPageSize = 10;
@@ -45,6 +49,9 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate, account
   const [followUpOutcome, setFollowUpOutcome] = useState<LocalFollowUpOutcome>("needs_review");
   const [followUpNote, setFollowUpNote] = useState("");
   const [followUpNotice, setFollowUpNotice] = useState("");
+  const [queueStatusFilter, setQueueStatusFilter] = useState<FollowUpQueueStatusFilter>("outstanding");
+  const [queueAgeFilter, setQueueAgeFilter] = useState<FollowUpQueueAgeFilter>("all");
+  const [queuePriorityFilter, setQueuePriorityFilter] = useState<FollowUpQueuePriorityFilter>("all");
   const controllerRef = useRef<AbortController | null>(null);
   const previewRef = useRef<HTMLElement | null>(null);
   const previewTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -102,6 +109,12 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate, account
   const selectedTimeline = selectedBookmarkId
     ? followUpJournal.entries.filter(entry => entry.notificationId === selectedBookmarkId).slice().reverse() : [];
   const recentFollowUps = followUpJournal.entries.slice(-6).reverse();
+  const followUpQueue = canWriteFollowUps ? buildFollowUpQueue(followUpJournal, new Date()) : [];
+  const filteredQueue = filterFollowUpQueue(followUpQueue, {
+    status: queueStatusFilter, age: queueAgeFilter, priority: queuePriorityFilter,
+  });
+  const activeReviewCount = followUpQueue.filter(item => item.latestOutcome !== "reviewed_locally").length;
+  const overdueReviewCount = followUpQueue.filter(item => item.latestOutcome !== "reviewed_locally" && item.age === "overdue").length;
 
   useEffect(() => {
     if (selectedAlert) previewRef.current?.focus();
@@ -313,6 +326,54 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate, account
         {canWriteFollowUps && <section className="home-follow-up-journal" aria-label="Personal follow-up review history">
           <h4>My local follow-up history</h4>
           <p>Manual notes only. These are visible to this account on this browser, not encrypted, not shared with the Hub, and not evidence that a notification is resolved. Never include passwords, addresses, private camera details or access codes.</p>
+          <section className="home-follow-up-queue" aria-label="Owner follow-up review queue">
+            <h5>My follow-up queue</h5>
+            <p>Personal review priorities calculated from your latest local note per notification. The age measures time since that note, not the age of the actual alert. No actions or notification status updates occur here.</p>
+            <p role="status">{activeReviewCount} needing personal follow-up · {overdueReviewCount} last reviewed 14+ days ago · {followUpQueue.length} unique locally tracked notifications.</p>
+            <div className="home-follow-up-queue-filters" role="group" aria-label="Personal follow-up queue filters">
+              <label htmlFor="home-follow-up-queue-status">Review status
+                <select id="home-follow-up-queue-status" value={queueStatusFilter}
+                  onChange={event => setQueueStatusFilter(event.target.value as FollowUpQueueStatusFilter)}>
+                  <option value="outstanding">Needs personal follow-up</option>
+                  <option value="reviewed_locally">Reviewed locally (not resolved)</option>
+                  <option value="all">All locally tracked</option>
+                </select>
+              </label>
+              <label htmlFor="home-follow-up-queue-age">Time since local note
+                <select id="home-follow-up-queue-age" value={queueAgeFilter}
+                  onChange={event => setQueueAgeFilter(event.target.value as FollowUpQueueAgeFilter)}>
+                  <option value="all">Any age</option>
+                  <option value="aging">7+ days</option>
+                  <option value="overdue">14+ days</option>
+                  <option value="clock_check">Clock check needed</option>
+                </select>
+              </label>
+              <label htmlFor="home-follow-up-queue-priority">Personal review priority
+                <select id="home-follow-up-queue-priority" value={queuePriorityFilter}
+                  onChange={event => setQueuePriorityFilter(event.target.value as FollowUpQueuePriorityFilter)}>
+                  <option value="all">All priorities</option>
+                  <option value="high">High (14+ days outstanding)</option>
+                  <option value="attention">Attention (aging, follow-up or clock check)</option>
+                  <option value="routine">Routine or reviewed locally</option>
+                </select>
+              </label>
+              <button type="button" disabled={queueStatusFilter === "outstanding" && queueAgeFilter === "all" && queuePriorityFilter === "all"}
+                onClick={() => { setQueueStatusFilter("outstanding"); setQueueAgeFilter("all"); setQueuePriorityFilter("all"); }}>
+                Reset queue filters
+              </button>
+            </div>
+            <p className="home-activity-filter-count" role="status">Showing {filteredQueue.length} of {followUpQueue.length} local review records. Not a search of the server inbox.</p>
+            {filteredQueue.length === 0 ? <p>No locally recorded reviews match these queue filters. This does not mean the inbox is clear.</p>
+              : <ol>{filteredQueue.map(item => <li key={item.notificationId}>
+                <strong>Notification #{item.notificationId} · {item.priority === "high" ? "High personal priority"
+                  : item.priority === "attention" ? "Attention suggested" : "Routine personal priority"}</strong>
+                <span>{followUpOutcomeLabel(item.latestOutcome)} · {followUpQueueAgeLabel(item)}</span>
+                <small>{item.entryCount} local note{item.entryCount === 1 ? "" : "s"} · Latest {new Date(item.latestAt).toLocaleString()}</small>
+                <button type="button" onClick={() => jumpToFollowUp(item.notificationId, item.pageOffset)}>
+                  Review locally tracked notification #{item.notificationId}
+                </button>
+              </li>)}</ol>}
+          </section>
           {recentFollowUps.length === 0 ? <p>No personal follow-up entries yet.</p> :
             <ol>{recentFollowUps.map(entry => <li key={entry.id}>
               <strong>Notification #{entry.notificationId} — {followUpOutcomeLabel(entry.outcome)}</strong>
