@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 
 import type { WindowsAdoptionReview290 } from "./windowsFieldAdoption290";
 import { compareRecoveryHistory292, SIGNED_RECEIPT_PREREQUISITES_292 } from "./windowsDriftContinuity292";
+import { WindowsEvidenceIntake293Panel } from "./WindowsEvidenceIntake293Panel";
 import {
   exportRecoveryHistory291, guideWindowsRecovery291, recordRecoveryDecision291,
   RECOVERY_DECISION_LABELS_291, type RecoveryDecision291, type RecoveryHistoryEntry291,
@@ -122,6 +123,7 @@ export function WindowsRecoveryDecision291Panel({ review, getCurrentReview, expe
       <p>Comparison is an in-memory interpretation of owner notes only. It does not validate a signature,
         accept the original Windows host, close drift, enroll an issuer or authorize Master Shell publication.</p>
     </section>
+    <WindowsEvidenceIntake293Panel episodes={continuity.episodes} expectedMainSha={expectedMainSha} />
     <button type="button" disabled={history.length === 0} onClick={downloadHistory}>
       Download private owner-decision history (JSON)
     </button>
