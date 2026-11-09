@@ -386,4 +386,56 @@ describe("Build 274 Home activity and alerts", () => {
       expect(localStorage.getItem("rosevear-ai-hub:local-follow-up:v1:34")).toBeNull();
     } finally { storageStub.mockRestore(); }
   });
+
+  test("Build 281 filters and prioritizes locally tracked reviews, navigates safely to their recorded page", async () => {
+    localStorage.clear(); sessionStorage.clear();
+    localStorage.setItem("rosevear-ai-hub:local-follow-up:v1:281", JSON.stringify({ version: 1, entries: [
+      { id: 1, notificationId: 11, pageOffset: 10, outcome: "follow_up",
+        note: "Need a check", recordedAt: "2026-10-01T12:00:00.000Z" },
+      { id: 2, notificationId: 1, pageOffset: 0, outcome: "reviewed_locally",
+        note: "Reviewed manually", recordedAt: "2026-10-03T12:00:00.000Z" },
+    ] }));
+    vi.mocked(getNotifications).mockImplementation(async options => ({
+      notifications: options?.offset === 10 ? [{ ...notifications[1], id: 11, title: "Garage alert" }] : [notifications[0]],
+      total: 11, limit: 10, offset: options?.offset ?? 0,
+    }) as never);
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={281}
+      allowed={["Home", "Notifications"]} onNavigate={vi.fn()} />);
+    const queue = screen.getByRole("region", { name: "Owner follow-up review queue" });
+    await screen.findByText(/Inbox page 1 of 2/);
+    expect(queue).toHaveTextContent("1 needing personal follow-up");
+    expect(queue).toHaveTextContent("High personal priority");
+    expect(within(queue).getAllByRole("listitem")).toHaveLength(1);
+    fireEvent.change(within(queue).getByRole("combobox", { name: "Review status" }), { target: { value: "reviewed_locally" } });
+    expect(queue).toHaveTextContent("Notification #1");
+    expect(queue).toHaveTextContent("Reviewed locally (not resolved)");
+    expect(queue).not.toHaveTextContent("Need a check");
+    fireEvent.change(within(queue).getByRole("combobox", { name: "Review status" }), { target: { value: "outstanding" } });
+    fireEvent.change(within(queue).getByRole("combobox", { name: "Time since local note" }), { target: { value: "overdue" } });
+    fireEvent.change(within(queue).getByRole("combobox", { name: "Personal review priority" }), { target: { value: "high" } });
+    expect(within(queue).getAllByRole("listitem")).toHaveLength(1);
+    fireEvent.click(within(queue).getByRole("button", { name: "Review locally tracked notification #11" }));
+    await screen.findByText(/Inbox page 2 of 2/);
+    expect(screen.getByRole("region", { name: "Alert detail preview" })).toHaveTextContent("Notification #11");
+    expect(getNotifications).toHaveBeenCalledTimes(2);
+    expect(getNotificationSummary).toHaveBeenCalledTimes(2);
+    expect(localStorage.getItem("rosevear-ai-hub:local-follow-up:v1:281")).toContain("Need a check");
+  });
+
+  test("Build 281 hides owner queue without notification access or administrator permissions", async () => {
+    localStorage.clear(); sessionStorage.clear();
+    localStorage.setItem("rosevear-ai-hub:local-follow-up:v1:282", JSON.stringify({ version: 1, entries: [{
+      id: 1, notificationId: 1, pageOffset: 0, outcome: "follow_up", note: "Private local review",
+      recordedAt: "2026-10-01T12:00:00.000Z",
+    }] }));
+    render(<HomeActivitySummary health={healthy} role="read_only" accountId={282}
+      allowed={["Notifications"]} onNavigate={vi.fn()} />);
+    await screen.findByText(/Last inbox check:/);
+    expect(screen.queryByRole("region", { name: "Owner follow-up review queue" })).not.toBeInTheDocument();
+    cleanup();
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={282}
+      allowed={["Home"]} onNavigate={vi.fn()} />);
+    await screen.findByText(/Last inbox check:/);
+    expect(screen.queryByRole("region", { name: "Owner follow-up review queue" })).not.toBeInTheDocument();
+  });
 });
