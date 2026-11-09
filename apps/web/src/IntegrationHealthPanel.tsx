@@ -10,6 +10,7 @@ import {
 import { IntegrationAcceptancePanel } from "./IntegrationAcceptancePanel";
 import { CommsHubConnectionPanel } from "./CommsHubConnectionPanel";
 import { SixAppReadinessPanel } from "./SixAppReadinessPanel";
+import { MasterShellReadinessPanel283 } from "./MasterShellReadinessPanel283";
 
 type IntegrationState = "online" | "offline" | "not_configured" | "unavailable";
 type Observation = {
@@ -132,6 +133,10 @@ export function IntegrationHealthPanel() {
         <summary>Historical six-app QL-275 contract checklist (optional reference)</summary>
         <p>This fixed offline checklist records an older planning phase. It is not a current prerequisite or proof of today's connection state. Review authenticated Comms evidence in the connection panel below.</p>
         <SixAppReadinessPanel />
+      </details>
+      <details className="hub-historical-checks">
+        <summary>Master Shell proposed reporting and integration gap assessment (owner review)</summary>
+        <MasterShellReadinessPanel283 />
       </details>
       <IntegrationAcceptancePanel />
       <CommsHubConnectionPanel />
