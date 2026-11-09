@@ -142,10 +142,15 @@ jobs:
         shell: bash
         run: |
           # npm sometimes omits an optional platform-specific Rollup package,
-          # especially on cached hosted runners. Only repair this CI workspace.
+          # especially on cached hosted runners. npm install --no-save from a
+          # workspace can leave the native package missing after a second pass.
+          # Extract the exact installed Rollup version into THIS CI checkout.
           if ! node -e "require('rollup')"; then
             version=$(node -p "require('rollup/package.json').version")
-            npm install --no-save --package-lock=false --ignore-scripts --include=optional "@rollup/rollup-linux-x64-gnu@$version"
+            tarball=$(npm pack "@rollup/rollup-linux-x64-gnu@$version" --pack-destination "$RUNNER_TEMP" --silent)
+            target="$GITHUB_WORKSPACE/node_modules/@rollup/rollup-linux-x64-gnu"
+            mkdir -p "$target"
+            tar -xzf "$RUNNER_TEMP/$tarball" -C "$target" --strip-components=1
             node -e "require('rollup')"
           fi
       - name: Type check
