@@ -111,7 +111,7 @@ def test_untrusted_inspector_rejected_without_raw_output(tmp_path, monkeypatch):
         monkeypatch.setattr(
             launcher.subprocess,
             "run",
-            lambda *_args, **_kwargs: SimpleNamespace(
+            lambda *_args, response_text=response_text, **_kwargs: SimpleNamespace(
                 returncode=0, stdout=response_text
             ),
         )
