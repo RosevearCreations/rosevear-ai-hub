@@ -82,8 +82,17 @@ def test_candidate_matching_is_never_binary_proof(tmp_path, monkeypatch):
     assert calls[0][1]["check"] is False
     changed = _snapshot()
     changed["checkout_sha_candidate"] = "b" * 40
-    monkeypatch.setattr(launcher.subprocess, "run", lambda *_args, **_kwargs: SimpleNamespace(returncode=0, stdout=json.dumps(changed)))
-    assert launcher.collect_windows_launcher_evidence(tmp_path)["candidate_comparison"] == "CANDIDATES_DIFFER"
+    monkeypatch.setattr(
+        launcher.subprocess,
+        "run",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            returncode=0, stdout=json.dumps(changed)
+        ),
+    )
+    assert (
+        launcher.collect_windows_launcher_evidence(tmp_path)["candidate_comparison"]
+        == "CANDIDATES_DIFFER"
+    )
 
 
 def test_untrusted_inspector_rejected_without_raw_output(tmp_path, monkeypatch):
@@ -98,7 +107,14 @@ def test_untrusted_inspector_rejected_without_raw_output(tmp_path, monkeypatch):
         {"web_launcher": {"ancestor_kinds": ["PRIVATE_PATH"]}},
     ):
         raw = {**_snapshot(), **modification}
-        monkeypatch.setattr(launcher.subprocess, "run", lambda *_args, **_kwargs: SimpleNamespace(returncode=0, stdout=json.dumps(raw)))
+        response_text = json.dumps(raw)
+        monkeypatch.setattr(
+            launcher.subprocess,
+            "run",
+            lambda *_args, **_kwargs: SimpleNamespace(
+                returncode=0, stdout=response_text
+            ),
+        )
         result = launcher.collect_windows_launcher_evidence(tmp_path)
         assert result["candidate_comparison"] == "INSPECTOR_UNAVAILABLE"
         assert "PRIVATE" not in json.dumps(result)
@@ -108,7 +124,10 @@ def test_untrusted_inspector_rejected_without_raw_output(tmp_path, monkeypatch):
         raise subprocess.TimeoutExpired("powershell.exe", 20, output="SECRET")
 
     monkeypatch.setattr(launcher.subprocess, "run", timeout)
-    assert launcher.collect_windows_launcher_evidence(tmp_path)["candidate_comparison"] == "INSPECTOR_UNAVAILABLE"
+    assert (
+        launcher.collect_windows_launcher_evidence(tmp_path)["candidate_comparison"]
+        == "INSPECTOR_UNAVAILABLE"
+    )
 
 
 def test_owner_only_endpoint_and_no_cache(tmp_path, monkeypatch):
@@ -125,13 +144,38 @@ def test_owner_only_endpoint_and_no_cache(tmp_path, monkeypatch):
     client = TestClient(app)
     url = "/api/v1/system/windows-launcher-evidence"
     assert client.get(url).status_code == 401
-    assert client.post("/api/v1/auth/bootstrap", json={"username": "owner", "password": "owner-windows-286-secret"}).status_code == 201
-    monkeypatch.setattr("rosevear_ai_hub.api.resources.collect_windows_launcher_evidence", lambda _root: {"installed_release_verified": False})
+    assert (
+        client.post(
+            "/api/v1/auth/bootstrap",
+            json={"username": "owner", "password": "owner-windows-286-secret"},
+        ).status_code
+        == 201
+    )
+    monkeypatch.setattr(
+        "rosevear_ai_hub.api.resources.collect_windows_launcher_evidence",
+        lambda _root: {"installed_release_verified": False},
+    )
     response = client.get(url)
     assert response.status_code == 200
     assert response.headers["cache-control"] == "no-store"
     assert response.json()["installed_release_verified"] is False
-    assert client.post("/api/v1/auth/users", json={"username": "family", "password": "family-windows-286-secret", "role": "household_user"}).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/users",
+            json={
+                "username": "family",
+                "password": "family-windows-286-secret",
+                "role": "household_user",
+            },
+        ).status_code
+        == 201
+    )
     client.post("/api/v1/auth/logout")
-    assert client.post("/api/v1/auth/login", json={"username": "family", "password": "family-windows-286-secret"}).status_code == 200
+    assert (
+        client.post(
+            "/api/v1/auth/login",
+            json={"username": "family", "password": "family-windows-286-secret"},
+        ).status_code
+        == 200
+    )
     assert client.get(url).status_code == 403
