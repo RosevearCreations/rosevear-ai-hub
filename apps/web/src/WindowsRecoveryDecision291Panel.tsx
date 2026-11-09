@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import type { WindowsAdoptionReview290 } from "./windowsFieldAdoption290";
+import { compareRecoveryHistory292, SIGNED_RECEIPT_PREREQUISITES_292 } from "./windowsDriftContinuity292";
 import {
   exportRecoveryHistory291, guideWindowsRecovery291, recordRecoveryDecision291,
   RECOVERY_DECISION_LABELS_291, type RecoveryDecision291, type RecoveryHistoryEntry291,
@@ -16,6 +17,7 @@ export function WindowsRecoveryDecision291Panel({ review, getCurrentReview, expe
   const [decision, setDecision] = useState<RecoveryDecision291>("DEFER_ON_HOLD");
   const [acknowledged, setAcknowledged] = useState(false);
   const [history, setHistory] = useState<RecoveryHistoryEntry291[]>([]);
+  const continuity = useMemo(() => compareRecoveryHistory292(history), [history]);
   const [notice, setNotice] = useState("No owner recovery decisions recorded in this browser session.");
 
   function recordDecision() {
@@ -99,6 +101,27 @@ export function WindowsRecoveryDecision291Panel({ review, getCurrentReview, expe
         {" "}original host acceptance: HOLD.
       </li>)}
     </ol>}
+    <section aria-labelledby="windows-continuity-292-title">
+      <p className="eyebrow">Build 292 · Original-host drift continuity (unverified owner notes)</p>
+      <h4 id="windows-continuity-292-title">Reported drift episodes and transitions</h4>
+      <p>{continuity.comparedObservations} browser-session observations; {continuity.episodes.length} reported episodes;
+        {" "}{continuity.transitions.length} transitions. <strong>0 independently verified receipts.</strong>
+        Source SHA changes start a separate episode, and apparent alignment never proves recovery.</p>
+      {continuity.episodes.length > 0 && <ol aria-label="Reported Windows drift episodes">
+        {continuity.episodes.map((episode, index) => <li key={index}>
+          {episode.status.replaceAll("_", " ").toLowerCase()} — {episode.observationCount} observation(s),
+          {" "}<time dateTime={episode.firstObservedUtc}>{episode.firstObservedUtc}</time>
+          {" "}to <time dateTime={episode.lastObservedUtc}>{episode.lastObservedUtc}</time>;
+          {" "}source {episode.sourceSha ? episode.sourceSha.slice(0, 8) + "… (owner entered)" : "missing or unverified"}.
+        </li>)}
+      </ol>}
+      <h4>Separately verified signed-receipt intake prerequisites (all HOLD)</h4>
+      <ol aria-label="Signed receipt prerequisites on HOLD">
+        {SIGNED_RECEIPT_PREREQUISITES_292.map(gate => <li key={gate}>{gate} — HOLD, not independently verified</li>)}
+      </ol>
+      <p>Comparison is an in-memory interpretation of owner notes only. It does not validate a signature,
+        accept the original Windows host, close drift, enroll an issuer or authorize Master Shell publication.</p>
+    </section>
     <button type="button" disabled={history.length === 0} onClick={downloadHistory}>
       Download private owner-decision history (JSON)
     </button>
