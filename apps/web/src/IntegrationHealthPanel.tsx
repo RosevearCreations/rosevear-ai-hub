@@ -63,7 +63,7 @@ function observation(name: string, state: IntegrationState, detail: string): Obs
 }
 
 /** Explicit user refresh; reads existing status APIs only. No writes or hidden retry loop. */
-export function IntegrationHealthPanel() {
+export function IntegrationHealthPanel({ ownerId }: { ownerId: string }) {
   const [items, setItems] = useState<Observation[] | null>(null);
   const [checked, setChecked] = useState("");
   const [busy, setBusy] = useState(false);
@@ -136,7 +136,7 @@ export function IntegrationHealthPanel() {
       </details>
       <details className="hub-historical-checks">
         <summary>Master Shell proposed reporting and integration gap assessment (owner review)</summary>
-        <MasterShellReadinessPanel283 />
+        <MasterShellReadinessPanel283 ownerId={ownerId} />
       </details>
       <IntegrationAcceptancePanel />
       <CommsHubConnectionPanel />

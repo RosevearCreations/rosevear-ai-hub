@@ -22,7 +22,7 @@ afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe("Build 067 manual integration evidence", () => {
   it("archives the historical six-app planning checklist without hiding live manual health checks", () => {
-    render(<IntegrationHealthPanel />);
+    render(<IntegrationHealthPanel ownerId="ree-test" />);
     const toggle = screen.getByText("Historical six-app QL-275 contract checklist (optional reference)");
     expect(toggle.closest("details")).not.toHaveAttribute("open");
     expect(screen.getByRole("button", { name: "Check integration health" })).toBeEnabled();
@@ -36,7 +36,7 @@ describe("Build 067 manual integration evidence", () => {
     expect(screen.getByText("Six-app integration contract & readiness")).toBeInTheDocument();
   });
   it("does not perform a service request or remediation on mount", () => {
-    render(<IntegrationHealthPanel />);
+    render(<IntegrationHealthPanel ownerId="ree-test" />);
     expect(screen.getByText(/No status requests made/)).toBeInTheDocument();
     expect(getHomeAssistantStatus).not.toHaveBeenCalled();
     expect(getMQTTStatus).not.toHaveBeenCalled();
@@ -61,7 +61,7 @@ describe("Build 067 manual integration evidence", () => {
     vi.mocked(getFrigateStatus).mockRejectedValue(new Error("secret frigate"));
     vi.mocked(getGo2RTCStatus).mockRejectedValue(new Error("secret transport"));
     vi.mocked(getCameraDashboard).mockRejectedValue(new Error("secret camera"));
-    render(<IntegrationHealthPanel />);
+    render(<IntegrationHealthPanel ownerId="ree-test" />);
     fireEvent.click(screen.getByRole("button", { name: "Check integration health" }));
     await waitFor(() => expect(screen.getByText(/No changes made/)).toBeInTheDocument());
     expect(screen.getByText(/Home Assistant rejected the token/)).toBeInTheDocument();
@@ -93,7 +93,7 @@ describe("Build 067 manual integration evidence", () => {
       transport_online: true, transport_version: null,
       total: 0, enabled: 0, configured: 0, healthy: 0, attention: 0, cameras: [],
     });
-    render(<IntegrationHealthPanel />);
+    render(<IntegrationHealthPanel ownerId="ree-test" />);
     fireEvent.click(screen.getByRole("button", { name: "Check integration health" }));
     await waitFor(() => expect(screen.getByText(/No changes made/)).toBeInTheDocument());
     expect(screen.getByText(/Home Assistant: offline/)).toBeInTheDocument();
