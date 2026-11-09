@@ -23,7 +23,7 @@ describe("Build 291 owner-guided original Windows follow-up panel", () => {
       getCurrentReview={current} expectedMainSha={SHA} />);
     expect(current).not.toHaveBeenCalled();
     expect(screen.getByText(/0 independently verified acceptances/)).toBeInTheDocument();
-    expect(screen.getByText(/Version drift:/).textContent).toContain("disagree");
+    expect(screen.getByText(/Version drift:/).parentElement?.textContent).toContain("disagree");
     expect(screen.getByRole("button", { name: /Record owner follow-up decision locally/ }))
       .toBeDisabled();
     expect(screen.getByRole("button", { name: /Download private owner-decision history/ }))
