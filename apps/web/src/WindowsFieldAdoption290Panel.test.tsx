@@ -66,7 +66,8 @@ describe("Build 290 owner-visible field adoption walkthrough", () => {
     expect(getWindowsLauncherEvidence286).toHaveBeenCalledTimes(1);
     expect(screen.getByText(/Windows runtime: live windows service snapshot/)).toBeInTheDocument();
     expect(screen.getByText(/A package version is never a Git commit identity/)).toBeInTheDocument();
-    expect(screen.getByRole("table")).toHaveTextContent("Windows launcher checkout candidate");
+    expect(screen.getByRole("table", { name: /Source-to-Windows candidate comparison/ }))
+      .toHaveTextContent("Windows launcher checkout candidate");
     expect(screen.getByText(/Original Windows machine identity, loaded executable provenance/)).toBeInTheDocument();
     rerender(<WindowsFieldAdoption290Panel expectedMainSha={SHA_B} mainRunUrl={RUN} adoption={adoption(now)} />);
     await waitFor(() => expect(screen.getByText(/Source reference or installed snapshot changed/)).toBeInTheDocument());
