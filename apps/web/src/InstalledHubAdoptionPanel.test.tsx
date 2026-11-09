@@ -3,7 +3,8 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
 import { getHubVersion, getReleaseObservability } from "./api";
 
-vi.mock("./api", () => ({ getHubVersion: vi.fn(), getReleaseObservability: vi.fn() }));
+vi.mock("./api", () => ({ getHubVersion: vi.fn(), getReleaseObservability: vi.fn(),
+  getHealth: vi.fn(), getWindowsRuntimeEvidence285: vi.fn(), getWindowsLauncherEvidence286: vi.fn() }));
 afterEach(() => { cleanup(); vi.resetAllMocks(); });
 
 describe("Build 113 installed evidence panel", () => {
@@ -15,6 +16,8 @@ describe("Build 113 installed evidence panel", () => {
     render(<InstalledHubAdoptionPanel />);
     expect(getHubVersion).not.toHaveBeenCalled();
     expect(getReleaseObservability).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { name: /Is our Windows installation reporting the same release/i })).toBeInTheDocument();
+    expect(screen.getByText(/0 of 7 independently verified here/)).toBeInTheDocument();
     expect(screen.getByText(/FIELD ADOPTION HOLD/)).toBeTruthy();
     fireEvent.change(screen.getByRole("textbox", { name: "Expected main commit SHA" }), { target: { value: "a".repeat(40) } });
     fireEvent.change(screen.getByRole("textbox", { name: "Expected main GitHub Actions run" }), {

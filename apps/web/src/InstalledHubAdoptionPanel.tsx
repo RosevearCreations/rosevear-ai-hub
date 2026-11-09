@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { getHubVersion, getReleaseObservability, type HubVersionResponse, type ReleaseObservabilityResponse } from "./api";
 import { assessInstalledHub, browserBuild, createInstalledHubReceipt, installedVersionDriftReadback, parsePrivateFieldHandoff, type PrivateFieldHandoff } from "./installedHubAdoption";
+import { WindowsFieldAdoption290Panel } from "./WindowsFieldAdoption290Panel";
 
-type Snapshot = { backend: HubVersionResponse | null; local: ReleaseObservabilityResponse | null };
+type Snapshot = { backend: HubVersionResponse | null; local: ReleaseObservabilityResponse | null; checkedAtMs: number };
 
 export function InstalledHubAdoptionPanel() {
   const [mainSha, setMainSha] = useState("");
@@ -45,6 +46,7 @@ export function InstalledHubAdoptionPanel() {
     setSnapshot({
       backend: backend.status === "fulfilled" ? backend.value : null,
       local: local.status === "fulfilled" ? local.value : null,
+      checkedAtMs: Date.now(),
     });
     setNotice("Read-only local evidence checked. A response is not a verified running commit or device recovery.");
     setLoading(false);
@@ -149,6 +151,7 @@ export function InstalledHubAdoptionPanel() {
       </div>
       {notice && <p role="status">{notice}</p>}
       <p><small>Read-only: no updater enrollment, GitHub request, service change, database restore, camera enrollment or stream access. For independent runtime/device acceptance use the actual Windows installation and supervised Home Assistant/camera checks.</small></p>
+      <WindowsFieldAdoption290Panel expectedMainSha={mainSha} mainRunUrl={runUrl} adoption={snapshot} />
     </section>
   );
 }
