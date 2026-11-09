@@ -44,7 +44,7 @@ describe("Build 283 Master Shell readiness candidate", () => {
   });
 
   it("filters relevant estimates and N/A facets accessibly and previews the non-transmitted schema", () => {
-    render(<MasterShellReadinessPanel283 />);
+    render(<MasterShellReadinessPanel283 ownerId="ree-test" />);
     expect(screen.getByText(/Owner review only — not transmitted/)).toBeInTheDocument();
     expect(screen.queryByText(/Customer experience · mobile:/)).toBeNull();
     fireEvent.change(screen.getByLabelText("Module scope"), { target: { value: "not-applicable" } });
@@ -63,7 +63,7 @@ describe("Build 283 Master Shell readiness candidate", () => {
   });
 
   it("shows no publish, grant or connection action in the preview", () => {
-    render(<MasterShellReadinessPanel283 />);
+    render(<MasterShellReadinessPanel283 ownerId="ree-test" />);
     expect(screen.queryByRole("button", { name: /publish|connect|grant|approve|export|send/i })).toBeNull();
     expect(document.body.textContent).not.toContain("DISCONNECTED / HOLD");
   });

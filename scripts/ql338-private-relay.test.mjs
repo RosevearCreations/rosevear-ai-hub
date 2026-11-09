@@ -73,7 +73,8 @@ test('QL-338 encrypted offline snapshot recovers after process restart and drops
   assert.doesNotMatch(diskBytes,/receipt-001|\ba{64}\b/);
   assert.deepEqual(openOfflineQueue(JSON.parse(diskBytes),key,now).entries,entries);
   assert.equal(openOfflineQueue(JSON.parse(diskBytes),key,now+1_800_000).expiredCount,1);
-  const tampered=JSON.parse(diskBytes);tampered.ciphertext='x'+tampered.ciphertext.slice(1);
+  const tampered=JSON.parse(diskBytes);
+  tampered.ciphertext=(tampered.ciphertext.startsWith('A')?'B':'A')+tampered.ciphertext.slice(1);
   assert.throws(()=>openOfflineQueue(tampered,key,now),/DENY_QUEUE/);
   assert.throws(()=>openOfflineQueue(JSON.parse(diskBytes),randomBytes(32),now),/DENY_QUEUE/);
   assert.throws(()=>sealOfflineQueue([...entries,entries[0]],key,now),/DENY_QUEUE/);

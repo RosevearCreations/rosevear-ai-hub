@@ -1,9 +1,10 @@
 import { useState } from "react";
 
 import { buildMasterShellCandidateReport, hubModuleEstimates, masterShellOpenDecisions, masterShellRoutingAssessment } from "./masterShellReadiness283";
+import { OwnerFieldAcceptance284 } from "./OwnerFieldAcceptance284";
 
 /** Owner-only, local review of a proposed report. Never publishes or authenticates. */
-export function MasterShellReadinessPanel283() {
+export function MasterShellReadinessPanel283({ ownerId }: { ownerId: string }) {
   const [scope, setScope] = useState<"applicable" | "not-applicable" | "all">("applicable");
   const [showPreview, setShowPreview] = useState(false);
   const modules = hubModuleEstimates.filter(item => scope === "all" || (scope === "applicable" ? item.percent !== null : item.percent === null));
@@ -31,6 +32,7 @@ export function MasterShellReadinessPanel283() {
     <ul>{masterShellRoutingAssessment.map(route => <li key={route.flow}><strong>{route.flow} — {route.state}</strong>. {route.detail}</li>)}</ul>
     <h3>Decisions for the joint Master Shell architecture</h3>
     <ol>{masterShellOpenDecisions.map(decision => <li key={decision}>{decision}</li>)}</ol>
+    <OwnerFieldAcceptance284 key={ownerId} ownerId={ownerId} />
     <button type="button" aria-expanded={showPreview} aria-controls="master-shell-candidate-preview" onClick={() => setShowPreview(previous => !previous)}>
       {showPreview ? "Hide proposed report schema" : "Preview proposed report schema"}
     </button>
