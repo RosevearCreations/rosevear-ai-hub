@@ -52,6 +52,8 @@ describe("Build 287 Windows owner acceptance and Master Shell HOLD", () => {
     expect(recordWindowsOwnerObservation287(localStorage, "ree", [], mismatch, "owner_reported_issue", true, now).saved).toBe(true);
     const invalid = reviewWindowsLauncherEvidence({ ...raw(now), installed_release_verified: true }, now);
     expect(recordWindowsOwnerObservation287(localStorage, "ree", [], invalid, "owner_reported_issue", true, now).saved).toBe(false);
+    const fabricated = { ...review, recordedSha: "PRIVATE_PATH" };
+    expect(recordWindowsOwnerObservation287(localStorage, "ree", [], fabricated, "owner_reported_working", true, now).saved).toBe(false);
   });
 
   it("reports bounded release, launcher and task drift without treating stability as identity proof", () => {
