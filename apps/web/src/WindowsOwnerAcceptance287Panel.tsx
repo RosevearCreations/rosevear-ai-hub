@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { getWindowsLauncherEvidence286 } from "./api";
+import { WindowsEvidenceHandoff288Panel } from "./WindowsEvidenceHandoff288Panel";
 import { reviewWindowsLauncherEvidence, type LauncherReview } from "./windowsLauncherEvidence286";
 import {
   inspectWindowsLauncherDrift287, loadOwnerWindowsRecords287, masterShellWindowsReadiness287,
@@ -90,7 +91,7 @@ export function WindowsOwnerAcceptance287Panel({ ownerId }: { ownerId: string })
     }
   }
 
-  return <section className="panel" aria-labelledby="windows-owner-287-title">
+  return <><section className="panel" aria-labelledby="windows-owner-287-title">
     <p className="eyebrow">Build 287 · Original Windows owner observations and drift</p>
     <h3 id="windows-owner-287-title">Owner field evidence and Master Shell reconciliation</h3>
     <p>Compare a fresh read-only launcher snapshot with up to five previous <strong>owner-reported</strong> observations saved only in this browser. This screen does not prove we are on Ree's physical Windows machine, sign an acceptance, modify startup settings or send a Master Shell report.</p>
@@ -135,5 +136,5 @@ export function WindowsOwnerAcceptance287Panel({ ownerId }: { ownerId: string })
         {JSON.stringify(masterShellWindowsReadiness287(records, review, nowMs), null, 2)}
       </pre>
     </div>}
-  </section>;
+  </section><WindowsEvidenceHandoff288Panel ownerId={ownerId} records={records} review={review} /></>;
 }
