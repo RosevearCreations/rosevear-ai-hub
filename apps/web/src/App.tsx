@@ -512,7 +512,7 @@ export function App() {
             {canAdminister && <FieldRecoverySummaryPanel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <div id="hub-system-release"><ReleaseAcceptancePanel onNavigate={(target) => setSection(target as Section)} /></div>}
             {canAdminister && <ReleaseObservabilityPanel />}
-            {canAdminister && <InstalledHubAdoptionPanel />}
+            {canAdminister && <InstalledHubAdoptionPanel key={String(user.id)} />}
             {canAdminister && <div id="hub-system-connection"><IntegrationHealthPanel ownerId={String(user.id)} /></div>}
             {canAdminister && <RestartAppsPanel />}
             <div id="hub-system-remote"><RemoteAccessPanel /></div>
