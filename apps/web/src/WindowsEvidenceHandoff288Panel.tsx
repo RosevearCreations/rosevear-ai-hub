@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import type { LauncherReview } from "./windowsLauncherEvidence286";
 import type { OwnerWindowsRecord } from "./windowsOwnerAcceptance287";
+import { WindowsOfflineHandoffReview289Panel } from "./WindowsOfflineHandoffReview289Panel";
 import {
   acknowledgeWindowsDrift288, acknowledgementMatches288, loadWindowsDriftAck288,
   prepareWindowsSigningRequest288, reviewWindowsDrift288,
@@ -77,7 +78,7 @@ export function WindowsEvidenceHandoff288Panel({ ownerId, records, review }: {
     } finally { window.setTimeout(() => URL.revokeObjectURL(url), 0); }
   }
 
-  return <section className="panel" aria-labelledby="windows-handoff-288-title">
+  return <><section className="panel" aria-labelledby="windows-handoff-288-title">
     <p className="eyebrow">Build 288 · Windows evidence handoff and Master Shell alignment</p>
     <h3 id="windows-handoff-288-title">Prepare a signed-evidence handoff</h3>
     <p>The current Build 287 owner observation is the source for this <strong>offline signing request</strong>. A SHA-256 digest can bind its sanitized fields, but a digest is <strong>not a signature</strong>. No private signing key is handled by this browser.</p>
@@ -109,5 +110,5 @@ export function WindowsEvidenceHandoff288Panel({ ownerId, records, review }: {
       </details>
     </>}
     <p><strong>Master Shell: HOLD.</strong> No network publishing, device restart, provider enrollment, signature verification, trusted source promotion or cross-application routing is performed.</p>
-  </section>;
+  </section><WindowsOfflineHandoffReview289Panel key={ownerId} /></>;
 }
