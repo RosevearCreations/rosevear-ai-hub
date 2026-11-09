@@ -411,7 +411,7 @@ export function getHealth(signal?: AbortSignal): Promise<HealthResponse> {
   return getJson<HealthResponse>("/health", signal);
 }
 
-/** Build 285: owner-authenticated read of the responding backend\'s local host. */
+/** Build 285: owner-authenticated read of the responding backend's local host. */
 export function getWindowsRuntimeEvidence285(signal?: AbortSignal): Promise<unknown> {
   return getJson<unknown>("/api/v1/system/windows-runtime-evidence", signal);
 }
