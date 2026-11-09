@@ -15,6 +15,7 @@ from rosevear_ai_hub.models import Base
 
 def test_non_windows_never_probes_services_or_invents_machine_proof(tmp_path, monkeypatch):
     monkeypatch.setattr(runtime, "is_windows_host", lambda: False)
+
     def unexpected_probe(_name):
         raise AssertionError("unexpected probe")
 
@@ -54,7 +55,10 @@ def test_windows_service_reads_are_allowlisted_and_never_expose_raw_output(tmp_p
     assert result["recorded_active_release_sha"] == "a" * 40
     assert result["recorded_release_basis"] == "UNVERIFIED_LOCAL_POINTER"
     assert [row["status"] for row in result["services"]] == [
-        "RUNNING", "STOPPED", "NOT_REGISTERED", "UNAVAILABLE",
+        "RUNNING",
+        "STOPPED",
+        "NOT_REGISTERED",
+        "UNAVAILABLE",
     ]
     assert len(calls) == 4
     assert all(cmd[:2] == ["sc.exe", "query"] for cmd, _ in calls)
@@ -96,9 +100,16 @@ def test_windows_runtime_endpoint_requires_owner_or_administrator(tmp_path, monk
     client = TestClient(app)
     address = "/api/v1/system/windows-runtime-evidence"
     assert client.get(address).status_code == 401
-    assert client.post("/api/v1/auth/bootstrap", json={
-        "username": "owner", "password": "windows-owner-secret-123",
-    }).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/bootstrap",
+            json={
+                "username": "owner",
+                "password": "windows-owner-secret-123",
+            },
+        ).status_code
+        == 201
+    )
     monkeypatch.setattr(
         "rosevear_ai_hub.api.resources.collect_windows_runtime_evidence",
         lambda _root: {
@@ -110,11 +121,26 @@ def test_windows_runtime_endpoint_requires_owner_or_administrator(tmp_path, monk
     assert response.status_code == 200
     assert response.headers["cache-control"] == "no-store"
     assert response.json()["installed_binary_verified"] is False
-    assert client.post("/api/v1/auth/users", json={
-        "username": "family", "password": "family-windows-secret-123", "role": "household_user",
-    }).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/users",
+            json={
+                "username": "family",
+                "password": "family-windows-secret-123",
+                "role": "household_user",
+            },
+        ).status_code
+        == 201
+    )
     client.post("/api/v1/auth/logout")
-    assert client.post("/api/v1/auth/login", json={
-        "username": "family", "password": "family-windows-secret-123",
-    }).status_code == 200
+    assert (
+        client.post(
+            "/api/v1/auth/login",
+            json={
+                "username": "family",
+                "password": "family-windows-secret-123",
+            },
+        ).status_code
+        == 200
+    )
     assert client.get(address).status_code == 403
