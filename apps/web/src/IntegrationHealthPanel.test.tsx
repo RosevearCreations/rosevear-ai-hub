@@ -26,6 +26,11 @@ describe("Build 067 manual integration evidence", () => {
     const toggle = screen.getByText("Historical six-app QL-275 contract checklist (optional reference)");
     expect(toggle.closest("details")).not.toHaveAttribute("open");
     expect(screen.getByRole("button", { name: "Check integration health" })).toBeEnabled();
+    const masterShellReview = screen.getByText("Master Shell proposed reporting and integration gap assessment (owner review)");
+    expect(masterShellReview.closest("details")).not.toHaveAttribute("open");
+    fireEvent.click(masterShellReview);
+    expect(masterShellReview.closest("details")).toHaveAttribute("open");
+    expect(screen.getByText("AI Hub source inventory and evidence gaps")).toBeInTheDocument();
     fireEvent.click(toggle);
     expect(toggle.closest("details")).toHaveAttribute("open");
     expect(screen.getByText("Six-app integration contract & readiness")).toBeInTheDocument();
