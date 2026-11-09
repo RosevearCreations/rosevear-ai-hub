@@ -134,8 +134,10 @@ export function recordWindowsOwnerObservation287(
         review.web?.chainStatus !== "partial_or_complete" || review.backend?.chainStatus !== "partial_or_complete" ||
         review.web?.processPredatesCheckoutCommit === true || review.backend?.processPredatesCheckoutCommit === true
       ))) return { saved: false, records: [...existing] };
+  const candidate = validRecord(snapshotFromReview(review as LauncherReview, outcome, nowMs));
+  if (!candidate) return { saved: false, records: [...existing] };
   const next = [...existing.map(validRecord).filter((item): item is OwnerWindowsRecord => item !== null),
-    snapshotFromReview(review as LauncherReview, outcome, nowMs)].slice(-MAX_RECORDS);
+    candidate].slice(-MAX_RECORDS);
   try {
     storage.setItem(key, JSON.stringify({ version: VERSION, records: next }));
     return { saved: true, records: next };
@@ -182,6 +184,7 @@ export function masterShellWindowsReadiness287(
     observedOwnerRecordCount: Math.min(records.length, MAX_RECORDS),
     lastOwnerOutcome: last?.outcome ?? null,
     lastOwnerRecordAge: !last ? "NOT_RECORDED" :
+      last.recordedAtMs > nowMs + FUTURE_TOLERANCE_MS ? "CLOCK_CHECK" :
       nowMs - last.recordedAtMs > RETENTION_MS ? "STALE" : "OWNER_REPORTED_ONLY",
     currentLauncherState: current?.state ?? "NOT_SAMPLED",
     driftState: drift.state,
