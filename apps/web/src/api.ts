@@ -416,6 +416,11 @@ export function getWindowsRuntimeEvidence285(signal?: AbortSignal): Promise<unkn
   return getJson<unknown>("/api/v1/system/windows-runtime-evidence", signal);
 }
 
+/** Build 286: owner-only manual read of bounded launcher and release candidates. */
+export function getWindowsLauncherEvidence286(signal?: AbortSignal): Promise<unknown> {
+  return getJson<unknown>("/api/v1/system/windows-launcher-evidence", signal);
+}
+
 export function getOllamaStatus(signal?: AbortSignal): Promise<OllamaStatusResponse> {
   return getJson<OllamaStatusResponse>("/api/v1/models/ollama/status", signal);
 }
