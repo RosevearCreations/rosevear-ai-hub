@@ -63,6 +63,19 @@
 .home-follow-up-queue ol { max-height: 25rem; overflow-y: auto; }
 .home-follow-up-queue li { border-left: 3px solid var(--shell-accent, #476e87); }
 .home-follow-up-queue li button { justify-self: start; }
+.home-follow-up-insights { border: 1px solid var(--shell-border, #8199a9); border-radius: .5rem; padding: .65rem; margin: .8rem 0; background: var(--shell-paper, #fff); }
+.home-follow-up-insights h6 { margin: .15rem 0 .4rem; font-size: .9rem; }
+.home-follow-up-insights p { font-size: .8rem; line-height: 1.45; color: var(--shell-muted, #385369); }
+.home-follow-up-insights > section { margin-top: .75rem; padding-top: .55rem; border-top: 1px solid var(--shell-border, #8199a9); }
+.home-follow-up-insights-controls { display: flex; flex-wrap: wrap; align-items: end; gap: .4rem; }
+.home-follow-up-insights-controls label { display: flex; flex-direction: column; gap: .2rem; font-size: .8rem; font-weight: 700; }
+.home-follow-up-insights-controls :is(input,select) { box-sizing: border-box; width: min(100%, 15rem); min-height: 2.5rem; border-radius: .45rem; padding: .4rem; border: 1px solid var(--shell-border, #8199a9); background: var(--shell-selected, #fff); color: var(--shell-ink, #173d52); }
+.home-follow-up-insights-controls :is(input,select):focus-visible { outline: 3px solid var(--shell-accent, #c38a0d); outline-offset: 2px; }
+.home-follow-up-workload { display: grid; gap: .3rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); }
+.home-follow-up-workload div { padding: .5rem; border: 1px solid var(--shell-border, #8199a9); border-radius: .4rem; background: var(--shell-selected, #fff); }
+.home-follow-up-workload dt { font-size: .75rem; }
+.home-follow-up-workload dd { margin: .25rem 0 0; font-weight: 800; }
+.home-follow-up-insights pre { max-height: 20rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; padding: .55rem; border: 1px solid var(--shell-border, #8199a9); border-radius: .4rem; background: var(--shell-selected, #fff); color: var(--shell-ink, #173d52); font-size: .75rem; }
 .home-follow-up-editor label { display: grid; gap: .25rem; margin: .55rem 0; font-size: .85rem; font-weight: 700; }
 .home-follow-up-editor :is(select, textarea) { box-sizing: border-box; width: 100%; max-width: 28rem; padding: .55rem; border: 1px solid var(--shell-border, #8199a9); border-radius: .45rem; background: var(--shell-paper, #fff); color: var(--shell-ink, #173d52); }
 .home-follow-up-editor :is(select, textarea):focus-visible { outline: 3px solid var(--shell-accent, #c38a0d); outline-offset: 2px; }
