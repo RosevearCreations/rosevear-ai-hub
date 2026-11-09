@@ -8,6 +8,7 @@ import { browserBuild } from "./installedHubAdoption";
 import { reviewWindowsLauncherEvidence, type LauncherReview } from "./windowsLauncherEvidence286";
 import { reviewWindowsRuntimeEvidence, type WindowsEvidenceReview } from "./windowsRuntimeEvidence285";
 import { assessWindowsFieldAdoption290, SIGNED_RECEIPT_GATES_290 } from "./windowsFieldAdoption290";
+import { WindowsRecoveryDecision291Panel } from "./WindowsRecoveryDecision291Panel";
 
 type Adoption = { backend: HubVersionResponse | null; local: ReleaseObservabilityResponse | null;
   checkedAtMs: number } | null;
@@ -111,5 +112,13 @@ export function WindowsFieldAdoption290Panel({ expectedMainSha, mainRunUrl, adop
     <p><strong>Installed release, signed receipt and Master Shell: HOLD.</strong> No machine identity,
       signer enrollment, independent witness, signed owner consent, webhook transmission,
       device commands, restart or remote repair is performed by this panel.</p>
+    <WindowsRecoveryDecision291Panel
+      key={expectedMainSha + ":" + mainRunUrl + ":" + (adoption?.checkedAtMs ?? "none")}
+      review={review} expectedMainSha={expectedMainSha}
+      getCurrentReview={() => assessWindowsFieldAdoption290({
+        expectedMainSha, mainRunUrl, web: browserBuild, adoption, runtime, launcher,
+        nowMs: Date.now(),
+      })}
+    />
   </section>;
 }
