@@ -11,6 +11,10 @@ import {
   saveAlertReviewPreferences, saveAlertReviewSession, saveNamedAlertView, safeAlertViewName,
   toggleAlertBookmark,
 } from "./alertReviewPreferences";
+import {
+  appendFollowUpEntry, followUpOutcomeLabel, loadFollowUpJournal, MAX_FOLLOW_UP_ENTRIES,
+  MAX_FOLLOW_UP_NOTE_LENGTH, saveFollowUpJournal, safeFollowUpNote, type LocalFollowUpOutcome,
+} from "./alertFollowUpJournal";
 import "./homeActivitySummary.css";
 
 const notificationPageSize = 10;
@@ -37,6 +41,10 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate, account
   const [savedViewName, setSavedViewName] = useState("");
   const [selectedViewId, setSelectedViewId] = useState("");
   const [savedViewNotice, setSavedViewNotice] = useState("");
+  const [followUpJournal, setFollowUpJournal] = useState(() => loadFollowUpJournal(browserStorage("localStorage"), ownerId));
+  const [followUpOutcome, setFollowUpOutcome] = useState<LocalFollowUpOutcome>("needs_review");
+  const [followUpNote, setFollowUpNote] = useState("");
+  const [followUpNotice, setFollowUpNotice] = useState("");
   const controllerRef = useRef<AbortController | null>(null);
   const previewRef = useRef<HTMLElement | null>(null);
   const previewTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -90,13 +98,24 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate, account
   const selectedBookmarkId = selectedAlert?.source === "notification" ? selectedAlert.record?.notificationId : null;
   const selectedBookmarked = preferences.bookmarks.some(item => item.notificationId === selectedBookmarkId);
   const restoredAlertMissing = !!page && !!selectedAlertKey && !selectedAlert;
+  const canWriteFollowUps = !!accountId && canOpenNotifications && (role === "owner" || role === "administrator");
+  const selectedTimeline = selectedBookmarkId
+    ? followUpJournal.entries.filter(entry => entry.notificationId === selectedBookmarkId).slice().reverse() : [];
+  const recentFollowUps = followUpJournal.entries.slice(-6).reverse();
 
   useEffect(() => {
     if (selectedAlert) previewRef.current?.focus();
   }, [selectedAlert?.key]);
 
+  const clearFollowUpDraft = () => {
+    setFollowUpNote("");
+    setFollowUpOutcome("needs_review");
+    setFollowUpNotice("");
+  };
+
   const closePreview = () => {
     setSelectedAlertKey(null);
+    clearFollowUpDraft();
     previewTriggerRef.current?.focus();
   };
 
@@ -123,6 +142,34 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate, account
     setPreferences(next);
     setSavedViewNotice(stored ? "Personal alert bookmark updated. Inbox status was not changed."
       : "Bookmark changed only in this Home session; browser storage is unavailable.");
+  };
+
+  const saveLocalFollowUp = () => {
+    if (!canWriteFollowUps || !selectedBookmarkId) return;
+    if (!safeFollowUpNote(followUpNote)) {
+      setFollowUpNotice(`Enter a note of 1–${MAX_FOLLOW_UP_NOTE_LENGTH} characters without links or credentials.`);
+      return;
+    }
+    const next = appendFollowUpEntry(followUpJournal, { notificationId: selectedBookmarkId,
+      pageOffset, outcome: followUpOutcome, note: followUpNote, recordedAt: new Date().toISOString() });
+    if (!next) {
+      setFollowUpNotice(`Local journal is full or this alert has reached its history limit (${MAX_FOLLOW_UP_ENTRIES} entries total). No prior entry was removed.`);
+      return;
+    }
+    if (!saveFollowUpJournal(browserStorage("localStorage"), ownerId, next)) {
+      setFollowUpNotice("Local storage is unavailable. Nothing was saved; copy the note before leaving this screen.");
+      return;
+    }
+    setFollowUpJournal(next);
+    setFollowUpNote("");
+    setFollowUpNotice("Personal review note saved only in this browser. The inbox and alert status were not changed.");
+  };
+
+  const jumpToFollowUp = (notificationId: number, offset: number) => {
+    setAlertFilter("all"); setSourceFilter("notification"); setSearchQuery("");
+    setPageOffset(offset); setSelectedAlertKey(`notification-${notificationId}`);
+    clearFollowUpDraft();
+    setFollowUpNotice(`Checking notification #${notificationId} on the recorded page. Its current position and availability must be verified.`);
   };
 
   return <section className="home-activity-summary" aria-labelledby="home-activity-title">
@@ -227,7 +274,7 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate, account
                 aria-controls={selectedAlert?.key === item.key ? "home-alert-detail-preview" : undefined}
                 onClick={event => {
                   if (selectedAlertKey === item.key) closePreview();
-                  else { previewTriggerRef.current = event.currentTarget; setSelectedAlertKey(item.key); }
+                  else { clearFollowUpDraft(); previewTriggerRef.current = event.currentTarget; setSelectedAlertKey(item.key); }
                 }}>Preview details for {item.title}</button>
               {item.destination && item.actionLabel
                 ? <button type="button" onClick={() => openAllowedRoute(item.destination)}>{item.actionLabel}</button>
@@ -263,6 +310,19 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate, account
                 aria-label={`Remove bookmark for notification #${item.notificationId}`}>Remove</button>
             </li>)}</ul>}
         </nav>
+        {canWriteFollowUps && <section className="home-follow-up-journal" aria-label="Personal follow-up review history">
+          <h4>My local follow-up history</h4>
+          <p>Manual notes only. These are visible to this account on this browser, not encrypted, not shared with the Hub, and not evidence that a notification is resolved. Never include passwords, addresses, private camera details or access codes.</p>
+          {recentFollowUps.length === 0 ? <p>No personal follow-up entries yet.</p> :
+            <ol>{recentFollowUps.map(entry => <li key={entry.id}>
+              <strong>Notification #{entry.notificationId} — {followUpOutcomeLabel(entry.outcome)}</strong>
+              <small>{new Date(entry.recordedAt).toLocaleString()} · Local note only</small>
+              <button type="button" onClick={() => jumpToFollowUp(entry.notificationId, entry.pageOffset)}>
+                Review notification #{entry.notificationId} again
+              </button>
+            </li>)}</ol>}
+          <p>{followUpJournal.entries.length} of {MAX_FOLLOW_UP_ENTRIES} local history entries. No inbox acknowledgements or server updates.</p>
+        </section>}
         {restoredAlertMissing && <p className="home-activity-empty" role="status">
           The previously selected alert is not available in this loaded page or filter. It may have moved or been removed; no review is assumed.
         </p>}
@@ -282,6 +342,33 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate, account
             ? <p><strong>Inbox message:</strong> {selectedAlert.record?.message ?? "Message not available in this bounded preview; review the inbox if permitted."}</p>
             : <p>Additional notification content is available only to accounts authorized for the notification inbox.</p>)}
           <p className="home-alert-detail-caution">{sourceContext.explanation} Previewing does not mark a notification read or verify an alert.</p>
+          {selectedBookmarkId && canWriteFollowUps && <section className="home-follow-up-editor" aria-label="Personal alert follow-up notes">
+            <h5>Manual follow-up — notification #{selectedBookmarkId}</h5>
+            <p>Choose the status of our personal review, not the notification's server status. “Reviewed locally” does not mean resolved. Notes stay in this browser and are not secure storage.</p>
+            <label htmlFor="home-follow-up-outcome">Personal review status
+              <select id="home-follow-up-outcome" value={followUpOutcome}
+                onChange={event => setFollowUpOutcome(event.target.value as LocalFollowUpOutcome)}>
+                <option value="needs_review">Needs review</option>
+                <option value="investigating">Investigating</option>
+                <option value="follow_up">Follow-up needed</option>
+                <option value="reviewed_locally">Reviewed locally (not resolved)</option>
+              </select>
+            </label>
+            <label htmlFor="home-follow-up-note">Personal follow-up note
+              <textarea id="home-follow-up-note" maxLength={MAX_FOLLOW_UP_NOTE_LENGTH} rows={3}
+                placeholder="What did we check, and what needs attention next?" value={followUpNote}
+                onChange={event => setFollowUpNote(event.target.value)} />
+            </label>
+            <button type="button" onClick={saveLocalFollowUp}>Save local review note</button>
+            <p role="status">{followUpNotice || "Saving creates a local timeline entry only. No alert state changes."}</p>
+            <h5>Review outcome timeline</h5>
+            {selectedTimeline.length === 0 ? <p>No personal review history for this notification.</p> :
+              <ol>{selectedTimeline.map(entry => <li key={entry.id}>
+                <strong>{followUpOutcomeLabel(entry.outcome)}</strong>
+                <small>{new Date(entry.recordedAt).toLocaleString()} · Personal entry #{entry.id}</small>
+                <p>{entry.note}</p>
+              </li>)}</ol>}
+          </section>}
           <div className="home-alert-detail-actions">
             {selectedAlert.source === "notification" && selectedBookmarkId && canOpenNotifications && accountId
               ? <button type="button" aria-pressed={selectedBookmarked}

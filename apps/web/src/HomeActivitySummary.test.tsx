@@ -323,4 +323,67 @@ describe("Build 274 Home activity and alerts", () => {
     expect(screen.queryByRole("region", { name: "Alert detail preview" })).not.toBeInTheDocument();
     expect(screen.getByLabelText("Local notification counts")).toHaveTextContent("Unread 1");
   });
+
+  test("Build 280 saves an owner's personal note and timeline without changing inbox state", async () => {
+    localStorage.clear(); sessionStorage.clear();
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={31}
+      allowed={["Home", "Notifications"]} onNavigate={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Preview details for Pump check" }));
+    const editor = screen.getByRole("region", { name: "Personal alert follow-up notes" });
+    fireEvent.change(within(editor).getByRole("combobox", { name: "Personal review status" }),
+      { target: { value: "investigating" } });
+    fireEvent.change(within(editor).getByRole("textbox", { name: "Personal follow-up note" }),
+      { target: { value: "Checked local readings; follow up tomorrow." } });
+    fireEvent.click(within(editor).getByRole("button", { name: "Save local review note" }));
+    expect(within(editor).getByRole("status")).toHaveTextContent("The inbox and alert status were not changed");
+    expect(within(editor).getByText("Checked local readings; follow up tomorrow.")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Personal follow-up review history" })).toHaveTextContent("Investigating");
+    const stored = JSON.parse(localStorage.getItem("rosevear-ai-hub:local-follow-up:v1:31") ?? "null");
+    expect(stored.entries).toEqual([expect.objectContaining({ notificationId: 1, outcome: "investigating" })]);
+    expect(JSON.stringify(stored)).not.toContain("Pump check");
+    expect(getNotifications).toHaveBeenCalledTimes(1);
+    expect(getNotificationSummary).toHaveBeenCalledTimes(1);
+    cleanup();
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={31}
+      allowed={["Home", "Notifications"]} onNavigate={vi.fn()} />);
+    expect(await screen.findByRole("region", { name: "Personal follow-up review history" })).toHaveTextContent("Investigating");
+    expect(screen.getByRole("region", { name: "Personal alert follow-up notes" })).toHaveTextContent("Checked local readings");
+  });
+
+  test("Build 280 hides personal journal across accounts and from read-only roles", async () => {
+    localStorage.clear(); sessionStorage.clear();
+    localStorage.setItem("rosevear-ai-hub:local-follow-up:v1:32", JSON.stringify({ version: 1, entries: [{
+      id: 1, notificationId: 1, pageOffset: 0, outcome: "needs_review",
+      note: "Private owner observation", recordedAt: "2026-11-08T15:00:00.000Z",
+    }] }));
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={33}
+      allowed={["Home", "Notifications"]} onNavigate={vi.fn()} />);
+    await screen.findByText(/Last inbox check:/);
+    expect(screen.queryByText("Private owner observation")).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Personal follow-up review history" })).toHaveTextContent("No personal follow-up entries");
+    cleanup();
+    render(<HomeActivitySummary health={healthy} role="read_only" accountId={32}
+      allowed={["Home", "Notifications"]} onNavigate={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Preview details for Pump check" }));
+    expect(screen.queryByRole("region", { name: "Personal follow-up review history" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Personal alert follow-up notes" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Private owner observation")).not.toBeInTheDocument();
+  });
+
+  test("Build 280 fails closed if browser storage cannot save the local note", async () => {
+    localStorage.clear(); sessionStorage.clear();
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={34}
+      allowed={["Home", "Notifications"]} onNavigate={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Preview details for Pump check" }));
+    const editor = screen.getByRole("region", { name: "Personal alert follow-up notes" });
+    fireEvent.change(within(editor).getByRole("textbox", { name: "Personal follow-up note" }),
+      { target: { value: "Review is incomplete" } });
+    const storageStub = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw Error("blocked"); });
+    try {
+      fireEvent.click(within(editor).getByRole("button", { name: "Save local review note" }));
+      expect(within(editor).getByRole("status")).toHaveTextContent("Nothing was saved");
+      expect(within(editor).getByText("No personal review history for this notification.")).toBeInTheDocument();
+      expect(localStorage.getItem("rosevear-ai-hub:local-follow-up:v1:34")).toBeNull();
+    } finally { storageStub.mockRestore(); }
+  });
 });
