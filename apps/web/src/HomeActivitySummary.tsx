@@ -17,8 +17,9 @@ import {
 } from "./alertFollowUpJournal";
 import {
   buildFollowUpQueue, filterFollowUpQueue, followUpQueueAgeLabel,
-  type FollowUpQueueAgeFilter, type FollowUpQueuePriorityFilter, type FollowUpQueueStatusFilter,
+  type FollowUpQueueAgeFilter, type FollowUpQueueFilters, type FollowUpQueuePriorityFilter, type FollowUpQueueStatusFilter,
 } from "./alertFollowUpQueue";
+import { OwnerFollowUpInsights } from "./OwnerFollowUpInsights";
 import "./homeActivitySummary.css";
 
 const notificationPageSize = 10;
@@ -110,9 +111,10 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate, account
     ? followUpJournal.entries.filter(entry => entry.notificationId === selectedBookmarkId).slice().reverse() : [];
   const recentFollowUps = followUpJournal.entries.slice(-6).reverse();
   const followUpQueue = canWriteFollowUps ? buildFollowUpQueue(followUpJournal, new Date()) : [];
-  const filteredQueue = filterFollowUpQueue(followUpQueue, {
+  const queueFilters: FollowUpQueueFilters = {
     status: queueStatusFilter, age: queueAgeFilter, priority: queuePriorityFilter,
-  });
+  };
+  const filteredQueue = filterFollowUpQueue(followUpQueue, queueFilters);
   const activeReviewCount = followUpQueue.filter(item => item.latestOutcome !== "reviewed_locally").length;
   const overdueReviewCount = followUpQueue.filter(item => item.latestOutcome !== "reviewed_locally" && item.age === "overdue").length;
 
@@ -362,6 +364,9 @@ export function HomeActivitySummary({ health, role, allowed, onNavigate, account
                 Reset queue filters
               </button>
             </div>
+            <OwnerFollowUpInsights accountId={ownerId} journal={followUpJournal}
+              queue={followUpQueue} matching={filteredQueue} filters={queueFilters}
+              onApplyFilters={next => { setQueueStatusFilter(next.status); setQueueAgeFilter(next.age); setQueuePriorityFilter(next.priority); }} />
             <p className="home-activity-filter-count" role="status">Showing {filteredQueue.length} of {followUpQueue.length} local review records. Not a search of the server inbox.</p>
             {filteredQueue.length === 0 ? <p>No locally recorded reviews match these queue filters. This does not mean the inbox is clear.</p>
               : <ol>{filteredQueue.map(item => <li key={item.notificationId}>

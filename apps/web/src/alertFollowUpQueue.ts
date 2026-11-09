@@ -6,6 +6,11 @@ export type FollowUpQueuePriority = "high" | "attention" | "routine";
 export type FollowUpQueueStatusFilter = "all" | "outstanding" | "reviewed_locally";
 export type FollowUpQueueAgeFilter = "all" | "aging" | "overdue" | "clock_check";
 export type FollowUpQueuePriorityFilter = "all" | FollowUpQueuePriority;
+export type FollowUpQueueFilters = {
+  status: FollowUpQueueStatusFilter;
+  age: FollowUpQueueAgeFilter;
+  priority: FollowUpQueuePriorityFilter;
+};
 export type FollowUpQueueItem = {
   notificationId: number;
   pageOffset: number;
@@ -53,9 +58,7 @@ export function buildFollowUpQueue(journal: LocalFollowUpJournal, now: Date): Fo
     || Date.parse(a.latestAt) - Date.parse(b.latestAt) || a.notificationId - b.notificationId);
 }
 
-export function filterFollowUpQueue(items: readonly FollowUpQueueItem[], filters: {
-  status: FollowUpQueueStatusFilter; age: FollowUpQueueAgeFilter; priority: FollowUpQueuePriorityFilter;
-}): FollowUpQueueItem[] {
+export function filterFollowUpQueue(items: readonly FollowUpQueueItem[], filters: FollowUpQueueFilters): FollowUpQueueItem[] {
   return items.filter(item =>
     (filters.status === "all" || (filters.status === "reviewed_locally"
       ? item.latestOutcome === "reviewed_locally" : item.latestOutcome !== "reviewed_locally")) &&

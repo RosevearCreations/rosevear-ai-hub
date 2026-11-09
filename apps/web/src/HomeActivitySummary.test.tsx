@@ -432,10 +432,62 @@ describe("Build 274 Home activity and alerts", () => {
       allowed={["Notifications"]} onNavigate={vi.fn()} />);
     await screen.findByText(/Last inbox check:/);
     expect(screen.queryByRole("region", { name: "Owner follow-up review queue" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Saved owner queue presets and local review trends" })).not.toBeInTheDocument();
     cleanup();
     render(<HomeActivitySummary health={healthy} role="owner" accountId={282}
       allowed={["Home"]} onNavigate={vi.fn()} />);
     await screen.findByText(/Last inbox check:/);
     expect(screen.queryByRole("region", { name: "Owner follow-up review queue" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Saved owner queue presets and local review trends" })).not.toBeInTheDocument();
+  });
+
+  test("Build 282 saves owner queue presets, restores them, and previews counts without private note text or inbox writes", async () => {
+    localStorage.clear(); sessionStorage.clear();
+    localStorage.setItem("rosevear-ai-hub:local-follow-up:v1:282", JSON.stringify({ version: 1, entries: [
+      { id: 1, notificationId: 1, pageOffset: 0, outcome: "needs_review",
+        note: "PRIVATE camera passphrase must never export", recordedAt: "2026-01-01T12:00:00.000Z" },
+      { id: 2, notificationId: 2, pageOffset: 0, outcome: "reviewed_locally",
+        note: "Private owner detail", recordedAt: "2026-01-02T12:00:00.000Z" },
+    ] }));
+    const onNavigate = vi.fn();
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={282}
+      allowed={["Home", "Notifications"]} onNavigate={onNavigate} />);
+    await screen.findByText(/Last inbox check:/);
+    const queue = screen.getByRole("region", { name: "Owner follow-up review queue" });
+    const insights = screen.getByRole("region", { name: "Saved owner queue presets and local review trends" });
+    fireEvent.change(within(queue).getByRole("combobox", { name: "Time since local note" }), { target: { value: "overdue" } });
+    fireEvent.change(within(queue).getByRole("combobox", { name: "Personal review priority" }), { target: { value: "high" } });
+    fireEvent.change(within(insights).getByRole("textbox", { name: "Preset name" }), { target: { value: "Weekly overdue" } });
+    fireEvent.click(within(insights).getByRole("button", { name: "Save queue filters" }));
+    expect(within(insights).getByRole("status")).toHaveTextContent("Saved");
+    const raw = localStorage.getItem("rosevear-ai-hub:follow-up-queue-presets:v1:282") ?? "";
+    expect(raw).toContain("Weekly overdue");
+    expect(raw).not.toContain("PRIVATE");
+    expect(raw).not.toContain("notificationId");
+    fireEvent.click(within(queue).getByRole("button", { name: "Reset queue filters" }));
+    expect(within(queue).getByRole("combobox", { name: "Time since local note" })).toHaveValue("all");
+    fireEvent.click(within(insights).getByRole("button", { name: "Apply queue preset" }));
+    expect(within(queue).getByRole("combobox", { name: "Time since local note" })).toHaveValue("overdue");
+    expect(within(queue).getByRole("combobox", { name: "Personal review priority" })).toHaveValue("high");
+    expect(within(insights).getByRole("region", { name: "Personal follow-up workload trends" })).toHaveTextContent("Outstanding personal reviews");
+    fireEvent.click(within(insights).getByRole("button", { name: "Preview safe report" }));
+    const report = within(insights).getByLabelText("Private local report preview");
+    expect(report).toHaveTextContent("Matching tracked notifications: 1");
+    expect(report).toHaveTextContent("not exported or sent");
+    expect(report).not.toHaveTextContent("PRIVATE camera passphrase");
+    expect(report).not.toHaveTextContent("Private owner detail");
+    expect(report).not.toHaveTextContent("Notification #1");
+    expect(getNotifications).toHaveBeenCalledTimes(1);
+    expect(getNotificationSummary).toHaveBeenCalledTimes(1);
+    expect(onNavigate).not.toHaveBeenCalled();
+    cleanup();
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={282}
+      allowed={["Home", "Notifications"]} onNavigate={onNavigate} />);
+    expect(await screen.findByRole("combobox", { name: "Saved queue presets" })).toHaveTextContent("Weekly overdue");
+    cleanup();
+    render(<HomeActivitySummary health={healthy} role="owner" accountId={283}
+      allowed={["Home", "Notifications"]} onNavigate={onNavigate} />);
+    await screen.findByText(/Last inbox check:/);
+    expect(screen.getByRole("combobox", { name: "Saved queue presets" })).not.toHaveTextContent("Weekly overdue");
   });
 });
