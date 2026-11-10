@@ -14,6 +14,7 @@ import { MasterShellReadinessPanel283 } from "./MasterShellReadinessPanel283";
 import { WindowsRuntimeEvidence285Panel } from "./WindowsRuntimeEvidence285Panel";
 import { WindowsLauncherEvidence286Panel } from "./WindowsLauncherEvidence286Panel";
 import { WindowsOwnerAcceptance287Panel } from "./WindowsOwnerAcceptance287Panel";
+import { MasterShellUptime303Panel } from "./MasterShellUptime303Panel";
 
 type IntegrationState = "online" | "offline" | "not_configured" | "unavailable";
 type Observation = {
@@ -133,6 +134,7 @@ export function IntegrationHealthPanel({ ownerId }: { ownerId: string }) {
         </>
       ) : <p>No status requests made in this session.</p>}
       <WindowsRuntimeEvidence285Panel />
+      <MasterShellUptime303Panel />
       <WindowsLauncherEvidence286Panel ownerId={ownerId} />
       <WindowsOwnerAcceptance287Panel key={ownerId} ownerId={ownerId} />
       <details className="hub-historical-checks">
