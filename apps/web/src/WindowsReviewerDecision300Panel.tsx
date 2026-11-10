@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { exportShellIntake300, reviewDecisionEvidence300 } from "./windowsReviewerDecision300";
+import { WindowsAuthorityReplay301Panel } from "./WindowsAuthorityReplay301Panel";
 
 /** Offline decision-candidate review: does not connect to the Windows host or Master Shell. */
 export function WindowsReviewerDecision300Panel({ expectedMainSha }: { expectedMainSha: string }) {
@@ -8,6 +9,7 @@ export function WindowsReviewerDecision300Panel({ expectedMainSha }: { expectedM
   const [decisionRaw, setDecisionRaw] = useState("");
   const [observedMainSha, setObservedMainSha] = useState("");
   const [acknowledged, setAcknowledged] = useState(false);
+  const [showAuthority301, setShowAuthority301] = useState(false);
   const [message, setMessage] = useState("No independent reviewer decision or original-host authority verified.");
   const report = reviewDecisionEvidence300({ packetRaw, reviewerRaw, decisionRaw,
     observedMainSha, expectedMainSha, nowMs: Date.now() });
@@ -28,6 +30,7 @@ export function WindowsReviewerDecision300Panel({ expectedMainSha }: { expectedM
   function clear() {
     setPacketRaw(""); setReviewerRaw(""); setDecisionRaw(""); setObservedMainSha("");
     setAcknowledged(false);
+    setShowAuthority301(false);
     setMessage("Build 300 private review inputs cleared from the browser session.");
   }
   return <section aria-labelledby="windows-decision-300-title">
@@ -71,5 +74,11 @@ export function WindowsReviewerDecision300Panel({ expectedMainSha }: { expectedM
     <button type="button" onClick={clear}>Clear Build 300 private inputs</button>
     <p role="status">{message}</p>
     <p><strong>Independently verified decisions: 0. Messages sent: 0. Shell authorization: HOLD.</strong></p>
+    <button type="button" aria-expanded={showAuthority301}
+      onClick={() => setShowAuthority301(show => !show)}>
+      {showAuthority301 ? "Close Build 301 protected-intake review" : "Open Build 301 protected-intake review"}
+    </button>
+    {showAuthority301 && <WindowsAuthorityReplay301Panel key={expectedMainSha}
+      expectedMainSha={expectedMainSha} decisionReport={report} />}
   </section>;
 }
