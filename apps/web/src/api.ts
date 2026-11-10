@@ -416,6 +416,11 @@ export function getMasterShellLocalUptime303(signal?: AbortSignal): Promise<unkn
   return getJson<unknown>("/api/v1/system/master-shell-local-uptime", signal);
 }
 
+/** Build 304: protected owner read of durable original-host monitoring (no Shell send). */
+export function getMasterShellActivation304(signal?: AbortSignal): Promise<unknown> {
+  return getJson<unknown>("/api/v1/system/master-shell-reconciliation", signal);
+}
+
 /** Build 285: owner-authenticated read of the responding backend's local host. */
 export function getWindowsRuntimeEvidence285(signal?: AbortSignal): Promise<unknown> {
   return getJson<unknown>("/api/v1/system/windows-runtime-evidence", signal);
