@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { WindowsCustody295Panel } from "./WindowsCustody295Panel";
 import type { IntakeNote293 } from "./windowsEvidenceIntake293";
 import {
   recordSupervisedReview294, runSyntheticReplayHarness294,
@@ -78,6 +79,7 @@ export function WindowsAcceptance294Panel({ notes, expectedMainSha }: {
         {result.scenario}: {result.verdict.replaceAll("_", " ").toLowerCase()}
       </li>)}</ol>
     </div>}
+    <WindowsCustody295Panel intakeNotes={notes} supervisedReviews={history} expectedMainSha={expectedMainSha} />
     <p><strong>Original host: HOLD. Issuer/witness: HOLD. Signed receipt: HOLD. Master Shell: HOLD.</strong>
       GitHub source checks cannot satisfy these field-acceptance requirements.</p>
   </section>;
