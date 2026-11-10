@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi import APIRouter, Request, Response, status
 from fastapi.exceptions import HTTPException
 
+from rosevear_ai_hub.master_shell_acceptance305 import inspect_original_release305
 from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
 from rosevear_ai_hub.master_shell_uptime303 import LocalUptimeSampler303
 from rosevear_ai_hub.release_observability import collect_release_observability
@@ -13,6 +14,34 @@ from rosevear_ai_hub.windows_launcher_evidence286 import collect_windows_launche
 from rosevear_ai_hub.windows_runtime_evidence285 import collect_windows_runtime_evidence
 
 router = APIRouter(prefix="/api/v1/system", tags=["system"])
+
+
+@router.get("/master-shell-305-readiness")
+def master_shell_305_readiness(request: Request, response: Response) -> dict[str, object]:
+    """Owner-only, local, manual reconciliation. Never authenticates the receiver."""
+    response.headers["Cache-Control"] = "private, no-store"
+    monitor = getattr(request.app.state, "master_shell_uptime303", None)
+    if not isinstance(monitor, PersistentReeMonitor304):
+        monitor = PersistentReeMonitor304(enabled=False)
+    release = inspect_original_release305(Path.cwd(), monitor)
+    return {
+        "schema": "rosevear.ai-hub.master360-acceptance-305.v1",
+        "sourceId": "rosevear-ai-hub",
+        "sourceBuild": 305,
+        "controller": "ai-data-platform",
+        "controllerBuild": 360,
+        "controllerMainAtReconciliation": "4b45b435fa7b6fc83b94e31556648fe4190a9f53",
+        "commsQl411RevisionAtReconciliation": "e8ec7853133725bbdf51893548a20cac67ebfbed",
+        "commsQl412": "HOLD_CONTRACT_NOT_YET_ON_COMMS_MAIN",
+        "installedRelease": release,
+        "durableMonitoring": monitor.persistent_snapshot304(),
+        "oneTest": "HOLD_OWNER_APPROVED_PROTECTED_SOURCE_SIGNATURE_NOT_EXECUTED",
+        "commsAck": "HOLD_INDEPENDENT_RECEIVER_SIGNATURE_NOT_VERIFIED",
+        "automationHost": "REE_ORIGINAL_WINDOWS_ONLY",
+        "newWindowsScheduledTasks": 0,
+        "connection": "HOLD",
+        "slaveGate": "HOLD_NEXT_MASTER_INTEGRATION_STAGE",
+    }
 
 
 @router.get("/master-shell-local-uptime")

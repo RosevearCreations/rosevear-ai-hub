@@ -1,0 +1,31 @@
+{
+  "schema": "rosevear.master-shell.activation-ack.v1",
+  "activation": "MASTER360-AIHUB-305-ACK",
+  "sourceId": "rosevear-ai-hub",
+  "sourceBuild": 305,
+  "sourceMainBeforeBuild": "1a52acf4fc756088d0a1ab38b350f96fccce2a1b",
+  "controller": "ai-data-platform",
+  "controllerMainAtReconciliation": "4b45b435fa7b6fc83b94e31556648fe4190a9f53",
+  "commsMainAtReconciliation": "e8ec7853133725bbdf51893548a20cac67ebfbed",
+  "commsReceiverContract": "QL411_METADATA_ONLY_SIGNED_SAMPLES",
+  "commsQl412RuntimeContract": "HOLD_NOT_YET_ON_CURRENT_COMMS_MAIN",
+  "sourceImplementation": {
+    "installedReleaseRead": "CODE_READY_READ_ONLY_POINTER_AND_HOST_POLICY",
+    "persistentUptimeDashboard": "CODE_READY_304_BOUNDED_SEVEN_DAY_READ",
+    "protectedOneTest": "CODE_READY_OFFLINE_QL411_COMPATIBLE_SIGNER_COMPONENT",
+    "commsAckReview": "CODE_READY_FAIL_CLOSED_NO_LIVE_ACCEPTANCE",
+    "newWindowsScheduledTasks": 0,
+    "existingRecoveryTaskChanged": false,
+    "existingLauncherChanged": false
+  },
+  "originalHost": "DESKTOP-AE894KC",
+  "installedRelease": "HOLD_REQUIRES_REE_ORIGINAL_HOST_PROCESS_VERIFICATION",
+  "durableMonitoring": "HOLD_REQUIRES_CURRENT_ORIGINAL_HOST_HISTORY",
+  "sourceSignedTelemetry": "HOLD_NO_PROTECTED_OWNER_AUTHORIZED_ONE_TEST_EXECUTED",
+  "commsAck": "HOLD_NO_INDEPENDENT_RECEIVER_SIGNED_ACK",
+  "automationHost": "REE_ORIGINAL_WINDOWS_ONLY_CODE_ENFORCED_HOST_NOT_LIVE_VERIFIED",
+  "connection": "HOLD",
+  "receiver": "OFF",
+  "slaveGate": "HOLD_NEXT_MASTER_INTEGRATION_STAGE",
+  "interpretation": "Code promotion cannot be used as original Windows installed-release, signer, receiver or master connection proof."
+}
