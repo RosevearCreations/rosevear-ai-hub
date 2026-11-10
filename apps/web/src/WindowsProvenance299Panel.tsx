@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { exportShellStatus299, reconcileOriginalProvenance299 } from "./windowsProvenance299";
+import { WindowsReviewerDecision300Panel } from "./WindowsReviewerDecision300Panel";
 
 /** Metadata-only local reviewer intake. It cannot authenticate a person or a receipt. */
 export function WindowsProvenance299Panel({ expectedMainSha }: { expectedMainSha: string }) {
   const [packetRaw, setPacketRaw] = useState("");
   const [reviewerRaw, setReviewerRaw] = useState("");
   const [acknowledged, setAcknowledged] = useState(false);
+  const [showDecision300, setShowDecision300] = useState(false);
   const [message, setMessage] = useState("No original-host receipt or independent reviewer evidence verified.");
   const report = reconcileOriginalProvenance299({ packetRaw, reviewerRaw,
     expectedMainSha, nowMs: Date.now() });
@@ -26,6 +28,7 @@ export function WindowsProvenance299Panel({ expectedMainSha }: { expectedMainSha
   }
   function clear() {
     setPacketRaw(""); setReviewerRaw(""); setAcknowledged(false);
+    setShowDecision300(false);
     setMessage("Private Build 299 review inputs cleared from this browser session.");
   }
   return <section aria-labelledby="windows-provenance-299-title">
@@ -63,6 +66,12 @@ export function WindowsProvenance299Panel({ expectedMainSha }: { expectedMainSha
     <button type="button" onClick={clear}>Clear Build 299 private inputs</button>
     <p role="status">{message}</p>
     <p><strong>Verified receipt count: 0. Published messages: 0. Master Shell authorization: HOLD.</strong></p>
+    <button type="button" aria-expanded={showDecision300}
+      onClick={() => setShowDecision300(value => !value)}>
+      {showDecision300 ? "Close Build 300 private decision review" : "Open Build 300 private decision review"}
+    </button>
+    {showDecision300 && <WindowsReviewerDecision300Panel key={expectedMainSha}
+      expectedMainSha={expectedMainSha} />}
   </section>;
 }
 
