@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { WindowsAcceptance294Panel } from "./WindowsAcceptance294Panel";
 
 import type { DriftEpisode292 } from "./windowsDriftContinuity292";
 import {
@@ -128,6 +129,7 @@ export function WindowsEvidenceIntake293Panel({ episodes, expectedMainSha }: {
         <th scope="row">{gate.authority}</th><td>{gate.requirement}</td><td>HOLD</td>
       </tr>)}</tbody>
     </table>
+    <WindowsAcceptance294Panel notes={notes} expectedMainSha={expectedMainSha} />
     <p><strong>Original host: HOLD. Signed receipt: HOLD. Master Shell: HOLD.</strong>
       Operator acknowledgement records only local review metadata; it is not permission to run, sign, enroll or publish anything.</p>
   </section>;

@@ -22,7 +22,7 @@ describe("Build 291 owner-guided original Windows follow-up panel", () => {
     render(<WindowsRecoveryDecision291Panel review={review}
       getCurrentReview={current} expectedMainSha={SHA} />);
     expect(current).not.toHaveBeenCalled();
-    expect(screen.getByText(/0 independently verified acceptances/)).toBeInTheDocument();
+    expect(screen.getByText(/0 session decision\(s\) recorded; 0 independently verified acceptances/)).toBeInTheDocument();
     expect(screen.getByText(/Version drift:/).parentElement?.textContent).toContain("disagree");
     expect(screen.getByRole("button", { name: /Record owner follow-up decision locally/ }))
       .toBeDisabled();
