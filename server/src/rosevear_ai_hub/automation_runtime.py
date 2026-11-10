@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
+import platform
+import socket
 from datetime import UTC, datetime
 from typing import Any
 
@@ -29,6 +32,7 @@ from rosevear_ai_hub.event_engine import (
 from rosevear_ai_hub.integrations.frigate import FrigateError, get_frigate_client
 from rosevear_ai_hub.integrations.home_assistant import HomeAssistantError
 from rosevear_ai_hub.integrations.mqtt import MQTTError, MQTTMessageRecord
+from rosevear_ai_hub.master_shell_uptime303 import authorized_local_host
 from rosevear_ai_hub.models import AppSetting, Automation
 
 logger = logging.getLogger(__name__)
@@ -73,6 +77,15 @@ class AutomationEventRuntime:
 
     async def start(self) -> None:
         if self._running:
+            return
+        # Owner-opt-in: prevent this Hub event worker from running on a second
+        # computer. Other apps' cloud jobs are NOT modified by this flag.
+        if os.getenv("ROSEVEAR_REQUIRE_REE_AUTOMATION_HOST") == "1" and not authorized_local_host(
+            system=platform.system(), hostname=socket.gethostname(), enabled=True
+        ):
+            logger.warning(
+                "Automation event runtime held: not the authorized original Windows host"
+            )
             return
         self._running = True
         self._stopping.clear()

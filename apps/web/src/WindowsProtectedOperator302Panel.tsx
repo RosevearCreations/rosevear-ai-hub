@@ -5,6 +5,7 @@ import {
   type EscalationIssue302, type LocalEscalation302,
 } from "./windowsProtectedOperator302";
 import type { inspectReceiptCandidate301 } from "./windowsAuthorityReplay301";
+import { WindowsSupervisedPilot303Panel } from "./WindowsSupervisedPilot303Panel";
 
 /** Operator-side case preparation only, never original evidence intake or a Comms Hub message. */
 export function WindowsProtectedOperator302Panel({ expectedMainSha, receiptReview }: {
@@ -14,6 +15,7 @@ export function WindowsProtectedOperator302Panel({ expectedMainSha, receiptRevie
   const [selected, setSelected] = useState<EscalationIssue302>("ORIGINAL_HOST_UNVERIFIED");
   const [acknowledged, setAcknowledged] = useState(false);
   const [cases, setCases] = useState<LocalEscalation302[]>([]);
+  const [showPilot303, setShowPilot303] = useState(false);
   const [message, setMessage] = useState("No independently authenticated receipt or Shell enrollment record received.");
   const review = operatorIntakeReview302(receiptReview);
   const routes = applicableEscalations302(receiptReview);
@@ -90,5 +92,11 @@ export function WindowsProtectedOperator302Panel({ expectedMainSha, receiptRevie
     <button type="button" onClick={clear}>Clear Build 302 local exceptions</button>
     <p role="status">{message}</p>
     <p><strong>Verified source-signed receipts: 0. Enrolled receivers: 0. Messages sent: 0.</strong></p>
+    <button type="button" aria-expanded={showPilot303}
+      onClick={() => setShowPilot303(value => !value)}>
+      {showPilot303 ? "Close Build 303 supervised pilot" : "Open Build 303 supervised pilot"}
+    </button>
+    {showPilot303 && <WindowsSupervisedPilot303Panel expectedMainSha={expectedMainSha}
+      receiptReview={receiptReview} cases={cases} />}
   </section>;
 }
