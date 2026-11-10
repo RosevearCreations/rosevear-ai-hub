@@ -1,0 +1,30 @@
+{
+  "activation": "MASTER360-AIHUB-306-ACK",
+  "sourceId": "rosevear-ai-hub",
+  "sourceBuild": 306,
+  "controller": "ai-data-platform",
+  "controller360Main": "4b45b435fa7b6fc83b94e31556648fe4190a9f53",
+  "aiData361MainAtReconciliation": "69355a853f10bbe4d3785bcede8b44e0c788be65",
+  "aiHub305MainAtReconciliation": "27b234337f5a3f041dfca4541e33ed6aa821fa4f",
+  "commsQl412MainAtReconciliation": "e42ffa856595a2d24c634653d83b1d80f2d6eaa4",
+  "originalHost": "DESKTOP-AE894KC",
+  "independentReviewerHost": "TEMPLAR",
+  "code": {
+    "ownerProtectedReleaseReview": "CODE_READY_EXTERNAL_PIN_AND_OWNER_AUTHORITY_REQUIRED",
+    "sourceSignedOneTestImport": "CODE_READY_EXTERNAL_PROTECTED_EPISODE_CLAIM_REQUIRED",
+    "sevenDayTrend": "CODE_READY_READ_ONLY_EXISTING_SQLITE",
+    "threeMasterDashboard": "CODE_READY_SOURCE_ONLY_OTHER_MASTERS_HOLD",
+    "newWindowsScheduledTasks": 0,
+    "existingRecoveryTaskChanged": false,
+    "existingLauncherChanged": false
+  },
+  "installedRelease": "HOLD_ORIGINAL_REE_PROCESS_AND_INDEPENDENT_OWNER_ACCEPTANCE",
+  "durableMonitoring": "HOLD_UNTIL_ORIGINAL_REE_7_DAY_SAMPLES_OBSERVED",
+  "sourceSignedTelemetry": "HOLD_NO_OWNER_AUTHORIZED_ONE_TEST_IMPORTED",
+  "commsAck": "HOLD_NO_INDEPENDENT_RECEIVER_SIGNED_ACK",
+  "automationHost": "DESKTOP-AE894KC_ONLY_CODE_GATED_NOT_LIVE_VERIFIED",
+  "threeMastersSynced": false,
+  "receiver": "OFF",
+  "connection": "HOLD",
+  "slaveGate": "HOLD_NEXT_MASTER_INTEGRATION_STAGE"
+}

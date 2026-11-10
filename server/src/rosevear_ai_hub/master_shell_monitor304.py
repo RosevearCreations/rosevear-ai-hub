@@ -20,6 +20,7 @@ from rosevear_ai_hub.master_shell_uptime303 import (
 )
 
 WINDOW_MS = 7 * 24 * 60 * 60 * 1000
+DAY_MS = 24 * 60 * 60 * 1000
 MAX_HISTORY = 7 * 1440
 AUTOMATION_HOST_FLAG = "ROSEVEAR_REQUIRE_REE_AUTOMATION_HOST"
 ID_BY_PORT = {port: name for name, port in LOCAL_SERVICES}
@@ -145,6 +146,48 @@ class DurableUptimeLedger304:
             "services": services,
             "incidentCandidates": conditions,
         }
+
+    def observed_daily_trend306(self, now_ms: int) -> list[dict[str, object]] | None:
+        """Read the existing ledger; missing minutes are unknown, never uptime.
+
+        Keep the previous seven UTC calendar days, including today's partial
+        day, and return only actual observed minute buckets. This performs no
+        migrations, writes, scheduler changes or external health probes.
+        """
+        if type(now_ms) is not int or now_ms < 0:
+            return None
+        first_day = now_ms // DAY_MS - 6
+        try:
+            with sqlite3.connect(self.path, timeout=2) as db:
+                db.execute("PRAGMA query_only=ON")
+                rows = db.execute(
+                    """SELECT captured_ms,hub_api,hub_web,caddy_proxy
+                    FROM master_uptime304
+                    WHERE captured_ms >= ? AND captured_ms <= ?
+                    ORDER BY minute_bucket ASC LIMIT ?""",
+                    (first_day * DAY_MS, now_ms + 5000, MAX_HISTORY),
+                ).fetchall()
+        except (OSError, sqlite3.Error):
+            return None
+        by_day: dict[int, dict[str, object]] = {}
+        for stamp, api, web, proxy in rows:
+            day = stamp // DAY_MS
+            if day < first_day or day > now_ms // DAY_MS:
+                continue
+            if day not in by_day:
+                by_day[day] = {
+                    "dayUtc": datetime.fromtimestamp(day * DAY_MS / 1000, UTC).date().isoformat(),
+                    "observedMinutes": 0,
+                    "reachableMinutes": {"hub_api": 0, "hub_web": 0, "caddy_proxy": 0},
+                }
+            bucket = by_day[day]
+            bucket["observedMinutes"] += 1
+            for name, state in zip(
+                ("hub_api", "hub_web", "caddy_proxy"), (api, web, proxy), strict=True
+            ):
+                if state == 1:
+                    bucket["reachableMinutes"][name] += 1
+        return [by_day[key] for key in sorted(by_day)]
 
 
 class PersistentReeMonitor304(LocalUptimeSampler303):
