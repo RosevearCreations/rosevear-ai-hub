@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { prepareFieldPacket297, SOURCE_MAP_297 } from "./windowsFieldPacket297";
+import { WindowsReceiptReview298Panel } from "./WindowsReceiptReview298Panel";
 import type { CustodyNote295, HandoffDryRun295 } from "./windowsCustodyHandoff295";
 import {
   FIELD_RECEIPT_CHECKLIST_296, deriveCustodyExceptions296,
@@ -182,9 +183,11 @@ export function WindowsCustodyReview296Panel({ custodyNotes, dryRuns, expectedMa
     </label>
     <button type="button" disabled={!acknowledgePacket || !checklists.length || !lastCustody}
       onClick={downloadFieldPacket}>Download Build 297 review packet (HOLD)</button>
+    <WindowsReceiptReview298Panel key={expectedMainSha} expectedMainSha={expectedMainSha} />
     <p><strong>Original Windows host, signer, independent witness, signed consent,
       cryptographic receipt and Master Shell authority: HOLD.</strong>
       GitHub source CI cannot verify any of these.</p>
   </section>;
 }
+
 
