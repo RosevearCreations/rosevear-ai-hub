@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { inspectFieldPacket298, recordOwnerTriage298, type ReviewIssue298 } from "./windowsReceiptReview298";
+import { WindowsProvenance299Panel } from "./WindowsProvenance299Panel";
 
 /** No persistent state, uploads, network requests, signer or trust acceptance. */
 export function WindowsReceiptReview298Panel({ expectedMainSha }: { expectedMainSha: string }) {
@@ -62,6 +63,8 @@ export function WindowsReceiptReview298Panel({ expectedMainSha }: { expectedMain
     </ol>}
     <p><strong>AI Data Platform and Comms Hub source connections: HOLD.</strong>
       A valid packet schema only proves that local JSON matches the expected review format.</p>
+    <WindowsProvenance299Panel key={expectedMainSha} expectedMainSha={expectedMainSha} />
   </section>;
 }
+
 
