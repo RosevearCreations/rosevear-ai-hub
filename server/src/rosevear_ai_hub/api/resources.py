@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi import APIRouter, Request, Response, status
 from fastapi.exceptions import HTTPException
 
+from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
 from rosevear_ai_hub.master_shell_uptime303 import LocalUptimeSampler303
 from rosevear_ai_hub.release_observability import collect_release_observability
 from rosevear_ai_hub.resource_budget import collect_resource_snapshot
@@ -23,6 +24,38 @@ def master_shell_local_uptime(request: Request, response: Response) -> dict[str,
         # Test/client lifespan not started: never claim monitoring was enabled.
         monitor = LocalUptimeSampler303(enabled=False)
     return monitor.snapshot()
+
+
+@router.get("/master-shell-reconciliation")
+def master_shell_reconciliation304(request: Request, response: Response) -> dict[str, object]:
+    """Owner-only durable monitor and unsent Comms incident candidates.
+
+    Never substitute browser headers or an unsigned sample for original-host
+    owner consent, signer enrollment, or a receiver-signed acknowledgment.
+    """
+    response.headers["Cache-Control"] = "private, no-store"
+    monitor = getattr(request.app.state, "master_shell_uptime303", None)
+    if not isinstance(monitor, PersistentReeMonitor304):
+        monitor = PersistentReeMonitor304(enabled=False)
+    snapshot = monitor.persistent_snapshot304()
+    # Do not generate a purported source-revision-bound incident until a
+    # separate original-host installed revision has been independently pinned.
+    return {
+        "schema": "rosevear.ai-hub.master360-activation-status.v1",
+        "controller": "ai-data-platform",
+        "controllerBuild": 360,
+        "sourceId": "rosevear-ai-hub",
+        "sourceRole": "SOURCE",
+        "monitoring": snapshot,
+        "signedTelemetry": "HOLD_ORIGINAL_SIGNER_AND_OWNER_AUTHORIZATION_REQUIRED",
+        "commsIncidentHandoff": "HOLD_RECEIVER_ACK_NOT_INDEPENDENTLY_VERIFIED",
+        # Actual source-revision binding is deliberately not guessed from GitHub
+        # and requires separate original-host installed-release verification.
+        "sourceRevisionBoundIncidents": "HOLD_INSTALLED_SOURCE_REVISION_NOT_PINNED",
+        "slaveStage": "HOLD_NEXT_MASTER_INTEGRATION_STAGE",
+        "newWindowsScheduledTasks": 0,
+        "connections": {"ai-data-platform": "HOLD", "rosevear-comms-hub": "HOLD"},
+    }
 
 
 @router.get("/resource-budget")

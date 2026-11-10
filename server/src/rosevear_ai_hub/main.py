@@ -57,7 +57,7 @@ from rosevear_ai_hub.automation_runtime import AutomationEventRuntime
 from rosevear_ai_hub.camera_runtime import reconcile_camera_streams
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.logging import configure_logging
-from rosevear_ai_hub.master_shell_uptime303 import LocalUptimeSampler303
+from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
 from rosevear_ai_hub.schemas import HealthResponse, VersionResponse
 
 
@@ -67,7 +67,7 @@ async def _lifespan(application: FastAPI):
     application.state.automation_event_runtime = runtime
     # No cross-host automation migration or network publishing: this sampler
     # runs only on Ree's original Windows server when explicitly enabled.
-    monitor = LocalUptimeSampler303()
+    monitor = PersistentReeMonitor304()
     application.state.master_shell_uptime303 = monitor
     try:
         await monitor.start()
