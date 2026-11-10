@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { WindowsCustodyReview296Panel } from "./WindowsCustodyReview296Panel";
 
 import type { IntakeNote293 } from "./windowsEvidenceIntake293";
 import type { SupervisedReview294 } from "./windowsSupervisedAcceptance294";
@@ -19,6 +20,7 @@ export function WindowsCustody295Panel({ intakeNotes, supervisedReviews, expecte
   const [destination, setDestination] = useState<HandoffDestination295>("AI_DATA_PLATFORM_READ_ONLY_REVIEW");
   const [custody, setCustody] = useState<CustodyNote295[]>([]);
   const [dryRuns, setDryRuns] = useState<HandoffDryRun295[]>([]);
+  const [reviewGeneration, setReviewGeneration] = useState(0);
   const [status, setStatus] = useState("No original-Windows evidence registered or independently verified.");
   const lastNote = custody[custody.length - 1] ?? null;
   const registry = evidenceRegistryInterface295(lastNote);
@@ -50,6 +52,7 @@ export function WindowsCustody295Panel({ intakeNotes, supervisedReviews, expecte
     setStatus("Handoff simulation blocked by missing independent evidence. Zero messages sent; no trusted receipt registered.");
   }
   function clear() {
+    setReviewGeneration(previous => previous + 1);
     setCustody([]);
     setDryRuns([]);
     setAcknowledged(false);
@@ -129,6 +132,8 @@ export function WindowsCustody295Panel({ intakeNotes, supervisedReviews, expecte
         {run.missingIndependentAuthorities} independent authority gates missing.
       </li>)}
     </ol>}
+    <WindowsCustodyReview296Panel key={reviewGeneration} custodyNotes={custody}
+      dryRuns={dryRuns} expectedMainSha={expectedMainSha} />
     <button type="button" disabled={!custody.length && !dryRuns.length} onClick={download}>
       Download private custody and dry-run metadata (JSON)
     </button>
