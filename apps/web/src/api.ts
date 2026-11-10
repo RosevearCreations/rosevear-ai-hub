@@ -421,6 +421,11 @@ export function getMasterShellActivation304(signal?: AbortSignal): Promise<unkno
   return getJson<unknown>("/api/v1/system/master-shell-reconciliation", signal);
 }
 
+/** Build 305 original-Windows manual installed-release and QL-412 one-TEST HOLD review. */
+export function getMasterShellAcceptance305(signal?: AbortSignal): Promise<unknown> {
+  return getJson<unknown>("/api/v1/system/master-shell-305-readiness", signal);
+}
+
 /** Build 285: owner-authenticated read of the responding backend's local host. */
 export function getWindowsRuntimeEvidence285(signal?: AbortSignal): Promise<unknown> {
   return getJson<unknown>("/api/v1/system/windows-runtime-evidence", signal);
