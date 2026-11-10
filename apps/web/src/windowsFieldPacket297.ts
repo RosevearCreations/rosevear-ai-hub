@@ -24,6 +24,8 @@ export function prepareFieldPacket297(input: {
   if (!input.acknowledged || !SHA.test(sha) ||
       !Number.isSafeInteger(input.nowMs) || input.nowMs < 0 ||
       !validCustody296(input.note, sha, input.nowMs)) return null;
+  const note = input.note;
+  if (!note) return null;
   const checklist = input.checklist;
   if (!checklist || checklist.sourceSha !== sha ||
       checklist.ownerDecision !== "APPROVE_CHECKLIST_FOR_FIELD_REVIEW_ONLY" ||
@@ -35,14 +37,14 @@ export function prepareFieldPacket297(input: {
         s.id === g.id && s.state === "INDEPENDENT_PROOF_NOT_RECEIVED")) ||
       !Number.isFinite(Date.parse(checklist.reviewedAtUtc)) ||
       Date.parse(checklist.reviewedAtUtc) > input.nowMs + 60_000 ||
-      Date.parse(checklist.reviewedAtUtc) < Date.parse(input.note.reviewedAtUtc)) return null;
+      Date.parse(checklist.reviewedAtUtc) < Date.parse(note.reviewedAtUtc)) return null;
   return {
     schema: "rosevear.ai-hub.independent-field-review-packet.v1" as const,
     createdAtUtc: new Date(input.nowMs).toISOString(),
     sourceSha: sha,
     provenance: "PRIVATE_BROWSER_SESSION_UNVERIFIED" as const,
     ownerAction: "SUPERVISED_REVIEW_HANDOFF_ONLY" as const,
-    custodyDigestClaim: input.note.unsignedDigest,
+    custodyDigestClaim: note.unsignedDigest,
     originalHostVerified: false as const,
     independentSignerVerified: false as const,
     witnessVerified: false as const,
@@ -56,4 +58,3 @@ export function prepareFieldPacket297(input: {
     productionAuthorization: "HOLD" as const,
   };
 }
-
