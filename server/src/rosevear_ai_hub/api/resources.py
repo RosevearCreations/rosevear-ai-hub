@@ -6,6 +6,7 @@ from fastapi import APIRouter, Request, Response, status
 from fastapi.exceptions import HTTPException
 
 from rosevear_ai_hub.master_shell_acceptance305 import inspect_original_release305
+from rosevear_ai_hub.master_shell_acceptance306 import reconcile_three_master_uptime306
 from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
 from rosevear_ai_hub.master_shell_uptime303 import LocalUptimeSampler303
 from rosevear_ai_hub.release_observability import collect_release_observability
@@ -14,6 +15,20 @@ from rosevear_ai_hub.windows_launcher_evidence286 import collect_windows_launche
 from rosevear_ai_hub.windows_runtime_evidence285 import collect_windows_runtime_evidence
 
 router = APIRouter(prefix="/api/v1/system", tags=["system"])
+
+
+@router.get("/master-shell-306-acceptance")
+def master_shell_306_acceptance(request: Request, response: Response) -> dict[str, object]:
+    """Owner-only read of existing original-host trends and missing import gates.
+
+    Protected owner-signed reviews must be imported through a separately
+    authenticated, locally approved adapter; this GET never accepts writes.
+    """
+    response.headers["Cache-Control"] = "private, no-store"
+    monitor = getattr(request.app.state, "master_shell_uptime303", None)
+    if not isinstance(monitor, PersistentReeMonitor304):
+        monitor = PersistentReeMonitor304(enabled=False)
+    return reconcile_three_master_uptime306(monitor)
 
 
 @router.get("/master-shell-305-readiness")
