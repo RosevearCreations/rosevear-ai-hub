@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { prepareFieldPacket297, SOURCE_MAP_297 } from "./windowsFieldPacket297";
 import type { CustodyNote295, HandoffDryRun295 } from "./windowsCustodyHandoff295";
 import {
   FIELD_RECEIPT_CHECKLIST_296, deriveCustodyExceptions296,
@@ -25,6 +26,7 @@ export function WindowsCustodyReview296Panel({ custodyNotes, dryRuns, expectedMa
   const [acknowledgeChecklist, setAcknowledgeChecklist] = useState(false);
   const [exceptions, setExceptions] = useState<Exception296[]>([]);
   const [checklists, setChecklists] = useState<ChecklistReview296[]>([]);
+  const [acknowledgePacket, setAcknowledgePacket] = useState(false);
   const [status, setStatus] = useState("No independent field receipts have been verified; all authorities remain HOLD.");
   const nowMs = Date.now();
   const possibleIssues = deriveCustodyExceptions296({
@@ -61,7 +63,26 @@ export function WindowsCustodyReview296Panel({ custodyNotes, dryRuns, expectedMa
     setChecklists([]);
     setAcknowledgeException(false);
     setAcknowledgeChecklist(false);
+    setAcknowledgePacket(false);
     setStatus("Build 296 local exception and checklist notes cleared; no external state changed.");
+  }
+  function downloadFieldPacket() {
+    const packet = prepareFieldPacket297({ note: lastCustody,
+      checklist: checklists[checklists.length - 1] ?? null,
+      expectedMainSha, acknowledged: acknowledgePacket, nowMs: Date.now() });
+    setAcknowledgePacket(false);
+    if (!packet) {
+      setStatus("Build 297 packet blocked: current custody, later checklist and explicit review acknowledgement are required.");
+      return;
+    }
+    const url = URL.createObjectURL(new Blob([JSON.stringify(packet, null, 2) + "\n"],
+      { type: "application/json" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "rosevear-field-review-297-" + new Date().toISOString().slice(0, 10) + ".json";
+    anchor.click();
+    URL.revokeObjectURL(url);
+    setStatus("Private Build 297 review packet exported. No receipt verified and no application contacted.");
   }
   function download() {
     if (!exceptions.length && !checklists.length) return;
@@ -140,8 +161,30 @@ export function WindowsCustodyReview296Panel({ custodyNotes, dryRuns, expectedMa
       Download private exception and checklist metadata (JSON)
     </button>
     <button type="button" onClick={clear}>Clear Build 296 local review notes</button>
+    <h4>Build 297 — Independent field receipt review packet</h4>
+    <p>Cross-application mapping is a design inventory, not a connection report. The Hub supplies
+      local Windows evidence candidates to the two complementary Master Shell planes. Business
+      applications remain separately isolated sources, not subordinate Windows devices.</p>
+    <ul aria-label="Build 297 cross-application source mapping">
+      {SOURCE_MAP_297.map(source => <li key={source.application}>
+        <strong>{source.application}</strong> — {source.role.replaceAll("_", " ").toLowerCase()};
+        {" "}{source.lane.replaceAll("_", " ").toLowerCase()}; connection NOT VERIFIED.
+      </li>)}
+    </ul>
+    <p>Seven original-evidence authorities remain unverified. The packet contains only a claimed
+      unsigned custody digest and review requirements. It cannot prove issuer identity,
+      owner consent, witness independence, Windows process identity or trusted receipt lineage.</p>
+    <label className="installed-adoption-check">
+      <input type="checkbox" checked={acknowledgePacket}
+        onChange={event => setAcknowledgePacket(event.target.checked)} />
+      I understand this is a private owner-supervised review handoff only, with no trust
+      acceptance, cross-app publication, credential enrollment or production authorization.
+    </label>
+    <button type="button" disabled={!acknowledgePacket || !checklists.length || !lastCustody}
+      onClick={downloadFieldPacket}>Download Build 297 review packet (HOLD)</button>
     <p><strong>Original Windows host, signer, independent witness, signed consent,
       cryptographic receipt and Master Shell authority: HOLD.</strong>
       GitHub source CI cannot verify any of these.</p>
   </section>;
 }
+
