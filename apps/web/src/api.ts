@@ -411,6 +411,11 @@ export function getHealth(signal?: AbortSignal): Promise<HealthResponse> {
   return getJson<HealthResponse>("/health", signal);
 }
 
+/** Build 303: authenticated local source uptime, never a remote Shell connection. */
+export function getMasterShellLocalUptime303(signal?: AbortSignal): Promise<unknown> {
+  return getJson<unknown>("/api/v1/system/master-shell-local-uptime", signal);
+}
+
 /** Build 285: owner-authenticated read of the responding backend's local host. */
 export function getWindowsRuntimeEvidence285(signal?: AbortSignal): Promise<unknown> {
   return getJson<unknown>("/api/v1/system/windows-runtime-evidence", signal);
