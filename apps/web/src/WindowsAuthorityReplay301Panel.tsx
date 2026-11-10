@@ -5,6 +5,7 @@ import {
   type ReplaySimulation301,
 } from "./windowsAuthorityReplay301";
 import type { reviewDecisionEvidence300 } from "./windowsReviewerDecision300";
+import { WindowsProtectedOperator302Panel } from "./WindowsProtectedOperator302Panel";
 
 /** Protected-intake boundary preview; never stores or transmits real receipts or credentials. */
 export function WindowsAuthorityReplay301Panel({ expectedMainSha, decisionReport }: {
@@ -14,6 +15,7 @@ export function WindowsAuthorityReplay301Panel({ expectedMainSha, decisionReport
   const [candidateRaw, setCandidateRaw] = useState("");
   const [history, setHistory] = useState<ReplaySimulation301[]>([]);
   const [acknowledged, setAcknowledged] = useState(false);
+  const [showOperator302, setShowOperator302] = useState(false);
   const [status, setStatus] = useState("No protected receipt received, verified, or recorded.");
   const checklist = authorityEnrollmentChecklist301(decisionReport);
   const review = inspectReceiptCandidate301({ candidateRaw, expectedMainSha,
@@ -44,6 +46,7 @@ export function WindowsAuthorityReplay301Panel({ expectedMainSha, decisionReport
   }
   function clear() {
     setCandidateRaw(""); setHistory([]); setAcknowledged(false);
+    setShowOperator302(false);
     setStatus("Build 301 local receipt candidates and simulated replay history cleared.");
   }
   return <section aria-labelledby="windows-authority-301-title">
@@ -88,5 +91,11 @@ export function WindowsAuthorityReplay301Panel({ expectedMainSha, decisionReport
     <button type="button" onClick={clear}>Clear Build 301 private inputs</button>
     <p role="status">{status}</p>
     <p><strong>Accepted receipts: 0. Verified signatures: 0. Shell messages: 0.</strong></p>
+    <button type="button" aria-expanded={showOperator302}
+      onClick={() => setShowOperator302(open => !open)}>
+      {showOperator302 ? "Close Build 302 protected operator review" : "Open Build 302 protected operator review"}
+    </button>
+    {showOperator302 && <WindowsProtectedOperator302Panel key={expectedMainSha}
+      expectedMainSha={expectedMainSha} receiptReview={review} />}
   </section>;
 }
