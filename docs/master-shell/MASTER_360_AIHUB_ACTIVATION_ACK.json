@@ -1,0 +1,33 @@
+{
+  "schema": "rosevear.master-shell.activation-ack.v1",
+  "activation": "MASTER360-AIHUB-ACTIVATE",
+  "sourceId": "rosevear-ai-hub",
+  "sourceRole": "SOURCE",
+  "sourceBuild": 304,
+  "controller": "ai-data-platform",
+  "controllerBuild": 360,
+  "controllerMainAtReconciliation": "4b45b435fa7b6fc83b94e31556648fe4190a9f53",
+  "controllerContract": "docs/master-shell/MASTER_360_ACTIVATION_CONTRACT.json",
+  "controllerContractGitBlobSha": "5c361cf41de9ca2c1f9e5d2ffe2030fa1179f1f3",
+  "commsMainAtReconciliation": "ccbeab4307ed6458399dcb0eb03324aeaf12f97f",
+  "originalSourceMainBeforeBuild": "9df3130cbe87dd65a6a3da9c238a521f8fff38a5",
+  "automationHostPolicy": "REE_ORIGINAL_WINDOWS_ONLY",
+  "expectedOriginalWindowsHost": "DESKTOP-AE894KC",
+  "independentReviewerHost": "TEMPLAR",
+  "sourceImplementation": {
+    "durableMonitoring": "CODE_IMPLEMENTED_LOCAL_SQLITE_BOUNDED_SEVEN_DAYS",
+    "signedReadOnlyTelemetry": "CODE_IMPLEMENTED_PROTECTED_TEST_ONLY_NO_SENDER",
+    "commsIncidentHandoff": "CODE_IMPLEMENTED_OFFLINE_CANDIDATES_AND_ACK_VERIFIER_ONLY",
+    "operatorRead": "/api/v1/system/master-shell-reconciliation",
+    "newWindowsScheduledTasks": 0,
+    "existingRecoveryTaskModified": false,
+    "externalAutomationActionsAdded": 0
+  },
+  "originalHostInstalledBuild304": "HOLD_NOT_VERIFIED",
+  "originalHostDurableSamples": "HOLD_NOT_VERIFIED",
+  "sourceSignerEnrollment": "HOLD_NOT_VERIFIED",
+  "receiverSignedCommsAck": "HOLD_NOT_VERIFIED",
+  "authenticatedMasterConnection": "HOLD",
+  "slaveGate": "HOLD_NEXT_MASTER_INTEGRATION_STAGE",
+  "interpretation": "Source code implementation only; not a signed proof or installation record."
+}
