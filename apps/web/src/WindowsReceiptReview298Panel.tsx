@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { inspectFieldPacket298, recordOwnerTriage298, type ReviewIssue298 } from "./windowsReceiptReview298";
+import { WindowsProvenance299Panel } from "./WindowsProvenance299Panel";
 
 /** No persistent state, uploads, network requests, signer or trust acceptance. */
 export function WindowsReceiptReview298Panel({ expectedMainSha }: { expectedMainSha: string }) {
@@ -7,6 +8,7 @@ export function WindowsReceiptReview298Panel({ expectedMainSha }: { expectedMain
   const [acknowledged, setAcknowledged] = useState(false);
   const [selected, setSelected] = useState<ReviewIssue298>("INDEPENDENT_PROOF_MISSING");
   const [notes, setNotes] = useState<NonNullable<ReturnType<typeof recordOwnerTriage298>>[]>([]);
+  const [showProvenance299, setShowProvenance299] = useState(false);
   const [status, setStatus] = useState("No independent receipt accepted. Packet not inspected.");
   const review = inspectFieldPacket298(raw, expectedMainSha, Date.now());
   const issue = review.issues.includes(selected) ? selected : review.issues[0];
@@ -20,7 +22,7 @@ export function WindowsReceiptReview298Panel({ expectedMainSha }: { expectedMain
     setStatus("OPEN/HOLD triage recorded locally; no evidence was verified or sent.");
   }
   function clear() {
-    setRaw(""); setAcknowledged(false); setNotes([]);
+    setRaw(""); setAcknowledged(false); setNotes([]); setShowProvenance299(false);
     setStatus("Build 298 input and local triage notes cleared.");
   }
   return <section aria-labelledby="windows-receipt-298-title">
@@ -62,6 +64,13 @@ export function WindowsReceiptReview298Panel({ expectedMainSha }: { expectedMain
     </ol>}
     <p><strong>AI Data Platform and Comms Hub source connections: HOLD.</strong>
       A valid packet schema only proves that local JSON matches the expected review format.</p>
+    <button type="button" aria-expanded={showProvenance299}
+      onClick={() => setShowProvenance299(open => !open)}>
+      {showProvenance299 ? "Close Build 299 private provenance review" : "Open Build 299 private provenance review"}
+    </button>
+    {showProvenance299 && <WindowsProvenance299Panel key={expectedMainSha}
+      expectedMainSha={expectedMainSha} />}
   </section>;
 }
+
 
