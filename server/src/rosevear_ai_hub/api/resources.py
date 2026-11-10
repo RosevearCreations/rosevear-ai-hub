@@ -2,15 +2,27 @@
 
 from pathlib import Path
 
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, Request, Response, status
 from fastapi.exceptions import HTTPException
 
+from rosevear_ai_hub.master_shell_uptime303 import LocalUptimeSampler303
 from rosevear_ai_hub.release_observability import collect_release_observability
 from rosevear_ai_hub.resource_budget import collect_resource_snapshot
 from rosevear_ai_hub.windows_launcher_evidence286 import collect_windows_launcher_evidence
 from rosevear_ai_hub.windows_runtime_evidence285 import collect_windows_runtime_evidence
 
 router = APIRouter(prefix="/api/v1/system", tags=["system"])
+
+
+@router.get("/master-shell-local-uptime")
+def master_shell_local_uptime(request: Request, response: Response) -> dict[str, object]:
+    """Owner-only loopback observations; neither signed evidence nor a Shell GET."""
+    response.headers["Cache-Control"] = "no-store"
+    monitor = getattr(request.app.state, "master_shell_uptime303", None)
+    if not isinstance(monitor, LocalUptimeSampler303):
+        # Test/client lifespan not started: never claim monitoring was enabled.
+        monitor = LocalUptimeSampler303(enabled=False)
+    return monitor.snapshot()
 
 
 @router.get("/resource-budget")
