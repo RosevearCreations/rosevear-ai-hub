@@ -39,20 +39,44 @@ ACK_SCHEMA = "rosevear.master360.ql414.receiver-ack.v1"
 OPERATION = "MASTER360_ONE_TEST_READ_ONLY"
 CORRELATION = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{11,95}\Z")
 ACK_KEYS = (
-    "schema", "operation", "sourceId", "hostId", "sourceRevision",
-    "sourceEpisodeId", "correlationId", "receivedAt", "receiverKeyId",
-    "sourcePayloadSha256", "decision", "connection",
+    "schema",
+    "operation",
+    "sourceId",
+    "hostId",
+    "sourceRevision",
+    "sourceEpisodeId",
+    "correlationId",
+    "receivedAt",
+    "receiverKeyId",
+    "sourcePayloadSha256",
+    "decision",
+    "connection",
 )
 SOURCE_KEYS = (
-    "schema", "sourceId", "hostId", "sourceRevision", "capturedAt", "episodeId", "samples",
+    "schema",
+    "sourceId",
+    "hostId",
+    "sourceRevision",
+    "capturedAt",
+    "episodeId",
+    "samples",
 )
 MASTER_SOURCES = ("ai-data-platform", "rosevear-comms-hub", "rosevear-ai-hub")
 MASTER_RECEIPT_KEYS = (
-    "schema", "sourceId", "hostId", "revision", "issuedAt", "receiptId", "evidence",
+    "schema",
+    "sourceId",
+    "hostId",
+    "revision",
+    "issuedAt",
+    "receiptId",
+    "evidence",
 )
 MASTER_EVIDENCE_AXES = (
-    "installedRelease", "persistentHistory", "signedTelemetry",
-    "replayProtection", "incidentAcceptance",
+    "installedRelease",
+    "persistentHistory",
+    "signedTelemetry",
+    "replayProtection",
+    "incidentAcceptance",
 )
 
 
@@ -88,7 +112,9 @@ def review_installed_307_on_ree308(
 ) -> dict[str, object]:
     """Independent TEMPLAR field proof must match *installed* Build 307."""
     result = review_original_owner_release306(
-        root, monitor, signed_review,
+        root,
+        monitor,
+        signed_review,
         reviewer_public_der=reviewer_public_der,
         independent_reviewer_pin=independent_reviewer_pin,
         expected_installed_revision=AIHUB307_MAIN,
@@ -123,17 +149,26 @@ def _valid_source(envelope: Any, now: int, source_public_der: bytes | None, pin:
 
 
 def _field_accepted(
-    root: Path, monitor: PersistentReeMonitor304, signed_field_review: Any,
-    reviewer_public_der: bytes | None, independent_reviewer_pin: str,
-    release_owner_authorize: Callable[..., bool] | None, now: int,
+    root: Path,
+    monitor: PersistentReeMonitor304,
+    signed_field_review: Any,
+    reviewer_public_der: bytes | None,
+    independent_reviewer_pin: str,
+    release_owner_authorize: Callable[..., bool] | None,
+    now: int,
 ) -> bool:
-    return review_installed_307_on_ree308(
-        root, monitor, signed_field_review,
-        reviewer_public_der=reviewer_public_der,
-        independent_reviewer_pin=independent_reviewer_pin,
-        owner_authorize=release_owner_authorize,
-        now_ms=now,
-    ).get("accepted") is True
+    return (
+        review_installed_307_on_ree308(
+            root,
+            monitor,
+            signed_field_review,
+            reviewer_public_der=reviewer_public_der,
+            independent_reviewer_pin=independent_reviewer_pin,
+            owner_authorize=release_owner_authorize,
+            now_ms=now,
+        ).get("accepted")
+        is True
+    )
 
 
 def prepare_ql414_one_test_request308(
@@ -161,26 +196,42 @@ def prepare_ql414_one_test_request308(
     now = int(time.time() * 1000) if now_ms is None else now_ms
     if not _on_ree(monitor) or type(now) is not int:
         return _hold("HOLD_NOT_ORIGINAL_REE_HOST_WITH_MONITOR")
-    if not all(callable(x) for x in (source_import_claimed, owner_authorize_one_test,
-                                    independent_reviewer_approve)):
+    if not all(
+        callable(x)
+        for x in (source_import_claimed, owner_authorize_one_test, independent_reviewer_approve)
+    ):
         return _hold("HOLD_MISSING_PROTECTED_ORIGINAL_HOST_AUTHORITIES")
     if not isinstance(correlation_id, str) or not CORRELATION.fullmatch(correlation_id):
         return _hold("HOLD_QL414_CORRELATION_FORMAT")
-    if not _field_accepted(root, monitor, signed_field_review, reviewer_public_der,
-                           independent_reviewer_pin, release_owner_authorize, now):
+    if not _field_accepted(
+        root,
+        monitor,
+        signed_field_review,
+        reviewer_public_der,
+        independent_reviewer_pin,
+        release_owner_authorize,
+        now,
+    ):
         return _hold("HOLD_INSTALLED_BUILD307_OWNER_REVIEW")
-    if not _valid_source(source_envelope, now, source_public_der,
-                         independently_pinned_source_sha256):
+    if not _valid_source(
+        source_envelope, now, source_public_der, independently_pinned_source_sha256
+    ):
         return _hold("HOLD_SOURCE_SIGNED_QL411_REVISION_OR_FRESHNESS")
     p = source_envelope["payload"]
     digest = hashlib.sha256(_serialize(p)).hexdigest()
-    args = {"source_id": SOURCE, "source_revision": AIHUB307_MAIN,
-            "episode_id": p["episodeId"], "envelope_sha256": digest,
-            "correlation_id": correlation_id}
+    args = {
+        "source_id": SOURCE,
+        "source_revision": AIHUB307_MAIN,
+        "episode_id": p["episodeId"],
+        "envelope_sha256": digest,
+        "correlation_id": correlation_id,
+    }
     try:
         if (
-            source_import_claimed(source_id=SOURCE, episode_id=p["episodeId"],
-                                  envelope_sha256=digest) is not True
+            source_import_claimed(
+                source_id=SOURCE, episode_id=p["episodeId"], envelope_sha256=digest
+            )
+            is not True
             or owner_authorize_one_test(**args) is not True
             or independent_reviewer_approve(**args) is not True
         ):
@@ -190,8 +241,11 @@ def prepare_ql414_one_test_request308(
     return {
         **_hold("QL414_REQUEST_PREPARED_NOT_TRANSMITTED"),
         "accepted": True,
-        "request": {"operation": OPERATION, "correlationId": correlation_id,
-                    "envelope": source_envelope},
+        "request": {
+            "operation": OPERATION,
+            "correlationId": correlation_id,
+            "envelope": source_envelope,
+        },
         "sourceEnvelopeSha256": digest,
         "sourceRevision": AIHUB307_MAIN,
         "transportSent": False,
@@ -225,11 +279,20 @@ def verify_ql414_receiver_ack308(
     now = int(time.time() * 1000) if now_ms is None else now_ms
     if not _on_ree(monitor) or type(now) is not int:
         return _hold("HOLD_NOT_ORIGINAL_REE_HOST_WITH_MONITOR")
-    if not all(callable(x) for x in (source_import_claimed, protected_transport_attest,
-                                    owner_authorize, independent_reviewer_approve, claim_chain)):
+    if not all(
+        callable(x)
+        for x in (
+            source_import_claimed,
+            protected_transport_attest,
+            owner_authorize,
+            independent_reviewer_approve,
+            claim_chain,
+        )
+    ):
         return _hold("HOLD_INDEPENDENT_RUNTIME_AUTHORITY_MISSING")
-    if not _valid_source(source_envelope, now, source_public_der,
-                         independently_pinned_source_sha256):
+    if not _valid_source(
+        source_envelope, now, source_public_der, independently_pinned_source_sha256
+    ):
         return _hold("HOLD_INVALID_SIGNED_SOURCE_ENVELOPE")
     if not isinstance(comms_ack, dict) or set(comms_ack) != {"payload", "signature"}:
         return _hold("HOLD_MISSING_INDEPENDENT_COMMS_SIGNATURE")
@@ -259,22 +322,32 @@ def verify_ql414_receiver_ack308(
         or now - when > 300_000
     ):
         return _hold("HOLD_ACK_REVISION_EPISODE_DIGEST_CORRELATION_OR_FRESHNESS")
-    if not _trusted_signature(ack, comms_ack["signature"], receiver_public_der,
-                              independently_pinned_receiver_sha256):
+    if not _trusted_signature(
+        ack, comms_ack["signature"], receiver_public_der, independently_pinned_receiver_sha256
+    ):
         return _hold("HOLD_INDEPENDENT_COMMS_SIGNER_PIN_MISMATCH")
     ack_digest = hashlib.sha256(_serialize(ack)).hexdigest()
-    args = {"source_id": SOURCE, "source_revision": AIHUB307_MAIN,
-            "episode_id": p["episodeId"], "source_digest": source_digest,
-            "comms_digest": ack_digest, "correlation_id": correlation_id}
+    args = {
+        "source_id": SOURCE,
+        "source_revision": AIHUB307_MAIN,
+        "episode_id": p["episodeId"],
+        "source_digest": source_digest,
+        "comms_digest": ack_digest,
+        "correlation_id": correlation_id,
+    }
     try:
         if (
-            source_import_claimed(source_id=SOURCE, episode_id=p["episodeId"],
-                                  envelope_sha256=source_digest) is not True
+            source_import_claimed(
+                source_id=SOURCE, episode_id=p["episodeId"], envelope_sha256=source_digest
+            )
+            is not True
             or protected_transport_attest(**args) is not True
             or owner_authorize(**args) is not True
             or independent_reviewer_approve(**args) is not True
-            or claim_chain(episode_id=p["episodeId"], source_digest=source_digest,
-                           comms_digest=ack_digest) is not True
+            or claim_chain(
+                episode_id=p["episodeId"], source_digest=source_digest, comms_digest=ack_digest
+            )
+            is not True
         ):
             return _hold("HOLD_TRANSPORT_OWNER_REVIEW_OR_DURABLE_REPLAY")
     except (OSError, ValueError, TypeError):
@@ -313,8 +386,9 @@ def review_three_master_receipts308(
     now = int(time.time() * 1000) if now_ms is None else now_ms
     if not _on_ree(monitor) or type(now) is not int:
         return _hold("HOLD_NOT_ORIGINAL_REE_HOST_WITH_MONITOR")
-    if not all(callable(x) for x in (owner_authorize, independent_reviewer_approve,
-                                    atomic_claim_batch)):
+    if not all(
+        callable(x) for x in (owner_authorize, independent_reviewer_approve, atomic_claim_batch)
+    ):
         return _hold("HOLD_MASTER_INDEPENDENT_RUNTIME_AUTHORITIES")
     if not isinstance(receipts, list) or len(receipts) != 3:
         return _hold("HOLD_REQUIRE_ALL_THREE_MASTER_RECEIPTS")
@@ -346,15 +420,19 @@ def review_three_master_receipts308(
         if (
             payload["schema"] != "rosevear.master360.protected-receipt.v1"
             or payload["revision"] != expected[source_id]
-            or payload["hostId"] != (
-                ORIGINAL_HOST if source_id == SOURCE else "PROTECTED_MASTER_RUNTIME"
-            )
-            or when is None or not 0 <= now - when <= 300_000
-            or not isinstance(receipt_id, str) or not CORRELATION.fullmatch(receipt_id)
-            or not isinstance(evidence, dict) or set(evidence) != set(MASTER_EVIDENCE_AXES)
+            or payload["hostId"]
+            != (ORIGINAL_HOST if source_id == SOURCE else "PROTECTED_MASTER_RUNTIME")
+            or when is None
+            or not 0 <= now - when <= 300_000
+            or not isinstance(receipt_id, str)
+            or not CORRELATION.fullmatch(receipt_id)
+            or not isinstance(evidence, dict)
+            or set(evidence) != set(MASTER_EVIDENCE_AXES)
             or any(evidence[axis] not in ("VERIFIED", "HOLD") for axis in MASTER_EVIDENCE_AXES)
             or not _trusted_signature(
-                payload, item["signature"], pinned_public_der.get(source_id),
+                payload,
+                item["signature"],
+                pinned_public_der.get(source_id),
                 independent_pins_sha256.get(source_id, ""),
             )
         ):
@@ -368,9 +446,8 @@ def review_three_master_receipts308(
         if (
             owner_authorize(batch_sha256=digest) is not True
             or independent_reviewer_approve(batch_sha256=digest) is not True
-            or atomic_claim_batch(
-                replay_keys=tuple(sorted(claims)), batch_sha256=digest
-            ) is not True
+            or atomic_claim_batch(replay_keys=tuple(sorted(claims)), batch_sha256=digest)
+            is not True
         ):
             return _hold("HOLD_OWNER_REVIEW_OR_DURABLE_MASTER_RECEIPT_REPLAY")
     except (OSError, TypeError, ValueError):
