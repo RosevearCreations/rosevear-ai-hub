@@ -442,6 +442,10 @@ export function getMasterShellAcceptance309(signal?: AbortSignal): Promise<unkno
   return getJson<unknown>("/api/v1/system/master-shell-309-acceptance", signal);
 }
 
+export function getMasterShellAcceptance310(signal?: AbortSignal): Promise<unknown> {
+  return getJson<unknown>("/api/v1/system/master-shell-310-acceptance", signal);
+}
+
 /** Build 285: owner-authenticated read of the responding backend's local host. */
 export function getWindowsRuntimeEvidence285(signal?: AbortSignal): Promise<unknown> {
   return getJson<unknown>("/api/v1/system/windows-runtime-evidence", signal);
