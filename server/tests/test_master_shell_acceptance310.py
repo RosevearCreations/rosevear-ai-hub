@@ -1,3 +1,5 @@
+# fmt: off
+# ruff: noqa: E501, I001
 """Build 310: synthetic private witnesses never substitute for Ree field evidence."""
 import base64
 import hashlib
@@ -76,6 +78,8 @@ def source():
         "samples": [
             {"observationId": "oneTest310Sample1", "service": "hub_api_8765",
              "observedAt": _utc(NOW - 1500), "reachable": True, "latencyMs": 5.0},
+            {"observationId": "oneTest310Sample2", "service": "hub_api_8765",
+             "observedAt": _utc(NOW - 1200), "reachable": True, "latencyMs": 5.1},
         ],
     }
 
