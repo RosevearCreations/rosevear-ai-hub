@@ -9,6 +9,7 @@ from rosevear_ai_hub.master_shell_acceptance305 import inspect_original_release3
 from rosevear_ai_hub.master_shell_acceptance306 import reconcile_three_master_uptime306
 from rosevear_ai_hub.master_shell_acceptance307 import reconcile_master_evidence307
 from rosevear_ai_hub.master_shell_acceptance308 import reconcile_master_evidence308
+from rosevear_ai_hub.master_shell_acceptance309 import reconcile_master_evidence309
 from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
 from rosevear_ai_hub.master_shell_uptime303 import LocalUptimeSampler303
 from rosevear_ai_hub.release_observability import collect_release_observability
@@ -17,6 +18,16 @@ from rosevear_ai_hub.windows_launcher_evidence286 import collect_windows_launche
 from rosevear_ai_hub.windows_runtime_evidence285 import collect_windows_runtime_evidence
 
 router = APIRouter(prefix="/api/v1/system", tags=["system"])
+
+
+@router.get("/master-shell-309-acceptance")
+def master_shell_309_acceptance(request: Request, response: Response) -> dict[str, object]:
+    """Owner-only no-store source projection; no protected evidence import."""
+    response.headers["Cache-Control"] = "private, no-store"
+    monitor = getattr(request.app.state, "master_shell_uptime303", None)
+    if not isinstance(monitor, PersistentReeMonitor304):
+        monitor = PersistentReeMonitor304(enabled=False)
+    return reconcile_master_evidence309(monitor)
 
 
 @router.get("/master-shell-308-acceptance")
