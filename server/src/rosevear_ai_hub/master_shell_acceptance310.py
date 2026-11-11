@@ -1,3 +1,5 @@
+# fmt: off
+# ruff: noqa: E501, I001
 """Build 310: supervised original-host adoption, one-TEST export audit and owner gate.
 
 No network sender, receiver, key enrollment, task, or Master connection actuator.
