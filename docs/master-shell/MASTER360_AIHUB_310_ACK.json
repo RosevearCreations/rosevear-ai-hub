@@ -1,0 +1,20 @@
+{
+  "receipt": "MASTER360-AIHUB-310-ACK",
+  "source": "rosevear-ai-hub",
+  "build": 310,
+  "source309Production": "0a94c72ee4a1ded1babeac68deeb981ad33835ef",
+  "build310Production": "VERIFY_FROM_MAIN_AFTER_MERGE",
+  "comms417": "6cd77dc4f5eb5f6c7a97d3155532a51e8e4c81f6",
+  "controller373": "2e5405519b5c96a7bbd803688a099eae300dde31",
+  "code": "VERIFY_POST_MERGE",
+  "installedSource": "HOLD",
+  "protectedExportAudit": "HOLD",
+  "realCommsAck": "HOLD",
+  "controllerOwnerDecision": "HOLD",
+  "receiver": "OFF",
+  "connection": "HOLD",
+  "mastersSynced": "HOLD",
+  "automationHost": "DESKTOP-AE894KC_ONLY",
+  "newWindowsTasks": 0,
+  "privateKeysExported": false
+}
