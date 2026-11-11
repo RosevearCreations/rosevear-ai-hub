@@ -149,6 +149,33 @@ class ProtectedSourceImportLedger306:
         except (OSError, sqlite3.Error):
             return False
 
+    def was_claimed(self, *, source_id: str, episode_id: str, envelope_sha256: str) -> bool:
+        """Build 307 read-back: only a prior exact protected import counts.
+
+        Never create a database or accept caller-supplied claim summaries as
+        proof of a previous original-host intake.
+        """
+        if (
+            platform.system() != "Windows"
+            or socket.gethostname().upper() != ORIGINAL_HOST
+            or source_id != SOURCE
+            or not isinstance(episode_id, str)
+            or not EPISODE.fullmatch(episode_id)
+            or not isinstance(envelope_sha256, str)
+            or not HEX64.fullmatch(envelope_sha256)
+            or not self.path.is_file()
+        ):
+            return False
+        try:
+            with sqlite3.connect(self.path, timeout=2) as db:
+                result = db.execute(
+                    "SELECT envelope_sha256 FROM source_import306 WHERE episode_id=?",
+                    (episode_id,),
+                ).fetchone()
+                return result is not None and result[0] == envelope_sha256
+        except (OSError, sqlite3.Error):
+            return False
+
 
 def review_original_owner_release306(
     root: Path,
