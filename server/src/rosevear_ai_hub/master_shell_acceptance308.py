@@ -124,7 +124,14 @@ def review_installed_307_on_ree308(
     return {**result, "reviewBuild": 308, "requiredInstalledRevision": AIHUB307_MAIN}
 
 
-def _valid_source(envelope: Any, now: int, source_public_der: bytes | None, pin: str) -> bool:
+def _valid_source(
+    envelope: Any,
+    now: int,
+    source_public_der: bytes | None,
+    pin: str,
+    *,
+    expected_revision: str = AIHUB307_MAIN,
+) -> bool:
     if (
         not isinstance(envelope, dict)
         or set(envelope) != {"payload", "signature"}
@@ -138,7 +145,7 @@ def _valid_source(envelope: Any, now: int, source_public_der: bytes | None, pin:
         and p["schema"] == COMMS_SCHEMA
         and p["sourceId"] == SOURCE
         and p["hostId"] == ORIGINAL_HOST
-        and p["sourceRevision"] == AIHUB307_MAIN
+        and p["sourceRevision"] == expected_revision
         and isinstance(p["episodeId"], str)
         and EPISODE.fullmatch(p["episodeId"])
         and captured is not None
@@ -269,6 +276,7 @@ def verify_ql414_receiver_ack308(
     owner_authorize: Callable[..., bool] | None,
     independent_reviewer_approve: Callable[..., bool] | None,
     claim_chain: Callable[..., bool] | None,
+    expected_source_revision: str = AIHUB307_MAIN,
     now_ms: int | None = None,
 ) -> dict[str, object]:
     """Validate authentic QL-414 SHA/episode/correlation and claim durable chain.
@@ -291,7 +299,11 @@ def verify_ql414_receiver_ack308(
     ):
         return _hold("HOLD_INDEPENDENT_RUNTIME_AUTHORITY_MISSING")
     if not _valid_source(
-        source_envelope, now, source_public_der, independently_pinned_source_sha256
+        source_envelope,
+        now,
+        source_public_der,
+        independently_pinned_source_sha256,
+        expected_revision=expected_source_revision,
     ):
         return _hold("HOLD_INVALID_SIGNED_SOURCE_ENVELOPE")
     if not isinstance(comms_ack, dict) or set(comms_ack) != {"payload", "signature"}:
@@ -306,7 +318,7 @@ def verify_ql414_receiver_ack308(
         or ack["operation"] != OPERATION
         or ack["sourceId"] != SOURCE
         or ack["hostId"] != ORIGINAL_HOST
-        or ack["sourceRevision"] != AIHUB307_MAIN
+        or ack["sourceRevision"] != expected_source_revision
         or ack["sourceEpisodeId"] != p["episodeId"]
         or ack["sourcePayloadSha256"] != source_digest
         or ack["connection"] != "HOLD"
@@ -329,7 +341,7 @@ def verify_ql414_receiver_ack308(
     ack_digest = hashlib.sha256(_serialize(ack)).hexdigest()
     args = {
         "source_id": SOURCE,
-        "source_revision": AIHUB307_MAIN,
+        "source_revision": expected_source_revision,
         "episode_id": p["episodeId"],
         "source_digest": source_digest,
         "comms_digest": ack_digest,
@@ -355,7 +367,7 @@ def verify_ql414_receiver_ack308(
     return {
         **_hold("SIGNED_QL414_SOURCE_RECEIVER_CHAIN_REVIEWED_NOT_CONNECTED"),
         "accepted": True,
-        "sourceRevision": AIHUB307_MAIN,
+        "sourceRevision": expected_source_revision,
         "commsContractRevision": COMMS_QL414_MAIN,
         "episodeId": p["episodeId"],
         "correlationId": correlation_id,
