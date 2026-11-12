@@ -51,9 +51,13 @@ def _fresh(value: Any, now: int) -> int | None:
 def _scope(value: Any) -> bool:
     return (
         isinstance(value, dict)
-        and set(value) == {
-            "ceremonyId", "sourceId", "episodeId",
-            "sourceRevision", "controllerRevision",
+        and set(value)
+        == {
+            "ceremonyId",
+            "sourceId",
+            "episodeId",
+            "sourceRevision",
+            "controllerRevision",
         }
         and bool(ID.fullmatch(str(value.get("ceremonyId", ""))))
         and bool(ID.fullmatch(str(value.get("episodeId", ""))))
@@ -63,10 +67,12 @@ def _scope(value: Any) -> bool:
     )
 
 
-def _signed_native(envelope: Any, fields: set[str], schema: str, der: bytes,
-                   pin: str, issued: str, now: int) -> dict[str, Any] | None:
+def _signed_native(
+    envelope: Any, fields: set[str], schema: str, der: bytes, pin: str, issued: str, now: int
+) -> dict[str, Any] | None:
     if not (
-        isinstance(envelope, dict) and set(envelope) == {"payload", "signature"}
+        isinstance(envelope, dict)
+        and set(envelope) == {"payload", "signature"}
         and isinstance(envelope["payload"], dict)
         and set(envelope["payload"]) == fields
         and envelope["payload"].get("schema") == schema
@@ -93,12 +99,19 @@ class ProtectedRecoveryJournal318:
                 (episode, ceremony),
             ).fetchall()
 
-    def exact(self, monitor: PersistentReeMonitor304, episode: str, ceremony: str,
-              stage: str, digest: str) -> bool:
-        if not (_on_ree(monitor) and stage in STAGES and _sha(digest)
-                and isinstance(episode, str) and ID.fullmatch(episode)
-                and isinstance(ceremony, str) and ID.fullmatch(ceremony)
-                and self.path.is_file()):
+    def exact(
+        self, monitor: PersistentReeMonitor304, episode: str, ceremony: str, stage: str, digest: str
+    ) -> bool:
+        if not (
+            _on_ree(monitor)
+            and stage in STAGES
+            and _sha(digest)
+            and isinstance(episode, str)
+            and ID.fullmatch(episode)
+            and isinstance(ceremony, str)
+            and ID.fullmatch(ceremony)
+            and self.path.is_file()
+        ):
             return False
         try:
             rows = self._rows(episode, ceremony)
@@ -113,11 +126,25 @@ class ProtectedRecoveryJournal318:
         except (OSError, sqlite3.Error, IndexError):
             return False
 
-    def claim(self, monitor: PersistentReeMonitor304, episode: str, ceremony: str,
-              stage: str, digest: str, previous: str) -> bool:
-        if not (_on_ree(monitor) and stage in STAGES and _sha(digest) and _sha(previous)
-                and isinstance(episode, str) and ID.fullmatch(episode)
-                and isinstance(ceremony, str) and ID.fullmatch(ceremony)):
+    def claim(
+        self,
+        monitor: PersistentReeMonitor304,
+        episode: str,
+        ceremony: str,
+        stage: str,
+        digest: str,
+        previous: str,
+    ) -> bool:
+        if not (
+            _on_ree(monitor)
+            and stage in STAGES
+            and _sha(digest)
+            and _sha(previous)
+            and isinstance(episode, str)
+            and ID.fullmatch(episode)
+            and isinstance(ceremony, str)
+            and ID.fullmatch(ceremony)
+        ):
             return False
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -150,9 +177,15 @@ class ProtectedRecoveryJournal318:
 
 
 def verify_ql427_external_witness318(
-    monitor: PersistentReeMonitor304, audit317: Any, export: Any, witness: Any, *,
-    prior: ProtectedCheckpointJournal317, journal: ProtectedRecoveryJournal318,
-    witness_der: bytes, witness_pin: str,
+    monitor: PersistentReeMonitor304,
+    audit317: Any,
+    export: Any,
+    witness: Any,
+    *,
+    prior: ProtectedCheckpointJournal317,
+    journal: ProtectedRecoveryJournal318,
+    witness_der: bytes,
+    witness_pin: str,
     attest_reopened_owner_ack: Callable[..., bool] | None,
     attest_external_witness_custody: Callable[..., bool] | None,
     now_ms: int | None = None,
@@ -160,21 +193,41 @@ def verify_ql427_external_witness318(
     """Verify original audit plus exact native QL-427 independent witness."""
     now = int(time.time() * 1000) if now_ms is None else now_ms
     if not (
-        _on_ree(monitor) and isinstance(prior, ProtectedCheckpointJournal317)
+        _on_ree(monitor)
+        and isinstance(prior, ProtectedCheckpointJournal317)
         and isinstance(journal, ProtectedRecoveryJournal318)
-        and isinstance(audit317, dict) and audit317.get("accepted") is True
+        and isinstance(audit317, dict)
+        and audit317.get("accepted") is True
         and audit317.get("state") == "DURABLE_INDEPENDENT_OWNER_INCIDENT_AUDIT_CLOSED_RECOVERY_HOLD"
-        and audit317.get("receiver") == "OFF" and audit317.get("connection") == "HOLD"
-        and prior.exact(monitor, audit317.get("episodeId"), audit317.get("ceremonyId"),
-                        "OWNER_AUDIT", audit317.get("auditDigest"))
+        and audit317.get("receiver") == "OFF"
+        and audit317.get("connection") == "HOLD"
+        and prior.exact(
+            monitor,
+            audit317.get("episodeId"),
+            audit317.get("ceremonyId"),
+            "OWNER_AUDIT",
+            audit317.get("auditDigest"),
+        )
         and isinstance(export, dict)
-        and set(export) == {"schema", "scope", "checkpointIndex", "checkpointDigest",
-                            "incidentId", "ownerAckEvidenceDigest",
-                            "rollbackCheckpointDigest", "preparedAt"}
-        and export["schema"] == EXPORT_SCHEMA and _scope(export["scope"])
-        and type(export["checkpointIndex"]) is int and export["checkpointIndex"] >= 2
-        and all(_sha(export.get(k)) for k in
-                ("checkpointDigest", "ownerAckEvidenceDigest", "rollbackCheckpointDigest"))
+        and set(export)
+        == {
+            "schema",
+            "scope",
+            "checkpointIndex",
+            "checkpointDigest",
+            "incidentId",
+            "ownerAckEvidenceDigest",
+            "rollbackCheckpointDigest",
+            "preparedAt",
+        }
+        and export["schema"] == EXPORT_SCHEMA
+        and _scope(export["scope"])
+        and type(export["checkpointIndex"]) is int
+        and export["checkpointIndex"] >= 2
+        and all(
+            _sha(export.get(k))
+            for k in ("checkpointDigest", "ownerAckEvidenceDigest", "rollbackCheckpointDigest")
+        )
         and _fresh(export["preparedAt"], now) is not None
         and export["scope"]["episodeId"] == audit317["episodeId"]
         and export["scope"]["ceremonyId"] == audit317["ceremonyId"]
@@ -182,17 +235,32 @@ def verify_ql427_external_witness318(
     ):
         return _hold("HOLD_QL427_REOPENED_OWNER_AUDIT_AND_EXPORT_REQUIRED")
     p = _signed_native(
-        witness, {"schema", "scope", "checkpointIndex", "checkpointDigest", "incidentId",
-                  "exportDigest", "witnessId", "witnessedAt"},
-        WITNESS_SCHEMA, witness_der, witness_pin, "witnessedAt", now,
+        witness,
+        {
+            "schema",
+            "scope",
+            "checkpointIndex",
+            "checkpointDigest",
+            "incidentId",
+            "exportDigest",
+            "witnessId",
+            "witnessedAt",
+        },
+        WITNESS_SCHEMA,
+        witness_der,
+        witness_pin,
+        "witnessedAt",
+        now,
     )
     if not (
-        p and p["scope"] == export["scope"]
+        p
+        and p["scope"] == export["scope"]
         and p["checkpointIndex"] == export["checkpointIndex"]
         and p["checkpointDigest"] == export["checkpointDigest"]
         and p["incidentId"] == export["incidentId"]
         and p["exportDigest"] == _digest(export)
-        and isinstance(p["witnessId"], str) and PERSON.fullmatch(p["witnessId"])
+        and isinstance(p["witnessId"], str)
+        and PERSON.fullmatch(p["witnessId"])
         and _fresh(p["witnessedAt"], now) >= _fresh(export["preparedAt"], now)
     ):
         return _hold("HOLD_QL427_INDEPENDENT_SIGNED_WITNESS_INVALID")
@@ -211,81 +279,136 @@ def verify_ql427_external_witness318(
     if not (
         _callback(attest_reopened_owner_ack, **evidence)
         and _callback(attest_external_witness_custody, **evidence)
-        and journal.claim(monitor, audit317["episodeId"], audit317["ceremonyId"],
-                          "WITNESS", digest, ZERO)
+        and journal.claim(
+            monitor, audit317["episodeId"], audit317["ceremonyId"], "WITNESS", digest, ZERO
+        )
     ):
         return _hold("HOLD_QL427_EXTERNAL_WITNESS_CUSTODY_OR_REPLAY")
     return {
         **_hold("QL427_INDEPENDENT_CHECKPOINT_WITNESS_ONLY"),
-        "accepted": True, "scope": export["scope"], "incidentId": audit317["incidentId"],
-        "checkpointDigest": export["checkpointDigest"], "witnessDigest": digest,
-        "witnessedAt": p["witnessedAt"], "receiver": "OFF_NOT_FRESHLY_VERIFIED",
+        "accepted": True,
+        "scope": export["scope"],
+        "incidentId": audit317["incidentId"],
+        "checkpointDigest": export["checkpointDigest"],
+        "witnessDigest": digest,
+        "witnessedAt": p["witnessedAt"],
+        "receiver": "OFF_NOT_FRESHLY_VERIFIED",
     }
 
 
 def revalidate_ql427_isolation318(
-    monitor: PersistentReeMonitor304, witnessed: Any, signed_off: Any, *,
-    journal: ProtectedRecoveryJournal318, receiver_der: bytes, receiver_pin: str,
+    monitor: PersistentReeMonitor304,
+    witnessed: Any,
+    signed_off: Any,
+    *,
+    journal: ProtectedRecoveryJournal318,
+    receiver_der: bytes,
+    receiver_pin: str,
     attest_independent_receiver_off: Callable[..., bool] | None,
     attest_ql427_post_rollback_readback: Callable[..., bool] | None,
     now_ms: int | None = None,
 ) -> dict[str, object]:
     """A new signed OFF observation is mandatory; QL-426 OFF is not enough."""
     now = int(time.time() * 1000) if now_ms is None else now_ms
-    unknown = {**_hold("HOLD_QL427_FRESH_OFF_UNVERIFIED"),
-               "receiver": "UNKNOWN_MANUAL_RECOVERY_REQUIRED"}
+    unknown = {
+        **_hold("HOLD_QL427_FRESH_OFF_UNVERIFIED"),
+        "receiver": "UNKNOWN_MANUAL_RECOVERY_REQUIRED",
+    }
     if not (
-        isinstance(witnessed, dict) and witnessed.get("accepted") is True
+        isinstance(witnessed, dict)
+        and witnessed.get("accepted") is True
         and witnessed.get("state") == "QL427_INDEPENDENT_CHECKPOINT_WITNESS_ONLY"
         and isinstance(journal, ProtectedRecoveryJournal318)
         and _scope(witnessed.get("scope"))
-        and journal.exact(monitor, witnessed["scope"]["episodeId"],
-                          witnessed["scope"]["ceremonyId"], "WITNESS",
-                          witnessed.get("witnessDigest"))
+        and journal.exact(
+            monitor,
+            witnessed["scope"]["episodeId"],
+            witnessed["scope"]["ceremonyId"],
+            "WITNESS",
+            witnessed.get("witnessDigest"),
+        )
     ):
         return unknown
     p = _signed_native(
-        signed_off, {"schema", "scope", "incidentId", "checkpointDigest",
-                     "witnessDigest", "checkId", "receiverState", "observedAt"},
-        OFF_SCHEMA, receiver_der, receiver_pin, "observedAt", now,
+        signed_off,
+        {
+            "schema",
+            "scope",
+            "incidentId",
+            "checkpointDigest",
+            "witnessDigest",
+            "checkId",
+            "receiverState",
+            "observedAt",
+        },
+        OFF_SCHEMA,
+        receiver_der,
+        receiver_pin,
+        "observedAt",
+        now,
     )
     if not (
-        p and p["scope"] == witnessed["scope"]
+        p
+        and p["scope"] == witnessed["scope"]
         and p["incidentId"] == witnessed["incidentId"]
         and p["checkpointDigest"] == witnessed["checkpointDigest"]
         and p["witnessDigest"] == witnessed["witnessDigest"]
-        and isinstance(p["checkId"], str) and ID.fullmatch(p["checkId"])
+        and isinstance(p["checkId"], str)
+        and ID.fullmatch(p["checkId"])
         and p["receiverState"] == "OFF"
         and _fresh(p["observedAt"], now) >= _timestamp(witnessed["witnessedAt"])
     ):
         return unknown
     digest = _digest(p)
-    evidence = {"source_revision": SOURCE317_MAIN, "comms_revision": COMMS427_MAIN,
-                "incident_id": witnessed["incidentId"],
-                "checkpoint_digest": witnessed["checkpointDigest"],
-                "witness_digest": witnessed["witnessDigest"],
-                "isolation_digest": digest, "check_id": p["checkId"]}
+    evidence = {
+        "source_revision": SOURCE317_MAIN,
+        "comms_revision": COMMS427_MAIN,
+        "incident_id": witnessed["incidentId"],
+        "checkpoint_digest": witnessed["checkpointDigest"],
+        "witness_digest": witnessed["witnessDigest"],
+        "isolation_digest": digest,
+        "check_id": p["checkId"],
+    }
     if not (
         _callback(attest_independent_receiver_off, **evidence)
         and _callback(attest_ql427_post_rollback_readback, **evidence)
-        and journal.claim(monitor, p["scope"]["episodeId"], p["scope"]["ceremonyId"],
-                          "ISOLATION", digest, witnessed["witnessDigest"])
+        and journal.claim(
+            monitor,
+            p["scope"]["episodeId"],
+            p["scope"]["ceremonyId"],
+            "ISOLATION",
+            digest,
+            witnessed["witnessDigest"],
+        )
     ):
         return unknown
     return {
         **_hold("QL427_FRESH_SIGNED_RECEIVER_OFF_REVALIDATED"),
-        "accepted": True, "scope": p["scope"], "incidentId": p["incidentId"],
-        "checkpointDigest": p["checkpointDigest"], "witnessDigest": p["witnessDigest"],
-        "isolationDigest": digest, "observedAt": p["observedAt"], "receiver": "OFF",
+        "accepted": True,
+        "scope": p["scope"],
+        "incidentId": p["incidentId"],
+        "checkpointDigest": p["checkpointDigest"],
+        "witnessDigest": p["witnessDigest"],
+        "isolationDigest": digest,
+        "observedAt": p["observedAt"],
+        "receiver": "OFF",
     }
 
 
 def close_ql427_three_master_recovery318(
-    monitor: PersistentReeMonitor304, isolated: Any, reports: Any,
-    owner_signed: Any, comms_closure: Any, *,
+    monitor: PersistentReeMonitor304,
+    isolated: Any,
+    reports: Any,
+    owner_signed: Any,
+    comms_closure: Any,
+    *,
     journal: ProtectedRecoveryJournal318,
-    master_keys: dict[str, bytes], master_pins: dict[str, str],
-    owner_der: bytes, owner_pin: str, reviewer_der: bytes, reviewer_pin: str,
+    master_keys: dict[str, bytes],
+    master_pins: dict[str, str],
+    owner_der: bytes,
+    owner_pin: str,
+    reviewer_der: bytes,
+    reviewer_pin: str,
     attest_reopened_comms_closure: Callable[..., bool] | None,
     attest_independent_closure_anchor: Callable[..., bool] | None,
     now_ms: int | None = None,
@@ -293,16 +416,24 @@ def close_ql427_three_master_recovery318(
     """Administrative recovery closure only; never pilot reactivation."""
     now = int(time.time() * 1000) if now_ms is None else now_ms
     if not (
-        isinstance(isolated, dict) and isolated.get("accepted") is True
+        isinstance(isolated, dict)
+        and isolated.get("accepted") is True
         and isolated.get("state") == "QL427_FRESH_SIGNED_RECEIVER_OFF_REVALIDATED"
-        and isolated.get("receiver") == "OFF" and _scope(isolated.get("scope"))
+        and isolated.get("receiver") == "OFF"
+        and _scope(isolated.get("scope"))
         and isinstance(journal, ProtectedRecoveryJournal318)
-        and journal.exact(monitor, isolated["scope"]["episodeId"],
-                          isolated["scope"]["ceremonyId"], "ISOLATION",
-                          isolated.get("isolationDigest"))
-        and isinstance(reports, dict) and set(reports) == set(MASTERS)
+        and journal.exact(
+            monitor,
+            isolated["scope"]["episodeId"],
+            isolated["scope"]["ceremonyId"],
+            "ISOLATION",
+            isolated.get("isolationDigest"),
+        )
+        and isinstance(reports, dict)
+        and set(reports) == set(MASTERS)
         and _trusted_roles(master_keys, master_pins, set(MASTERS))
-        and _public_ed25519(owner_der, owner_pin) and _public_ed25519(reviewer_der, reviewer_pin)
+        and _public_ed25519(owner_der, owner_pin)
+        and _public_ed25519(reviewer_der, reviewer_pin)
         and owner_pin != reviewer_pin
         and not ({owner_pin, reviewer_pin} & set(master_pins.values()))
         and isinstance(comms_closure, dict)
@@ -315,14 +446,32 @@ def close_ql427_three_master_recovery318(
         and _sha(comms_closure.get("recoveryClosureDigest"))
     ):
         return _hold("HOLD_INDEPENDENT_QL427_CLOSURE_AND_SIGNER_CUSTODY_REQUIRED")
-    fields = {"schema", "masterId", "scope", "incidentId", "checkpointDigest",
-              "witnessDigest", "isolationDigest", "status", "observedAt"}
+    fields = {
+        "schema",
+        "masterId",
+        "scope",
+        "incidentId",
+        "checkpointDigest",
+        "witnessDigest",
+        "isolationDigest",
+        "status",
+        "observedAt",
+    }
     bodies = []
     for master in MASTERS:
-        p = _signed_native(reports[master], fields, MASTER_SCHEMA,
-                           master_keys[master], master_pins[master], "observedAt", now)
+        p = _signed_native(
+            reports[master],
+            fields,
+            MASTER_SCHEMA,
+            master_keys[master],
+            master_pins[master],
+            "observedAt",
+            now,
+        )
         if not (
-            p and p["masterId"] == master and p["scope"] == isolated["scope"]
+            p
+            and p["masterId"] == master
+            and p["scope"] == isolated["scope"]
             and p["incidentId"] == isolated["incidentId"]
             and p["checkpointDigest"] == isolated["checkpointDigest"]
             and p["witnessDigest"] == isolated["witnessDigest"]
@@ -335,21 +484,35 @@ def close_ql427_three_master_recovery318(
     report_digest = _digest(bodies)
     envelope = owner_signed if isinstance(owner_signed, dict) else {}
     p = envelope.get("payload")
-    owner_fields = {"schema", "scope", "incidentId", "checkpointDigest", "witnessDigest",
-                    "isolationDigest", "reportsDigest", "action", "closedAt",
-                    "ownerId", "reviewerId"}
+    owner_fields = {
+        "schema",
+        "scope",
+        "incidentId",
+        "checkpointDigest",
+        "witnessDigest",
+        "isolationDigest",
+        "reportsDigest",
+        "action",
+        "closedAt",
+        "ownerId",
+        "reviewerId",
+    }
     if not (
         set(envelope) == {"payload", "ownerSignature", "reviewerSignature"}
-        and isinstance(p, dict) and set(p) == owner_fields
+        and isinstance(p, dict)
+        and set(p) == owner_fields
         and p["schema"] == OWNER_SCHEMA
-        and p["scope"] == isolated["scope"] and p["incidentId"] == isolated["incidentId"]
+        and p["scope"] == isolated["scope"]
+        and p["incidentId"] == isolated["incidentId"]
         and p["checkpointDigest"] == isolated["checkpointDigest"]
         and p["witnessDigest"] == isolated["witnessDigest"]
         and p["isolationDigest"] == isolated["isolationDigest"]
         and p["reportsDigest"] == report_digest
         and p["action"] == "ACCEPT_RECOVERY_CLOSURE_KEEP_RECEIVER_OFF"
-        and isinstance(p["ownerId"], str) and PERSON.fullmatch(p["ownerId"])
-        and isinstance(p["reviewerId"], str) and PERSON.fullmatch(p["reviewerId"])
+        and isinstance(p["ownerId"], str)
+        and PERSON.fullmatch(p["ownerId"])
+        and isinstance(p["reviewerId"], str)
+        and PERSON.fullmatch(p["reviewerId"])
         and p["ownerId"] != p["reviewerId"]
         and _fresh(p["closedAt"], now) is not None
         and _fresh(p["closedAt"], now) >= _timestamp(isolated["observedAt"])
@@ -358,30 +521,42 @@ def close_ql427_three_master_recovery318(
     ):
         return _hold("HOLD_QL427_DUAL_OWNER_RECOVERY_CLOSURE_INVALID")
     digest = _digest(p)
-    evidence = {"source_revision": SOURCE317_MAIN, "comms_revision": COMMS427_MAIN,
-                "episode_id": isolated["scope"]["episodeId"],
-                "ceremony_id": isolated["scope"]["ceremonyId"],
-                "incident_id": isolated["incidentId"],
-                "checkpoint_digest": isolated["checkpointDigest"],
-                "witness_digest": isolated["witnessDigest"],
-                "isolation_digest": isolated["isolationDigest"],
-                "three_master_digest": report_digest,
-                "owner_digest": digest,
-                "comms_closure_digest": comms_closure["recoveryClosureDigest"]}
+    evidence = {
+        "source_revision": SOURCE317_MAIN,
+        "comms_revision": COMMS427_MAIN,
+        "episode_id": isolated["scope"]["episodeId"],
+        "ceremony_id": isolated["scope"]["ceremonyId"],
+        "incident_id": isolated["incidentId"],
+        "checkpoint_digest": isolated["checkpointDigest"],
+        "witness_digest": isolated["witnessDigest"],
+        "isolation_digest": isolated["isolationDigest"],
+        "three_master_digest": report_digest,
+        "owner_digest": digest,
+        "comms_closure_digest": comms_closure["recoveryClosureDigest"],
+    }
     if not (
         _callback(attest_reopened_comms_closure, **evidence)
         and _callback(attest_independent_closure_anchor, **evidence)
-        and journal.claim(monitor, isolated["scope"]["episodeId"],
-                          isolated["scope"]["ceremonyId"], "RECOVERY_CLOSURE",
-                          _digest(evidence), isolated["isolationDigest"])
+        and journal.claim(
+            monitor,
+            isolated["scope"]["episodeId"],
+            isolated["scope"]["ceremonyId"],
+            "RECOVERY_CLOSURE",
+            _digest(evidence),
+            isolated["isolationDigest"],
+        )
     ):
         return _hold("HOLD_QL427_CLOSURE_READBACK_ANCHOR_OR_REPLAY")
     return {
         **_hold("QL427_THREE_MASTER_RECOVERY_INCIDENT_CLOSED_HOLD"),
-        "accepted": True, "incidentId": isolated["incidentId"],
+        "accepted": True,
+        "incidentId": isolated["incidentId"],
         "closureDigest": _digest(evidence),
-        "receiver": "OFF", "connection": "HOLD", "ownerAcceptance": "HOLD",
-        "masterSync": "HOLD", "recovery": "NEW_SUPERVISED_QL424_CEREMONY_REQUIRED",
+        "receiver": "OFF",
+        "connection": "HOLD",
+        "ownerAcceptance": "HOLD",
+        "masterSync": "HOLD",
+        "recovery": "NEW_SUPERVISED_QL424_CEREMONY_REQUIRED",
     }
 
 
@@ -402,6 +577,8 @@ def reconcile_master_evidence318(monitor: PersistentReeMonitor304) -> dict[str, 
         "ql427ExternalClosureAnchor": "HOLD_NO_EXTERNAL_DURABLE_CLOSURE_ANCHOR",
         "runtimeUptime": "UNKNOWN_NO_CONTINUOUS_ORIGINAL_HOST_MONITORING",
         "originalHostUptime": "UNKNOWN_NO_ORIGINAL_REE_ATTESTATION",
-        "receiver": "OFF", "connection": "HOLD", "ownerAcceptance": "HOLD",
+        "receiver": "OFF",
+        "connection": "HOLD",
+        "ownerAcceptance": "HOLD",
         "masterSync": "HOLD",
     }
