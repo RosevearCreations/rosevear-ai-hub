@@ -69,7 +69,9 @@ def setup(monkeypatch, tmp_path):
     journal316 = ProtectedPilotContinuityJournal316(tmp_path / "health316.sqlite3")
     journal317 = ProtectedCheckpointJournal317(tmp_path / "checkpoints317.sqlite3")
     assert journal316.accept_snapshot(
-        Ree(), ceremony=CEREMONY, episode=EPISODE,
+        Ree(),
+        ceremony=CEREMONY,
+        episode=EPISODE,
         sequences={m: 1 for m in ("rosevear-ai-hub", "rosevear-comms-hub", "ai-data-platform")},
         digest="a" * 64,
     )
@@ -113,32 +115,30 @@ def setup(monkeypatch, tmp_path):
 
 def test_original_host_checkpoint_requires_real_external_custody(monkeypatch, tmp_path):
     journal, health, original, body, kw = setup(monkeypatch, tmp_path)
+    assert not witness_durable_ql426_checkpoint317(Ree(), health, signed(signer()[0], body), **kw)[
+        "accepted"
+    ]
     assert not witness_durable_ql426_checkpoint317(
-        Ree(), health, signed(signer()[0], body), **kw
-    )["accepted"]
-    assert not witness_durable_ql426_checkpoint317(
-        Ree(), health, signed(original[0], body),
+        Ree(),
+        health,
+        signed(original[0], body),
         **{**kw, "attest_external_head_custody": None},
     )["accepted"]
     assert not witness_durable_ql426_checkpoint317(
         Ree(), health, signed(original[0], {**body, "sourceRevision": "stale"}), **kw
     )["accepted"]
-    good = witness_durable_ql426_checkpoint317(
-        Ree(), health, signed(original[0], body), **kw
-    )
+    good = witness_durable_ql426_checkpoint317(Ree(), health, signed(original[0], body), **kw)
     assert good["accepted"] is True
     assert good["connection"] == "HOLD"
     assert journal.exact(Ree(), EPISODE, CEREMONY, "CHECKPOINT", good["checkpointDigest"])
-    assert not witness_durable_ql426_checkpoint317(
-        Ree(), health, signed(original[0], body), **kw
-    )["accepted"]
+    assert not witness_durable_ql426_checkpoint317(Ree(), health, signed(original[0], body), **kw)[
+        "accepted"
+    ]
 
 
 def test_signed_rollback_and_three_master_owner_closure(monkeypatch, tmp_path):
     journal, health, original, body, kw = setup(monkeypatch, tmp_path)
-    checkpoint = witness_durable_ql426_checkpoint317(
-        Ree(), health, signed(original[0], body), **kw
-    )
+    checkpoint = witness_durable_ql426_checkpoint317(Ree(), health, signed(original[0], body), **kw)
     receiver = signer()
     off = {
         "schema": "rosevear.ql426.receiver-rollback-readback.v1",
@@ -172,13 +172,19 @@ def test_signed_rollback_and_three_master_owner_closure(monkeypatch, tmp_path):
         "now_ms": NOW,
     }
     missing = reconcile_ql426_signed_rollback317(
-        Ree(), checkpoint, rollback, signed(receiver[0], off),
+        Ree(),
+        checkpoint,
+        rollback,
+        signed(receiver[0], off),
         **{**rk, "attest_independent_receiver_disabled": None},
     )
     assert not missing["accepted"]
     assert missing["receiver"] == "UNKNOWN_MANUAL_RECOVERY_REQUIRED"
     wrong = reconcile_ql426_signed_rollback317(
-        Ree(), checkpoint, rollback, signed(receiver[0], {**off, "receiverState": "ON"}),
+        Ree(),
+        checkpoint,
+        rollback,
+        signed(receiver[0], {**off, "receiverState": "ON"}),
         **rk,
     )
     assert not wrong["accepted"]
@@ -191,10 +197,7 @@ def test_signed_rollback_and_three_master_owner_closure(monkeypatch, tmp_path):
         Ree(), checkpoint, rollback, signed(receiver[0], off), **rk
     )["accepted"]
     roles = {k: signer() for k in ("owner", "reviewer")}
-    masters = {
-        k: signer()
-        for k in ("rosevear-ai-hub", "rosevear-comms-hub", "ai-data-platform")
-    }
+    masters = {k: signer() for k in ("rosevear-ai-hub", "rosevear-comms-hub", "ai-data-platform")}
     ack = {
         "schema": ACK_SCHEMA,
         "incidentId": INCIDENT,
@@ -215,9 +218,7 @@ def test_signed_rollback_and_three_master_owner_closure(monkeypatch, tmp_path):
         "ackCheckpointDigest": "e" * 64,
         "signedEnvelope": {
             "payload": ack,
-            "ownerSignature": base64.b64encode(
-                roles["owner"][0].sign(_serialize(ack))
-            ).decode(),
+            "ownerSignature": base64.b64encode(roles["owner"][0].sign(_serialize(ack))).decode(),
             "reviewerSignature": base64.b64encode(
                 roles["reviewer"][0].sign(_serialize(ack))
             ).decode(),
@@ -257,40 +258,42 @@ def test_signed_rollback_and_three_master_owner_closure(monkeypatch, tmp_path):
         **owner_ack,
         "signedEnvelope": {
             **owner_ack["signedEnvelope"],
-            "reviewerSignature": base64.b64encode(
-                signer()[0].sign(_serialize(ack))
-            ).decode(),
+            "reviewerSignature": base64.b64encode(signer()[0].sign(_serialize(ack))).decode(),
         },
     }
+    assert not audit_independent_owner_incident317(Ree(), accepted, forged, reports, **akw)[
+        "accepted"
+    ]
     assert not audit_independent_owner_incident317(
-        Ree(), accepted, forged, reports, **akw
-    )["accepted"]
-    assert not audit_independent_owner_incident317(
-        Ree(), accepted, owner_ack,
+        Ree(),
+        accepted,
+        owner_ack,
         {**reports, "ai-data-platform": reports["rosevear-comms-hub"]},
         **akw,
     )["accepted"]
     assert not audit_independent_owner_incident317(
-        Ree(), accepted, owner_ack, reports,
+        Ree(),
+        accepted,
+        owner_ack,
+        reports,
         **{**akw, "attest_ql426_durable_owner_ack": None},
     )["accepted"]
-    result = audit_independent_owner_incident317(
-        Ree(), accepted, owner_ack, reports, **akw
-    )
+    result = audit_independent_owner_incident317(Ree(), accepted, owner_ack, reports, **akw)
     assert result["accepted"] is True
     assert result["receiver"] == "OFF"
     assert result["connection"] == "HOLD"
     assert result["ownerAcceptance"] == "HOLD"
     assert result["recovery"] == "NEW_SUPERVISED_QL424_CEREMONY_REQUIRED"
-    assert not audit_independent_owner_incident317(
-        Ree(), accepted, owner_ack, reports, **akw
-    )["accepted"]
+    assert not audit_independent_owner_incident317(Ree(), accepted, owner_ack, reports, **akw)[
+        "accepted"
+    ]
 
 
 def test_private_owner_status_never_claims_live_pilot_from_code():
-    assert TestClient(app).get(
-        "/api/v1/system/master-shell-317-acceptance"
-    ).status_code in (401, 403)
+    assert TestClient(app).get("/api/v1/system/master-shell-317-acceptance").status_code in (
+        401,
+        403,
+    )
     state = reconcile_master_evidence317(Ree())
     assert state["sourceBuild"] == 317
     assert state["receiver"] == "OFF"
