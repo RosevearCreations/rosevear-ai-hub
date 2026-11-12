@@ -179,16 +179,15 @@ def fixture(monkeypatch, tmp_path):
 def test_witnessed_export_closure_requires_real_signatures_and_replay(monkeypatch, tmp_path):
     monitor, export, source, receiver, kwargs, ledger = fixture(monkeypatch, tmp_path)
     wrong = signed(signer()[0], receiver["payload"])
+    assert not close_witnessed_export311(monitor, export, source, wrong, **kwargs)["accepted"]
     assert not close_witnessed_export311(
-        monitor, export, source, wrong, **kwargs
-    )["accepted"]
-    assert not close_witnessed_export311(
-        monitor, export, source, receiver,
+        monitor,
+        export,
+        source,
+        receiver,
         **{**kwargs, "independently_attest_comms_timeline": lambda **_: False},
     )["accepted"]
-    result = close_witnessed_export311(
-        monitor, export, source, receiver, **kwargs
-    )
+    result = close_witnessed_export311(monitor, export, source, receiver, **kwargs)
     assert result["accepted"] is True
     assert result["state"] == "ONE_TEST_EXPORT_CUSTODY_CLOSED_NOT_CONNECTED"
     assert result["receiverAckVerified"] is True
@@ -202,9 +201,7 @@ def test_witnessed_export_closure_requires_real_signatures_and_replay(monkeypatc
         receiver_digest=result["receiverAckSha256"],
         timeline_digest=result["ql420TimelineSha256"],
     )
-    assert not close_witnessed_export311(
-        monitor, export, source, receiver, **kwargs
-    )["accepted"]
+    assert not close_witnessed_export311(monitor, export, source, receiver, **kwargs)["accepted"]
     assert not ledger.claim(
         monitor,
         episode=EPISODE,
@@ -250,15 +247,21 @@ def test_controller_custody_reconciles_without_connecting(monkeypatch, tmp_path)
         "now_ms": NOW,
     }
     assert not reconcile_controller_contract311(
-        monitor, closed, signed(controller_key, {**body, "connection": "CONNECTED"}),
+        monitor,
+        closed,
+        signed(controller_key, {**body, "connection": "CONNECTED"}),
         **options,
     )["accepted"]
     assert not reconcile_controller_contract311(
-        monitor, closed, signed(controller_key, body),
+        monitor,
+        closed,
+        signed(controller_key, body),
         **{**options, "owner_review_authorize": lambda **_: False},
     )["accepted"]
     assert not reconcile_controller_contract311(
-        monitor, closed, signed(controller_key, body),
+        monitor,
+        closed,
+        signed(controller_key, body),
         **{**options, "independent_controller_pin": "f" * 64},
     )["accepted"]
     result = reconcile_controller_contract311(
@@ -269,7 +272,9 @@ def test_controller_custody_reconciles_without_connecting(monkeypatch, tmp_path)
     assert result["mastersSynced"] is False
     assert result["receiver"] == "OFF"
     assert not reconcile_controller_contract311(
-        monitor, closed, signed(controller_key, body),
+        monitor,
+        closed,
+        signed(controller_key, body),
         **{**options, "now_ms": NOW + 301_000},
     )["accepted"]
 
