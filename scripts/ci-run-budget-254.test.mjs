@@ -21,10 +21,17 @@ assert.equal(result.maxQueueSeconds, 9);
 assert.deepEqual(result.warnings, []);
 assert.match(result.markdown, /Required checks: \*\*5\/5 SUCCESS\*\*/);
 assert.ok(result.markdown.includes("desktop-windows"));
+// GitHub can report queued while verified required jobs are already completed.
+// A queued run is acceptable only when every independent job really succeeded.
+assert.equal(summarizeRun254({ ...input, run: { ...run, status: "queued" } }).gateRows.length, 5);
+assert.throws(() => summarizeRun254({ ...input, run: { ...run, status: "queued" },
+  jobs: jobs.map(job => job.name === "backend" ? { ...job, status: "queued" } : job) }),
+/incomplete/);
 assert.equal(summarizeRun254({ ...input, run: { ...run, event: "push" },
   eventName: "push", ref: "refs/heads/main" }).gateRows.length, 5);
 
 for (const changes of [
+  { run: { ...run, status: "completed" } },
   { requiredResults: { ...requiredResults, web: { result: "skipped" } } },
   { requiredResults: { ...requiredResults, backend: { result: "failure" } } },
   { jobs: jobs.filter(job => job.name !== "web") },
