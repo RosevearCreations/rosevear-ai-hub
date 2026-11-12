@@ -22,6 +22,7 @@ from rosevear_ai_hub.master_shell_acceptance318 import reconcile_master_evidence
 from rosevear_ai_hub.master_shell_acceptance319 import reconcile_master_evidence319
 from rosevear_ai_hub.master_shell_acceptance320 import reconcile_master_evidence320
 from rosevear_ai_hub.master_shell_acceptance321 import reconcile_master_evidence321
+from rosevear_ai_hub.master_shell_acceptance322 import reconcile_master_evidence322
 from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
 from rosevear_ai_hub.master_shell_uptime303 import LocalUptimeSampler303
 from rosevear_ai_hub.release_observability import collect_release_observability
@@ -30,6 +31,16 @@ from rosevear_ai_hub.windows_launcher_evidence286 import collect_windows_launche
 from rosevear_ai_hub.windows_runtime_evidence285 import collect_windows_runtime_evidence
 
 router = APIRouter(prefix="/api/v1/system", tags=["system"])
+
+
+@router.get("/master-shell-322-acceptance")
+def master_shell_322_acceptance(request: Request, response: Response) -> dict[str, object]:
+    """Owner-only original-host QL-431 source HOLD, never signer/control intake."""
+    response.headers["Cache-Control"] = "private, no-store"
+    monitor = getattr(request.app.state, "master_shell_uptime303", None)
+    if not isinstance(monitor, PersistentReeMonitor304):
+        monitor = PersistentReeMonitor304(enabled=False)
+    return reconcile_master_evidence322(monitor)
 
 
 @router.get("/master-shell-321-acceptance")
