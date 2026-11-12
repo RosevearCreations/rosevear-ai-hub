@@ -29,7 +29,7 @@ class Ree:
     persist_eligible = True
 
     def persistent_snapshot304(self):
-        return {"collectionState": "OBSERVING_REE_LOCAL", "sampleCount": 1}
+        return {"collectionState": "OBSERVING_REE_LOCAL", "sampleCount": 3}
 
 
 def original_host(monkeypatch):
