@@ -252,7 +252,7 @@ def respond(case, challenge, *, secret=None, state="OFF", host="DESKTOP-AE894KC"
         "hostMachineId": host,
         "receiverState": state,
         "nextCeremonyId": "newCeremony320Original",
-        "respondedAt": _utc(NOW - 2000),
+        "respondedAt": _utc(NOW),
     }
     return signed(secret or case["keys"]["originalHost"][0], body)
 
@@ -362,7 +362,7 @@ def test_three_master_dual_owner_witness_is_one_use_never_activation(monkeypatch
             "hostResponseDigest": host["hostResponseDigest"],
             "nextCeremonyId": host["nextCeremonyId"],
             "status": "WITNESSED_NEW_SUPERVISED_PILOT_PRECHECK_ONLY",
-            "witnessedAt": _utc(NOW - 1000),
+            "witnessedAt": _utc(NOW),
         }
         reports[master] = signed(case["keys"][master][0], body)
     report_digest = hashlib.sha256(_serialize([reports[m]["payload"] for m in MASTERS])).hexdigest()
@@ -380,7 +380,7 @@ def test_three_master_dual_owner_witness_is_one_use_never_activation(monkeypatch
         "action": "ACCEPT_SIGNED_PRECHECK_ONLY_REQUIRE_NEW_QL424_CEREMONY_KEEP_OFF",
         "ownerId": "ownerOriginal320",
         "reviewerId": "reviewerExternal320",
-        "approvedAt": _utc(NOW - 500),
+        "approvedAt": _utc(NOW),
     }
     approval = owner_signed(decision, case["owner"], case["reviewer"])
     params = {
