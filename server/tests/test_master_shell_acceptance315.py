@@ -134,26 +134,42 @@ def test_original_host_dual_signed_enrollment_and_fail_closed(monkeypatch, tmp_p
         monkeypatch, tmp_path
     )
     assert not enroll_original_host_authority315(
-        Ree(), prior_owner, old,
+        Ree(),
+        prior_owner,
+        old,
         {**certs, "reviewer": signed(signer()[0], certs["reviewer"]["payload"])},
         **kw,
     )["accepted"]
     assert not enroll_original_host_authority315(
-        Ree(), prior_owner, old, certs,
+        Ree(),
+        prior_owner,
+        old,
+        certs,
         **{**kw, "attest_source_host_key_custody": None},
     )["accepted"]
     assert not enroll_original_host_authority315(
-        Ree(), prior_owner, old, certs,
+        Ree(),
+        prior_owner,
+        old,
+        certs,
         **{**kw, "receiver_der": source[1]},
     )["accepted"]
     result = enroll_original_host_authority315(
-        Ree(), prior_owner, old, certs, **kw,
+        Ree(),
+        prior_owner,
+        old,
+        certs,
+        **kw,
     )
     assert result["accepted"] is True
     assert result["receiver"] == "OFF"
     assert result["connection"] == "HOLD"
     assert not enroll_original_host_authority315(
-        Ree(), prior_owner, old, certs, **kw,
+        Ree(),
+        prior_owner,
+        old,
+        certs,
+        **kw,
     )["accepted"]
 
 
@@ -162,7 +178,11 @@ def test_receiver_off_witness_and_three_master_owner_gate(monkeypatch, tmp_path)
         monkeypatch, tmp_path
     )
     enrollment = enroll_original_host_authority315(
-        Ree(), prior_owner, old, certs, **kw,
+        Ree(),
+        prior_owner,
+        old,
+        certs,
+        **kw,
     )
     original = {
         "schema": SOURCE_SCHEMA,
@@ -206,28 +226,37 @@ def test_receiver_off_witness_and_three_master_owner_gate(monkeypatch, tmp_path)
         "now_ms": NOW,
     }
     assert not verify_isolated_receiver_readiness315(
-        Ree(), enrollment, signed(source[0], original),
+        Ree(),
+        enrollment,
+        signed(source[0], original),
         signed(receiver[0], {**received, "receiverState": "ISOLATED_ONE_TEST_ON"}),
         **wkw,
     )["accepted"]
     assert not verify_isolated_receiver_readiness315(
-        Ree(), enrollment, signed(source[0], original),
+        Ree(),
+        enrollment,
+        signed(source[0], original),
         signed(receiver[0], received),
         **{**wkw, "attest_receiver_disabled_readback": None},
     )["accepted"]
     witness = verify_isolated_receiver_readiness315(
-        Ree(), enrollment, signed(source[0], original),
-        signed(receiver[0], received), **wkw,
+        Ree(),
+        enrollment,
+        signed(source[0], original),
+        signed(receiver[0], received),
+        **wkw,
     )
     assert witness["accepted"] is True
     assert witness["receiver"] == "OFF"
     assert not verify_isolated_receiver_readiness315(
-        Ree(), enrollment, signed(source[0], original),
-        signed(receiver[0], received), **wkw,
+        Ree(),
+        enrollment,
+        signed(source[0], original),
+        signed(receiver[0], received),
+        **wkw,
     )["accepted"]
     masters = {
-        master: signer()
-        for master in ("rosevear-ai-hub", "rosevear-comms-hub", "ai-data-platform")
+        master: signer() for master in ("rosevear-ai-hub", "rosevear-comms-hub", "ai-data-platform")
     }
     receipts = {}
     for master in masters:
@@ -282,15 +311,25 @@ def test_receiver_off_witness_and_three_master_owner_gate(monkeypatch, tmp_path)
         "now_ms": NOW,
     }
     assert not review_three_master_operational_gate315(
-        Ree(), witness, {**receipts, "ai-data-platform": receipts["rosevear-comms-hub"]},
-        decisions, **okw,
+        Ree(),
+        witness,
+        {**receipts, "ai-data-platform": receipts["rosevear-comms-hub"]},
+        decisions,
+        **okw,
     )["accepted"]
     assert not review_three_master_operational_gate315(
-        Ree(), witness, receipts, decisions,
+        Ree(),
+        witness,
+        receipts,
+        decisions,
         **{**okw, "attest_independent_master_registry": None},
     )["accepted"]
     result = review_three_master_operational_gate315(
-        Ree(), witness, receipts, decisions, **okw,
+        Ree(),
+        witness,
+        receipts,
+        decisions,
+        **okw,
     )
     assert result["accepted"] is True
     assert result["state"] == "THREE_MASTER_SUPERVISED_PILOT_READY_NOT_EXECUTED"
@@ -298,7 +337,11 @@ def test_receiver_off_witness_and_three_master_owner_gate(monkeypatch, tmp_path)
     assert result["ownerAcceptance"] == "HOLD"
     assert result["connection"] == "HOLD"
     assert not review_three_master_operational_gate315(
-        Ree(), witness, receipts, decisions, **okw,
+        Ree(),
+        witness,
+        receipts,
+        decisions,
+        **okw,
     )["accepted"]
 
 
