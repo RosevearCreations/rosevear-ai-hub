@@ -14,7 +14,7 @@ from rosevear_ai_hub.master_shell_acceptance305 import _timestamp, _utc
 from rosevear_ai_hub.master_shell_acceptance308 import _hold, _on_ree
 from rosevear_ai_hub.master_shell_acceptance312 import MASTERS, _callback
 from rosevear_ai_hub.master_shell_acceptance315 import _public_ed25519
-from rosevear_ai_hub.master_shell_acceptance319 import _digest, _id, _recent
+from rosevear_ai_hub.master_shell_acceptance319 import _digest, _id
 from rosevear_ai_hub.master_shell_acceptance321 import ProtectedPilotJournal321, _dual
 from rosevear_ai_hub.master_shell_acceptance322 import (
     ProtectedContinuityJournal322,
