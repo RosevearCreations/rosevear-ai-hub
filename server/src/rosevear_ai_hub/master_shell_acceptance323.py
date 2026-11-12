@@ -149,11 +149,12 @@ def review_ql432_recovery323(
     now_ms: int | None = None,
 ) -> dict[str, Any]:
     """A single, original-host supervised readback; never reactivates a receiver."""
-    hold = lambda reason: {
-        **_hold(reason),
-        "receiver": "OFF_PENDING_INDEPENDENT_REVALIDATION",
-        "connection": "HOLD",
-    }
+    def hold(reason: str) -> dict[str, Any]:
+        return {
+            **_hold(reason),
+            "receiver": "OFF_PENDING_INDEPENDENT_REVALIDATION",
+            "connection": "HOLD",
+        }
     now = int(time.time() * 1000) if now_ms is None else now_ms
     scope = _accepted(monitor, pilot_acceptance, pilot_journal)
     if not (
