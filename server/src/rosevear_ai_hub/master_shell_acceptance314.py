@@ -344,8 +344,7 @@ def reconcile_ql423_restoration314(
         "restoration_digest": result_digest,
     }
     if not (
-        _callback(attest_ql423_reopened_store, **args)
-        and _callback(attest_real_restart, **args)
+        _callback(attest_ql423_reopened_store, **args) and _callback(attest_real_restart, **args)
     ):
         return _hold("HOLD_UNVERIFIED_QL423_DURABLE_RESTART_READBACK")
     if not journal.claim(
@@ -389,8 +388,7 @@ def recheck_owner_decision314(
         and isinstance(journal, ProtectedFieldJournal314)
         and isinstance(restored, dict)
         and restored.get("accepted") is True
-        and restored.get("state")
-        == "THREE_MASTER_QL423_RESTORATION_WITNESSED_REVIEW_ONLY"
+        and restored.get("state") == "THREE_MASTER_QL423_RESTORATION_WITNESSED_REVIEW_ONLY"
         and restored.get("connection") == "HOLD"
         and isinstance(signed_decisions, dict)
         and set(signed_decisions) == {"owner", "reviewer"}
@@ -444,18 +442,14 @@ def recheck_owner_decision314(
             and body["fieldDigest"] == restored["fieldDigest"]
             and body["restorationDigest"] == restored["restorationDigest"]
             and body["ql422TerminalSha256"] == restored["ql422TerminalSha256"]
-            and body["previousControllerReviewSha256"]
-            == restored["controllerReviewSha256"]
+            and body["previousControllerReviewSha256"] == restored["controllerReviewSha256"]
             and body["decision"] in ("REQUEST_ACTIVATION_REVIEW", "MAINTAIN_HOLD", "REOPEN")
             and body["ownerAcceptance"] == "HOLD"
             and body["connection"] == "HOLD"
         ):
             return _hold("HOLD_INVALID_SEPARATE_OWNER_REVIEW_SIGNATURE")
         decisions.append(body)
-    if any(
-        decisions[0][key] != decisions[1][key]
-        for key in fields - {"role", "issuedAt"}
-    ):
+    if any(decisions[0][key] != decisions[1][key] for key in fields - {"role", "issuedAt"}):
         return _hold("HOLD_OWNER_AND_REVIEWER_DECISIONS_DISAGREE")
     digest = hashlib.sha256(
         "|".join(hashlib.sha256(_serialize(body)).hexdigest() for body in decisions).encode()
