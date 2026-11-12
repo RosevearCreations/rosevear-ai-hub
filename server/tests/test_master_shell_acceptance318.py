@@ -65,61 +65,79 @@ def setup(monkeypatch, tmp_path):
     old = ProtectedCheckpointJournal317(tmp_path / "prior317.db")
     journal = ProtectedRecoveryJournal318(tmp_path / "recovery318.db")
     prev = "0" * 64
-    for stage, digest in (("CHECKPOINT", "a" * 64),
-                          ("ROLLBACK", "b" * 64),
-                          ("OWNER_AUDIT", "c" * 64)):
+    for stage, digest in (
+        ("CHECKPOINT", "a" * 64),
+        ("ROLLBACK", "b" * 64),
+        ("OWNER_AUDIT", "c" * 64),
+    ):
         assert old.claim(Ree(), EPISODE, CEREMONY, stage, digest, prev)
         prev = digest
     audit = {
         "accepted": True,
         "state": "DURABLE_INDEPENDENT_OWNER_INCIDENT_AUDIT_CLOSED_RECOVERY_HOLD",
-        "episodeId": EPISODE, "ceremonyId": CEREMONY, "incidentId": INCIDENT,
-        "auditDigest": "c" * 64, "receiver": "OFF", "connection": "HOLD",
+        "episodeId": EPISODE,
+        "ceremonyId": CEREMONY,
+        "incidentId": INCIDENT,
+        "auditDigest": "c" * 64,
+        "receiver": "OFF",
+        "connection": "HOLD",
     }
     scope = {
-        "ceremonyId": CEREMONY, "sourceId": "rosevear-ai-hub",
-        "episodeId": EPISODE, "sourceRevision": SOURCE315_MAIN,
+        "ceremonyId": CEREMONY,
+        "sourceId": "rosevear-ai-hub",
+        "episodeId": EPISODE,
+        "sourceRevision": SOURCE315_MAIN,
         "controllerRevision": CONTROLLER380_MAIN,
     }
     export = {
         "schema": "rosevear.ql427.checkpoint-witness-export.v1",
-        "scope": scope, "checkpointIndex": 3, "checkpointDigest": "d" * 64,
-        "incidentId": INCIDENT, "ownerAckEvidenceDigest": "e" * 64,
-        "rollbackCheckpointDigest": "f" * 64, "preparedAt": _utc(NOW - 5000),
+        "scope": scope,
+        "checkpointIndex": 3,
+        "checkpointDigest": "d" * 64,
+        "incidentId": INCIDENT,
+        "ownerAckEvidenceDigest": "e" * 64,
+        "rollbackCheckpointDigest": "f" * 64,
+        "preparedAt": _utc(NOW - 5000),
     }
     witness = signer()
     payload = {
         "schema": "rosevear.ql427.independent-checkpoint-witness.v1",
-        "scope": scope, "checkpointIndex": 3, "checkpointDigest": "d" * 64,
-        "incidentId": INCIDENT, "exportDigest": hashlib.sha256(_serialize(export)).hexdigest(),
-        "witnessId": "independentReviewer318", "witnessedAt": _utc(NOW - 4000),
+        "scope": scope,
+        "checkpointIndex": 3,
+        "checkpointDigest": "d" * 64,
+        "incidentId": INCIDENT,
+        "exportDigest": hashlib.sha256(_serialize(export)).hexdigest(),
+        "witnessId": "independentReviewer318",
+        "witnessedAt": _utc(NOW - 4000),
     }
     kw = {
-        "prior": old, "journal": journal, "witness_der": witness[1],
-        "witness_pin": witness[2], "attest_reopened_owner_ack": lambda **_: True,
-        "attest_external_witness_custody": lambda **_: True, "now_ms": NOW,
+        "prior": old,
+        "journal": journal,
+        "witness_der": witness[1],
+        "witness_pin": witness[2],
+        "attest_reopened_owner_ack": lambda **_: True,
+        "attest_external_witness_custody": lambda **_: True,
+        "now_ms": NOW,
     }
     return journal, audit, export, witness, payload, kw
 
 
 def test_witness_cannot_be_claimed_without_original_and_external_custody(monkeypatch, tmp_path):
     journal, audit, export, witness, payload, kw = setup(monkeypatch, tmp_path)
-    bad = verify_ql427_external_witness318(
-        Ree(), audit, export, signed(signer()[0], payload), **kw
-    )
+    bad = verify_ql427_external_witness318(Ree(), audit, export, signed(signer()[0], payload), **kw)
     assert bad["connection"] == "HOLD"
     assert not bad.get("accepted")
     assert not verify_ql427_external_witness318(
-        Ree(), audit, export, signed(witness[0], payload),
+        Ree(),
+        audit,
+        export,
+        signed(witness[0], payload),
         **{**kw, "attest_external_witness_custody": None},
     ).get("accepted")
     assert not verify_ql427_external_witness318(
-        Ree(), audit, {**export, "checkpointDigest": "9" * 64},
-        signed(witness[0], payload), **kw
+        Ree(), audit, {**export, "checkpointDigest": "9" * 64}, signed(witness[0], payload), **kw
     ).get("accepted")
-    good = verify_ql427_external_witness318(
-        Ree(), audit, export, signed(witness[0], payload), **kw
-    )
+    good = verify_ql427_external_witness318(Ree(), audit, export, signed(witness[0], payload), **kw)
     assert good["accepted"] is True
     assert good["connection"] == "HOLD"
     assert good["receiver"] == "OFF_NOT_FRESHLY_VERIFIED"
@@ -137,14 +155,21 @@ def test_stale_on_or_forged_receiver_isolation_fails_closed(monkeypatch, tmp_pat
     receiver = signer()
     off = {
         "schema": "rosevear.ql427.post-rollback-isolation.v1",
-        "scope": export["scope"], "incidentId": INCIDENT, "checkpointDigest": "d" * 64,
-        "witnessDigest": witnessed["witnessDigest"], "checkId": "isolationCheck318",
-        "receiverState": "OFF", "observedAt": _utc(NOW - 3000),
+        "scope": export["scope"],
+        "incidentId": INCIDENT,
+        "checkpointDigest": "d" * 64,
+        "witnessDigest": witnessed["witnessDigest"],
+        "checkId": "isolationCheck318",
+        "receiverState": "OFF",
+        "observedAt": _utc(NOW - 3000),
     }
     rk = {
-        "journal": journal, "receiver_der": receiver[1], "receiver_pin": receiver[2],
+        "journal": journal,
+        "receiver_der": receiver[1],
+        "receiver_pin": receiver[2],
         "attest_independent_receiver_off": lambda **_: True,
-        "attest_ql427_post_rollback_readback": lambda **_: True, "now_ms": NOW,
+        "attest_ql427_post_rollback_readback": lambda **_: True,
+        "now_ms": NOW,
     }
     for attempt in (
         signed(signer()[0], off),
@@ -155,15 +180,17 @@ def test_stale_on_or_forged_receiver_isolation_fails_closed(monkeypatch, tmp_pat
         invalid = revalidate_ql427_isolation318(Ree(), witnessed, attempt, **rk)
         assert invalid["receiver"] == "UNKNOWN_MANUAL_RECOVERY_REQUIRED"
     assert not revalidate_ql427_isolation318(
-        Ree(), witnessed, signed(receiver[0], off),
+        Ree(),
+        witnessed,
+        signed(receiver[0], off),
         **{**rk, "attest_ql427_post_rollback_readback": None},
     ).get("accepted")
     isolated = revalidate_ql427_isolation318(Ree(), witnessed, signed(receiver[0], off), **rk)
     assert isolated["accepted"] is True
     assert isolated["receiver"] == "OFF"
-    assert not revalidate_ql427_isolation318(
-        Ree(), witnessed, signed(receiver[0], off), **rk
-    ).get("accepted")
+    assert not revalidate_ql427_isolation318(Ree(), witnessed, signed(receiver[0], off), **rk).get(
+        "accepted"
+    )
 
 
 def test_three_master_closure_never_reenables_receiver(monkeypatch, tmp_path):
@@ -174,23 +201,35 @@ def test_three_master_closure_never_reenables_receiver(monkeypatch, tmp_path):
     receiver = signer()
     off = {
         "schema": "rosevear.ql427.post-rollback-isolation.v1",
-        "scope": export["scope"], "incidentId": INCIDENT, "checkpointDigest": "d" * 64,
-        "witnessDigest": witnessed["witnessDigest"], "checkId": "isolationCheck318",
-        "receiverState": "OFF", "observedAt": _utc(NOW - 3000),
+        "scope": export["scope"],
+        "incidentId": INCIDENT,
+        "checkpointDigest": "d" * 64,
+        "witnessDigest": witnessed["witnessDigest"],
+        "checkId": "isolationCheck318",
+        "receiverState": "OFF",
+        "observedAt": _utc(NOW - 3000),
     }
     isolated = revalidate_ql427_isolation318(
-        Ree(), witnessed, signed(receiver[0], off),
-        journal=journal, receiver_der=receiver[1], receiver_pin=receiver[2],
+        Ree(),
+        witnessed,
+        signed(receiver[0], off),
+        journal=journal,
+        receiver_der=receiver[1],
+        receiver_pin=receiver[2],
         attest_independent_receiver_off=lambda **_: True,
-        attest_ql427_post_rollback_readback=lambda **_: True, now_ms=NOW,
+        attest_ql427_post_rollback_readback=lambda **_: True,
+        now_ms=NOW,
     )
     masters = {m: signer() for m in MASTERS}
     reports = {}
     for m in MASTERS:
         p = {
             "schema": "rosevear.ql427.master-recovery-closure.v1",
-            "masterId": m, "scope": export["scope"], "incidentId": INCIDENT,
-            "checkpointDigest": "d" * 64, "witnessDigest": witnessed["witnessDigest"],
+            "masterId": m,
+            "scope": export["scope"],
+            "incidentId": INCIDENT,
+            "checkpointDigest": "d" * 64,
+            "witnessDigest": witnessed["witnessDigest"],
             "isolationDigest": isolated["isolationDigest"],
             "status": "CONFIRMED_ISOLATED_RECOVERY_CLOSED",
             "observedAt": _utc(NOW - 2000),
@@ -200,11 +239,15 @@ def test_three_master_closure_never_reenables_receiver(monkeypatch, tmp_path):
     report_digest = hashlib.sha256(_serialize([reports[m]["payload"] for m in MASTERS])).hexdigest()
     accepted = {
         "schema": "rosevear.ql427.owner-recovery-closure.v1",
-        "scope": export["scope"], "incidentId": INCIDENT, "checkpointDigest": "d" * 64,
+        "scope": export["scope"],
+        "incidentId": INCIDENT,
+        "checkpointDigest": "d" * 64,
         "witnessDigest": witnessed["witnessDigest"],
-        "isolationDigest": isolated["isolationDigest"], "reportsDigest": report_digest,
+        "isolationDigest": isolated["isolationDigest"],
+        "reportsDigest": report_digest,
         "action": "ACCEPT_RECOVERY_CLOSURE_KEEP_RECEIVER_OFF",
-        "closedAt": _utc(NOW - 1000), "ownerId": "ownerOriginal318",
+        "closedAt": _utc(NOW - 1000),
+        "ownerId": "ownerOriginal318",
         "reviewerId": "reviewerIndependent318",
     }
     reviews = {
@@ -214,29 +257,42 @@ def test_three_master_closure_never_reenables_receiver(monkeypatch, tmp_path):
     }
     comms = {
         "state": "DURABLE_THREE_MASTER_RECOVERY_CLOSURE_RECORDED",
-        "incidentId": INCIDENT, "checkpointDigest": "d" * 64, "masterCount": 3,
-        "receiver": "OFF_VERIFIED_SIGNED_READBACK", "connection": "HOLD",
+        "incidentId": INCIDENT,
+        "checkpointDigest": "d" * 64,
+        "masterCount": 3,
+        "receiver": "OFF_VERIFIED_SIGNED_READBACK",
+        "connection": "HOLD",
         "recoveryClosureDigest": "9" * 64,
     }
     ck = {
-        "journal": journal, "master_keys": {m: masters[m][1] for m in MASTERS},
+        "journal": journal,
+        "master_keys": {m: masters[m][1] for m in MASTERS},
         "master_pins": {m: masters[m][2] for m in MASTERS},
-        "owner_der": owner[1], "owner_pin": owner[2],
-        "reviewer_der": reviewer[1], "reviewer_pin": reviewer[2],
+        "owner_der": owner[1],
+        "owner_pin": owner[2],
+        "reviewer_der": reviewer[1],
+        "reviewer_pin": reviewer[2],
         "attest_reopened_comms_closure": lambda **_: True,
-        "attest_independent_closure_anchor": lambda **_: True, "now_ms": NOW,
+        "attest_independent_closure_anchor": lambda **_: True,
+        "now_ms": NOW,
     }
     assert not close_ql427_three_master_recovery318(
-        Ree(), isolated, reports, reviews, comms,
+        Ree(),
+        isolated,
+        reports,
+        reviews,
+        comms,
         **{**ck, "attest_independent_closure_anchor": None},
     ).get("accepted")
     assert not close_ql427_three_master_recovery318(
-        Ree(), isolated, {**reports, "ai-data-platform": reports["rosevear-comms-hub"]},
-        reviews, comms, **ck
+        Ree(),
+        isolated,
+        {**reports, "ai-data-platform": reports["rosevear-comms-hub"]},
+        reviews,
+        comms,
+        **ck,
     ).get("accepted")
-    result = close_ql427_three_master_recovery318(
-        Ree(), isolated, reports, reviews, comms, **ck
-    )
+    result = close_ql427_three_master_recovery318(Ree(), isolated, reports, reviews, comms, **ck)
     assert result["accepted"] is True
     assert result["receiver"] == "OFF"
     assert result["connection"] == "HOLD"
@@ -250,7 +306,8 @@ def test_three_master_closure_never_reenables_receiver(monkeypatch, tmp_path):
 
 def test_owner_readback_is_protected_source_status_not_live_activation():
     assert TestClient(app).get("/api/v1/system/master-shell-318-acceptance").status_code in (
-        401, 403,
+        401,
+        403,
     )
     status = reconcile_master_evidence318(Ree())
     assert status["sourceBuild"] == 318
