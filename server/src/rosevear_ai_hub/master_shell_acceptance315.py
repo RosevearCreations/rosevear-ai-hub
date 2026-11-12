@@ -50,10 +50,7 @@ def _identity(value: Any) -> bool:
 
 def _public_ed25519(der: Any, pin: Any) -> bool:
     if not (
-        isinstance(der, bytes)
-        and 32 <= len(der) <= 512
-        and isinstance(pin, str)
-        and len(pin) == 64
+        isinstance(der, bytes) and 32 <= len(der) <= 512 and isinstance(pin, str) and len(pin) == 64
     ):
         return False
     try:
@@ -190,8 +187,7 @@ def enroll_original_host_authority315(
         and isinstance(previous_restoration, dict)
         and previous_owner.get("accepted") is True
         and previous_restoration.get("accepted") is True
-        and previous_owner.get("state")
-        == "READY_FOR_SEPARATE_SUPERVISED_ACTIVATION_NOT_EXECUTED"
+        and previous_owner.get("state") == "READY_FOR_SEPARATE_SUPERVISED_ACTIVATION_NOT_EXECUTED"
         and previous_restoration.get("state")
         == "THREE_MASTER_QL423_RESTORATION_WITNESSED_REVIEW_ONLY"
         and previous_owner.get("connection") == "HOLD"
@@ -229,18 +225,35 @@ def enroll_original_host_authority315(
     ):
         return _hold("HOLD_INVALID_OR_SHARED_PUBLIC_SIGNER_AUTHORITY")
     fields = {
-        "schema", "role", "operatorId", "hostId", "sourceId",
-        "sourceRevision", "commsRevision", "controllerRevision",
-        "episodeId", "correlationId", "sourcePublicSha256",
-        "receiverPublicSha256", "priorOwnerDecisionSha256",
-        "fieldDigest", "restorationDigest", "enrollmentId",
-        "intent", "issuedAt", "connection",
+        "schema",
+        "role",
+        "operatorId",
+        "hostId",
+        "sourceId",
+        "sourceRevision",
+        "commsRevision",
+        "controllerRevision",
+        "episodeId",
+        "correlationId",
+        "sourcePublicSha256",
+        "receiverPublicSha256",
+        "priorOwnerDecisionSha256",
+        "fieldDigest",
+        "restorationDigest",
+        "enrollmentId",
+        "intent",
+        "issuedAt",
+        "connection",
     }
     records = []
     for role in ("owner", "reviewer"):
         body = _signed(
-            certificates[role], fields, ENROLL_SCHEMA,
-            owner_keys[role], owner_pins[role], now,
+            certificates[role],
+            fields,
+            ENROLL_SCHEMA,
+            owner_keys[role],
+            owner_pins[role],
+            now,
         )
         if body is None or not (
             body["role"] == role
@@ -264,8 +277,7 @@ def enroll_original_host_authority315(
             return _hold("HOLD_INVALID_DUAL_SIGNED_ORIGINAL_HOST_ENROLLMENT")
         records.append(body)
     if records[0]["operatorId"] == records[1]["operatorId"] or any(
-        records[0][k] != records[1][k]
-        for k in fields - {"role", "operatorId", "issuedAt"}
+        records[0][k] != records[1][k] for k in fields - {"role", "operatorId", "issuedAt"}
     ):
         return _hold("HOLD_OWNER_REVIEWER_ENROLLMENT_DISAGREEMENT")
     digest = hashlib.sha256(_serialize(records)).hexdigest()
@@ -331,20 +343,36 @@ def verify_isolated_receiver_readiness315(
         and _public_ed25519(receiver_der, enrollment.get("receiverPublicSha256"))
         and enrollment.get("sourcePublicSha256") != enrollment.get("receiverPublicSha256")
         and journal.exact(
-            monitor, enrollment.get("episodeId"), enrollment.get("correlationId"),
-            "ENROLL", enrollment.get("enrollmentDigest"),
+            monitor,
+            enrollment.get("episodeId"),
+            enrollment.get("correlationId"),
+            "ENROLL",
+            enrollment.get("enrollmentDigest"),
         )
     ):
         return _hold("HOLD_NO_EXACT_SOURCE_RECEIVER_AUTHORITY_ENROLLMENT")
     source_fields = {
-        "schema", "hostId", "sourceId", "sourceRevision",
-        "commsRevision", "controllerRevision", "episodeId",
-        "correlationId", "enrollmentDigest", "enrollmentId",
-        "receiverIntent", "issuedAt", "connection",
+        "schema",
+        "hostId",
+        "sourceId",
+        "sourceRevision",
+        "commsRevision",
+        "controllerRevision",
+        "episodeId",
+        "correlationId",
+        "enrollmentDigest",
+        "enrollmentId",
+        "receiverIntent",
+        "issuedAt",
+        "connection",
     }
     original = _signed(
-        signed_source, source_fields, SOURCE_SCHEMA,
-        source_der, enrollment["sourcePublicSha256"], now,
+        signed_source,
+        source_fields,
+        SOURCE_SCHEMA,
+        source_der,
+        enrollment["sourcePublicSha256"],
+        now,
     )
     if original is None or not (
         original["hostId"] == HOST
@@ -362,15 +390,29 @@ def verify_isolated_receiver_readiness315(
         return _hold("HOLD_INVALID_ORIGINAL_HOST_SIGNED_PRE_FLIGHT")
     original_digest = hashlib.sha256(_serialize(original)).hexdigest()
     receiver_fields = {
-        "schema", "receiverId", "hostId", "sourceRevision",
-        "commsRevision", "controllerRevision", "episodeId",
-        "correlationId", "enrollmentDigest", "enrollmentId",
-        "sourceTelemetrySha256", "receiverState", "ceremonyState",
-        "issuedAt", "connection",
+        "schema",
+        "receiverId",
+        "hostId",
+        "sourceRevision",
+        "commsRevision",
+        "controllerRevision",
+        "episodeId",
+        "correlationId",
+        "enrollmentDigest",
+        "enrollmentId",
+        "sourceTelemetrySha256",
+        "receiverState",
+        "ceremonyState",
+        "issuedAt",
+        "connection",
     }
     received = _signed(
-        signed_receiver, receiver_fields, RECEIVER_SCHEMA,
-        receiver_der, enrollment["receiverPublicSha256"], now,
+        signed_receiver,
+        receiver_fields,
+        RECEIVER_SCHEMA,
+        receiver_der,
+        enrollment["receiverPublicSha256"],
+        now,
     )
     if received is None or not (
         received["receiverId"] == "rosevear-comms-hub"
@@ -408,8 +450,12 @@ def verify_isolated_receiver_readiness315(
     ):
         return _hold("HOLD_NO_REAL_RECEIVER_OFF_OR_HOST_PRE_FLIGHT")
     if not journal.claim(
-        monitor, enrollment["episodeId"], enrollment["correlationId"],
-        "RECEIVER_WITNESS", digest, enrollment["enrollmentDigest"],
+        monitor,
+        enrollment["episodeId"],
+        enrollment["correlationId"],
+        "RECEIVER_WITNESS",
+        digest,
+        enrollment["enrollmentDigest"],
     ):
         return _hold("HOLD_RECEIVER_WITNESS_REPLAY_OR_STORAGE")
     return {
@@ -460,22 +506,38 @@ def review_three_master_operational_gate315(
         and _trusted_roles(operator_keys, operator_pins, {"owner", "reviewer"})
         and not set(master_pins.values()) & set(operator_pins.values())
         and journal.exact(
-            monitor, witness.get("episodeId"), witness.get("correlationId"),
-            "RECEIVER_WITNESS", witness.get("witnessDigest"),
+            monitor,
+            witness.get("episodeId"),
+            witness.get("correlationId"),
+            "RECEIVER_WITNESS",
+            witness.get("witnessDigest"),
         )
     ):
         return _hold("HOLD_THREE_MASTER_Ql424_PILOT_PRE_FLIGHT")
     fields = {
-        "schema", "master", "sourceRevision", "commsRevision",
-        "controllerRevision", "episodeId", "correlationId",
-        "enrollmentDigest", "witnessDigest", "ceremonyState",
-        "decision", "issuedAt", "connection",
+        "schema",
+        "master",
+        "sourceRevision",
+        "commsRevision",
+        "controllerRevision",
+        "episodeId",
+        "correlationId",
+        "enrollmentDigest",
+        "witnessDigest",
+        "ceremonyState",
+        "decision",
+        "issuedAt",
+        "connection",
     }
     receipts = []
     for master in MASTERS:
         body = _signed(
-            signed_masters[master], fields, MASTER_SCHEMA,
-            master_keys[master], master_pins[master], now,
+            signed_masters[master],
+            fields,
+            MASTER_SCHEMA,
+            master_keys[master],
+            master_pins[master],
+            now,
         )
         if body is None or not (
             body["master"] == master
@@ -494,16 +556,30 @@ def review_three_master_operational_gate315(
         receipts.append(body)
     master_digest = hashlib.sha256(_serialize(receipts)).hexdigest()
     owner_fields = {
-        "schema", "role", "operatorId", "sourceRevision",
-        "commsRevision", "controllerRevision", "episodeId",
-        "correlationId", "witnessDigest", "threeMasterSha256",
-        "decision", "issuedAt", "ownerAcceptance", "connection",
+        "schema",
+        "role",
+        "operatorId",
+        "sourceRevision",
+        "commsRevision",
+        "controllerRevision",
+        "episodeId",
+        "correlationId",
+        "witnessDigest",
+        "threeMasterSha256",
+        "decision",
+        "issuedAt",
+        "ownerAcceptance",
+        "connection",
     }
     decisions = []
     for role in ("owner", "reviewer"):
         body = _signed(
-            signed_decisions[role], owner_fields, OWNER_SCHEMA,
-            operator_keys[role], operator_pins[role], now,
+            signed_decisions[role],
+            owner_fields,
+            OWNER_SCHEMA,
+            operator_keys[role],
+            operator_pins[role],
+            now,
         )
         if body is None or not (
             body["role"] == role
@@ -544,8 +620,12 @@ def review_three_master_operational_gate315(
     ):
         return _hold("HOLD_NO_INDEPENDENT_MASTER_OR_OWNER_GATE_CUSTODY")
     if not journal.claim(
-        monitor, witness["episodeId"], witness["correlationId"],
-        "OWNER_GATE", digest, witness["witnessDigest"],
+        monitor,
+        witness["episodeId"],
+        witness["correlationId"],
+        "OWNER_GATE",
+        digest,
+        witness["witnessDigest"],
     ):
         return _hold("HOLD_REPLAYED_THREE_MASTER_OPERATOR_DECISION")
     return {
