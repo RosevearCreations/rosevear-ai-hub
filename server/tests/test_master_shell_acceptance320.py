@@ -1,4 +1,5 @@
 """Build 320 — protected QL-429 signer enrollment, random challenge, OFF witness."""
+
 import base64
 import hashlib
 
@@ -11,16 +12,22 @@ from rosevear_ai_hub.master_shell_acceptance305 import _serialize, _utc
 from rosevear_ai_hub.master_shell_acceptance316 import CONTROLLER380_MAIN, SOURCE315_MAIN
 from rosevear_ai_hub.master_shell_acceptance319 import ProtectedAnchorJournal319
 from rosevear_ai_hub.master_shell_acceptance320 import (
-    COMMS429_CONTRACT, SOURCE319_MAIN,
-    ProtectedEnrollmentJournal320, enroll_ql429_external_pins320,
-    issue_ql429_original_challenge320, reconcile_master_evidence320,
-    verify_ql429_original_host_off320, witness_ql429_three_master_pilot320,
+    COMMS429_CONTRACT,
+    SOURCE319_MAIN,
+    ProtectedEnrollmentJournal320,
+    enroll_ql429_external_pins320,
+    issue_ql429_original_challenge320,
+    reconcile_master_evidence320,
+    verify_ql429_original_host_off320,
+    witness_ql429_three_master_pilot320,
 )
 
 NOW = 1794480000000
 SCOPE = {
-    "ceremonyId": "ceremony320Original", "sourceId": "rosevear-ai-hub",
-    "episodeId": "episode320Original", "sourceRevision": SOURCE315_MAIN,
+    "ceremonyId": "ceremony320Original",
+    "sourceId": "rosevear-ai-hub",
+    "episodeId": "episode320Original",
+    "sourceRevision": SOURCE315_MAIN,
     "controllerRevision": CONTROLLER380_MAIN,
 }
 INCIDENT = "incident320Original"
@@ -54,7 +61,10 @@ def signer():
 
 
 def signed(key, payload):
-    return {"payload": payload, "signature": base64.b64encode(key.sign(_serialize(payload))).decode()}
+    return {
+        "payload": payload,
+        "signature": base64.b64encode(key.sign(_serialize(payload))).decode(),
+    }
 
 
 def owner_signed(body, owner, reviewer):
@@ -73,7 +83,8 @@ def bootstrap(monkeypatch, tmp_path):
     owner, reviewer = signer(), signer()
     enrollment = {
         "schema": "rosevear.ql429.external-anchor-enrollment.v1",
-        "externalStoreId": STORE, "anchorId": ANCHOR,
+        "externalStoreId": STORE,
+        "anchorId": ANCHOR,
         "originalHostMachineId": "DESKTOP-AE894KC",
         "pins": {
             "anchor": pin_keys["anchor"][3],
@@ -81,41 +92,59 @@ def bootstrap(monkeypatch, tmp_path):
             "originalHost": pin_keys["originalHost"][3],
             "masters": {m: pin_keys[m][3] for m in MASTERS},
         },
-        "ownerId": "ownerOriginal320", "reviewerId": "reviewerExternal320",
+        "ownerId": "ownerOriginal320",
+        "reviewerId": "reviewerExternal320",
         "createdAt": _utc(NOW - 10000),
     }
     enrolled_digest = hashlib.sha256(_serialize(enrollment)).hexdigest()
-    approval = owner_signed({
-        "schema": "rosevear.ql429.enrollment-owner-approval.v1",
-        "enrollmentDigest": enrolled_digest,
-        "action": "ENROLL_OFF_HOST_PUBLIC_PINS_NO_RECEIVER_ACTIVATION",
-        "signedAt": _utc(NOW - 9000),
-    }, owner, reviewer)
+    approval = owner_signed(
+        {
+            "schema": "rosevear.ql429.enrollment-owner-approval.v1",
+            "enrollmentDigest": enrolled_digest,
+            "action": "ENROLL_OFF_HOST_PUBLIC_PINS_NO_RECEIVER_ACTIVATION",
+            "signedAt": _utc(NOW - 9000),
+        },
+        owner,
+        reviewer,
+    )
     proofs = {}
     for role in ("anchor", "reader", "originalHost"):
-        proofs[role] = signed(pin_keys[role][0], {
-            "schema": "rosevear.ql429.pin-possession.v1",
-            "enrollmentDigest": enrolled_digest,
-            "role": role, "observedAt": _utc(NOW - 8000),
-        })
+        proofs[role] = signed(
+            pin_keys[role][0],
+            {
+                "schema": "rosevear.ql429.pin-possession.v1",
+                "enrollmentDigest": enrolled_digest,
+                "role": role,
+                "observedAt": _utc(NOW - 8000),
+            },
+        )
     enrollment_kwargs = {
-        "journal": journal, "owner_der": owner[1], "owner_pin": owner[2],
-        "reviewer_der": reviewer[1], "reviewer_pin": reviewer[2],
+        "journal": journal,
+        "owner_der": owner[1],
+        "owner_pin": owner[2],
+        "reviewer_der": reviewer[1],
+        "reviewer_pin": reviewer[2],
         "attest_owner_custody": lambda **_: True,
         "attest_reviewer_custody": lambda **_: True,
         "attest_external_store": lambda **_: True,
-        "attest_original_host": lambda **_: True, "now_ms": NOW,
+        "attest_original_host": lambda **_: True,
+        "now_ms": NOW,
     }
     local = {
-        "scope": SCOPE, "incidentId": INCIDENT, "checkpointIndex": 3,
-        "checkpointDigest": "d" * 64, "closureReceiptDigest": "e" * 64,
+        "scope": SCOPE,
+        "incidentId": INCIDENT,
+        "checkpointIndex": 3,
+        "checkpointDigest": "d" * 64,
+        "closureReceiptDigest": "e" * 64,
         "closurePayloadDigest": "f" * 64,
     }
     precheck = {
         "accepted": True,
         "state": "QL428_SUPERVISED_REENTRY_PRECHECK_ONLY",
-        "reentryId": REENTRY, "precheckDigest": "c" * 64,
-        "connection": "HOLD", "receiver": "OFF",
+        "reentryId": REENTRY,
+        "precheckDigest": "c" * 64,
+        "connection": "HOLD",
+        "receiver": "OFF",
     }
     for stage, digest, previous, nonce in (
         ("ANCHOR", "a" * 64, "0" * 64, "nonceEnroll320"),
@@ -123,72 +152,105 @@ def bootstrap(monkeypatch, tmp_path):
         ("PRECHECK", "c" * 64, "b" * 64, REENTRY),
     ):
         assert anchor_journal.claim(
-            Ree(), SCOPE, stage, digest, previous, nonce=nonce,
-            store_id=STORE, anchor_id=ANCHOR, sequence=3,
+            Ree(),
+            SCOPE,
+            stage,
+            digest,
+            previous,
+            nonce=nonce,
+            store_id=STORE,
+            anchor_id=ANCHOR,
+            sequence=3,
         )
     anchor_body = {
         "schema": "rosevear.ql428.external-closure-anchor.v1",
-        **local, "anchorId": ANCHOR, "externalStoreId": STORE,
-        "anchorSequence": 5, "anchoredAt": _utc(NOW - 22000),
+        **local,
+        "anchorId": ANCHOR,
+        "externalStoreId": STORE,
+        "anchorSequence": 5,
+        "anchoredAt": _utc(NOW - 22000),
     }
     changed = {"drift": False}
 
     def read_local(**_):
-        return {
-            **local, "checkpointDigest": "0" * 64
-        } if changed["drift"] else local
+        return {**local, "checkpointDigest": "0" * 64} if changed["drift"] else local
 
     def read_remote(**args):
         p = {
             "schema": "rosevear.ql428.external-anchor-readback.v1",
-            "scope": SCOPE, "anchorId": ANCHOR,
+            "scope": SCOPE,
+            "anchorId": ANCHOR,
             "anchorDigest": hashlib.sha256(_serialize(anchor_body)).hexdigest(),
-            "requestId": args["request_id"], "externalStoreId": STORE,
-            "remoteDurable": True, "remoteSequence": 6,
+            "requestId": args["request_id"],
+            "externalStoreId": STORE,
+            "remoteDurable": True,
+            "remoteSequence": 6,
             "retrievedAt": _utc(NOW - 3000),
         }
         return {
             "anchor": signed(pin_keys["anchor"][0], anchor_body),
             "readback": signed(pin_keys["reader"][0], p),
         }
+
     challenge_kwargs = {
-        "old_journal": anchor_journal, "journal": journal,
-        "external_store_id": STORE, "scope": SCOPE, "reentry_id": REENTRY,
+        "old_journal": anchor_journal,
+        "journal": journal,
+        "external_store_id": STORE,
+        "scope": SCOPE,
+        "reentry_id": REENTRY,
         "request_id": "freshRemoteRequest320",
         "comms_precheck_digest": "9" * 64,
-        "read_remote": read_remote, "read_local": read_local,
+        "read_remote": read_remote,
+        "read_local": read_local,
         "attest_external_store": lambda **_: True,
-        "attest_reopened_ql428_precheck": lambda **_: True, "now_ms": NOW,
+        "attest_reopened_ql428_precheck": lambda **_: True,
+        "now_ms": NOW,
     }
     return {
-        "journal": journal, "keys": pin_keys, "owner": owner,
-        "reviewer": reviewer, "enrollment": enrollment, "approval": approval,
-        "proofs": proofs, "enrollment_kwargs": enrollment_kwargs,
-        "precheck": precheck, "challenge_kwargs": challenge_kwargs,
-        "changed": changed, "read_remote": read_remote,
+        "journal": journal,
+        "keys": pin_keys,
+        "owner": owner,
+        "reviewer": reviewer,
+        "enrollment": enrollment,
+        "approval": approval,
+        "proofs": proofs,
+        "enrollment_kwargs": enrollment_kwargs,
+        "precheck": precheck,
+        "challenge_kwargs": challenge_kwargs,
+        "changed": changed,
+        "read_remote": read_remote,
     }
 
 
 def enroll(case):
     return enroll_ql429_external_pins320(
-        Ree(), case["enrollment"], case["approval"], case["proofs"],
+        Ree(),
+        case["enrollment"],
+        case["approval"],
+        case["proofs"],
         **case["enrollment_kwargs"],
     )
 
 
 def issue(case):
     return issue_ql429_original_challenge320(
-        Ree(), case["precheck"], **case["challenge_kwargs"],
+        Ree(),
+        case["precheck"],
+        **case["challenge_kwargs"],
     )
 
 
 def respond(case, challenge, *, secret=None, state="OFF", host="DESKTOP-AE894KC"):
     body = {
         "schema": "rosevear.ql429.original-host-fresh-response.v1",
-        "scope": SCOPE, "incidentId": INCIDENT, "externalStoreId": STORE,
-        "reentryId": REENTRY, "challengeDigest": challenge["challengeDigest"],
+        "scope": SCOPE,
+        "incidentId": INCIDENT,
+        "externalStoreId": STORE,
+        "reentryId": REENTRY,
+        "challengeDigest": challenge["challengeDigest"],
         "challengeId": challenge["challenge"]["challengeId"],
-        "hostMachineId": host, "receiverState": state,
+        "hostMachineId": host,
+        "receiverState": state,
         "nextCeremonyId": "newCeremony320Original",
         "respondedAt": _utc(NOW - 2000),
     }
@@ -198,14 +260,20 @@ def respond(case, challenge, *, secret=None, state="OFF", host="DESKTOP-AE894KC"
 def test_enrollment_requires_dual_signatures_custody_and_device_proofs(monkeypatch, tmp_path):
     case = bootstrap(monkeypatch, tmp_path)
     invalid = enroll_ql429_external_pins320(
-        Ree(), case["enrollment"], case["approval"], case["proofs"],
+        Ree(),
+        case["enrollment"],
+        case["approval"],
+        case["proofs"],
         **{**case["enrollment_kwargs"], "attest_original_host": None},
     )
     assert not invalid.get("accepted")
     forged = dict(case["proofs"])
     forged["anchor"] = signed(signer()[0], case["proofs"]["anchor"]["payload"])
     assert not enroll_ql429_external_pins320(
-        Ree(), case["enrollment"], case["approval"], forged,
+        Ree(),
+        case["enrollment"],
+        case["approval"],
+        forged,
         **case["enrollment_kwargs"],
     ).get("accepted")
     good = enroll(case)
@@ -220,7 +288,8 @@ def test_challenge_requires_fresh_remote_and_durable_precheck(monkeypatch, tmp_p
     assert not issue(case).get("accepted")
     assert enroll(case)["accepted"]
     denied = issue_ql429_original_challenge320(
-        Ree(), case["precheck"],
+        Ree(),
+        case["precheck"],
         **{**case["challenge_kwargs"], "attest_reopened_ql428_precheck": None},
     )
     assert not denied.get("accepted")
@@ -238,25 +307,28 @@ def test_original_host_must_sign_fresh_off_on_correct_machine(monkeypatch, tmp_p
     case = bootstrap(monkeypatch, tmp_path)
     assert enroll(case)["accepted"]
     challenge = issue(case)
-    kw = {"journal": case["journal"],
-          "attest_original_host_off": lambda **_: True, "now_ms": NOW}
+    kw = {"journal": case["journal"], "attest_original_host_off": lambda **_: True, "now_ms": NOW}
     for candidate in (
         respond(case, challenge, secret=signer()[0]),
         respond(case, challenge, state="ON"),
         respond(case, challenge, host="TEMPLAR"),
     ):
-        bad = verify_ql429_original_host_off320(
-            Ree(), STORE, REENTRY, candidate, **kw)
+        bad = verify_ql429_original_host_off320(Ree(), STORE, REENTRY, candidate, **kw)
         assert not bad.get("accepted") and bad["connection"] == "HOLD"
     assert not verify_ql429_original_host_off320(
-        Ree(), STORE, REENTRY, respond(case, challenge),
+        Ree(),
+        STORE,
+        REENTRY,
+        respond(case, challenge),
         **{**kw, "attest_original_host_off": None},
     ).get("accepted")
-    good = verify_ql429_original_host_off320(
-        Ree(), STORE, REENTRY, respond(case, challenge), **kw)
+    good = verify_ql429_original_host_off320(Ree(), STORE, REENTRY, respond(case, challenge), **kw)
     assert good["accepted"] and good["receiver"] == "OFF"
     assert not verify_ql429_original_host_off320(
-        Ree(), STORE, REENTRY, respond(case, challenge),
+        Ree(),
+        STORE,
+        REENTRY,
+        respond(case, challenge),
         **{**kw, "now_ms": NOW + 65000},
     ).get("accepted")
 
@@ -267,42 +339,56 @@ def test_three_master_dual_owner_witness_is_one_use_never_activation(monkeypatch
     challenge = issue(case)
     response = respond(case, challenge)
     host = verify_ql429_original_host_off320(
-        Ree(), STORE, REENTRY, response, journal=case["journal"],
-        attest_original_host_off=lambda **_: True, now_ms=NOW,
+        Ree(),
+        STORE,
+        REENTRY,
+        response,
+        journal=case["journal"],
+        attest_original_host_off=lambda **_: True,
+        now_ms=NOW,
     )
     assert host["accepted"]
     reports = {}
     for master in MASTERS:
         body = {
             "schema": "rosevear.ql429.master-pilot-reentry-witness.v1",
-            "masterId": master, "scope": SCOPE, "incidentId": INCIDENT,
-            "externalStoreId": STORE, "closureReceiptDigest": "e" * 64,
-            "reentryId": REENTRY, "challengeDigest": host["challengeDigest"],
+            "masterId": master,
+            "scope": SCOPE,
+            "incidentId": INCIDENT,
+            "externalStoreId": STORE,
+            "closureReceiptDigest": "e" * 64,
+            "reentryId": REENTRY,
+            "challengeDigest": host["challengeDigest"],
             "hostResponseDigest": host["hostResponseDigest"],
             "nextCeremonyId": host["nextCeremonyId"],
             "status": "WITNESSED_NEW_SUPERVISED_PILOT_PRECHECK_ONLY",
             "witnessedAt": _utc(NOW - 1000),
         }
         reports[master] = signed(case["keys"][master][0], body)
-    report_digest = hashlib.sha256(
-        _serialize([reports[m]["payload"] for m in MASTERS])
-    ).hexdigest()
+    report_digest = hashlib.sha256(_serialize([reports[m]["payload"] for m in MASTERS])).hexdigest()
     decision = {
         "schema": "rosevear.ql429.owner-three-master-pilot-witness.v1",
-        "scope": SCOPE, "incidentId": INCIDENT, "externalStoreId": STORE,
-        "reentryId": REENTRY, "closureReceiptDigest": "e" * 64,
+        "scope": SCOPE,
+        "incidentId": INCIDENT,
+        "externalStoreId": STORE,
+        "reentryId": REENTRY,
+        "closureReceiptDigest": "e" * 64,
         "challengeDigest": host["challengeDigest"],
         "hostResponseDigest": host["hostResponseDigest"],
-        "nextCeremonyId": host["nextCeremonyId"], "mastersDigest": report_digest,
+        "nextCeremonyId": host["nextCeremonyId"],
+        "mastersDigest": report_digest,
         "action": "ACCEPT_SIGNED_PRECHECK_ONLY_REQUIRE_NEW_QL424_CEREMONY_KEEP_OFF",
-        "ownerId": "ownerOriginal320", "reviewerId": "reviewerExternal320",
+        "ownerId": "ownerOriginal320",
+        "reviewerId": "reviewerExternal320",
         "approvedAt": _utc(NOW - 500),
     }
     approval = owner_signed(decision, case["owner"], case["reviewer"])
     params = {
         "journal": case["journal"],
-        "owner_der": case["owner"][1], "owner_pin": case["owner"][2],
-        "reviewer_der": case["reviewer"][1], "reviewer_pin": case["reviewer"][2],
+        "owner_der": case["owner"][1],
+        "owner_pin": case["owner"][2],
+        "reviewer_der": case["reviewer"][1],
+        "reviewer_pin": case["reviewer"][2],
         "attest_original_host_off": lambda **_: True,
         "attest_master_witness_custody": lambda **_: True,
         "attest_owner_decision": lambda **_: True,
@@ -314,16 +400,23 @@ def test_three_master_dual_owner_witness_is_one_use_never_activation(monkeypatch
         Ree(), STORE, REENTRY, response, invalid_report, approval, **params
     ).get("accepted")
     invalid_action = owner_signed(
-        {**decision, "action": "ACTIVATE_RECEIVER"}, case["owner"], case["reviewer"])
+        {**decision, "action": "ACTIVATE_RECEIVER"}, case["owner"], case["reviewer"]
+    )
     assert not witness_ql429_three_master_pilot320(
         Ree(), STORE, REENTRY, response, reports, invalid_action, **params
     ).get("accepted")
     assert not witness_ql429_three_master_pilot320(
-        Ree(), STORE, REENTRY, response, reports, approval,
+        Ree(),
+        STORE,
+        REENTRY,
+        response,
+        reports,
+        approval,
         **{**params, "attest_external_witness_storage": None},
     ).get("accepted")
     good = witness_ql429_three_master_pilot320(
-        Ree(), STORE, REENTRY, response, reports, approval, **params)
+        Ree(), STORE, REENTRY, response, reports, approval, **params
+    )
     assert good["accepted"] and good["masterCount"] == 3
     assert good["receiver"] == "OFF" and good["connection"] == "HOLD"
     assert good["ownerAcceptance"] == "HOLD" and good["masterSync"] == "HOLD"
@@ -335,7 +428,8 @@ def test_three_master_dual_owner_witness_is_one_use_never_activation(monkeypatch
 
 def test_read_only_ql429_owner_status_is_not_live_proof():
     assert TestClient(app).get("/api/v1/system/master-shell-320-acceptance").status_code in (
-        401, 403,
+        401,
+        403,
     )
     status = reconcile_master_evidence320(Ree())
     assert status["sourceBuild"] == 320
