@@ -34,6 +34,7 @@ import { MasterShellAcceptance319Panel } from "./MasterShellAcceptance319Panel";
 import { MasterShellAcceptance320Panel } from "./MasterShellAcceptance320Panel";
 import { MasterShellAcceptance321Panel } from "./MasterShellAcceptance321Panel";
 import { MasterShellAcceptance322Panel } from "./MasterShellAcceptance322Panel";
+import { MasterShellAcceptance323Panel } from "./MasterShellAcceptance323Panel";
 
 type IntegrationState = "online" | "offline" | "not_configured" | "unavailable";
 type Observation = {
@@ -173,6 +174,7 @@ export function IntegrationHealthPanel({ ownerId }: { ownerId: string }) {
       <MasterShellAcceptance320Panel />
       <MasterShellAcceptance321Panel />
       <MasterShellAcceptance322Panel />
+      <MasterShellAcceptance323Panel />
       <WindowsLauncherEvidence286Panel ownerId={ownerId} />
       <WindowsOwnerAcceptance287Panel key={ownerId} ownerId={ownerId} />
       <details className="hub-historical-checks">
