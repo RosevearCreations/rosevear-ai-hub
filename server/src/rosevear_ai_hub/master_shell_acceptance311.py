@@ -218,8 +218,7 @@ def close_witnessed_export311(
         and isinstance(receiver_ack, dict)
         and isinstance(receiver_ack.get("payload"), dict)
         and source_envelope["payload"]["episodeId"] == episode
-        and hashlib.sha256(_serialize(source_envelope["payload"])).hexdigest()
-        == source_digest
+        and hashlib.sha256(_serialize(source_envelope["payload"])).hexdigest() == source_digest
         and export_audit.exact_witness(
             monitor,
             episode=episode,
@@ -398,8 +397,7 @@ def reconcile_controller_contract311(
     }
     try:
         authorized = (
-            attest_controller_ledger(**args) is True
-            and owner_review_authorize(**args) is True
+            attest_controller_ledger(**args) is True and owner_review_authorize(**args) is True
         )
     except (OSError, ValueError, TypeError):
         authorized = False
@@ -437,12 +435,15 @@ def review_master_discrepancy311(
         return _hold("HOLD_NO_AUTHENTICATED_CASE_OBSERVATION")
     severity = SEVERITIES[issue]
     try:
-        trusted = independent_case_witness(
-            source_id=SOURCE,
-            issue_code=issue,
-            observed_at_ms=observed_at_ms,
-            source_revision=SOURCE310_MAIN,
-        ) is True
+        trusted = (
+            independent_case_witness(
+                source_id=SOURCE,
+                issue_code=issue,
+                observed_at_ms=observed_at_ms,
+                source_revision=SOURCE310_MAIN,
+            )
+            is True
+        )
     except (OSError, ValueError, TypeError):
         trusted = False
     if not trusted:
