@@ -51,7 +51,10 @@ def _fresh(value: Any, now: int) -> int | None:
 def _scope(value: Any) -> bool:
     return (
         isinstance(value, dict)
-        and set(value) == {"ceremonyId", "sourceId", "episodeId", "sourceRevision", "controllerRevision"}
+        and set(value) == {
+            "ceremonyId", "sourceId", "episodeId",
+            "sourceRevision", "controllerRevision",
+        }
         and bool(ID.fullmatch(str(value.get("ceremonyId", ""))))
         and bool(ID.fullmatch(str(value.get("episodeId", ""))))
         and value["sourceId"] == "rosevear-ai-hub"
