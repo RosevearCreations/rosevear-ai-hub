@@ -93,10 +93,7 @@ class ProtectedNewCeremonyJournal324:
         evidence_digest: str,
     ):
         if not (
-            _on_ree(monitor)
-            and _id(incident_id)
-            and _sha(export_digest)
-            and _sha(evidence_digest)
+            _on_ree(monitor) and _id(incident_id) and _sha(export_digest) and _sha(evidence_digest)
         ):
             return None
         receipt_digest = _digest(
@@ -241,9 +238,7 @@ def run_ql433_new_ceremony_precheck324(
         if not checkpoint:
             return hold("HOLD_QL433_ORIGINAL_INCIDENT_CHECKPOINT_MISSING")
         receipt = review_journal.read(monitor, checkpoint["entry"]["incidentId"])
-        previously_approved = precheck_journal.read(
-            monitor, checkpoint["entry"]["incidentId"]
-        )
+        previously_approved = precheck_journal.read(monitor, checkpoint["entry"]["incidentId"])
     except (ValueError, KeyError):
         return hold("HOLD_QL433_PRIOR_OR_LOCAL_CUSTODY_UNREADABLE")
     if not _ql432_decision_ok(ql432_decision, receipt, checkpoint):
@@ -295,9 +290,7 @@ def run_ql433_new_ceremony_precheck324(
     ):
         return hold("HOLD_QL433_INDEPENDENT_SIGNED_PRIOR_OR_NEW_SCOPE_NOT_VERIFIED")
     try:
-        external = read_external_decision_anchor(
-            export_record=export, export_digest=export_digest
-        )
+        external = read_external_decision_anchor(export_record=export, export_digest=export_digest)
     except Exception:
         return hold("HOLD_QL433_REAL_EXTERNAL_DECISION_ANCHOR_UNAVAILABLE")
     if not isinstance(external, dict) or set(external) != {"anchor", "reader"}:
