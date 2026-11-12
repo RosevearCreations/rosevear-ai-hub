@@ -94,17 +94,27 @@ def setup(monkeypatch, tmp_path):
     from rosevear_ai_hub.master_shell_acceptance313 import ZERO
 
     assert prior.claim(
-        Ree(), episode=EPISODE, correlation=CORRELATION,
-        stage="PILOT", digest=pilot["pilotReceiptSha256"], previous_digest=ZERO,
+        Ree(),
+        episode=EPISODE,
+        correlation=CORRELATION,
+        stage="PILOT",
+        digest=pilot["pilotReceiptSha256"],
+        previous_digest=ZERO,
     )
     assert prior.claim(
-        Ree(), episode=EPISODE, correlation=CORRELATION,
-        stage="QL421_CLOSURE", digest=closure["commsReviewSha256"],
+        Ree(),
+        episode=EPISODE,
+        correlation=CORRELATION,
+        stage="QL421_CLOSURE",
+        digest=closure["commsReviewSha256"],
         previous_digest=pilot["pilotReceiptSha256"],
     )
     assert prior.claim(
-        Ree(), episode=EPISODE, correlation=CORRELATION,
-        stage="CONTROLLER", digest=owner["controllerReviewSha256"],
+        Ree(),
+        episode=EPISODE,
+        correlation=CORRELATION,
+        stage="CONTROLLER",
+        digest=owner["controllerReviewSha256"],
         previous_digest=closure["commsReviewSha256"],
     )
     body = {
@@ -143,29 +153,26 @@ def test_signed_original_host_requires_persistent_prior_chain(monkeypatch, tmp_p
         Ree(), pilot, closure, owner, signed(signer()[0], body), **kw
     )["accepted"]
     assert not reconcile_original_field314(
-        Ree(), pilot, closure, owner, signed(key[0], body),
+        Ree(),
+        pilot,
+        closure,
+        owner,
+        signed(key[0], body),
         **{**kw, "attest_ql423_custody": None},
     )["accepted"]
     assert not reconcile_original_field314(
-        Ree(), pilot, closure, owner,
-        signed(key[0], {**body, "sourceRevision": "stale"}), **kw
+        Ree(), pilot, closure, owner, signed(key[0], {**body, "sourceRevision": "stale"}), **kw
     )["accepted"]
     assert not reconcile_original_field314(
-        Ree(), pilot, closure, owner,
-        signed(key[0], {**body, "issuedAt": _utc(NOW - 301000)}), **kw
+        Ree(), pilot, closure, owner, signed(key[0], {**body, "issuedAt": _utc(NOW - 301000)}), **kw
     )["accepted"]
     assert not reconcile_original_field314(
-        Ree(), pilot, closure, owner,
-        signed(key[0], {**body, "connection": "CONNECTED"}), **kw
+        Ree(), pilot, closure, owner, signed(key[0], {**body, "connection": "CONNECTED"}), **kw
     )["accepted"]
-    first = reconcile_original_field314(
-        Ree(), pilot, closure, owner, signed(key[0], body), **kw
-    )
+    first = reconcile_original_field314(Ree(), pilot, closure, owner, signed(key[0], body), **kw)
     assert first["accepted"] is True
     assert first["connection"] == "HOLD"
-    assert journal.exact(
-        Ree(), EPISODE, CORRELATION, "FIELD", first["fieldDigest"]
-    )
+    assert journal.exact(Ree(), EPISODE, CORRELATION, "FIELD", first["fieldDigest"])
     assert not reconcile_original_field314(
         Ree(), pilot, closure, owner, signed(key[0], body), **kw
     )["accepted"]
@@ -173,9 +180,7 @@ def test_signed_original_host_requires_persistent_prior_chain(monkeypatch, tmp_p
 
 def test_three_master_replay_and_distinct_signed_owner_review(monkeypatch, tmp_path):
     key, prior, journal, pilot, closure, owner, body, kw = setup(monkeypatch, tmp_path)
-    original = reconcile_original_field314(
-        Ree(), pilot, closure, owner, signed(key[0], body), **kw
-    )
+    original = reconcile_original_field314(Ree(), pilot, closure, owner, signed(key[0], body), **kw)
     masters = ("rosevear-ai-hub", "rosevear-comms-hub", "ai-data-platform")
     keys = {m: signer() for m in masters}
     ql422 = "f" * 64
@@ -208,20 +213,18 @@ def test_three_master_replay_and_distinct_signed_owner_review(monkeypatch, tmp_p
         "now_ms": NOW,
     }
     assert not reconcile_ql423_restoration314(
-        Ree(), original, receipts,
+        Ree(),
+        original,
+        receipts,
         **{**rkw, "attest_real_restart": None},
     )["accepted"]
     assert not reconcile_ql423_restoration314(
         Ree(), original, {**receipts, masters[2]: receipts[masters[1]]}, **rkw
     )["accepted"]
-    restored = reconcile_ql423_restoration314(
-        Ree(), original, receipts, **rkw
-    )
+    restored = reconcile_ql423_restoration314(Ree(), original, receipts, **rkw)
     assert restored["accepted"] is True
     assert restored["connection"] == "HOLD"
-    assert not reconcile_ql423_restoration314(
-        Ree(), original, receipts, **rkw
-    )["accepted"]
+    assert not reconcile_ql423_restoration314(Ree(), original, receipts, **rkw)["accepted"]
     reviewers = {role: signer() for role in ("owner", "reviewer")}
     decisions = {}
     for role in reviewers:
@@ -252,7 +255,9 @@ def test_three_master_replay_and_distinct_signed_owner_review(monkeypatch, tmp_p
         "now_ms": NOW,
     }
     assert not recheck_owner_decision314(
-        Ree(), restored, decisions,
+        Ree(),
+        restored,
+        decisions,
         **{**okw, "attest_controller_owner_ledger": None},
     )["accepted"]
     altered = {
@@ -262,20 +267,14 @@ def test_three_master_replay_and_distinct_signed_owner_review(monkeypatch, tmp_p
             {**decisions["reviewer"]["payload"], "decision": "MAINTAIN_HOLD"},
         ),
     }
-    assert not recheck_owner_decision314(
-        Ree(), restored, altered, **okw
-    )["accepted"]
-    approved = recheck_owner_decision314(
-        Ree(), restored, decisions, **okw
-    )
+    assert not recheck_owner_decision314(Ree(), restored, altered, **okw)["accepted"]
+    approved = recheck_owner_decision314(Ree(), restored, decisions, **okw)
     assert approved["accepted"] is True
     assert approved["state"] == "READY_FOR_SEPARATE_SUPERVISED_ACTIVATION_NOT_EXECUTED"
     assert approved["receiver"] == "OFF"
     assert approved["ownerAcceptance"] == "HOLD"
     assert approved["connection"] == "HOLD"
-    assert not recheck_owner_decision314(
-        Ree(), restored, decisions, **okw
-    )["accepted"]
+    assert not recheck_owner_decision314(Ree(), restored, decisions, **okw)["accepted"]
 
 
 def test_owner_view_never_promotes_runtime_without_independent_evidence():
