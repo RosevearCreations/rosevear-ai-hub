@@ -14,12 +14,11 @@ from rosevear_ai_hub.master_shell_acceptance305 import _timestamp, _utc
 from rosevear_ai_hub.master_shell_acceptance308 import _hold, _on_ree
 from rosevear_ai_hub.master_shell_acceptance312 import MASTERS, _callback
 from rosevear_ai_hub.master_shell_acceptance315 import _public_ed25519
-from rosevear_ai_hub.master_shell_acceptance319 import _digest, _id
+from rosevear_ai_hub.master_shell_acceptance319 import _digest, _id, _native, _recent
 from rosevear_ai_hub.master_shell_acceptance321 import ProtectedPilotJournal321, _dual
 from rosevear_ai_hub.master_shell_acceptance322 import (
     ProtectedContinuityJournal322,
     _accepted,
-    _recent_signed,
     reconcile_master_evidence322,
 )
 from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
@@ -133,7 +132,18 @@ def _check(
     now: int,
     earliest: int,
 ):
-    return _recent_signed(envelope, {"schema", *fields}, schema, *key, now, earliest)
+    p = _native(envelope, {"schema", *fields}, schema, *key)
+    timestamp_field = (
+        "anchoredAt"
+        if schema == ANCHOR
+        else "readAt"
+        if schema == READER
+        else "observedAt"
+    )
+    observed = _recent(p.get(timestamp_field), now) if p else None
+    if observed is None or observed < earliest:
+        return None
+    return p
 
 
 def _require(p: Any, expected: dict[str, Any]) -> bool:
