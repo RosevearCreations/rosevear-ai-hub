@@ -15,6 +15,7 @@ from rosevear_ai_hub.master_shell_acceptance305 import _timestamp, _utc
 from rosevear_ai_hub.master_shell_acceptance308 import _hold, _on_ree
 from rosevear_ai_hub.master_shell_acceptance310 import _sha
 from rosevear_ai_hub.master_shell_acceptance312 import MASTERS, _callback
+from rosevear_ai_hub.master_shell_acceptance316 import CONTROLLER380_MAIN
 from rosevear_ai_hub.master_shell_acceptance319 import _digest, _id, _native, _recent
 from rosevear_ai_hub.master_shell_acceptance321 import ProtectedPilotJournal321, _dual
 from rosevear_ai_hub.master_shell_acceptance322 import (
@@ -26,7 +27,6 @@ from rosevear_ai_hub.master_shell_acceptance323 import (
     _pins,
     reconcile_master_evidence323,
 )
-from rosevear_ai_hub.master_shell_acceptance316 import CONTROLLER380_MAIN
 from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
 
 SOURCE323_MAIN = "99a6eba7d60373328d5e29f869082172c895e93a"
