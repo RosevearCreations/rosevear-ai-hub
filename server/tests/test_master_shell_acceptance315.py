@@ -225,7 +225,10 @@ def test_receiver_off_witness_and_three_master_owner_gate(monkeypatch, tmp_path)
         Ree(), enrollment, signed(source[0], original),
         signed(receiver[0], received), **wkw,
     )["accepted"]
-    masters = {master: signer() for master in ("rosevear-ai-hub", "rosevear-comms-hub", "ai-data-platform")}
+    masters = {
+        master: signer()
+        for master in ("rosevear-ai-hub", "rosevear-comms-hub", "ai-data-platform")
+    }
     receipts = {}
     for master in masters:
         body = {
