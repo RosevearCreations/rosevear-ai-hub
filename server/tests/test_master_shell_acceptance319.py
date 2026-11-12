@@ -218,8 +218,9 @@ def test_remote_custody_drift_and_fake_signed_readback_fail_closed(monkeypatch, 
         **{**kw, "anchor_reader": wrong_nonce},
     )
     assert not rejected.get("accepted")
-    shared = {k: v for k, v in proposal["exportRecord"].items()
-              if k not in ("schema", "preparedAt")}
+    shared = {
+        k: v for k, v in proposal["exportRecord"].items() if k not in ("schema", "preparedAt")
+    }
 
     def shared_local(**_):
         return shared
@@ -230,9 +231,12 @@ def test_remote_custody_drift_and_fake_signed_readback_fail_closed(monkeypatch, 
         return result
 
     alias_drift = reconcile_ql428_external_custody319(
-        Ree(), proposal, stage="ANCHOR", request_id="challengeAlias319",
-        **{**kw, "read_local_custody": shared_local,
-           "anchor_reader": mutate_same_snapshot})
+        Ree(),
+        proposal,
+        stage="ANCHOR",
+        request_id="challengeAlias319",
+        **{**kw, "read_local_custody": shared_local, "anchor_reader": mutate_same_snapshot},
+    )
     assert alias_drift["connection"] == "HOLD"
     assert not alias_drift.get("accepted")
 
