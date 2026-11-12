@@ -20,7 +20,7 @@ from rosevear_ai_hub.master_shell_acceptance308 import _hold, _on_ree
 from rosevear_ai_hub.master_shell_acceptance310 import _sha
 from rosevear_ai_hub.master_shell_acceptance312 import MASTERS, _callback
 from rosevear_ai_hub.master_shell_acceptance315 import _public_ed25519
-from rosevear_ai_hub.master_shell_acceptance316 import CONTROLLER380_MAIN, SOURCE315_MAIN
+from rosevear_ai_hub.master_shell_acceptance316 import CONTROLLER380_MAIN
 from rosevear_ai_hub.master_shell_acceptance319 import (
     ProtectedAnchorJournal319,
     _anchor_readback,
