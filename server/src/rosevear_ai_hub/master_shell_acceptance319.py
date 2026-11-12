@@ -108,7 +108,9 @@ def _local_snapshot(reader: Any, scope: Any) -> dict[str, Any] | None:
         )
     ):
         return None
-    return value
+    # Freeze the independent pre/post-I/O snapshots: protected adapters may
+    # return the same mutable object from repeated reads.
+    return {**value, "scope": dict(value["scope"])}
 
 
 class ProtectedAnchorJournal319:
