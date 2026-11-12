@@ -52,7 +52,10 @@ export function summarizeRun254({ run, jobs, requiredResults, eventName, ref, ba
     || eventName === "pull_request" && ["main", "dev"].includes(baseRef);
   assert.ok(expectedEvent, "CI must run on a dev/main PR or a production main push only");
   assert.equal(run.event, eventName, "GitHub API run event disagrees with job context");
-  assert.equal(run.status, "in_progress", "Budget check must examine the current in-progress run");
+  // GitHub can temporarily report queued while its independent jobs execute.
+  // The required completed/successful gate checks below remain authoritative.
+  assert.ok(["in_progress", "queued"].includes(run.status),
+    "Budget check requires an active GitHub run");
 
   const queueBudget = positiveBudget(queueBudgetSeconds, "Queue budget");
   const wallBudget = positiveBudget(wallBudgetSeconds, "Wall-time budget");
