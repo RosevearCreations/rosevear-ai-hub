@@ -208,10 +208,7 @@ class ProtectedPilotContinuityJournal316:
         snapshot_digest: str,
         recovery_digest: str,
     ) -> bool:
-        if not (
-            self.exact(monitor, ceremony, episode, snapshot_digest)
-            and _sha(recovery_digest)
-        ):
+        if not (self.exact(monitor, ceremony, episode, snapshot_digest) and _sha(recovery_digest)):
             return False
         try:
             with sqlite3.connect(self.path, timeout=2) as db:
@@ -281,9 +278,19 @@ def attest_isolated_original_pilot316(
     ):
         return _hold("HOLD_NO_AUTHENTICATED_QL424_AND_315_PILOT_CHAIN")
     fields = {
-        "schema", "hostId", "sourceId", "sourceRevision", "commsRevision",
-        "controllerRevision", "episodeId", "correlationId", "ceremonyId",
-        "readinessDigest", "ql424AcceptanceSha256", "issuedAt", "pilotMode",
+        "schema",
+        "hostId",
+        "sourceId",
+        "sourceRevision",
+        "commsRevision",
+        "controllerRevision",
+        "episodeId",
+        "correlationId",
+        "ceremonyId",
+        "readinessDigest",
+        "ql424AcceptanceSha256",
+        "issuedAt",
+        "pilotMode",
     }
     body = _signed(signed_original, fields, PILOT_SCHEMA, source_der, source_pin, now)
     if body is None or not (
@@ -364,8 +371,12 @@ def verify_three_master_health316(
     payload_digests = []
     for master in MASTERS:
         checked = _master_heartbeat(
-            heartbeats[master], master, pilot,
-            master_keys[master], master_pins[master], now,
+            heartbeats[master],
+            master,
+            pilot,
+            master_keys[master],
+            master_pins[master],
+            now,
         )
         if checked is None:
             return {
@@ -441,8 +452,10 @@ def review_fail_closed_recovery316(
         and health.get("state") == "THREE_MASTER_SIGNED_QL425_HEALTH_SNAPSHOT_NOT_UPTIME"
         and _sha(health.get("healthDigest"))
         and journal.exact(
-            monitor, health.get("ceremonyId"),
-            health.get("episodeId"), health.get("healthDigest"),
+            monitor,
+            health.get("ceremonyId"),
+            health.get("episodeId"),
+            health.get("healthDigest"),
         )
         and _public_ed25519(receiver_der, receiver_pin)
         and _trusted_roles(operator_keys, operator_pins, {"owner", "reviewer"})
@@ -452,13 +465,19 @@ def review_fail_closed_recovery316(
     ):
         return unknown
     off_fields = {
-        "schema", "receiverId", "ceremonyId", "episodeId",
-        "sourceRevision", "commsRevision", "controllerRevision",
-        "healthDigest", "receiverState", "rollbackState", "issuedAt",
+        "schema",
+        "receiverId",
+        "ceremonyId",
+        "episodeId",
+        "sourceRevision",
+        "commsRevision",
+        "controllerRevision",
+        "healthDigest",
+        "receiverState",
+        "rollbackState",
+        "issuedAt",
     }
-    off = _signed(
-        signed_receiver_off, off_fields, OFF_SCHEMA, receiver_der, receiver_pin, now
-    )
+    off = _signed(signed_receiver_off, off_fields, OFF_SCHEMA, receiver_der, receiver_pin, now)
     if off is None or not (
         off["receiverId"] == "rosevear-comms-hub"
         and off["ceremonyId"] == health["ceremonyId"]
@@ -473,16 +492,30 @@ def review_fail_closed_recovery316(
         return unknown
     off_digest = _digest(off)
     owner_fields = {
-        "schema", "role", "operatorId", "ceremonyId", "episodeId",
-        "sourceRevision", "commsRevision", "controllerRevision",
-        "healthDigest", "receiverOffSha256", "decision", "issuedAt",
-        "connection", "ownerAcceptance",
+        "schema",
+        "role",
+        "operatorId",
+        "ceremonyId",
+        "episodeId",
+        "sourceRevision",
+        "commsRevision",
+        "controllerRevision",
+        "healthDigest",
+        "receiverOffSha256",
+        "decision",
+        "issuedAt",
+        "connection",
+        "ownerAcceptance",
     }
     records = []
     for role in ("owner", "reviewer"):
         body = _signed(
-            signed_owner_reviews[role], owner_fields, OWNER_SCHEMA,
-            operator_keys[role], operator_pins[role], now,
+            signed_owner_reviews[role],
+            owner_fields,
+            OWNER_SCHEMA,
+            operator_keys[role],
+            operator_pins[role],
+            now,
         )
         if body is None or not (
             body["role"] == role

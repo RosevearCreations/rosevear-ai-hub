@@ -68,12 +68,8 @@ def fixture(monkeypatch, tmp_path):
     journal315 = ProtectedAuthorityJournal315(tmp_path / "prior315.sqlite3")
     journal316 = ProtectedPilotContinuityJournal316(tmp_path / "health316.sqlite3")
     assert journal315.claim(Ree(), EPISODE, CORRELATION, "ENROLL", "a" * 64, "0" * 64)
-    assert journal315.claim(
-        Ree(), EPISODE, CORRELATION, "RECEIVER_WITNESS", "b" * 64, "a" * 64
-    )
-    assert journal315.claim(
-        Ree(), EPISODE, CORRELATION, "OWNER_GATE", "c" * 64, "b" * 64
-    )
+    assert journal315.claim(Ree(), EPISODE, CORRELATION, "RECEIVER_WITNESS", "b" * 64, "a" * 64)
+    assert journal315.claim(Ree(), EPISODE, CORRELATION, "OWNER_GATE", "c" * 64, "b" * 64)
     gate = {
         "accepted": True,
         "state": "THREE_MASTER_SUPERVISED_PILOT_READY_NOT_EXECUTED",
@@ -129,32 +125,28 @@ def test_authenticated_original_host_ql424_chain_and_rejection(monkeypatch, tmp_
         Ree(), gate, accepted, signed(signer()[0], payload), **kw
     )["accepted"]
     assert not attest_isolated_original_pilot316(
-        Ree(), gate, accepted, signed(key[0], payload),
+        Ree(),
+        gate,
+        accepted,
+        signed(key[0], payload),
         **{**kw, "attest_receiver_isolated_state": None},
     )["accepted"]
     assert not attest_isolated_original_pilot316(
-        Ree(), gate, {**accepted, "receiver": "OFF"},
-        signed(key[0], payload), **kw
+        Ree(), gate, {**accepted, "receiver": "OFF"}, signed(key[0], payload), **kw
     )["accepted"]
     assert not attest_isolated_original_pilot316(
-        Ree(), gate, accepted,
-        signed(key[0], {**payload, "issuedAt": _utc(NOW - 301000)}), **kw
+        Ree(), gate, accepted, signed(key[0], {**payload, "issuedAt": _utc(NOW - 301000)}), **kw
     )["accepted"]
-    result = attest_isolated_original_pilot316(
-        Ree(), gate, accepted, signed(key[0], payload), **kw
-    )
+    result = attest_isolated_original_pilot316(Ree(), gate, accepted, signed(key[0], payload), **kw)
     assert result["accepted"] is True
     assert result["connection"] == "HOLD"
 
 
 def test_ql425_native_signatures_sequence_and_verified_owner_recovery(monkeypatch, tmp_path):
     journal, gate, accepted, key, payload, kw = fixture(monkeypatch, tmp_path)
-    pilot = attest_isolated_original_pilot316(
-        Ree(), gate, accepted, signed(key[0], payload), **kw
-    )
+    pilot = attest_isolated_original_pilot316(Ree(), gate, accepted, signed(key[0], payload), **kw)
     masters = {
-        master: signer()
-        for master in ("rosevear-ai-hub", "rosevear-comms-hub", "ai-data-platform")
+        master: signer() for master in ("rosevear-ai-hub", "rosevear-comms-hub", "ai-data-platform")
     }
     heartbeats = {}
     for master in masters:
@@ -180,11 +172,14 @@ def test_ql425_native_signatures_sequence_and_verified_owner_recovery(monkeypatc
         "now_ms": NOW,
     }
     assert not verify_three_master_health316(
-        Ree(), pilot, {**heartbeats, "ai-data-platform": heartbeats["rosevear-comms-hub"]},
+        Ree(),
+        pilot,
+        {**heartbeats, "ai-data-platform": heartbeats["rosevear-comms-hub"]},
         **mk,
     )["accepted"]
     assert not verify_three_master_health316(
-        Ree(), pilot,
+        Ree(),
+        pilot,
         {
             **heartbeats,
             "rosevear-ai-hub": signed(
@@ -198,16 +193,16 @@ def test_ql425_native_signatures_sequence_and_verified_owner_recovery(monkeypatc
         **mk,
     )["accepted"]
     assert not verify_three_master_health316(
-        Ree(), pilot, heartbeats,
+        Ree(),
+        pilot,
+        heartbeats,
         **{**mk, "attest_protected_receiver_state": None},
     )["accepted"]
     health = verify_three_master_health316(Ree(), pilot, heartbeats, **mk)
     assert health["accepted"] is True
     assert health["connection"] == "HOLD"
     assert health["runtimeUptime"] == "SINGLE_SIGNED_SNAPSHOT_NOT_CONTINUOUS_UPTIME"
-    assert not verify_three_master_health316(
-        Ree(), pilot, heartbeats, **mk
-    )["accepted"]
+    assert not verify_three_master_health316(Ree(), pilot, heartbeats, **mk)["accepted"]
 
     receiver = signer()
     operator = {role: signer() for role in ("owner", "reviewer")}
@@ -257,14 +252,20 @@ def test_ql425_native_signatures_sequence_and_verified_owner_recovery(monkeypatc
         "now_ms": NOW,
     }
     missing = review_fail_closed_recovery316(
-        Ree(), health, signed_off, reviews,
+        Ree(),
+        health,
+        signed_off,
+        reviews,
         **{**rk, "attest_independent_receiver_off_readback": None},
     )
     assert not missing["accepted"]
     assert missing["receiver"] == "UNKNOWN_MANUAL_RECOVERY_REQUIRED"
     wrong = review_fail_closed_recovery316(
-        Ree(), health, signed(receiver[0], {**off, "receiverState": "ON"}),
-        reviews, **rk,
+        Ree(),
+        health,
+        signed(receiver[0], {**off, "receiverState": "ON"}),
+        reviews,
+        **rk,
     )
     assert not wrong["accepted"]
     assert wrong["receiver"] == "UNKNOWN_MANUAL_RECOVERY_REQUIRED"
@@ -275,26 +276,23 @@ def test_ql425_native_signatures_sequence_and_verified_owner_recovery(monkeypatc
             {**reviews["reviewer"]["payload"], "decision": "RESTART"},
         ),
     }
-    assert not review_fail_closed_recovery316(
-        Ree(), health, signed_off, bad_reviews, **rk
-    )["accepted"]
-    result = review_fail_closed_recovery316(
-        Ree(), health, signed_off, reviews, **rk
-    )
+    assert not review_fail_closed_recovery316(Ree(), health, signed_off, bad_reviews, **rk)[
+        "accepted"
+    ]
+    result = review_fail_closed_recovery316(Ree(), health, signed_off, reviews, **rk)
     assert result["accepted"] is True
     assert result["receiver"] == "OFF"
     assert result["connection"] == "HOLD"
     assert result["ownerAcceptance"] == "HOLD"
     assert result["recovery"] == "MANUAL_SUPERVISED_NEW_CEREMONY_REQUIRED"
-    assert not review_fail_closed_recovery316(
-        Ree(), health, signed_off, reviews, **rk
-    )["accepted"]
+    assert not review_fail_closed_recovery316(Ree(), health, signed_off, reviews, **rk)["accepted"]
 
 
 def test_316_owner_status_is_no_store_and_fail_closed():
-    assert TestClient(app).get(
-        "/api/v1/system/master-shell-316-acceptance"
-    ).status_code in (401, 403)
+    assert TestClient(app).get("/api/v1/system/master-shell-316-acceptance").status_code in (
+        401,
+        403,
+    )
     state = reconcile_master_evidence316(Ree())
     assert state["sourceBuild"] == 316
     assert state["receiver"] == "OFF"
