@@ -39,9 +39,10 @@ def fixture(monkeypatch, tmp_path):
     decision = ql432_run(case, anchor_id, nonce, prior_masters, prior_owner, old_args)
     assert decision["accepted"] and decision["connection"] == "HOLD"
     checkpoint = case["journal"].read(Ree(), SCOPE)
-    fresh = {role: signer() for role in (
-        "anchor", "reader", "host", "receiver", "owner", "reviewer", *MASTERS
-    )}
+    fresh = {
+        role: signer()
+        for role in ("anchor", "reader", "host", "receiver", "owner", "reviewer", *MASTERS)
+    }
     export = {
         "schema": EXPORT,
         "scope": SCOPE,
@@ -109,19 +110,22 @@ def fixture(monkeypatch, tmp_path):
     }
     reports = {}
     for master in MASTERS:
-        reports[master] = signed(fresh[master], {
-            "schema": MASTER,
-            "masterId": master,
-            "scope": SCOPE,
-            "incidentId": decision["incidentId"],
-            "ql432OwnerReviewReceiptDigest": decision["reviewReceiptDigest"],
-            "externalDecisionReadbackDigest": _digest(reader),
-            "receiverOffDigest": _digest(receiver),
-            "nextCeremonyId": NEW_CEREMONY,
-            "nextEpisodeId": NEW_EPISODE,
-            "status": "NEW_CEREMONY_PRECHECK_ONLY_RECEIVER_OFF",
-            "observedAt": _utc(NOW),
-        })
+        reports[master] = signed(
+            fresh[master],
+            {
+                "schema": MASTER,
+                "masterId": master,
+                "scope": SCOPE,
+                "incidentId": decision["incidentId"],
+                "ql432OwnerReviewReceiptDigest": decision["reviewReceiptDigest"],
+                "externalDecisionReadbackDigest": _digest(reader),
+                "receiverOffDigest": _digest(receiver),
+                "nextCeremonyId": NEW_CEREMONY,
+                "nextEpisodeId": NEW_EPISODE,
+                "status": "NEW_CEREMONY_PRECHECK_ONLY_RECEIVER_OFF",
+                "observedAt": _utc(NOW),
+            },
+        )
     owner = {
         "schema": OWNER,
         "scope": SCOPE,
@@ -160,9 +164,15 @@ def fixture(monkeypatch, tmp_path):
         "attest_owner_custody": lambda **_: True,
         "now_ms": NOW,
     }
-    return case, decision, fresh, reports, dual(
-        fresh["owner"], fresh["reviewer"], owner
-    ), args, precheck
+    return (
+        case,
+        decision,
+        fresh,
+        reports,
+        dual(fresh["owner"], fresh["reviewer"], owner),
+        args,
+        precheck,
+    )
 
 
 def run(case, decision, reports, owner, args, **params):
@@ -203,38 +213,40 @@ def test_fail_closed_missing_custody_and_incorrect_signers(monkeypatch, tmp_path
         {"attest_fresh_nonce": None},
         {"attest_external_custody": None},
         {"read_external_decision_anchor": lambda **_: None},
-        {"read_external_decision_anchor": lambda **_: {
-            "anchor": signed(signer(), {"schema": ANCHOR}),
-            "reader": signed(fresh["reader"], {"schema": READER}),
-        }},
-        {"read_original_host_off": lambda **_: signed(
-            fresh["host"], {"schema": HOST, "hostMachineId": "TEMPLAR"}
-        )},
-        {"read_independent_receiver_off": lambda **_: signed(
-            fresh["receiver"], {"schema": RECEIVER, "receiverState": "ISOLATED_ONE_TEST_ON"}
-        )},
+        {
+            "read_external_decision_anchor": lambda **_: {
+                "anchor": signed(signer(), {"schema": ANCHOR}),
+                "reader": signed(fresh["reader"], {"schema": READER}),
+            }
+        },
+        {
+            "read_original_host_off": lambda **_: signed(
+                fresh["host"], {"schema": HOST, "hostMachineId": "TEMPLAR"}
+            )
+        },
+        {
+            "read_independent_receiver_off": lambda **_: signed(
+                fresh["receiver"], {"schema": RECEIVER, "receiverState": "ISOLATED_ONE_TEST_ON"}
+            )
+        },
         {"keys": {**args["keys"], "reader": args["keys"]["anchor"]}},
     ]
     for changed in failures:
         failed = run(case, decision, reports, owner, {**args, **changed})
         assert failed["connection"] == "HOLD"
         assert not failed.get("accepted")
-    wrong_reports = {
-        **reports, "ai-data-platform": reports["rosevear-comms-hub"]
-    }
+    wrong_reports = {**reports, "ai-data-platform": reports["rosevear-comms-hub"]}
     assert not run(case, decision, wrong_reports, owner, args).get("accepted")
     wrong_owner = dual(
-        fresh["owner"], fresh["reviewer"],
-        {**owner["payload"], "action": "ENABLE_RECEIVER"}
+        fresh["owner"], fresh["reviewer"], {**owner["payload"], "action": "ENABLE_RECEIVER"}
     )
     assert not run(case, decision, reports, wrong_owner, args).get("accepted")
-    assert not run(
-        case, {**decision, "reviewReceiptDigest": "f" * 64}, reports, owner, args
-    ).get("accepted")
-    assert not run(
-        case, decision, reports, owner, args,
-        next_ceremony_id=SCOPE["ceremonyId"]
-    ).get("accepted")
+    assert not run(case, {**decision, "reviewReceiptDigest": "f" * 64}, reports, owner, args).get(
+        "accepted"
+    )
+    assert not run(case, decision, reports, owner, args, next_ceremony_id=SCOPE["ceremonyId"]).get(
+        "accepted"
+    )
 
 
 def test_local_receipts_and_terminal_chain_fail_closed_when_tampered(monkeypatch, tmp_path):
