@@ -133,13 +133,12 @@ def _check(
     earliest: int,
 ):
     p = _native(envelope, {"schema", *fields}, schema, *key)
-    timestamp_field = (
-        "anchoredAt"
-        if schema == ANCHOR
-        else "readAt"
-        if schema == READER
-        else "observedAt"
-    )
+    if schema == ANCHOR:
+        timestamp_field = "anchoredAt"
+    elif schema == READER:
+        timestamp_field = "readAt"
+    else:
+        timestamp_field = "observedAt"
     observed = _recent(p.get(timestamp_field), now) if p else None
     if observed is None or observed < earliest:
         return None
