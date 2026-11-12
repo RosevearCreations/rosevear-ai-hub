@@ -210,14 +210,28 @@ def witness_durable_ql426_checkpoint317(
     ):
         return _hold("HOLD_316_SIGNED_PILOT_HEALTH_AND_JOURNAL_MISSING")
     fields = {
-        "schema", "hostId", "sourceId", "sourceRevision",
-        "ql426CommsRevision", "controllerRevision", "episodeId",
-        "ceremonyId", "healthDigest", "ql426CheckpointDigest",
-        "ql426Index", "ql426EvidenceDigest", "issuedAt", "connection",
+        "schema",
+        "hostId",
+        "sourceId",
+        "sourceRevision",
+        "ql426CommsRevision",
+        "controllerRevision",
+        "episodeId",
+        "ceremonyId",
+        "healthDigest",
+        "ql426CheckpointDigest",
+        "ql426Index",
+        "ql426EvidenceDigest",
+        "issuedAt",
+        "connection",
     }
     p = _signed(
-        signed_host_checkpoint, fields, CHECKPOINT_SCHEMA,
-        original_host_der, original_host_pin, now,
+        signed_host_checkpoint,
+        fields,
+        CHECKPOINT_SCHEMA,
+        original_host_der,
+        original_host_pin,
+        now,
     )
     if p is None or not (
         p["hostId"] == "DESKTOP-AE894KC"
@@ -254,9 +268,7 @@ def witness_durable_ql426_checkpoint317(
         and _callback(attest_external_head_custody, **evidence)
     ):
         return _hold("HOLD_NO_REOPENED_QL426_OR_EXTERNAL_CUSTODY_PROOF")
-    if not journal.claim(
-        monitor, p["episodeId"], p["ceremonyId"], "CHECKPOINT", digest, ZERO
-    ):
+    if not journal.claim(monitor, p["episodeId"], p["ceremonyId"], "CHECKPOINT", digest, ZERO):
         return _hold("HOLD_CHECKPOINT_REPLAY_OR_STORAGE_FAILURE")
     return {
         **_hold("QL426_DURABLE_ORIGINAL_HOST_CHECKPOINT_WITNESSED_REVIEW_ONLY"),
@@ -298,6 +310,7 @@ def reconcile_ql426_signed_rollback317(
         == "QL426_DURABLE_ORIGINAL_HOST_CHECKPOINT_WITNESSED_REVIEW_ONLY"
         and isinstance(ql426_rollback, dict)
         and ql426_rollback.get("state") == "DURABLE_VERIFIED_ROLLBACK_INCIDENT"
+        and isinstance(ql426_rollback.get("scope"), dict)
         and _identity(ql426_rollback.get("incidentId"))
         and _sha(ql426_rollback.get("rollbackCheckpointDigest"))
         and journal.exact(
@@ -384,8 +397,7 @@ def audit_independent_owner_incident317(
         and isinstance(journal, ProtectedCheckpointJournal317)
         and isinstance(rollback, dict)
         and rollback.get("accepted") is True
-        and rollback.get("state")
-        == "SIGNED_QL426_RECEIVER_OFF_ROLLBACK_DURABLY_CORRELATED"
+        and rollback.get("state") == "SIGNED_QL426_RECEIVER_OFF_ROLLBACK_DURABLY_CORRELATED"
         and rollback.get("receiver") == "OFF"
         and isinstance(ql426_owner_ack, dict)
         and ql426_owner_ack.get("state") == "DURABLE_DUAL_SIGNED_OWNER_INCIDENT_ACK"
@@ -408,16 +420,29 @@ def audit_independent_owner_incident317(
     ):
         return _hold("HOLD_MISSING_VERIFIED_ROLLBACK_AND_DISTINCT_SIGNERS")
     fields = {
-        "schema", "masterId", "episodeId", "ceremonyId", "incidentId",
-        "sourceRevision", "commsRevision", "controllerRevision",
-        "rollbackDigest", "commsOwnerAckDigest", "decision",
-        "issuedAt", "connection",
+        "schema",
+        "masterId",
+        "episodeId",
+        "ceremonyId",
+        "incidentId",
+        "sourceRevision",
+        "commsRevision",
+        "controllerRevision",
+        "rollbackDigest",
+        "commsOwnerAckDigest",
+        "decision",
+        "issuedAt",
+        "connection",
     }
     receipts = []
     for master in MASTERS:
         body = _signed(
-            three_master_receipts[master], fields, MASTER_SCHEMA,
-            master_keys[master], master_pins[master], now,
+            three_master_receipts[master],
+            fields,
+            MASTER_SCHEMA,
+            master_keys[master],
+            master_pins[master],
+            now,
         )
         if body is None or not (
             body["masterId"] == master
@@ -440,9 +465,18 @@ def audit_independent_owner_incident317(
     signed_ack = ql426_owner_ack.get("signedEnvelope")
     p = signed_ack.get("payload") if isinstance(signed_ack, dict) else None
     ack_fields = {
-        "schema", "incidentId", "ceremonyId", "sourceId", "episodeId",
-        "sourceRevision", "controllerRevision", "rollbackCheckpointDigest",
-        "action", "acceptedAt", "ownerId", "reviewerId",
+        "schema",
+        "incidentId",
+        "ceremonyId",
+        "sourceId",
+        "episodeId",
+        "sourceRevision",
+        "controllerRevision",
+        "rollbackCheckpointDigest",
+        "action",
+        "acceptedAt",
+        "ownerId",
+        "reviewerId",
     }
     if not (
         isinstance(signed_ack, dict)
