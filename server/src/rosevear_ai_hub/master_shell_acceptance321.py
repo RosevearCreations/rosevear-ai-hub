@@ -5,16 +5,14 @@ signers, external custody and owner authority must be supplied and attested by
 the real protected operator. This module creates no web intake, scheduled task,
 receiver integration or claim that original-host deployment has occurred.
 """
-import hashlib
 import inspect
-import json
 import sqlite3
 import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from rosevear_ai_hub.master_shell_acceptance305 import _timestamp, _utc
+from rosevear_ai_hub.master_shell_acceptance305 import _timestamp
 from rosevear_ai_hub.master_shell_acceptance306 import _trusted_signature
 from rosevear_ai_hub.master_shell_acceptance308 import _hold, _on_ree
 from rosevear_ai_hub.master_shell_acceptance310 import _sha
