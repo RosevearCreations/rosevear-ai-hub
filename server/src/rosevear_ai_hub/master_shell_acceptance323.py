@@ -45,7 +45,8 @@ class ProtectedRecoveryReviewJournal323:
     def _read(db: sqlite3.Connection, incident_id: str) -> dict[str, str] | None:
         row = db.execute(
             "SELECT export_digest, decision_digest, receipt_digest "
-            "FROM recovery_review323 WHERE incident_id=?", (incident_id,)
+            "FROM recovery_review323 WHERE incident_id=?",
+            (incident_id,),
         ).fetchone()
         if row is None:
             return None
@@ -67,20 +68,28 @@ class ProtectedRecoveryReviewJournal323:
             raise ValueError("QL432_REVIEW_CUSTODY_UNREADABLE") from None
 
     def claim_once(
-        self, monitor: PersistentReeMonitor304, incident_id: str, export_digest: str,
+        self,
+        monitor: PersistentReeMonitor304,
+        incident_id: str,
+        export_digest: str,
         decision_digest: str,
     ):
         if not (
-            _on_ree(monitor) and _id(incident_id)
-            and isinstance(export_digest, str) and len(export_digest) == 64
-            and isinstance(decision_digest, str) and len(decision_digest) == 64
+            _on_ree(monitor)
+            and _id(incident_id)
+            and isinstance(export_digest, str)
+            and len(export_digest) == 64
+            and isinstance(decision_digest, str)
+            and len(decision_digest) == 64
         ):
             return None
-        receipt = _digest({
-            "incidentId": incident_id,
-            "exportDigest": export_digest,
-            "decisionDigest": decision_digest,
-        })
+        receipt = _digest(
+            {
+                "incidentId": incident_id,
+                "exportDigest": export_digest,
+                "decisionDigest": decision_digest,
+            }
+        )
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             with sqlite3.connect(self.path, timeout=2) as db:
@@ -106,10 +115,10 @@ class ProtectedRecoveryReviewJournal323:
 def _pins(keys: Any) -> bool:
     roles = ("anchor", "reader", "host", "receiver", "owner", "reviewer", *MASTERS)
     return (
-        isinstance(keys, dict) and set(keys) == set(roles)
+        isinstance(keys, dict)
+        and set(keys) == set(roles)
         and all(
-            isinstance(keys[k], tuple) and len(keys[k]) == 2
-            and _public_ed25519(*keys[k])
+            isinstance(keys[k], tuple) and len(keys[k]) == 2 and _public_ed25519(*keys[k])
             for k in roles
         )
         and len({keys[k][1] for k in roles}) == len(roles)
@@ -117,8 +126,12 @@ def _pins(keys: Any) -> bool:
 
 
 def _check(
-    envelope: Any, fields: set[str], schema: str, key: tuple[bytes, str],
-    now: int, earliest: int,
+    envelope: Any,
+    fields: set[str],
+    schema: str,
+    key: tuple[bytes, str],
+    now: int,
+    earliest: int,
 ):
     return _recent_signed(envelope, {"schema", *fields}, schema, *key, now, earliest)
 
@@ -149,23 +162,29 @@ def review_ql432_recovery323(
     now_ms: int | None = None,
 ) -> dict[str, Any]:
     """A single, original-host supervised readback; never reactivates a receiver."""
+
     def hold(reason: str) -> dict[str, Any]:
         return {
             **_hold(reason),
             "receiver": "OFF_PENDING_INDEPENDENT_REVALIDATION",
             "connection": "HOLD",
         }
+
     now = int(time.time() * 1000) if now_ms is None else now_ms
     scope = _accepted(monitor, pilot_acceptance, pilot_journal)
     if not (
-        scope and type(now) is int and _id(anchor_id) and _id(challenge_nonce)
+        scope
+        and type(now) is int
+        and _id(anchor_id)
+        and _id(challenge_nonce)
         and anchor_id != challenge_nonce
         and isinstance(incident_journal, ProtectedContinuityJournal322)
         and isinstance(review_journal, ProtectedRecoveryReviewJournal323)
         and _pins(keys)
-        and all(callable(x) for x in (
-            read_external_anchor, read_original_host_off, read_independent_receiver_off
-        ))
+        and all(
+            callable(x)
+            for x in (read_external_anchor, read_original_host_off, read_independent_receiver_off)
+        )
     ):
         return hold("HOLD_QL432_ORIGINAL_HOST_SIGNER_OR_PILOT_AUTHORITY_MISSING")
     try:
@@ -173,14 +192,18 @@ def review_ql432_recovery323(
     except ValueError:
         return hold("HOLD_QL432_QL431_CUSTODY_TAMPERED")
     if not (
-        checkpoint and checkpoint["index"] >= 3
+        checkpoint
+        and checkpoint["index"] >= 3
         and checkpoint["entry"]["kind"] == "RECONCILED"
         and checkpoint["entry"]["ql430AcceptedDigest"] == pilot_acceptance["acceptedDigest"]
         and all(
             checkpoint["entry"].get(k)
             for k in (
-                "incidentId", "receiverOffDigest", "shutdownAckDigest",
-                "reportsDigest", "ownerDecisionDigest"
+                "incidentId",
+                "receiverOffDigest",
+                "shutdownAckDigest",
+                "reportsDigest",
+                "ownerDecisionDigest",
             )
         )
     ):
@@ -202,16 +225,20 @@ def review_ql432_recovery323(
     exported = _digest(export)
     evidence = {
         "ceremony_id": scope["ceremonyId"],
-        "incident_id": incident, "checkpoint_digest": checkpoint["recordDigest"],
-        "anchor_id": anchor_id, "challenge_nonce": challenge_nonce,
+        "incident_id": incident,
+        "checkpoint_digest": checkpoint["recordDigest"],
+        "anchor_id": anchor_id,
+        "challenge_nonce": challenge_nonce,
         "host": "DESKTOP-AE894KC",
     }
-    if not all((
-        _callback(attest_operator, **evidence),
-        _callback(attest_fresh_nonce, **evidence),
-        _callback(attest_external_custody, **evidence),
-        _callback(attest_owner_custody, **evidence),
-    )):
+    if not all(
+        (
+            _callback(attest_operator, **evidence),
+            _callback(attest_fresh_nonce, **evidence),
+            _callback(attest_external_custody, **evidence),
+            _callback(attest_owner_custody, **evidence),
+        )
+    ):
         return hold("HOLD_QL432_INDEPENDENT_PRIVATE_CUSTODY_UNVERIFIED")
     try:
         if review_journal.read(monitor, incident) is not None:
@@ -224,95 +251,205 @@ def review_ql432_recovery323(
         return hold("HOLD_QL432_EXTERNAL_ANCHOR_SERVICE_UNAVAILABLE")
     if not (isinstance(external, dict) and set(external) == {"anchor", "reader"}):
         return hold("HOLD_QL432_INDEPENDENT_EXTERNAL_READBACK_MISSING")
-    a = _check(external["anchor"], {
-        "anchorId", "challengeNonce", "exportDigest", "scope", "incidentId",
-        "checkpointIndex", "checkpointDigest", "receiverOffDigest",
-        "status", "anchoredAt",
-    }, ANCHOR, keys["anchor"], now, now - 60_000)
-    if not _require(a, {
-        "anchorId": anchor_id, "challengeNonce": challenge_nonce,
-        "exportDigest": exported, "scope": scope, "incidentId": incident,
-        "checkpointIndex": checkpoint["index"],
-        "checkpointDigest": checkpoint["recordDigest"],
-        "receiverOffDigest": entry["receiverOffDigest"],
-        "status": "EXTERNALLY_ANCHORED_IMMUTABLE_CHECKPOINT",
-    }):
+    a = _check(
+        external["anchor"],
+        {
+            "anchorId",
+            "challengeNonce",
+            "exportDigest",
+            "scope",
+            "incidentId",
+            "checkpointIndex",
+            "checkpointDigest",
+            "receiverOffDigest",
+            "status",
+            "anchoredAt",
+        },
+        ANCHOR,
+        keys["anchor"],
+        now,
+        now - 60_000,
+    )
+    if not _require(
+        a,
+        {
+            "anchorId": anchor_id,
+            "challengeNonce": challenge_nonce,
+            "exportDigest": exported,
+            "scope": scope,
+            "incidentId": incident,
+            "checkpointIndex": checkpoint["index"],
+            "checkpointDigest": checkpoint["recordDigest"],
+            "receiverOffDigest": entry["receiverOffDigest"],
+            "status": "EXTERNALLY_ANCHORED_IMMUTABLE_CHECKPOINT",
+        },
+    ):
         return hold("HOLD_QL432_EXTERNAL_ANCHOR_SIGNATURE_OR_SCOPE_REJECTED")
-    r = _check(external["reader"], {
-        "anchorId", "challengeNonce", "exportDigest", "anchorDigest",
-        "checkpointDigest", "status", "readAt",
-    }, READER, keys["reader"], now, _timestamp(a["anchoredAt"]))
-    if not _require(r, {
-        "anchorId": anchor_id, "challengeNonce": challenge_nonce,
-        "exportDigest": exported, "anchorDigest": _digest(a),
-        "checkpointDigest": checkpoint["recordDigest"],
-        "status": "INDEPENDENT_EXTERNAL_CHECKPOINT_READBACK_MATCHED",
-    }):
+    r = _check(
+        external["reader"],
+        {
+            "anchorId",
+            "challengeNonce",
+            "exportDigest",
+            "anchorDigest",
+            "checkpointDigest",
+            "status",
+            "readAt",
+        },
+        READER,
+        keys["reader"],
+        now,
+        _timestamp(a["anchoredAt"]),
+    )
+    if not _require(
+        r,
+        {
+            "anchorId": anchor_id,
+            "challengeNonce": challenge_nonce,
+            "exportDigest": exported,
+            "anchorDigest": _digest(a),
+            "checkpointDigest": checkpoint["recordDigest"],
+            "status": "INDEPENDENT_EXTERNAL_CHECKPOINT_READBACK_MATCHED",
+        },
+    ):
         return hold("HOLD_QL432_INDEPENDENT_ANCHOR_READER_REJECTED")
     try:
-        host_env = read_original_host_off(
-            export_record=export, external_readback_digest=_digest(r)
-        )
+        host_env = read_original_host_off(export_record=export, external_readback_digest=_digest(r))
     except Exception:
         return hold("HOLD_QL432_ORIGINAL_HOST_OFF_UNAVAILABLE")
-    h = _check(host_env, {
-        "scope", "incidentId", "challengeNonce", "readbackDigest",
-        "hostMachineId", "receiverState", "observedAt",
-    }, HOST, keys["host"], now, _timestamp(r["readAt"]))
-    if not _require(h, {
-        "scope": scope, "incidentId": incident, "challengeNonce": challenge_nonce,
-        "readbackDigest": _digest(r), "hostMachineId": "DESKTOP-AE894KC",
-        "receiverState": "OFF",
-    }):
+    h = _check(
+        host_env,
+        {
+            "scope",
+            "incidentId",
+            "challengeNonce",
+            "readbackDigest",
+            "hostMachineId",
+            "receiverState",
+            "observedAt",
+        },
+        HOST,
+        keys["host"],
+        now,
+        _timestamp(r["readAt"]),
+    )
+    if not _require(
+        h,
+        {
+            "scope": scope,
+            "incidentId": incident,
+            "challengeNonce": challenge_nonce,
+            "readbackDigest": _digest(r),
+            "hostMachineId": "DESKTOP-AE894KC",
+            "receiverState": "OFF",
+        },
+    ):
         return hold("HOLD_QL432_SIGNED_ORIGINAL_HOST_OFF_REJECTED")
     try:
         receiver_env = read_independent_receiver_off(
-            export_record=export, host_evidence_digest=_digest(h),
-            external_readback_digest=_digest(r)
+            export_record=export,
+            host_evidence_digest=_digest(h),
+            external_readback_digest=_digest(r),
         )
     except Exception:
         return hold("HOLD_QL432_INDEPENDENT_RECEIVER_OFF_UNAVAILABLE")
-    receiver = _check(receiver_env, {
-        "scope", "incidentId", "challengeNonce", "hostEvidenceDigest",
-        "readbackDigest", "receiverState", "observedAt",
-    }, RECEIVER, keys["receiver"], now, _timestamp(h["observedAt"]))
-    if not _require(receiver, {
-        "scope": scope, "incidentId": incident, "challengeNonce": challenge_nonce,
-        "hostEvidenceDigest": _digest(h), "readbackDigest": _digest(r),
-        "receiverState": "OFF",
-    }):
+    receiver = _check(
+        receiver_env,
+        {
+            "scope",
+            "incidentId",
+            "challengeNonce",
+            "hostEvidenceDigest",
+            "readbackDigest",
+            "receiverState",
+            "observedAt",
+        },
+        RECEIVER,
+        keys["receiver"],
+        now,
+        _timestamp(h["observedAt"]),
+    )
+    if not _require(
+        receiver,
+        {
+            "scope": scope,
+            "incidentId": incident,
+            "challengeNonce": challenge_nonce,
+            "hostEvidenceDigest": _digest(h),
+            "readbackDigest": _digest(r),
+            "receiverState": "OFF",
+        },
+    ):
         return hold("HOLD_QL432_SIGNED_INDEPENDENT_RECEIVER_OFF_REJECTED")
     if not (isinstance(master_reports, dict) and set(master_reports) == set(MASTERS)):
         return hold("HOLD_QL432_THREE_MASTER_DISPOSITION_REQUIRED")
     reports = []
     for master in MASTERS:
-        p = _check(master_reports[master], {
-            "masterId", "scope", "incidentId", "checkpointDigest",
-            "readbackDigest", "receiverOffDigest", "status", "observedAt",
-        }, MASTER, keys[master], now, _timestamp(receiver["observedAt"]))
-        if not _require(p, {
-            "masterId": master, "scope": scope, "incidentId": incident,
-            "checkpointDigest": checkpoint["recordDigest"],
-            "readbackDigest": _digest(r), "receiverOffDigest": _digest(receiver),
-            "status": "RECONCILED_OFF_NEW_CEREMONY_REQUIRED",
-        }):
+        p = _check(
+            master_reports[master],
+            {
+                "masterId",
+                "scope",
+                "incidentId",
+                "checkpointDigest",
+                "readbackDigest",
+                "receiverOffDigest",
+                "status",
+                "observedAt",
+            },
+            MASTER,
+            keys[master],
+            now,
+            _timestamp(receiver["observedAt"]),
+        )
+        if not _require(
+            p,
+            {
+                "masterId": master,
+                "scope": scope,
+                "incidentId": incident,
+                "checkpointDigest": checkpoint["recordDigest"],
+                "readbackDigest": _digest(r),
+                "receiverOffDigest": _digest(receiver),
+                "status": "RECONCILED_OFF_NEW_CEREMONY_REQUIRED",
+            },
+        ):
             return hold("HOLD_QL432_MASTER_RECOVERY_DISPOSITION_REJECTED")
         reports.append(p)
     owner = _dual(
-        owner_review, {
-            "schema", "scope", "incidentId", "checkpointDigest",
-            "readbackDigest", "receiverOffDigest", "reportsDigest",
-            "action", "ownerId", "reviewerId", "reviewedAt",
-        }, OWNER, ACTION, *keys["owner"], *keys["reviewer"],
-        now, max(_timestamp(p["observedAt"]) for p in reports), "reviewedAt"
+        owner_review,
+        {
+            "schema",
+            "scope",
+            "incidentId",
+            "checkpointDigest",
+            "readbackDigest",
+            "receiverOffDigest",
+            "reportsDigest",
+            "action",
+            "ownerId",
+            "reviewerId",
+            "reviewedAt",
+        },
+        OWNER,
+        ACTION,
+        *keys["owner"],
+        *keys["reviewer"],
+        now,
+        max(_timestamp(p["observedAt"]) for p in reports),
+        "reviewedAt",
     )
-    if not _require(owner, {
-        "scope": scope, "incidentId": incident,
-        "checkpointDigest": checkpoint["recordDigest"],
-        "readbackDigest": _digest(r),
-        "receiverOffDigest": _digest(receiver),
-        "reportsDigest": _digest(reports),
-    }):
+    if not _require(
+        owner,
+        {
+            "scope": scope,
+            "incidentId": incident,
+            "checkpointDigest": checkpoint["recordDigest"],
+            "readbackDigest": _digest(r),
+            "receiverOffDigest": _digest(receiver),
+            "reportsDigest": _digest(reports),
+        },
+    ):
         return hold("HOLD_QL432_DUAL_SIGNED_OWNER_REVIEW_REJECTED")
     # Reopen after external I/O to reject local changes or chain corruption.
     try:
@@ -321,11 +458,16 @@ def review_ql432_recovery323(
         return hold("HOLD_QL432_POST_READBACK_LOCAL_CUSTODY_TAMPERED")
     if reopened != checkpoint:
         return hold("HOLD_QL432_LOCAL_CHECKPOINT_DRIFT_DURING_READBACK")
-    decision_digest = _digest({
-        "anchor": _digest(a), "reader": _digest(r),
-        "host": _digest(h), "receiver": _digest(receiver),
-        "masterReports": _digest(reports), "owner": _digest(owner)
-    })
+    decision_digest = _digest(
+        {
+            "anchor": _digest(a),
+            "reader": _digest(r),
+            "host": _digest(h),
+            "receiver": _digest(receiver),
+            "masterReports": _digest(reports),
+            "owner": _digest(owner),
+        }
+    )
     receipt = review_journal.claim_once(monitor, incident, exported, decision_digest)
     if not receipt:
         return hold("HOLD_QL432_REVIEW_RECEIPT_ALREADY_USED_OR_UNDURABLE")
