@@ -66,8 +66,7 @@ class ProtectedPilotJournal313:
         previous_digest: str,
     ) -> bool:
         if not (
-            self._valid(monitor, episode, correlation, stage, digest)
-            and _sha(previous_digest)
+            self._valid(monitor, episode, correlation, stage, digest) and _sha(previous_digest)
         ):
             return False
         expected_stage = STAGES.index(stage)
@@ -116,10 +115,7 @@ class ProtectedPilotJournal313:
         stage: str,
         digest: str,
     ) -> bool:
-        if not (
-            self._valid(monitor, episode, correlation, stage, digest)
-            and self.path.is_file()
-        ):
+        if not (self._valid(monitor, episode, correlation, stage, digest) and self.path.is_file()):
             return False
         try:
             with sqlite3.connect(self.path, timeout=2) as db:
@@ -184,10 +180,8 @@ def import_signed_original_pilot313(
         and isinstance(journal, ProtectedPilotJournal313)
         and isinstance(admitted_pilot, dict)
         and admitted_pilot.get("accepted") is True
-        and admitted_pilot.get("state")
-        == "ORIGINAL_HOST_PILOT_EVIDENCE_ADOPTED_NO_ACTIVATION"
-        and admitted_pilot.get("sourceRevision")
-        == "41b3d69962dd22480badf26fc6a65dfb59f88ac9"
+        and admitted_pilot.get("state") == "ORIGINAL_HOST_PILOT_EVIDENCE_ADOPTED_NO_ACTIVATION"
+        and admitted_pilot.get("sourceRevision") == "41b3d69962dd22480badf26fc6a65dfb59f88ac9"
         and admitted_pilot.get("connection") == "HOLD"
         and isinstance(three_master_handoff, dict)
         and three_master_handoff.get("accepted") is True
@@ -198,13 +192,26 @@ def import_signed_original_pilot313(
     ):
         return _hold("HOLD_MISSING_PROTECTED_312_PILOT_CHAIN")
     fields = {
-        "schema", "sourceId", "hostId", "sourceRevision", "episodeId",
-        "correlationId", "pilotCustodySha256", "threeMasterReceiptSetSha256",
-        "receiverAckSha256", "ql421ClosureSha256", "issuedAt", "connection",
+        "schema",
+        "sourceId",
+        "hostId",
+        "sourceRevision",
+        "episodeId",
+        "correlationId",
+        "pilotCustodySha256",
+        "threeMasterReceiptSetSha256",
+        "receiverAckSha256",
+        "ql421ClosureSha256",
+        "issuedAt",
+        "connection",
     }
     body = _signed(
-        signed_receipt, fields, PILOT_SCHEMA,
-        source_public_der, independent_source_pin, now,
+        signed_receipt,
+        fields,
+        PILOT_SCHEMA,
+        source_public_der,
+        independent_source_pin,
+        now,
     )
     if body is None:
         return _hold("HOLD_INVALID_OR_STALE_SOURCE_SIGNATURE")
@@ -218,8 +225,7 @@ def import_signed_original_pilot313(
         and body["sourceRevision"] == SOURCE312_MAIN
         and body["connection"] == "HOLD"
         and body["pilotCustodySha256"] == admitted_pilot.get("agreementSha256")
-        and body["threeMasterReceiptSetSha256"]
-        == three_master_handoff.get("receiptSetSha256")
+        and body["threeMasterReceiptSetSha256"] == three_master_handoff.get("receiptSetSha256")
         and body["receiverAckSha256"] == admitted_pilot.get("receiverAckSha256")
         and body["ql421ClosureSha256"] == three_master_handoff.get("closureSha256")
         and episode == admitted_pilot.get("episodeId")
@@ -229,16 +235,20 @@ def import_signed_original_pilot313(
         and all(
             _sha(body[key])
             for key in (
-                "pilotCustodySha256", "threeMasterReceiptSetSha256",
-                "receiverAckSha256", "ql421ClosureSha256",
+                "pilotCustodySha256",
+                "threeMasterReceiptSetSha256",
+                "receiverAckSha256",
+                "ql421ClosureSha256",
             )
         )
     ):
         return _hold("HOLD_PILOT_SOURCE_REVISION_EPISODE_OR_DIGEST")
     digest = hashlib.sha256(_serialize(body)).hexdigest()
     evidence = {
-        "host_id": HOST, "source_revision": SOURCE312_MAIN,
-        "episode_id": episode, "correlation_id": corr,
+        "host_id": HOST,
+        "source_revision": SOURCE312_MAIN,
+        "episode_id": episode,
+        "correlation_id": corr,
         "source_receipt_digest": digest,
         "closure_digest": body["ql421ClosureSha256"],
     }
@@ -249,14 +259,20 @@ def import_signed_original_pilot313(
     ):
         return _hold("HOLD_NO_ORIGINAL_REE_INSTALL_REPLAY_OR_OWNER_WITNESS")
     if not journal.claim(
-        monitor, episode=episode, correlation=corr,
-        stage="PILOT", digest=digest, previous_digest=ZERO,
+        monitor,
+        episode=episode,
+        correlation=corr,
+        stage="PILOT",
+        digest=digest,
+        previous_digest=ZERO,
     ):
         return _hold("HOLD_DUPLICATE_OR_UNAVAILABLE_ORIGINAL_PILOT_JOURNAL")
     return {
         **_hold("ORIGINAL_SIGNED_PILOT_IMPORTED_NO_ACTIVATION"),
-        "accepted": True, "episodeId": episode,
-        "correlationId": corr, "pilotReceiptSha256": digest,
+        "accepted": True,
+        "episodeId": episode,
+        "correlationId": corr,
+        "pilotReceiptSha256": digest,
         "ql421ClosureSha256": body["ql421ClosureSha256"],
         "receiverAckSha256": body["receiverAckSha256"],
         "sourceRevision": SOURCE312_MAIN,
@@ -286,21 +302,38 @@ def read_ql421_closure313(
         and imported_pilot.get("state") == "ORIGINAL_SIGNED_PILOT_IMPORTED_NO_ACTIVATION"
         and imported_pilot.get("connection") == "HOLD"
         and journal.exact(
-            monitor, episode=imported_pilot.get("episodeId"),
+            monitor,
+            episode=imported_pilot.get("episodeId"),
             correlation=imported_pilot.get("correlationId"),
-            stage="PILOT", digest=imported_pilot.get("pilotReceiptSha256"),
+            stage="PILOT",
+            digest=imported_pilot.get("pilotReceiptSha256"),
         )
     ):
         return _hold("HOLD_ORIGINAL_PILOT_JOURNAL_READBACK")
     fields = {
-        "schema", "commsId", "commsRevision", "sourceId", "sourceRevision",
-        "episodeId", "correlationId", "pilotReceiptSha256", "ql421ClosureSha256",
-        "ql421OwnerAuditSha256", "ql422OperatorDecisionSha256", "decision",
-        "connection", "ownerAcceptance", "issuedAt",
+        "schema",
+        "commsId",
+        "commsRevision",
+        "sourceId",
+        "sourceRevision",
+        "episodeId",
+        "correlationId",
+        "pilotReceiptSha256",
+        "ql421ClosureSha256",
+        "ql421OwnerAuditSha256",
+        "ql422OperatorDecisionSha256",
+        "decision",
+        "connection",
+        "ownerAcceptance",
+        "issuedAt",
     }
     body = _signed(
-        signed_comms_review, fields, CLOSURE_SCHEMA,
-        comms_public_der, independent_comms_pin, now,
+        signed_comms_review,
+        fields,
+        CLOSURE_SCHEMA,
+        comms_public_der,
+        independent_comms_pin,
+        now,
     )
     if body is None:
         return _hold("HOLD_UNSIGNED_STALE_OR_MISMATCHED_COMMS_REVIEW")
@@ -322,7 +355,8 @@ def read_ql421_closure313(
         return _hold("HOLD_INCONSISTENT_QL421_CLOSURE_OR_OPERATOR_DECISION")
     digest = hashlib.sha256(_serialize(body)).hexdigest()
     evidence = {
-        "source_id": SOURCE, "source_revision": SOURCE312_MAIN,
+        "source_id": SOURCE,
+        "source_revision": SOURCE312_MAIN,
         "comms_revision": COMMS422_MAIN,
         "episode_id": body["episodeId"],
         "correlation_id": body["correlationId"],
@@ -336,15 +370,20 @@ def read_ql421_closure313(
     ):
         return _hold("HOLD_MISSING_INDEPENDENT_QL422_CLOSURE_READBACK")
     if not journal.claim(
-        monitor, episode=body["episodeId"], correlation=body["correlationId"],
-        stage="QL421_CLOSURE", digest=digest,
+        monitor,
+        episode=body["episodeId"],
+        correlation=body["correlationId"],
+        stage="QL421_CLOSURE",
+        digest=digest,
         previous_digest=body["pilotReceiptSha256"],
     ):
         return _hold("HOLD_DUPLICATE_OR_UNAVAILABLE_COMMS_CLOSURE_JOURNAL")
     return {
         **_hold("QL421_CLOSURE_REVIEW_WITNESSED_NOT_ACCEPTED"),
-        "accepted": True, "episodeId": body["episodeId"],
-        "correlationId": body["correlationId"], "pilotReceiptSha256": body["pilotReceiptSha256"],
+        "accepted": True,
+        "episodeId": body["episodeId"],
+        "correlationId": body["correlationId"],
+        "pilotReceiptSha256": body["pilotReceiptSha256"],
         "commsReviewSha256": digest,
         "ql421OwnerAuditSha256": body["ql421OwnerAuditSha256"],
         "ql422OperatorDecisionSha256": body["ql422OperatorDecisionSha256"],
@@ -380,25 +419,42 @@ def review_controller_owner_continuity313(
         and comms_review.get("state") == "QL421_CLOSURE_REVIEW_WITNESSED_NOT_ACCEPTED"
         and comms_review.get("episodeId") == imported_pilot.get("episodeId")
         and comms_review.get("correlationId") == imported_pilot.get("correlationId")
-        and comms_review.get("pilotReceiptSha256")
-        == imported_pilot.get("pilotReceiptSha256")
+        and comms_review.get("pilotReceiptSha256") == imported_pilot.get("pilotReceiptSha256")
         and journal.exact(
-            monitor, episode=comms_review.get("episodeId"),
+            monitor,
+            episode=comms_review.get("episodeId"),
             correlation=comms_review.get("correlationId"),
-            stage="QL421_CLOSURE", digest=comms_review.get("commsReviewSha256"),
+            stage="QL421_CLOSURE",
+            digest=comms_review.get("commsReviewSha256"),
         )
     ):
         return _hold("HOLD_UNVERIFIED_QL421_CLOSURE_CONTINUITY")
     fields = {
-        "schema", "controller", "controllerRevision", "sourceId", "sourceRevision",
-        "commsRevision", "episodeId", "correlationId", "pilotReceiptSha256",
-        "commsReviewSha256", "previousControllerReviewSha256",
-        "ql421OwnerAuditSha256", "decision", "ownerAcceptance", "connection",
-        "mastersSynced", "issuedAt",
+        "schema",
+        "controller",
+        "controllerRevision",
+        "sourceId",
+        "sourceRevision",
+        "commsRevision",
+        "episodeId",
+        "correlationId",
+        "pilotReceiptSha256",
+        "commsReviewSha256",
+        "previousControllerReviewSha256",
+        "ql421OwnerAuditSha256",
+        "decision",
+        "ownerAcceptance",
+        "connection",
+        "mastersSynced",
+        "issuedAt",
     }
     body = _signed(
-        signed_controller_review, fields, OWNER_SCHEMA,
-        controller_public_der, independent_controller_pin, now,
+        signed_controller_review,
+        fields,
+        OWNER_SCHEMA,
+        controller_public_der,
+        independent_controller_pin,
+        now,
     )
     if body is None:
         return _hold("HOLD_INVALID_CONTROLLER_CONTINUITY_SIGNATURE")
@@ -422,8 +478,10 @@ def review_controller_owner_continuity313(
         return _hold("HOLD_CONTROLLER_REVISION_OR_OWNER_DECISION_DRIFT")
     digest = hashlib.sha256(_serialize(body)).hexdigest()
     evidence = {
-        "source_revision": SOURCE312_MAIN, "controller_revision": CONTROLLER378_MAIN,
-        "comms_revision": COMMS422_MAIN, "episode_id": body["episodeId"],
+        "source_revision": SOURCE312_MAIN,
+        "controller_revision": CONTROLLER378_MAIN,
+        "comms_revision": COMMS422_MAIN,
+        "episode_id": body["episodeId"],
         "correlation_id": body["correlationId"],
         "decision_digest": digest,
         "prior_decision_digest": body["previousControllerReviewSha256"],
@@ -435,16 +493,23 @@ def review_controller_owner_continuity313(
     ):
         return _hold("HOLD_CONTROLLER_LEDGER_OR_INDEPENDENT_OWNER_REVIEW")
     if not journal.claim(
-        monitor, episode=body["episodeId"], correlation=body["correlationId"],
-        stage="CONTROLLER", digest=digest,
+        monitor,
+        episode=body["episodeId"],
+        correlation=body["correlationId"],
+        stage="CONTROLLER",
+        digest=digest,
         previous_digest=body["commsReviewSha256"],
     ):
         return _hold("HOLD_DUPLICATE_OR_UNAVAILABLE_OWNER_CONTINUITY_JOURNAL")
     return {
         **_hold("SIGNED_OWNER_REVIEW_CONTINUITY_NO_ACTIVATION"),
-        "accepted": True, "episodeId": body["episodeId"],
-        "correlationId": body["correlationId"], "controllerReviewSha256": digest,
-        "ownerAcceptance": "HOLD", "receiver": "OFF", "masterSync": "HOLD",
+        "accepted": True,
+        "episodeId": body["episodeId"],
+        "correlationId": body["correlationId"],
+        "controllerReviewSha256": digest,
+        "ownerAcceptance": "HOLD",
+        "receiver": "OFF",
+        "masterSync": "HOLD",
     }
 
 
