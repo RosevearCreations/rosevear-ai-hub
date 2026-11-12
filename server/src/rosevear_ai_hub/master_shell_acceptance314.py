@@ -14,7 +14,7 @@ from typing import Any
 from rosevear_ai_hub.master_shell_acceptance305 import _serialize
 from rosevear_ai_hub.master_shell_acceptance308 import _hold, _on_ree
 from rosevear_ai_hub.master_shell_acceptance310 import _corr, _episode, _sha
-from rosevear_ai_hub.master_shell_acceptance312 import _callback, MASTERS
+from rosevear_ai_hub.master_shell_acceptance312 import MASTERS, _callback
 from rosevear_ai_hub.master_shell_acceptance313 import (
     ProtectedPilotJournal313,
     _signed,
