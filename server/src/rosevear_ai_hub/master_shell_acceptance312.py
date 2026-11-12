@@ -105,10 +105,7 @@ def negotiate_controller_schema312(
         "agreement_digest": digest,
         "schema": CONTROLLER_SCHEMA311,
     }
-    if not (
-        _callback(attest_deployed_schema, **args)
-        and _callback(owner_authorize, **args)
-    ):
+    if not (_callback(attest_deployed_schema, **args) and _callback(owner_authorize, **args)):
         return _hold("HOLD_NO_INDEPENDENT_CONTROLLER_DEPLOYMENT_OR_OWNER")
     return {
         **_hold("SCHEMA_MATCHED_READ_ONLY_NO_ACTIVATION"),
@@ -142,11 +139,9 @@ def adopt_original_host_pilot312(
         and closed_export.get("receiverAckVerified") is True
         and closed_export.get("connection") == "HOLD"
         and controller_review.get("accepted") is True
-        and controller_review.get("state")
-        == "SIGNED_CONTROLLER_OWNER_REVIEWED_NO_ACTIVATION"
+        and controller_review.get("state") == "SIGNED_CONTROLLER_OWNER_REVIEWED_NO_ACTIVATION"
         and controller_review.get("episodeId") == closed_export.get("episodeId")
-        and controller_review.get("correlationId")
-        == closed_export.get("correlationId")
+        and controller_review.get("correlationId") == closed_export.get("correlationId")
         and controller_review.get("connection") == "HOLD"
         and agreement.get("accepted") is True
         and agreement.get("state") == "SCHEMA_MATCHED_READ_ONLY_NO_ACTIVATION"
@@ -169,9 +164,7 @@ def adopt_original_host_pilot312(
         and all(_sha(d) for d in digests.values())
         and _sha(controller_review.get("decisionSha256"))
         and _sha(agreement.get("agreementSha256"))
-        and closure_ledger.exact(
-            monitor, episode=episode, correlation=correlation, **digests
-        )
+        and closure_ledger.exact(monitor, episode=episode, correlation=correlation, **digests)
     ):
         return _hold("HOLD_EXACT_311_CLOSURE_CUSTODY_OR_DIGEST")
     args = {
@@ -184,8 +177,7 @@ def adopt_original_host_pilot312(
         "agreement_digest": agreement["agreementSha256"],
     }
     if not (
-        _callback(attest_original_host, **args)
-        and _callback(attest_controller_review, **args)
+        _callback(attest_original_host, **args) and _callback(attest_controller_review, **args)
     ):
         return _hold("HOLD_MISSING_INDEPENDENT_ORIGINAL_HOST_WITNESS")
     return {
@@ -268,8 +260,7 @@ def certify_three_master_handoff312(
         and isinstance(ledger, ProtectedHandoffLedger312)
         and isinstance(adopted_pilot, dict)
         and adopted_pilot.get("accepted") is True
-        and adopted_pilot.get("state")
-        == "ORIGINAL_HOST_PILOT_EVIDENCE_ADOPTED_NO_ACTIVATION"
+        and adopted_pilot.get("state") == "ORIGINAL_HOST_PILOT_EVIDENCE_ADOPTED_NO_ACTIVATION"
         and adopted_pilot.get("connection") == "HOLD"
         and adopted_pilot.get("sourceRevision") == SOURCE311_MAIN
         and isinstance(signed_receipts, dict)

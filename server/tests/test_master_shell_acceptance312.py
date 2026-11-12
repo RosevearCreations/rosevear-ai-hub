@@ -34,9 +34,7 @@ class Ree:
 
 def original_host(monkeypatch):
     for module in ("master_shell_acceptance306", "master_shell_acceptance308"):
-        monkeypatch.setattr(
-            f"rosevear_ai_hub.{module}.platform.system", lambda: "Windows"
-        )
+        monkeypatch.setattr(f"rosevear_ai_hub.{module}.platform.system", lambda: "Windows")
         monkeypatch.setattr(
             f"rosevear_ai_hub.{module}.socket.gethostname",
             lambda: "DESKTOP-AE894KC",
@@ -88,9 +86,9 @@ def test_controller_negotiation_requires_independent_proof(monkeypatch):
     assert not negotiate_controller_schema312(
         Ree(), signed(key, body), **{**kwargs, "attest_deployed_schema": None}
     )["accepted"]
-    assert not negotiate_controller_schema312(
-        Ree(), signed(signer()[0], body), **kwargs
-    )["accepted"]
+    assert not negotiate_controller_schema312(Ree(), signed(signer()[0], body), **kwargs)[
+        "accepted"
+    ]
     assert not negotiate_controller_schema312(
         Ree(), signed(key, {**body, "sourceRevision": "stale"}), **kwargs
     )["accepted"]
@@ -98,7 +96,8 @@ def test_controller_negotiation_requires_independent_proof(monkeypatch):
         Ree(), signed(key, {**body, "connection": "CONNECTED"}), **kwargs
     )["accepted"]
     assert not negotiate_controller_schema312(
-        Ree(), signed(key, {**body, "negotiatedAt": _utc(NOW - 301000)}),
+        Ree(),
+        signed(key, {**body, "negotiatedAt": _utc(NOW - 301000)}),
         **kwargs,
     )["accepted"]
     result = negotiate_controller_schema312(Ree(), signed(key, body), **kwargs)
@@ -169,9 +168,7 @@ def test_three_master_exact_signatures_replay_and_owner_gate(monkeypatch, tmp_pa
     assert approved["accepted"] is True
     assert approved["connection"] == "HOLD"
     assert approved["ownerAcceptance"] == "HOLD"
-    assert not certify_three_master_handoff312(
-        Ree(), pilot, receipts, **kwargs
-    )["accepted"]
+    assert not certify_three_master_handoff312(Ree(), pilot, receipts, **kwargs)["accepted"]
 
 
 def test_owner_status_is_no_store_and_does_not_open_connection():
