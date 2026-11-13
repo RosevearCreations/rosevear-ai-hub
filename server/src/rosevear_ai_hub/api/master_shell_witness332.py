@@ -33,5 +33,8 @@ def read_ql441_owner_status(
         "privateDecisionPresent": False,
         "lastIndependentObservationAt": None,
         "leaseExpiresAt": None,
-        "message": "Live original-host signed ON/OFF and shutdown custody not independently verified.",
+        "message": (
+            "Live original-host signed ON/OFF and shutdown custody "
+            "not independently verified."
+        ),
     }
