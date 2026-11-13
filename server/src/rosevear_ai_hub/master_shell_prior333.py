@@ -3,6 +3,7 @@
 Only original-host protected private journal plus independently pinned signed
 predecessor evidence is eligible. A browser-supplied status alone is not proof.
 """
+
 from typing import Any
 
 from rosevear_ai_hub.master_shell_acceptance312 import MASTERS
@@ -73,7 +74,8 @@ def verify_prior_witness333(
         request441.get("leaseId"),
     )
     if not (
-        pending and decision
+        pending
+        and decision
         and pending["requestDigest"] == req_digest
         and pending["evidenceDigest"] == previous_digest
         and decision["requestDigest"] == req_digest
@@ -89,9 +91,11 @@ def verify_prior_witness333(
         and request441.get("ql440IssuerDigest") == link["issuerDigest"]
         and request441.get("ql440PendingReceiptDigest") == link["pending"]["receiptDigest"]
         and request441.get("ql440IssuedReceiptDigest") == link["issued"]["receiptDigest"]
-        and type(start) is int and type(expires) is int
+        and type(start) is int
+        and type(expires) is int
         and 0 < expires - start <= 120_000
-        and isinstance(challenge, str) and isinstance(nonce, str)
+        and isinstance(challenge, str)
+        and isinstance(nonce, str)
         and isinstance(lease, str)
         and len({challenge, nonce, lease, link["challengeNonce"]}) == 4
     ):
@@ -107,7 +111,8 @@ def verify_prior_witness333(
             and body.get("leaseId") == lease
             and body.get("ql440IssuerDigest") == link["issuerDigest"]
             and body.get("action") == OWNER_ACTION
-            and isinstance(body.get("ownerId"), str) and body["ownerId"]
+            and isinstance(body.get("ownerId"), str)
+            and body["ownerId"]
         ):
             return None
         initial.append(body)
@@ -160,7 +165,8 @@ def verify_prior_witness333(
     for master in MASTERS:
         body = verify332(master, masters441[master], pins441)
         if not (
-            body and body.get("masterId") == master
+            body
+            and body.get("masterId") == master
             and body.get("requestDigest") == req_digest
             and body.get("challengeId") == challenge
             and body.get("challengeNonce") == nonce
@@ -190,20 +196,21 @@ def verify_prior_witness333(
         ):
             return None
         final_owners.append(body)
-    evidence = _digest({
-        "issuer": link["issuer"]["payload"],
-        "sourceOwners": initial,
-        "consumption": consumption,
-        "originalHostOn": host,
-        "independentOn": receiver,
-        "masterDecisions": reports,
-        "finalOwners": final_owners,
-        "prior": previous_digest,
-        "decision": verdict,
-    })
-    if (
-        decision["evidenceDigest"] != evidence
-        or result441.get("independentOnDigest") != _digest(receiver)
+    evidence = _digest(
+        {
+            "issuer": link["issuer"]["payload"],
+            "sourceOwners": initial,
+            "consumption": consumption,
+            "originalHostOn": host,
+            "independentOn": receiver,
+            "masterDecisions": reports,
+            "finalOwners": final_owners,
+            "prior": previous_digest,
+            "decision": verdict,
+        }
+    )
+    if decision["evidenceDigest"] != evidence or result441.get("independentOnDigest") != _digest(
+        receiver
     ):
         return None
     return (
@@ -216,7 +223,9 @@ def verify_prior_witness333(
             }
         ),
         {
-            "incident": incident, "challengeId": challenge, "leaseId": lease,
+            "incident": incident,
+            "challengeId": challenge,
+            "leaseId": lease,
             "leaseExpiresAtMs": expires,
             "independentOnDigest": _digest(receiver),
             "decisionReceiptDigest": decision["receiptDigest"],
