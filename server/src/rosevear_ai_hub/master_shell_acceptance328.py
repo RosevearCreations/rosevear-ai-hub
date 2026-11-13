@@ -74,10 +74,17 @@ class ProtectedClosureJournal328:
         exported, evidence, receipt = row
         if not all(_sha(x) for x in row):
             raise ValueError("QL437_INVALID_CLOSURE_RECEIPT")
-        if _digest({
-            "incidentId": incident, "stage": stage,
-            "exportDigest": exported, "evidenceDigest": evidence,
-        }) != receipt:
+        if (
+            _digest(
+                {
+                    "incidentId": incident,
+                    "stage": stage,
+                    "exportDigest": exported,
+                    "evidenceDigest": evidence,
+                }
+            )
+            != receipt
+        ):
             raise ValueError("QL437_TAMPERED_CLOSURE_RECEIPT")
         return {
             "exportDigest": exported,
@@ -87,8 +94,10 @@ class ProtectedClosureJournal328:
 
     def read(self, monitor: PersistentReeMonitor304, incident: str, stage: str):
         if not (
-            _on_ree(monitor) and _id(incident)
-            and stage in ("PENDING", "FINAL") and self.path.is_file()
+            _on_ree(monitor)
+            and _id(incident)
+            and stage in ("PENDING", "FINAL")
+            and self.path.is_file()
         ):
             return None
         try:
@@ -99,20 +108,30 @@ class ProtectedClosureJournal328:
             raise ValueError("QL437_PRIVATE_CLOSURE_CUSTODY_UNREADABLE") from None
 
     def claim_once(
-        self, monitor: PersistentReeMonitor304, incident: str, stage: str,
-        export_digest: str, evidence_digest: str,
+        self,
+        monitor: PersistentReeMonitor304,
+        incident: str,
+        stage: str,
+        export_digest: str,
+        evidence_digest: str,
     ):
         if not (
-            _on_ree(monitor) and _id(incident)
+            _on_ree(monitor)
+            and _id(incident)
             and stage in ("PENDING", "FINAL")
-            and _sha(export_digest) and _sha(evidence_digest)
+            and _sha(export_digest)
+            and _sha(evidence_digest)
             and self.path.is_absolute()
         ):
             return None
-        receipt = _digest({
-            "incidentId": incident, "stage": stage,
-            "exportDigest": export_digest, "evidenceDigest": evidence_digest,
-        })
+        receipt = _digest(
+            {
+                "incidentId": incident,
+                "stage": stage,
+                "exportDigest": export_digest,
+                "evidenceDigest": evidence_digest,
+            }
+        )
         try:
             self.path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
             if self.path.is_symlink() or self.path.parent.is_symlink():
@@ -135,7 +154,8 @@ class ProtectedClosureJournal328:
                 else:
                     p = self._read(db, incident, "PENDING")
                     if (
-                        p is None or p["exportDigest"] != export_digest
+                        p is None
+                        or p["exportDigest"] != export_digest
                         or self._read(db, incident, "FINAL") is not None
                     ):
                         return None
@@ -167,10 +187,11 @@ class ProtectedClosureJournal328:
 def _pins(keys: Any) -> bool:
     roles = ("anchor", "reader", "host", "receiver", "exception", "owner", "reviewer", *MASTERS)
     return (
-        isinstance(keys, dict) and set(keys) == set(roles)
+        isinstance(keys, dict)
+        and set(keys) == set(roles)
         and all(
-            isinstance(keys[k], tuple) and len(keys[k]) == 2
-            and _public_ed25519(*keys[k]) for k in roles
+            isinstance(keys[k], tuple) and len(keys[k]) == 2 and _public_ed25519(*keys[k])
+            for k in roles
         )
         and len({keys[k][1] for k in roles}) == len(roles)
     )
@@ -208,9 +229,8 @@ def _prior(
         and ql436_shutdown.get("nextCeremonyId") == ql435_pilot.get("nextCeremonyId")
         and ql436_shutdown.get("leaseExpiresAt") == ql435_pilot.get("leaseExpiresAt")
         and ql436_shutdown.get("leaseDisposition") in (TIMELY, LATE_HOST, LATE_OFF)
-        and ql436_shutdown.get("leaseExceptionEscalationRequired") is (
-            ql436_shutdown.get("leaseDisposition") != TIMELY
-        )
+        and ql436_shutdown.get("leaseExceptionEscalationRequired")
+        is (ql436_shutdown.get("leaseDisposition") != TIMELY)
         and _id(ql436_shutdown.get("incidentReviewId"))
         and _id(ql436_shutdown.get("shutdownNonce"))
         and _sha(ql436_shutdown.get("pendingReceiptDigest"))
@@ -219,21 +239,32 @@ def _prior(
     ):
         return None
     chain = _prior327(
-        monitor, scope, ql432_decision, ql433_precheck, ql434_readiness,
-        ql435_pilot, incident_journal, review_journal, precheck_journal,
-        readiness_journal, pilot_evidence_journal,
+        monitor,
+        scope,
+        ql432_decision,
+        ql433_precheck,
+        ql434_readiness,
+        ql435_pilot,
+        incident_journal,
+        review_journal,
+        precheck_journal,
+        readiness_journal,
+        pilot_evidence_journal,
     )
     if not chain:
         return None
     try:
         pending = shutdown_journal.read(monitor, ql436_shutdown["nextCeremonyId"], "PENDING")
         reconciled = shutdown_journal.read(
-            monitor, ql436_shutdown["nextCeremonyId"], "RECONCILED",
+            monitor,
+            ql436_shutdown["nextCeremonyId"],
+            "RECONCILED",
         )
     except ValueError:
         return None
     if not (
-        pending and reconciled
+        pending
+        and reconciled
         and pending["receiptDigest"] == ql436_shutdown["pendingReceiptDigest"]
         and reconciled["receiptDigest"] == ql436_shutdown["reconciledReceiptDigest"]
         and pending["requestDigest"] == reconciled["requestDigest"]
@@ -243,9 +274,13 @@ def _prior(
 
 
 def prepare_ql437_export328(
-    scope: dict[str, Any], ql435_pilot: dict[str, Any],
-    ql436_shutdown: dict[str, Any], prior: dict[str, Any],
-    export_id: str, anchor_nonce: str, now: int,
+    scope: dict[str, Any],
+    ql435_pilot: dict[str, Any],
+    ql436_shutdown: dict[str, Any],
+    prior: dict[str, Any],
+    export_id: str,
+    anchor_nonce: str,
+    now: int,
 ):
     """An exported proposal is not an immutable anchor or live receiver proof."""
     chain327 = prior["chain"]
@@ -327,34 +362,60 @@ def run_ql437_anchored_off_closure328(
     now = int(time.time() * 1000) if now_ms is None else now_ms
     scope = _accepted(monitor, pilot_acceptance, pilot_journal)
     if not (
-        scope and isinstance(ql436_shutdown, dict)
-        and type(now) is int and _id(export_id) and _id(anchor_nonce)
+        scope
+        and isinstance(ql436_shutdown, dict)
+        and type(now) is int
+        and _id(export_id)
+        and _id(anchor_nonce)
         and export_id != anchor_nonce
-        and export_id not in (
+        and export_id
+        not in (
             ql436_shutdown.get("incidentReviewId"),
             ql436_shutdown.get("originalIncidentId"),
             ql436_shutdown.get("nextCeremonyId"),
         )
-        and anchor_nonce not in (
+        and anchor_nonce
+        not in (
             ql436_shutdown.get("incidentReviewId"),
             ql436_shutdown.get("shutdownNonce"),
         )
         and isinstance(closure_journal, ProtectedClosureJournal328)
         and _pins(keys)
-        and all(callable(x) for x in (
-            read_external_anchor, read_host_off, read_independent_off,
-        ))
+        and all(
+            callable(x)
+            for x in (
+                read_external_anchor,
+                read_host_off,
+                read_independent_off,
+            )
+        )
     ):
         return hold("HOLD_QL437_PROTECTED_ORIGINAL_HOST_EXPORT_OR_PINS_MISSING")
     prior = _prior(
-        monitor, scope, ql432_decision, ql433_precheck, ql434_readiness,
-        ql435_pilot, ql436_shutdown, incident_journal, review_journal,
-        precheck_journal, readiness_journal, pilot_evidence_journal, shutdown_journal,
+        monitor,
+        scope,
+        ql432_decision,
+        ql433_precheck,
+        ql434_readiness,
+        ql435_pilot,
+        ql436_shutdown,
+        incident_journal,
+        review_journal,
+        precheck_journal,
+        readiness_journal,
+        pilot_evidence_journal,
+        shutdown_journal,
     )
     if not prior:
         return hold("HOLD_QL437_EXACT_QL431_TO_QL436_PRIVATE_CUSTODY_INVALID")
     export = prepare_ql437_export328(
-        scope, ql435_pilot, ql436_shutdown, prior, export_id, anchor_nonce, now,
+        scope,
+        ql435_pilot,
+        ql436_shutdown,
+        prior,
+        export_id,
+        anchor_nonce,
+        now,
     )
     export_digest = _digest(export)
     evidence = {
@@ -368,13 +429,15 @@ def run_ql437_anchored_off_closure328(
         "ql436_digest": export["ql436ReconciledReceiptDigest"],
         "export_digest": export_digest,
     }
-    if not all((
-        _callback(attest_operator, **evidence),
-        _callback(attest_signed_ql436, **evidence),
-        _callback(attest_independent_anchor, **evidence),
-        _callback(attest_independent_receiver, **evidence),
-        _callback(attest_owner_custody, **evidence),
-    )):
+    if not all(
+        (
+            _callback(attest_operator, **evidence),
+            _callback(attest_signed_ql436, **evidence),
+            _callback(attest_independent_anchor, **evidence),
+            _callback(attest_independent_receiver, **evidence),
+            _callback(attest_owner_custody, **evidence),
+        )
+    ):
         return hold("HOLD_QL437_INDEPENDENT_SIGNED_CUSTODY_AUTHORITY_UNVERIFIED")
     if export["exceptionEscalationRequired"] and not callable(read_exception_custody):
         return hold("HOLD_QL437_EXPIRED_LEASE_INDEPENDENT_EXCEPTION_CUSTODY_REQUIRED")
@@ -387,18 +450,24 @@ def run_ql437_anchored_off_closure328(
     except ValueError:
         return hold("HOLD_QL437_PRIVATE_LEDGER_UNREADABLE")
     pending = closure_journal.claim_once(
-        monitor, incident, "PENDING", export_digest,
-        _digest({
-            "anchorChallengeNonce": anchor_nonce,
-            "ql436ReconciledReceiptDigest": export["ql436ReconciledReceiptDigest"],
-            "leaseDisposition": export["leaseDisposition"],
-        }),
+        monitor,
+        incident,
+        "PENDING",
+        export_digest,
+        _digest(
+            {
+                "anchorChallengeNonce": anchor_nonce,
+                "ql436ReconciledReceiptDigest": export["ql436ReconciledReceiptDigest"],
+                "leaseDisposition": export["leaseDisposition"],
+            }
+        ),
     )
     if pending is None:
         return hold("HOLD_QL437_PENDING_WRITE_FAILED_OR_REPLAY")
     try:
         anchor_env = read_external_anchor(
-            export_record=export, export_digest=export_digest,
+            export_record=export,
+            export_digest=export_digest,
             pending_receipt_digest=pending["receiptDigest"],
         )
     except Exception:
@@ -406,35 +475,68 @@ def run_ql437_anchored_off_closure328(
     if not isinstance(anchor_env, dict):
         return hold("HOLD_QL437_ANCHOR_OR_INDEPENDENT_READER_MISSING")
     anchor = _signed(
-        anchor_env.get("anchor"), {
-            "exportId", "anchorChallengeNonce", "exportDigest",
-            "originalIncidentId", "incidentReviewId", "nextCeremonyId",
-            "ql436ReconciledReceiptDigest", "leaseDisposition", "status", "anchoredAt",
-        }, ANCHOR_SCHEMA, keys["anchor"], now, now - 60_000, "anchoredAt",
+        anchor_env.get("anchor"),
+        {
+            "exportId",
+            "anchorChallengeNonce",
+            "exportDigest",
+            "originalIncidentId",
+            "incidentReviewId",
+            "nextCeremonyId",
+            "ql436ReconciledReceiptDigest",
+            "leaseDisposition",
+            "status",
+            "anchoredAt",
+        },
+        ANCHOR_SCHEMA,
+        keys["anchor"],
+        now,
+        now - 60_000,
+        "anchoredAt",
     )
-    if not _match(anchor, {
-        "exportId": export_id, "anchorChallengeNonce": anchor_nonce,
-        "exportDigest": export_digest, "originalIncidentId": incident,
-        "incidentReviewId": export["incidentReviewId"],
-        "nextCeremonyId": export["nextCeremonyId"],
-        "ql436ReconciledReceiptDigest": export["ql436ReconciledReceiptDigest"],
-        "leaseDisposition": export["leaseDisposition"],
-        "status": "EXTERNAL_IMMUTABLE_SIGNED_OFF_EVIDENCE_ANCHORED",
-    }) or _timestamp(anchor["anchoredAt"]) < _timestamp(export["preparedAt"]):
+    if not _match(
+        anchor,
+        {
+            "exportId": export_id,
+            "anchorChallengeNonce": anchor_nonce,
+            "exportDigest": export_digest,
+            "originalIncidentId": incident,
+            "incidentReviewId": export["incidentReviewId"],
+            "nextCeremonyId": export["nextCeremonyId"],
+            "ql436ReconciledReceiptDigest": export["ql436ReconciledReceiptDigest"],
+            "leaseDisposition": export["leaseDisposition"],
+            "status": "EXTERNAL_IMMUTABLE_SIGNED_OFF_EVIDENCE_ANCHORED",
+        },
+    ) or _timestamp(anchor["anchoredAt"]) < _timestamp(export["preparedAt"]):
         return hold("HOLD_QL437_EXTERNAL_ANCHOR_INVALID")
     reader = _signed(
-        anchor_env.get("reader"), {
-            "exportId", "anchorChallengeNonce", "exportDigest",
-            "externalAnchorDigest", "originalIncidentId", "status", "readAt",
-        }, READBACK_SCHEMA, keys["reader"], now,
-        _timestamp(anchor["anchoredAt"]), "readAt",
+        anchor_env.get("reader"),
+        {
+            "exportId",
+            "anchorChallengeNonce",
+            "exportDigest",
+            "externalAnchorDigest",
+            "originalIncidentId",
+            "status",
+            "readAt",
+        },
+        READBACK_SCHEMA,
+        keys["reader"],
+        now,
+        _timestamp(anchor["anchoredAt"]),
+        "readAt",
     )
-    if not _match(reader, {
-        "exportId": export_id, "anchorChallengeNonce": anchor_nonce,
-        "exportDigest": export_digest, "externalAnchorDigest": _digest(anchor),
-        "originalIncidentId": incident,
-        "status": "INDEPENDENT_EXACT_ANCHORED_OFF_EVIDENCE_READBACK",
-    }):
+    if not _match(
+        reader,
+        {
+            "exportId": export_id,
+            "anchorChallengeNonce": anchor_nonce,
+            "exportDigest": export_digest,
+            "externalAnchorDigest": _digest(anchor),
+            "originalIncidentId": incident,
+            "status": "INDEPENDENT_EXACT_ANCHORED_OFF_EVIDENCE_READBACK",
+        },
+    ):
         return hold("HOLD_QL437_DISTINCT_ANCHOR_READER_INVALID")
     try:
         host_env = read_host_off(
@@ -445,47 +547,87 @@ def run_ql437_anchored_off_closure328(
     except Exception:
         return hold("HOLD_QL437_ORIGINAL_HOST_POST_SHUTDOWN_OFF_UNAVAILABLE")
     host = _signed(
-        host_env, {
-            "hostMachineId", "scope", "originalIncidentId",
-            "nextCeremonyId", "exportId", "anchorChallengeNonce",
-            "anchorDigest", "independentReadbackDigest", "receiverState",
-            "shutdownContinuitySequence", "observedAt",
-        }, HOST_SCHEMA, keys["host"], now, _timestamp(reader["readAt"]), "observedAt",
+        host_env,
+        {
+            "hostMachineId",
+            "scope",
+            "originalIncidentId",
+            "nextCeremonyId",
+            "exportId",
+            "anchorChallengeNonce",
+            "anchorDigest",
+            "independentReadbackDigest",
+            "receiverState",
+            "shutdownContinuitySequence",
+            "observedAt",
+        },
+        HOST_SCHEMA,
+        keys["host"],
+        now,
+        _timestamp(reader["readAt"]),
+        "observedAt",
     )
-    if not _match(host, {
-        "hostMachineId": "DESKTOP-AE894KC", "scope": scope,
-        "originalIncidentId": incident, "nextCeremonyId": export["nextCeremonyId"],
-        "exportId": export_id, "anchorChallengeNonce": anchor_nonce,
-        "anchorDigest": _digest(anchor),
-        "independentReadbackDigest": _digest(reader), "receiverState": "OFF",
-    }) or type(host["shutdownContinuitySequence"]) is not int or (
-        host["shutdownContinuitySequence"] < 1
+    if (
+        not _match(
+            host,
+            {
+                "hostMachineId": "DESKTOP-AE894KC",
+                "scope": scope,
+                "originalIncidentId": incident,
+                "nextCeremonyId": export["nextCeremonyId"],
+                "exportId": export_id,
+                "anchorChallengeNonce": anchor_nonce,
+                "anchorDigest": _digest(anchor),
+                "independentReadbackDigest": _digest(reader),
+                "receiverState": "OFF",
+            },
+        )
+        or type(host["shutdownContinuitySequence"]) is not int
+        or (host["shutdownContinuitySequence"] < 1)
     ):
         return hold("HOLD_QL437_SIGNED_ORIGINAL_HOST_OFF_INVALID")
     try:
         off_env = read_independent_off(
-            export_record=export, host_off_digest=_digest(host),
+            export_record=export,
+            host_off_digest=_digest(host),
             independent_reader_digest=_digest(reader),
         )
     except Exception:
         return hold("HOLD_QL437_INDEPENDENT_RECEIVER_OFF_UNAVAILABLE")
     off = _signed(
-        off_env, {
-            "originalIncidentId", "nextCeremonyId", "exportId",
-            "anchorChallengeNonce", "hostOffDigest",
-            "independentAnchorReadbackDigest", "receiverState",
-            "offContinuitySequence", "observedAt",
-        }, OFF_SCHEMA, keys["receiver"], now,
-        _timestamp(host["observedAt"]), "observedAt",
+        off_env,
+        {
+            "originalIncidentId",
+            "nextCeremonyId",
+            "exportId",
+            "anchorChallengeNonce",
+            "hostOffDigest",
+            "independentAnchorReadbackDigest",
+            "receiverState",
+            "offContinuitySequence",
+            "observedAt",
+        },
+        OFF_SCHEMA,
+        keys["receiver"],
+        now,
+        _timestamp(host["observedAt"]),
+        "observedAt",
     )
-    if not _match(off, {
-        "originalIncidentId": incident,
-        "nextCeremonyId": export["nextCeremonyId"],
-        "exportId": export_id, "anchorChallengeNonce": anchor_nonce,
-        "hostOffDigest": _digest(host),
-        "independentAnchorReadbackDigest": _digest(reader), "receiverState": "OFF",
-    }) or type(off["offContinuitySequence"]) is not int or (
-        off["offContinuitySequence"] < host["shutdownContinuitySequence"]
+    if (
+        not _match(
+            off,
+            {
+                "originalIncidentId": incident,
+                "nextCeremonyId": export["nextCeremonyId"],
+                "exportId": export_id,
+                "anchorChallengeNonce": anchor_nonce,
+                "hostOffDigest": _digest(host),
+                "independentAnchorReadbackDigest": _digest(reader),
+                "receiverState": "OFF",
+            },
+        )
+        or type(off["offContinuitySequence"]) is not int
+        or (off["offContinuitySequence"] < host["shutdownContinuitySequence"])
     ):
         return hold("HOLD_QL437_INDEPENDENT_FRESH_SIGNED_OFF_INVALID")
     if not isinstance(master_reports, dict) or set(master_reports) != set(MASTERS):
@@ -493,23 +635,37 @@ def run_ql437_anchored_off_closure328(
     masters = []
     for master_id in MASTERS:
         m = _signed(
-            master_reports[master_id], {
-                "masterId", "originalIncidentId", "nextCeremonyId",
-                "exportDigest", "independentAnchorReadbackDigest",
-                "independentOffDigest", "leaseDisposition", "status", "observedAt",
-            }, MASTER_SCHEMA, keys[master_id], now,
-            _timestamp(off["observedAt"]), "observedAt",
+            master_reports[master_id],
+            {
+                "masterId",
+                "originalIncidentId",
+                "nextCeremonyId",
+                "exportDigest",
+                "independentAnchorReadbackDigest",
+                "independentOffDigest",
+                "leaseDisposition",
+                "status",
+                "observedAt",
+            },
+            MASTER_SCHEMA,
+            keys[master_id],
+            now,
+            _timestamp(off["observedAt"]),
+            "observedAt",
         )
-        if not _match(m, {
-            "masterId": master_id,
-            "originalIncidentId": incident,
-            "nextCeremonyId": export["nextCeremonyId"],
-            "exportDigest": export_digest,
-            "independentAnchorReadbackDigest": _digest(reader),
-            "independentOffDigest": _digest(off),
-            "leaseDisposition": export["leaseDisposition"],
-            "status": "SIGNED_POST_SHUTDOWN_OFF_HOLD_NO_REENTRY",
-        }):
+        if not _match(
+            m,
+            {
+                "masterId": master_id,
+                "originalIncidentId": incident,
+                "nextCeremonyId": export["nextCeremonyId"],
+                "exportDigest": export_digest,
+                "independentAnchorReadbackDigest": _digest(reader),
+                "independentOffDigest": _digest(off),
+                "leaseDisposition": export["leaseDisposition"],
+                "status": "SIGNED_POST_SHUTDOWN_OFF_HOLD_NO_REENTRY",
+            },
+        ):
             return hold("HOLD_QL437_THREE_MASTER_SIGNED_CUSTODY_INVALID")
         masters.append(m)
     masters_digest = _digest(masters)
@@ -518,58 +674,101 @@ def run_ql437_anchored_off_closure328(
     if export["exceptionEscalationRequired"]:
         try:
             exception_env = read_exception_custody(
-                export_record=export, masters_digest=masters_digest,
+                export_record=export,
+                masters_digest=masters_digest,
                 independent_off_digest=_digest(off),
             )
         except Exception:
             return hold("HOLD_QL437_EXPIRED_LEASE_CUSTODY_UNAVAILABLE")
         exception = _signed(
-            exception_env, {
-                "originalIncidentId", "incidentReviewId", "nextCeremonyId",
-                "exportDigest", "independentAnchorReadbackDigest",
-                "independentOffDigest", "mastersDigest", "leaseDisposition",
-                "status", "recordedAt",
-            }, EXCEPTION_SCHEMA, keys["exception"], now,
-            latest_masters, "recordedAt",
+            exception_env,
+            {
+                "originalIncidentId",
+                "incidentReviewId",
+                "nextCeremonyId",
+                "exportDigest",
+                "independentAnchorReadbackDigest",
+                "independentOffDigest",
+                "mastersDigest",
+                "leaseDisposition",
+                "status",
+                "recordedAt",
+            },
+            EXCEPTION_SCHEMA,
+            keys["exception"],
+            now,
+            latest_masters,
+            "recordedAt",
         )
-        if not _match(exception, {
+        if not _match(
+            exception,
+            {
+                "originalIncidentId": incident,
+                "incidentReviewId": export["incidentReviewId"],
+                "nextCeremonyId": export["nextCeremonyId"],
+                "exportDigest": export_digest,
+                "independentAnchorReadbackDigest": _digest(reader),
+                "independentOffDigest": _digest(off),
+                "mastersDigest": masters_digest,
+                "leaseDisposition": export["leaseDisposition"],
+                "status": "LEASE_EXCEPTION_INDEPENDENT_CUSTODY_OPEN_NOT_CLOSED",
+            },
+        ):
+            return hold("HOLD_QL437_SIGNED_EXCEPTION_CUSTODY_INVALID")
+    owner_action = LATE_ACTION if exception else ON_TIME_ACTION
+    owner = _dual(
+        owner_review,
+        {
+            "schema",
+            "originalIncidentId",
+            "incidentReviewId",
+            "exportDigest",
+            "independentAnchorReadbackDigest",
+            "independentOffDigest",
+            "mastersDigest",
+            "exceptionCustodyDigest",
+            "leaseDisposition",
+            "action",
+            "ownerId",
+            "reviewerId",
+            "reviewedAt",
+        },
+        OWNER_SCHEMA,
+        owner_action,
+        *keys["owner"],
+        *keys["reviewer"],
+        now,
+        _timestamp(exception["recordedAt"]) if exception else latest_masters,
+        "reviewedAt",
+    )
+    if not _match(
+        owner,
+        {
             "originalIncidentId": incident,
             "incidentReviewId": export["incidentReviewId"],
-            "nextCeremonyId": export["nextCeremonyId"],
             "exportDigest": export_digest,
             "independentAnchorReadbackDigest": _digest(reader),
             "independentOffDigest": _digest(off),
             "mastersDigest": masters_digest,
+            "exceptionCustodyDigest": _digest(exception) if exception else None,
             "leaseDisposition": export["leaseDisposition"],
-            "status": "LEASE_EXCEPTION_INDEPENDENT_CUSTODY_OPEN_NOT_CLOSED",
-        }):
-            return hold("HOLD_QL437_SIGNED_EXCEPTION_CUSTODY_INVALID")
-    owner_action = LATE_ACTION if exception else ON_TIME_ACTION
-    owner = _dual(
-        owner_review, {
-            "schema", "originalIncidentId", "incidentReviewId",
-            "exportDigest", "independentAnchorReadbackDigest",
-            "independentOffDigest", "mastersDigest", "exceptionCustodyDigest",
-            "leaseDisposition", "action", "ownerId", "reviewerId", "reviewedAt",
-        }, OWNER_SCHEMA, owner_action, *keys["owner"], *keys["reviewer"],
-        now, _timestamp(exception["recordedAt"]) if exception else latest_masters,
-        "reviewedAt",
-    )
-    if not _match(owner, {
-        "originalIncidentId": incident,
-        "incidentReviewId": export["incidentReviewId"],
-        "exportDigest": export_digest,
-        "independentAnchorReadbackDigest": _digest(reader),
-        "independentOffDigest": _digest(off),
-        "mastersDigest": masters_digest,
-        "exceptionCustodyDigest": _digest(exception) if exception else None,
-        "leaseDisposition": export["leaseDisposition"],
-    }):
+        },
+    ):
         return hold("HOLD_QL437_DUAL_OWNER_CLOSURE_OR_EXCEPTION_DECISION_INVALID")
     latest = _prior(
-        monitor, scope, ql432_decision, ql433_precheck, ql434_readiness,
-        ql435_pilot, ql436_shutdown, incident_journal, review_journal,
-        precheck_journal, readiness_journal, pilot_evidence_journal, shutdown_journal,
+        monitor,
+        scope,
+        ql432_decision,
+        ql433_precheck,
+        ql434_readiness,
+        ql435_pilot,
+        ql436_shutdown,
+        incident_journal,
+        review_journal,
+        precheck_journal,
+        readiness_journal,
+        pilot_evidence_journal,
+        shutdown_journal,
     )
     try:
         reread_pending = closure_journal.read(monitor, incident, "PENDING")
@@ -578,17 +777,23 @@ def run_ql437_anchored_off_closure328(
     if latest != prior or reread_pending != pending:
         return hold("HOLD_QL437_PROTECTED_CHAIN_OR_PENDING_DRIFT")
     final = closure_journal.claim_once(
-        monitor, incident, "FINAL", export_digest, _digest({
-            "pendingDigest": pending["receiptDigest"],
-            "externalAnchorDigest": _digest(anchor),
-            "independentReadbackDigest": _digest(reader),
-            "hostOffDigest": _digest(host),
-            "independentOffDigest": _digest(off),
-            "mastersDigest": masters_digest,
-            "exceptionCustodyDigest": _digest(exception) if exception else None,
-            "ownerDecisionDigest": _digest(owner),
-            "leaseDisposition": export["leaseDisposition"],
-        }),
+        monitor,
+        incident,
+        "FINAL",
+        export_digest,
+        _digest(
+            {
+                "pendingDigest": pending["receiptDigest"],
+                "externalAnchorDigest": _digest(anchor),
+                "independentReadbackDigest": _digest(reader),
+                "hostOffDigest": _digest(host),
+                "independentOffDigest": _digest(off),
+                "mastersDigest": masters_digest,
+                "exceptionCustodyDigest": _digest(exception) if exception else None,
+                "ownerDecisionDigest": _digest(owner),
+                "leaseDisposition": export["leaseDisposition"],
+            }
+        ),
     )
     if final is None:
         return hold("HOLD_QL437_FINAL_READBACK_OR_COMMIT_FAILED")
@@ -598,12 +803,14 @@ def run_ql437_anchored_off_closure328(
         "accepted": True,
         "state": (
             "DURABLE_QL437_EXPIRED_LEASE_EXCEPTION_OPEN_INDEPENDENT_CUSTODY"
-            if late else "DURABLE_QL437_OWNER_SUPERVISED_INCIDENT_CLOSURE_READBACK"
+            if late
+            else "DURABLE_QL437_OWNER_SUPERVISED_INCIDENT_CLOSURE_READBACK"
         ),
         "receiver": "OFF_VERIFIED_HOST_AND_INDEPENDENT_READBACK_FOR_THIS_REVIEW_ONLY",
         "ownerAcceptance": (
             "DUAL_SIGNED_OPEN_LEASE_EXCEPTION_NO_CLOSURE"
-            if late else "DUAL_SIGNED_ON_TIME_INCIDENT_CLOSURE_READBACK_ONLY"
+            if late
+            else "DUAL_SIGNED_ON_TIME_INCIDENT_CLOSURE_READBACK_ONLY"
         ),
         "incidentClosureAuthorized": not late,
         "leaseExceptionOpen": late,
