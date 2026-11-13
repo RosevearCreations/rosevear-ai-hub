@@ -173,13 +173,18 @@ def test_missing_or_malformed_predecessor_custody_digests_fail_before_pending(
             }
             journal = q.ProtectedCorrectiveJournal329(tmp_path / f"{field}-{str(invalid)[:5]}.db")
             result = q.review_corrective_closure329(
-                Ree(), prior, request, journal, {},
+                Ree(),
+                prior,
+                request,
+                journal,
+                {},
                 read_host=lambda **kwargs: None,
                 read_off=lambda **kwargs: None,
                 read_reviewer=lambda **kwargs: None,
                 read_anchor=lambda **kwargs: None,
                 read_reader=lambda **kwargs: None,
-                master_reports={}, owner_signatures={},
+                master_reports={},
+                owner_signatures={},
             )
             assert result["accepted"] is False
             assert result["connection"] == "HOLD"
