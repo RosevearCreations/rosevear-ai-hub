@@ -5,6 +5,7 @@ or off-host custody claims; only the supplied mock adapters are exercised.
 """
 
 from copy import deepcopy
+import sqlite3
 
 import pytest
 
@@ -181,6 +182,7 @@ def make_case(monkeypatch, tmp_path, disposition):
             **inputs
         )
 
+    run.prior_journal = ql437
     return run, journal, evidence, owners, inputs, calls
 
 
@@ -232,3 +234,37 @@ def test_missing_master_or_one_owner_fails_after_pending(monkeypatch, tmp_path):
     del owners2["ownerReviewer"]
     assert run2()["accepted"] is False
     assert journal2.read(LocalMonitor(), "originalIncidentSynthetic329", "CLOSED") is None
+
+def test_protected_ql437_tamper_blocks_corrective_pending(monkeypatch, tmp_path):
+    run, journal, _, _, _, calls = make_case(monkeypatch, tmp_path, LATE_HOST)
+    with sqlite3.connect(run.prior_journal.path) as db:
+        db.execute(
+            "UPDATE closure328 SET receipt_digest=? WHERE stage='FINAL'",
+            ("f" * 64,),
+        )
+    result = run()
+    assert result["accepted"] is False
+    assert result["connection"] == "HOLD"
+    assert not journal.path.exists()
+    assert calls == []
+
+
+def test_protected_ql437_changes_mid_review_prevent_closed(monkeypatch, tmp_path):
+    run, journal, _, _, inputs, _ = make_case(monkeypatch, tmp_path, LATE_OFF)
+    original_reader = inputs["read_reader"]
+
+    def change_prior_custody(**kwargs):
+        output = original_reader(**kwargs)
+        with sqlite3.connect(run.prior_journal.path) as db:
+            db.execute(
+                "UPDATE closure328 SET receipt_digest=? WHERE stage='FINAL'",
+                ("f" * 64,),
+            )
+        return output
+
+    inputs["read_reader"] = change_prior_custody
+    result = run()
+    assert result["accepted"] is False
+    assert result["connection"] == "HOLD"
+    assert journal.read(LocalMonitor(), "originalIncidentSynthetic329", "PENDING")
+    assert journal.read(LocalMonitor(), "originalIncidentSynthetic329", "CLOSED") is None
