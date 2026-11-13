@@ -28,9 +28,9 @@ from rosevear_ai_hub.master_shell_acceptance324 import (
 )
 from rosevear_ai_hub.master_shell_acceptance325 import (
     ProtectedReadinessJournal325,
-    _prior as _prior325,
     reconcile_master_evidence325,
 )
+from rosevear_ai_hub.master_shell_acceptance325 import _prior as _prior325
 from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
 
 SOURCE325_MAIN = "453b00a404d2392dac22ded18ee3f9f77a2466c4"
@@ -533,7 +533,9 @@ def run_ql435_isolated_pilot_evidence326(
         "pendingReceiptDigest": pending["receiptDigest"],
         "acceptedReceiptDigest": accepted["receiptDigest"],
         "independentOnWitnessDigest": _digest(witness),
-        "permittedNextAction": "SUPERVISED_FAIL_CLOSED_OFF_AND_SIGNED_RUNTIME_CONTINUITY_RECHECK_ONLY",
+        "permittedNextAction": (
+            "SUPERVISED_FAIL_CLOSED_OFF_AND_SIGNED_RUNTIME_CONTINUITY_RECHECK_ONLY"
+        ),
         "connection": "HOLD",
         "activationAuthorized": False,
         "manualReceiverIsolationRequired": True,
