@@ -153,7 +153,9 @@ def fixture(monkeypatch, tmp_path, late=False, veto=False):
 
 @pytest.mark.parametrize("late", [False, True])
 @pytest.mark.parametrize("veto", [False, True])
-def test_signed_shutdown_on_time_or_expired_with_prior_go_or_veto(monkeypatch, tmp_path, late, veto):
+def test_signed_shutdown_on_time_or_expired_with_prior_go_or_veto(
+    monkeypatch, tmp_path, late, veto
+):
     case = fixture(monkeypatch, tmp_path, late, veto)
     result = case["run"]()
     assert result["accepted"] is True, result
