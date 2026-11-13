@@ -13,13 +13,9 @@ from rosevear_ai_hub import master_shell_acceptance328 as ql437_source
 from rosevear_ai_hub import master_shell_acceptance329 as q
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from rosevear_ai_hub.master_shell_acceptance327 import LATE_HOST, LATE_OFF
-from test_master_shell_acceptance322 import SCOPE, signed, signer
+from test_master_shell_acceptance322 import Ree, SCOPE, signed, signer
 from test_master_shell_acceptance328 import fixture as historical_fixture
 from test_master_shell_acceptance328 import run as historical_run
-
-
-class LocalMonitor:
-    pass
 
 
 def make_case(monkeypatch, tmp_path, disposition):
@@ -181,7 +177,7 @@ def make_case(monkeypatch, tmp_path, disposition):
 
     def run():
         return q.review_corrective_closure329(
-            LocalMonitor(),
+            Ree(),
             prior,
             request,
             journal,
@@ -208,7 +204,7 @@ def test_signed_full_chain_both_expired_exception_types(monkeypatch, tmp_path, d
     assert result["leaseExceptionOpen"] is False
     assert result["receiver"] == "OFF_VERIFIED_FOR_THIS_SIGNED_REVIEW_ONLY"
     assert calls == ["host", "receiver", "remediationReviewer", "anchor", "reader"]
-    assert journal.read(LocalMonitor(), run.incident_id, "CLOSED")
+    assert journal.read(Ree(), run.incident_id, "CLOSED")
     assert run()["accepted"] is False
 
 
@@ -236,19 +232,19 @@ def test_forged_signed_evidence_cannot_close(monkeypatch, tmp_path, role, mutati
     assert result["accepted"] is False
     assert result["connection"] == "HOLD"
     assert result["activationAuthorized"] is False
-    assert journal.read(LocalMonitor(), run.incident_id, "PENDING")
-    assert journal.read(LocalMonitor(), run.incident_id, "CLOSED") is None
+    assert journal.read(Ree(), run.incident_id, "PENDING")
+    assert journal.read(Ree(), run.incident_id, "CLOSED") is None
 
 
 def test_missing_master_or_one_owner_fails_after_pending(monkeypatch, tmp_path):
     run, journal, _, owners, inputs, _ = make_case(monkeypatch, tmp_path, LATE_OFF)
     del inputs["master_reports"]["ai-data-platform"]
     assert run()["accepted"] is False
-    assert journal.read(LocalMonitor(), run.incident_id, "CLOSED") is None
+    assert journal.read(Ree(), run.incident_id, "CLOSED") is None
     run2, journal2, _, owners2, _, _ = make_case(monkeypatch, tmp_path / "owner-case", LATE_OFF)
     del owners2["ownerReviewer"]
     assert run2()["accepted"] is False
-    assert journal2.read(LocalMonitor(), run2.incident_id, "CLOSED") is None
+    assert journal2.read(Ree(), run2.incident_id, "CLOSED") is None
 
 
 def test_protected_ql437_tamper_blocks_corrective_pending(monkeypatch, tmp_path):
@@ -282,5 +278,5 @@ def test_protected_ql437_changes_mid_review_prevent_closed(monkeypatch, tmp_path
     result = run()
     assert result["accepted"] is False
     assert result["connection"] == "HOLD"
-    assert journal.read(LocalMonitor(), run.incident_id, "PENDING")
-    assert journal.read(LocalMonitor(), run.incident_id, "CLOSED") is None
+    assert journal.read(Ree(), run.incident_id, "PENDING")
+    assert journal.read(Ree(), run.incident_id, "CLOSED") is None
