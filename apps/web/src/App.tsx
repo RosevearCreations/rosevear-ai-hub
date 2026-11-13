@@ -473,7 +473,7 @@ export function App() {
             <Ql442OwnerShutdownPanel />
           </details>
         )}
-        {section === "System" && canAdminister && <HubUpdatePanel />
+        {section === "System" && canAdminister && <HubUpdatePanel />}
         {section === "System" && canAdminister && <WindowsFirstActivation246Panel />}
         {section === "System" && <HubVitalCards health={health} ollama={ollama} />}
         {section === "System" && <SystemWorkspaceGuide backend={health.kind} ollama={ollama.kind}
