@@ -1,0 +1,65 @@
+/* Build 330: opt-in, shared Master Shell instrument language.
+   Based on owner-approved Workshop Operations visual reference.
+   Scoped to .master-command-ui: no unsafe global theme switch. */
+.master-command-ui {
+  --mc-bg: #06111f;
+  --mc-rail: #071522;
+  --mc-card: #0b2132;
+  --mc-card-raised: #0e293d;
+  --mc-border: #20435a;
+  --mc-text: #eff5fb;
+  --mc-muted: #a6b9cc;
+  --mc-purple: #9c39ff;
+  --mc-blue: #169cf0;
+  --mc-green: #00c895;
+  --mc-amber: #f5b52f;
+  --mc-red: #f36a76;
+  color: var(--mc-text);
+  background: var(--mc-bg);
+  border: 1px solid var(--mc-border);
+  border-radius: 16px;
+  min-width: 0;
+  color-scheme: dark;
+}
+.master-command-ui *, .master-command-ui *::before, .master-command-ui *::after { box-sizing: border-box; }
+.master-command-ui .mc-topbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:12px 18px; border-bottom:1px solid var(--mc-border); background:var(--mc-rail); }
+.master-command-ui .mc-brand { display:flex; align-items:center; gap:10px; min-width:0; font-weight:750; letter-spacing:.01em; }
+.master-command-ui .mc-brand-mark { display:grid; place-items:center; width:32px; height:32px; border:2px solid var(--mc-purple); border-radius:50%; color:var(--mc-purple); font-size:13px; font-weight:800; }
+.master-command-ui .mc-release { font-size:.7rem; padding:4px 8px; border:1px solid #6832a2; color:#e4b9ff; border-radius:6px; text-transform:uppercase; letter-spacing:.07em; }
+.master-command-ui .mc-body { display:grid; grid-template-columns:168px minmax(0,1fr); min-height:480px; }
+.master-command-ui .mc-rail { display:flex; flex-direction:column; gap:4px; padding:14px 8px; border-right:1px solid var(--mc-border); background:var(--mc-rail); }
+.master-command-ui .mc-rail-item { display:block; width:100%; padding:10px 12px; border:1px solid transparent; background:transparent; color:var(--mc-muted); border-radius:8px; text-align:left; text-decoration:none; font:inherit; font-size:.83rem; cursor:pointer; }
+.master-command-ui .mc-rail-item[aria-current="page"] { border-left:3px solid var(--mc-purple); background:#281338; color:#fff; }
+.master-command-ui .mc-rail-item:hover { background:#17283c; color:#fff; }
+.master-command-ui .mc-main { padding:20px; min-width:0; }
+.master-command-ui .mc-hero { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; }
+.master-command-ui .mc-hero h2 { font-size:clamp(1.35rem,2vw,1.8rem); line-height:1.2; margin:0 0 5px; color:#fff; }
+.master-command-ui .mc-hero p { margin:0; color:var(--mc-muted); font-size:.85rem; }
+.master-command-ui .mc-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+.master-command-ui .mc-kpi { display:grid; grid-template-columns:36px minmax(0,1fr); gap:10px; align-items:center; border:1px solid var(--mc-border); border-radius:9px; padding:13px 12px; min-width:0; background:var(--mc-card); }
+.master-command-ui .mc-kpi-icon { display:grid; place-items:center; width:34px; height:34px; border-radius:8px; background:#29123e; border:1px solid var(--mc-purple); color:var(--mc-purple); }
+.master-command-ui .mc-kpi-label { display:block; font-size:.72rem; color:var(--mc-muted); }
+.master-command-ui .mc-kpi-value { display:block; margin:3px 0; font-size:1.35rem; font-weight:800; color:#fff; font-variant-numeric:tabular-nums; }
+.master-command-ui .mc-kpi-detail { display:block; font-size:.7rem; color:var(--mc-muted); }
+.master-command-ui .mc-kpi[data-tone="info"] .mc-kpi-icon { background:#082a48; border-color:var(--mc-blue); color:var(--mc-blue); }
+.master-command-ui .mc-kpi[data-tone="healthy"] .mc-kpi-icon { background:#073a30; border-color:var(--mc-green); color:var(--mc-green); }
+.master-command-ui .mc-kpi[data-tone="warning"] .mc-kpi-icon { background:#3b2a0b; border-color:var(--mc-amber); color:var(--mc-amber); }
+.master-command-ui .mc-kpi[data-tone="critical"] .mc-kpi-icon { background:#3b1721; border-color:var(--mc-red); color:var(--mc-red); }
+.master-command-ui .mc-panel { margin-top:14px; padding:16px; background:var(--mc-card); border:1px solid var(--mc-border); border-radius:10px; }
+.master-command-ui .mc-panel h3 { font-size:.96rem; margin:0 0 12px; }
+.master-command-ui .mc-launchers { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.master-command-ui .mc-launcher { display:block; min-width:0; color:var(--mc-text); border:1px solid var(--mc-border); border-radius:9px; background:var(--mc-card-raised); padding:14px; text-decoration:none; }
+.master-command-ui .mc-launcher:hover, .master-command-ui .mc-launcher:focus-visible { border-color:var(--mc-purple); }
+.master-command-ui .mc-launcher strong, .master-command-ui .mc-launcher small { display:block; }
+.master-command-ui .mc-launcher small { margin:4px 0 12px; color:var(--mc-muted); }
+.master-command-ui .mc-meter { height:5px; border-radius:99px; background:#254157; overflow:hidden; }
+.master-command-ui .mc-meter > span { display:block; height:100%; border-radius:inherit; background:var(--mc-purple); }
+.master-command-ui .mc-status { font-size:.73rem; color:var(--mc-muted); }
+.master-command-ui .mc-status[data-tone="healthy"] { color:var(--mc-green); }
+.master-command-ui .mc-status[data-tone="warning"] { color:var(--mc-amber); }
+.master-command-ui .mc-status[data-tone="critical"] { color:var(--mc-red); }
+.master-command-ui .mc-empty { color:var(--mc-muted); border:1px dashed var(--mc-border); border-radius:9px; padding:20px; }
+.master-command-ui :is(a,button,input,select):focus-visible { outline:3px solid #d7a5ff; outline-offset:3px; }
+@media(max-width:1050px) { .master-command-ui .mc-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .master-command-ui .mc-launchers {grid-template-columns:repeat(2,minmax(0,1fr));} }
+@media(max-width:670px) { .master-command-ui .mc-body {display:block;} .master-command-ui .mc-rail { flex-direction:row; overflow-x:auto; border-right:0; border-bottom:1px solid var(--mc-border); } .master-command-ui .mc-rail-item {flex:0 0 auto; width:auto; white-space:nowrap;} .master-command-ui .mc-main {padding:14px;} .master-command-ui .mc-grid,.master-command-ui .mc-launchers {grid-template-columns:1fr;} }
+@media(prefers-reduced-motion:reduce) { .master-command-ui * {scroll-behavior:auto!important; transition:none!important;} }
