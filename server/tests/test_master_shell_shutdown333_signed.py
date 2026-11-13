@@ -132,6 +132,7 @@ def fixture(monkeypatch, tmp_path, late=False, veto=False):
 
         def read(role=role, **kwargs):
             return deepcopy(evidence[role])
+
         adapters[role] = read
 
     def run():
