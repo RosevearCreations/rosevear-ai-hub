@@ -21,14 +21,55 @@ QL-440's ISSUED receipt permits a *separate supervised challenge attempt*, not r
 9. Require the original two distinct owners to sign the exact final decision: GO uses `DUAL_OWNER_GO_ACCEPT_WITNESSED_ON_AND_REQUIRE_SHUTDOWN`; NO_GO uses `DUAL_OWNER_NO_GO_REQUIRE_IMMEDIATE_SHUTDOWN`. Bind source/master initial approvals, independent ON evidence and ordered Master digest.
 10. Recheck prior QL-440 receipts and QL-441 PENDING; revalidate lease time; commit one-use protected DECISION with fsync and exact readback. Require **separate supervised shutdown and fresh independent OFF** next. Decision readback after restart is historical only and must return `QL441_PRIVATE_DECISION_FRESH_OFF_AND_LEASE_CLOSEOUT_REQUIRED`.
 
-## Initial scoped code, NOT release authority
+## Implemented signed source review and read-only owner instrument
 
-`server/src/rosevear_ai_hub/master_shell_witness332.py` is a **shape-only read-only rejector** with synthetic negative tests. It does not verify Ed25519 signatures, establish protected personal-owner sessions, operate a Windows receiver, open a one-use journal, or ever return trusted GO/NO_GO. Even fully consistent shape returns HOLD pending these requirements. Keep draft until full implementation exists.
+The following are **code-level synthetic acceptance only**, not evidence of a live
+supervised ceremony, Windows signer enrollment or actual receiver ON/OFF.
 
-The owner-approved 31-page Master Shell reference applies to the protected read-only Receiver & Ceremony instrument: dark navy, purple active navigation, source-backed metrics, observed timestamps, explicit unknown/HOLD, expiry, audit and shutdown confirmation. Do not render a receiver ON control or invent a live status. Preserve all system/tenant authority boundaries.
+- `server/src/rosevear_ai_hub/master_shell_prior332.py` reopens exact QL-431–439
+  source-custody and QL-440 protected PENDING/ISSUED, independently verifies
+  QL-440 signed host OFF, independent receiver OFF, ordered three Master decisions,
+  distinct signed owners and original-host issuer, and reconstructs the ISSUED
+  evidence digest.
+- `server/src/rosevear_ai_hub/master_shell_decision332.py` implements the private
+  absolute-path 0700/0600, exclusive-create, fsynced one-use PENDING/DECISION
+  custody and restart-safe UNKNOWN/HOLD projection. A consumed PENDING is never
+  silently reused.
+- `server/src/rosevear_ai_hub/master_shell_observation332.py` verifies signed,
+  time-bounded owner approvals, separately read original signed issuer, host
+  challenge consumption and watchdog, original-host ON observation, independently
+  pinned receiver ON observation, exactly three signed GO/veto Master decisions,
+  and two signed final owner GO/NO-GO decisions. A veto must produce NO_GO. It
+  revalidates predecessor custody before DECISION and **never issues ON commands**.
+- `server/src/rosevear_ai_hub/master_shell_witness332.py` retains a conservative
+  unsigned shape guard that can never make a trusted GO decision.
+- `server/src/rosevear_ai_hub/api/master_shell_witness332.py` exposes only an
+  owner-authenticated, no-store, HOLD/UNKNOWN GET status. It has **no** receiver
+  ON, lease-issuance or restart write route.
+- `apps/web/src/Ql441OwnerWitnessPanel.tsx` provides the owner-approved deep
+  navy/purple Master Command Receiver & Ceremony instrument, accessible within
+  the System workspace to owners only. Unavailable signed sources show HOLD and
+  UNKNOWN instead of invented GO, uptime or independent observations.
+
+Synthetic test coverage includes signed GO and independent Master NO_GO veto for
+both QL-438 expired-lease classifications, forged and altered host/receiver ON,
+wrong host (TEMPLAR), missing watchdog, wrong sequence/digest, issuer absence,
+nonce/lease reuse, long/expired lease, owner collusion/broadened authority, missing
+Master and mismatched final owner decision; plus private journal tamper,
+interruption/replay, permission/symlink protections and unauthenticated API denial.
+
+**Operational limitation:** Original personal-owner authentication, live signing
+keys, real independently anchored QL-440 readbacks and physical receiver
+observation/shutdown must still occur under a separately supervised
+DESKTOP-AE894KC procedure. GitHub CI does not perform that ceremony. No local
+receipt or code-green build establishes live ON, OFF, CONNECTED or activation.
+
+The owner-approved 31-page Master Shell visual direction remains scoped to AI
+Hub. This build does not change Comms Hub, AI Data Platform, iCamp, Yard Workers,
+Rosie Dazzlers or Devil n Dove.
 
 ## Gate to promote
 
-Signed synthetic positive GO plus veto NO_GO; absent, forged, replayed, stale, wrong-host and wrong-key signatures; owner collusion; nonce reuse; lease >120 seconds or expiry; incorrect independent ON digest/sequence; three-Master decision forgeries; custody interruption/replay/symlinks/tamper; fail-closed owner UI. Verify six required jobs GREEN on feature PR, dev push, scoped main PR, exact main push plus deployed Worker JS/CSS parity; compare exact SHA at every step. Only code release health may be GREEN—not physical live receiver status.
+Signed synthetic positive GO plus veto NO_GO; absent, forged, replayed, stale, wrong-host and wrong-key signatures; owner collusion; nonce reuse; lease >120 seconds or expiry; incorrect independent ON digest/sequence; three-Master decision forgeries; custody interruption/replay/symlinks/tamper; fail-closed owner UI. Verify six required jobs GREEN on feature PR, scoped main PR and exact main push; compare the exact SHA at every step. The repository intentionally runs checks on PRs to dev and omits duplicate dev-push runs; do not claim a nonexistent dev-push verification. Verify applicable deployment artifact parity independently before any claim of live installation. Only code release health may be GREEN—not physical live receiver status.
 
 **Next proposed Build 333 — QL-442 Signed Isolated Receiver Shutdown, Lease Expiry Enforcement, Independent OFF Attestation & Three-Master Pilot Closure Continuity.**
