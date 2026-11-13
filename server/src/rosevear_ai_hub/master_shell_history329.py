@@ -66,7 +66,6 @@ class ProtectedHistoricalChain329:
             and self.ql436.get("originalIncidentId") == ql437.get("originalIncidentId")
             and self.ql436.get("leaseDisposition") == ql437.get("leaseDisposition")
             and self.ql436.get("nextCeremonyId") == ql437.get("nextCeremonyId")
-            and self.ql436.get("incidentClosureAuthorized") is False
             and self.ql436.get("leaseExceptionEscalationRequired") is True
         ):
             return None
