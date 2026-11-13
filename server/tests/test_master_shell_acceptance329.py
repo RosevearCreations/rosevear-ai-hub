@@ -1,4 +1,5 @@
 """QL-438 fail-closed synthetic tests; no physical Windows or external custody."""
+
 import sqlite3
 
 from rosevear_ai_hub import master_shell_acceptance329 as q
@@ -55,9 +56,18 @@ def test_missing_original_host_or_open_exception_never_claims_closure(monkeypatc
         },
     ):
         result = q.review_corrective_closure329(
-            Ree(), prior, {}, journal, {},
-            read_host=None, read_off=None, read_reviewer=None,
-            read_anchor=None, read_reader=None, master_reports={}, owner_signatures={},
+            Ree(),
+            prior,
+            {},
+            journal,
+            {},
+            read_host=None,
+            read_off=None,
+            read_reviewer=None,
+            read_anchor=None,
+            read_reader=None,
+            master_reports={},
+            owner_signatures={},
         )
         assert result["accepted"] is False
         assert result["connection"] == "HOLD"
