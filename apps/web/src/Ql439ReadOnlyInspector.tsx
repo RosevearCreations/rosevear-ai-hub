@@ -46,12 +46,22 @@ export function Ql439ReadOnlyInspector({
     return <section className="mc-panel" role="alert">Evidence state inconsistent; remain on HOLD.</section>;
   }
 
-  // Source claims are displayed as unverified references, never trusted signature results.
-  const receipts = snapshot.verifiedReceipts.filter(item =>
-    typeof item.id === "string" && typeof item.label === "string" &&
-    typeof item.signer === "string" && typeof item.observedAt === "string" &&
-    typeof item.digest === "string" && /^[0-9a-fA-F]{64}$/.test(item.digest)
-  );
+  // A partially malformed or duplicated source list must never appear as a complete
+  // verified custody chain. Fail closed rather than silently dropping forged rows.
+  const receiptIds = new Set<string>();
+  const receipts = snapshot.verifiedReceipts;
+  const invalidReceipt = receipts.some(item => {
+    if (!item || typeof item !== "object" ||
+        ![item.id, item.label, item.signer, item.observedAt].every(value =>
+          typeof value === "string" && value.trim().length > 0) ||
+        typeof item.digest !== "string" || !/^[0-9a-fA-F]{64}$/.test(item.digest) ||
+        receiptIds.has(item.id)) return true;
+    receiptIds.add(item.id);
+    return false;
+  });
+  if (invalidReceipt) {
+    return <section className="mc-panel" role="alert">Evidence receipts inconsistent; remain on HOLD.</section>;
+  }
   return <section className="mc-panel" aria-label="QL-439 protected evidence inspector">
     <h3>Original-host readiness evidence</h3>
     <p className="mc-status" data-tone="warning">HOLD — preparation only, no activation authority</p>
