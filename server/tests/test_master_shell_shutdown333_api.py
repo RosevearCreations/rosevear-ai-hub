@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from rosevear_ai_hub.main import app
+from rosevear_ai_hub.main import app, create_app
 
 
 def test_owner_only_shutdown_status_requires_authentication():
@@ -20,7 +20,7 @@ def test_ql442_has_no_receiver_control_routes():
 def test_source_projection_is_explicitly_unknown_and_hold():
     matches = [
         route
-        for route in app.routes
+        for route in create_app().routes
         if getattr(route, "path", None) == "/api/v1/system/master-shell-333-shutdown"
     ]
     assert len(matches) == 1
