@@ -13,7 +13,7 @@ from rosevear_ai_hub import master_shell_acceptance328 as ql437_source
 from rosevear_ai_hub import master_shell_acceptance329 as q
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from rosevear_ai_hub.master_shell_acceptance327 import LATE_HOST, LATE_OFF
-from test_master_shell_acceptance322 import Ree, SCOPE, signed, signer
+from test_master_shell_acceptance322 import SCOPE, Ree, signed, signer
 from test_master_shell_acceptance328 import fixture as historical_fixture
 from test_master_shell_acceptance328 import run as historical_run
 
