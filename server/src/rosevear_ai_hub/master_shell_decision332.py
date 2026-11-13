@@ -63,8 +63,7 @@ class ProtectedWitnessJournal332:
             return None
         try:
             if os.name != "nt" and (
-                self.directory.stat().st_mode & 0o077
-                or path.stat().st_mode & 0o077
+                self.directory.stat().st_mode & 0o077 or path.stat().st_mode & 0o077
             ):
                 raise ValueError("unprotected witness directory or receipt")
             with path.open("r", encoding="utf-8") as file:
