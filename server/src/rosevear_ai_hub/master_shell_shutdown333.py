@@ -57,6 +57,7 @@ def review_signed_shutdown333(
     final_now_ms: int,
 ) -> dict[str, Any]:
     """Original-host read-only signed closeout; never issues shutdown commands."""
+
     def fail(reason: str) -> dict[str, Any]:
         return hold_decision333(reason)
 
@@ -81,8 +82,7 @@ def review_signed_shutdown333(
         and type(final_now_ms) is int
         and 0 <= final_now_ms - now_ms <= 120_000
         and all(
-            callable(fn)
-            for fn in (read_comms_source, read_host_shutdown, read_independent_off)
+            callable(fn) for fn in (read_comms_source, read_host_shutdown, read_independent_off)
         )
     ):
         return fail("HOLD_QL442_PROTECTED_HOST_SIGNERS_OR_CLOCK_INVALID")
@@ -132,9 +132,7 @@ def review_signed_shutdown333(
         ):
             return fail("HOLD_QL442_ORIGINAL_COMMS_SOURCE_PROOF_INVALID")
 
-        host_envelope = read_host_shutdown(
-            request=request, commsSourceDigest=_digest(source)
-        )
+        host_envelope = read_host_shutdown(request=request, commsSourceDigest=_digest(source))
         host = verify442("host", host_envelope, pins)
         if not (
             host
@@ -156,9 +154,7 @@ def review_signed_shutdown333(
             and now_ms - host["shutdownAtMs"] <= 120_000
         ):
             return fail("HOLD_QL442_ORIGINAL_HOST_SIGNED_OFF_INVALID")
-        off_envelope = read_independent_off(
-            request=request, signedHostDigest=_digest(host)
-        )
+        off_envelope = read_independent_off(request=request, signedHostDigest=_digest(host))
         off = verify442("receiver", off_envelope, pins)
         if not (
             off
@@ -203,9 +199,7 @@ def review_signed_shutdown333(
             reports.append(body)
         masters_digest = _digest(reports)
         expected_owner = OWNER_LATE if expired else OWNER_ON_TIME
-        if not isinstance(dual_owners, dict) or set(dual_owners) != {
-            "owner", "ownerReviewer"
-        }:
+        if not isinstance(dual_owners, dict) or set(dual_owners) != {"owner", "ownerReviewer"}:
             return fail("HOLD_QL442_DUAL_SIGNED_OWNER_REVIEW_REQUIRED")
         owners = []
         for role, owner_id in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
@@ -219,8 +213,7 @@ def review_signed_shutdown333(
                 and body.get("masterReportsDigest") == masters_digest
                 and body.get("decision") == expected_owner
                 and type(body.get("reviewedAtMs")) is int
-                and max(r["reviewedAtMs"] for r in reports)
-                <= body["reviewedAtMs"] <= final_now_ms
+                and max(r["reviewedAtMs"] for r in reports) <= body["reviewedAtMs"] <= final_now_ms
             ):
                 return fail("HOLD_QL442_TWO_OWNER_CLOSEOUT_SIGNATURES_INVALID")
             owners.append(body)
@@ -229,18 +222,25 @@ def review_signed_shutdown333(
             return fail("HOLD_QL442_PRIOR_SIGNED_CUSTODY_DRIFT")
         if journal.read(monitor, incident, "PENDING") != pending:
             return fail("HOLD_QL442_PRIVATE_PENDING_DRIFT")
-        evidence = _digest({
-            "prior": prior_digest, "commsSource": source, "host": host,
-            "independentOff": off, "masters": reports, "owners": owners,
-            "disposition": classification,
-        })
+        evidence = _digest(
+            {
+                "prior": prior_digest,
+                "commsSource": source,
+                "host": host,
+                "independentOff": off,
+                "masters": reports,
+                "owners": owners,
+                "disposition": classification,
+            }
+        )
         final_stage = "EXCEPTION" if expired else "CLOSED"
         final_receipt = journal.claim(monitor, incident, final_stage, req_digest, evidence)
         if not final_receipt:
             return fail("HOLD_QL442_FINAL_ONE_USE_CUSTODY_INVALID")
         result = {
             **hold_decision333(EXCEPTION if expired else CLOSED),
-            "accepted": True, "state": EXCEPTION if expired else CLOSED,
+            "accepted": True,
+            "state": EXCEPTION if expired else CLOSED,
             "originalIncidentId": incident,
             "leaseDisposition": classification,
             "leaseExceptionOpen": expired,
