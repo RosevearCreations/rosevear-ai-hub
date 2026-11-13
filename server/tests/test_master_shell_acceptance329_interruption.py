@@ -145,3 +145,19 @@ def test_wrong_remedy_rejected_before_pending(monkeypatch, tmp_path):
     assert result["accepted"] is False
     assert result["activationAuthorized"] is False
     assert not journal.path.exists()
+
+
+def test_recycled_signer_public_key_pin_rejected_before_pending(monkeypatch, tmp_path):
+    prior, request, keys, journal = _case(monkeypatch, tmp_path)
+    keys["receiver"] = (keys["host"][0], "receiver")
+    result = _run(
+        prior,
+        request,
+        keys,
+        journal,
+        lambda **kwargs: (_ for _ in ()).throw(AssertionError("unsafe signer reached")),
+    )
+    assert result["state"] == "HOLD_QL438_INVALID_BOUND_REQUEST_OR_SIGNER_PINS"
+    assert result["connection"] == "HOLD"
+    assert result["activationAuthorized"] is False
+    assert not journal.path.exists()
