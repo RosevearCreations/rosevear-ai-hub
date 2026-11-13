@@ -1,4 +1,5 @@
 """Synthetic QL-442 signed ON_TIME and EXPIRED shutdown, never physical OFF."""
+
 from copy import deepcopy
 
 import pytest
@@ -134,7 +135,11 @@ def fixture(monkeypatch, tmp_path, late=False, veto=False):
 
     def run():
         return q.review_signed_shutdown333(
-            Ree(), prior, request, journal, pins,
+            Ree(),
+            prior,
+            request,
+            journal,
+            pins,
             read_comms_source=adapters["commsSource"],
             read_host_shutdown=adapters["host"],
             read_independent_off=adapters["receiver"],
@@ -145,9 +150,17 @@ def fixture(monkeypatch, tmp_path, late=False, veto=False):
         )
 
     return {
-        "run": run, "prior": prior, "request": request, "evidence": evidence,
-        "keys": keys, "pins": pins, "masters": master_reports, "owners": owners,
-        "adapters": adapters, "journal": journal, "incident": issued["originalIncidentId"],
+        "run": run,
+        "prior": prior,
+        "request": request,
+        "evidence": evidence,
+        "keys": keys,
+        "pins": pins,
+        "masters": master_reports,
+        "owners": owners,
+        "adapters": adapters,
+        "journal": journal,
+        "incident": issued["originalIncidentId"],
     }
 
 
