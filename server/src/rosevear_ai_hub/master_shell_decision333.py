@@ -125,8 +125,7 @@ class ProtectedWitnessJournal333:
                     return None
             if stage == "PENDING":
                 if any(
-                    self._path(incident, item).exists()
-                    or self._path(incident, item).is_symlink()
+                    self._path(incident, item).exists() or self._path(incident, item).is_symlink()
                     for item in STAGES
                 ):
                     return None
