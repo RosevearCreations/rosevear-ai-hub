@@ -57,6 +57,7 @@ import { Ql439OwnerReadinessPanel } from "./Ql439OwnerReadinessPanel";
 import { Ql440OwnerIssuancePanel } from "./Ql440OwnerIssuancePanel";
 import { Ql441OwnerWitnessPanel } from "./Ql441OwnerWitnessPanel";
 import { Ql442OwnerShutdownPanel } from "./Ql442OwnerShutdownPanel";
+import { Ql443OwnerRenewalPanel } from "./Ql443OwnerRenewalPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -471,6 +472,14 @@ export function App() {
             <p>Original-host and independent OFF evidence remains separate from live
               state, CONNECTED or activation. Expired leases remain exceptions.</p>
             <Ql442OwnerShutdownPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-443 protected OFF custody admission and three-Master renewal (read-only)</summary>
+            <p>Signed historical evidence does not prove present physical OFF.
+              Expired leases remain open exceptions, and connection remains HOLD.</p>
+            <Ql443OwnerRenewalPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}

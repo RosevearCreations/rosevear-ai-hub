@@ -46,6 +46,8 @@ class ProtectedWitnessJournal333:
 
     def __init__(self, directory: Path):
         self.directory = directory
+        self.stages = STAGES
+        self.terminal_stages = ("CLOSED", "EXCEPTION")
 
     def _path(self, incident: str, stage: str) -> Path:
         return self.directory / f"{_digest({'incident': incident})}.{stage}.json"
@@ -55,7 +57,7 @@ class ProtectedWitnessJournal333:
             _on_ree(monitor)
             and self.directory.is_absolute()
             and not self.directory.is_symlink()
-            and stage in STAGES
+            and stage in self.stages
             and isinstance(incident, str)
             and bool(incident)
         ):
@@ -111,7 +113,7 @@ class ProtectedWitnessJournal333:
             _on_ree(monitor)
             and self.directory.is_absolute()
             and not self.directory.is_symlink()
-            and stage in STAGES
+            and stage in self.stages
             and isinstance(incident, str)
             and bool(incident)
             and _sha(request_digest)
@@ -128,7 +130,7 @@ class ProtectedWitnessJournal333:
             if stage == "PENDING":
                 if any(
                     self._path(incident, item).exists() or self._path(incident, item).is_symlink()
-                    for item in STAGES
+                    for item in self.stages
                 ):
                     return None
             else:
@@ -139,7 +141,7 @@ class ProtectedWitnessJournal333:
                     or any(
                         self._path(incident, item).exists()
                         or self._path(incident, item).is_symlink()
-                        for item in ("CLOSED", "EXCEPTION")
+                        for item in self.terminal_stages
                     )
                 ):
                     return None
