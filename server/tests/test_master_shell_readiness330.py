@@ -13,9 +13,7 @@ from test_master_shell_acceptance329_signed import make_case
 
 def fixture(monkeypatch, tmp_path, disposition=LATE_HOST):
     monkeypatch.setattr(q, "_on_ree", lambda _: True)
-    run438, closed_journal, _, _, _, _ = make_case(
-        monkeypatch, tmp_path / "prior", disposition
-    )
+    run438, closed_journal, _, _, _, _ = make_case(monkeypatch, tmp_path / "prior", disposition)
     closed = run438()
     assert closed["accepted"] is True, closed
     prior = run438.prior437
@@ -139,8 +137,17 @@ def fixture(monkeypatch, tmp_path, disposition=LATE_HOST):
 
     def review(*, anchor_adapter=None):
         return q.review_readiness330(
-            Ree(), prior, request438, closed, closed_journal, history,
-            signed438, keys438, request, journal, pins,
+            Ree(),
+            prior,
+            request438,
+            closed,
+            closed_journal,
+            history,
+            signed438,
+            keys438,
+            request,
+            journal,
+            pins,
             read_anchor=anchor_adapter or adapter("anchor"),
             read_reader=adapter("reader"),
             read_host_off=adapter("host"),
@@ -203,9 +210,7 @@ def test_signed_readiness_both_closed_lease_causes(monkeypatch, tmp_path, dispos
         ("receiver", "observedAtMs", 1_200_000),
     ],
 )
-def test_forged_or_wrong_signed_witness_consumes_pending(
-    monkeypatch, tmp_path, role, field, value
-):
+def test_forged_or_wrong_signed_witness_consumes_pending(monkeypatch, tmp_path, role, field, value):
     case = fixture(monkeypatch, tmp_path)
     case["evidence"][role]["payload"][field] = value
     result = case["review"]()
