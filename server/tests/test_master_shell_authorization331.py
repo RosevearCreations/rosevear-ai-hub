@@ -92,7 +92,10 @@ def evaluate(case):
 
 
 def test_even_valid_shape_is_not_cryptographic_authority():
-    assert evaluate(fixture())["reason"] == "HOLD_QL440_SIGNATURES_AND_ONE_USE_CUSTODY_NOT_YET_VERIFIED"
+    assert (
+        evaluate(fixture())["reason"]
+        == "HOLD_QL440_SIGNATURES_AND_ONE_USE_CUSTODY_NOT_YET_VERIFIED"
+    )
 
 
 def test_restart_issuance_receipt_never_proves_current_off():
@@ -121,14 +124,22 @@ def test_prior_receipt_drift_is_held():
 
 
 def test_templar_and_receiver_on_are_held():
-    for field, value in (("hostMachineId", "TEMPLAR"), ("receiverState", "ON"), ("failClosedShutdownArmed", False)):
+    for field, value in (
+        ("hostMachineId", "TEMPLAR"),
+        ("receiverState", "ON"),
+        ("failClosedShutdownArmed", False),
+    ):
         case = fixture()
         case[2][field] = value
         assert not evaluate(case)["accepted"]
 
 
 def test_independent_off_missing_or_sequence_rollback_is_held():
-    for field, value in (("receiverState", "ON"), ("offContinuitySequence", 16), ("hostOffDigest", "f" * 64)):
+    for field, value in (
+        ("receiverState", "ON"),
+        ("offContinuitySequence", 16),
+        ("hostOffDigest", "f" * 64),
+    ):
         case = fixture()
         case[3][field] = value
         assert not evaluate(case)["accepted"]
