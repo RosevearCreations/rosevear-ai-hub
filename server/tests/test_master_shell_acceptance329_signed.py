@@ -190,6 +190,10 @@ def make_case(monkeypatch, tmp_path, disposition):
     run.prior_journal = ql437
     run.history = history
     run.incident_id = incident
+    run.prior437 = prior
+    run.request438 = request
+    run.pins438 = pins
+    run.signed438 = {**evidence, **master_reports, **owners}
     return run, journal, evidence, owners, inputs, calls
 
 
