@@ -77,6 +77,7 @@ def review_renewal334(
     final_now_ms: int,
 ) -> dict[str, Any]:
     """Read and admit independently signed sources, never turn hardware ON/OFF."""
+
     def fail(reason: str) -> dict[str, Any]:
         return hold334(reason)
 
@@ -100,9 +101,9 @@ def review_renewal334(
         and type(now_ms) is int
         and type(final_now_ms) is int
         and 0 <= final_now_ms - now_ms <= 120_000
-        and all(callable(fn) for fn in (
-            read_comms_source, read_ai_platform, read_fresh_independent_off
-        ))
+        and all(
+            callable(fn) for fn in (read_comms_source, read_ai_platform, read_fresh_independent_off)
+        )
     ):
         return fail("HOLD_QL443_PROTECTED_HOST_SIGNERS_OR_CLOCK_INVALID")
     try:
@@ -124,9 +125,8 @@ def review_renewal334(
             and request.get("historicalIndependentOffDigest") == link["historicalOffDigest"]
             and isinstance(nonce, str)
             and len(nonce) >= 12
-            and len(
-                {nonce, link["originalShutdownNonce"], link["challengeId"], link["leaseId"]}
-            ) == 4
+            and len({nonce, link["originalShutdownNonce"], link["challengeId"], link["leaseId"]})
+            == 4
             and now_ms >= link["historicalOffAtMs"]
         ):
             return fail("HOLD_QL443_EXACT_PRIOR_CUSTODY_AND_FRESH_NONCE_REQUIRED")
@@ -218,9 +218,7 @@ def review_renewal334(
             ):
                 return fail("HOLD_QL443_THREE_MASTER_FRESH_OFF_DIVERGENCE")
             reports.append(body)
-        if not isinstance(dual_owners, dict) or set(dual_owners) != {
-            "owner", "ownerReviewer"
-        }:
+        if not isinstance(dual_owners, dict) or set(dual_owners) != {"owner", "ownerReviewer"}:
             return fail("HOLD_QL443_TWO_DISTINCT_OWNERS_REQUIRED")
         owners = []
         expected_owner = OWNER_LATE if link["leaseDisposition"] == EXPIRED else OWNER_ADMIT
@@ -245,11 +243,17 @@ def review_renewal334(
             return fail("HOLD_QL443_PROTECTED_PREDECESSOR_DRIFT")
         if journal.read(monitor, incident, "PENDING") != pending:
             return fail("HOLD_QL443_PENDING_CUSTODY_DRIFT")
-        evidence = _digest({
-            "prior": prior_digest, "source": source, "platform": platform,
-            "freshOff": fresh, "masters": reports, "owners": owners,
-            "disposition": link["leaseDisposition"],
-        })
+        evidence = _digest(
+            {
+                "prior": prior_digest,
+                "source": source,
+                "platform": platform,
+                "freshOff": fresh,
+                "masters": reports,
+                "owners": owners,
+                "disposition": link["leaseDisposition"],
+            }
+        )
         late = link["leaseDisposition"] == EXPIRED
         stage = "EXCEPTION" if late else "ADMITTED"
         terminal = journal.claim(monitor, incident, stage, req_digest, evidence)

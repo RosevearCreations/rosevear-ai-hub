@@ -64,7 +64,8 @@ def fixture(monkeypatch, tmp_path, late=False):
         "historicalOffDigest": link["historicalOffDigest"],
         "leaseDisposition": link["leaseDisposition"],
         "classification": (
-            "EXPIRED_LEASE_EXCEPTION_HANDOFF_REQUIRED" if late
+            "EXPIRED_LEASE_EXCEPTION_HANDOFF_REQUIRED"
+            if late
             else "SIGNED_OFF_PILOT_CLOSURE_READY_FOR_DURABLE_ADMISSION"
         ),
         "reviewedAtMs": 1_432_000,
@@ -101,9 +102,7 @@ def fixture(monkeypatch, tmp_path, late=False):
         )
     masters_digest = _digest([reports[m]["payload"] for m in q.MASTERS])
     owners = {}
-    for role, owner_id in zip(
-        ("owner", "ownerReviewer"), link["ownerIds"], strict=True
-    ):
+    for role, owner_id in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
         owners[role] = signed(
             keys[role],
             {
@@ -123,25 +122,37 @@ def fixture(monkeypatch, tmp_path, late=False):
         "aiPlatform": signed(keys["aiPlatform"], platform),
         "independentOff": signed(keys["independentOff"], fresh),
     }
-    adapters = {
-        role: (lambda role=role, **_: deepcopy(evidence[role])) for role in evidence
-    }
+    adapters = {role: (lambda role=role, **_: deepcopy(evidence[role])) for role in evidence}
     journal = q.ProtectedRenewalJournal334(tmp_path / "private-ql443")
 
     def run():
         return q.review_renewal334(
-            Ree(), prior, request, journal, pins,
+            Ree(),
+            prior,
+            request,
+            journal,
+            pins,
             read_comms_source=adapters["commsSource"],
             read_ai_platform=adapters["aiPlatform"],
             read_fresh_independent_off=adapters["independentOff"],
-            master_reports=reports, dual_owners=owners,
-            now_ms=1_450_000, final_now_ms=1_455_000,
+            master_reports=reports,
+            dual_owners=owners,
+            now_ms=1_450_000,
+            final_now_ms=1_455_000,
         )
 
     return {
-        "run": run, "prior": prior, "request": request, "evidence": evidence,
-        "keys": keys, "pins": pins, "adapters": adapters, "masters": reports,
-        "owners": owners, "journal": journal, "incident": link["incident"],
+        "run": run,
+        "prior": prior,
+        "request": request,
+        "evidence": evidence,
+        "keys": keys,
+        "pins": pins,
+        "adapters": adapters,
+        "masters": reports,
+        "owners": owners,
+        "journal": journal,
+        "incident": link["incident"],
         "link": link,
     }
 
@@ -229,7 +240,13 @@ def test_symlink_and_both_terminal_stages_rejected(monkeypatch, tmp_path):
     case = fixture(monkeypatch, tmp_path / "reboot")
     result = case["run"]()
     assert result["accepted"] is True
-    assert case["journal"].claim(
-        Ree(), case["incident"], "EXCEPTION",
-        _digest(case["request"]), "0" * 64,
-    ) is None
+    assert (
+        case["journal"].claim(
+            Ree(),
+            case["incident"],
+            "EXCEPTION",
+            _digest(case["request"]),
+            "0" * 64,
+        )
+        is None
+    )

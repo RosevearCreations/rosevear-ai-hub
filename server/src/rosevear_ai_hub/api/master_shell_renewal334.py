@@ -39,8 +39,5 @@ def read_ql443_owner_renewal(
         "expiredLeaseException": "UNVERIFIED_REVIEW_REQUIRED",
         "threeMasterFreshOff": "NOT_VERIFIED",
         "lastFreshIndependentOffAt": None,
-        "message": (
-            "Signed QL-443 custody, three-Master renewal and live receiver OFF "
-            "are not enrolled."
-        ),
+        "message": "QL-443 signed custody and physical receiver OFF remain unverified.",
     }
