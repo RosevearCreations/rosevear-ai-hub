@@ -12,9 +12,9 @@ from rosevear_ai_hub.master_shell_acceptance315 import _public_ed25519
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from rosevear_ai_hub.master_shell_issuance331 import (
     ISSUED,
+    ISSUER_DECISION,
     MASTER_DECISION,
     OWNER_DECISION,
-    ISSUER_DECISION,
     ROLES,
     ProtectedIssuanceJournal331,
     _prior439,
@@ -118,7 +118,7 @@ def prior_signed_issuance332(
         and v.get("challengeNonce") == request440.get("challengeNonce")
         and v.get("independentOffDigest") == _digest(receiver)
         and v.get("decision") == MASTER_DECISION
-        for master, v in zip(MASTERS, masters)
+        for master, v in zip(MASTERS, masters, strict=True)
     ):
         return None
     masters_digest = _digest(masters)
