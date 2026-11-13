@@ -135,3 +135,51 @@ def test_symlinked_journal_cannot_be_read_as_protected_custody(monkeypatch, tmp_
     assert alias.read(Ree(), "incident", "PENDING") is None
     assert alias.claim(Ree(), "incident", "CLOSED", digest, digest) is None
     assert journal.read(Ree(), "incident", "PENDING") is not None
+
+
+def test_missing_or_malformed_predecessor_custody_digests_fail_before_pending(monkeypatch, tmp_path):
+    monkeypatch.setattr(q, "_on_ree", lambda monitor: True)
+    for field in ("finalReceiptDigest", "externalAnchorDigest", "independentAnchorReadbackDigest"):
+        for invalid in (None, "", "0" * 63, "Z" * 64):
+            prior = {
+                "accepted": True,
+                "state": "DURABLE_QL437_EXPIRED_LEASE_EXCEPTION_OPEN_INDEPENDENT_CUSTODY",
+                "leaseExceptionOpen": True,
+                "incidentClosureAuthorized": False,
+                "connection": "HOLD",
+                "activationAuthorized": False,
+                "leaseDisposition": LATE_HOST,
+                "originalIncidentId": "incident329",
+                "nextCeremonyId": "ceremony329",
+                "finalReceiptDigest": "a" * 64,
+                "externalAnchorDigest": "b" * 64,
+                "independentAnchorReadbackDigest": "c" * 64,
+            }
+            prior[field] = invalid
+            request = {
+                "remediationNonce": "unique-nonce-329-a",
+                "remediationId": "unique-remediation-329",
+                "originalIncidentId": "incident329",
+                "ql437FinalReceiptDigest": prior["finalReceiptDigest"],
+                "ql437AnchorDigest": prior["externalAnchorDigest"],
+                "ql437ReaderDigest": prior["independentAnchorReadbackDigest"],
+                "leaseDisposition": LATE_HOST,
+                "rootCause": q.REMEDIES[LATE_HOST][0],
+                "remedy": q.REMEDIES[LATE_HOST][1],
+                "sourceRevision": "a" * 40,
+                "controllerRevision": "b" * 40,
+            }
+            journal = q.ProtectedCorrectiveJournal329(tmp_path / f"{field}-{str(invalid)[:5]}.db")
+            result = q.review_corrective_closure329(
+                Ree(), prior, request, journal, {},
+                read_host=lambda **kwargs: None,
+                read_off=lambda **kwargs: None,
+                read_reviewer=lambda **kwargs: None,
+                read_anchor=lambda **kwargs: None,
+                read_reader=lambda **kwargs: None,
+                master_reports={}, owner_signatures={},
+            )
+            assert result["accepted"] is False
+            assert result["connection"] == "HOLD"
+            assert result["activationAuthorized"] is False
+            assert not journal.path.exists()
