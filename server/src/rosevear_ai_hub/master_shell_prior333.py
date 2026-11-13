@@ -205,5 +205,7 @@ def verify_prior_witness333(
             "decisionReceiptDigest": decision["receiptDigest"],
             "ownerIds": [v["ownerId"] for v in initial],
             "requestDigest": req_digest,
+            "independentOnAtMs": receiver["observedAtMs"],
+            "independentOnSequence": receiver["sequence"],
         },
     )
