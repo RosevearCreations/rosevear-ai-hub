@@ -63,7 +63,10 @@ def check_ql440_prerequisite_shape(
             return hold_ql440("HOLD_QL440_MISSING_REQUEST_BINDING")
         if request[name] != readiness.get(name):
             return hold_ql440("HOLD_QL440_PRIOR_READINESS_DRIFT")
-    for name in ("pendingReceiptDigest", "readinessReceiptDigest", "renewedAnchorDigest", "independentReaderDigest"):
+    for name in (
+        "pendingReceiptDigest", "readinessReceiptDigest",
+        "renewedAnchorDigest", "independentReaderDigest",
+    ):
         value = request.get(name)
         if not isinstance(value, str) or len(value) != 64:
             return hold_ql440("HOLD_QL440_INVALID_PRIOR_DIGEST")
@@ -87,7 +90,10 @@ def check_ql440_prerequisite_shape(
     sequence = observer.get("offContinuitySequence")
     if type(sequence) is not int or sequence < host_sequence:
         return hold_ql440("HOLD_QL440_INDEPENDENT_OFF_SEQUENCE_INVALID")
-    if observer.get("nonce") != request["nonce"] or observer.get("hostOffDigest") != host.get("signedDigest"):
+    if (
+        observer.get("nonce") != request["nonce"]
+        or observer.get("hostOffDigest") != host.get("signedDigest")
+    ):
         return hold_ql440("HOLD_QL440_INDEPENDENT_OFF_BINDING_INVALID")
     if not isinstance(masters, Mapping) or set(masters) != set(MASTERS_440):
         return hold_ql440("HOLD_QL440_THREE_MASTER_REPORTS_MISSING")
@@ -103,7 +109,11 @@ def check_ql440_prerequisite_shape(
             return hold_ql440("HOLD_QL440_MASTER_PREREQUISITE_INVALID")
     if not isinstance(owners, Mapping) or owners.get("decision") != OWNER_DECISION:
         return hold_ql440("HOLD_QL440_DUAL_OWNER_DECISION_INVALID")
-    if owners.get("ownerId") == owners.get("reviewerId") or not owners.get("ownerId") or not owners.get("reviewerId"):
+    if (
+        owners.get("ownerId") == owners.get("reviewerId")
+        or not owners.get("ownerId")
+        or not owners.get("reviewerId")
+    ):
         return hold_ql440("HOLD_QL440_OWNER_REVIEWER_NOT_DISTINCT")
     if owners.get("nonce") != request["nonce"]:
         return hold_ql440("HOLD_QL440_OWNER_BINDING_INVALID")
