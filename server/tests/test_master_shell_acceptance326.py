@@ -7,7 +7,6 @@ from fastapi.testclient import TestClient
 from rosevear_ai_hub.main import app
 from rosevear_ai_hub.master_shell_acceptance305 import _utc
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
-from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
 from rosevear_ai_hub.master_shell_acceptance326 import (
     ENROLLMENT,
     HOST_ON,
@@ -25,6 +24,7 @@ from rosevear_ai_hub.master_shell_acceptance326 import (
     reconcile_master_evidence326,
     run_ql435_isolated_pilot_evidence326,
 )
+from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
 from test_master_shell_acceptance322 import MASTERS, NOW, SCOPE, Ree, dual, signed, signer
 from test_master_shell_acceptance325 import fixture as ql434_fixture
 from test_master_shell_acceptance325 import run as ql434_run
