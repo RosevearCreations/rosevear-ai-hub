@@ -80,8 +80,24 @@ describe("QL-439 read-only owner inspector", () => {
       verifiedReceipts: [{ ...snapshot.verifiedReceipts[0], digest: "not-a-sha256" }],
     };
     render(<Ql439ReadOnlyInspector snapshot={malformed} />);
-    expect(screen.getByText("No authorized receipts supplied.")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("remain on HOLD");
     expect(screen.queryByText("not-a-sha256")).not.toBeInTheDocument();
+  });
+
+  it("rejects duplicate receipt identifiers and partial forgery without showing any trusted rows", () => {
+    const good = snapshot.verifiedReceipts[0];
+    for (const receipts of [
+      [good, { ...good, label: "forged duplicate" }],
+      [good, { ...good, id: "bad", digest: "invalid" }],
+      [good, null],
+    ]) {
+      const { unmount } = render(<Ql439ReadOnlyInspector snapshot={{
+        ...snapshot, verifiedReceipts: receipts as Ql439ReadinessSnapshot["verifiedReceipts"],
+      }} />);
+      expect(screen.getByRole("alert")).toHaveTextContent("remain on HOLD");
+      expect(screen.queryByRole("table")).not.toBeInTheDocument();
+      unmount();
+    }
   });
 
   it("does not fabricate receipts when source supplies none", () => {
