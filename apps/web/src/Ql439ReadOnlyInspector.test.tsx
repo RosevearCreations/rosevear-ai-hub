@@ -59,6 +59,21 @@ describe("QL-439 read-only owner inspector", () => {
     }
   });
 
+  it("rejects absent source provenance and contradictory historical OFF", () => {
+    for (const patch of [
+      { source: "" },
+      { incidentId: " " },
+      { observedAt: "" },
+      { custody: "UNVERIFIED", receiverObservation: "SIGNED_OFF_HISTORICAL" },
+    ]) {
+      const { unmount } = render(<Ql439ReadOnlyInspector
+        snapshot={{ ...snapshot, ...patch } as Ql439ReadinessSnapshot} />);
+      expect(screen.getByRole("alert")).toHaveTextContent("remain on HOLD");
+      expect(screen.queryByText("protected-synthetic-fixture")).not.toBeInTheDocument();
+      unmount();
+    }
+  });
+
   it("does not render malformed digest claims as verified receipt rows", () => {
     const malformed = {
       ...snapshot,
