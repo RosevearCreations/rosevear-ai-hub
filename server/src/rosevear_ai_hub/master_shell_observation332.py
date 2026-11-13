@@ -113,10 +113,7 @@ def review_witnessed_on332(
     nonce = request.get("challengeNonce")
     lease_id = request.get("leaseId")
     if not (
-        all(
-            isinstance(x, str) and len(x) >= 12
-            for x in (challenge, nonce, lease_id)
-        )
+        all(isinstance(x, str) and len(x) >= 12 for x in (challenge, nonce, lease_id))
         and len({challenge, nonce, lease_id, linked["challengeNonce"]}) == 4
         and request.get("action") == ACTION
         and request.get("originalIncidentId") == linked["incident"]
@@ -209,9 +206,7 @@ def review_witnessed_on332(
         ):
             return fail("HOLD_QL441_ORIGINAL_HOST_SIGNED_ON_OBSERVATION_INVALID")
 
-        receiver_envelope = read_independent_on(
-            request=request, hostOnDigest=_digest(host)
-        )
+        receiver_envelope = read_independent_on(request=request, hostOnDigest=_digest(host))
         receiver = verify332("receiverOn", receiver_envelope, pins)
         if not (
             receiver
@@ -249,7 +244,8 @@ def review_witnessed_on332(
         master_digest = _digest(reports)
         expected_owner = OWNER_NO_GO if disposition == NO_GO else OWNER_GO
         if not isinstance(final_owner_signatures, dict) or set(final_owner_signatures) != {
-            "finalSourceOwner", "finalMasterOwner"
+            "finalSourceOwner",
+            "finalMasterOwner",
         }:
             return fail("HOLD_QL441_FINAL_DUAL_OWNER_DECISION_REQUIRED")
         final_owners = []
