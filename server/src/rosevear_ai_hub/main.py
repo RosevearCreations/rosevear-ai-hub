@@ -35,7 +35,9 @@ from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.knowledge_reviews import router as knowledge_reviews_router
 from rosevear_ai_hub.api.maintenance_actions import router as maintenance_actions_router
-from rosevear_ai_hub.api.master_shell_corrective329 import router as master_shell_corrective329_router
+from rosevear_ai_hub.api.master_shell_corrective329 import (
+    router as master_shell_corrective329_router,
+)
 from rosevear_ai_hub.api.mqtt import router as mqtt_router
 from rosevear_ai_hub.api.notifications import router as notifications_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
