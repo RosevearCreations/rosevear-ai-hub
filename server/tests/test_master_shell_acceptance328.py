@@ -35,29 +35,66 @@ ANCHOR_NONCE = "independentAnchorChallengeNonce328"
 
 def fixture(monkeypatch, tmp_path, mode="timely"):
     (
-        case, ql432, ql433, ql434, ql435, _,
-        _, _, reports436, owner436, args436,
+        case,
+        ql432,
+        ql433,
+        ql434,
+        ql435,
+        _,
+        _,
+        _,
+        reports436,
+        owner436,
+        args436,
     ) = ql436_fixture(monkeypatch, tmp_path, mode=mode)
     shutdown = ql436_run(
-        case, ql432, ql433, ql434, ql435, reports436, owner436, args436,
+        case,
+        ql432,
+        ql433,
+        ql434,
+        ql435,
+        reports436,
+        owner436,
+        args436,
     )
     assert shutdown["accepted"] and shutdown["activationAuthorized"] is False
     prior = _prior(
-        Ree(), SCOPE, ql432, ql433, ql434, ql435, shutdown,
-        args436["incident_journal"], args436["review_journal"],
-        args436["precheck_journal"], args436["readiness_journal"],
-        args436["pilot_evidence_journal"], args436["shutdown_journal"],
+        Ree(),
+        SCOPE,
+        ql432,
+        ql433,
+        ql434,
+        ql435,
+        shutdown,
+        args436["incident_journal"],
+        args436["review_journal"],
+        args436["precheck_journal"],
+        args436["readiness_journal"],
+        args436["pilot_evidence_journal"],
+        args436["shutdown_journal"],
     )
     assert prior
     now = args436["now_ms"] + 10_000
     export = prepare_ql437_export328(
-        SCOPE, ql435, shutdown, prior, EXPORT_ID, ANCHOR_NONCE, now,
+        SCOPE,
+        ql435,
+        shutdown,
+        prior,
+        EXPORT_ID,
+        ANCHOR_NONCE,
+        now,
     )
     keys = {
         name: signer()
         for name in (
-            "anchor", "reader", "host", "receiver",
-            "exception", "owner", "reviewer", *MASTERS,
+            "anchor",
+            "reader",
+            "host",
+            "receiver",
+            "exception",
+            "owner",
+            "reviewer",
+            *MASTERS,
         )
     }
     anchor = {
@@ -111,18 +148,21 @@ def fixture(monkeypatch, tmp_path, mode="timely"):
     }
     masters = {}
     for master in MASTERS:
-        masters[master] = signed(keys[master], {
-            "schema": MASTER_SCHEMA,
-            "masterId": master,
-            "originalIncidentId": shutdown["originalIncidentId"],
-            "nextCeremonyId": shutdown["nextCeremonyId"],
-            "exportDigest": _digest(export),
-            "independentAnchorReadbackDigest": _digest(reader),
-            "independentOffDigest": _digest(off),
-            "leaseDisposition": shutdown["leaseDisposition"],
-            "status": "SIGNED_POST_SHUTDOWN_OFF_HOLD_NO_REENTRY",
-            "observedAt": _utc(now),
-        })
+        masters[master] = signed(
+            keys[master],
+            {
+                "schema": MASTER_SCHEMA,
+                "masterId": master,
+                "originalIncidentId": shutdown["originalIncidentId"],
+                "nextCeremonyId": shutdown["nextCeremonyId"],
+                "exportDigest": _digest(export),
+                "independentAnchorReadbackDigest": _digest(reader),
+                "independentOffDigest": _digest(off),
+                "leaseDisposition": shutdown["leaseDisposition"],
+                "status": "SIGNED_POST_SHUTDOWN_OFF_HOLD_NO_REENTRY",
+                "observedAt": _utc(now),
+            },
+        )
     masters_digest = _digest([masters[m]["payload"] for m in MASTERS])
     exception = {
         "schema": EXCEPTION_SCHEMA,
@@ -138,21 +178,25 @@ def fixture(monkeypatch, tmp_path, mode="timely"):
         "recordedAt": _utc(now),
     }
     late = shutdown["leaseExceptionEscalationRequired"]
-    owner = dual(keys["owner"], keys["reviewer"], {
-        "schema": OWNER_SCHEMA,
-        "originalIncidentId": shutdown["originalIncidentId"],
-        "incidentReviewId": shutdown["incidentReviewId"],
-        "exportDigest": _digest(export),
-        "independentAnchorReadbackDigest": _digest(reader),
-        "independentOffDigest": _digest(off),
-        "mastersDigest": masters_digest,
-        "exceptionCustodyDigest": _digest(exception) if late else None,
-        "leaseDisposition": shutdown["leaseDisposition"],
-        "action": LATE_ACTION if late else ON_TIME_ACTION,
-        "ownerId": "originalClosureOwner328",
-        "reviewerId": "independentClosureReviewer328",
-        "reviewedAt": _utc(now),
-    })
+    owner = dual(
+        keys["owner"],
+        keys["reviewer"],
+        {
+            "schema": OWNER_SCHEMA,
+            "originalIncidentId": shutdown["originalIncidentId"],
+            "incidentReviewId": shutdown["incidentReviewId"],
+            "exportDigest": _digest(export),
+            "independentAnchorReadbackDigest": _digest(reader),
+            "independentOffDigest": _digest(off),
+            "mastersDigest": masters_digest,
+            "exceptionCustodyDigest": _digest(exception) if late else None,
+            "leaseDisposition": shutdown["leaseDisposition"],
+            "action": LATE_ACTION if late else ON_TIME_ACTION,
+            "ownerId": "originalClosureOwner328",
+            "reviewerId": "independentClosureReviewer328",
+            "reviewedAt": _utc(now),
+        },
+    )
     closure = ProtectedClosureJournal328(tmp_path / "closure328.db")
     args = {
         "pilot_journal": args436["pilot_journal"],
@@ -179,20 +223,55 @@ def fixture(monkeypatch, tmp_path, mode="timely"):
         "now_ms": now,
     }
     return (
-        case, ql432, ql433, ql434, ql435, shutdown,
-        keys, anchor, reader, host, off, masters, exception, owner, args,
+        case,
+        ql432,
+        ql433,
+        ql434,
+        ql435,
+        shutdown,
+        keys,
+        anchor,
+        reader,
+        host,
+        off,
+        masters,
+        exception,
+        owner,
+        args,
     )
 
 
 def run(values, args=None, reports=None, owners=None):
     (
-        case, ql432, ql433, ql434, ql435, shutdown,
-        _, _, _, _, _, masters, _, owner, default,
+        case,
+        ql432,
+        ql433,
+        ql434,
+        ql435,
+        shutdown,
+        _,
+        _,
+        _,
+        _,
+        _,
+        masters,
+        _,
+        owner,
+        default,
     ) = values
     return run_ql437_anchored_off_closure328(
-        Ree(), case["acceptance"], ql432, ql433, ql434, ql435, shutdown,
-        EXPORT_ID, ANCHOR_NONCE, reports if reports is not None else masters,
-        owners if owners is not None else owner, **(args if args is not None else default),
+        Ree(),
+        case["acceptance"],
+        ql432,
+        ql433,
+        ql434,
+        ql435,
+        shutdown,
+        EXPORT_ID,
+        ANCHOR_NONCE,
+        reports if reports is not None else masters,
+        owners if owners is not None else owner,
+        **(args if args is not None else default),
     )
 
 
@@ -226,9 +305,7 @@ def test_expired_lease_both_types_remain_open(monkeypatch, tmp_path):
         v = fixture(monkeypatch, path, mode)
         result = run(v)
         assert result["accepted"]
-        assert result["state"] == (
-            "DURABLE_QL437_EXPIRED_LEASE_EXCEPTION_OPEN_INDEPENDENT_CUSTODY"
-        )
+        assert result["state"] == ("DURABLE_QL437_EXPIRED_LEASE_EXCEPTION_OPEN_INDEPENDENT_CUSTODY")
         assert result["leaseDisposition"] == expected
         assert result["incidentClosureAuthorized"] is False
         assert result["leaseExceptionOpen"] is True
@@ -253,9 +330,12 @@ def test_independent_off_on_or_wrong_sequence_fails_closed(monkeypatch, tmp_path
     v = fixture(monkeypatch, tmp_path)
     kw = v[-1]
     keys, off = v[6], v[10]
-    bad = {**kw, "read_independent_off": lambda **_: signed(
-        keys["receiver"], {**off, "receiverState": "ON"}
-    )}
+    bad = {
+        **kw,
+        "read_independent_off": lambda **_: signed(
+            keys["receiver"], {**off, "receiverState": "ON"}
+        ),
+    }
     result = run(v, args=bad)
     assert not result.get("accepted")
     assert result["receiver"] == "UNKNOWN_PENDING_INDEPENDENT_OFF_REVALIDATION"
@@ -275,7 +355,8 @@ def test_late_exception_requires_signed_open_custody_and_matching_owner(monkeypa
     w = fixture(monkeypatch, another, "late_host")
     keys, owner = w[6], w[13]
     false_closure = dual(
-        keys["owner"], keys["reviewer"],
+        keys["owner"],
+        keys["reviewer"],
         {**owner["payload"], "action": ON_TIME_ACTION},
     )
     result = run(w, owners=false_closure)
@@ -309,5 +390,6 @@ def test_source_projection_cannot_prove_live_off_and_api_is_private():
     assert projection["activationAuthorized"] is False
     assert projection["receiver"] == "UNKNOWN_PENDING_INDEPENDENT_OFF_REVALIDATION"
     assert TestClient(app).get("/api/v1/system/master-shell-328-acceptance").status_code in (
-        401, 403,
+        401,
+        403,
     )
