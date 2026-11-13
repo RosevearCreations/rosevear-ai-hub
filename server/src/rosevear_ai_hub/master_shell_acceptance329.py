@@ -354,6 +354,11 @@ def review_corrective_closure329(
             and ap.get("previousAnchorDigest") == prior437["externalAnchorDigest"]
             and ap.get("masterDigest") == master_digest
             and ap.get("offDigest") == _digest(op)
+            and isinstance(ap.get("externalStoreId"), str)
+            and bool(ap["externalStoreId"])
+            and ap.get("immutable") is True
+            and type(ap.get("anchorSequence")) is int
+            and ap["anchorSequence"] > 0
         ):
             return fail("HOLD_QL438_EXTERNAL_ANCHOR_INVALID")
         reader = read_reader(request=request, anchorDigest=_digest(ap))
@@ -362,6 +367,10 @@ def review_corrective_closure329(
             _verify("reader", reader, keys, rd)
             and rd.get("requestDigest") == digest
             and rd.get("anchorDigest") == _digest(ap)
+            and rd.get("externalStoreId") == ap["externalStoreId"]
+            and rd.get("remoteDurable") is True
+            and type(rd.get("readbackSequence")) is int
+            and rd["readbackSequence"] >= ap["anchorSequence"]
         ):
             return fail("HOLD_QL438_INDEPENDENT_ANCHOR_READBACK_INVALID")
         if not isinstance(owner_signatures, dict) or set(owner_signatures) != {
