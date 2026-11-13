@@ -46,8 +46,7 @@ def fixture(monkeypatch, tmp_path):
         "ql434": readiness.read(Ree(), ql434["incidentId"]),
     }
     keys = {
-        role: signer()
-        for role in ("host", "pre_off", "on_witness", "owner", "reviewer", *MASTERS)
+        role: signer() for role in ("host", "pre_off", "on_witness", "owner", "reviewer", *MASTERS)
     }
     request = {
         "schema": REQUEST,
@@ -191,9 +190,16 @@ def fixture(monkeypatch, tmp_path):
         "now_ms": NOW,
     }
     return (
-        case, ql432, precheck, ql434, keys,
+        case,
+        ql432,
+        precheck,
+        ql434,
+        keys,
         dual(keys["owner"], keys["reviewer"], permit),
-        reports, dual(keys["owner"], keys["reviewer"], owner), args, journal,
+        reports,
+        dual(keys["owner"], keys["reviewer"], owner),
+        args,
+        journal,
     )
 
 
@@ -241,45 +247,61 @@ def test_pre_challenge_failures_cannot_create_on_evidence(monkeypatch, tmp_path)
         {"attest_signed_ql434": None},
         {"attest_hard_shutdown_armed": None},
         {"attest_challenge_fresh": None},
-        {"read_host_enrollment": lambda **_: signed(
-            keys["host"], {"schema": ENROLLMENT, "receiverState": "ON"}
-        )},
-        {"read_independent_pre_off": lambda **_: signed(
-            keys["pre_off"], {"schema": PRE_OFF, "receiverState": "ON"}
-        )},
+        {
+            "read_host_enrollment": lambda **_: signed(
+                keys["host"], {"schema": ENROLLMENT, "receiverState": "ON"}
+            )
+        },
+        {
+            "read_independent_pre_off": lambda **_: signed(
+                keys["pre_off"], {"schema": PRE_OFF, "receiverState": "ON"}
+            )
+        },
         {"keys": {**args["keys"], "pre_off": args["keys"]["host"]}},
     ]
     for change in failures:
-        denied = run(case, ql432, precheck, ql434, permit, reports, owner, {
-            **args, **change
-        })
+        denied = run(case, ql432, precheck, ql434, permit, reports, owner, {**args, **change})
         assert not denied.get("accepted")
         assert denied["connection"] == "HOLD"
         assert denied["activationAuthorized"] is False
         assert denied["manualReceiverIsolationRequired"] is False
     assert journal.read(Ree(), ql434["nextCeremonyId"], "PENDING") is None
     invalid_lease = run(
-        case, ql432, precheck, ql434, permit, reports, owner, args,
+        case,
+        ql432,
+        precheck,
+        ql434,
+        permit,
+        reports,
+        owner,
+        args,
         lease=_utc(NOW + MAX_LEASE_MS + 1),
     )
     assert not invalid_lease.get("accepted")
     wrong_permit = dual(
-        keys["owner"], keys["reviewer"],
+        keys["owner"],
+        keys["reviewer"],
         {**permit["payload"], "action": "ENABLE_RECEIVER"},
     )
-    assert not run(
-        case, ql432, precheck, ql434, wrong_permit, reports, owner, args
-    ).get("accepted")
+    assert not run(case, ql432, precheck, ql434, wrong_permit, reports, owner, args).get("accepted")
 
 
 def test_post_pending_failure_requires_isolation_and_consumes_ceremony(monkeypatch, tmp_path):
     case, ql432, precheck, ql434, _, permit, reports, owner, args, journal = fixture(
         monkeypatch, tmp_path
     )
+
     def unavailable(**_):
         raise OSError("no real host observation")
+
     failed = run(
-        case, ql432, precheck, ql434, permit, reports, owner,
+        case,
+        ql432,
+        precheck,
+        ql434,
+        permit,
+        reports,
+        owner,
         {**args, "read_host_on_evidence": unavailable},
     )
     assert failed["connection"] == "HOLD"
@@ -296,10 +318,19 @@ def test_forged_on_or_master_evidence_preserves_pending(monkeypatch, tmp_path):
         monkeypatch, tmp_path
     )
     forged = run(
-        case, ql432, precheck, ql434, permit, reports, owner,
-        {**args, "read_independent_on_evidence": lambda **_: signed(
-            keys["on_witness"], {"schema": INDEPENDENT_ON, "receiverState": "OFF"}
-        )},
+        case,
+        ql432,
+        precheck,
+        ql434,
+        permit,
+        reports,
+        owner,
+        {
+            **args,
+            "read_independent_on_evidence": lambda **_: signed(
+                keys["on_witness"], {"schema": INDEPENDENT_ON, "receiverState": "OFF"}
+            ),
+        },
     )
     assert not forged.get("accepted")
     assert forged["manualReceiverIsolationRequired"] is True
@@ -316,7 +347,8 @@ def test_receipt_tampering_and_source_only_authority(monkeypatch, tmp_path):
         db.execute("UPDATE pilot326 SET receipt_digest=? WHERE stage='PENDING'", ("f" * 64,))
     assert not run(case, ql432, precheck, ql434, permit, reports, owner, args).get("accepted")
     assert TestClient(app).get("/api/v1/system/master-shell-326-acceptance").status_code in (
-        401, 403,
+        401,
+        403,
     )
     projection = reconcile_master_evidence326(Ree())
     assert projection["sourceBuild"] == 326
