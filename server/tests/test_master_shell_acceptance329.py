@@ -137,7 +137,9 @@ def test_symlinked_journal_cannot_be_read_as_protected_custody(monkeypatch, tmp_
     assert journal.read(Ree(), "incident", "PENDING") is not None
 
 
-def test_missing_or_malformed_predecessor_custody_digests_fail_before_pending(monkeypatch, tmp_path):
+def test_missing_or_malformed_predecessor_custody_digests_fail_before_pending(
+    monkeypatch, tmp_path
+):
     monkeypatch.setattr(q, "_on_ree", lambda monitor: True)
     for field in ("finalReceiptDigest", "externalAnchorDigest", "independentAnchorReadbackDigest"):
         for invalid in (None, "", "0" * 63, "Z" * 64):
