@@ -46,6 +46,29 @@ describe("QL-439 read-only owner inspector", () => {
     expect(screen.queryByText("protected-synthetic-fixture")).not.toBeInTheDocument();
   });
 
+  it("rejects malformed custody and receiver states", () => {
+    for (const patch of [
+      { custody: "CONNECTED" },
+      { receiverObservation: "LIVE_OFF" },
+      { verifiedReceipts: null },
+    ]) {
+      const { unmount } = render(<Ql439ReadOnlyInspector
+        snapshot={{ ...snapshot, ...patch } as unknown as Ql439ReadinessSnapshot} />);
+      expect(screen.getByRole("alert")).toHaveTextContent("remain on HOLD");
+      unmount();
+    }
+  });
+
+  it("does not render malformed digest claims as verified receipt rows", () => {
+    const malformed = {
+      ...snapshot,
+      verifiedReceipts: [{ ...snapshot.verifiedReceipts[0], digest: "not-a-sha256" }],
+    };
+    render(<Ql439ReadOnlyInspector snapshot={malformed} />);
+    expect(screen.getByText("No authorized receipts supplied.")).toBeInTheDocument();
+    expect(screen.queryByText("not-a-sha256")).not.toBeInTheDocument();
+  });
+
   it("does not fabricate receipts when source supplies none", () => {
     render(<Ql439ReadOnlyInspector snapshot={{ ...snapshot, verifiedReceipts: [] }} />);
     expect(screen.getByText("No authorized receipts supplied.")).toBeInTheDocument();
