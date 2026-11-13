@@ -23,6 +23,8 @@ def hold_decision333(reason: str) -> dict[str, Any]:
         "state": reason,
         "connection": "HOLD",
         "activationAuthorized": False,
+        "physicalReceiverCurrentlyOff": False,
+        "manualIsolationAndIndependentOffRequired": True,
         "slaveGate": "HOLD_NEXT_MASTER_INTEGRATION_STAGE",
         "manualReceiverIsolationRequired": True,
         "receiver": UNKNOWN,
