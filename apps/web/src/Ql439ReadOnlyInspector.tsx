@@ -34,11 +34,20 @@ export function Ql439ReadOnlyInspector({
   if (!snapshot) return <section className="mc-panel" role="status">No authorized QL-439 evidence snapshot.</section>;
 
   // Reject unsafe/unexpected server states instead of silently rendering them as trusted.
-  if (snapshot.connection !== "HOLD" || snapshot.activationAuthorized !== false ||\n      !["PENDING", "READINESS", "UNVERIFIED"].includes(snapshot.custody) ||\n      !["UNKNOWN", "SIGNED_OFF_HISTORICAL"].includes(snapshot.receiverObservation) ||\n      !Array.isArray(snapshot.verifiedReceipts)) {
+  if (snapshot.connection !== "HOLD" || snapshot.activationAuthorized !== false ||
+      !["PENDING", "READINESS", "UNVERIFIED"].includes(snapshot.custody) ||
+      !["UNKNOWN", "SIGNED_OFF_HISTORICAL"].includes(snapshot.receiverObservation) ||
+      !Array.isArray(snapshot.verifiedReceipts)) {
     return <section className="mc-panel" role="alert">Evidence state inconsistent; remain on HOLD.</section>;
   }
 
-  // Source claims are displayed as unverified references, never trusted signature results.\n  const receipts = snapshot.verifiedReceipts.filter(item =>\n    typeof item.id === "string" && typeof item.label === "string" &&\n    typeof item.signer === "string" && typeof item.observedAt === "string" &&\n    typeof item.digest === "string" && /^[0-9a-fA-F]{64}$/.test(item.digest)\n  );\n  return <section className="mc-panel" aria-label="QL-439 protected evidence inspector">
+  // Source claims are displayed as unverified references, never trusted signature results.
+  const receipts = snapshot.verifiedReceipts.filter(item =>
+    typeof item.id === "string" && typeof item.label === "string" &&
+    typeof item.signer === "string" && typeof item.observedAt === "string" &&
+    typeof item.digest === "string" && /^[0-9a-fA-F]{64}$/.test(item.digest)
+  );
+  return <section className="mc-panel" aria-label="QL-439 protected evidence inspector">
     <h3>Original-host readiness evidence</h3>
     <p className="mc-status" data-tone="warning">HOLD — preparation only, no activation authority</p>
     <dl className="mc-evidence-meta">
