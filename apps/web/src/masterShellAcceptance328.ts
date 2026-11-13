@@ -19,7 +19,7 @@ const required = {
   ql437LiveOff: "UNKNOWN_NO_FRESH_ORIGINAL_HOST_RUNTIME_READBACK",
 } as const;
 
-export type Acceptance328 = Acceptance327 & {
+export type Acceptance328 = Omit<Acceptance327, "receiver"> & {
   source327MainAtReconciliation: string;
   commsQl437ContractAtReconciliation: string;
   receiver: "UNKNOWN_PENDING_INDEPENDENT_OFF_REVALIDATION";
