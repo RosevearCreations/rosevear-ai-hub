@@ -4,6 +4,7 @@ These tests exercise the protected attempt boundary, not live Windows or
 Ed25519 acceptance. A successful signed end-to-end path remains required.
 """
 
+from rosevear_ai_hub import master_shell_acceptance328 as q437
 from rosevear_ai_hub import master_shell_acceptance329 as q
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from rosevear_ai_hub.master_shell_acceptance327 import LATE_HOST
@@ -15,6 +16,7 @@ class OriginalHost:
 
 def _case(monkeypatch, tmp_path):
     monkeypatch.setattr(q, "_on_ree", lambda monitor: True)
+    monkeypatch.setattr(q437, "_on_ree", lambda monitor: True)
     incident = "incident-ql438-original"
     digest = _digest({"source": "ql437", "incident": incident})
     prior = {
@@ -31,11 +33,16 @@ def _case(monkeypatch, tmp_path):
         "externalAnchorDigest": digest,
         "independentAnchorReadbackDigest": digest,
     }
+    predecessor = q.ProtectedClosureJournal328(tmp_path / "ql437-prior.db")
+    assert predecessor.claim_once(OriginalHost(), incident, "PENDING", digest, digest)
+    final = predecessor.claim_once(OriginalHost(), incident, "FINAL", digest, digest)
+    assert final
+    prior["finalReceiptDigest"] = final["receiptDigest"]
     request = {
         "originalIncidentId": incident,
         "remediationNonce": "fresh-remediation-nonce-ql438",
         "remediationId": "remediation-ql438",
-        "ql437FinalReceiptDigest": digest,
+        "ql437FinalReceiptDigest": prior["finalReceiptDigest"],
         "ql437AnchorDigest": digest,
         "ql437ReaderDigest": digest,
         "leaseDisposition": LATE_HOST,
@@ -56,10 +63,10 @@ def _case(monkeypatch, tmp_path):
     )
     keys = {role: (bytes([index + 1]) * 32, role) for index, role in enumerate(roles)}
     journal = q.ProtectedCorrectiveJournal329(tmp_path / "private-corrective.db")
-    return prior, request, keys, journal
+    return prior, request, keys, journal, predecessor
 
 
-def _run(prior, request, keys, journal, host):
+def _run(prior, request, keys, journal, predecessor, host):
     def unavailable(**kwargs):
         raise AssertionError("unexpected external evidence call")
 
@@ -69,6 +76,7 @@ def _run(prior, request, keys, journal, host):
         request,
         journal,
         keys,
+        ql437_journal=predecessor,
         read_host=host,
         read_off=unavailable,
         read_reviewer=unavailable,
@@ -82,7 +90,7 @@ def _run(prior, request, keys, journal, host):
 def test_pending_precedes_external_adapter_and_interrupted_attempt_is_consumed(
     monkeypatch, tmp_path
 ):
-    prior, request, keys, journal = _case(monkeypatch, tmp_path)
+    prior, request, keys, journal, predecessor = _case(monkeypatch, tmp_path)
     observations = []
 
     def interrupted_host(**kwargs):
@@ -90,7 +98,7 @@ def test_pending_precedes_external_adapter_and_interrupted_attempt_is_consumed(
         observations.append(receipt)
         raise OSError("simulated original-host adapter interruption")
 
-    result = _run(prior, request, keys, journal, interrupted_host)
+    result = _run(prior, request, keys, journal, predecessor, interrupted_host)
     assert result["accepted"] is False
     assert result["connection"] == "HOLD"
     assert result["activationAuthorized"] is False
@@ -105,20 +113,21 @@ def test_pending_precedes_external_adapter_and_interrupted_attempt_is_consumed(
         called.append(True)
         raise AssertionError("replay reached original-host adapter")
 
-    replay = _run(prior, request, keys, journal, forbidden_replay)
+    replay = _run(prior, request, keys, journal, predecessor, forbidden_replay)
     assert replay["accepted"] is False
     assert replay["state"] == "HOLD_QL438_ONE_USE_PENDING_FAILED_OR_REPLAY"
     assert called == []
 
 
 def test_changed_request_cannot_reuse_consumed_incident(monkeypatch, tmp_path):
-    prior, request, keys, journal = _case(monkeypatch, tmp_path)
+    prior, request, keys, journal, predecessor = _case(monkeypatch, tmp_path)
     assert (
         _run(
             prior,
             request,
             keys,
             journal,
+            predecessor,
             lambda **kwargs: (_ for _ in ()).throw(OSError("interrupt")),
         )["accepted"]
         is False
@@ -129,6 +138,7 @@ def test_changed_request_cannot_reuse_consumed_incident(monkeypatch, tmp_path):
         changed,
         keys,
         journal,
+        predecessor,
         lambda **kwargs: (_ for _ in ()).throw(AssertionError("replay")),
     )
     assert result["state"] == "HOLD_QL438_ONE_USE_PENDING_FAILED_OR_REPLAY"
@@ -136,13 +146,14 @@ def test_changed_request_cannot_reuse_consumed_incident(monkeypatch, tmp_path):
 
 
 def test_wrong_remedy_rejected_before_pending(monkeypatch, tmp_path):
-    prior, request, keys, journal = _case(monkeypatch, tmp_path)
+    prior, request, keys, journal, predecessor = _case(monkeypatch, tmp_path)
     request["remedy"] = "ACTIVATE_RECEIVER"
     result = _run(
         prior,
         request,
         keys,
         journal,
+        predecessor,
         lambda **kwargs: (_ for _ in ()).throw(AssertionError("unsafe adapter call")),
     )
     assert result["accepted"] is False
@@ -151,13 +162,14 @@ def test_wrong_remedy_rejected_before_pending(monkeypatch, tmp_path):
 
 
 def test_recycled_signer_public_key_pin_rejected_before_pending(monkeypatch, tmp_path):
-    prior, request, keys, journal = _case(monkeypatch, tmp_path)
+    prior, request, keys, journal, predecessor = _case(monkeypatch, tmp_path)
     keys["receiver"] = (keys["host"][0], "receiver")
     result = _run(
         prior,
         request,
         keys,
         journal,
+        predecessor,
         lambda **kwargs: (_ for _ in ()).throw(AssertionError("unsafe signer reached")),
     )
     assert result["state"] == "HOLD_QL438_INVALID_BOUND_REQUEST_OR_SIGNER_PINS"
