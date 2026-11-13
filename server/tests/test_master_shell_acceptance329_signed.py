@@ -120,11 +120,17 @@ def make_case(monkeypatch, tmp_path, disposition):
         "previousAnchorDigest": prior["externalAnchorDigest"],
         "masterDigest": masters_digest,
         "offDigest": _digest(off),
+        "externalStoreId": "isolated-immutable-store-329",
+        "immutable": True,
+        "anchorSequence": 21,
     }
     reader = {
         "schema": "rosevear.ai-hub.ql438.reader.v1",
         "requestDigest": req_digest,
         "anchorDigest": _digest(anchor),
+        "externalStoreId": anchor["externalStoreId"],
+        "remoteDurable": True,
+        "readbackSequence": 22,
     }
     owners = {
         role: signed(
@@ -203,7 +209,11 @@ def test_signed_full_chain_both_expired_exception_types(monkeypatch, tmp_path, d
         ("receiver", ("offSequence", 18)),
         ("remediationReviewer", ("remedy", "UNAPPROVED_REPAIR")),
         ("anchor", ("previousAnchorDigest", "0" * 64)),
+        ("anchor", ("immutable", False)),
+        ("anchor", ("anchorSequence", 0)),
         ("reader", ("anchorDigest", "f" * 64)),
+        ("reader", ("remoteDurable", False)),
+        ("reader", ("readbackSequence", 1)),
     ],
 )
 def test_forged_signed_evidence_cannot_close(monkeypatch, tmp_path, role, mutation):
