@@ -55,6 +55,7 @@ import { NotificationsView } from "./NotificationsView";
 import { OperationsDashboard } from "./OperationsDashboard";
 import { Ql439OwnerReadinessPanel } from "./Ql439OwnerReadinessPanel";
 import { Ql440OwnerIssuancePanel } from "./Ql440OwnerIssuancePanel";
+import { Ql441OwnerWitnessPanel } from "./Ql441OwnerWitnessPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -453,6 +454,14 @@ export function App() {
             <p>Only a separately signed original-host issuance may authorize a future
               challenge. This view cannot start a receiver or issue any authority.</p>
             <Ql440OwnerIssuancePanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-441 independently witnessed receiver ON Go/No-Go (read-only)</summary>
+            <p>Signed ON observations require separate owner approval and fresh
+              independent shutdown verification. HOLD does not prove present OFF.</p>
+            <Ql441OwnerWitnessPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
