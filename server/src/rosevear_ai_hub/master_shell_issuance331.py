@@ -190,7 +190,9 @@ def _prior439(
         return None
     predecessor_digest = before[0]
     original_incident = request439.get("originalIncidentId")
-    if not isinstance(original_incident, str) or original_incident != readiness439.get("originalIncidentId"):
+    if not isinstance(original_incident, str) or original_incident != readiness439.get(
+        "originalIncidentId"
+    ):
         return None
     pending = journal439.read(monitor, original_incident, "PENDING")
     ready = journal439.read(monitor, original_incident, "READINESS")
