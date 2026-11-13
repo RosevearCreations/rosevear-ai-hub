@@ -13,6 +13,7 @@ from rosevear_ai_hub.master_shell_acceptance308 import _on_ree
 from rosevear_ai_hub.master_shell_acceptance312 import MASTERS
 from rosevear_ai_hub.master_shell_acceptance319 import _digest, _native
 from rosevear_ai_hub.master_shell_acceptance327 import LATE_HOST, LATE_OFF
+from rosevear_ai_hub.master_shell_acceptance328 import ProtectedClosureJournal328
 
 REMEDIES = {
     LATE_HOST: (
@@ -182,6 +183,7 @@ def review_corrective_closure329(
     journal: ProtectedCorrectiveJournal329,
     keys: dict[str, tuple[bytes, str]],
     *,
+    ql437_journal: ProtectedClosureJournal328 | None = None,
     read_host: Any,
     read_off: Any,
     read_reviewer: Any,
@@ -268,6 +270,23 @@ def review_corrective_closure329(
         and len({key[1] for key in keys.values()}) == len(keys)
     ):
         return fail("HOLD_QL438_INVALID_BOUND_REQUEST_OR_SIGNER_PINS")
+    # The previous OPEN decision must be backed by protected original-host
+    # QL-437 PENDING and FINAL custody, not a caller-supplied status dictionary.
+    if not isinstance(ql437_journal, ProtectedClosureJournal328):
+        return fail("HOLD_QL438_PROTECTED_QL437_CUSTODY_REQUIRED")
+    try:
+        prior_pending = ql437_journal.read(monitor, incident, "PENDING")
+        prior_final = ql437_journal.read(monitor, incident, "FINAL")
+    except ValueError:
+        return fail("HOLD_QL438_PROTECTED_QL437_CUSTODY_UNREADABLE")
+    if not (
+        prior_pending
+        and prior_final
+        and prior_pending["exportDigest"] == prior_final["exportDigest"]
+        and prior_final["receiptDigest"] == prior437["finalReceiptDigest"]
+    ):
+        return fail("HOLD_QL438_PROTECTED_QL437_CUSTODY_MISMATCH")
+
     digest = _digest(request)
     pending = journal.claim(monitor, incident, "PENDING", digest, digest)
     if pending is None:
@@ -361,6 +380,12 @@ def review_corrective_closure329(
                 and p.get("decision") == DECISION
             ):
                 return fail("HOLD_QL438_DUAL_OWNER_SIGNATURE_INVALID")
+        # The predecessor receipts must still match exactly after external I/O.
+        if (
+            ql437_journal.read(monitor, incident, "PENDING") != prior_pending
+            or ql437_journal.read(monitor, incident, "FINAL") != prior_final
+        ):
+            return fail("HOLD_QL438_PRIOR_CUSTODY_DRIFT")
         if journal.read(monitor, incident, "PENDING") != pending:
             return fail("HOLD_QL438_PRIVATE_PENDING_TAMPERED")
         evidence = _digest(
