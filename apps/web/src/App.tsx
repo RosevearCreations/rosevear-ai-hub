@@ -53,7 +53,7 @@ import { ResourceBudgetPanel } from "./ResourceBudgetPanel";
 import { LocalModelHealthPanel } from "./LocalModelHealthPanel";
 import { NotificationsView } from "./NotificationsView";
 import { OperationsDashboard } from "./OperationsDashboard";
-import { Ql439ReadOnlyInspector } from "./Ql439ReadOnlyInspector";
+import { Ql439OwnerReadinessPanel } from "./Ql439OwnerReadinessPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -441,9 +441,9 @@ export function App() {
           <details className="hub-historical-checks">
             <summary>QL-439 protected original-host readiness (read-only)</summary>
             <p>Historical signed evidence requires an independently verified, authorized source.
-              No protected QL-439 receipt endpoint is enrolled in this build.
+              An owner-only source endpoint is available but no live evidence source is enrolled.
               This view does not prove live receiver OFF or authorize activation.</p>
-            <Ql439ReadOnlyInspector />
+            <Ql439OwnerReadinessPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
