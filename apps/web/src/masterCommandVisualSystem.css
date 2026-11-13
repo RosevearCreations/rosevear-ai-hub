@@ -63,3 +63,16 @@
 @media(max-width:1050px) { .master-command-ui .mc-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .master-command-ui .mc-launchers {grid-template-columns:repeat(2,minmax(0,1fr));} }
 @media(max-width:670px) { .master-command-ui .mc-body {display:block;} .master-command-ui .mc-rail { flex-direction:row; overflow-x:auto; border-right:0; border-bottom:1px solid var(--mc-border); } .master-command-ui .mc-rail-item {flex:0 0 auto; width:auto; white-space:nowrap;} .master-command-ui .mc-main {padding:14px;} .master-command-ui .mc-grid,.master-command-ui .mc-launchers {grid-template-columns:1fr;} }
 @media(prefers-reduced-motion:reduce) { .master-command-ui * {scroll-behavior:auto!important; transition:none!important;} }
+
+/* Source-backed QL-439 evidence inspector: responsive and keyboard-scrollable. */
+.master-command-ui .mc-evidence-meta { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.master-command-ui .mc-evidence-meta div { min-width:0; padding:10px; background:var(--mc-card-raised); border-radius:8px; }
+.master-command-ui .mc-evidence-meta dt { font-size:.72rem; color:var(--mc-muted); }
+.master-command-ui .mc-evidence-meta dd { margin:4px 0 0; overflow-wrap:anywhere; }
+.master-command-ui .mc-table-scroll { overflow-x:auto; max-width:100%; }
+.master-command-ui .mc-evidence-table { border-collapse:collapse; width:100%; min-width:620px; text-align:left; font-size:.83rem; }
+.master-command-ui .mc-evidence-table caption { text-align:left; color:var(--mc-muted); padding:8px 0; }
+.master-command-ui .mc-evidence-table th, .master-command-ui .mc-evidence-table td { padding:10px; border-bottom:1px solid var(--mc-border); overflow-wrap:anywhere; }
+.master-command-ui .mc-evidence-table thead { color:var(--mc-muted); }
+.master-command-ui .mc-evidence-table code { overflow-wrap:anywhere; }
+@media(max-width:670px) { .master-command-ui .mc-evidence-meta { grid-template-columns:1fr; } }
