@@ -45,9 +45,7 @@ def make_case(monkeypatch, tmp_path, disposition):
     assert ql437.claim_once(
         LocalMonitor(), incident, "FINAL", export, _digest({"final": "signed-ql437"})
     )
-    prior["finalReceiptDigest"] = ql437.read(LocalMonitor(), incident, "FINAL")[
-        "receiptDigest"
-    ]
+    prior["finalReceiptDigest"] = ql437.read(LocalMonitor(), incident, "FINAL")["receiptDigest"]
     request = {
         "remediationNonce": nonce,
         "remediationId": "syntheticRemediation329",
@@ -173,13 +171,7 @@ def make_case(monkeypatch, tmp_path, disposition):
 
     def run():
         return q.review_corrective_closure329(
-            LocalMonitor(),
-            prior,
-            request,
-            journal,
-            pins,
-            ql437_journal=ql437,
-            **inputs
+            LocalMonitor(), prior, request, journal, pins, ql437_journal=ql437, **inputs
         )
 
     run.prior_journal = ql437
