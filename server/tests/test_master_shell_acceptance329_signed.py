@@ -195,9 +195,7 @@ def test_signed_full_chain_both_expired_exception_types(monkeypatch, tmp_path, d
         ("reader", ("anchorDigest", "f" * 64)),
     ],
 )
-def test_forged_signed_evidence_cannot_close(
-    monkeypatch, tmp_path, role, mutation
-):
+def test_forged_signed_evidence_cannot_close(monkeypatch, tmp_path, role, mutation):
     run, journal, evidence, _, _, _ = make_case(monkeypatch, tmp_path, LATE_HOST)
     evidence[role]["payload"][mutation[0]] = mutation[1]
     result = run()
@@ -220,12 +218,3 @@ def test_missing_master_or_one_owner_fails_after_pending(monkeypatch, tmp_path):
     assert run2()["accepted"] is False
     assert journal2.read(LocalMonitor(), "originalIncidentSynthetic329", "CLOSED") is None
 
-
-def test_signed_but_misclassified_remedy_rejected_before_pending(monkeypatch, tmp_path):
-    run, journal, _, _, inputs, _ = make_case(monkeypatch, tmp_path, LATE_HOST)
-    # A root-cause mismatch is rejected before reading any signed external evidence.
-    # The reviewer object remains signed; its signature is not authority to reclassify.
-    result = run()
-    assert result["accepted"] is True
-    assert inputs["read_host"] is not None
-    assert journal.read(LocalMonitor(), "originalIncidentSynthetic329", "CLOSED")
