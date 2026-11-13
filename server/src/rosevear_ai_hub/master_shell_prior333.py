@@ -9,8 +9,15 @@ from rosevear_ai_hub.master_shell_acceptance312 import MASTERS
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from rosevear_ai_hub.master_shell_decision332 import ProtectedWitnessJournal332
 from rosevear_ai_hub.master_shell_observation332 import (
-    ACTION, CUSTODY, GO, NO_GO, OWNER_ACTION, OWNER_GO, OWNER_NO_GO,
-    ROLES, verify332,
+    ACTION,
+    CUSTODY,
+    GO,
+    NO_GO,
+    OWNER_ACTION,
+    OWNER_GO,
+    OWNER_NO_GO,
+    ROLES,
+    verify332,
 )
 from rosevear_ai_hub.master_shell_prior332 import prior_signed_issuance332
 
@@ -194,10 +201,20 @@ def verify_prior_witness333(
         "prior": previous_digest,
         "decision": verdict,
     })
-    if decision["evidenceDigest"] != evidence or result441.get("independentOnDigest") != _digest(receiver):
+    if (
+        decision["evidenceDigest"] != evidence
+        or result441.get("independentOnDigest") != _digest(receiver)
+    ):
         return None
     return (
-        _digest({"predecessor": previous_digest, "pending": pending, "decision": decision, "signedEvidence": evidence}),
+        _digest(
+            {
+                "predecessor": previous_digest,
+                "pending": pending,
+                "decision": decision,
+                "signedEvidence": evidence,
+            }
+        ),
         {
             "incident": incident, "challengeId": challenge, "leaseId": lease,
             "leaseExpiresAtMs": expires,
