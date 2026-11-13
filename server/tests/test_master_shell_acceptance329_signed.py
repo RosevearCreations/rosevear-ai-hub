@@ -211,10 +211,7 @@ def test_missing_master_or_one_owner_fails_after_pending(monkeypatch, tmp_path):
     del inputs["master_reports"]["ai-data-platform"]
     assert run()["accepted"] is False
     assert journal.read(LocalMonitor(), "originalIncidentSynthetic329", "CLOSED") is None
-    run2, journal2, _, owners2, _, _ = make_case(
-        monkeypatch, tmp_path / "owner-case", LATE_OFF
-    )
+    run2, journal2, _, owners2, _, _ = make_case(monkeypatch, tmp_path / "owner-case", LATE_OFF)
     del owners2["ownerReviewer"]
     assert run2()["accepted"] is False
     assert journal2.read(LocalMonitor(), "originalIncidentSynthetic329", "CLOSED") is None
-
