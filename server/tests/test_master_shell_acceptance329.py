@@ -121,3 +121,17 @@ def test_symlinked_journal_is_not_writable(monkeypatch, tmp_path):
     digest = _digest({"attempt": "ql438-symlink"})
     assert journal.claim(Ree(), "incident", "PENDING", digest, digest) is None
     assert target.read_bytes() == b"do not touch"
+
+
+def test_symlinked_journal_cannot_be_read_as_protected_custody(monkeypatch, tmp_path):
+    monkeypatch.setattr(q, "_on_ree", lambda monitor: True)
+    target = tmp_path / "original.db"
+    journal = q.ProtectedCorrectiveJournal329(target)
+    digest = _digest({"request": "symlink-readback"})
+    assert journal.claim(Ree(), "incident", "PENDING", digest, digest)
+    linked = tmp_path / "untrusted-alias.db"
+    linked.symlink_to(target)
+    alias = q.ProtectedCorrectiveJournal329(linked)
+    assert alias.read(Ree(), "incident", "PENDING") is None
+    assert alias.claim(Ree(), "incident", "CLOSED", digest, digest) is None
+    assert journal.read(Ree(), "incident", "PENDING") is not None
