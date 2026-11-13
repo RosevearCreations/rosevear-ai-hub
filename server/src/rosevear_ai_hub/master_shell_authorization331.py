@@ -64,8 +64,10 @@ def check_ql440_prerequisite_shape(
         if request[name] != readiness.get(name):
             return hold_ql440("HOLD_QL440_PRIOR_READINESS_DRIFT")
     for name in (
-        "pendingReceiptDigest", "readinessReceiptDigest",
-        "renewedAnchorDigest", "independentReaderDigest",
+        "pendingReceiptDigest",
+        "readinessReceiptDigest",
+        "renewedAnchorDigest",
+        "independentReaderDigest",
     ):
         value = request.get(name)
         if not isinstance(value, str) or len(value) != 64:
@@ -90,9 +92,8 @@ def check_ql440_prerequisite_shape(
     sequence = observer.get("offContinuitySequence")
     if type(sequence) is not int or sequence < host_sequence:
         return hold_ql440("HOLD_QL440_INDEPENDENT_OFF_SEQUENCE_INVALID")
-    if (
-        observer.get("nonce") != request["nonce"]
-        or observer.get("hostOffDigest") != host.get("signedDigest")
+    if observer.get("nonce") != request["nonce"] or observer.get("hostOffDigest") != host.get(
+        "signedDigest"
     ):
         return hold_ql440("HOLD_QL440_INDEPENDENT_OFF_BINDING_INVALID")
     if not isinstance(masters, Mapping) or set(masters) != set(MASTERS_440):
