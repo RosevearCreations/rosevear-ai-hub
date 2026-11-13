@@ -56,6 +56,7 @@ import { OperationsDashboard } from "./OperationsDashboard";
 import { Ql439OwnerReadinessPanel } from "./Ql439OwnerReadinessPanel";
 import { Ql440OwnerIssuancePanel } from "./Ql440OwnerIssuancePanel";
 import { Ql441OwnerWitnessPanel } from "./Ql441OwnerWitnessPanel";
+import { Ql442OwnerShutdownPanel } from "./Ql442OwnerShutdownPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -462,6 +463,14 @@ export function App() {
             <p>Signed ON observations require separate owner approval and fresh
               independent shutdown verification. HOLD does not prove present OFF.</p>
             <Ql441OwnerWitnessPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-442 signed receiver OFF and lease closeout (read-only)</summary>
+            <p>Original-host and independent OFF evidence remains separate from live
+              state, CONNECTED or activation. Expired leases remain exceptions.</p>
+            <Ql442OwnerShutdownPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
