@@ -34,9 +34,7 @@ def fixture(monkeypatch, tmp_path):
         monkeypatch, tmp_path
     )
     precheck = ql433_run(case, ql432, reports433, owner433, args433)
-    assert precheck["accepted"] and precheck["activationAuthorized"] is not True if (
-        "activationAuthorized" in precheck
-    ) else precheck["connection"] == "HOLD"
+    assert precheck["accepted"] and precheck["connection"] == "HOLD"
     incident = precheck["incidentId"]
     keys = {
         role: signer()
