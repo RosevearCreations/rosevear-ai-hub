@@ -120,9 +120,16 @@ def fixture(monkeypatch, tmp_path, disposition=LATE_HOST):
         )
 
     return {
-        "run": run, "prior": prior, "ready": ready, "request": request,
-        "journal": journal, "masters": masters, "owners": owners,
-        "keys": keys, "evidence": signed_evidence, "calls": calls,
+        "run": run,
+        "prior": prior,
+        "ready": ready,
+        "request": request,
+        "journal": journal,
+        "masters": masters,
+        "owners": owners,
+        "keys": keys,
+        "evidence": signed_evidence,
+        "calls": calls,
     }
 
 
@@ -158,9 +165,7 @@ def test_signed_ql440_challenge_only_after_exact_ql439(monkeypatch, tmp_path, di
         ("issuer", "ownersDigest", "0" * 64),
     ],
 )
-def test_tampered_ql440_signatures_never_issue(
-    monkeypatch, tmp_path, role, field, value
-):
+def test_tampered_ql440_signatures_never_issue(monkeypatch, tmp_path, role, field, value):
     case = fixture(monkeypatch, tmp_path)
     case["evidence"][role]["payload"][field] = value
     result = case["run"]()
