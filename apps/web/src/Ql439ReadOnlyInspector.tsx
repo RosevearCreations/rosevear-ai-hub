@@ -55,8 +55,8 @@ export function Ql439ReadOnlyInspector({
         ![item.id, item.label, item.signer, item.observedAt].every(value =>
           typeof value === "string" && value.trim().length > 0) ||
         typeof item.digest !== "string" || !/^[0-9a-fA-F]{64}$/.test(item.digest) ||
-        receiptIds.has(item.id)) return true;
-    receiptIds.add(item.id);
+        receiptIds.has(item.id.trim())) return true;
+    receiptIds.add(item.id.trim());
     return false;
   });
   if (invalidReceipt) {
