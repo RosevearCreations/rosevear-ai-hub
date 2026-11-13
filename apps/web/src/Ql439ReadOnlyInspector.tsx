@@ -37,7 +37,12 @@ export function Ql439ReadOnlyInspector({
   if (snapshot.connection !== "HOLD" || snapshot.activationAuthorized !== false ||
       !["PENDING", "READINESS", "UNVERIFIED"].includes(snapshot.custody) ||
       !["UNKNOWN", "SIGNED_OFF_HISTORICAL"].includes(snapshot.receiverObservation) ||
-      !Array.isArray(snapshot.verifiedReceipts)) {
+      !Array.isArray(snapshot.verifiedReceipts) ||
+      ![snapshot.source, snapshot.observedAt, snapshot.incidentId,
+        snapshot.ceremonyId, snapshot.episodeId].every(value =>
+        typeof value === "string" && value.trim().length > 0) ||
+      (snapshot.custody === "UNVERIFIED" &&
+        snapshot.receiverObservation === "SIGNED_OFF_HISTORICAL")) {
     return <section className="mc-panel" role="alert">Evidence state inconsistent; remain on HOLD.</section>;
   }
 
