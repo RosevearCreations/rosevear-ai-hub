@@ -30,9 +30,7 @@ CHALLENGE = "newAuthorityChallenge325"
 
 
 def fixture(monkeypatch, tmp_path):
-    case, ql432, _, reports433, owner433, args433, prior = ql433_fixture(
-        monkeypatch, tmp_path
-    )
+    case, ql432, _, reports433, owner433, args433, prior = ql433_fixture(monkeypatch, tmp_path)
     precheck = ql433_run(case, ql432, reports433, owner433, args433)
     assert precheck["accepted"] and precheck["connection"] == "HOLD"
     incident = precheck["incidentId"]
@@ -117,20 +115,23 @@ def fixture(monkeypatch, tmp_path):
     }
     reports = {}
     for master in MASTERS:
-        reports[master] = signed(keys[master], {
-            "schema": MASTER,
-            "masterId": master,
-            "scope": SCOPE,
-            "incidentId": incident,
-            "authorityId": AUTHORITY,
-            "ql433PrecheckReceiptDigest": receipt433["receiptDigest"],
-            "handoffWitnessDigest": _digest(witnessed),
-            "receiverOffDigest": _digest(receiver),
-            "nextCeremonyId": precheck["nextCeremonyId"],
-            "nextEpisodeId": precheck["nextEpisodeId"],
-            "status": "NEW_CEREMONY_PREPARATION_ONLY_NOT_ACTIVATED",
-            "observedAt": _utc(NOW),
-        })
+        reports[master] = signed(
+            keys[master],
+            {
+                "schema": MASTER,
+                "masterId": master,
+                "scope": SCOPE,
+                "incidentId": incident,
+                "authorityId": AUTHORITY,
+                "ql433PrecheckReceiptDigest": receipt433["receiptDigest"],
+                "handoffWitnessDigest": _digest(witnessed),
+                "receiverOffDigest": _digest(receiver),
+                "nextCeremonyId": precheck["nextCeremonyId"],
+                "nextEpisodeId": precheck["nextEpisodeId"],
+                "status": "NEW_CEREMONY_PREPARATION_ONLY_NOT_ACTIVATED",
+                "observedAt": _utc(NOW),
+            },
+        )
     owner = {
         "schema": OWNER,
         "scope": SCOPE,
@@ -171,22 +172,25 @@ def fixture(monkeypatch, tmp_path):
         "now_ms": NOW,
     }
     return (
-        case, ql432, precheck, keys, reports,
-        dual(keys["owner"], keys["reviewer"], owner), args, readiness,
+        case,
+        ql432,
+        precheck,
+        keys,
+        reports,
+        dual(keys["owner"], keys["reviewer"], owner),
+        args,
+        readiness,
     )
 
 
 def run(case, ql432, precheck, reports, owner, args):
     return run_ql434_signed_readiness325(
-        Ree(), case["acceptance"], ql432, precheck,
-        AUTHORITY, CHALLENGE, reports, owner, **args
+        Ree(), case["acceptance"], ql432, precheck, AUTHORITY, CHALLENGE, reports, owner, **args
     )
 
 
 def test_signed_readiness_stays_off_hold_and_is_one_use(monkeypatch, tmp_path):
-    case, ql432, precheck, _, reports, owner, args, journal = fixture(
-        monkeypatch, tmp_path
-    )
+    case, ql432, precheck, _, reports, owner, args, journal = fixture(monkeypatch, tmp_path)
     result = run(case, ql432, precheck, reports, owner, args)
     assert result["accepted"]
     assert result["state"] == "DURABLE_QL434_SIGNED_NEW_CEREMONY_READINESS_HANDOFF"
@@ -200,9 +204,7 @@ def test_signed_readiness_stays_off_hold_and_is_one_use(monkeypatch, tmp_path):
 
 
 def test_missing_forged_or_on_evidence_fails_closed(monkeypatch, tmp_path):
-    case, ql432, precheck, keys, reports, owner, args, _ = fixture(
-        monkeypatch, tmp_path
-    )
+    case, ql432, precheck, keys, reports, owner, args, _ = fixture(monkeypatch, tmp_path)
     failures = [
         {"attest_operator": None},
         {"attest_signed_ql433_precheck": None},
@@ -210,16 +212,22 @@ def test_missing_forged_or_on_evidence_fails_closed(monkeypatch, tmp_path):
         {"attest_fresh_nonce": None},
         {"attest_external_custody": None},
         {"read_authority_handoff": lambda **_: None},
-        {"read_authority_handoff": lambda **_: {
-            "issuer": signed(signer(), {"schema": ISSUER}),
-            "witness": signed(keys["witness"], {"schema": WITNESS}),
-        }},
-        {"read_original_host_readiness": lambda **_: signed(
-            keys["host"], {"schema": HOST, "hostMachineId": "TEMPLAR"}
-        )},
-        {"read_independent_receiver_off": lambda **_: signed(
-            keys["receiver"], {"schema": RECEIVER, "receiverState": "ON"}
-        )},
+        {
+            "read_authority_handoff": lambda **_: {
+                "issuer": signed(signer(), {"schema": ISSUER}),
+                "witness": signed(keys["witness"], {"schema": WITNESS}),
+            }
+        },
+        {
+            "read_original_host_readiness": lambda **_: signed(
+                keys["host"], {"schema": HOST, "hostMachineId": "TEMPLAR"}
+            )
+        },
+        {
+            "read_independent_receiver_off": lambda **_: signed(
+                keys["receiver"], {"schema": RECEIVER, "receiverState": "ON"}
+            )
+        },
         {"keys": {**args["keys"], "witness": args["keys"]["issuer"]}},
     ]
     for bad in failures:
@@ -230,8 +238,7 @@ def test_missing_forged_or_on_evidence_fails_closed(monkeypatch, tmp_path):
     wrong_reports = {**reports, "ai-data-platform": reports["rosevear-comms-hub"]}
     assert not run(case, ql432, precheck, wrong_reports, owner, args).get("accepted")
     bad_owner = dual(
-        keys["owner"], keys["reviewer"],
-        {**owner["payload"], "action": "ENABLE_RECEIVER"}
+        keys["owner"], keys["reviewer"], {**owner["payload"], "action": "ENABLE_RECEIVER"}
     )
     assert not run(case, ql432, precheck, reports, bad_owner, args).get("accepted")
     assert not run(
@@ -240,9 +247,7 @@ def test_missing_forged_or_on_evidence_fails_closed(monkeypatch, tmp_path):
 
 
 def test_tampered_receipt_and_original_incident_fail_closed(monkeypatch, tmp_path):
-    case, ql432, precheck, _, reports, owner, args, journal = fixture(
-        monkeypatch, tmp_path
-    )
+    case, ql432, precheck, _, reports, owner, args, journal = fixture(monkeypatch, tmp_path)
     assert run(case, ql432, precheck, reports, owner, args)["accepted"]
     with sqlite3.connect(journal.path) as db:
         db.execute("UPDATE readiness325 SET receipt_digest=?", ("f" * 64,))
@@ -254,7 +259,8 @@ def test_tampered_receipt_and_original_incident_fail_closed(monkeypatch, tmp_pat
 
 def test_no_live_pilot_or_browser_control_exposed():
     assert TestClient(app).get("/api/v1/system/master-shell-325-acceptance").status_code in (
-        401, 403
+        401,
+        403,
     )
     source = reconcile_master_evidence325(Ree())
     assert source["sourceBuild"] == 325
