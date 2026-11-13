@@ -19,7 +19,9 @@ def test_ql442_has_no_receiver_control_routes():
 
 def test_source_projection_is_explicitly_unknown_and_hold():
     matches = [
-        route for route in app.routes if getattr(route, "path", None) == "/api/v1/system/master-shell-333-shutdown"
+        route
+        for route in app.routes
+        if getattr(route, "path", None) == "/api/v1/system/master-shell-333-shutdown"
     ]
     assert len(matches) == 1
     assert matches[0].methods == {"GET"}
