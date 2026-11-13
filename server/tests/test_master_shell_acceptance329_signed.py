@@ -182,7 +182,7 @@ def make_case(monkeypatch, tmp_path, disposition):
 def test_signed_full_chain_both_expired_exception_types(monkeypatch, tmp_path, disposition):
     run, journal, _, _, _, calls = make_case(monkeypatch, tmp_path, disposition)
     result = run()
-    assert result["accepted"] is True
+    assert result["accepted"] is True, result
     assert result["state"] == "DURABLE_QL438_OWNER_GATED_LEASE_EXCEPTION_CLOSURE_READBACK"
     assert result["connection"] == "HOLD"
     assert result["activationAuthorized"] is False
