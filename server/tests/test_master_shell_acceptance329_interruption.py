@@ -113,13 +113,16 @@ def test_pending_precedes_external_adapter_and_interrupted_attempt_is_consumed(
 
 def test_changed_request_cannot_reuse_consumed_incident(monkeypatch, tmp_path):
     prior, request, keys, journal = _case(monkeypatch, tmp_path)
-    assert _run(
-        prior,
-        request,
-        keys,
-        journal,
-        lambda **kwargs: (_ for _ in ()).throw(OSError("interrupt")),
-    )["accepted"] is False
+    assert (
+        _run(
+            prior,
+            request,
+            keys,
+            journal,
+            lambda **kwargs: (_ for _ in ()).throw(OSError("interrupt")),
+        )["accepted"]
+        is False
+    )
     changed = dict(request, remediationNonce="different-remediation-nonce-ql438")
     result = _run(
         prior,
