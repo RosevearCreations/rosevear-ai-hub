@@ -105,12 +105,21 @@ def fixture(monkeypatch, tmp_path, disposition=LATE_HOST):
         def read(**kwargs):
             calls.append(role)
             return deepcopy(signed_evidence[role])
+
         return read
 
     def run(*, issuer_adapter=None):
         return q.review_issuance331(
-            Ree(), prior["input438"], ready, prior["request"], prior["journal"],
-            signed439, pins439, request, journal, pins,
+            Ree(),
+            prior["input438"],
+            ready,
+            prior["request"],
+            prior["journal"],
+            signed439,
+            pins439,
+            request,
+            journal,
+            pins,
             read_host_off=adapter("host"),
             read_independent_off=adapter("receiver"),
             master_reports=masters,
