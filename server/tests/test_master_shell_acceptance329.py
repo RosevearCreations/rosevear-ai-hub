@@ -1,9 +1,9 @@
 """QL-438 fail-closed synthetic tests; no physical Windows or external custody."""
 import sqlite3
 
+from rosevear_ai_hub import master_shell_acceptance329 as q
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from rosevear_ai_hub.master_shell_acceptance327 import LATE_HOST, LATE_OFF, TIMELY
-from rosevear_ai_hub import master_shell_acceptance329 as q
 
 
 class Ree:
@@ -45,8 +45,15 @@ def test_tampered_receipt_detected(monkeypatch, tmp_path):
 def test_missing_original_host_or_open_exception_never_claims_closure(monkeypatch, tmp_path):
     monkeypatch.setattr(q, "_on_ree", lambda monitor: True)
     journal = q.ProtectedCorrectiveJournal329(tmp_path / "blocked.db")
-    for prior in ({}, {"accepted": True, "state": "DURABLE_QL437_OWNER_SUPERVISED_INCIDENT_CLOSURE_READBACK",
-                       "leaseDisposition": TIMELY, "leaseExceptionOpen": False}):
+    for prior in (
+        {},
+        {
+            "accepted": True,
+            "state": "DURABLE_QL437_OWNER_SUPERVISED_INCIDENT_CLOSURE_READBACK",
+            "leaseDisposition": TIMELY,
+            "leaseExceptionOpen": False,
+        },
+    ):
         result = q.review_corrective_closure329(
             Ree(), prior, {}, journal, {},
             read_host=None, read_off=None, read_reviewer=None,
