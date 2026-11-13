@@ -223,6 +223,16 @@ def review_corrective_closure329(
         and len(rid) >= 12
         and len({incident, nonce, rid, prior437.get("nextCeremonyId")}) == 4
         and request.get("originalIncidentId") == incident
+        and all(
+            isinstance(prior437.get(field), str)
+            and len(prior437[field]) == 64
+            and all(c in "0123456789abcdef" for c in prior437[field])
+            for field in (
+                "finalReceiptDigest",
+                "externalAnchorDigest",
+                "independentAnchorReadbackDigest",
+            )
+        )
         and request.get("ql437FinalReceiptDigest") == prior437.get("finalReceiptDigest")
         and request.get("ql437AnchorDigest") == prior437.get("externalAnchorDigest")
         and request.get("ql437ReaderDigest") == prior437.get("independentAnchorReadbackDigest")
