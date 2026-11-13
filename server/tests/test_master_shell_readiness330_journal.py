@@ -38,8 +38,7 @@ def test_interrupted_partial_pending_can_never_be_reused(monkeypatch, tmp_path):
     with pytest.raises(ValueError):
         journal.read(Ree(), "incidentOne", "PENDING")
     assert journal.claim(Ree(), "incidentOne", "PENDING", "a" * 64, "b" * 64) is None
-    with pytest.raises(ValueError):
-        journal.claim(Ree(), "incidentOne", "READINESS", "a" * 64, "b" * 64)
+    assert journal.claim(Ree(), "incidentOne", "READINESS", "a" * 64, "b" * 64) is None
 
 
 @pytest.mark.skipif(os.name == "nt", reason="POSIX-only symlink exercise")
