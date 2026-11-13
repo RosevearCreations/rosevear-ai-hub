@@ -55,18 +55,28 @@ def fixture(monkeypatch, tmp_path, mode="timely"):
         master_seen = owner_seen = NOW + 4_000
 
     prior = _prior(
-        Ree(), SCOPE, ql432, ql433, ql434, pilot,
-        args435["incident_journal"], args435["review_journal"],
-        args435["precheck_journal"], args435["readiness_journal"], pilot_journal,
+        Ree(),
+        SCOPE,
+        ql432,
+        ql433,
+        ql434,
+        pilot,
+        args435["incident_journal"],
+        args435["review_journal"],
+        args435["precheck_journal"],
+        args435["readiness_journal"],
+        pilot_journal,
     )
     assert prior
     request = prepare_ql436_shutdown327(
-        SCOPE, pilot, prior, SHUTDOWN_NONCE, REVIEW_ID, now,
+        SCOPE,
+        pilot,
+        prior,
+        SHUTDOWN_NONCE,
+        REVIEW_ID,
+        now,
     )
-    keys = {
-        role: signer()
-        for role in ("host", "receiver", "owner", "reviewer", *MASTERS)
-    }
+    keys = {role: signer() for role in ("host", "receiver", "owner", "reviewer", *MASTERS)}
     shutdown = {
         "schema": HOST,
         "requestDigest": _digest(request),
@@ -102,13 +112,35 @@ def fixture(monkeypatch, tmp_path, mode="timely"):
         "observedAt": _utc(off_seen),
     }
     disposition = _disposition(
-        NOW + 10_000, shutdown_at, off_seen,
+        NOW + 10_000,
+        shutdown_at,
+        off_seen,
     )
     masters = {}
     for master in MASTERS:
-        masters[master] = signed(keys[master], {
-            "schema": MASTER,
-            "masterId": master,
+        masters[master] = signed(
+            keys[master],
+            {
+                "schema": MASTER,
+                "masterId": master,
+                "requestDigest": _digest(request),
+                "incidentReviewId": REVIEW_ID,
+                "originalIncidentId": pilot["incidentId"],
+                "nextCeremonyId": pilot["nextCeremonyId"],
+                "shutdownNonce": SHUTDOWN_NONCE,
+                "hostShutdownDigest": _digest(shutdown),
+                "independentOffDigest": _digest(off),
+                "leaseExpiresAt": pilot["leaseExpiresAt"],
+                "leaseDisposition": disposition,
+                "decision": ACK,
+                "observedAt": _utc(master_seen),
+            },
+        )
+    owner = dual(
+        keys["owner"],
+        keys["reviewer"],
+        {
+            "schema": OWNER,
             "requestDigest": _digest(request),
             "incidentReviewId": REVIEW_ID,
             "originalIncidentId": pilot["incidentId"],
@@ -116,27 +148,14 @@ def fixture(monkeypatch, tmp_path, mode="timely"):
             "shutdownNonce": SHUTDOWN_NONCE,
             "hostShutdownDigest": _digest(shutdown),
             "independentOffDigest": _digest(off),
-            "leaseExpiresAt": pilot["leaseExpiresAt"],
+            "mastersDigest": _digest([masters[m]["payload"] for m in MASTERS]),
             "leaseDisposition": disposition,
-            "decision": ACK,
-            "observedAt": _utc(master_seen),
-        })
-    owner = dual(keys["owner"], keys["reviewer"], {
-        "schema": OWNER,
-        "requestDigest": _digest(request),
-        "incidentReviewId": REVIEW_ID,
-        "originalIncidentId": pilot["incidentId"],
-        "nextCeremonyId": pilot["nextCeremonyId"],
-        "shutdownNonce": SHUTDOWN_NONCE,
-        "hostShutdownDigest": _digest(shutdown),
-        "independentOffDigest": _digest(off),
-        "mastersDigest": _digest([masters[m]["payload"] for m in MASTERS]),
-        "leaseDisposition": disposition,
-        "action": OWNER_TIMELY if disposition == TIMELY else OWNER_LATE,
-        "ownerId": "originalHostSupervisor327",
-        "reviewerId": "independentCustodian327",
-        "reviewedAt": _utc(owner_seen),
-    })
+            "action": OWNER_TIMELY if disposition == TIMELY else OWNER_LATE,
+            "ownerId": "originalHostSupervisor327",
+            "reviewerId": "independentCustodian327",
+            "reviewedAt": _utc(owner_seen),
+        },
+    )
     shutdown_journal = ProtectedShutdownJournal327(tmp_path / "shutdown327.db")
     args = {
         "pilot_journal": args435["pilot_journal"],
@@ -161,15 +180,22 @@ def fixture(monkeypatch, tmp_path, mode="timely"):
 
 def run(case, ql432, ql433, ql434, pilot, masters, owner, args):
     return run_ql436_shutdown_reconciliation327(
-        Ree(), case["acceptance"], ql432, ql433, ql434, pilot,
-        SHUTDOWN_NONCE, REVIEW_ID, masters, owner, **args,
+        Ree(),
+        case["acceptance"],
+        ql432,
+        ql433,
+        ql434,
+        pilot,
+        SHUTDOWN_NONCE,
+        REVIEW_ID,
+        masters,
+        owner,
+        **args,
     )
 
 
 def test_timely_independently_signed_off_reconciles_no_reentry(monkeypatch, tmp_path):
-    case, ql432, ql433, ql434, pilot, _, _, _, masters, owner, args = fixture(
-        monkeypatch, tmp_path
-    )
+    case, ql432, ql433, ql434, pilot, _, _, _, masters, owner, args = fixture(monkeypatch, tmp_path)
     result = run(case, ql432, ql433, ql434, pilot, masters, owner, args)
     assert result["accepted"]
     assert result["state"] == "DURABLE_QL436_POST_PILOT_SIGNED_OFF_RECONCILED"
@@ -222,11 +248,15 @@ def test_invalid_host_or_independent_off_remains_unknown_pending(monkeypatch, tm
 
 
 def test_pre_pending_authority_and_late_owner_mismatch_fail_closed(monkeypatch, tmp_path):
-    case, ql432, ql433, ql434, pilot, _, _, _, masters, owner, args = fixture(
-        monkeypatch, tmp_path
-    )
+    case, ql432, ql433, ql434, pilot, _, _, _, masters, owner, args = fixture(monkeypatch, tmp_path)
     result = run(
-        case, ql432, ql433, ql434, pilot, masters, owner,
+        case,
+        ql432,
+        ql433,
+        ql434,
+        pilot,
+        masters,
+        owner,
         {**args, "attest_operator": None},
     )
     assert not result.get("accepted")
@@ -237,7 +267,8 @@ def test_pre_pending_authority_and_late_owner_mismatch_fail_closed(monkeypatch, 
     values = fixture(monkeypatch, late_dir, mode="late_off")
     ca, d, p, r, q, keys, host, off, reports, signed_owner, kw = values
     wrong = dual(
-        keys["owner"], keys["reviewer"],
+        keys["owner"],
+        keys["reviewer"],
         {**signed_owner["payload"], "action": OWNER_TIMELY},
     )
     rejected = run(ca, d, p, r, q, reports, wrong, kw)
@@ -247,9 +278,7 @@ def test_pre_pending_authority_and_late_owner_mismatch_fail_closed(monkeypatch, 
 
 
 def test_tampered_shutdown_or_previous_custody_fail_closed(monkeypatch, tmp_path):
-    case, ql432, ql433, ql434, pilot, _, _, _, masters, owner, args = fixture(
-        monkeypatch, tmp_path
-    )
+    case, ql432, ql433, ql434, pilot, _, _, _, masters, owner, args = fixture(monkeypatch, tmp_path)
     assert run(case, ql432, ql433, ql434, pilot, masters, owner, args)["accepted"]
     journal = args["shutdown_journal"]
     with sqlite3.connect(journal.path) as db:
