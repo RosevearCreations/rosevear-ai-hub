@@ -11,9 +11,7 @@ from test_master_shell_acceptance322 import Ree
 
 
 def test_ql440_private_owner_api_not_public():
-    assert TestClient(app).get("/api/v1/system/master-shell-331-issuance").status_code in (
-        401, 403
-    )
+    assert TestClient(app).get("/api/v1/system/master-shell-331-issuance").status_code in (401, 403)
 
 
 def test_ql440_issuance_journal_exclusive_and_restart_unknown(monkeypatch, tmp_path):
