@@ -53,6 +53,7 @@ import { ResourceBudgetPanel } from "./ResourceBudgetPanel";
 import { LocalModelHealthPanel } from "./LocalModelHealthPanel";
 import { NotificationsView } from "./NotificationsView";
 import { OperationsDashboard } from "./OperationsDashboard";
+import { Ql439ReadOnlyInspector } from "./Ql439ReadOnlyInspector";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -436,6 +437,15 @@ export function App() {
           </div>
           <SystemHealth health={health} />
         </header>}
+        {section === "System" && canAdminister && (
+          <details className="hub-historical-checks">
+            <summary>QL-439 protected original-host readiness (read-only)</summary>
+            <p>Historical signed evidence requires an independently verified, authorized source.
+              No protected QL-439 receipt endpoint is enrolled in this build.
+              This view does not prove live receiver OFF or authorize activation.</p>
+            <Ql439ReadOnlyInspector />
+          </details>
+        )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
         {section === "System" && canAdminister && <WindowsFirstActivation246Panel />}
         {section === "System" && <HubVitalCards health={health} ollama={ollama} />}
