@@ -15,6 +15,7 @@ from rosevear_ai_hub.master_shell_acceptance315 import _public_ed25519
 from rosevear_ai_hub.master_shell_acceptance319 import _digest, _native
 from rosevear_ai_hub.master_shell_acceptance327 import LATE_HOST, LATE_OFF
 from rosevear_ai_hub.master_shell_acceptance328 import ProtectedClosureJournal328
+from rosevear_ai_hub.master_shell_history329 import ProtectedHistoricalChain329
 
 REMEDIES = {
     LATE_HOST: (
@@ -185,6 +186,7 @@ def review_corrective_closure329(
     keys: dict[str, tuple[bytes, str]],
     *,
     ql437_journal: ProtectedClosureJournal328 | None = None,
+    ql431_437_history: ProtectedHistoricalChain329 | None = None,
     read_host: Any,
     read_off: Any,
     read_reviewer: Any,
@@ -286,6 +288,20 @@ def review_corrective_closure329(
         and prior_final["receiptDigest"] == prior437["finalReceiptDigest"]
     ):
         return fail("HOLD_QL438_PROTECTED_QL437_CUSTODY_MISMATCH")
+
+    # Native QL-431–436 protected journals and QL-437 PENDING/FINAL must
+    # reconcile in addition to the caller's status and 437 journal readback.
+    if not (
+        isinstance(ql431_437_history, ProtectedHistoricalChain329)
+        and ql431_437_history.closure_journal is ql437_journal
+    ):
+        return fail("HOLD_QL438_NATIVE_QL431_TO_437_CHAIN_REQUIRED")
+    try:
+        predecessor_chain = ql431_437_history.read(monitor, prior437, request)
+    except (ValueError, TypeError, KeyError, OSError, sqlite3.Error):
+        predecessor_chain = None
+    if predecessor_chain is None:
+        return fail("HOLD_QL438_NATIVE_QL431_TO_437_CHAIN_INVALID")
 
     digest = _digest(request)
     pending = journal.claim(monitor, incident, "PENDING", digest, digest)
@@ -395,6 +411,8 @@ def review_corrective_closure329(
             or ql437_journal.read(monitor, incident, "FINAL") != prior_final
         ):
             return fail("HOLD_QL438_PRIOR_CUSTODY_DRIFT")
+        if ql431_437_history.read(monitor, prior437, request) != predecessor_chain:
+            return fail("HOLD_QL438_NATIVE_HISTORY_DRIFT")
         if journal.read(monitor, incident, "PENDING") != pending:
             return fail("HOLD_QL438_PRIVATE_PENDING_TAMPERED")
         evidence = _digest(
