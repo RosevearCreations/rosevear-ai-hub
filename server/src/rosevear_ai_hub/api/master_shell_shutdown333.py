@@ -1,4 +1,5 @@
 """QL-442 owner-authenticated no-store status: no physical receiver assertion."""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response
