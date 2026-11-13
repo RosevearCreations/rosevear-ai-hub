@@ -54,6 +54,8 @@ class ProtectedCorrectiveJournal329:
             _on_ree(monitor)
             and self.path.is_absolute()
             and stage in ("PENDING", "CLOSED")
+            and not self.path.is_symlink()
+            and not self.path.parent.is_symlink()
             and self.path.is_file()
         ):
             return None
