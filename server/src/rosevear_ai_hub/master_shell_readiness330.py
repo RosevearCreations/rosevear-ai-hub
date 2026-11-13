@@ -293,6 +293,7 @@ def review_readiness330(
     now_ms: int,
 ) -> dict[str, Any]:
     """Never turns a receiver ON. Acceptance is historical code-level readiness."""
+
     def fail(reason: str) -> dict[str, Any]:
         return hold439(reason)
 
