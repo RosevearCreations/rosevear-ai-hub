@@ -14,8 +14,8 @@ from rosevear_ai_hub.master_shell_acceptance308 import _on_ree
 from rosevear_ai_hub.master_shell_acceptance312 import MASTERS
 from rosevear_ai_hub.master_shell_acceptance315 import _public_ed25519
 from rosevear_ai_hub.master_shell_acceptance319 import _digest, _native
+from rosevear_ai_hub.master_shell_acceptance329 import ProtectedCorrectiveJournal329
 from rosevear_ai_hub.master_shell_acceptance329 import (
-    ProtectedCorrectiveJournal329,
     _verify as verify438,
 )
 from rosevear_ai_hub.master_shell_history329 import ProtectedHistoricalChain329
