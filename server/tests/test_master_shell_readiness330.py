@@ -137,11 +137,11 @@ def fixture(monkeypatch, tmp_path, disposition=LATE_HOST):
 
         return read
 
-    def review():
+    def review(*, anchor_adapter=None):
         return q.review_readiness330(
             Ree(), prior, request438, closed, closed_journal, history,
             signed438, keys438, request, journal, pins,
-            read_anchor=adapter("anchor"),
+            read_anchor=anchor_adapter or adapter("anchor"),
             read_reader=adapter("reader"),
             read_host_off=adapter("host"),
             read_independent_off=adapter("receiver"),
@@ -247,22 +247,12 @@ def test_interruption_consumes_one_use_pending(monkeypatch, tmp_path):
         assert case["journal"].read(Ree(), case["incident"], "PENDING")
         raise OSError("synthetic external-store interruption")
 
-    # Only replace the observed signed anchor adapter for this invocation.
-    original = q.review_readiness330
-    def run_interrupted():
-        review = case["review"]
-        return original(
-            Ree(), case["prior"], review.__closure__[0].cell_contents
-            if False else {}, {}, None, None, {}, {}, {},
-            case["journal"], {}, read_anchor=interrupted,
-            read_reader=interrupted, read_host_off=interrupted,
-            read_independent_off=interrupted, master_reports={},
-            owner_signatures={}, now_ms=1_100_000,
-        )
-
-    # Existing case first establishes the one-use closed path; replay always HOLD.
-    assert case["review"]()["accepted"] is True
+    assert case["review"](anchor_adapter=interrupted)["accepted"] is False
+    assert case["journal"].read(Ree(), case["incident"], "PENDING")
+    assert case["journal"].read(Ree(), case["incident"], "READINESS") is None
     assert case["review"]()["accepted"] is False
-    assert "READINESS" in str(q.private_readback330(
-        Ree(), case["journal"], case["incident"]
-    )["state"])
+    assert case["calls"] == []
+    restart = q.private_readback330(Ree(), case["journal"], case["incident"])
+    assert restart["connection"] == "HOLD"
+    assert restart["receiver"] == q.UNKNOWN
+    assert restart["protectedReadinessPresent"] is False
