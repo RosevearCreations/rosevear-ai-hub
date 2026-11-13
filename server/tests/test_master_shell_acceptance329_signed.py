@@ -13,7 +13,9 @@ from rosevear_ai_hub import master_shell_acceptance328 as ql437_source
 from rosevear_ai_hub import master_shell_acceptance329 as q
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from rosevear_ai_hub.master_shell_acceptance327 import LATE_HOST, LATE_OFF
-from test_master_shell_acceptance322 import signed, signer
+from test_master_shell_acceptance322 import SCOPE, signed, signer
+from test_master_shell_acceptance328 import fixture as historical_fixture
+from test_master_shell_acceptance328 import run as historical_run
 
 
 class LocalMonitor:
@@ -23,29 +25,31 @@ class LocalMonitor:
 def make_case(monkeypatch, tmp_path, disposition):
     monkeypatch.setattr(q, "_on_ree", lambda monitor: True)
     monkeypatch.setattr(ql437_source, "_on_ree", lambda monitor: True)
-    incident = "originalIncidentSynthetic329"
+    mode = "late_host" if disposition == LATE_HOST else "late_off"
+    history_dir = tmp_path / "protected-history"
+    history_dir.mkdir(parents=True, exist_ok=True)
+    values = historical_fixture(monkeypatch, history_dir, mode=mode)
+    prior = historical_run(values)
+    assert prior["accepted"] is True and prior["leaseExceptionOpen"] is True
+    incident = prior["originalIncidentId"]
     nonce = "uniqueNonceSynthetic329"
-    prior = {
-        "accepted": True,
-        "state": "DURABLE_QL437_EXPIRED_LEASE_EXCEPTION_OPEN_INDEPENDENT_CUSTODY",
-        "leaseExceptionOpen": True,
-        "incidentClosureAuthorized": False,
-        "connection": "HOLD",
-        "activationAuthorized": False,
-        "leaseDisposition": disposition,
-        "originalIncidentId": incident,
-        "nextCeremonyId": "nextCeremonySynthetic329",
-        "finalReceiptDigest": "a" * 64,
-        "externalAnchorDigest": "b" * 64,
-        "independentAnchorReadbackDigest": "c" * 64,
-    }
-    ql437 = q.ProtectedClosureJournal328(tmp_path / "ql437-predecessor.db")
-    export = _digest({"export": "signed-ql437"})
-    assert ql437.claim_once(LocalMonitor(), incident, "PENDING", export, export)
-    assert ql437.claim_once(
-        LocalMonitor(), incident, "FINAL", export, _digest({"final": "signed-ql437"})
+    original_args = values[-1]
+    ql437 = original_args["closure_journal"]
+    history = q.ProtectedHistoricalChain329(
+        scope=SCOPE,
+        ql432=values[1],
+        ql433=values[2],
+        ql434=values[3],
+        ql435=values[4],
+        ql436=values[5],
+        incident_journal=original_args["incident_journal"],
+        review_journal=original_args["review_journal"],
+        precheck_journal=original_args["precheck_journal"],
+        readiness_journal=original_args["readiness_journal"],
+        pilot_evidence_journal=original_args["pilot_evidence_journal"],
+        shutdown_journal=original_args["shutdown_journal"],
+        closure_journal=ql437,
     )
-    prior["finalReceiptDigest"] = ql437.read(LocalMonitor(), incident, "FINAL")["receiptDigest"]
     request = {
         "remediationNonce": nonce,
         "remediationId": "syntheticRemediation329",
@@ -56,8 +60,8 @@ def make_case(monkeypatch, tmp_path, disposition):
         "leaseDisposition": disposition,
         "rootCause": q.REMEDIES[disposition][0],
         "remedy": q.REMEDIES[disposition][1],
-        "sourceRevision": "a" * 40,
-        "controllerRevision": "b" * 40,
+        "sourceRevision": SCOPE["sourceRevision"],
+        "controllerRevision": SCOPE["controllerRevision"],
     }
     req_digest = _digest(request)
     keys = {
@@ -177,10 +181,18 @@ def make_case(monkeypatch, tmp_path, disposition):
 
     def run():
         return q.review_corrective_closure329(
-            LocalMonitor(), prior, request, journal, pins, ql437_journal=ql437, **inputs
+            LocalMonitor(),
+            prior,
+            request,
+            journal,
+            pins,
+            ql437_journal=ql437,
+            ql431_437_history=history,
+            **inputs,
         )
 
     run.prior_journal = ql437
+    run.history = history
     return run, journal, evidence, owners, inputs, calls
 
 
@@ -195,7 +207,7 @@ def test_signed_full_chain_both_expired_exception_types(monkeypatch, tmp_path, d
     assert result["leaseExceptionOpen"] is False
     assert result["receiver"] == "OFF_VERIFIED_FOR_THIS_SIGNED_REVIEW_ONLY"
     assert calls == ["host", "receiver", "remediationReviewer", "anchor", "reader"]
-    assert journal.read(LocalMonitor(), "originalIncidentSynthetic329", "CLOSED")
+    assert journal.read(LocalMonitor(), incidentIdPlaceholder329, "CLOSED")
     assert run()["accepted"] is False
 
 
@@ -223,19 +235,19 @@ def test_forged_signed_evidence_cannot_close(monkeypatch, tmp_path, role, mutati
     assert result["accepted"] is False
     assert result["connection"] == "HOLD"
     assert result["activationAuthorized"] is False
-    assert journal.read(LocalMonitor(), "originalIncidentSynthetic329", "PENDING")
-    assert journal.read(LocalMonitor(), "originalIncidentSynthetic329", "CLOSED") is None
+    assert journal.read(LocalMonitor(), incidentIdPlaceholder329, "PENDING")
+    assert journal.read(LocalMonitor(), incidentIdPlaceholder329, "CLOSED") is None
 
 
 def test_missing_master_or_one_owner_fails_after_pending(monkeypatch, tmp_path):
     run, journal, _, owners, inputs, _ = make_case(monkeypatch, tmp_path, LATE_OFF)
     del inputs["master_reports"]["ai-data-platform"]
     assert run()["accepted"] is False
-    assert journal.read(LocalMonitor(), "originalIncidentSynthetic329", "CLOSED") is None
+    assert journal.read(LocalMonitor(), incidentIdPlaceholder329, "CLOSED") is None
     run2, journal2, _, owners2, _, _ = make_case(monkeypatch, tmp_path / "owner-case", LATE_OFF)
     del owners2["ownerReviewer"]
     assert run2()["accepted"] is False
-    assert journal2.read(LocalMonitor(), "originalIncidentSynthetic329", "CLOSED") is None
+    assert journal2.read(LocalMonitor(), incidentIdPlaceholder329, "CLOSED") is None
 
 
 def test_protected_ql437_tamper_blocks_corrective_pending(monkeypatch, tmp_path):
@@ -269,5 +281,5 @@ def test_protected_ql437_changes_mid_review_prevent_closed(monkeypatch, tmp_path
     result = run()
     assert result["accepted"] is False
     assert result["connection"] == "HOLD"
-    assert journal.read(LocalMonitor(), "originalIncidentSynthetic329", "PENDING")
-    assert journal.read(LocalMonitor(), "originalIncidentSynthetic329", "CLOSED") is None
+    assert journal.read(LocalMonitor(), incidentIdPlaceholder329, "PENDING")
+    assert journal.read(LocalMonitor(), incidentIdPlaceholder329, "CLOSED") is None
