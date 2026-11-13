@@ -15,7 +15,7 @@ from rosevear_ai_hub.master_shell_decision333 import (
     hold_decision333,
 )
 from rosevear_ai_hub.master_shell_prior334 import verify_prior_shutdown334
-from rosevear_ai_hub.master_shell_shutdown333 import EXPIRED, ON_TIME
+from rosevear_ai_hub.master_shell_shutdown333 import EXPIRED
 
 ACTION = "PROTECTED_QL443_SHUTDOWN_CUSTODY_ADMISSION_AND_FRESH_OFF_ONLY"
 ADMITTED = "DURABLE_QL443_SIGNED_SHUTDOWN_EVIDENCE_ADMITTED"
@@ -124,7 +124,9 @@ def review_renewal334(
             and request.get("historicalIndependentOffDigest") == link["historicalOffDigest"]
             and isinstance(nonce, str)
             and len(nonce) >= 12
-            and len({nonce, link["originalShutdownNonce"], link["challengeId"], link["leaseId"]}) == 4
+            and len(
+                {nonce, link["originalShutdownNonce"], link["challengeId"], link["leaseId"]}
+            ) == 4
             and now_ms >= link["historicalOffAtMs"]
         ):
             return fail("HOLD_QL443_EXACT_PRIOR_CUSTODY_AND_FRESH_NONCE_REQUIRED")

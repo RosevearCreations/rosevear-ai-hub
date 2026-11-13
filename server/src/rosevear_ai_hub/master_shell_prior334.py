@@ -205,7 +205,12 @@ def verify_prior_shutdown334(
     ):
         return None
     custody_digest = _digest(
-        {"prior": prior_digest, "pending": pending, "terminal": terminal, "signedEvidence": evidence}
+        {
+            "prior": prior_digest,
+            "pending": pending,
+            "terminal": terminal,
+            "signedEvidence": evidence,
+        }
     )
     return custody_digest, {
         "incident": incident,
