@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
-from rosevear_ai_hub.master_shell_acceptance324 import _signed
+from rosevear_ai_hub.master_shell_acceptance319 import _native
 from rosevear_ai_hub.master_shell_acceptance327 import LATE_HOST, LATE_OFF
 from rosevear_ai_hub.master_shell_acceptance312 import MASTERS
 from rosevear_ai_hub.master_shell_acceptance308 import _on_ree
@@ -98,7 +98,7 @@ def _verify(role: str, signed: Any, keys: dict[str, tuple[bytes, str]], expected
         and isinstance(signed, dict)
         and isinstance(signed.get("payload"), dict)
         and signed["payload"] == expected
-        and _signed(signed, keys[role], expected)
+        and signed["payload"].get("schema") == f"rosevear.ai-hub.ql438.{role}.v1"\n        and _native(signed, set(expected), f"rosevear.ai-hub.ql438.{role}.v1", *keys[role]) == expected
     )
 
 
