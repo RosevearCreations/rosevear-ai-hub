@@ -140,9 +140,7 @@ def _pins(keys: Any) -> bool:
         isinstance(keys, dict)
         and set(keys) == set(roles)
         and all(
-            isinstance(keys[k], tuple)
-            and len(keys[k]) == 2
-            and _public_ed25519(*keys[k])
+            isinstance(keys[k], tuple) and len(keys[k]) == 2 and _public_ed25519(*keys[k])
             for k in roles
         )
         and len({keys[k][1] for k in roles}) == len(roles)
@@ -335,67 +333,121 @@ def run_ql434_signed_readiness325(
     i = _signed(
         handoff["issuer"],
         {
-            "authorityId", "challengeNonce", "exportDigest", "scope",
-            "incidentId", "ql433PrecheckReceiptDigest", "nextCeremonyId",
-            "nextEpisodeId", "status", "issuedAt",
+            "authorityId",
+            "challengeNonce",
+            "exportDigest",
+            "scope",
+            "incidentId",
+            "ql433PrecheckReceiptDigest",
+            "nextCeremonyId",
+            "nextEpisodeId",
+            "status",
+            "issuedAt",
         },
-        ISSUER, keys["issuer"], now, now - 60_000, "issuedAt",
+        ISSUER,
+        keys["issuer"],
+        now,
+        now - 60_000,
+        "issuedAt",
     )
-    if not _match(i, {
-        "authorityId": authority_id, "challengeNonce": challenge_nonce,
-        "exportDigest": export_digest, "scope": scope, "incidentId": incident,
-        "ql433PrecheckReceiptDigest": prior["precheck"]["receiptDigest"],
-        "nextCeremonyId": export["nextCeremonyId"],
-        "nextEpisodeId": export["nextEpisodeId"],
-        "status": "NEW_CEREMONY_READINESS_HANDOFF_NOT_ACTIVATION",
-    }):
+    if not _match(
+        i,
+        {
+            "authorityId": authority_id,
+            "challengeNonce": challenge_nonce,
+            "exportDigest": export_digest,
+            "scope": scope,
+            "incidentId": incident,
+            "ql433PrecheckReceiptDigest": prior["precheck"]["receiptDigest"],
+            "nextCeremonyId": export["nextCeremonyId"],
+            "nextEpisodeId": export["nextEpisodeId"],
+            "status": "NEW_CEREMONY_READINESS_HANDOFF_NOT_ACTIVATION",
+        },
+    ):
         return hold("HOLD_QL434_ISSUER_SIGNED_SCOPE_OR_AUTHORITY_INVALID")
     w = _signed(
         handoff["witness"],
         {
-            "authorityId", "challengeNonce", "exportDigest", "issuerDigest",
-            "nextCeremonyId", "nextEpisodeId", "status", "witnessedAt",
+            "authorityId",
+            "challengeNonce",
+            "exportDigest",
+            "issuerDigest",
+            "nextCeremonyId",
+            "nextEpisodeId",
+            "status",
+            "witnessedAt",
         },
-        WITNESS, keys["witness"], now, _timestamp(i["issuedAt"]), "witnessedAt",
+        WITNESS,
+        keys["witness"],
+        now,
+        _timestamp(i["issuedAt"]),
+        "witnessedAt",
     )
-    if not _match(w, {
-        "authorityId": authority_id, "challengeNonce": challenge_nonce,
-        "exportDigest": export_digest, "issuerDigest": _digest(i),
-        "nextCeremonyId": export["nextCeremonyId"],
-        "nextEpisodeId": export["nextEpisodeId"],
-        "status": "INDEPENDENT_HANDOFF_READBACK_NO_ACTIVATION",
-    }):
+    if not _match(
+        w,
+        {
+            "authorityId": authority_id,
+            "challengeNonce": challenge_nonce,
+            "exportDigest": export_digest,
+            "issuerDigest": _digest(i),
+            "nextCeremonyId": export["nextCeremonyId"],
+            "nextEpisodeId": export["nextEpisodeId"],
+            "status": "INDEPENDENT_HANDOFF_READBACK_NO_ACTIVATION",
+        },
+    ):
         return hold("HOLD_QL434_INDEPENDENT_AUTHORITY_WITNESS_INVALID")
     try:
         host_env = read_original_host_readiness(
-            export_record=export, handoff_witness_digest=_digest(w),
+            export_record=export,
+            handoff_witness_digest=_digest(w),
         )
     except Exception:
         return hold("HOLD_QL434_ORIGINAL_HOST_READINESS_UNAVAILABLE")
     h = _signed(
         host_env,
         {
-            "hostMachineId", "scope", "incidentId", "authorityId", "challengeNonce",
-            "nextCeremonyId", "nextEpisodeId", "sourceRevision",
-            "controllerRevision", "handoffWitnessDigest", "receiverState",
-            "readiness", "observedAt",
+            "hostMachineId",
+            "scope",
+            "incidentId",
+            "authorityId",
+            "challengeNonce",
+            "nextCeremonyId",
+            "nextEpisodeId",
+            "sourceRevision",
+            "controllerRevision",
+            "handoffWitnessDigest",
+            "receiverState",
+            "readiness",
+            "observedAt",
         },
-        HOST, keys["host"], now, _timestamp(w["witnessedAt"]), "observedAt",
+        HOST,
+        keys["host"],
+        now,
+        _timestamp(w["witnessedAt"]),
+        "observedAt",
     )
-    if not _match(h, {
-        "hostMachineId": "DESKTOP-AE894KC", "scope": scope, "incidentId": incident,
-        "authorityId": authority_id, "challengeNonce": challenge_nonce,
-        "nextCeremonyId": export["nextCeremonyId"],
-        "nextEpisodeId": export["nextEpisodeId"],
-        "sourceRevision": export["sourceRevision"],
-        "controllerRevision": export["controllerRevision"],
-        "handoffWitnessDigest": _digest(w), "receiverState": "OFF",
-        "readiness": "HOST_READY_FOR_SEPARATE_NEW_SUPERVISED_CEREMONY_ONLY",
-    }):
+    if not _match(
+        h,
+        {
+            "hostMachineId": "DESKTOP-AE894KC",
+            "scope": scope,
+            "incidentId": incident,
+            "authorityId": authority_id,
+            "challengeNonce": challenge_nonce,
+            "nextCeremonyId": export["nextCeremonyId"],
+            "nextEpisodeId": export["nextEpisodeId"],
+            "sourceRevision": export["sourceRevision"],
+            "controllerRevision": export["controllerRevision"],
+            "handoffWitnessDigest": _digest(w),
+            "receiverState": "OFF",
+            "readiness": "HOST_READY_FOR_SEPARATE_NEW_SUPERVISED_CEREMONY_ONLY",
+        },
+    ):
         return hold("HOLD_QL434_ORIGINAL_HOST_SIGNED_OFF_READINESS_INVALID")
     try:
         off_env = read_independent_receiver_off(
-            export_record=export, host_readiness_digest=_digest(h),
+            export_record=export,
+            host_readiness_digest=_digest(h),
             handoff_witness_digest=_digest(w),
         )
     except Exception:
@@ -403,17 +455,33 @@ def run_ql434_signed_readiness325(
     off = _signed(
         off_env,
         {
-            "scope", "incidentId", "authorityId", "challengeNonce",
-            "hostReadinessDigest", "handoffWitnessDigest", "receiverState",
+            "scope",
+            "incidentId",
+            "authorityId",
+            "challengeNonce",
+            "hostReadinessDigest",
+            "handoffWitnessDigest",
+            "receiverState",
             "observedAt",
         },
-        RECEIVER, keys["receiver"], now, _timestamp(h["observedAt"]), "observedAt",
+        RECEIVER,
+        keys["receiver"],
+        now,
+        _timestamp(h["observedAt"]),
+        "observedAt",
     )
-    if not _match(off, {
-        "scope": scope, "incidentId": incident, "authorityId": authority_id,
-        "challengeNonce": challenge_nonce, "hostReadinessDigest": _digest(h),
-        "handoffWitnessDigest": _digest(w), "receiverState": "OFF",
-    }):
+    if not _match(
+        off,
+        {
+            "scope": scope,
+            "incidentId": incident,
+            "authorityId": authority_id,
+            "challengeNonce": challenge_nonce,
+            "hostReadinessDigest": _digest(h),
+            "handoffWitnessDigest": _digest(w),
+            "receiverState": "OFF",
+        },
+    ):
         return hold("HOLD_QL434_SIGNED_INDEPENDENT_RECEIVER_OFF_INVALID")
     if not isinstance(master_reports, dict) or set(master_reports) != set(MASTERS):
         return hold("HOLD_QL434_THREE_SIGNED_MASTERS_REQUIRED")
@@ -422,59 +490,107 @@ def run_ql434_signed_readiness325(
         p = _signed(
             master_reports[master],
             {
-                "masterId", "scope", "incidentId", "authorityId",
-                "ql433PrecheckReceiptDigest", "handoffWitnessDigest",
-                "receiverOffDigest", "nextCeremonyId", "nextEpisodeId",
-                "status", "observedAt",
+                "masterId",
+                "scope",
+                "incidentId",
+                "authorityId",
+                "ql433PrecheckReceiptDigest",
+                "handoffWitnessDigest",
+                "receiverOffDigest",
+                "nextCeremonyId",
+                "nextEpisodeId",
+                "status",
+                "observedAt",
             },
-            MASTER, keys[master], now, _timestamp(off["observedAt"]), "observedAt",
+            MASTER,
+            keys[master],
+            now,
+            _timestamp(off["observedAt"]),
+            "observedAt",
         )
-        if not _match(p, {
-            "masterId": master, "scope": scope, "incidentId": incident,
-            "authorityId": authority_id,
-            "ql433PrecheckReceiptDigest": prior["precheck"]["receiptDigest"],
-            "handoffWitnessDigest": _digest(w),
-            "receiverOffDigest": _digest(off),
-            "nextCeremonyId": export["nextCeremonyId"],
-            "nextEpisodeId": export["nextEpisodeId"],
-            "status": "NEW_CEREMONY_PREPARATION_ONLY_NOT_ACTIVATED",
-        }):
+        if not _match(
+            p,
+            {
+                "masterId": master,
+                "scope": scope,
+                "incidentId": incident,
+                "authorityId": authority_id,
+                "ql433PrecheckReceiptDigest": prior["precheck"]["receiptDigest"],
+                "handoffWitnessDigest": _digest(w),
+                "receiverOffDigest": _digest(off),
+                "nextCeremonyId": export["nextCeremonyId"],
+                "nextEpisodeId": export["nextEpisodeId"],
+                "status": "NEW_CEREMONY_PREPARATION_ONLY_NOT_ACTIVATED",
+            },
+        ):
             return hold("HOLD_QL434_SIGNED_MASTER_READINESS_DISPOSITION_INVALID")
         masters.append(p)
     owner = _dual(
         owner_review,
         {
-            "schema", "scope", "incidentId", "authorityId", "challengeNonce",
-            "ql433PrecheckReceiptDigest", "handoffWitnessDigest",
-            "receiverOffDigest", "mastersDigest", "nextCeremonyId",
-            "nextEpisodeId", "ownerId", "reviewerId", "action", "authorizedAt",
+            "schema",
+            "scope",
+            "incidentId",
+            "authorityId",
+            "challengeNonce",
+            "ql433PrecheckReceiptDigest",
+            "handoffWitnessDigest",
+            "receiverOffDigest",
+            "mastersDigest",
+            "nextCeremonyId",
+            "nextEpisodeId",
+            "ownerId",
+            "reviewerId",
+            "action",
+            "authorizedAt",
         },
-        OWNER, OWNER_ACTION, *keys["owner"], *keys["reviewer"],
-        now, max(_timestamp(p["observedAt"]) for p in masters), "authorizedAt",
+        OWNER,
+        OWNER_ACTION,
+        *keys["owner"],
+        *keys["reviewer"],
+        now,
+        max(_timestamp(p["observedAt"]) for p in masters),
+        "authorizedAt",
     )
-    if not _match(owner, {
-        "scope": scope, "incidentId": incident, "authorityId": authority_id,
-        "challengeNonce": challenge_nonce,
-        "ql433PrecheckReceiptDigest": prior["precheck"]["receiptDigest"],
-        "handoffWitnessDigest": _digest(w), "receiverOffDigest": _digest(off),
-        "mastersDigest": _digest(masters),
-        "nextCeremonyId": export["nextCeremonyId"],
-        "nextEpisodeId": export["nextEpisodeId"],
-    }):
+    if not _match(
+        owner,
+        {
+            "scope": scope,
+            "incidentId": incident,
+            "authorityId": authority_id,
+            "challengeNonce": challenge_nonce,
+            "ql433PrecheckReceiptDigest": prior["precheck"]["receiptDigest"],
+            "handoffWitnessDigest": _digest(w),
+            "receiverOffDigest": _digest(off),
+            "mastersDigest": _digest(masters),
+            "nextCeremonyId": export["nextCeremonyId"],
+            "nextEpisodeId": export["nextEpisodeId"],
+        },
+    ):
         return hold("HOLD_QL434_DUAL_SIGNED_OWNER_READINESS_ONLY_INVALID")
     current = _prior(
-        monitor, scope, ql432_decision, ql433_precheck,
-        incident_journal, review_journal, precheck_journal,
+        monitor,
+        scope,
+        ql432_decision,
+        ql433_precheck,
+        incident_journal,
+        review_journal,
+        precheck_journal,
     )
     if current != prior:
         return hold("HOLD_QL434_PRIOR_QL431_432_433_CUSTODY_DRIFT")
-    evidence_digest = _digest({
-        "issuerDigest": _digest(i), "witnessDigest": _digest(w),
-        "hostDigest": _digest(h), "receiverOffDigest": _digest(off),
-        "mastersDigest": _digest(masters), "ownerDigest": _digest(owner),
-        "nextCeremonyId": export["nextCeremonyId"],
-        "nextEpisodeId": export["nextEpisodeId"],
-    })
+    evidence_digest = _digest(
+        {
+            "issuerDigest": _digest(i),
+            "witnessDigest": _digest(w),
+            "hostDigest": _digest(h),
+            "receiverOffDigest": _digest(off),
+            "mastersDigest": _digest(masters),
+            "ownerDigest": _digest(owner),
+            "nextCeremonyId": export["nextCeremonyId"],
+            "nextEpisodeId": export["nextEpisodeId"],
+        }
+    )
     recorded = readiness_journal.claim_once(monitor, incident, export_digest, evidence_digest)
     if recorded is None:
         return hold("HOLD_QL434_READINESS_RECEIPT_REPLAY_OR_UNDURABLE")
