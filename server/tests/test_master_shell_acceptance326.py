@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from rosevear_ai_hub.main import app
 from rosevear_ai_hub.master_shell_acceptance305 import _utc
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
+from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
 from rosevear_ai_hub.master_shell_acceptance326 import (
     ENROLLMENT,
     HOST_ON,
@@ -350,7 +351,7 @@ def test_receipt_tampering_and_source_only_authority(monkeypatch, tmp_path):
         401,
         403,
     )
-    projection = reconcile_master_evidence326(Ree())
+    projection = reconcile_master_evidence326(PersistentReeMonitor304(enabled=False))
     assert projection["sourceBuild"] == 326
     assert projection["connection"] == "HOLD"
     assert projection["activationAuthorized"] is False
