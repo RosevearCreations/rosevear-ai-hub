@@ -86,3 +86,38 @@ def test_late_paths_are_distinct_and_owner_status_is_source_only():
     assert status["connection"] == "HOLD"
     assert status["activationAuthorized"] is False
     assert status["runtimeUptime"] == "UNKNOWN"
+
+
+def test_closed_receipt_tampering_never_proves_closure(monkeypatch, tmp_path):
+    monkeypatch.setattr(q, "_on_ree", lambda monitor: True)
+    journal = q.ProtectedCorrectiveJournal329(tmp_path / "closed-tamper.db")
+    request = _digest({"request": "ql438-closed"})
+    evidence = _digest({"evidence": "ql438-closed"})
+    assert journal.claim(Ree(), "incident-closed", "PENDING", request, request)
+    assert journal.claim(Ree(), "incident-closed", "CLOSED", request, evidence)
+    with sqlite3.connect(journal.path) as db:
+        db.execute(
+            "UPDATE corrective329 SET evidence_digest=? WHERE incident=? AND stage=?",
+            ("0" * 64, "incident-closed", "CLOSED"),
+        )
+    import pytest
+
+    with pytest.raises(ValueError, match="TAMPERED"):
+        journal.read(Ree(), "incident-closed", "CLOSED")
+    assert journal.claim(Ree(), "incident-closed", "CLOSED", request, evidence) is None
+    projection = q.reconcile_master_evidence329(Ree())
+    assert projection["connection"] == "HOLD"
+    assert projection["activationAuthorized"] is False
+    assert projection["receiver"] == q.UNKNOWN_OFF
+
+
+def test_symlinked_journal_is_not_writable(monkeypatch, tmp_path):
+    monkeypatch.setattr(q, "_on_ree", lambda monitor: True)
+    target = tmp_path / "untrusted.db"
+    target.write_bytes(b"do not touch")
+    linked = tmp_path / "linked.db"
+    linked.symlink_to(target)
+    journal = q.ProtectedCorrectiveJournal329(linked)
+    digest = _digest({"attempt": "ql438-symlink"})
+    assert journal.claim(Ree(), "incident", "PENDING", digest, digest) is None
+    assert target.read_bytes() == b"do not touch"
