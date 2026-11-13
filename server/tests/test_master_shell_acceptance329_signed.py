@@ -4,8 +4,8 @@ All Ed25519 keys are generated inside tests. These tests make no physical receiv
 or off-host custody claims; only the supplied mock adapters are exercised.
 """
 
-from copy import deepcopy
 import sqlite3
+from copy import deepcopy
 
 import pytest
 
