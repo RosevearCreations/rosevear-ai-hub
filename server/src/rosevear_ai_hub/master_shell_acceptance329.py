@@ -11,6 +11,7 @@ from typing import Any
 
 from rosevear_ai_hub.master_shell_acceptance308 import _on_ree
 from rosevear_ai_hub.master_shell_acceptance312 import MASTERS
+from rosevear_ai_hub.master_shell_acceptance315 import _public_ed25519
 from rosevear_ai_hub.master_shell_acceptance319 import _digest, _native
 from rosevear_ai_hub.master_shell_acceptance327 import LATE_HOST, LATE_OFF
 from rosevear_ai_hub.master_shell_acceptance328 import ProtectedClosureJournal328
@@ -261,9 +262,8 @@ def review_corrective_closure329(
             isinstance(key, tuple)
             and len(key) == 2
             and isinstance(key[0], bytes)
-            and len(key[0]) == 32
             and isinstance(key[1], str)
-            and bool(key[1])
+            and _public_ed25519(key[0], key[1])
             for key in keys.values()
         )
         and len({key[0] for key in keys.values()}) == len(keys)
