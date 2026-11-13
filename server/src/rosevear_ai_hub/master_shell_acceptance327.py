@@ -71,12 +71,17 @@ class ProtectedShutdownJournal327:
         req, evidence, receipt = row
         if not all(_sha(v) for v in row):
             raise ValueError("QL436_SHUTDOWN_RECEIPT_INVALID")
-        if _digest({
-            "ceremonyId": ceremony,
-            "stage": stage,
-            "requestDigest": req,
-            "evidenceDigest": evidence,
-        }) != receipt:
+        if (
+            _digest(
+                {
+                    "ceremonyId": ceremony,
+                    "stage": stage,
+                    "requestDigest": req,
+                    "evidenceDigest": evidence,
+                }
+            )
+            != receipt
+        ):
             raise ValueError("QL436_SHUTDOWN_RECEIPT_TAMPERED")
         return {
             "requestDigest": req,
@@ -116,12 +121,14 @@ class ProtectedShutdownJournal327:
             and self.path.is_absolute()
         ):
             return None
-        receipt = _digest({
-            "ceremonyId": ceremony,
-            "stage": stage,
-            "requestDigest": request_digest,
-            "evidenceDigest": evidence_digest,
-        })
+        receipt = _digest(
+            {
+                "ceremonyId": ceremony,
+                "stage": stage,
+                "requestDigest": request_digest,
+                "evidenceDigest": evidence_digest,
+            }
+        )
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
             if self.path.parent.is_symlink() or self.path.is_symlink():
@@ -165,9 +172,7 @@ def _pins(keys: Any) -> bool:
         isinstance(keys, dict)
         and set(keys) == set(roles)
         and all(
-            isinstance(keys[k], tuple)
-            and len(keys[k]) == 2
-            and _public_ed25519(*keys[k])
+            isinstance(keys[k], tuple) and len(keys[k]) == 2 and _public_ed25519(*keys[k])
             for k in roles
         )
         and len({keys[k][1] for k in roles}) == len(roles)
@@ -346,20 +351,33 @@ def run_ql436_shutdown_reconciliation327(
     ):
         return hold("HOLD_QL436_PROTECTED_SHUTDOWN_AUTHORITY_OR_SIGNER_PINS_MISSING")
     prior = _prior(
-        monitor, scope, ql432_decision, ql433_precheck, ql434_readiness,
-        ql435_pilot, incident_journal, review_journal, precheck_journal,
-        readiness_journal, pilot_evidence_journal,
+        monitor,
+        scope,
+        ql432_decision,
+        ql433_precheck,
+        ql434_readiness,
+        ql435_pilot,
+        incident_journal,
+        review_journal,
+        precheck_journal,
+        readiness_journal,
+        pilot_evidence_journal,
     )
     lease = _timestamp(ql435_pilot.get("leaseExpiresAt"))
     if not (
-        prior and lease is not None
+        prior
+        and lease is not None
         and -15_000 <= now - lease <= 60_000
-        and shutdown_nonce not in (
-            ql435_pilot["challengeId"], ql435_pilot["challengeNonce"],
+        and shutdown_nonce
+        not in (
+            ql435_pilot["challengeId"],
+            ql435_pilot["challengeNonce"],
             ql435_pilot["nextCeremonyId"],
         )
-        and incident_review_id not in (
-            ql435_pilot["challengeId"], ql435_pilot["challengeNonce"],
+        and incident_review_id
+        not in (
+            ql435_pilot["challengeId"],
+            ql435_pilot["challengeNonce"],
             ql435_pilot["nextCeremonyId"],
         )
     ):
@@ -373,7 +391,12 @@ def run_ql436_shutdown_reconciliation327(
     except ValueError:
         return hold("HOLD_QL436_SHUTDOWN_LEDGER_UNREADABLE")
     request = prepare_ql436_shutdown327(
-        scope, ql435_pilot, prior, shutdown_nonce, incident_review_id, now,
+        scope,
+        ql435_pilot,
+        prior,
+        shutdown_nonce,
+        incident_review_id,
+        now,
     )
     request_digest = _digest(request)
     evidence = {
@@ -387,59 +410,88 @@ def run_ql436_shutdown_reconciliation327(
         "lease_expires_at": request["leaseExpiresAt"],
         "request_digest": request_digest,
     }
-    if not all((
-        _callback(attest_operator, **evidence),
-        _callback(attest_signed_ql435, **evidence),
-        _callback(attest_fail_closed_shutdown, **evidence),
-        _callback(attest_independent_receiver, **evidence),
-        _callback(attest_owner_custody, **evidence),
-    )):
+    if not all(
+        (
+            _callback(attest_operator, **evidence),
+            _callback(attest_signed_ql435, **evidence),
+            _callback(attest_fail_closed_shutdown, **evidence),
+            _callback(attest_independent_receiver, **evidence),
+            _callback(attest_owner_custody, **evidence),
+        )
+    ):
         return hold("HOLD_QL436_ORIGINAL_HOST_OR_SIGNED_SHUTDOWN_AUTHORITY_UNVERIFIED")
     pending = shutdown_journal.claim_once(
-        monitor, ceremony, "PENDING", request_digest,
-        _digest({
-            "reviewId": incident_review_id,
-            "shutdownNonce": shutdown_nonce,
-            "ql435AcceptedReceiptDigest": request["ql435AcceptedReceiptDigest"],
-            "leaseExpiresAt": request["leaseExpiresAt"],
-        }),
+        monitor,
+        ceremony,
+        "PENDING",
+        request_digest,
+        _digest(
+            {
+                "reviewId": incident_review_id,
+                "shutdownNonce": shutdown_nonce,
+                "ql435AcceptedReceiptDigest": request["ql435AcceptedReceiptDigest"],
+                "leaseExpiresAt": request["leaseExpiresAt"],
+            }
+        ),
     )
     if pending is None:
         return hold("HOLD_QL436_DURABLE_PENDING_WRITE_FAILED_OR_REPLAY")
     try:
         host_env = read_signed_host_shutdown(
-            request=request, request_digest=request_digest,
+            request=request,
+            request_digest=request_digest,
             pending_receipt_digest=pending["receiptDigest"],
         )
     except Exception:
         return hold("HOLD_QL436_ORIGINAL_HOST_SHUTDOWN_PROOF_UNAVAILABLE")
     host = _signed(
-        host_env, {
-            "requestDigest", "hostMachineId", "scope", "originalIncidentId",
-            "incidentReviewId", "nextCeremonyId", "nextEpisodeId", "challengeId",
-            "originalChallengeNonce", "shutdownNonce", "leaseExpiresAt",
-            "ql435AcceptedReceiptDigest", "shutdownMechanism", "receiverState",
-            "shutdownAt", "observedAt", "shutdownSequence",
-        }, HOST, keys["host"], now, now - 60_000, "observedAt",
+        host_env,
+        {
+            "requestDigest",
+            "hostMachineId",
+            "scope",
+            "originalIncidentId",
+            "incidentReviewId",
+            "nextCeremonyId",
+            "nextEpisodeId",
+            "challengeId",
+            "originalChallengeNonce",
+            "shutdownNonce",
+            "leaseExpiresAt",
+            "ql435AcceptedReceiptDigest",
+            "shutdownMechanism",
+            "receiverState",
+            "shutdownAt",
+            "observedAt",
+            "shutdownSequence",
+        },
+        HOST,
+        keys["host"],
+        now,
+        now - 60_000,
+        "observedAt",
     )
     shutdown_at = _timestamp(host.get("shutdownAt")) if host else None
     if not (
-        _match(host, {
-            "requestDigest": request_digest,
-            "hostMachineId": "DESKTOP-AE894KC",
-            "scope": scope,
-            "originalIncidentId": request["originalIncidentId"],
-            "incidentReviewId": incident_review_id,
-            "nextCeremonyId": ceremony,
-            "nextEpisodeId": request["nextEpisodeId"],
-            "challengeId": request["challengeId"],
-            "originalChallengeNonce": request["originalChallengeNonce"],
-            "shutdownNonce": shutdown_nonce,
-            "leaseExpiresAt": request["leaseExpiresAt"],
-            "ql435AcceptedReceiptDigest": request["ql435AcceptedReceiptDigest"],
-            "shutdownMechanism": "ORIGINAL_HOST_FAIL_CLOSED_PILOT_DISABLE",
-            "receiverState": "OFF",
-        })
+        _match(
+            host,
+            {
+                "requestDigest": request_digest,
+                "hostMachineId": "DESKTOP-AE894KC",
+                "scope": scope,
+                "originalIncidentId": request["originalIncidentId"],
+                "incidentReviewId": incident_review_id,
+                "nextCeremonyId": ceremony,
+                "nextEpisodeId": request["nextEpisodeId"],
+                "challengeId": request["challengeId"],
+                "originalChallengeNonce": request["originalChallengeNonce"],
+                "shutdownNonce": shutdown_nonce,
+                "leaseExpiresAt": request["leaseExpiresAt"],
+                "ql435AcceptedReceiptDigest": request["ql435AcceptedReceiptDigest"],
+                "shutdownMechanism": "ORIGINAL_HOST_FAIL_CLOSED_PILOT_DISABLE",
+                "receiverState": "OFF",
+            },
+        )
         and type(host.get("shutdownSequence")) is int
         and host["shutdownSequence"] >= 1
         and shutdown_at is not None
@@ -448,53 +500,132 @@ def run_ql436_shutdown_reconciliation327(
         return hold("HOLD_QL436_HOST_SIGNED_OFF_OR_SHUTDOWN_SEQUENCE_INVALID")
     try:
         off_env = read_signed_independent_off(
-            request=request, host_shutdown_digest=_digest(host),
+            request=request,
+            host_shutdown_digest=_digest(host),
             required_state="OFF",
         )
     except Exception:
         return hold("HOLD_QL436_INDEPENDENT_RECEIVER_OFF_UNAVAILABLE")
     off = _signed(
-        off_env, {
-            "requestDigest", "originalIncidentId", "incidentReviewId",
-            "nextCeremonyId", "challengeId", "shutdownNonce",
-            "hostShutdownDigest", "leaseExpiresAt", "receiverState",
-            "offContinuitySequence", "observedAt",
-        }, OFF, keys["receiver"], now, _timestamp(host["observedAt"]), "observedAt",
+        off_env,
+        {
+            "requestDigest",
+            "originalIncidentId",
+            "incidentReviewId",
+            "nextCeremonyId",
+            "challengeId",
+            "shutdownNonce",
+            "hostShutdownDigest",
+            "leaseExpiresAt",
+            "receiverState",
+            "offContinuitySequence",
+            "observedAt",
+        },
+        OFF,
+        keys["receiver"],
+        now,
+        _timestamp(host["observedAt"]),
+        "observedAt",
     )
     if not (
-        _match(off, {
-            "requestDigest": request_digest,
-            "originalIncidentId": request["originalIncidentId"],
-            "incidentReviewId": incident_review_id,
-            "nextCeremonyId": ceremony,
-            "challengeId": request["challengeId"],
-            "shutdownNonce": shutdown_nonce,
-            "hostShutdownDigest": _digest(host),
-            "leaseExpiresAt": request["leaseExpiresAt"],
-            "receiverState": "OFF",
-        })
+        _match(
+            off,
+            {
+                "requestDigest": request_digest,
+                "originalIncidentId": request["originalIncidentId"],
+                "incidentReviewId": incident_review_id,
+                "nextCeremonyId": ceremony,
+                "challengeId": request["challengeId"],
+                "shutdownNonce": shutdown_nonce,
+                "hostShutdownDigest": _digest(host),
+                "leaseExpiresAt": request["leaseExpiresAt"],
+                "receiverState": "OFF",
+            },
+        )
         and type(off.get("offContinuitySequence")) is int
         and off["offContinuitySequence"] >= host["shutdownSequence"]
         and off["offContinuitySequence"] >= 1
     ):
         return hold("HOLD_QL436_INDEPENDENT_SIGNED_RECEIVER_OFF_READBACK_INVALID")
     disposition = _disposition(
-        lease, shutdown_at, _timestamp(off["observedAt"]),
+        lease,
+        shutdown_at,
+        _timestamp(off["observedAt"]),
     )
     if not isinstance(master_reports, dict) or set(master_reports) != set(MASTERS):
         return hold("HOLD_QL436_THREE_INDEPENDENT_MASTER_CONTINUITY_REPORTS_MISSING")
     masters = []
     for master in MASTERS:
         p = _signed(
-            master_reports[master], {
-                "masterId", "requestDigest", "incidentReviewId",
-                "originalIncidentId", "nextCeremonyId", "shutdownNonce",
-                "hostShutdownDigest", "independentOffDigest", "leaseExpiresAt",
-                "leaseDisposition", "decision", "observedAt",
-            }, MASTER, keys[master], now, _timestamp(off["observedAt"]), "observedAt",
+            master_reports[master],
+            {
+                "masterId",
+                "requestDigest",
+                "incidentReviewId",
+                "originalIncidentId",
+                "nextCeremonyId",
+                "shutdownNonce",
+                "hostShutdownDigest",
+                "independentOffDigest",
+                "leaseExpiresAt",
+                "leaseDisposition",
+                "decision",
+                "observedAt",
+            },
+            MASTER,
+            keys[master],
+            now,
+            _timestamp(off["observedAt"]),
+            "observedAt",
         )
-        if not _match(p, {
-            "masterId": master,
+        if not _match(
+            p,
+            {
+                "masterId": master,
+                "requestDigest": request_digest,
+                "incidentReviewId": incident_review_id,
+                "originalIncidentId": request["originalIncidentId"],
+                "nextCeremonyId": ceremony,
+                "shutdownNonce": shutdown_nonce,
+                "hostShutdownDigest": _digest(host),
+                "independentOffDigest": _digest(off),
+                "leaseExpiresAt": request["leaseExpiresAt"],
+                "leaseDisposition": disposition,
+                "decision": ACK,
+            },
+        ):
+            return hold("HOLD_QL436_THREE_MASTER_SIGNED_INCIDENT_CUSTODY_MISMATCH")
+        masters.append(p)
+    owner_action = OWNER_TIMELY if disposition == TIMELY else OWNER_LATE
+    owner = _dual(
+        owner_review,
+        {
+            "schema",
+            "requestDigest",
+            "incidentReviewId",
+            "originalIncidentId",
+            "nextCeremonyId",
+            "shutdownNonce",
+            "hostShutdownDigest",
+            "independentOffDigest",
+            "mastersDigest",
+            "leaseDisposition",
+            "action",
+            "ownerId",
+            "reviewerId",
+            "reviewedAt",
+        },
+        OWNER,
+        owner_action,
+        *keys["owner"],
+        *keys["reviewer"],
+        now,
+        max(_timestamp(m["observedAt"]) for m in masters),
+        "reviewedAt",
+    )
+    if not _match(
+        owner,
+        {
             "requestDigest": request_digest,
             "incidentReviewId": incident_review_id,
             "originalIncidentId": request["originalIncidentId"],
@@ -502,38 +633,23 @@ def run_ql436_shutdown_reconciliation327(
             "shutdownNonce": shutdown_nonce,
             "hostShutdownDigest": _digest(host),
             "independentOffDigest": _digest(off),
-            "leaseExpiresAt": request["leaseExpiresAt"],
+            "mastersDigest": _digest(masters),
             "leaseDisposition": disposition,
-            "decision": ACK,
-        }):
-            return hold("HOLD_QL436_THREE_MASTER_SIGNED_INCIDENT_CUSTODY_MISMATCH")
-        masters.append(p)
-    owner_action = OWNER_TIMELY if disposition == TIMELY else OWNER_LATE
-    owner = _dual(
-        owner_review, {
-            "schema", "requestDigest", "incidentReviewId", "originalIncidentId",
-            "nextCeremonyId", "shutdownNonce", "hostShutdownDigest",
-            "independentOffDigest", "mastersDigest", "leaseDisposition",
-            "action", "ownerId", "reviewerId", "reviewedAt",
-        }, OWNER, owner_action, *keys["owner"], *keys["reviewer"],
-        now, max(_timestamp(m["observedAt"]) for m in masters), "reviewedAt",
-    )
-    if not _match(owner, {
-        "requestDigest": request_digest,
-        "incidentReviewId": incident_review_id,
-        "originalIncidentId": request["originalIncidentId"],
-        "nextCeremonyId": ceremony,
-        "shutdownNonce": shutdown_nonce,
-        "hostShutdownDigest": _digest(host),
-        "independentOffDigest": _digest(off),
-        "mastersDigest": _digest(masters),
-        "leaseDisposition": disposition,
-    }):
+        },
+    ):
         return hold("HOLD_QL436_DUAL_OWNER_LEASE_DISPOSITION_OR_ESCALATION_INVALID")
     latest = _prior(
-        monitor, scope, ql432_decision, ql433_precheck, ql434_readiness,
-        ql435_pilot, incident_journal, review_journal, precheck_journal,
-        readiness_journal, pilot_evidence_journal,
+        monitor,
+        scope,
+        ql432_decision,
+        ql433_precheck,
+        ql434_readiness,
+        ql435_pilot,
+        incident_journal,
+        review_journal,
+        precheck_journal,
+        readiness_journal,
+        pilot_evidence_journal,
     )
     try:
         reread_pending = shutdown_journal.read(monitor, ceremony, "PENDING")
@@ -542,15 +658,20 @@ def run_ql436_shutdown_reconciliation327(
     if latest != prior or reread_pending != pending:
         return hold("HOLD_QL436_PRIOR_OR_PENDING_CUSTODY_DRIFT")
     reconciled = shutdown_journal.claim_once(
-        monitor, ceremony, "RECONCILED", request_digest,
-        _digest({
-            "pendingReceiptDigest": pending["receiptDigest"],
-            "hostShutdownDigest": _digest(host),
-            "independentOffDigest": _digest(off),
-            "leaseDisposition": disposition,
-            "mastersDigest": _digest(masters),
-            "ownerReviewDigest": _digest(owner),
-        }),
+        monitor,
+        ceremony,
+        "RECONCILED",
+        request_digest,
+        _digest(
+            {
+                "pendingReceiptDigest": pending["receiptDigest"],
+                "hostShutdownDigest": _digest(host),
+                "independentOffDigest": _digest(off),
+                "leaseDisposition": disposition,
+                "mastersDigest": _digest(masters),
+                "ownerReviewDigest": _digest(owner),
+            }
+        ),
     )
     if reconciled is None:
         return hold("HOLD_QL436_RECONCILED_RECEIPT_UNDURABLE_OR_REPLAY")
