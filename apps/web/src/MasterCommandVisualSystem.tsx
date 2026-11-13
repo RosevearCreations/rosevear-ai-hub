@@ -53,7 +53,7 @@ export function MasterCommandVisualSystem({
           {navigation.map(item => <a className="mc-rail-item" href={item.href} key={item.id}
             aria-current={currentPath === item.href ? "page" : undefined}>{item.label}</a>)}
         </nav>
-        <main className="mc-main">
+        <div className="mc-main">
           <div className="mc-hero"><div><h2>{title}</h2><p>{subtitle}</p></div></div>
           {kpis.length > 0 ? <div className="mc-grid" aria-label="Operational instruments">
             {kpis.map(item => <article className="mc-kpi" data-tone={item.tone} key={item.id}>
@@ -78,7 +78,7 @@ export function MasterCommandVisualSystem({
             </div> : <div className="mc-empty">No permitted workspaces.</div>}
           </section>
           {children}
-        </main>
+        </div>
       </div>
     </section>
   );
