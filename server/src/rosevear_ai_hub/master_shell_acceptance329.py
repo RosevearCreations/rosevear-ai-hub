@@ -192,6 +192,13 @@ def review_corrective_closure329(
                 "host", "receiver", "remediationReviewer", "anchor",
                 "reader", "owner", "ownerReviewer", *MASTERS,
             }
+            and all(
+                isinstance(key, tuple) and len(key) == 2
+                and isinstance(key[0], bytes) and len(key[0]) == 32
+                and isinstance(key[1], str) and bool(key[1])
+                for key in keys.values()
+            )
+            and len({key[0] for key in keys.values()}) == len(keys)
             and len({key[1] for key in keys.values()}) == len(keys)):
         return fail("HOLD_QL438_INVALID_BOUND_REQUEST_OR_SIGNER_PINS")
     digest = _digest(request)
