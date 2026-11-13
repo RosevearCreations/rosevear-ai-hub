@@ -34,6 +34,7 @@ from rosevear_ai_hub.api.integration_v1 import router as integration_v1_router
 from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.knowledge_reviews import router as knowledge_reviews_router
+from rosevear_ai_hub.api.master_shell_corrective329 import router as master_shell_corrective329_router
 from rosevear_ai_hub.api.maintenance_actions import router as maintenance_actions_router
 from rosevear_ai_hub.api.mqtt import router as mqtt_router
 from rosevear_ai_hub.api.notifications import router as notifications_router
@@ -139,6 +140,7 @@ def create_app() -> FastAPI:
     application.include_router(auth_router)
     application.include_router(backup_inventory_router)
     application.include_router(security_posture_router)
+    application.include_router(master_shell_corrective329_router)
     application.include_router(global_search_router)
     # QL-243: default-off, nonproduction-only, authenticated GET health metadata.
     application.include_router(integration_v1_router)
