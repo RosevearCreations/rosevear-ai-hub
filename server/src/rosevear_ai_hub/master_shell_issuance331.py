@@ -307,24 +307,28 @@ def review_issuance331(
     now_ms: int,
 ) -> dict[str, Any]:
     """Challenge issuance is narrower than pilot/receiver ON authorization."""
+
     def fail(reason: str) -> dict[str, Any]:
         return hold_issuance331(reason)
 
     if not (
-        _on_ree(monitor) and type(now_ms) is int
+        _on_ree(monitor)
+        and type(now_ms) is int
         and isinstance(request, dict)
         and isinstance(journal, ProtectedIssuanceJournal331)
-        and isinstance(keys, dict) and set(keys) == set(ROLES)
+        and isinstance(keys, dict)
+        and set(keys) == set(ROLES)
         and all(
-            isinstance(key, tuple) and len(key) == 2
-            and isinstance(key[0], bytes) and isinstance(key[1], str)
-            and _public_ed25519(*key) for key in keys.values()
+            isinstance(key, tuple)
+            and len(key) == 2
+            and isinstance(key[0], bytes)
+            and isinstance(key[1], str)
+            and _public_ed25519(*key)
+            for key in keys.values()
         )
         and len({key[0] for key in keys.values()}) == len(keys)
         and len({key[1] for key in keys.values()}) == len(keys)
-        and all(callable(adapter) for adapter in (
-            read_host_off, read_independent_off, read_issuer
-        ))
+        and all(callable(adapter) for adapter in (read_host_off, read_independent_off, read_issuer))
     ):
         return fail("HOLD_QL440_SOURCE_HOST_OR_SIGNERS_INVALID")
     try:
