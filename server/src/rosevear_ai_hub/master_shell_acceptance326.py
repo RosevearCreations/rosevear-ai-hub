@@ -72,12 +72,17 @@ class ProtectedIsolatedPilotJournal326:
         request_digest, evidence_digest, receipt_digest = row
         if not all(_sha(x) for x in row):
             raise ValueError("QL435_PILOT_RECEIPT_INVALID")
-        if _digest({
-            "ceremonyId": ceremony,
-            "stage": stage,
-            "requestDigest": request_digest,
-            "evidenceDigest": evidence_digest,
-        }) != receipt_digest:
+        if (
+            _digest(
+                {
+                    "ceremonyId": ceremony,
+                    "stage": stage,
+                    "requestDigest": request_digest,
+                    "evidenceDigest": evidence_digest,
+                }
+            )
+            != receipt_digest
+        ):
             raise ValueError("QL435_PILOT_RECEIPT_TAMPERED")
         return {
             "requestDigest": request_digest,
@@ -87,7 +92,9 @@ class ProtectedIsolatedPilotJournal326:
 
     def read(self, monitor: PersistentReeMonitor304, ceremony: str, stage: str):
         if not (
-            _on_ree(monitor) and _id(ceremony) and stage in ("PENDING", "ACCEPTED")
+            _on_ree(monitor)
+            and _id(ceremony)
+            and stage in ("PENDING", "ACCEPTED")
             and self.path.is_file()
         ):
             return None
@@ -107,17 +114,22 @@ class ProtectedIsolatedPilotJournal326:
         evidence_digest: str,
     ):
         if not (
-            _on_ree(monitor) and _id(ceremony) and stage in ("PENDING", "ACCEPTED")
-            and _sha(request_digest) and _sha(evidence_digest)
+            _on_ree(monitor)
+            and _id(ceremony)
+            and stage in ("PENDING", "ACCEPTED")
+            and _sha(request_digest)
+            and _sha(evidence_digest)
             and self.path.is_absolute()
         ):
             return None
-        receipt_digest = _digest({
-            "ceremonyId": ceremony,
-            "stage": stage,
-            "requestDigest": request_digest,
-            "evidenceDigest": evidence_digest,
-        })
+        receipt_digest = _digest(
+            {
+                "ceremonyId": ceremony,
+                "stage": stage,
+                "requestDigest": request_digest,
+                "evidenceDigest": evidence_digest,
+            }
+        )
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
             if self.path.parent.is_symlink() or self.path.is_symlink():
@@ -156,10 +168,11 @@ class ProtectedIsolatedPilotJournal326:
 def _pins(keys: Any) -> bool:
     roles = ("host", "pre_off", "on_witness", "owner", "reviewer", *MASTERS)
     return (
-        isinstance(keys, dict) and set(keys) == set(roles)
+        isinstance(keys, dict)
+        and set(keys) == set(roles)
         and all(
-            isinstance(keys[k], tuple) and len(keys[k]) == 2
-            and _public_ed25519(*keys[k]) for k in roles
+            isinstance(keys[k], tuple) and len(keys[k]) == 2 and _public_ed25519(*keys[k])
+            for k in roles
         )
         and len({keys[k][1] for k in roles}) == len(roles)
     )
@@ -200,8 +213,13 @@ def _prior(
     ):
         return None
     previous = _prior325(
-        monitor, scope, ql432_decision, ql433_precheck,
-        incident_journal, review_journal, precheck_journal,
+        monitor,
+        scope,
+        ql432_decision,
+        ql433_precheck,
+        incident_journal,
+        review_journal,
+        precheck_journal,
     )
     if not previous:
         return None
@@ -256,7 +274,8 @@ def run_ql435_isolated_pilot_evidence326(
             **_hold(reason),
             "receiver": (
                 "UNKNOWN_OR_ON_SUPERVISED_FAIL_CLOSED_SHUTDOWN_REQUIRED"
-                if post_pending else "OFF_NOT_ACTIVATED_BY_QL435"
+                if post_pending
+                else "OFF_NOT_ACTIVATED_BY_QL435"
             ),
             "connection": "HOLD",
             "activationAuthorized": False,
@@ -268,28 +287,46 @@ def run_ql435_isolated_pilot_evidence326(
     expiry = _timestamp(lease_expires_at)
     scope = _accepted(monitor, pilot_acceptance, pilot_journal)
     if not (
-        scope and type(now) is int and _id(challenge_id) and _id(challenge_nonce)
+        scope
+        and type(now) is int
+        and _id(challenge_id)
+        and _id(challenge_nonce)
         and challenge_id != challenge_nonce
-        and expiry is not None and 0 < expiry - now <= MAX_LEASE_MS
+        and expiry is not None
+        and 0 < expiry - now <= MAX_LEASE_MS
         and _utc(expiry) == lease_expires_at
         and isinstance(isolated_journal, ProtectedIsolatedPilotJournal326)
         and _pins(keys)
-        and all(callable(x) for x in (
-            read_host_enrollment, read_independent_pre_off,
-            read_host_on_evidence, read_independent_on_evidence,
-        ))
+        and all(
+            callable(x)
+            for x in (
+                read_host_enrollment,
+                read_independent_pre_off,
+                read_host_on_evidence,
+                read_independent_on_evidence,
+            )
+        )
     ):
         return hold("HOLD_QL435_ORIGINAL_HOST_AUTHORITY_FRESH_LEASE_OR_PINS_MISSING")
     prior = _prior(
-        monitor, scope, ql432_decision, ql433_precheck, ql434_readiness,
-        incident_journal, review_journal, precheck_journal, readiness_journal,
+        monitor,
+        scope,
+        ql432_decision,
+        ql433_precheck,
+        ql434_readiness,
+        incident_journal,
+        review_journal,
+        precheck_journal,
+        readiness_journal,
     )
     if not prior:
         return hold("HOLD_QL435_EXACT_QL431_TO_QL434_PRIVATE_CUSTODY_INVALID")
     ceremony = ql434_readiness["nextCeremonyId"]
     episode = ql434_readiness["nextEpisodeId"]
     if challenge_id in (ceremony, episode, ql434_readiness["authorityId"]) or challenge_nonce in (
-        ceremony, episode, ql434_readiness["authorityId"]
+        ceremony,
+        episode,
+        ql434_readiness["authorityId"],
     ):
         return hold("HOLD_QL435_REUSED_CHALLENGE_OR_AUTHORITY")
     try:
@@ -332,81 +369,168 @@ def run_ql435_isolated_pilot_evidence326(
         "lease_expires_at": lease_expires_at,
         "request_digest": request_digest,
     }
-    if not all((
-        _callback(attest_operator, **callback_evidence),
-        _callback(attest_signed_ql434, **callback_evidence),
-        _callback(attest_hard_shutdown_armed, **callback_evidence),
-        _callback(attest_challenge_fresh, **callback_evidence),
-        _callback(attest_owner_custody, **callback_evidence),
-    )):
+    if not all(
+        (
+            _callback(attest_operator, **callback_evidence),
+            _callback(attest_signed_ql434, **callback_evidence),
+            _callback(attest_hard_shutdown_armed, **callback_evidence),
+            _callback(attest_challenge_fresh, **callback_evidence),
+            _callback(attest_owner_custody, **callback_evidence),
+        )
+    ):
         return hold("HOLD_QL435_PROTECTED_LEASE_OR_INDEPENDENT_AUTHORITY_UNVERIFIED")
     try:
         enrollment_env = read_host_enrollment(request=request, request_digest=request_digest)
     except Exception:
         return hold("HOLD_QL435_ORIGINAL_HOST_OFF_ENROLLMENT_UNAVAILABLE")
     enrollment = _signed_after(
-        enrollment_env, {
-            "requestDigest", "scope", "incidentId", "challengeId", "challengeNonce",
-            "nextCeremonyId", "nextEpisodeId", "hostMachineId", "receiverState",
-            "failClosedShutdownArmed", "leaseExpiresAt", "enrollmentStatus", "enrolledAt",
-        }, ENROLLMENT, keys["host"], now, now - 60_000, "enrolledAt",
+        enrollment_env,
+        {
+            "requestDigest",
+            "scope",
+            "incidentId",
+            "challengeId",
+            "challengeNonce",
+            "nextCeremonyId",
+            "nextEpisodeId",
+            "hostMachineId",
+            "receiverState",
+            "failClosedShutdownArmed",
+            "leaseExpiresAt",
+            "enrollmentStatus",
+            "enrolledAt",
+        },
+        ENROLLMENT,
+        keys["host"],
+        now,
+        now - 60_000,
+        "enrolledAt",
     )
-    if not _match(enrollment, {
-        "requestDigest": request_digest, "scope": scope,
-        "incidentId": request["incidentId"], "challengeId": challenge_id,
-        "challengeNonce": challenge_nonce, "nextCeremonyId": ceremony,
-        "nextEpisodeId": episode, "hostMachineId": "DESKTOP-AE894KC",
-        "receiverState": "OFF", "failClosedShutdownArmed": True,
-        "leaseExpiresAt": lease_expires_at,
-        "enrollmentStatus": "FRESH_ISOLATED_ONE_TEST_ENROLLMENT_NOT_ENABLED",
-    }) or _timestamp(enrollment["enrolledAt"]) >= expiry:
+    if (
+        not _match(
+            enrollment,
+            {
+                "requestDigest": request_digest,
+                "scope": scope,
+                "incidentId": request["incidentId"],
+                "challengeId": challenge_id,
+                "challengeNonce": challenge_nonce,
+                "nextCeremonyId": ceremony,
+                "nextEpisodeId": episode,
+                "hostMachineId": "DESKTOP-AE894KC",
+                "receiverState": "OFF",
+                "failClosedShutdownArmed": True,
+                "leaseExpiresAt": lease_expires_at,
+                "enrollmentStatus": "FRESH_ISOLATED_ONE_TEST_ENROLLMENT_NOT_ENABLED",
+            },
+        )
+        or _timestamp(enrollment["enrolledAt"]) >= expiry
+    ):
         return hold("HOLD_QL435_HOST_SIGNED_OFF_ENROLLMENT_OR_HARD_SHUTDOWN_INVALID")
     try:
         pre_off_env = read_independent_pre_off(
-            request=request, host_enrollment_digest=_digest(enrollment),
+            request=request,
+            host_enrollment_digest=_digest(enrollment),
         )
     except Exception:
         return hold("HOLD_QL435_INDEPENDENT_PRE_CHALLENGE_OFF_UNAVAILABLE")
     pre_off = _signed_after(
-        pre_off_env, {
-            "challengeId", "challengeNonce", "hostEnrollmentDigest",
-            "leaseExpiresAt", "receiverState", "observedAt",
-        }, PRE_OFF, keys["pre_off"], now, _timestamp(enrollment["enrolledAt"]), "observedAt",
+        pre_off_env,
+        {
+            "challengeId",
+            "challengeNonce",
+            "hostEnrollmentDigest",
+            "leaseExpiresAt",
+            "receiverState",
+            "observedAt",
+        },
+        PRE_OFF,
+        keys["pre_off"],
+        now,
+        _timestamp(enrollment["enrolledAt"]),
+        "observedAt",
     )
-    if not _match(pre_off, {
-        "challengeId": challenge_id, "challengeNonce": challenge_nonce,
-        "hostEnrollmentDigest": _digest(enrollment),
-        "leaseExpiresAt": lease_expires_at, "receiverState": "OFF",
-    }) or _timestamp(pre_off["observedAt"]) >= expiry:
+    if (
+        not _match(
+            pre_off,
+            {
+                "challengeId": challenge_id,
+                "challengeNonce": challenge_nonce,
+                "hostEnrollmentDigest": _digest(enrollment),
+                "leaseExpiresAt": lease_expires_at,
+                "receiverState": "OFF",
+            },
+        )
+        or _timestamp(pre_off["observedAt"]) >= expiry
+    ):
         return hold("HOLD_QL435_INDEPENDENT_PRE_ON_OFF_INVALID")
     pre_authorized = _dual(
         pre_permit,
         {
-            "schema", "requestDigest", "hostEnrollmentDigest", "preOffDigest",
-            "challengeId", "challengeNonce", "nextCeremonyId", "nextEpisodeId",
-            "leaseExpiresAt", "action", "ownerId", "reviewerId", "approvedAt",
-        }, PRE_PERMIT, PRE_PERMIT_ACTION, *keys["owner"], *keys["reviewer"],
-        now, _timestamp(pre_off["observedAt"]), "approvedAt",
+            "schema",
+            "requestDigest",
+            "hostEnrollmentDigest",
+            "preOffDigest",
+            "challengeId",
+            "challengeNonce",
+            "nextCeremonyId",
+            "nextEpisodeId",
+            "leaseExpiresAt",
+            "action",
+            "ownerId",
+            "reviewerId",
+            "approvedAt",
+        },
+        PRE_PERMIT,
+        PRE_PERMIT_ACTION,
+        *keys["owner"],
+        *keys["reviewer"],
+        now,
+        _timestamp(pre_off["observedAt"]),
+        "approvedAt",
     )
-    if not _match(pre_authorized, {
-        "requestDigest": request_digest, "hostEnrollmentDigest": _digest(enrollment),
-        "preOffDigest": _digest(pre_off), "challengeId": challenge_id,
-        "challengeNonce": challenge_nonce, "nextCeremonyId": ceremony,
-        "nextEpisodeId": episode, "leaseExpiresAt": lease_expires_at,
-    }) or _timestamp(pre_authorized["approvedAt"]) >= expiry:
+    if (
+        not _match(
+            pre_authorized,
+            {
+                "requestDigest": request_digest,
+                "hostEnrollmentDigest": _digest(enrollment),
+                "preOffDigest": _digest(pre_off),
+                "challengeId": challenge_id,
+                "challengeNonce": challenge_nonce,
+                "nextCeremonyId": ceremony,
+                "nextEpisodeId": episode,
+                "leaseExpiresAt": lease_expires_at,
+            },
+        )
+        or _timestamp(pre_authorized["approvedAt"]) >= expiry
+    ):
         return hold("HOLD_QL435_DUAL_SIGNED_SINGLE_PILOT_PREPERMIT_INVALID")
     current = _prior(
-        monitor, scope, ql432_decision, ql433_precheck, ql434_readiness,
-        incident_journal, review_journal, precheck_journal, readiness_journal,
+        monitor,
+        scope,
+        ql432_decision,
+        ql433_precheck,
+        ql434_readiness,
+        incident_journal,
+        review_journal,
+        precheck_journal,
+        readiness_journal,
     )
     if current != prior:
         return hold("HOLD_QL435_PRIOR_CUSTODY_DRIFT_BEFORE_PENDING")
     pending = isolated_journal.claim_once(
-        monitor, ceremony, "PENDING", request_digest, _digest({
-            "enrollmentDigest": _digest(enrollment),
-            "preOffDigest": _digest(pre_off),
-            "prePermitDigest": _digest(pre_authorized),
-        }),
+        monitor,
+        ceremony,
+        "PENDING",
+        request_digest,
+        _digest(
+            {
+                "enrollmentDigest": _digest(enrollment),
+                "preOffDigest": _digest(pre_off),
+                "prePermitDigest": _digest(pre_authorized),
+            }
+        ),
     )
     if pending is None:
         return hold("HOLD_QL435_PENDING_NOT_DURABLE_OR_CEREMONY_REPLAYED")
@@ -422,83 +546,185 @@ def run_ql435_isolated_pilot_evidence326(
     except Exception:
         return hold("HOLD_QL435_HOST_ON_EVIDENCE_UNAVAILABLE_SHUTDOWN_REQUIRED", True)
     host_on = _signed_after(
-        on_env, {
-            "requestDigest", "challengeId", "challengeNonce", "prePermitDigest",
-            "hostMachineId", "nextCeremonyId", "nextEpisodeId",
-            "leaseExpiresAt", "receiverState", "isolatedMode",
-            "failClosedShutdownArmed", "observedAt",
-        }, HOST_ON, keys["host"], now, _timestamp(pre_authorized["approvedAt"]), "observedAt",
+        on_env,
+        {
+            "requestDigest",
+            "challengeId",
+            "challengeNonce",
+            "prePermitDigest",
+            "hostMachineId",
+            "nextCeremonyId",
+            "nextEpisodeId",
+            "leaseExpiresAt",
+            "receiverState",
+            "isolatedMode",
+            "failClosedShutdownArmed",
+            "observedAt",
+        },
+        HOST_ON,
+        keys["host"],
+        now,
+        _timestamp(pre_authorized["approvedAt"]),
+        "observedAt",
     )
-    if not _match(host_on, {
-        "requestDigest": request_digest, "challengeId": challenge_id,
-        "challengeNonce": challenge_nonce, "prePermitDigest": _digest(pre_authorized),
-        "hostMachineId": "DESKTOP-AE894KC", "nextCeremonyId": ceremony,
-        "nextEpisodeId": episode, "leaseExpiresAt": lease_expires_at,
-        "receiverState": "ISOLATED_ONE_TEST_ON", "isolatedMode": True,
-        "failClosedShutdownArmed": True,
-    }) or _timestamp(host_on["observedAt"]) >= expiry:
+    if (
+        not _match(
+            host_on,
+            {
+                "requestDigest": request_digest,
+                "challengeId": challenge_id,
+                "challengeNonce": challenge_nonce,
+                "prePermitDigest": _digest(pre_authorized),
+                "hostMachineId": "DESKTOP-AE894KC",
+                "nextCeremonyId": ceremony,
+                "nextEpisodeId": episode,
+                "leaseExpiresAt": lease_expires_at,
+                "receiverState": "ISOLATED_ONE_TEST_ON",
+                "isolatedMode": True,
+                "failClosedShutdownArmed": True,
+            },
+        )
+        or _timestamp(host_on["observedAt"]) >= expiry
+    ):
         return hold("HOLD_QL435_SIGNED_HOST_ON_CHALLENGE_INVALID_SHUTDOWN_REQUIRED", True)
     try:
         witnessed_env = read_independent_on_evidence(
-            request=request, host_on_digest=_digest(host_on),
+            request=request,
+            host_on_digest=_digest(host_on),
         )
     except Exception:
         return hold("HOLD_QL435_INDEPENDENT_ON_WITNESS_UNAVAILABLE_SHUTDOWN_REQUIRED", True)
     witness = _signed_after(
-        witnessed_env, {
-            "challengeId", "challengeNonce", "hostOnDigest",
-            "nextCeremonyId", "nextEpisodeId", "leaseExpiresAt",
-            "receiverState", "observation", "observedAt",
-        }, INDEPENDENT_ON, keys["on_witness"], now, _timestamp(host_on["observedAt"]), "observedAt",
+        witnessed_env,
+        {
+            "challengeId",
+            "challengeNonce",
+            "hostOnDigest",
+            "nextCeremonyId",
+            "nextEpisodeId",
+            "leaseExpiresAt",
+            "receiverState",
+            "observation",
+            "observedAt",
+        },
+        INDEPENDENT_ON,
+        keys["on_witness"],
+        now,
+        _timestamp(host_on["observedAt"]),
+        "observedAt",
     )
-    if not _match(witness, {
-        "challengeId": challenge_id, "challengeNonce": challenge_nonce,
-        "hostOnDigest": _digest(host_on), "nextCeremonyId": ceremony,
-        "nextEpisodeId": episode, "leaseExpiresAt": lease_expires_at,
-        "receiverState": "ISOLATED_ONE_TEST_ON",
-        "observation": "INDEPENDENT_SINGLE_NONCE_BOUND_PILOT_ON_SEEN",
-    }) or _timestamp(witness["observedAt"]) >= expiry:
+    if (
+        not _match(
+            witness,
+            {
+                "challengeId": challenge_id,
+                "challengeNonce": challenge_nonce,
+                "hostOnDigest": _digest(host_on),
+                "nextCeremonyId": ceremony,
+                "nextEpisodeId": episode,
+                "leaseExpiresAt": lease_expires_at,
+                "receiverState": "ISOLATED_ONE_TEST_ON",
+                "observation": "INDEPENDENT_SINGLE_NONCE_BOUND_PILOT_ON_SEEN",
+            },
+        )
+        or _timestamp(witness["observedAt"]) >= expiry
+    ):
         return hold("HOLD_QL435_INDEPENDENT_ON_WITNESS_INVALID_SHUTDOWN_REQUIRED", True)
     if not isinstance(master_reports, dict) or set(master_reports) != set(MASTERS):
         return hold("HOLD_QL435_THREE_SIGNED_MASTER_REPORTS_MISSING_SHUTDOWN_REQUIRED", True)
     masters = []
     for master in MASTERS:
         m = _signed_after(
-            master_reports[master], {
-                "masterId", "requestDigest", "challengeId", "challengeNonce",
-                "independentOnWitnessDigest", "nextCeremonyId", "nextEpisodeId",
-                "leaseExpiresAt", "status", "observedAt",
-            }, MASTER, keys[master], now, _timestamp(witness["observedAt"]), "observedAt",
+            master_reports[master],
+            {
+                "masterId",
+                "requestDigest",
+                "challengeId",
+                "challengeNonce",
+                "independentOnWitnessDigest",
+                "nextCeremonyId",
+                "nextEpisodeId",
+                "leaseExpiresAt",
+                "status",
+                "observedAt",
+            },
+            MASTER,
+            keys[master],
+            now,
+            _timestamp(witness["observedAt"]),
+            "observedAt",
         )
-        if not _match(m, {
-            "masterId": master, "requestDigest": request_digest,
-            "challengeId": challenge_id, "challengeNonce": challenge_nonce,
-            "independentOnWitnessDigest": _digest(witness),
-            "nextCeremonyId": ceremony, "nextEpisodeId": episode,
-            "leaseExpiresAt": lease_expires_at,
-            "status": "SIGNED_ISOLATED_ON_EVIDENCE_REVIEW_ONLY_NO_GENERAL_CONNECTED",
-        }) or _timestamp(m["observedAt"]) >= expiry:
+        if (
+            not _match(
+                m,
+                {
+                    "masterId": master,
+                    "requestDigest": request_digest,
+                    "challengeId": challenge_id,
+                    "challengeNonce": challenge_nonce,
+                    "independentOnWitnessDigest": _digest(witness),
+                    "nextCeremonyId": ceremony,
+                    "nextEpisodeId": episode,
+                    "leaseExpiresAt": lease_expires_at,
+                    "status": "SIGNED_ISOLATED_ON_EVIDENCE_REVIEW_ONLY_NO_GENERAL_CONNECTED",
+                },
+            )
+            or _timestamp(m["observedAt"]) >= expiry
+        ):
             return hold("HOLD_QL435_THREE_MASTER_SIGNED_DECISION_INVALID_SHUTDOWN_REQUIRED", True)
         masters.append(m)
     owner = _dual(
-        owner_decision, {
-            "schema", "requestDigest", "challengeId", "challengeNonce",
-            "independentOnWitnessDigest", "mastersDigest",
-            "nextCeremonyId", "nextEpisodeId", "leaseExpiresAt", "action",
-            "ownerId", "reviewerId", "decidedAt",
-        }, OWNER, OWNER_ACTION, *keys["owner"], *keys["reviewer"],
-        now, max(_timestamp(m["observedAt"]) for m in masters), "decidedAt",
+        owner_decision,
+        {
+            "schema",
+            "requestDigest",
+            "challengeId",
+            "challengeNonce",
+            "independentOnWitnessDigest",
+            "mastersDigest",
+            "nextCeremonyId",
+            "nextEpisodeId",
+            "leaseExpiresAt",
+            "action",
+            "ownerId",
+            "reviewerId",
+            "decidedAt",
+        },
+        OWNER,
+        OWNER_ACTION,
+        *keys["owner"],
+        *keys["reviewer"],
+        now,
+        max(_timestamp(m["observedAt"]) for m in masters),
+        "decidedAt",
     )
-    if not _match(owner, {
-        "requestDigest": request_digest, "challengeId": challenge_id,
-        "challengeNonce": challenge_nonce, "independentOnWitnessDigest": _digest(witness),
-        "mastersDigest": _digest(masters), "nextCeremonyId": ceremony,
-        "nextEpisodeId": episode, "leaseExpiresAt": lease_expires_at,
-    }) or _timestamp(owner["decidedAt"]) >= expiry:
+    if (
+        not _match(
+            owner,
+            {
+                "requestDigest": request_digest,
+                "challengeId": challenge_id,
+                "challengeNonce": challenge_nonce,
+                "independentOnWitnessDigest": _digest(witness),
+                "mastersDigest": _digest(masters),
+                "nextCeremonyId": ceremony,
+                "nextEpisodeId": episode,
+                "leaseExpiresAt": lease_expires_at,
+            },
+        )
+        or _timestamp(owner["decidedAt"]) >= expiry
+    ):
         return hold("HOLD_QL435_DUAL_OWNER_ON_REVIEW_INVALID_SHUTDOWN_REQUIRED", True)
     current = _prior(
-        monitor, scope, ql432_decision, ql433_precheck, ql434_readiness,
-        incident_journal, review_journal, precheck_journal, readiness_journal,
+        monitor,
+        scope,
+        ql432_decision,
+        ql433_precheck,
+        ql434_readiness,
+        incident_journal,
+        review_journal,
+        precheck_journal,
+        readiness_journal,
     )
     try:
         reread_pending = isolated_journal.read(monitor, ceremony, "PENDING")
@@ -507,13 +733,19 @@ def run_ql435_isolated_pilot_evidence326(
     if current != prior or reread_pending != pending:
         return hold("HOLD_QL435_PRIOR_OR_PENDING_CUSTODY_DRIFT_SHUTDOWN_REQUIRED", True)
     accepted = isolated_journal.claim_once(
-        monitor, ceremony, "ACCEPTED", request_digest, _digest({
-            "pendingReceiptDigest": pending["receiptDigest"],
-            "hostOnDigest": _digest(host_on),
-            "independentOnWitnessDigest": _digest(witness),
-            "mastersDigest": _digest(masters),
-            "ownerDecisionDigest": _digest(owner),
-        }),
+        monitor,
+        ceremony,
+        "ACCEPTED",
+        request_digest,
+        _digest(
+            {
+                "pendingReceiptDigest": pending["receiptDigest"],
+                "hostOnDigest": _digest(host_on),
+                "independentOnWitnessDigest": _digest(witness),
+                "mastersDigest": _digest(masters),
+                "ownerDecisionDigest": _digest(owner),
+            }
+        ),
     )
     if accepted is None:
         return hold("HOLD_QL435_ACCEPTED_ON_EVIDENCE_NOT_DURABLE_SHUTDOWN_REQUIRED", True)
