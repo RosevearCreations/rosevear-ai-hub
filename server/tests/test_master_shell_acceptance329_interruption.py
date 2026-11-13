@@ -68,6 +68,25 @@ def _case(monkeypatch, tmp_path):
 
 
 def _run(prior, request, keys, journal, predecessor, host):
+    # This unit test isolates interruption after an already validated history.
+    # Signed end-to-end tests use real QL-431–437 native protected journals.
+    history = q.ProtectedHistoricalChain329(
+        scope={},
+        ql432={},
+        ql433={},
+        ql434={},
+        ql435={},
+        ql436={},
+        incident_journal=None,
+        review_journal=None,
+        precheck_journal=None,
+        readiness_journal=None,
+        pilot_evidence_journal=None,
+        shutdown_journal=None,
+        closure_journal=predecessor,
+    )
+    history.read = lambda *args: "d" * 64
+
     def unavailable(**kwargs):
         raise AssertionError("unexpected external evidence call")
 
@@ -78,6 +97,7 @@ def _run(prior, request, keys, journal, predecessor, host):
         journal,
         keys,
         ql437_journal=predecessor,
+        ql431_437_history=history,
         read_host=host,
         read_off=unavailable,
         read_reviewer=unavailable,
