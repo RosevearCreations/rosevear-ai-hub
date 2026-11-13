@@ -36,6 +36,15 @@ def make_case(monkeypatch, tmp_path, disposition):
         "externalAnchorDigest": "b" * 64,
         "independentAnchorReadbackDigest": "c" * 64,
     }
+    ql437 = q.ProtectedClosureJournal328(tmp_path / "ql437-predecessor.db")
+    export = _digest({"export": "signed-ql437"})
+    assert ql437.claim_once(LocalMonitor(), incident, "PENDING", export, export)
+    assert ql437.claim_once(
+        LocalMonitor(), incident, "FINAL", export, _digest({"final": "signed-ql437"})
+    )
+    prior["finalReceiptDigest"] = ql437.read(LocalMonitor(), incident, "FINAL")[
+        "receiptDigest"
+    ]
     request = {
         "remediationNonce": nonce,
         "remediationId": "syntheticRemediation329",
@@ -161,7 +170,13 @@ def make_case(monkeypatch, tmp_path, disposition):
 
     def run():
         return q.review_corrective_closure329(
-            LocalMonitor(), prior, request, journal, pins, **inputs
+            LocalMonitor(),
+            prior,
+            request,
+            journal,
+            pins,
+            ql437_journal=ql437,
+            **inputs
         )
 
     return run, journal, evidence, owners, inputs, calls
