@@ -8,6 +8,7 @@ from rosevear_ai_hub import master_shell_acceptance328 as q437
 from rosevear_ai_hub import master_shell_acceptance329 as q
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from rosevear_ai_hub.master_shell_acceptance327 import LATE_HOST
+from test_master_shell_acceptance322 import signer
 
 
 class OriginalHost:
@@ -61,7 +62,7 @@ def _case(monkeypatch, tmp_path):
         "ownerReviewer",
         *q.MASTERS,
     )
-    keys = {role: (bytes([index + 1]) * 32, role) for index, role in enumerate(roles)}
+    keys = {role: signer()[1:] for role in roles}
     journal = q.ProtectedCorrectiveJournal329(tmp_path / "private-corrective.db")
     return prior, request, keys, journal, predecessor
 
