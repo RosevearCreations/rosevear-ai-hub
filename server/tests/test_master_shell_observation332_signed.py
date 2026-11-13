@@ -229,9 +229,7 @@ def test_signed_bounded_witness_go_or_master_veto(monkeypatch, tmp_path, disposi
     assert case["ledger"].read(Ree(), result["originalIncidentId"], "PENDING")
     assert case["ledger"].read(Ree(), result["originalIncidentId"], "DECISION")
     assert case["run"]()["accepted"] is False
-    reboot = custody.read_private_decision332(
-        Ree(), case["ledger"], result["originalIncidentId"]
-    )
+    reboot = custody.read_private_decision332(Ree(), case["ledger"], result["originalIncidentId"])
     assert reboot["connection"] == "HOLD"
     assert reboot["privateDecisionPresent"] is True
     assert reboot["receiver"] == custody.UNKNOWN
@@ -252,9 +250,7 @@ def test_signed_bounded_witness_go_or_master_veto(monkeypatch, tmp_path, disposi
         ("receiverOn", "observedAtMs", 1_319_000),
     ],
 )
-def test_forged_on_evidence_cannot_commit_decision(
-    monkeypatch, tmp_path, role, field, value
-):
+def test_forged_on_evidence_cannot_commit_decision(monkeypatch, tmp_path, role, field, value):
     case = fixture(monkeypatch, tmp_path)
     case["evidence"][role]["payload"][field] = value
     result = case["run"]()
@@ -314,9 +310,7 @@ def test_single_master_veto_requires_both_final_owner_no_go(monkeypatch, tmp_pat
     case = fixture(monkeypatch, tmp_path, veto=True)
     body = case["final"]["finalMasterOwner"]["payload"]
     body["action"] = q.OWNER_GO
-    case["final"]["finalMasterOwner"] = signed(
-        case["keys"]["finalMasterOwner"], body
-    )
+    case["final"]["finalMasterOwner"] = signed(case["keys"]["finalMasterOwner"], body)
     result = case["run"]()
     assert result["accepted"] is False
     assert result["connection"] == "HOLD"
