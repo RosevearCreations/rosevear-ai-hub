@@ -67,10 +67,9 @@ def inspect_ql441_unsigned(
             return hold_ql441("HOLD_QL441_CHALLENGE_BINDING_MISSING")
     if challenge["nonce"] == prior.get("ceremonyNonce"):
         return hold_ql441("HOLD_QL441_REPLAYED_NONCE")
-    if (
-        challenge.get("ceremonyId") != prior.get("ceremonyId")
-        or challenge.get("episodeId") != prior.get("episodeId")
-    ):
+    if challenge.get("ceremonyId") != prior.get("ceremonyId") or challenge.get(
+        "episodeId"
+    ) != prior.get("episodeId"):
         return hold_ql441("HOLD_QL441_PREDECESSOR_DRIFT")
     start = challenge.get("issuedAtMs")
     expires = challenge.get("leaseExpiresAtMs")
