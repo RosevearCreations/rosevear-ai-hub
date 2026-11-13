@@ -88,6 +88,7 @@ describe("QL-439 read-only owner inspector", () => {
     const good = snapshot.verifiedReceipts[0];
     for (const receipts of [
       [good, { ...good, label: "forged duplicate" }],
+      [good, { ...good, id: " receipt-a ", label: "whitespace-aliased replay" }],
       [good, { ...good, id: "bad", digest: "invalid" }],
       [good, null],
     ]) {
