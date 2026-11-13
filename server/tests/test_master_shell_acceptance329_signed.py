@@ -227,6 +227,7 @@ def test_missing_master_or_one_owner_fails_after_pending(monkeypatch, tmp_path):
     assert run2()["accepted"] is False
     assert journal2.read(LocalMonitor(), "originalIncidentSynthetic329", "CLOSED") is None
 
+
 def test_protected_ql437_tamper_blocks_corrective_pending(monkeypatch, tmp_path):
     run, journal, _, _, _, calls = make_case(monkeypatch, tmp_path, LATE_HOST)
     with sqlite3.connect(run.prior_journal.path) as db:
