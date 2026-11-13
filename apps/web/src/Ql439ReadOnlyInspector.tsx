@@ -34,11 +34,11 @@ export function Ql439ReadOnlyInspector({
   if (!snapshot) return <section className="mc-panel" role="status">No authorized QL-439 evidence snapshot.</section>;
 
   // Reject unsafe/unexpected server states instead of silently rendering them as trusted.
-  if (snapshot.connection !== "HOLD" || snapshot.activationAuthorized !== false) {
+  if (snapshot.connection !== "HOLD" || snapshot.activationAuthorized !== false ||\n      !["PENDING", "READINESS", "UNVERIFIED"].includes(snapshot.custody) ||\n      !["UNKNOWN", "SIGNED_OFF_HISTORICAL"].includes(snapshot.receiverObservation) ||\n      !Array.isArray(snapshot.verifiedReceipts)) {
     return <section className="mc-panel" role="alert">Evidence state inconsistent; remain on HOLD.</section>;
   }
 
-  return <section className="mc-panel" aria-label="QL-439 protected evidence inspector">
+  // Source claims are displayed as unverified references, never trusted signature results.\n  const receipts = snapshot.verifiedReceipts.filter(item =>\n    typeof item.id === "string" && typeof item.label === "string" &&\n    typeof item.signer === "string" && typeof item.observedAt === "string" &&\n    typeof item.digest === "string" && /^[0-9a-fA-F]{64}$/.test(item.digest)\n  );\n  return <section className="mc-panel" aria-label="QL-439 protected evidence inspector">
     <h3>Original-host readiness evidence</h3>
     <p className="mc-status" data-tone="warning">HOLD — preparation only, no activation authority</p>
     <dl className="mc-evidence-meta">
@@ -56,12 +56,12 @@ export function Ql439ReadOnlyInspector({
         <caption>Source-supplied signed receipt references (not independent verification)</caption>
         <thead><tr><th scope="col">Receipt</th><th scope="col">Digest</th>
           <th scope="col">Signer</th><th scope="col">Observed</th></tr></thead>
-        <tbody>{snapshot.verifiedReceipts.map(item => <tr key={item.id}>
+        <tbody>{receipts.map(item => <tr key={item.id}>
           <th scope="row">{item.label}</th><td><code>{item.digest}</code></td>
           <td>{item.signer}</td><td>{item.observedAt}</td>
         </tr>)}</tbody>
       </table>
-      {snapshot.verifiedReceipts.length === 0 && <p role="status">No authorized receipts supplied.</p>}
+      {receipts.length === 0 && <p role="status">No authorized receipts supplied.</p>}
     </div>
     <p className="mc-status" data-tone="warning">Private restart readback cannot prove current physical OFF.</p>
   </section>;
