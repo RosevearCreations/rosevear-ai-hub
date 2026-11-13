@@ -170,6 +170,15 @@ def fixture(monkeypatch, tmp_path, disposition=LATE_HOST):
         "keys": keys,
         "calls": calls,
         "closed": closed,
+        "input438": {
+            "prior437": prior,
+            "request438": request438,
+            "result438": closed,
+            "ql438_journal": closed_journal,
+            "historical": history,
+            "signed438": signed438,
+            "pins438": keys438,
+        },
     }
 
 
