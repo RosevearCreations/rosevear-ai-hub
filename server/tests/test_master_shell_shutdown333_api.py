@@ -5,7 +5,6 @@ import inspect
 from fastapi.testclient import TestClient
 
 from rosevear_ai_hub.api.master_shell_shutdown333 import router as shutdown_router
-
 from rosevear_ai_hub.main import app, create_app
 
 PATH = "/api/v1/system/master-shell-333-shutdown"
