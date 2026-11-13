@@ -8,6 +8,7 @@ from copy import deepcopy
 
 import pytest
 
+from rosevear_ai_hub import master_shell_acceptance328 as ql437_source
 from rosevear_ai_hub import master_shell_acceptance329 as q
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from rosevear_ai_hub.master_shell_acceptance327 import LATE_HOST, LATE_OFF
@@ -20,6 +21,7 @@ class LocalMonitor:
 
 def make_case(monkeypatch, tmp_path, disposition):
     monkeypatch.setattr(q, "_on_ree", lambda monitor: True)
+    monkeypatch.setattr(ql437_source, "_on_ree", lambda monitor: True)
     incident = "originalIncidentSynthetic329"
     nonce = "uniqueNonceSynthetic329"
     prior = {
