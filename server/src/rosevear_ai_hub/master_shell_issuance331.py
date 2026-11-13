@@ -70,7 +70,11 @@ class ProtectedIssuanceJournal331:
             with path.open("r", encoding="utf-8") as handle:
                 value = json.load(handle)
             if not isinstance(value, dict) or set(value) != {
-                "incident", "stage", "requestDigest", "evidenceDigest", "receiptDigest"
+                "incident",
+                "stage",
+                "requestDigest",
+                "evidenceDigest",
+                "receiptDigest",
             }:
                 raise ValueError("unexpected fields")
             if value["incident"] != incident or value["stage"] != stage:
@@ -82,11 +86,17 @@ class ProtectedIssuanceJournal331:
                 for k in ("requestDigest", "evidenceDigest", "receiptDigest")
             ):
                 raise ValueError("invalid receipt")
-            if _digest({
-                "incident": incident, "stage": stage,
-                "requestDigest": value["requestDigest"],
-                "evidenceDigest": value["evidenceDigest"],
-            }) != value["receiptDigest"]:
+            if (
+                _digest(
+                    {
+                        "incident": incident,
+                        "stage": stage,
+                        "requestDigest": value["requestDigest"],
+                        "evidenceDigest": value["evidenceDigest"],
+                    }
+                )
+                != value["receiptDigest"]
+            ):
                 raise ValueError("tamper")
             return value
         except (OSError, UnicodeError, json.JSONDecodeError) as exc:
@@ -96,13 +106,14 @@ class ProtectedIssuanceJournal331:
         self, monitor: Any, incident: str, stage: str, request: str, evidence: str
     ) -> dict[str, str] | None:
         if not (
-            _on_ree(monitor) and self.directory.is_absolute()
+            _on_ree(monitor)
+            and self.directory.is_absolute()
             and not self.directory.is_symlink()
             and stage in ("PENDING", "ISSUED")
-            and isinstance(incident, str) and bool(incident)
+            and isinstance(incident, str)
+            and bool(incident)
             and all(
-                isinstance(x, str) and len(x) == 64
-                and all(c in "0123456789abcdef" for c in x)
+                isinstance(x, str) and len(x) == 64 and all(c in "0123456789abcdef" for c in x)
                 for x in (request, evidence)
             )
         ):
@@ -119,13 +130,16 @@ class ProtectedIssuanceJournal331:
             else:
                 previous = self.read(monitor, incident, "PENDING")
                 if (
-                    not previous or previous["requestDigest"] != request
+                    not previous
+                    or previous["requestDigest"] != request
                     or self._path(incident, "ISSUED").exists()
                 ):
                     return None
             record = {
-                "incident": incident, "stage": stage,
-                "requestDigest": request, "evidenceDigest": evidence,
+                "incident": incident,
+                "stage": stage,
+                "requestDigest": request,
+                "evidenceDigest": evidence,
             }
             record["receiptDigest"] = _digest(record)
             flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
@@ -151,7 +165,8 @@ def verify440(
     role: str, envelope: Any, keys: dict[str, tuple[bytes, str]]
 ) -> dict[str, Any] | None:
     if (
-        role not in keys or not isinstance(envelope, dict)
+        role not in keys
+        or not isinstance(envelope, dict)
         or not isinstance(envelope.get("payload"), dict)
     ):
         return None
@@ -161,9 +176,13 @@ def verify440(
 
 
 def _prior439(
-    monitor: Any, input438: dict[str, Any], readiness439: dict[str, Any],
-    request439: dict[str, Any], journal439: ProtectedReadinessJournal330,
-    signed439: dict[str, Any], keys439: dict[str, tuple[bytes, str]],
+    monitor: Any,
+    input438: dict[str, Any],
+    readiness439: dict[str, Any],
+    request439: dict[str, Any],
+    journal439: ProtectedReadinessJournal330,
+    signed439: dict[str, Any],
+    keys439: dict[str, tuple[bytes, str]],
 ) -> tuple[str, dict[str, Any]] | None:
     if not (
         isinstance(input438, dict)
@@ -174,14 +193,19 @@ def _prior439(
         and readiness439.get("activationAuthorized") is False
         and isinstance(request439, dict)
         and isinstance(journal439, ProtectedReadinessJournal330)
-        and isinstance(signed439, dict) and set(signed439) == set(PREV_ROLES)
-        and isinstance(keys439, dict) and set(keys439) == set(PREV_ROLES)
+        and isinstance(signed439, dict)
+        and set(signed439) == set(PREV_ROLES)
+        and isinstance(keys439, dict)
+        and set(keys439) == set(PREV_ROLES)
         and len({key[0] for key in keys439.values()}) == len(keys439)
         and len({key[1] for key in keys439.values()}) == len(keys439)
         and all(
-            isinstance(key, tuple) and len(key) == 2
-            and isinstance(key[0], bytes) and isinstance(key[1], str)
-            and _public_ed25519(*key) for key in keys439.values()
+            isinstance(key, tuple)
+            and len(key) == 2
+            and isinstance(key[0], bytes)
+            and isinstance(key[1], str)
+            and _public_ed25519(*key)
+            for key in keys439.values()
         )
     ):
         return None
@@ -197,7 +221,8 @@ def _prior439(
     pending = journal439.read(monitor, original_incident, "PENDING")
     ready = journal439.read(monitor, original_incident, "READINESS")
     if not (
-        pending and ready
+        pending
+        and ready
         and pending["requestDigest"] == ready["requestDigest"]
         and ready["requestDigest"] == _digest(request439)
         and pending["evidenceDigest"] == predecessor_digest
@@ -230,19 +255,27 @@ def _prior439(
         and bodies["owner"].get("ownerId") != bodies["ownerReviewer"].get("ownerId")
     ):
         return None
-    evidence = _digest({
-        "anchor": bodies["anchor"], "reader": bodies["reader"],
-        "host": bodies["host"], "receiver": bodies["receiver"],
-        "masters": [bodies[m] for m in MASTERS],
-        "owners": [bodies[r] for r in ("owner", "ownerReviewer")],
-        "predecessor": predecessor_digest,
-    })
+    evidence = _digest(
+        {
+            "anchor": bodies["anchor"],
+            "reader": bodies["reader"],
+            "host": bodies["host"],
+            "receiver": bodies["receiver"],
+            "masters": [bodies[m] for m in MASTERS],
+            "owners": [bodies[r] for r in ("owner", "ownerReviewer")],
+            "predecessor": predecessor_digest,
+        }
+    )
     if ready["evidenceDigest"] != evidence:
         return None
-    return _digest({
-        "prior": predecessor_digest, "pending": pending,
-        "readiness": ready, "signed": evidence,
-    }), {
+    return _digest(
+        {
+            "prior": predecessor_digest,
+            "pending": pending,
+            "readiness": ready,
+            "signed": evidence,
+        }
+    ), {
         "incident": original_incident,
         "ceremony": request439["proposedCeremonyId"],
         "episode": request439["proposedEpisodeId"],
@@ -305,7 +338,8 @@ def review_issuance331(
     prior_digest, linked = prior
     nonce = request.get("challengeNonce")
     if not (
-        isinstance(nonce, str) and len(nonce) >= 16
+        isinstance(nonce, str)
+        and len(nonce) >= 16
         and nonce != linked["renewalNonce"]
         and nonce not in (linked["ceremony"], linked["episode"], linked["incident"])
         and request.get("action") == CHALLENGE
@@ -327,7 +361,8 @@ def review_issuance331(
         host_env = read_host_off(request=request)
         host = verify440("host", host_env, keys)
         if not (
-            host and host.get("requestDigest") == digest
+            host
+            and host.get("requestDigest") == digest
             and host.get("hostMachineId") == "DESKTOP-AE894KC"
             and host.get("receiverState") == "OFF"
             and host.get("failClosedShutdownArmed") is True
@@ -341,7 +376,8 @@ def review_issuance331(
         receiver_env = read_independent_off(request=request, hostDigest=_digest(host))
         receiver = verify440("receiver", receiver_env, keys)
         if not (
-            receiver and receiver.get("requestDigest") == digest
+            receiver
+            and receiver.get("requestDigest") == digest
             and receiver.get("challengeNonce") == nonce
             and receiver.get("hostOffDigest") == _digest(host)
             and receiver.get("receiverState") == "OFF"
@@ -357,7 +393,8 @@ def review_issuance331(
         for master in MASTERS:
             body = verify440(master, master_reports[master], keys)
             if not (
-                body and body.get("masterId") == master
+                body
+                and body.get("masterId") == master
                 and body.get("requestDigest") == digest
                 and body.get("challengeNonce") == nonce
                 and body.get("independentOffDigest") == _digest(receiver)
@@ -367,14 +404,17 @@ def review_issuance331(
             reports.append(body)
         masters_digest = _digest(reports)
         if not isinstance(owner_signatures, dict) or set(owner_signatures) != {
-            "owner", "ownerReviewer"
+            "owner",
+            "ownerReviewer",
         }:
             return fail("HOLD_QL440_DUAL_OWNER_AUTHORITY_MISSING")
         owner_ids = set()
         for role in ("owner", "ownerReviewer"):
             body = verify440(role, owner_signatures[role], keys)
             if not (
-                body and isinstance(body.get("ownerId"), str) and bool(body["ownerId"])
+                body
+                and isinstance(body.get("ownerId"), str)
+                and bool(body["ownerId"])
                 and body.get("requestDigest") == digest
                 and body.get("challengeNonce") == nonce
                 and body.get("independentOffDigest") == _digest(receiver)
@@ -385,16 +425,19 @@ def review_issuance331(
             owner_ids.add(body["ownerId"])
         if len(owner_ids) != 2:
             return fail("HOLD_QL440_OWNER_IDENTITIES_NOT_DISTINCT")
-        owners_digest = _digest([
-            owner_signatures[r]["payload"] for r in ("owner", "ownerReviewer")
-        ])
+        owners_digest = _digest(
+            [owner_signatures[r]["payload"] for r in ("owner", "ownerReviewer")]
+        )
         issuer_env = read_issuer(
-            request=request, independentOffDigest=_digest(receiver),
-            mastersDigest=masters_digest, ownersDigest=owners_digest
+            request=request,
+            independentOffDigest=_digest(receiver),
+            mastersDigest=masters_digest,
+            ownersDigest=owners_digest,
         )
         issuer = verify440("issuer", issuer_env, keys)
         if not (
-            issuer and issuer.get("requestDigest") == digest
+            issuer
+            and issuer.get("requestDigest") == digest
             and issuer.get("hostMachineId") == "DESKTOP-AE894KC"
             and issuer.get("challengeNonce") == nonce
             and issuer.get("independentOffDigest") == _digest(receiver)
@@ -411,11 +454,20 @@ def review_issuance331(
         if journal.read(monitor, incident, "PENDING") != pending:
             return fail("HOLD_QL440_PRIVATE_PENDING_TAMPERED")
         receipt = journal.claim(
-            monitor, incident, "ISSUED", digest, _digest({
-                "host": host, "receiver": receiver, "masters": reports,
-                "owners": [owner_signatures[r]["payload"] for r in ("owner", "ownerReviewer")],
-                "issuer": issuer, "prior": prior_digest,
-            })
+            monitor,
+            incident,
+            "ISSUED",
+            digest,
+            _digest(
+                {
+                    "host": host,
+                    "receiver": receiver,
+                    "masters": reports,
+                    "owners": [owner_signatures[r]["payload"] for r in ("owner", "ownerReviewer")],
+                    "issuer": issuer,
+                    "prior": prior_digest,
+                }
+            ),
         )
         if not receipt:
             return fail("HOLD_QL440_ISSUED_UNDURABLE_OR_REPLAY")
