@@ -78,8 +78,17 @@ def fixture():
         for name in MASTERS
     }
     final = {"action": OWNER_GO, "challengeId": challenge_id}
-    return [prior, challenge, source_owner, master_owner,
-            consumption, host, receiver, masters, final]
+    return [
+        prior,
+        challenge,
+        source_owner,
+        master_owner,
+        consumption,
+        host,
+        receiver,
+        masters,
+        final,
+    ]
 
 
 def check(case, now=1_030_000):
