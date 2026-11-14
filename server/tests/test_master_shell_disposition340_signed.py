@@ -15,9 +15,16 @@ from test_master_shell_remediation339_signed import fixture as fixture448
 
 
 def fixture(
-    monkeypatch, tmp_path, *,
-    prior_exception=True, host_on=False, divergence=False,
-    locked=True, lease_revoked=True, watchdog=True, witness_isolation=True,
+    monkeypatch,
+    tmp_path,
+    *,
+    prior_exception=True,
+    host_on=False,
+    divergence=False,
+    locked=True,
+    lease_revoked=True,
+    watchdog=True,
+    witness_isolation=True,
 ):
     old = fixture448(monkeypatch, tmp_path / "ql448", prior_exception=prior_exception)
     outcome = old["run"]()
@@ -118,77 +125,103 @@ def fixture(
         "host": signed(keys["host"], host),
         "observer": signed(keys["observer"], witness),
     }
-    historically_off = not any((
-        host_on, divergence, not locked, not lease_revoked,
-        not watchdog, not witness_isolation,
-    ))
+    historically_off = not any(
+        (
+            host_on,
+            divergence,
+            not locked,
+            not lease_revoked,
+            not watchdog,
+            not witness_isolation,
+        )
+    )
     classification = q.CLASS_REVIEW if historically_off else q.CLASS_EXCEPTION
     decision = q.DECISION_REVIEW if historically_off else q.DECISION_EXCEPTION
-    anchored_digest = _digest({
-        "prior": prior_digest,
-        "source": _digest(source),
-        "anchor": _digest(anchor),
-        "host": _digest(host),
-        "observer": _digest(witness),
-        "classification": classification,
-        "ceremonyId": request["ceremonyId"],
-    })
+    anchored_digest = _digest(
+        {
+            "prior": prior_digest,
+            "source": _digest(source),
+            "anchor": _digest(anchor),
+            "host": _digest(host),
+            "observer": _digest(witness),
+            "classification": classification,
+            "ceremonyId": request["ceremonyId"],
+        }
+    )
     masters = {}
     for master in q.MASTERS:
-        masters[master] = signed(keys[master], {
-            "schema": f"rosevear.ai-hub.ql449.{master}.v1",
-            "masterId": master,
-            "requestDigest": rd,
-            "originalIncidentId": link["incident"],
-            "ceremonyId": request["ceremonyId"],
-            "ql448ReceiptDigest": link["ql448ReceiptDigest"],
-            "anchoredEvidenceDigest": anchored_digest,
-            "classification": classification,
-            "disposition": decision,
-            "incidentStatus": "OPEN_HOLD",
-            "reviewedAtMs": 1_718_000,
-        })
+        masters[master] = signed(
+            keys[master],
+            {
+                "schema": f"rosevear.ai-hub.ql449.{master}.v1",
+                "masterId": master,
+                "requestDigest": rd,
+                "originalIncidentId": link["incident"],
+                "ceremonyId": request["ceremonyId"],
+                "ql448ReceiptDigest": link["ql448ReceiptDigest"],
+                "anchoredEvidenceDigest": anchored_digest,
+                "classification": classification,
+                "disposition": decision,
+                "incidentStatus": "OPEN_HOLD",
+                "reviewedAtMs": 1_718_000,
+            },
+        )
     masters_digest = _digest([masters[k]["payload"] for k in q.MASTERS])
     owners = {}
-    for role, identity in zip(
-        ("owner", "ownerReviewer"), link["ownerIds"], strict=True
-    ):
-        owners[role] = signed(keys[role], {
-            "schema": f"rosevear.ai-hub.ql449.{role}.v1",
-            "ownerId": identity,
-            "requestDigest": rd,
-            "originalIncidentId": link["incident"],
-            "ceremonyId": request["ceremonyId"],
-            "ql448ReceiptDigest": link["ql448ReceiptDigest"],
-            "anchoredEvidenceDigest": anchored_digest,
-            "threeMasterDigest": masters_digest,
-            "classification": classification,
-            "disposition": decision,
-            "incidentStatus": "OPEN_HOLD",
-            "reviewedAtMs": 1_725_000,
-        })
+    for role, identity in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
+        owners[role] = signed(
+            keys[role],
+            {
+                "schema": f"rosevear.ai-hub.ql449.{role}.v1",
+                "ownerId": identity,
+                "requestDigest": rd,
+                "originalIncidentId": link["incident"],
+                "ceremonyId": request["ceremonyId"],
+                "ql448ReceiptDigest": link["ql448ReceiptDigest"],
+                "anchoredEvidenceDigest": anchored_digest,
+                "threeMasterDigest": masters_digest,
+                "classification": classification,
+                "disposition": decision,
+                "incidentStatus": "OPEN_HOLD",
+                "reviewedAtMs": 1_725_000,
+            },
+        )
     journal = q.ProtectedDispositionJournal340(tmp_path / "private-ql449")
 
     def run():
         return q.review_disposition340(
-            Ree(), prior, request, journal, pins,
+            Ree(),
+            prior,
+            request,
+            journal,
+            pins,
             read_comms_source=lambda **_: deepcopy(evidence["commsSource"]),
             read_external_anchor=lambda **_: deepcopy(evidence["externalAnchor"]),
             read_host=lambda **_: deepcopy(evidence["host"]),
             read_observer=lambda **_: deepcopy(evidence["observer"]),
-            master_reports=masters, dual_owners=owners,
-            now_ms=1_740_000, final_now_ms=1_745_000,
+            master_reports=masters,
+            dual_owners=owners,
+            now_ms=1_740_000,
+            final_now_ms=1_745_000,
         )
 
     return {
-        "run": run, "prior": prior, "request": request, "keys": keys,
-        "pins": pins, "evidence": evidence, "masters": masters,
-        "owners": owners, "journal": journal, "incident": link["incident"],
+        "run": run,
+        "prior": prior,
+        "request": request,
+        "keys": keys,
+        "pins": pins,
+        "evidence": evidence,
+        "masters": masters,
+        "owners": owners,
+        "journal": journal,
+        "incident": link["incident"],
     }
 
 
 @pytest.mark.parametrize(
-    ("options", "classification"), [
+    ("options", "classification"),
+    [
         ({}, q.CLASS_REVIEW),
         ({"host_on": True}, q.CLASS_EXCEPTION),
         ({"divergence": True}, q.CLASS_EXCEPTION),
@@ -215,23 +248,21 @@ def test_historical_anchored_off_and_signed_exceptions(
     assert result["physicalReceiverCurrentlyOff"] is False
     assert result["freshPhysicalOffProven"] is False
     assert case["run"]()["accepted"] is False
-    assert case["journal"].read(
-        Ree(), case["incident"], "REVIEW" if reviewed else "EXCEPTION"
+    assert case["journal"].read(Ree(), case["incident"], "REVIEW" if reviewed else "EXCEPTION")
+    assert (
+        q.read_private_disposition340(Ree(), case["journal"], case["incident"])["connection"]
+        == "HOLD"
     )
-    assert q.read_private_disposition340(
-        Ree(), case["journal"], case["incident"]
-    )["connection"] == "HOLD"
 
 
-def test_ql448_historical_continuity_without_original_exception_rejected(
-    monkeypatch, tmp_path
-):
+def test_ql448_historical_continuity_without_original_exception_rejected(monkeypatch, tmp_path):
     case = fixture(monkeypatch, tmp_path, prior_exception=False)
     assert case["journal"].directory.exists() is False
 
 
 @pytest.mark.parametrize(
-    ("role", "field", "value"), [
+    ("role", "field", "value"),
+    [
         ("commsSource", "incidentStatus", "CLOSED"),
         ("commsSource", "ql448HorizonDigest", "0" * 64),
         ("externalAnchor", "sourceDigest", "0" * 64),
@@ -260,9 +291,7 @@ def test_tampered_source_anchor_host_witness_or_clock_fails_closed(
     assert case["journal"].read(Ree(), case["incident"], "REVIEW") is None
 
 
-def test_original_private_ql448_custody_and_governance_veto(
-    monkeypatch, tmp_path
-):
+def test_original_private_ql448_custody_and_governance_veto(monkeypatch, tmp_path):
     case = fixture(monkeypatch, tmp_path)
     case["prior"]["result448"]["finalReceiptDigest"] = "0" * 64
     assert case["run"]()["accepted"] is False
@@ -281,9 +310,7 @@ def test_original_private_ql448_custody_and_governance_veto(
     assert case["run"]()["accepted"] is False
 
 
-def test_one_use_crash_replay_symlink_and_conflicting_terminal(
-    monkeypatch, tmp_path
-):
+def test_one_use_crash_replay_symlink_and_conflicting_terminal(monkeypatch, tmp_path):
     case = fixture(monkeypatch, tmp_path)
     case["evidence"]["externalAnchor"] = None
     assert case["run"]()["accepted"] is False
@@ -298,6 +325,9 @@ def test_one_use_crash_replay_symlink_and_conflicting_terminal(
 
     case = fixture(monkeypatch, tmp_path / "terminal")
     assert case["run"]()["accepted"] is True
-    assert case["journal"].claim(
-        Ree(), case["incident"], "EXCEPTION", _digest(case["request"]), "a" * 64
-    ) is None
+    assert (
+        case["journal"].claim(
+            Ree(), case["incident"], "EXCEPTION", _digest(case["request"]), "a" * 64
+        )
+        is None
+    )

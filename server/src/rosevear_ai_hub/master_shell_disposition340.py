@@ -22,8 +22,13 @@ ANCHOR_DISPOSITION = "INDEPENDENT_ANCHOR_HISTORICAL_REVIEW_ONLY"
 DECISION_REVIEW = "REVIEW_ANCHORED_HISTORICAL_OFF_KEEP_INCIDENT_OPEN_HOLD"
 DECISION_EXCEPTION = "ESCALATE_REATTESTATION_EXCEPTION_KEEP_INCIDENT_OPEN_HOLD"
 ROLES = (
-    "commsSource", "externalAnchor", "host", "observer",
-    "owner", "ownerReviewer", *MASTERS,
+    "commsSource",
+    "externalAnchor",
+    "host",
+    "observer",
+    "owner",
+    "ownerReviewer",
+    *MASTERS,
 )
 
 
@@ -126,8 +131,10 @@ def review_disposition340(
             and request.get("ql448HorizonDigest") == link["ql448HorizonDigest"]
             and request.get("ql448RemediationId") == link["ql448RemediationId"]
             and request.get("previousObserverDigest") == link["previousObserverDigest"]
-            and isinstance(ceremony, str) and len(ceremony) >= 12
-            and isinstance(nonce, str) and len(nonce) >= 12
+            and isinstance(ceremony, str)
+            and len(ceremony) >= 12
+            and isinstance(nonce, str)
+            and len(nonce) >= 12
             and len({ceremony, nonce, link["ql448Nonce"], link["ql448RemediationId"]}) == 4
             and now_ms > link["previousObservedAtMs"]
         ):
@@ -230,20 +237,24 @@ def review_disposition340(
             return fail("HOLD_QL449_INDEPENDENT_RECEIVER_READBACK_INVALID")
         historically_off = (
             host["receiverState"] == witness["receiverState"] == "OFF"
-            and host["isolationLock"] and host["leaseRevoked"]
-            and host["watchdogArmed"] and witness["isolationConfirmed"]
+            and host["isolationLock"]
+            and host["leaseRevoked"]
+            and host["watchdogArmed"]
+            and witness["isolationConfirmed"]
         )
         classification = CLASS_REVIEW if historically_off else CLASS_EXCEPTION
         decision = DECISION_REVIEW if historically_off else DECISION_EXCEPTION
-        evidence_digest = _digest({
-            "prior": prior_digest,
-            "source": _digest(source),
-            "anchor": _digest(anchor),
-            "host": _digest(host),
-            "observer": _digest(witness),
-            "classification": classification,
-            "ceremonyId": ceremony,
-        })
+        evidence_digest = _digest(
+            {
+                "prior": prior_digest,
+                "source": _digest(source),
+                "anchor": _digest(anchor),
+                "host": _digest(host),
+                "observer": _digest(witness),
+                "classification": classification,
+                "ceremonyId": ceremony,
+            }
+        )
         if not isinstance(master_reports, dict) or set(master_reports) != set(MASTERS):
             return fail("HOLD_QL449_THREE_DISTINCT_MASTER_VOTES_REQUIRED", not historically_off)
         reports = []
@@ -266,14 +277,10 @@ def review_disposition340(
                 return fail("HOLD_QL449_THREE_MASTER_DISPOSITION_VETO", not historically_off)
             reports.append(vote)
         reports_digest = _digest(reports)
-        if not isinstance(dual_owners, dict) or set(dual_owners) != {
-            "owner", "ownerReviewer"
-        }:
+        if not isinstance(dual_owners, dict) or set(dual_owners) != {"owner", "ownerReviewer"}:
             return fail("HOLD_QL449_TWO_INDEPENDENT_OWNER_VOTES_REQUIRED", not historically_off)
         owners = []
-        for role, identity in zip(
-            ("owner", "ownerReviewer"), link["ownerIds"], strict=True
-        ):
+        for role, identity in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
             body = verify449(role, dual_owners[role], pins)
             if not (
                 body
@@ -289,15 +296,15 @@ def review_disposition340(
                 and body.get("incidentStatus") == "OPEN_HOLD"
                 and type(body.get("reviewedAtMs")) is int
                 and max(report["reviewedAtMs"] for report in reports)
-                <= body["reviewedAtMs"] <= final_now_ms
+                <= body["reviewedAtMs"]
+                <= final_now_ms
             ):
                 return fail("HOLD_QL449_DUAL_OWNER_REVIEW_VETO", not historically_off)
             owners.append(body)
         if verify_prior_remediation340(monitor, **prior448) != verified:
             return fail("HOLD_QL449_ORIGINAL_QL448_PROTECTED_CUSTODY_DRIFT", not historically_off)
         if journal.read(monitor, incident, "PENDING") != pending or any(
-            journal.read(monitor, incident, stage) is not None
-            for stage in ("REVIEW", "EXCEPTION")
+            journal.read(monitor, incident, stage) is not None for stage in ("REVIEW", "EXCEPTION")
         ):
             return fail("HOLD_QL449_PENDING_OR_CONFLICTING_TERMINAL", not historically_off)
         if (
@@ -307,18 +314,26 @@ def review_disposition340(
             or final_now_ms - witness["observedAtMs"] > 60_000
         ):
             return fail("HOLD_QL449_ORIGINAL_SIGNED_EVIDENCE_EXPIRED", not historically_off)
-        signed_evidence = _digest({
-            "prior": prior_digest,
-            "request": req_digest,
-            "source": source, "anchor": anchor,
-            "host": host, "observer": witness,
-            "masters": reports, "owners": owners,
-            "classification": classification,
-            "disposition": decision,
-        })
+        signed_evidence = _digest(
+            {
+                "prior": prior_digest,
+                "request": req_digest,
+                "source": source,
+                "anchor": anchor,
+                "host": host,
+                "observer": witness,
+                "masters": reports,
+                "owners": owners,
+                "classification": classification,
+                "disposition": decision,
+            }
+        )
         terminal = journal.claim(
-            monitor, incident, "REVIEW" if historically_off else "EXCEPTION",
-            req_digest, signed_evidence,
+            monitor,
+            incident,
+            "REVIEW" if historically_off else "EXCEPTION",
+            req_digest,
+            signed_evidence,
         )
         if not terminal:
             return fail("HOLD_QL449_PRIVATE_TERMINAL_NOT_DURABLE", not historically_off)
@@ -337,7 +352,8 @@ def review_disposition340(
             "finalReceiptDigest": terminal["receiptDigest"],
             "nextAction": (
                 "OWNER_GATED_INCIDENT_REVIEW_FRESH_OFF_STILL_REQUIRED"
-                if historically_off else "SIGNED_OFF_REATTESTATION_EXCEPTION_OPEN"
+                if historically_off
+                else "SIGNED_OFF_REATTESTATION_EXCEPTION_OPEN"
             ),
         }
     except (KeyError, TypeError, ValueError, OSError):

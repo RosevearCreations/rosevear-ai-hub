@@ -58,11 +58,16 @@ def verify_prior_remediation340(
         and len({pin[0] for pin in pins448.values()}) == len(ROLES)
         and len({pin[1] for pin in pins448.values()}) == len(ROLES)
         and isinstance(signed448, dict)
-        and set(signed448) == {
-            "commsSource", "correctiveOfficer",
-            "hostSHORT", "observerSHORT",
-            "hostMEDIUM", "observerMEDIUM",
-            "hostLONG", "observerLONG",
+        and set(signed448)
+        == {
+            "commsSource",
+            "correctiveOfficer",
+            "hostSHORT",
+            "observerSHORT",
+            "hostMEDIUM",
+            "observerMEDIUM",
+            "hostLONG",
+            "observerLONG",
         }
         and isinstance(masters448, dict)
         and set(masters448) == set(MASTERS)
@@ -83,7 +88,9 @@ def verify_prior_remediation340(
     terminal = journal448.read(monitor, incident, "REVIEWED")
     conflict = journal448.read(monitor, incident, "EXCEPTION")
     if not (
-        pending and terminal and conflict is None
+        pending
+        and terminal
+        and conflict is None
         and pending.get("requestDigest") == req_digest
         and pending.get("evidenceDigest") == prior_digest
         and terminal.get("requestDigest") == req_digest
@@ -97,15 +104,18 @@ def verify_prior_remediation340(
         and request448.get("ql447FollowUpId") == link["followUpId"]
         and request448.get("priorClassification") == link["ql447Classification"]
         and request448.get("previousObserverDigest") == link["previousObserverDigest"]
-        and isinstance(remediation_id, str) and len(remediation_id) >= 12
-        and isinstance(nonce, str) and len(nonce) >= 12
+        and isinstance(remediation_id, str)
+        and len(remediation_id) >= 12
+        and isinstance(nonce, str)
+        and len(nonce) >= 12
         and len({remediation_id, nonce, link["previousNonce"], link["followUpId"]}) == 4
     ):
         return None
     source = verify448("commsSource", signed448["commsSource"], pins448)
     officer = verify448("correctiveOfficer", signed448["correctiveOfficer"], pins448)
     if not (
-        source and officer
+        source
+        and officer
         and source.get("requestDigest") == req_digest
         and source.get("originalIncidentId") == incident
         and source.get("priorQl447Digest") == prior_digest
@@ -183,22 +193,25 @@ def verify_prior_remediation340(
         last_host_digest = _digest(host)
         last_sequence = observer["sequence"]
         last_time = observer["observedAtMs"]
-    horizon_digest = _digest({
-        "prior": prior_digest,
-        "source": _digest(source),
-        "officer": _digest(officer),
-        "hostDigests": [_digest(h) for h, _ in observations],
-        "observerDigests": [_digest(o) for _, o in observations],
-        "classification": CLASS_CORRECTED,
-        "remediationId": remediation_id,
-    })
+    horizon_digest = _digest(
+        {
+            "prior": prior_digest,
+            "source": _digest(source),
+            "officer": _digest(officer),
+            "hostDigests": [_digest(h) for h, _ in observations],
+            "observerDigests": [_digest(o) for _, o in observations],
+            "classification": CLASS_CORRECTED,
+            "remediationId": remediation_id,
+        }
+    )
     if result448.get("horizonEvidenceDigest") != horizon_digest:
         return None
     reports = []
     for master in MASTERS:
         vote = verify448(master, masters448[master], pins448)
         if not (
-            vote and vote.get("masterId") == master
+            vote
+            and vote.get("masterId") == master
             and vote.get("requestDigest") == req_digest
             and vote.get("originalIncidentId") == incident
             and vote.get("remediationId") == remediation_id
@@ -218,7 +231,8 @@ def verify_prior_remediation340(
     for role, identity in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
         body = verify448(role, owners448[role], pins448)
         if not (
-            body and body.get("ownerId") == identity
+            body
+            and body.get("ownerId") == identity
             and body.get("requestDigest") == req_digest
             and body.get("originalIncidentId") == incident
             and body.get("remediationId") == remediation_id
@@ -233,27 +247,31 @@ def verify_prior_remediation340(
         ):
             return None
         owners.append(body)
-    evidence = _digest({
-        "prior": prior_digest,
-        "request": req_digest,
-        "source": source,
-        "officer": officer,
-        "host": [h for h, _ in observations],
-        "observers": [o for _, o in observations],
-        "masters": reports,
-        "owners": owners,
-        "horizonDigest": horizon_digest,
-        "classification": CLASS_CORRECTED,
-        "correctiveDecision": DECISION_REVIEWED,
-    })
+    evidence = _digest(
+        {
+            "prior": prior_digest,
+            "request": req_digest,
+            "source": source,
+            "officer": officer,
+            "host": [h for h, _ in observations],
+            "observers": [o for _, o in observations],
+            "masters": reports,
+            "owners": owners,
+            "horizonDigest": horizon_digest,
+            "classification": CLASS_CORRECTED,
+            "correctiveDecision": DECISION_REVIEWED,
+        }
+    )
     if terminal.get("evidenceDigest") != evidence:
         return None
-    return _digest({
-        "previous": prior_digest,
-        "pending": pending,
-        "terminal": terminal,
-        "signedEvidence": evidence,
-    }), {
+    return _digest(
+        {
+            "previous": prior_digest,
+            "pending": pending,
+            "terminal": terminal,
+            "signedEvidence": evidence,
+        }
+    ), {
         "incident": incident,
         "ql448ReceiptDigest": terminal["receiptDigest"],
         "ql448HorizonDigest": horizon_digest,
