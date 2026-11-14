@@ -59,6 +59,7 @@ import { Ql441OwnerWitnessPanel } from "./Ql441OwnerWitnessPanel";
 import { Ql442OwnerShutdownPanel } from "./Ql442OwnerShutdownPanel";
 import { Ql443OwnerRenewalPanel } from "./Ql443OwnerRenewalPanel";
 import { Ql444OwnerContinuityPanel } from "./Ql444OwnerContinuityPanel";
+import { Ql445OwnerStabilityPanel } from "./Ql445OwnerStabilityPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -489,6 +490,14 @@ export function App() {
             <p>Two independent OFF samples and signed owner decisions are required.
               Historical evidence never proves live receiver OFF or CONNECTED.</p>
             <Ql444OwnerContinuityPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-445 post-closure signed OFF stability and ON recurrence (read-only)</summary>
+            <p>Historical signed OFF and ON observations are not a present physical
+              receiver state; recurrence requires three-Master and dual-owner review.</p>
+            <Ql445OwnerStabilityPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
