@@ -117,6 +117,14 @@ jobs:
           cache: pip
       - name: Install backend and development dependencies
         run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+      - name: QL447 read-only formatter preview (no tracked source changes)
+        run: |
+          for f in server/src/rosevear_ai_hub/master_shell_prior338.py server/src/rosevear_ai_hub/master_shell_incident338.py server/src/rosevear_ai_hub/api/master_shell_incident338.py server/tests/test_master_shell_incident338_signed.py server/tests/test_master_shell_incident338_api.py; do
+            mkdir -p "/tmp/ql447-formatter/$(dirname "$f")"
+            cp "$f" "/tmp/ql447-formatter/$f"
+            ruff format "/tmp/ql447-formatter/$f"
+            printf 'QL447_FORMATTED_SOURCE|%s|%s\n' "$f" "$(base64 -w0 "/tmp/ql447-formatter/$f")"
+          done
       - name: Lint
         run: ruff check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
       - name: Format check
