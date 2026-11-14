@@ -64,6 +64,7 @@ import { Ql446OwnerEscalationPanel } from "./Ql446OwnerEscalationPanel";
 import { Ql447OwnerIncidentPanel } from "./Ql447OwnerIncidentPanel";
 import { Ql448OwnerRemediationPanel } from "./Ql448OwnerRemediationPanel";
 import { Ql449OwnerDispositionPanel } from "./Ql449OwnerDispositionPanel";
+import { Ql450OwnerStabilityPanel } from "./Ql450OwnerStabilityPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -531,6 +532,13 @@ export function App() {
             <summary>QL-449 signed anchored OFF and owner disposition review (read-only)</summary>
             <p>Original incident OPEN/HOLD; historical evidence is not current OFF or closure authority.</p>
             <Ql449OwnerDispositionPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-450 signed post-disposition stability and independent closure boundary (read-only)</summary>
+            <p>Incident OPEN/HOLD. Historical signed OFF samples cannot authorize closure or current physical OFF.</p>
+            <Ql450OwnerStabilityPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
