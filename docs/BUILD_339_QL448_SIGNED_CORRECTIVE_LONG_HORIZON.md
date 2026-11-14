@@ -1,0 +1,18 @@
+# Rosevear AI Hub Build 339 / QL-448 — Corrective remediation and long-horizon continuity
+
+Upstream contract: [Rosevear Comms Hub QL-448](https://github.com/RosevearCreations/rosevear-comms-hub/blob/main/docs/handoffs/QL448_MASTER360_CORRECTIVE_LONG_HORIZON_CONTINUITY.md).
+
+Build 339 follows fully GREEN Build 338 / QL-447. It verifies original signed protected QL-431–447 history; no status badge, synthetic signing key or copied digest establishes original-host custody.
+
+- **Exact protected source:** \`master_shell_prior339.py\` revalidates QL-447 signed Comms source, DESKTOP-AE894KC isolation lock/lease/watchdog report and independently signed receiver state, three canonical Master votes and two original owner signatures. It checks QL-447 PENDING and exclusive RECONFIRMED/EXCEPTION private receipts and exact prior QL-446 ESCALATION.
+- **Independent corrective receipt:** \`master_shell_remediation339.py\` requires a separately pinned Ed25519 corrective officer and exact new remediation/challenge bound to the original incident and QL-447 receipt. An exception may report completed or incomplete under HOLD; prior historical reconfirmation may only request a non-exception long-horizon recheck. Missing/forged receipts fail HOLD.
+- **Fresh long-horizon evidence:** Original Windows host SHORT/MEDIUM/LONG reports signed with monotonic digest/sequence and independent receiver observations must each remain within 60 seconds, with MEDIUM at least **10 seconds** and LONG at least **30 seconds** after SHORT. Every observation retains the exact QL-447 source, remediation digest and freshness controls.
+- **Conservative decision:** Only an exception with complete signed independent correction, independent OFF for every horizon, revoked lease, isolation lock and armed watchdog can evidence **closure preconditions** (not closure). Existing QL-447 reconfirmed histories can admit only historical continuity. ON, divergence, incomplete corrective disposition, unlocked isolation, active lease or disabled watchdog remains a signed open exception.
+- **Signed governance:** Three distinct Masters and two original-owner roles sign the exact horizon evidence/classification and OPEN_HOLD decision. One-use fsynced private 0600 receipts in 0700 directory transition PENDING to mutually exclusive REVIEWED or EXCEPTION. Interrupted PENDING, replay, tamper, stale claims and key collisions fail HOLD.
+- **Read-only owner System view:** Owner-only no-store GET \`/api/v1/system/master-shell-339-remediation\` never enables hardware actions. In the absence of actual enrolled original-host and independently signed evidence it displays all sources as NOT_VERIFIED and receiver UNKNOWN.
+
+**Absolute physical safety boundary:** Regardless of signed historical success, connection=HOLD, activationAuthorized=false, physicalReceiverCurrentlyOff=false, receiver=UNKNOWN_REQUIRES_FRESH_INDEPENDENT_OFF, incidentStatus=OPEN, incidentClosed=false and slaveGate=HOLD_NEXT_MASTER_INTEGRATION_STAGE. No automatic physical closure, receiver actuation, CONNECTED or owner impersonation.
+
+Test through exact feature PR six green jobs and merge to dev. Isolate only Build 339 source/UI/tests/docs files on current main rather than merge unrelated dev-only history. Require independent production PR six green checks, then exact main postmerge push six green checks before declaring source Production GREEN. Real external signer enrollment and physical receiver verification are separate supervised operations.
+
+**Next proposed Build 340 / QL-449:** Independently Anchored Corrective Closure Evidence, Fresh Original-Host OFF Re-Attestation & Owner-Gated Incident Disposition Continuity.
