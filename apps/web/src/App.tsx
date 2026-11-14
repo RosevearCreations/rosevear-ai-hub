@@ -61,6 +61,7 @@ import { Ql443OwnerRenewalPanel } from "./Ql443OwnerRenewalPanel";
 import { Ql444OwnerContinuityPanel } from "./Ql444OwnerContinuityPanel";
 import { Ql445OwnerStabilityPanel } from "./Ql445OwnerStabilityPanel";
 import { Ql446OwnerEscalationPanel } from "./Ql446OwnerEscalationPanel";
+import { Ql447OwnerIncidentPanel } from "./Ql447OwnerIncidentPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -507,6 +508,13 @@ export function App() {
             <p>Signed OFF history cannot establish current receiver state.
               Signed ON or disagreement is an incident case; connection remains HOLD.</p>
             <Ql446OwnerEscalationPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-447 signed original-host isolation and three-Master incident follow-up (read-only)</summary>
+            <p>Incident remains OPEN/HOLD. Historical signed isolation cannot prove current physical OFF.</p>
+            <Ql447OwnerIncidentPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
