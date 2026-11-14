@@ -143,9 +143,7 @@ def fixture(monkeypatch, tmp_path, *, late=False, recurring=False):
                 "reviewedAtMs": 1_550_000,
             },
         )
-    adapters = {
-        role: (lambda role=role, **_: deepcopy(evidence[role])) for role in evidence
-    }
+    adapters = {role: (lambda role=role, **_: deepcopy(evidence[role])) for role in evidence}
     journal = q.ProtectedStabilityJournal336(tmp_path / "private-ql445")
 
     def run():
@@ -286,6 +284,7 @@ def test_symlink_and_terminal_replay_rejected(monkeypatch, tmp_path):
     assert case["run"]()["accepted"] is False
     case = fixture(monkeypatch, tmp_path / "accepted", recurring=True)
     assert case["run"]()["accepted"] is True
-    assert case["journal"].claim(
-        Ree(), case["incident"], "STABLE", _digest(case["request"]), "a" * 64
-    ) is None
+    assert (
+        case["journal"].claim(Ree(), case["incident"], "STABLE", _digest(case["request"]), "a" * 64)
+        is None
+    )

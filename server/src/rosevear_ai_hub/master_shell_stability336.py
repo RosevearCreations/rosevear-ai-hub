@@ -309,8 +309,7 @@ def review_stability336(
         if journal.read(monitor, incident, "PENDING") != pending:
             return fail("HOLD_QL445_PENDING_CUSTODY_CHANGED")
         if any(
-            journal.read(monitor, incident, stage) is not None
-            for stage in ("STABLE", "RECURRENCE")
+            journal.read(monitor, incident, stage) is not None for stage in ("STABLE", "RECURRENCE")
         ):
             return fail("HOLD_QL445_TERMINAL_REPLAY")
         evidence = _digest(
