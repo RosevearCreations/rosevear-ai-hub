@@ -24,9 +24,7 @@ def fixture(
     watchdog=True,
     observer_isolation=True,
 ):
-    old = fixture447(
-        monkeypatch, tmp_path / "ql447", host_on=prior_exception
-    )
+    old = fixture447(monkeypatch, tmp_path / "ql447", host_on=prior_exception)
     result = old["run"]()
     assert result["accepted"] is True, result
     prior = {
@@ -68,9 +66,7 @@ def fixture(
         "observedAtMs": 1_630_000,
     }
     if disposition is None:
-        disposition = (
-            q.OFFICER_COMPLETE if prior_exception else q.OFFICER_CONTINUITY
-        )
+        disposition = q.OFFICER_COMPLETE if prior_exception else q.OFFICER_CONTINUITY
     officer = {
         "schema": "rosevear.ai-hub.ql448.correctiveOfficer.v1",
         "requestDigest": rd,
@@ -138,61 +134,70 @@ def fixture(
         last_host = _digest(host)
         seq = observer["sequence"]
     all_off = not (
-        host_on or divergence or not lease_revoked or not locked
-        or not watchdog or not observer_isolation
+        host_on
+        or divergence
+        or not lease_revoked
+        or not locked
+        or not watchdog
+        or not observer_isolation
     )
     clear = all_off and officer["disposition"] != q.OFFICER_INCOMPLETE
     corrected = prior_exception and clear
     continuity = not prior_exception and clear
     reviewed = corrected or continuity
     classification = (
-        q.CLASS_CORRECTED if corrected else
-        q.CLASS_CONTINUITY if continuity else q.CLASS_EXCEPTION
+        q.CLASS_CORRECTED if corrected else q.CLASS_CONTINUITY if continuity else q.CLASS_EXCEPTION
     )
     decision = q.DECISION_REVIEWED if reviewed else q.DECISION_EXCEPTION
-    horizon_digest = _digest({
-        "prior": prior_digest,
-        "source": _digest(source),
-        "officer": _digest(officer),
-        "hostDigests": host_digests,
-        "observerDigests": observer_digests,
-        "classification": classification,
-        "remediationId": request["remediationId"],
-    })
+    horizon_digest = _digest(
+        {
+            "prior": prior_digest,
+            "source": _digest(source),
+            "officer": _digest(officer),
+            "hostDigests": host_digests,
+            "observerDigests": observer_digests,
+            "classification": classification,
+            "remediationId": request["remediationId"],
+        }
+    )
     masters = {}
     for master in q.MASTERS:
-        masters[master] = signed(keys[master], {
-            "schema": f"rosevear.ai-hub.ql448.{master}.v1",
-            "masterId": master,
-            "requestDigest": rd,
-            "originalIncidentId": link["incident"],
-            "remediationId": request["remediationId"],
-            "ql447ReceiptDigest": link["ql447ReceiptDigest"],
-            "horizonEvidenceDigest": horizon_digest,
-            "classification": classification,
-            "correctiveDecision": decision,
-            "incidentStatus": "OPEN_HOLD",
-            "reviewedAtMs": 1_675_000,
-        })
+        masters[master] = signed(
+            keys[master],
+            {
+                "schema": f"rosevear.ai-hub.ql448.{master}.v1",
+                "masterId": master,
+                "requestDigest": rd,
+                "originalIncidentId": link["incident"],
+                "remediationId": request["remediationId"],
+                "ql447ReceiptDigest": link["ql447ReceiptDigest"],
+                "horizonEvidenceDigest": horizon_digest,
+                "classification": classification,
+                "correctiveDecision": decision,
+                "incidentStatus": "OPEN_HOLD",
+                "reviewedAtMs": 1_675_000,
+            },
+        )
     master_digest = _digest([masters[m]["payload"] for m in q.MASTERS])
     owners = {}
-    for role, owner_id in zip(
-        ("owner", "ownerReviewer"), link["ownerIds"], strict=True
-    ):
-        owners[role] = signed(keys[role], {
-            "schema": f"rosevear.ai-hub.ql448.{role}.v1",
-            "ownerId": owner_id,
-            "requestDigest": rd,
-            "originalIncidentId": link["incident"],
-            "remediationId": request["remediationId"],
-            "ql447ReceiptDigest": link["ql447ReceiptDigest"],
-            "horizonEvidenceDigest": horizon_digest,
-            "threeMasterDigest": master_digest,
-            "classification": classification,
-            "correctiveDecision": decision,
-            "incidentStatus": "OPEN_HOLD",
-            "reviewedAtMs": 1_678_000,
-        })
+    for role, owner_id in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
+        owners[role] = signed(
+            keys[role],
+            {
+                "schema": f"rosevear.ai-hub.ql448.{role}.v1",
+                "ownerId": owner_id,
+                "requestDigest": rd,
+                "originalIncidentId": link["incident"],
+                "remediationId": request["remediationId"],
+                "ql447ReceiptDigest": link["ql447ReceiptDigest"],
+                "horizonEvidenceDigest": horizon_digest,
+                "threeMasterDigest": master_digest,
+                "classification": classification,
+                "correctiveDecision": decision,
+                "incidentStatus": "OPEN_HOLD",
+                "reviewedAtMs": 1_678_000,
+            },
+        )
     journal = q.ProtectedRemediationJournal339(tmp_path / "private-ql448")
 
     def read_host(*, horizon, **_):
@@ -203,7 +208,11 @@ def fixture(
 
     def run():
         return q.review_remediation339(
-            Ree(), prior, request, journal, pins,
+            Ree(),
+            prior,
+            request,
+            journal,
+            pins,
             read_comms_source=lambda **_: deepcopy(evidence["commsSource"]),
             read_corrective_officer=lambda **_: deepcopy(evidence["correctiveOfficer"]),
             read_host=read_host,
@@ -251,9 +260,7 @@ def test_repaired_exception_historical_continuity_and_signed_unresolved(
     assert result["classification"] == classification
     reviewed = classification != q.CLASS_EXCEPTION
     assert result["state"] == (q.REVIEWED if reviewed else q.EXCEPTION)
-    assert result["exceptionClosurePreconditionsEvidenced"] is (
-        classification == q.CLASS_CORRECTED
-    )
+    assert result["exceptionClosurePreconditionsEvidenced"] is (classification == q.CLASS_CORRECTED)
     assert result["correctiveReviewAdmitted"] is True
     assert result["incidentStatus"] == "OPEN"
     assert result["incidentClosed"] is False
@@ -261,13 +268,9 @@ def test_repaired_exception_historical_continuity_and_signed_unresolved(
     assert result["activationAuthorized"] is False
     assert result["physicalReceiverCurrentlyOff"] is False
     assert case["run"]()["accepted"] is False
-    assert case["journal"].read(
-        Ree(), case["incident"], "REVIEWED" if reviewed else "EXCEPTION"
-    )
+    assert case["journal"].read(Ree(), case["incident"], "REVIEWED" if reviewed else "EXCEPTION")
     assert (
-        q.read_private_remediation339(Ree(), case["journal"], case["incident"])[
-            "connection"
-        ]
+        q.read_private_remediation339(Ree(), case["journal"], case["incident"])["connection"]
         == "HOLD"
     )
 
@@ -318,9 +321,7 @@ def test_ql447_custody_forgery_and_master_owner_veto(monkeypatch, tmp_path):
     assert case["run"]()["accepted"] is False
 
 
-def test_one_use_pending_crash_replay_symlink_and_terminal_collision(
-    monkeypatch, tmp_path
-):
+def test_one_use_pending_crash_replay_symlink_and_terminal_collision(monkeypatch, tmp_path):
     case = fixture(monkeypatch, tmp_path)
     case["evidence"]["commsSource"] = None
     assert case["run"]()["accepted"] is False

@@ -101,12 +101,15 @@ def verify_prior_incident339(
         and isinstance(request447.get("followUpId"), str)
         and len(request447["challengeNonce"]) >= 12
         and len(request447["followUpId"]) >= 12
-        and len({
-            request447["challengeNonce"],
-            request447["followUpId"],
-            link["previousNonce"],
-            link["previousWatchId"],
-        }) == 4
+        and len(
+            {
+                request447["challengeNonce"],
+                request447["followUpId"],
+                link["previousNonce"],
+                link["previousWatchId"],
+            }
+        )
+        == 4
     ):
         return None
     source = verify447("commsSource", signed447["commsSource"], pins447)
@@ -165,14 +168,16 @@ def verify_prior_incident339(
     )
     if reconfirmed is prior_exception:
         return None
-    isolation_digest = _digest({
-        "prior": prior_digest,
-        "source": _digest(source),
-        "host": _digest(host),
-        "observer": _digest(witness),
-        "classification": expected_class,
-        "followUpId": request447["followUpId"],
-    })
+    isolation_digest = _digest(
+        {
+            "prior": prior_digest,
+            "source": _digest(source),
+            "host": _digest(host),
+            "observer": _digest(witness),
+            "classification": expected_class,
+            "followUpId": request447["followUpId"],
+        }
+    )
     if result447.get("isolationEvidenceDigest") != isolation_digest:
         return None
     reports = []
@@ -216,25 +221,29 @@ def verify_prior_incident339(
         ):
             return None
         owners.append(body)
-    evidence = _digest({
-        "prior": prior_digest,
-        "request": request_digest,
-        "source": source,
-        "host": host,
-        "observer": witness,
-        "masters": reports,
-        "owners": owners,
-        "classification": expected_class,
-        "correctiveDecision": expected_decision,
-    })
+    evidence = _digest(
+        {
+            "prior": prior_digest,
+            "request": request_digest,
+            "source": source,
+            "host": host,
+            "observer": witness,
+            "masters": reports,
+            "owners": owners,
+            "classification": expected_class,
+            "correctiveDecision": expected_decision,
+        }
+    )
     if terminal.get("evidenceDigest") != evidence:
         return None
-    return _digest({
-        "previous": prior_digest,
-        "pending": pending,
-        "terminal": terminal,
-        "signedEvidence": evidence,
-    }), {
+    return _digest(
+        {
+            "previous": prior_digest,
+            "pending": pending,
+            "terminal": terminal,
+            "signedEvidence": evidence,
+        }
+    ), {
         "incident": incident,
         "ql446CaseId": link["caseId"],
         "ql447ReceiptDigest": terminal["receiptDigest"],

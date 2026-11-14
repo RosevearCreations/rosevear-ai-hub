@@ -117,14 +117,6 @@ jobs:
           cache: pip
       - name: Install backend and development dependencies
         run: python -m pip install --upgrade pip && pip install -e ".[dev]"
-      - name: QL448 temporary read-only canonical formatter preview
-        run: |
-          for f in server/src/rosevear_ai_hub/master_shell_prior339.py server/src/rosevear_ai_hub/master_shell_remediation339.py server/src/rosevear_ai_hub/api/master_shell_remediation339.py server/tests/test_master_shell_remediation339_signed.py server/tests/test_master_shell_remediation339_api.py server/src/rosevear_ai_hub/main.py; do
-            mkdir -p "/tmp/ql448-format/$(dirname "$f")"
-            cp "$f" "/tmp/ql448-format/$f"
-            ruff format "/tmp/ql448-format/$f"
-            printf 'QL448_FORMATTED_SOURCE|%s|%s\n' "$f" "$(base64 -w0 "/tmp/ql448-format/$f")"
-          done
       - name: Lint
         run: ruff check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
       - name: Format check

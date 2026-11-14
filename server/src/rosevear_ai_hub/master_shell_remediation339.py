@@ -230,16 +230,13 @@ def review_remediation339(
                 and type(host.get("sequence")) is int
                 and host["sequence"] > previous_sequence
                 and type(host.get("observedAtMs")) is int
-                and max(previous_time, officer["observedAtMs"]) < host["observedAtMs"]
-                <= now_ms
+                and max(previous_time, officer["observedAtMs"]) < host["observedAtMs"] <= now_ms
                 and now_ms - host["observedAtMs"] <= 60_000
             ):
                 return fail("HOLD_QL448_SIGNED_ORIGINAL_HOST_HORIZON_INVALID")
             if index == 1:
                 first_host_time = host["observedAtMs"]
-            elif host["observedAtMs"] - first_host_time < (
-                10_000 if index == 2 else 30_000
-            ):
+            elif host["observedAtMs"] - first_host_time < (10_000 if index == 2 else 30_000):
                 return fail("HOLD_QL448_MINIMUM_TEN_THIRTY_SECOND_HORIZON_VIOLATION")
             observer = verify448(
                 "observer",
@@ -302,18 +299,22 @@ def review_remediation339(
         classification = (
             CLASS_CORRECTED
             if closure_preconditions
-            else CLASS_CONTINUITY if continuity else CLASS_EXCEPTION
+            else CLASS_CONTINUITY
+            if continuity
+            else CLASS_EXCEPTION
         )
         decision = DECISION_REVIEWED if reviewed else DECISION_EXCEPTION
-        horizon_digest = _digest({
-            "prior": prior_digest,
-            "source": _digest(source),
-            "officer": _digest(officer),
-            "hostDigests": [_digest(host) for host, _ in observations],
-            "observerDigests": [_digest(observer) for _, observer in observations],
-            "classification": classification,
-            "remediationId": remediation_id,
-        })
+        horizon_digest = _digest(
+            {
+                "prior": prior_digest,
+                "source": _digest(source),
+                "officer": _digest(officer),
+                "hostDigests": [_digest(host) for host, _ in observations],
+                "observerDigests": [_digest(observer) for _, observer in observations],
+                "classification": classification,
+                "remediationId": remediation_id,
+            }
+        )
         if not isinstance(master_reports, dict) or set(master_reports) != set(MASTERS):
             return fail("HOLD_QL448_THREE_MASTER_SIGNED_REVIEWS_REQUIRED", not reviewed)
         reports = []
@@ -336,14 +337,10 @@ def review_remediation339(
                 return fail("HOLD_QL448_THREE_MASTER_CORRECTIVE_VETO", not reviewed)
             reports.append(vote)
         reports_digest = _digest(reports)
-        if not isinstance(dual_owners, dict) or set(dual_owners) != {
-            "owner", "ownerReviewer"
-        }:
+        if not isinstance(dual_owners, dict) or set(dual_owners) != {"owner", "ownerReviewer"}:
             return fail("HOLD_QL448_DISTINCT_DUAL_OWNER_VOTES_REQUIRED", not reviewed)
         owners = []
-        for role, owner_id in zip(
-            ("owner", "ownerReviewer"), link["ownerIds"], strict=True
-        ):
+        for role, owner_id in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
             body = verify448(role, dual_owners[role], pins)
             if not (
                 body
@@ -378,19 +375,21 @@ def review_remediation339(
             or final_now_ms - observations[-1][1]["observedAtMs"] > 60_000
         ):
             return fail("HOLD_QL448_EVIDENCE_EXPIRED_BEFORE_COMMIT", not reviewed)
-        evidence_digest = _digest({
-            "prior": prior_digest,
-            "request": req_digest,
-            "source": source,
-            "officer": officer,
-            "host": [h for h, _ in observations],
-            "observers": [o for _, o in observations],
-            "masters": reports,
-            "owners": owners,
-            "horizonDigest": horizon_digest,
-            "classification": classification,
-            "correctiveDecision": decision,
-        })
+        evidence_digest = _digest(
+            {
+                "prior": prior_digest,
+                "request": req_digest,
+                "source": source,
+                "officer": officer,
+                "host": [h for h, _ in observations],
+                "observers": [o for _, o in observations],
+                "masters": reports,
+                "owners": owners,
+                "horizonDigest": horizon_digest,
+                "classification": classification,
+                "correctiveDecision": decision,
+            }
+        )
         stage = "REVIEWED" if reviewed else "EXCEPTION"
         terminal = journal.claim(monitor, incident, stage, req_digest, evidence_digest)
         if not terminal:
@@ -411,7 +410,8 @@ def review_remediation339(
             "finalReceiptDigest": terminal["receiptDigest"],
             "nextAction": (
                 "FRESH_SUPERVISED_INDEPENDENT_RECEIVER_READBACK_REQUIRED"
-                if reviewed else "CORRECTIVE_ISOLATION_EXCEPTION_REMAINS_OPEN"
+                if reviewed
+                else "CORRECTIVE_ISOLATION_EXCEPTION_REMAINS_OPEN"
             ),
         }
     except (KeyError, TypeError, ValueError, OSError):
