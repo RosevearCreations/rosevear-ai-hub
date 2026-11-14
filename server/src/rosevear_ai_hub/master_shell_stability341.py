@@ -24,8 +24,14 @@ DECISION_STABLE = "PREVENT_RECURRENCE_HISTORICAL_STABILITY_KEEP_OPEN_HOLD"
 DECISION_EXCEPTION = "ESCALATE_SIGNED_RECURRENCE_KEEP_OPEN_HOLD"
 HORIZONS = ("SHORT", "MEDIUM", "LONG")
 ROLES = (
-    "commsSource", "externalAnchor", "host", "observer",
-    "closureAuthority", "owner", "ownerReviewer", *MASTERS,
+    "commsSource",
+    "externalAnchor",
+    "host",
+    "observer",
+    "closureAuthority",
+    "owner",
+    "ownerReviewer",
+    *MASTERS,
 )
 
 
@@ -53,12 +59,16 @@ def verify450(
 def hold341(reason: str, exception: bool = False) -> dict[str, Any]:
     return {
         **hold_decision333(reason),
-        "sourceBuild": 341, "state": reason,
+        "sourceBuild": 341,
+        "state": reason,
         "receiver": "UNKNOWN_REQUIRES_FRESH_INDEPENDENT_OFF",
-        "incidentStatus": "OPEN", "incidentClosed": False,
-        "closureAuthorized": False, "activationAuthorized": False,
+        "incidentStatus": "OPEN",
+        "incidentClosed": False,
+        "closureAuthorized": False,
+        "activationAuthorized": False,
         "physicalReceiverCurrentlyOff": False,
-        "historicalEvidenceOnly": True, "freshPhysicalOffProven": False,
+        "historicalEvidenceOnly": True,
+        "freshPhysicalOffProven": False,
         "independentStabilityReviewAdmitted": False,
         "unresolvedException": exception,
     }
@@ -103,10 +113,16 @@ def review_stability341(
         )
         and len({pin[0] for pin in pins.values()}) == len(ROLES)
         and len({pin[1] for pin in pins.values()}) == len(ROLES)
-        and all(callable(fn) for fn in (
-            read_comms_source, read_external_anchor, read_host,
-            read_observer, read_closure_authority,
-        ))
+        and all(
+            callable(fn)
+            for fn in (
+                read_comms_source,
+                read_external_anchor,
+                read_host,
+                read_observer,
+                read_closure_authority,
+            )
+        )
         and type(now_ms) is int
         and type(final_now_ms) is int
         and 0 <= final_now_ms - now_ms <= 60_000
@@ -129,10 +145,20 @@ def review_stability341(
             and request.get("ql449AnchoredDigest") == link["ql449AnchoredDigest"]
             and request.get("ql449CeremonyId") == link["ql449CeremonyId"]
             and request.get("previousObserverDigest") == link["previousObserverDigest"]
-            and isinstance(review_id, str) and len(review_id) >= 12
-            and isinstance(nonce, str) and len(nonce) >= 12
-            and len({review_id, nonce, link["ql449Nonce"],
-                     link["ql449CeremonyId"], link["ql449AnchorId"]}) == 5
+            and isinstance(review_id, str)
+            and len(review_id) >= 12
+            and isinstance(nonce, str)
+            and len(nonce) >= 12
+            and len(
+                {
+                    review_id,
+                    nonce,
+                    link["ql449Nonce"],
+                    link["ql449CeremonyId"],
+                    link["ql449AnchorId"],
+                }
+            )
+            == 5
             and now_ms > link["previousObservedAtMs"]
         ):
             return fail("HOLD_QL450_FRESH_SCOPED_NONREPLAYABLE_REVIEW_REQUIRED")
@@ -190,10 +216,12 @@ def review_stability341(
             host = verify450(
                 "host",
                 read_host(
-                    request=request, horizon=horizon,
+                    request=request,
+                    horizon=horizon,
                     anchorDigest=_digest(anchor),
                     previousObserverDigest=last_observer,
-                ), pins,
+                ),
+                pins,
             )
             if not (
                 host
@@ -220,17 +248,17 @@ def review_stability341(
                 return fail("HOLD_QL450_ORIGINAL_HOST_HORIZON_SIGNATURE_INVALID")
             if index == 1:
                 first_host_time = host["observedAtMs"]
-            elif host["observedAtMs"] - first_host_time < (
-                10_000 if index == 2 else 30_000
-            ):
+            elif host["observedAtMs"] - first_host_time < (10_000 if index == 2 else 30_000):
                 return fail("HOLD_QL450_MINIMUM_10_30_SECOND_HORIZON_INVALID")
             observer = verify450(
                 "observer",
                 read_observer(
-                    request=request, horizon=horizon,
+                    request=request,
+                    horizon=horizon,
                     hostDigest=_digest(host),
                     previousObserverDigest=last_observer,
-                ), pins,
+                ),
+                pins,
             )
             if not (
                 observer
@@ -259,25 +287,33 @@ def review_stability341(
             last_observed = observer["observedAtMs"]
         stable = all(
             h["receiverState"] == w["receiverState"] == "OFF"
-            and h["isolationLock"] and h["leaseRevoked"]
-            and h["watchdogArmed"] and w["isolationConfirmed"]
+            and h["isolationLock"]
+            and h["leaseRevoked"]
+            and h["watchdogArmed"]
+            and w["isolationConfirmed"]
             for h, w in observations
         )
         classification = CLASS_STABLE if stable else CLASS_EXCEPTION
         decision = DECISION_STABLE if stable else DECISION_EXCEPTION
-        stability_digest = _digest({
-            "prior": prior_digest, "source": _digest(source),
-            "anchor": _digest(anchor),
-            "hostDigests": [_digest(h) for h, _ in observations],
-            "observerDigests": [_digest(w) for _, w in observations],
-            "classification": classification, "reviewId": review_id,
-        })
+        stability_digest = _digest(
+            {
+                "prior": prior_digest,
+                "source": _digest(source),
+                "anchor": _digest(anchor),
+                "hostDigests": [_digest(h) for h, _ in observations],
+                "observerDigests": [_digest(w) for _, w in observations],
+                "classification": classification,
+                "reviewId": review_id,
+            }
+        )
         boundary = verify450(
             "closureAuthority",
             read_closure_authority(
-                request=request, stabilityDigest=stability_digest,
+                request=request,
+                stabilityDigest=stability_digest,
                 classification=classification,
-            ), pins,
+            ),
+            pins,
         )
         if not (
             boundary
@@ -321,14 +357,10 @@ def review_stability341(
                 return fail("HOLD_QL450_THREE_MASTER_RECURRENCE_VETO", not stable)
             reports.append(vote)
         report_digest = _digest(reports)
-        if not isinstance(dual_owners, dict) or set(dual_owners) != {
-            "owner", "ownerReviewer"
-        }:
+        if not isinstance(dual_owners, dict) or set(dual_owners) != {"owner", "ownerReviewer"}:
             return fail("HOLD_QL450_DUAL_OWNER_VOTES_REQUIRED", not stable)
         owners = []
-        for role, identity in zip(
-            ("owner", "ownerReviewer"), link["ownerIds"], strict=True
-        ):
+        for role, identity in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
             body = verify450(role, dual_owners[role], pins)
             if not (
                 body
@@ -346,15 +378,15 @@ def review_stability341(
                 and body.get("closureAuthorized") is False
                 and type(body.get("reviewedAtMs")) is int
                 and max(report["reviewedAtMs"] for report in reports)
-                <= body["reviewedAtMs"] <= final_now_ms
+                <= body["reviewedAtMs"]
+                <= final_now_ms
             ):
                 return fail("HOLD_QL450_DUAL_OWNER_CLOSURE_BOUNDARY_VETO", not stable)
             owners.append(body)
         if verify_prior_disposition341(monitor, **prior449) != verified:
             return fail("HOLD_QL450_ORIGINAL_QL449_CUSTODY_DRIFT", not stable)
         if journal.read(monitor, incident, "PENDING") != pending or any(
-            journal.read(monitor, incident, stage) is not None
-            for stage in ("STABLE", "EXCEPTION")
+            journal.read(monitor, incident, stage) is not None for stage in ("STABLE", "EXCEPTION")
         ):
             return fail("HOLD_QL450_PENDING_OR_TERMINAL_CUSTODY_DRIFT", not stable)
         if (
@@ -365,34 +397,48 @@ def review_stability341(
             or final_now_ms - boundary["reviewedAtMs"] > 60_000
         ):
             return fail("HOLD_QL450_FRESH_SIGNED_OBSERVATIONS_EXPIRED", not stable)
-        evidence_digest = _digest({
-            "prior": prior_digest, "request": req_digest,
-            "source": source, "anchor": anchor,
-            "hosts": [h for h, _ in observations],
-            "observers": [w for _, w in observations],
-            "boundary": boundary, "masters": reports, "owners": owners,
-            "classification": classification, "recurrenceDecision": decision,
-        })
+        evidence_digest = _digest(
+            {
+                "prior": prior_digest,
+                "request": req_digest,
+                "source": source,
+                "anchor": anchor,
+                "hosts": [h for h, _ in observations],
+                "observers": [w for _, w in observations],
+                "boundary": boundary,
+                "masters": reports,
+                "owners": owners,
+                "classification": classification,
+                "recurrenceDecision": decision,
+            }
+        )
         terminal = journal.claim(
-            monitor, incident, "STABLE" if stable else "EXCEPTION",
-            req_digest, evidence_digest,
+            monitor,
+            incident,
+            "STABLE" if stable else "EXCEPTION",
+            req_digest,
+            evidence_digest,
         )
         if not terminal:
             return fail("HOLD_QL450_PRIVATE_TERMINAL_NOT_DURABLE", not stable)
         return {
             **hold341(STABLE if stable else EXCEPTION, not stable),
-            "accepted": True, "originalIncidentId": incident,
-            "reviewId": review_id, "classification": classification,
+            "accepted": True,
+            "originalIncidentId": incident,
+            "reviewId": review_id,
+            "classification": classification,
             "recurrenceDecision": decision,
             "independentStabilityReviewAdmitted": True,
-            "masterCount": 3, "stabilityEvidenceDigest": stability_digest,
+            "masterCount": 3,
+            "stabilityEvidenceDigest": stability_digest,
             "closureBoundaryDigest": boundary_digest,
             "threeMasterDigest": report_digest,
             "pendingReceiptDigest": pending["receiptDigest"],
             "finalReceiptDigest": terminal["receiptDigest"],
             "nextAction": (
                 "SUPERVISED_FRESH_ORIGINAL_HOST_OFF_CEREMONY_REQUIRED"
-                if stable else "SUPERVISED_RECURRENCE_EXCEPTION_CORRECTION_REQUIRED"
+                if stable
+                else "SUPERVISED_RECURRENCE_EXCEPTION_CORRECTION_REQUIRED"
             ),
         }
     except (KeyError, TypeError, ValueError, OSError):

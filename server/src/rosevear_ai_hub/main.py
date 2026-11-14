@@ -53,9 +53,6 @@ from rosevear_ai_hub.api.master_shell_incident338 import (
 from rosevear_ai_hub.api.master_shell_issuance331 import (
     router as master_shell_issuance331_router,
 )
-from rosevear_ai_hub.api.master_shell_stability341 import (
-    router as master_shell_stability341_router,
-)
 from rosevear_ai_hub.api.master_shell_readiness330 import (
     router as master_shell_readiness330_router,
 )
@@ -70,6 +67,9 @@ from rosevear_ai_hub.api.master_shell_shutdown333 import (
 )
 from rosevear_ai_hub.api.master_shell_stability336 import (
     router as master_shell_stability336_router,
+)
+from rosevear_ai_hub.api.master_shell_stability341 import (
+    router as master_shell_stability341_router,
 )
 from rosevear_ai_hub.api.master_shell_witness332 import (
     router as master_shell_witness332_router,

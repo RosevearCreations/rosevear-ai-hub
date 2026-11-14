@@ -9,8 +9,14 @@ from typing import Any
 from rosevear_ai_hub.master_shell_acceptance312 import MASTERS
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from rosevear_ai_hub.master_shell_disposition340 import (
-    ACTION, ANCHOR_DISPOSITION, CLASS_REVIEW, DECISION_REVIEW, REVIEW, ROLES,
-    ProtectedDispositionJournal340, verify449,
+    ACTION,
+    ANCHOR_DISPOSITION,
+    CLASS_REVIEW,
+    DECISION_REVIEW,
+    REVIEW,
+    ROLES,
+    ProtectedDispositionJournal340,
+    verify449,
 )
 from rosevear_ai_hub.master_shell_prior340 import verify_prior_remediation340
 
@@ -69,7 +75,9 @@ def verify_prior_disposition341(
     terminal = journal449.read(monitor, incident, "REVIEW")
     exception = journal449.read(monitor, incident, "EXCEPTION")
     if not (
-        pending and terminal and exception is None
+        pending
+        and terminal
+        and exception is None
         and pending.get("requestDigest") == req_digest
         and pending.get("evidenceDigest") == prior_digest
         and terminal.get("requestDigest") == req_digest
@@ -83,8 +91,10 @@ def verify_prior_disposition341(
         and request449.get("ql448HorizonDigest") == link["ql448HorizonDigest"]
         and request449.get("ql448RemediationId") == link["ql448RemediationId"]
         and request449.get("previousObserverDigest") == link["previousObserverDigest"]
-        and isinstance(ceremony, str) and len(ceremony) >= 12
-        and isinstance(nonce, str) and len(nonce) >= 12
+        and isinstance(ceremony, str)
+        and len(ceremony) >= 12
+        and isinstance(nonce, str)
+        and len(nonce) >= 12
         and len({ceremony, nonce, link["ql448Nonce"], link["ql448RemediationId"]}) == 4
     ):
         return None
@@ -111,7 +121,8 @@ def verify_prior_disposition341(
         and anchor.get("sourceDigest") == _digest(source)
         and anchor.get("ceremonyId") == ceremony
         and anchor.get("challengeNonce") == nonce
-        and isinstance(anchor.get("anchorId"), str) and len(anchor["anchorId"]) >= 12
+        and isinstance(anchor.get("anchorId"), str)
+        and len(anchor["anchorId"]) >= 12
         and len({anchor["anchorId"], ceremony, nonce}) == 3
         and anchor.get("disposition") == ANCHOR_DISPOSITION
         and type(anchor.get("sequence")) is int
@@ -149,19 +160,25 @@ def verify_prior_disposition341(
         and observer["observedAtMs"] >= host["observedAtMs"]
     ):
         return None
-    anchored_digest = _digest({
-        "prior": prior_digest, "source": _digest(source),
-        "anchor": _digest(anchor), "host": _digest(host),
-        "observer": _digest(observer), "classification": CLASS_REVIEW,
-        "ceremonyId": ceremony,
-    })
+    anchored_digest = _digest(
+        {
+            "prior": prior_digest,
+            "source": _digest(source),
+            "anchor": _digest(anchor),
+            "host": _digest(host),
+            "observer": _digest(observer),
+            "classification": CLASS_REVIEW,
+            "ceremonyId": ceremony,
+        }
+    )
     if result449.get("anchoredEvidenceDigest") != anchored_digest:
         return None
     reports = []
     for master in MASTERS:
         vote = verify449(master, masters449[master], pins449)
         if not (
-            vote and vote.get("masterId") == master
+            vote
+            and vote.get("masterId") == master
             and vote.get("requestDigest") == req_digest
             and vote.get("originalIncidentId") == incident
             and vote.get("ceremonyId") == ceremony
@@ -181,7 +198,8 @@ def verify_prior_disposition341(
     for role, identity in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
         body = verify449(role, owners449[role], pins449)
         if not (
-            body and body.get("ownerId") == identity
+            body
+            and body.get("ownerId") == identity
             and body.get("requestDigest") == req_digest
             and body.get("originalIncidentId") == incident
             and body.get("ceremonyId") == ceremony
@@ -196,19 +214,30 @@ def verify_prior_disposition341(
         ):
             return None
         owners.append(body)
-    signed_evidence = _digest({
-        "prior": prior_digest, "request": req_digest,
-        "source": source, "anchor": anchor,
-        "host": host, "observer": observer,
-        "masters": reports, "owners": owners,
-        "classification": CLASS_REVIEW, "disposition": DECISION_REVIEW,
-    })
+    signed_evidence = _digest(
+        {
+            "prior": prior_digest,
+            "request": req_digest,
+            "source": source,
+            "anchor": anchor,
+            "host": host,
+            "observer": observer,
+            "masters": reports,
+            "owners": owners,
+            "classification": CLASS_REVIEW,
+            "disposition": DECISION_REVIEW,
+        }
+    )
     if terminal.get("evidenceDigest") != signed_evidence:
         return None
-    return _digest({
-        "previous": prior_digest, "pending": pending,
-        "terminal": terminal, "signedEvidence": signed_evidence,
-    }), {
+    return _digest(
+        {
+            "previous": prior_digest,
+            "pending": pending,
+            "terminal": terminal,
+            "signedEvidence": signed_evidence,
+        }
+    ), {
         "incident": incident,
         "ql449ReceiptDigest": terminal["receiptDigest"],
         "ql449AnchoredDigest": anchored_digest,
