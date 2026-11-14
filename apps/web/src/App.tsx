@@ -65,6 +65,7 @@ import { Ql447OwnerIncidentPanel } from "./Ql447OwnerIncidentPanel";
 import { Ql448OwnerRemediationPanel } from "./Ql448OwnerRemediationPanel";
 import { Ql449OwnerDispositionPanel } from "./Ql449OwnerDispositionPanel";
 import { Ql450OwnerStabilityPanel } from "./Ql450OwnerStabilityPanel";
+import { Ql451OwnerRenewalPanel } from "./Ql451OwnerRenewalPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -539,6 +540,13 @@ export function App() {
             <summary>QL-450 signed post-disposition stability and independent closure boundary (read-only)</summary>
             <p>Incident OPEN/HOLD. Historical signed OFF samples cannot authorize closure or current physical OFF.</p>
             <Ql450OwnerStabilityPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-451 original-host recurrence response and independently anchored OFF renewal (read-only)</summary>
+            <p>Signed historical review cannot close the incident or prove present receiver OFF.</p>
+            <Ql451OwnerRenewalPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
