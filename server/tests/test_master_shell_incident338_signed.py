@@ -37,7 +37,10 @@ def fixture(monkeypatch, tmp_path, *, prior_on=True, host_on=False, divergence=F
     verified = verify_prior_escalation338(Ree(), **prior)
     if not prior_on:
         assert verified is None
-        return {"prior": prior, "journal": q.ProtectedIncidentJournal338(tmp_path / "private-ql447")}
+        return {
+            "prior": prior,
+            "journal": q.ProtectedIncidentJournal338(tmp_path / "private-ql447"),
+        }
     assert verified is not None
     prior_digest, link = verified
     request = {
@@ -168,7 +171,10 @@ def test_signed_isolation_vs_corrective_exception(monkeypatch, tmp_path, options
         Ree(), case["incident"], "EXCEPTION" if exception else "RECONFIRMED"
     )
     assert case["run"]()["accepted"] is False
-    assert q.read_private_incident338(Ree(), case["journal"], case["incident"])["connection"] == "HOLD"
+    assert (
+        q.read_private_incident338(Ree(), case["journal"], case["incident"])["connection"]
+        == "HOLD"
+    )
 
 
 def test_ql446_stable_cannot_enter_reopened_incident(monkeypatch, tmp_path):

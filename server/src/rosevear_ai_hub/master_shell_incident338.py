@@ -33,7 +33,9 @@ class ProtectedIncidentJournal338(ProtectedWitnessJournal333):
         self.terminal_stages = ("RECONFIRMED", "EXCEPTION")
 
 
-def verify447(role: str, envelope: Any, pins: dict[str, tuple[bytes, str]]) -> dict[str, Any] | None:
+def verify447(
+    role: str, envelope: Any, pins: dict[str, tuple[bytes, str]]
+) -> dict[str, Any] | None:
     if role not in pins or not isinstance(envelope, dict):
         return None
     payload = envelope.get("payload")

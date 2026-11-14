@@ -9,9 +9,18 @@ from typing import Any
 from rosevear_ai_hub.master_shell_acceptance312 import MASTERS
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from rosevear_ai_hub.master_shell_escalation337 import (
-    ACTION, CLASS_DIVERGENCE, CLASS_REOPEN, ESCALATION, HORIZONS,
-    MASTER_REOPEN, OFFICER_ACTION, OFFICER_SEVERITY, OWNER_REOPEN, ROLES,
-    ProtectedEscalationJournal337, verify446,
+    ACTION,
+    CLASS_DIVERGENCE,
+    CLASS_REOPEN,
+    ESCALATION,
+    HORIZONS,
+    MASTER_REOPEN,
+    OFFICER_ACTION,
+    OFFICER_SEVERITY,
+    OWNER_REOPEN,
+    ROLES,
+    ProtectedEscalationJournal337,
+    verify446,
 )
 from rosevear_ai_hub.master_shell_prior337 import verify_prior_stability337
 

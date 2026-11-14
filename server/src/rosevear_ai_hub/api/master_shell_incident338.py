@@ -3,6 +3,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response
+
 from rosevear_ai_hub.auth import require_roles
 from rosevear_ai_hub.models import User
 
