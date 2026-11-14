@@ -27,3 +27,7 @@ Real DESKTOP-AE894KC source signer enrollment, independent external receiver wit
 6. Independently verify physical original-host installation and observed live OFF; never infer it from GitHub.
 
 Next proposed **Build 336 / QL-445 — Independently Reconciled Post-Closure OFF Attestations, Recurrence Detection & Three-Master Operational Stability Review.**
+
+## Exact production PR workflow reconciliation
+
+A missing GitHub Actions run is **not** a passing check. Verify a six-job `pull_request` workflow bound to this release candidate's final head SHA before merging; after the protected merge, separately verify six successful `push` jobs on the exact current `main` SHA. Never substitute a previous feature or earlier production run.
