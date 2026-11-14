@@ -250,24 +250,22 @@ def review_escalation337(
             previous_obs_digest = _digest(witness)
             previous_host_digest = _digest(host)
         divergence = any(h["receiverState"] != w["receiverState"] for h, w in observed)
-        any_on = any(
-            state["receiverState"] == "ON"
-            for pair in observed
-            for state in pair
-        )
+        any_on = any(state["receiverState"] == "ON" for pair in observed for state in pair)
         reopening = link["priorRecurrenceOpen"] or any_on or divergence
         classification = (
             CLASS_DIVERGENCE if divergence else CLASS_REOPEN if reopening else CLASS_WATCH
         )
         host_digests = [_digest(host) for host, _ in observed]
         observer_digests = [_digest(witness) for _, witness in observed]
-        watch_digest = _digest({
-            "prior": previous_digest,
-            "source": _digest(source),
-            "hostDigests": host_digests,
-            "observerDigests": observer_digests,
-            "classification": classification,
-        })
+        watch_digest = _digest(
+            {
+                "prior": previous_digest,
+                "source": _digest(source),
+                "hostDigests": host_digests,
+                "observerDigests": observer_digests,
+                "classification": classification,
+            }
+        )
         escalation_digest = None
         if reopening:
             officer = verify446("escalationOfficer", escalation_officer, pins)
@@ -313,9 +311,7 @@ def review_escalation337(
             ):
                 return fail("HOLD_QL446_THREE_MASTER_REOPENING_VETO", reopening)
             reports.append(body)
-        if not isinstance(dual_owners, dict) or set(dual_owners) != {
-            "owner", "ownerReviewer"
-        }:
+        if not isinstance(dual_owners, dict) or set(dual_owners) != {"owner", "ownerReviewer"}:
             return fail("HOLD_QL446_TWO_INDEPENDENT_OWNERS_REQUIRED", reopening)
         owners = []
         for role, owner_id in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
@@ -344,21 +340,22 @@ def review_escalation337(
         if journal.read(monitor, incident, "PENDING") != pending:
             return fail("HOLD_QL446_PENDING_CUSTODY_DRIFT", reopening)
         if any(
-            journal.read(monitor, incident, stage) is not None
-            for stage in ("WATCH", "ESCALATION")
+            journal.read(monitor, incident, stage) is not None for stage in ("WATCH", "ESCALATION")
         ):
             return fail("HOLD_QL446_TERMINAL_REPLAY", reopening)
-        evidence_digest = _digest({
-            "prior": previous_digest,
-            "source": source,
-            "hostProbes": [h for h, _ in observed],
-            "observerProbes": [w for _, w in observed],
-            "watchDigest": watch_digest,
-            "officer": escalation_digest,
-            "masters": reports,
-            "owners": owners,
-            "classification": classification,
-        })
+        evidence_digest = _digest(
+            {
+                "prior": previous_digest,
+                "source": source,
+                "hostProbes": [h for h, _ in observed],
+                "observerProbes": [w for _, w in observed],
+                "watchDigest": watch_digest,
+                "officer": escalation_digest,
+                "masters": reports,
+                "owners": owners,
+                "classification": classification,
+            }
+        )
         stage = "ESCALATION" if reopening else "WATCH"
         terminal = journal.claim(monitor, incident, stage, req_digest, evidence_digest)
         if not terminal:
@@ -400,9 +397,7 @@ def read_private_escalation337(
             status["state"] = "QL446_HISTORICAL_MULTI_HORIZON_OFF_NOT_LIVE_STATE"
             status["historicalReceiptDigest"] = stable["receiptDigest"]
         elif (
-            pending
-            and incident_open
-            and incident_open["requestDigest"] == pending["requestDigest"]
+            pending and incident_open and incident_open["requestDigest"] == pending["requestDigest"]
         ):
             status["state"] = "QL446_PROTECTED_RECURRENCE_CASE_OPEN_HOLD"
             status["historicalReceiptDigest"] = incident_open["receiptDigest"]

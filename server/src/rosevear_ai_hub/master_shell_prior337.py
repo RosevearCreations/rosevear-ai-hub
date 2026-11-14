@@ -90,26 +90,27 @@ def verify_prior_stability337(
         and request445.get("leaseId") == link["leaseId"]
         and request445.get("priorQl444Digest") == prior_digest
         and request445.get("ql444ClosureReceiptDigest") == link["ql444ClosureReceiptDigest"]
-        and request445.get("ql444RemediationReceiptDigest")
-        == link["ql444RemediationReceiptDigest"]
+        and request445.get("ql444RemediationReceiptDigest") == link["ql444RemediationReceiptDigest"]
         and request445.get("previousIndependentOffDigest") == link["previousOffDigest"]
         and isinstance(request445.get("watchNonce"), str)
         and len(request445["watchNonce"]) >= 12
         and isinstance(request445.get("watchId"), str)
         and len(request445["watchId"]) >= 12
-        and len({
-            request445["watchNonce"],
-            request445["watchId"],
-            link["previousNonce"],
-            link["previousWatchId"],
-        }) == 4
+        and len(
+            {
+                request445["watchNonce"],
+                request445["watchId"],
+                link["previousNonce"],
+                link["previousWatchId"],
+            }
+        )
+        == 4
     ):
         return None
     source = verify445("commsSource", signed445["commsSource"], pins445)
     hosts = [verify445("host", signed445[key], pins445) for key in ("hostOne", "hostTwo")]
     observers = [
-        verify445(role, signed445[role], pins445)
-        for role in ("observerOne", "observerTwo")
+        verify445(role, signed445[role], pins445) for role in ("observerOne", "observerTwo")
     ]
     if not (source and all(hosts) and all(observers)):
         return None
@@ -216,24 +217,28 @@ def verify_prior_stability337(
         ):
             return None
         owners.append(body)
-    evidence = _digest({
-        "prior": prior_digest,
-        "source": source,
-        "hostProbes": hosts,
-        "independentObservations": observers,
-        "masters": reports,
-        "owners": owners,
-        "classification": classification,
-    })
+    evidence = _digest(
+        {
+            "prior": prior_digest,
+            "source": source,
+            "hostProbes": hosts,
+            "independentObservations": observers,
+            "masters": reports,
+            "owners": owners,
+            "classification": classification,
+        }
+    )
     if terminal.get("evidenceDigest") != evidence:
         return None
     return (
-        _digest({
-            "previous": prior_digest,
-            "pending": pending,
-            "terminal": terminal,
-            "signedEvidence": evidence,
-        }),
+        _digest(
+            {
+                "previous": prior_digest,
+                "pending": pending,
+                "terminal": terminal,
+                "signedEvidence": evidence,
+            }
+        ),
         {
             "incident": incident,
             "challengeId": link["challengeId"],

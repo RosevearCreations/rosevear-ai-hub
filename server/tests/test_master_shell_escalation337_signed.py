@@ -120,17 +120,17 @@ def fixture(monkeypatch, tmp_path, *, prior_recurrence=False, new_on=False, dive
         seq = witness["sequence"]
     reopening = prior_recurrence or new_on or divergence
     classification = (
-        q.CLASS_DIVERGENCE
-        if divergence
-        else q.CLASS_REOPEN if reopening else q.CLASS_WATCH
+        q.CLASS_DIVERGENCE if divergence else q.CLASS_REOPEN if reopening else q.CLASS_WATCH
     )
-    watch_digest = _digest({
-        "prior": prior_digest,
-        "source": _digest(source),
-        "hostDigests": host_digests,
-        "observerDigests": witness_digests,
-        "classification": classification,
-    })
+    watch_digest = _digest(
+        {
+            "prior": prior_digest,
+            "source": _digest(source),
+            "hostDigests": host_digests,
+            "observerDigests": witness_digests,
+            "classification": classification,
+        }
+    )
     officer = None
     officer_digest = None
     if reopening:
@@ -258,9 +258,7 @@ def test_historical_watch_vs_protected_recurrence(
     assert result["recurrenceSuspected"] is opening
     assert result["incidentReopeningEvidenceAdmitted"] is opening
     assert result["classification"] == (
-        q.CLASS_DIVERGENCE
-        if divergence
-        else q.CLASS_REOPEN if opening else q.CLASS_WATCH
+        q.CLASS_DIVERGENCE if divergence else q.CLASS_REOPEN if opening else q.CLASS_WATCH
     )
     assert result["connection"] == "HOLD"
     assert result["activationAuthorized"] is False
