@@ -60,6 +60,7 @@ import { Ql442OwnerShutdownPanel } from "./Ql442OwnerShutdownPanel";
 import { Ql443OwnerRenewalPanel } from "./Ql443OwnerRenewalPanel";
 import { Ql444OwnerContinuityPanel } from "./Ql444OwnerContinuityPanel";
 import { Ql445OwnerStabilityPanel } from "./Ql445OwnerStabilityPanel";
+import { Ql446OwnerEscalationPanel } from "./Ql446OwnerEscalationPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -498,6 +499,14 @@ export function App() {
             <p>Historical signed OFF and ON observations are not a present physical
               receiver state; recurrence requires three-Master and dual-owner review.</p>
             <Ql445OwnerStabilityPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-446 three-horizon recurrence escalation and incident reopening (read-only)</summary>
+            <p>Signed OFF history cannot establish current receiver state.
+              Signed ON or disagreement is an incident case; connection remains HOLD.</p>
+            <Ql446OwnerEscalationPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
