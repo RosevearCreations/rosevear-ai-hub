@@ -58,9 +58,15 @@ def verify_prior_escalation338(
         and isinstance(pins446, dict)
         and set(pins446) == set(ROLES)
         and isinstance(signed446, dict)
-        and set(signed446) == {
-            "commsSource", "hostSHORT", "hostMEDIUM", "hostLONG",
-            "observerShort", "observerMedium", "observerLong",
+        and set(signed446)
+        == {
+            "commsSource",
+            "hostSHORT",
+            "hostMEDIUM",
+            "hostLONG",
+            "observerShort",
+            "observerMedium",
+            "observerLong",
         }
         and isinstance(masters446, dict)
         and set(masters446) == set(MASTERS)
@@ -98,10 +104,15 @@ def verify_prior_escalation338(
         and isinstance(request446.get("watchId"), str)
         and len(request446["challengeNonce"]) >= 12
         and len(request446["watchId"]) >= 12
-        and len({
-            request446["challengeNonce"], request446["watchId"],
-            link["previousNonce"], link["previousWatchId"],
-        }) == 4
+        and len(
+            {
+                request446["challengeNonce"],
+                request446["watchId"],
+                link["previousNonce"],
+                link["previousWatchId"],
+            }
+        )
+        == 4
     ):
         return None
     source = verify446("commsSource", signed446["commsSource"], pins446)
@@ -127,8 +138,9 @@ def verify_prior_escalation338(
     any_on, divergence = False, False
     last_observed_time = previous_time
     for index, horizon in enumerate(HORIZONS, start=1):
-        role = {"SHORT": "observerShort", "MEDIUM": "observerMedium",
-                "LONG": "observerLong"}[horizon]
+        role = {"SHORT": "observerShort", "MEDIUM": "observerMedium", "LONG": "observerLong"}[
+            horizon
+        ]
         host = verify446("host", signed446["host" + horizon], pins446)
         witness = verify446(role, signed446[role], pins446)
         if not (host and witness):
@@ -183,11 +195,15 @@ def verify_prior_escalation338(
     classification = CLASS_DIVERGENCE if divergence else CLASS_REOPEN
     if not (link["priorRecurrenceOpen"] or any_on or divergence):
         return None
-    watch_digest = _digest({
-        "prior": prior_digest, "source": _digest(source),
-        "hostDigests": host_digests, "observerDigests": observer_digests,
-        "classification": classification,
-    })
+    watch_digest = _digest(
+        {
+            "prior": prior_digest,
+            "source": _digest(source),
+            "hostDigests": host_digests,
+            "observerDigests": observer_digests,
+            "classification": classification,
+        }
+    )
     officer = verify446("escalationOfficer", officer446, pins446)
     if not (
         result446.get("classification") == classification
@@ -213,7 +229,8 @@ def verify_prior_escalation338(
     for master in MASTERS:
         body = verify446(master, masters446[master], pins446)
         if not (
-            body and body.get("masterId") == master
+            body
+            and body.get("masterId") == master
             and body.get("requestDigest") == request_digest
             and body.get("originalIncidentId") == incident
             and body.get("priorQl445Digest") == prior_digest
@@ -233,7 +250,8 @@ def verify_prior_escalation338(
     for role, owner_id in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
         body = verify446(role, owners446[role], pins446)
         if not (
-            body and body.get("ownerId") == owner_id
+            body
+            and body.get("ownerId") == owner_id
             and body.get("requestDigest") == request_digest
             and body.get("originalIncidentId") == incident
             and body.get("priorQl445Digest") == prior_digest
@@ -248,25 +266,44 @@ def verify_prior_escalation338(
         ):
             return None
         owners.append(body)
-    evidence = _digest({
-        "prior": prior_digest, "source": source,
-        "hostProbes": [verify446("host", signed446["host" + h], pins446) for h in HORIZONS],
-        "observerProbes": [
-            verify446({"SHORT": "observerShort", "MEDIUM": "observerMedium",
-                       "LONG": "observerLong"}[h], signed446[
-                {"SHORT": "observerShort", "MEDIUM": "observerMedium",
-                 "LONG": "observerLong"}[h]], pins446) for h in HORIZONS
-        ],
-        "watchDigest": watch_digest, "officer": _digest(officer),
-        "masters": reports, "owners": owners,
-        "classification": classification,
-    })
+    evidence = _digest(
+        {
+            "prior": prior_digest,
+            "source": source,
+            "hostProbes": [verify446("host", signed446["host" + h], pins446) for h in HORIZONS],
+            "observerProbes": [
+                verify446(
+                    {"SHORT": "observerShort", "MEDIUM": "observerMedium", "LONG": "observerLong"}[
+                        h
+                    ],
+                    signed446[
+                        {
+                            "SHORT": "observerShort",
+                            "MEDIUM": "observerMedium",
+                            "LONG": "observerLong",
+                        }[h]
+                    ],
+                    pins446,
+                )
+                for h in HORIZONS
+            ],
+            "watchDigest": watch_digest,
+            "officer": _digest(officer),
+            "masters": reports,
+            "owners": owners,
+            "classification": classification,
+        }
+    )
     if terminal.get("evidenceDigest") != evidence:
         return None
-    return _digest({
-        "previous": prior_digest, "pending": pending,
-        "terminal": terminal, "signedEvidence": evidence,
-    }), {
+    return _digest(
+        {
+            "previous": prior_digest,
+            "pending": pending,
+            "terminal": terminal,
+            "signedEvidence": evidence,
+        }
+    ), {
         "incident": incident,
         "caseId": officer["caseId"],
         "ql446ReceiptDigest": terminal["receiptDigest"],

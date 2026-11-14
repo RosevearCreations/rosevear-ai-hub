@@ -88,15 +88,21 @@ def review_incident338(
         and isinstance(pins, dict)
         and set(pins) == set(ROLES)
         and all(
-            isinstance(pin, tuple) and len(pin) == 2
-            and isinstance(pin[0], bytes) and isinstance(pin[1], str)
-            and _public_ed25519(*pin) for pin in pins.values()
+            isinstance(pin, tuple)
+            and len(pin) == 2
+            and isinstance(pin[0], bytes)
+            and isinstance(pin[1], str)
+            and _public_ed25519(*pin)
+            for pin in pins.values()
         )
         and len({pin[0] for pin in pins.values()}) == len(ROLES)
         and len({pin[1] for pin in pins.values()}) == len(ROLES)
-        and type(now_ms) is int and type(final_now_ms) is int
+        and type(now_ms) is int
+        and type(final_now_ms) is int
         and 0 <= final_now_ms - now_ms <= 60_000
-        and callable(read_comms_source) and callable(read_host) and callable(read_observer)
+        and callable(read_comms_source)
+        and callable(read_host)
+        and callable(read_observer)
     ):
         return fail("HOLD_QL447_ORIGINAL_HOST_SESSION_PINS_OR_CLOCK_UNTRUSTED")
     try:
@@ -117,8 +123,10 @@ def review_incident338(
             and request.get("previousObserverDigest") == link["previousObserverDigest"]
             and request.get("challengeId") == link["challengeId"]
             and request.get("leaseId") == link["leaseId"]
-            and isinstance(nonce, str) and len(nonce) >= 12
-            and isinstance(follow_up, str) and len(follow_up) >= 12
+            and isinstance(nonce, str)
+            and len(nonce) >= 12
+            and isinstance(follow_up, str)
+            and len(follow_up) >= 12
             and len({nonce, follow_up, link["previousNonce"], link["previousWatchId"]}) == 4
             and now_ms > link["previousObservedAtMs"]
         ):
@@ -128,7 +136,8 @@ def review_incident338(
             return fail("HOLD_QL447_PRIVATE_PENDING_ALREADY_CONSUMED_OR_UNDURABLE")
         source = verify447(
             "commsSource",
-            read_comms_source(request=request, pendingDigest=pending["receiptDigest"]), pins,
+            read_comms_source(request=request, pendingDigest=pending["receiptDigest"]),
+            pins,
         )
         if not (
             source
@@ -145,10 +154,13 @@ def review_incident338(
         ):
             return fail("HOLD_QL447_ORIGINAL_SIGNED_OPEN_INCIDENT_INVALID")
         host = verify447(
-            "host", read_host(request=request, sourceDigest=_digest(source)), pins,
+            "host",
+            read_host(request=request, sourceDigest=_digest(source)),
+            pins,
         )
         if not (
-            host and host.get("requestDigest") == req_digest
+            host
+            and host.get("requestDigest") == req_digest
             and host.get("originalIncidentId") == incident
             and host.get("ql446EscalationReceiptDigest") == link["ql446ReceiptDigest"]
             and host.get("ql446CaseId") == link["caseId"]
@@ -170,10 +182,13 @@ def review_incident338(
         ):
             return fail("HOLD_QL447_SIGNED_ORIGINAL_HOST_ISOLATION_INVALID")
         witness = verify447(
-            "observer", read_observer(request=request, hostDigest=_digest(host)), pins,
+            "observer",
+            read_observer(request=request, hostDigest=_digest(host)),
+            pins,
         )
         if not (
-            witness and witness.get("requestDigest") == req_digest
+            witness
+            and witness.get("requestDigest") == req_digest
             and witness.get("originalIncidentId") == incident
             and witness.get("ql446EscalationReceiptDigest") == link["ql446ReceiptDigest"]
             and witness.get("ql446CaseId") == link["caseId"]
@@ -191,23 +206,31 @@ def review_incident338(
             return fail("HOLD_QL447_SIGNED_INDEPENDENT_RECEIVER_INVALID")
         reconfirmed = (
             host["receiverState"] == witness["receiverState"] == "OFF"
-            and host["isolationLock"] and host["leaseRevoked"]
-            and host["watchdogArmed"] and witness["isolationConfirmed"]
+            and host["isolationLock"]
+            and host["leaseRevoked"]
+            and host["watchdogArmed"]
+            and witness["isolationConfirmed"]
         )
         classification = CLASS_RECONFIRMED if reconfirmed else CLASS_EXCEPTION
         decision = DECISION_RECONFIRMED if reconfirmed else DECISION_EXCEPTION
-        evidence_digest = _digest({
-            "prior": prior_digest, "source": _digest(source),
-            "host": _digest(host), "observer": _digest(witness),
-            "classification": classification, "followUpId": follow_up,
-        })
+        evidence_digest = _digest(
+            {
+                "prior": prior_digest,
+                "source": _digest(source),
+                "host": _digest(host),
+                "observer": _digest(witness),
+                "classification": classification,
+                "followUpId": follow_up,
+            }
+        )
         if not isinstance(master_reports, dict) or set(master_reports) != set(MASTERS):
             return fail("HOLD_QL447_THREE_MASTERS_REQUIRED", not reconfirmed)
         reports = []
         for master in MASTERS:
             body = verify447(master, master_reports[master], pins)
             if not (
-                body and body.get("masterId") == master
+                body
+                and body.get("masterId") == master
                 and body.get("requestDigest") == req_digest
                 and body.get("originalIncidentId") == incident
                 and body.get("followUpId") == follow_up
@@ -228,7 +251,8 @@ def review_incident338(
         for role, identity in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
             body = verify447(role, dual_owners[role], pins)
             if not (
-                body and body.get("ownerId") == identity
+                body
+                and body.get("ownerId") == identity
                 and body.get("requestDigest") == req_digest
                 and body.get("originalIncidentId") == incident
                 and body.get("followUpId") == follow_up
@@ -239,7 +263,8 @@ def review_incident338(
                 and body.get("correctiveDecision") == decision
                 and body.get("incidentStatus") == "OPEN_HOLD"
                 and type(body.get("reviewedAtMs")) is int
-                and max(report["reviewedAtMs"] for report in reports) <= body["reviewedAtMs"]
+                and max(report["reviewedAtMs"] for report in reports)
+                <= body["reviewedAtMs"]
                 <= final_now_ms
             ):
                 return fail("HOLD_QL447_DUAL_OWNER_CORRECTIVE_VETO", not reconfirmed)
@@ -248,19 +273,28 @@ def review_incident338(
             return fail("HOLD_QL447_PROTECTED_REOPENED_INCIDENT_DRIFT", not reconfirmed)
         if journal.read(monitor, incident, "PENDING") != pending:
             return fail("HOLD_QL447_PENDING_PRIVATE_CUSTODY_DRIFT", not reconfirmed)
-        if any(journal.read(monitor, incident, stage) is not None
-               for stage in ("RECONFIRMED", "EXCEPTION")):
+        if any(
+            journal.read(monitor, incident, stage) is not None
+            for stage in ("RECONFIRMED", "EXCEPTION")
+        ):
             return fail("HOLD_QL447_CONFLICTING_TERMINAL_CUSTODY", not reconfirmed)
         if final_now_ms - source["observedAtMs"] > 60_000 or (
             final_now_ms - witness["observedAtMs"] > 60_000
         ):
             return fail("HOLD_QL447_EXPIRED_SIGNED_ORIGINAL_EVIDENCE", not reconfirmed)
-        evidence = _digest({
-            "prior": prior_digest, "request": req_digest,
-            "source": source, "host": host, "observer": witness,
-            "masters": reports, "owners": owners,
-            "classification": classification, "correctiveDecision": decision,
-        })
+        evidence = _digest(
+            {
+                "prior": prior_digest,
+                "request": req_digest,
+                "source": source,
+                "host": host,
+                "observer": witness,
+                "masters": reports,
+                "owners": owners,
+                "classification": classification,
+                "correctiveDecision": decision,
+            }
+        )
         stage = "RECONFIRMED" if reconfirmed else "EXCEPTION"
         terminal = journal.claim(monitor, incident, stage, req_digest, evidence)
         if not terminal:
@@ -281,7 +315,8 @@ def review_incident338(
             "finalReceiptDigest": terminal["receiptDigest"],
             "nextAction": (
                 "CONTINUE_MANUAL_ISOLATION_INDEPENDENT_RECHECK"
-                if reconfirmed else "SUPERVISED_ISOLATION_EXCEPTION_REMEDIATION"
+                if reconfirmed
+                else "SUPERVISED_ISOLATION_EXCEPTION_REMEDIATION"
             ),
         }
     except (KeyError, TypeError, ValueError, OSError):
