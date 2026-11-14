@@ -58,6 +58,7 @@ import { Ql440OwnerIssuancePanel } from "./Ql440OwnerIssuancePanel";
 import { Ql441OwnerWitnessPanel } from "./Ql441OwnerWitnessPanel";
 import { Ql442OwnerShutdownPanel } from "./Ql442OwnerShutdownPanel";
 import { Ql443OwnerRenewalPanel } from "./Ql443OwnerRenewalPanel";
+import { Ql444OwnerContinuityPanel } from "./Ql444OwnerContinuityPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -480,6 +481,14 @@ export function App() {
             <p>Signed historical evidence does not prove present physical OFF.
               Expired leases remain open exceptions, and connection remains HOLD.</p>
             <Ql443OwnerRenewalPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-444 independently signed OFF watch and incident evidence closure (read-only)</summary>
+            <p>Two independent OFF samples and signed owner decisions are required.
+              Historical evidence never proves live receiver OFF or CONNECTED.</p>
+            <Ql444OwnerContinuityPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
