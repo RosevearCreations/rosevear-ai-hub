@@ -446,6 +446,10 @@ export function getMasterShellAcceptance310(signal?: AbortSignal): Promise<unkno
   return getJson<unknown>("/api/v1/system/master-shell-310-acceptance", signal);
 }
 
+export function getMasterShellRenewal342(signal?: AbortSignal): Promise<unknown> {
+  return getJson<unknown>("/api/v1/system/master-shell-342-renewal", signal);
+}
+
 export function getMasterShellStability341(signal?: AbortSignal): Promise<unknown> {
   return getJson<unknown>("/api/v1/system/master-shell-341-stability", signal);
 }
