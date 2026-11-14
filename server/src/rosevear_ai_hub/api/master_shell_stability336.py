@@ -43,5 +43,5 @@ def read_ql445_owner_stability(
         "threeMasterReview": "NOT_VERIFIED",
         "dualOwnerReview": "NOT_VERIFIED",
         "lastIndependentObservationAt": None,
-        "message": "Signed QL-445 original-device recurrence and stability evidence is not enrolled.",
+        "message": "QL-445 signed post-closure stability evidence remains unverified.",
     }

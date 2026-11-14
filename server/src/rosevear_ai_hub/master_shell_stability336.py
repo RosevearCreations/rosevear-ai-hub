@@ -281,9 +281,7 @@ def review_stability336(
             ):
                 return fail("HOLD_QL445_THREE_MASTER_VETO_OR_CLASSIFICATION_DRIFT")
             reports.append(body)
-        if not isinstance(dual_owners, dict) or set(dual_owners) != {
-            "owner", "ownerReviewer"
-        }:
+        if not isinstance(dual_owners, dict) or set(dual_owners) != {"owner", "ownerReviewer"}:
             return fail("HOLD_QL445_TWO_ORIGINAL_OWNERS_REQUIRED")
         owners = []
         for role, owner_id in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
@@ -310,7 +308,10 @@ def review_stability336(
             return fail("HOLD_QL445_PROTECTED_QL444_ANCESTRY_DRIFT")
         if journal.read(monitor, incident, "PENDING") != pending:
             return fail("HOLD_QL445_PENDING_CUSTODY_CHANGED")
-        if any(journal.read(monitor, incident, stage) is not None for stage in ("STABLE", "RECURRENCE")):
+        if any(
+            journal.read(monitor, incident, stage) is not None
+            for stage in ("STABLE", "RECURRENCE")
+        ):
             return fail("HOLD_QL445_TERMINAL_REPLAY")
         evidence = _digest(
             {

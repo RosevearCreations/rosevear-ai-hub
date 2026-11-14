@@ -182,7 +182,9 @@ def fixture(monkeypatch, tmp_path, *, late=False, recurring=False):
     }
 
 
-@pytest.mark.parametrize(("late", "recurring"), [(False, False), (True, False), (False, True), (True, True)])
+@pytest.mark.parametrize(
+    ("late", "recurring"), [(False, False), (True, False), (False, True), (True, True)]
+)
 def test_signed_stable_or_on_recurrence_fail_closed_operationally(
     monkeypatch, tmp_path, late, recurring
 ):
