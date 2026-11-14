@@ -176,9 +176,7 @@ def fixture(monkeypatch, tmp_path, late=False):
         "sampleOne": signed(keys["sampleOne"], sample_one),
         "sampleTwo": signed(keys["sampleTwo"], sample_two),
     }
-    adapters = {
-        role: (lambda role=role, **_: deepcopy(evidence[role])) for role in evidence
-    }
+    adapters = {role: (lambda role=role, **_: deepcopy(evidence[role])) for role in evidence}
     journal = q.ProtectedContinuityJournal335(tmp_path / "ql444-private")
 
     def run():
@@ -260,9 +258,7 @@ def test_two_signed_off_samples_close_evidence_only(monkeypatch, tmp_path, late)
         ("sampleTwo", "sequence", 1),
     ],
 )
-def test_forged_source_host_or_off_samples_fail_closed(
-    monkeypatch, tmp_path, role, field, value
-):
+def test_forged_source_host_or_off_samples_fail_closed(monkeypatch, tmp_path, role, field, value):
     case = fixture(monkeypatch, tmp_path)
     case["evidence"][role]["payload"][field] = value
     result = case["run"]()

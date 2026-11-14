@@ -333,9 +333,7 @@ def review_continuity335(
                 return fail("HOLD_QL444_THREE_MASTER_CLOSURE_VETO_OR_DRIFT")
             reports.append(body)
 
-        if not isinstance(final_owners, dict) or set(final_owners) != {
-            "owner", "ownerReviewer"
-        }:
+        if not isinstance(final_owners, dict) or set(final_owners) != {"owner", "ownerReviewer"}:
             return fail("HOLD_QL444_TWO_ORIGINAL_CLOSURE_OWNERS_REQUIRED")
         owners = []
         for role, owner_id in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
