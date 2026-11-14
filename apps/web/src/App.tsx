@@ -62,6 +62,7 @@ import { Ql444OwnerContinuityPanel } from "./Ql444OwnerContinuityPanel";
 import { Ql445OwnerStabilityPanel } from "./Ql445OwnerStabilityPanel";
 import { Ql446OwnerEscalationPanel } from "./Ql446OwnerEscalationPanel";
 import { Ql447OwnerIncidentPanel } from "./Ql447OwnerIncidentPanel";
+import { Ql448OwnerRemediationPanel } from "./Ql448OwnerRemediationPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -515,6 +516,13 @@ export function App() {
             <summary>QL-447 signed original-host isolation and three-Master incident follow-up (read-only)</summary>
             <p>Incident remains OPEN/HOLD. Historical signed isolation cannot prove current physical OFF.</p>
             <Ql447OwnerIncidentPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-448 signed corrective remediation and independent long-horizon review (read-only)</summary>
+            <p>Incident remains OPEN/HOLD; even signed historical OFF cannot establish current physical state.</p>
+            <Ql448OwnerRemediationPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
