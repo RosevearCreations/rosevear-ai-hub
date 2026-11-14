@@ -9,9 +9,17 @@ from rosevear_ai_hub.master_shell_acceptance312 import MASTERS
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from rosevear_ai_hub.master_shell_prior341 import verify_prior_disposition341
 from rosevear_ai_hub.master_shell_stability341 import (
-    ACTION, CLASS_EXCEPTION, CLASS_STABLE, DECISION_EXCEPTION,
-    DECISION_STABLE, EXCEPTION, HORIZONS, ROLES, STABLE,
-    ProtectedStabilityJournal341, verify450,
+    ACTION,
+    CLASS_EXCEPTION,
+    CLASS_STABLE,
+    DECISION_EXCEPTION,
+    DECISION_STABLE,
+    EXCEPTION,
+    HORIZONS,
+    ROLES,
+    STABLE,
+    ProtectedStabilityJournal341,
+    verify450,
 )
 
 
@@ -48,10 +56,17 @@ def verify_prior_stability342(
         and len({pin[0] for pin in pins450.values()}) == len(ROLES)
         and len({pin[1] for pin in pins450.values()}) == len(ROLES)
         and isinstance(signed450, dict)
-        and set(signed450) == {
-            "commsSource", "externalAnchor", "closureAuthority",
-            "hostSHORT", "observerSHORT", "hostMEDIUM", "observerMEDIUM",
-            "hostLONG", "observerLONG",
+        and set(signed450)
+        == {
+            "commsSource",
+            "externalAnchor",
+            "closureAuthority",
+            "hostSHORT",
+            "observerSHORT",
+            "hostMEDIUM",
+            "observerMEDIUM",
+            "hostLONG",
+            "observerLONG",
         }
         and isinstance(masters450, dict)
         and set(masters450) == set(MASTERS)
@@ -68,11 +83,11 @@ def verify_prior_stability342(
     stage = "STABLE" if result450["state"] == STABLE else "EXCEPTION"
     pending = journal450.read(monitor, incident, "PENDING")
     terminal = journal450.read(monitor, incident, stage)
-    conflict = journal450.read(
-        monitor, incident, "EXCEPTION" if stage == "STABLE" else "STABLE"
-    )
+    conflict = journal450.read(monitor, incident, "EXCEPTION" if stage == "STABLE" else "STABLE")
     if not (
-        pending and terminal and conflict is None
+        pending
+        and terminal
+        and conflict is None
         and pending.get("requestDigest") == req_digest
         and pending.get("evidenceDigest") == old_digest
         and terminal.get("requestDigest") == req_digest
@@ -90,10 +105,15 @@ def verify_prior_stability342(
         and len(request450["reviewId"]) >= 12
         and isinstance(request450.get("challengeNonce"), str)
         and len(request450["challengeNonce"]) >= 12
-        and len({
-            request450["reviewId"], request450["challengeNonce"],
-            link["ql449Nonce"], link["ql449CeremonyId"],
-        }) == 4
+        and len(
+            {
+                request450["reviewId"],
+                request450["challengeNonce"],
+                link["ql449Nonce"],
+                link["ql449CeremonyId"],
+            }
+        )
+        == 4
     ):
         return None
     source = verify450("commsSource", signed450["commsSource"], pins450)
@@ -183,8 +203,10 @@ def verify_prior_stability342(
         time = witness["observedAtMs"]
     stable = all(
         h["receiverState"] == w["receiverState"] == "OFF"
-        and h["isolationLock"] and h["leaseRevoked"]
-        and h["watchdogArmed"] and w["isolationConfirmed"]
+        and h["isolationLock"]
+        and h["leaseRevoked"]
+        and h["watchdogArmed"]
+        and w["isolationConfirmed"]
         for h, w in observations
     )
     classification = CLASS_STABLE if stable else CLASS_EXCEPTION
@@ -195,12 +217,17 @@ def verify_prior_stability342(
         and stage == ("STABLE" if stable else "EXCEPTION")
     ):
         return None
-    stability_digest = _digest({
-        "prior": old_digest, "source": _digest(source), "anchor": _digest(anchor),
-        "hostDigests": [_digest(h) for h, _ in observations],
-        "observerDigests": [_digest(w) for _, w in observations],
-        "classification": classification, "reviewId": request450["reviewId"],
-    })
+    stability_digest = _digest(
+        {
+            "prior": old_digest,
+            "source": _digest(source),
+            "anchor": _digest(anchor),
+            "hostDigests": [_digest(h) for h, _ in observations],
+            "observerDigests": [_digest(w) for _, w in observations],
+            "classification": classification,
+            "reviewId": request450["reviewId"],
+        }
+    )
     if not (
         result450.get("stabilityEvidenceDigest") == stability_digest
         and boundary.get("requestDigest") == req_digest
@@ -225,7 +252,8 @@ def verify_prior_stability342(
     for master in MASTERS:
         vote = verify450(master, masters450[master], pins450)
         if not (
-            vote and vote.get("masterId") == master
+            vote
+            and vote.get("masterId") == master
             and vote.get("requestDigest") == req_digest
             and vote.get("originalIncidentId") == incident
             and vote.get("ql449ReceiptDigest") == link["ql449ReceiptDigest"]
@@ -244,12 +272,11 @@ def verify_prior_stability342(
     if result450.get("threeMasterDigest") != reports_digest:
         return None
     owners = []
-    for role, identity in zip(
-        ("owner", "ownerReviewer"), link["ownerIds"], strict=True
-    ):
+    for role, identity in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
         body = verify450(role, owners450[role], pins450)
         if not (
-            body and body.get("ownerId") == identity
+            body
+            and body.get("ownerId") == identity
             and body.get("requestDigest") == req_digest
             and body.get("originalIncidentId") == incident
             and body.get("ql449ReceiptDigest") == link["ql449ReceiptDigest"]
@@ -266,20 +293,31 @@ def verify_prior_stability342(
         ):
             return None
         owners.append(body)
-    full_evidence_digest = _digest({
-        "prior": old_digest, "request": req_digest,
-        "source": source, "anchor": anchor,
-        "hosts": [h for h, _ in observations],
-        "observers": [w for _, w in observations],
-        "boundary": boundary, "masters": reports, "owners": owners,
-        "classification": classification, "recurrenceDecision": decision,
-    })
+    full_evidence_digest = _digest(
+        {
+            "prior": old_digest,
+            "request": req_digest,
+            "source": source,
+            "anchor": anchor,
+            "hosts": [h for h, _ in observations],
+            "observers": [w for _, w in observations],
+            "boundary": boundary,
+            "masters": reports,
+            "owners": owners,
+            "classification": classification,
+            "recurrenceDecision": decision,
+        }
+    )
     if terminal.get("evidenceDigest") != full_evidence_digest:
         return None
-    return _digest({
-        "prior": old_digest, "pending": pending,
-        "terminal": terminal, "signedEvidence": full_evidence_digest,
-    }), {
+    return _digest(
+        {
+            "prior": old_digest,
+            "pending": pending,
+            "terminal": terminal,
+            "signedEvidence": full_evidence_digest,
+        }
+    ), {
         "incident": incident,
         "ql450ReceiptDigest": terminal["receiptDigest"],
         "ql450StabilityDigest": stability_digest,

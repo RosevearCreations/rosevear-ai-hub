@@ -12,10 +12,17 @@ from test_master_shell_stability341_signed import fixture as fixture450
 
 
 def fixture(
-    monkeypatch, tmp_path, *,
-    prior_exception=False, response_unresolved=False,
-    host_on=False, divergence=False, locked=True, lease_revoked=True,
-    watchdog=True, isolation_confirmed=True,
+    monkeypatch,
+    tmp_path,
+    *,
+    prior_exception=False,
+    response_unresolved=False,
+    host_on=False,
+    divergence=False,
+    locked=True,
+    lease_revoked=True,
+    watchdog=True,
+    isolation_confirmed=True,
 ):
     old = fixture450(monkeypatch, tmp_path / "ql450", host_on=prior_exception)
     result = old["run"]()
@@ -51,32 +58,42 @@ def fixture(
     pins = {role: key[1:] for role, key in keys.items()}
     source = {
         "schema": "rosevear.ai-hub.ql451.commsSource.v1",
-        "requestDigest": rd, "originalIncidentId": link["incident"],
+        "requestDigest": rd,
+        "originalIncidentId": link["incident"],
         "priorQl450Digest": prior_digest,
         "ql450ReceiptDigest": link["ql450ReceiptDigest"],
         "ql450StabilityDigest": link["ql450StabilityDigest"],
         "priorClassification": link["priorClassification"],
-        "incidentStatus": "OPEN_HOLD", "observedAtMs": 2_100_000,
+        "incidentStatus": "OPEN_HOLD",
+        "observedAtMs": 2_100_000,
     }
     officer = {
         "schema": "rosevear.ai-hub.ql451.responseOfficer.v1",
-        "requestDigest": rd, "originalIncidentId": link["incident"],
+        "requestDigest": rd,
+        "originalIncidentId": link["incident"],
         "ql450ReceiptDigest": link["ql450ReceiptDigest"],
         "sourceDigest": _digest(source),
         "renewalId": request["renewalId"],
         "challengeNonce": request["challengeNonce"],
         "responseDisposition": (
-            q.RESPONSE_UNRESOLVED if response_unresolved else
-            q.RESPONSE_COMPLETE if prior_exception else q.RESPONSE_CONTINUITY
+            q.RESPONSE_UNRESOLVED
+            if response_unresolved
+            else q.RESPONSE_COMPLETE
+            if prior_exception
+            else q.RESPONSE_CONTINUITY
         ),
-        "isolationLock": locked, "leaseRevoked": lease_revoked,
-        "watchdogArmed": watchdog, "observedAtMs": 2_102_000,
+        "isolationLock": locked,
+        "leaseRevoked": lease_revoked,
+        "watchdogArmed": watchdog,
+        "observedAtMs": 2_102_000,
     }
     anchor = {
         "schema": "rosevear.ai-hub.ql451.externalAnchor.v1",
-        "requestDigest": rd, "originalIncidentId": link["incident"],
+        "requestDigest": rd,
+        "originalIncidentId": link["incident"],
         "ql450ReceiptDigest": link["ql450ReceiptDigest"],
-        "sourceDigest": _digest(source), "responseDigest": _digest(officer),
+        "sourceDigest": _digest(source),
+        "responseDigest": _digest(officer),
         "renewalId": request["renewalId"],
         "challengeNonce": request["challengeNonce"],
         "disposition": q.ANCHOR_DISPOSITION,
@@ -92,32 +109,37 @@ def fixture(
     host_digests, witness_digests = [], []
     prev_host, prev_witness = None, link["previousObserverDigest"]
     seq = anchor["sequence"]
-    for horizon, moment in zip(
-        q.HORIZONS, (2_108_000, 2_120_000, 2_140_000), strict=True
-    ):
+    for horizon, moment in zip(q.HORIZONS, (2_108_000, 2_120_000, 2_140_000), strict=True):
         state = "ON" if host_on and horizon == "MEDIUM" else "OFF"
         host = {
             "schema": "rosevear.ai-hub.ql451.host.v1",
-            "requestDigest": rd, "originalIncidentId": link["incident"],
+            "requestDigest": rd,
+            "originalIncidentId": link["incident"],
             "hostMachineId": "DESKTOP-AE894KC",
             "ql450ReceiptDigest": link["ql450ReceiptDigest"],
             "renewalId": request["renewalId"],
             "challengeNonce": request["challengeNonce"],
             "responseDigest": _digest(officer),
-            "anchorDigest": _digest(anchor), "horizon": horizon,
+            "anchorDigest": _digest(anchor),
+            "horizon": horizon,
             "previousHostDigest": prev_host,
             "previousObserverDigest": prev_witness,
-            "receiverState": state, "isolationLock": locked,
-            "leaseRevoked": lease_revoked, "watchdogArmed": watchdog,
-            "sequence": seq + 1, "observedAtMs": moment,
+            "receiverState": state,
+            "isolationLock": locked,
+            "leaseRevoked": lease_revoked,
+            "watchdogArmed": watchdog,
+            "sequence": seq + 1,
+            "observedAtMs": moment,
         }
         witness = {
             "schema": "rosevear.ai-hub.ql451.observer.v1",
-            "requestDigest": rd, "originalIncidentId": link["incident"],
+            "requestDigest": rd,
+            "originalIncidentId": link["incident"],
             "ql450ReceiptDigest": link["ql450ReceiptDigest"],
             "renewalId": request["renewalId"],
             "challengeNonce": request["challengeNonce"],
-            "anchorDigest": _digest(anchor), "horizon": horizon,
+            "anchorDigest": _digest(anchor),
+            "horizon": horizon,
             "signedHostDigest": _digest(host),
             "previousObserverDigest": prev_witness,
             "receiverState": "ON" if divergence and horizon == "LONG" else state,
@@ -131,88 +153,121 @@ def fixture(
         witness_digests.append(_digest(witness))
         prev_host, prev_witness = _digest(host), _digest(witness)
         seq = witness["sequence"]
-    renewed = not any((
-        response_unresolved, host_on, divergence, not locked,
-        not lease_revoked, not watchdog, not isolation_confirmed,
-    ))
+    renewed = not any(
+        (
+            response_unresolved,
+            host_on,
+            divergence,
+            not locked,
+            not lease_revoked,
+            not watchdog,
+            not isolation_confirmed,
+        )
+    )
     classification = q.CLASS_RENEWED if renewed else q.CLASS_EXCEPTION
     decision = q.DECISION_RENEWED if renewed else q.DECISION_EXCEPTION
-    renewal_digest = _digest({
-        "prior": prior_digest, "source": _digest(source),
-        "response": _digest(officer), "anchor": _digest(anchor),
-        "hostDigests": host_digests, "observerDigests": witness_digests,
-        "classification": classification, "renewalId": request["renewalId"],
-    })
+    renewal_digest = _digest(
+        {
+            "prior": prior_digest,
+            "source": _digest(source),
+            "response": _digest(officer),
+            "anchor": _digest(anchor),
+            "hostDigests": host_digests,
+            "observerDigests": witness_digests,
+            "classification": classification,
+            "renewalId": request["renewalId"],
+        }
+    )
     boundary = {
         "schema": "rosevear.ai-hub.ql451.closureAuthority.v1",
-        "requestDigest": rd, "originalIncidentId": link["incident"],
+        "requestDigest": rd,
+        "originalIncidentId": link["incident"],
         "ql450ReceiptDigest": link["ql450ReceiptDigest"],
         "renewalId": request["renewalId"],
         "challengeNonce": request["challengeNonce"],
         "renewalEvidenceDigest": renewal_digest,
-        "classification": classification, "boundaryDecision": q.BOUNDARY,
-        "closureAuthorized": False, "activationAuthorized": False,
+        "classification": classification,
+        "boundaryDecision": q.BOUNDARY,
+        "closureAuthorized": False,
+        "activationAuthorized": False,
         "physicalReceiverCurrentlyOff": False,
-        "incidentStatus": "OPEN_HOLD", "reviewedAtMs": 2_142_000,
+        "incidentStatus": "OPEN_HOLD",
+        "reviewedAtMs": 2_142_000,
     }
     evidence["closureAuthority"] = signed(keys["closureAuthority"], boundary)
     masters = {}
     for master in q.MASTERS:
-        masters[master] = signed(keys[master], {
-            "schema": f"rosevear.ai-hub.ql451.{master}.v1",
-            "masterId": master, "requestDigest": rd,
-            "originalIncidentId": link["incident"],
-            "ql450ReceiptDigest": link["ql450ReceiptDigest"],
-            "renewalId": request["renewalId"],
-            "renewalEvidenceDigest": renewal_digest,
-            "closureBoundaryDigest": _digest(boundary),
-            "classification": classification,
-            "reassessmentDecision": decision,
-            "incidentStatus": "OPEN_HOLD", "reviewedAtMs": 2_145_000,
-        })
+        masters[master] = signed(
+            keys[master],
+            {
+                "schema": f"rosevear.ai-hub.ql451.{master}.v1",
+                "masterId": master,
+                "requestDigest": rd,
+                "originalIncidentId": link["incident"],
+                "ql450ReceiptDigest": link["ql450ReceiptDigest"],
+                "renewalId": request["renewalId"],
+                "renewalEvidenceDigest": renewal_digest,
+                "closureBoundaryDigest": _digest(boundary),
+                "classification": classification,
+                "reassessmentDecision": decision,
+                "incidentStatus": "OPEN_HOLD",
+                "reviewedAtMs": 2_145_000,
+            },
+        )
     report_digest = _digest([masters[m]["payload"] for m in q.MASTERS])
     owners = {}
-    for role, identity in zip(
-        ("owner", "ownerReviewer"), link["ownerIds"], strict=True
-    ):
-        owners[role] = signed(keys[role], {
-            "schema": f"rosevear.ai-hub.ql451.{role}.v1",
-            "ownerId": identity, "requestDigest": rd,
-            "originalIncidentId": link["incident"],
-            "ql450ReceiptDigest": link["ql450ReceiptDigest"],
-            "renewalId": request["renewalId"],
-            "renewalEvidenceDigest": renewal_digest,
-            "closureBoundaryDigest": _digest(boundary),
-            "threeMasterDigest": report_digest,
-            "classification": classification,
-            "reassessmentDecision": decision,
-            "incidentStatus": "OPEN_HOLD", "closureAuthorized": False,
-            "reviewedAtMs": 2_149_000,
-        })
+    for role, identity in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
+        owners[role] = signed(
+            keys[role],
+            {
+                "schema": f"rosevear.ai-hub.ql451.{role}.v1",
+                "ownerId": identity,
+                "requestDigest": rd,
+                "originalIncidentId": link["incident"],
+                "ql450ReceiptDigest": link["ql450ReceiptDigest"],
+                "renewalId": request["renewalId"],
+                "renewalEvidenceDigest": renewal_digest,
+                "closureBoundaryDigest": _digest(boundary),
+                "threeMasterDigest": report_digest,
+                "classification": classification,
+                "reassessmentDecision": decision,
+                "incidentStatus": "OPEN_HOLD",
+                "closureAuthorized": False,
+                "reviewedAtMs": 2_149_000,
+            },
+        )
     journal = q.ProtectedRenewalJournal342(tmp_path / "private-ql451")
 
     def run():
         return q.review_renewal342(
-            Ree(), prior, request, journal, pins,
+            Ree(),
+            prior,
+            request,
+            journal,
+            pins,
             read_comms_source=lambda **_: deepcopy(evidence["commsSource"]),
             read_response_officer=lambda **_: deepcopy(evidence["responseOfficer"]),
             read_external_anchor=lambda **_: deepcopy(evidence["externalAnchor"]),
             read_host=lambda *, horizon, **_: deepcopy(evidence["host" + horizon]),
-            read_observer=lambda *, horizon, **_: deepcopy(
-                evidence["observer" + horizon]
-            ),
-            read_closure_authority=lambda **_: deepcopy(
-                evidence["closureAuthority"]
-            ),
-            master_reports=masters, dual_owners=owners,
-            now_ms=2_155_000, final_now_ms=2_157_000,
+            read_observer=lambda *, horizon, **_: deepcopy(evidence["observer" + horizon]),
+            read_closure_authority=lambda **_: deepcopy(evidence["closureAuthority"]),
+            master_reports=masters,
+            dual_owners=owners,
+            now_ms=2_155_000,
+            final_now_ms=2_157_000,
         )
 
     return {
-        "run": run, "prior": prior, "request": request,
-        "keys": keys, "pins": pins, "evidence": evidence,
-        "masters": masters, "owners": owners,
-        "journal": journal, "incident": link["incident"],
+        "run": run,
+        "prior": prior,
+        "request": request,
+        "keys": keys,
+        "pins": pins,
+        "evidence": evidence,
+        "masters": masters,
+        "owners": owners,
+        "journal": journal,
+        "incident": link["incident"],
     }
 
 
@@ -230,9 +285,7 @@ def fixture(
         ({"isolation_confirmed": False}, q.CLASS_EXCEPTION),
     ],
 )
-def test_repaired_recurring_and_historical_safe_boundary(
-    monkeypatch, tmp_path, options, expected
-):
+def test_repaired_recurring_and_historical_safe_boundary(monkeypatch, tmp_path, options, expected):
     case = fixture(monkeypatch, tmp_path, **options)
     result = case["run"]()
     assert result["accepted"] is True, result
@@ -249,9 +302,9 @@ def test_repaired_recurring_and_historical_safe_boundary(
     assert case["run"]()["accepted"] is False
     state = "RENEWED" if expected == q.CLASS_RENEWED else "EXCEPTION"
     assert case["journal"].read(Ree(), case["incident"], state)
-    assert q.read_private_renewal342(Ree(), case["journal"], case["incident"])[
-        "connection"
-    ] == "HOLD"
+    assert (
+        q.read_private_renewal342(Ree(), case["journal"], case["incident"])["connection"] == "HOLD"
+    )
 
 
 @pytest.mark.parametrize(
@@ -291,9 +344,7 @@ def test_ql450_private_custody_and_master_owner_veto(monkeypatch, tmp_path):
     assert not case["journal"].directory.exists()
 
     case = fixture(monkeypatch, tmp_path / "master")
-    case["masters"]["rosevear-comms-hub"]["payload"][
-        "reassessmentDecision"
-    ] = "ACTIVATE"
+    case["masters"]["rosevear-comms-hub"]["payload"]["reassessmentDecision"] = "ACTIVATE"
     assert case["run"]()["accepted"] is False
 
     case = fixture(monkeypatch, tmp_path / "owner")
@@ -320,7 +371,9 @@ def test_private_pending_crash_symlink_and_terminal_conflict(monkeypatch, tmp_pa
 
     case = fixture(monkeypatch, tmp_path / "terminal")
     assert case["run"]()["accepted"] is True
-    assert case["journal"].claim(
-        Ree(), case["incident"], "EXCEPTION",
-        _digest(case["request"]), "a" * 64
-    ) is None
+    assert (
+        case["journal"].claim(
+            Ree(), case["incident"], "EXCEPTION", _digest(case["request"]), "a" * 64
+        )
+        is None
+    )

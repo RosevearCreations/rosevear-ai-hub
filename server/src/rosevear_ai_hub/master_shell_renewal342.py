@@ -28,8 +28,15 @@ DECISION_RENEWED = "SIGNED_RENEWAL_PRECONDITIONS_KEEP_INCIDENT_OPEN_HOLD"
 DECISION_EXCEPTION = "SIGNED_RECURRENCE_REASSESSMENT_EXCEPTION_KEEP_OPEN_HOLD"
 HORIZONS = ("SHORT", "MEDIUM", "LONG")
 ROLES = (
-    "commsSource", "responseOfficer", "externalAnchor", "host",
-    "observer", "closureAuthority", "owner", "ownerReviewer", *MASTERS,
+    "commsSource",
+    "responseOfficer",
+    "externalAnchor",
+    "host",
+    "observer",
+    "closureAuthority",
+    "owner",
+    "ownerReviewer",
+    *MASTERS,
 )
 
 
@@ -57,11 +64,14 @@ def verify451(
 def hold342(reason: str, exception: bool = False) -> dict[str, Any]:
     return {
         **hold_decision333(reason),
-        "sourceBuild": 342, "state": reason,
+        "sourceBuild": 342,
+        "state": reason,
         "receiver": "UNKNOWN_REQUIRES_FRESH_INDEPENDENT_OFF",
         "connection": "HOLD",
-        "incidentStatus": "OPEN", "incidentClosed": False,
-        "closureAuthorized": False, "activationAuthorized": False,
+        "incidentStatus": "OPEN",
+        "incidentClosed": False,
+        "closureAuthorized": False,
+        "activationAuthorized": False,
         "physicalReceiverCurrentlyOff": False,
         "historicalEvidenceOnly": True,
         "responsePreconditionsEvidenced": False,
@@ -98,19 +108,31 @@ def review_renewal342(
         and isinstance(prior450, dict)
         and isinstance(request, dict)
         and isinstance(journal, ProtectedRenewalJournal342)
-        and isinstance(pins, dict) and set(pins) == set(ROLES)
+        and isinstance(pins, dict)
+        and set(pins) == set(ROLES)
         and all(
-            isinstance(pin, tuple) and len(pin) == 2
-            and isinstance(pin[0], bytes) and isinstance(pin[1], str)
-            and _public_ed25519(*pin) for pin in pins.values()
+            isinstance(pin, tuple)
+            and len(pin) == 2
+            and isinstance(pin[0], bytes)
+            and isinstance(pin[1], str)
+            and _public_ed25519(*pin)
+            for pin in pins.values()
         )
         and len({pin[0] for pin in pins.values()}) == len(ROLES)
         and len({pin[1] for pin in pins.values()}) == len(ROLES)
-        and all(callable(fn) for fn in (
-            read_comms_source, read_response_officer, read_external_anchor,
-            read_host, read_observer, read_closure_authority,
-        ))
-        and type(now_ms) is int and type(final_now_ms) is int
+        and all(
+            callable(fn)
+            for fn in (
+                read_comms_source,
+                read_response_officer,
+                read_external_anchor,
+                read_host,
+                read_observer,
+                read_closure_authority,
+            )
+        )
+        and type(now_ms) is int
+        and type(final_now_ms) is int
         and 0 <= final_now_ms - now_ms <= 60_000
     ):
         return fail("HOLD_QL451_ORIGINAL_SESSION_SIGNERS_OR_CLOCK_INVALID")
@@ -131,11 +153,19 @@ def review_renewal342(
             and request.get("ql450BoundaryDigest") == link["ql450BoundaryDigest"]
             and request.get("priorClassification") == link["priorClassification"]
             and request.get("previousObserverDigest") == link["previousObserverDigest"]
-            and isinstance(renewal_id, str) and len(renewal_id) >= 12
-            and isinstance(nonce, str) and len(nonce) >= 12
-            and len({
-                renewal_id, nonce, link["ql450ReviewId"], link["ql450Nonce"],
-            }) == 4
+            and isinstance(renewal_id, str)
+            and len(renewal_id) >= 12
+            and isinstance(nonce, str)
+            and len(nonce) >= 12
+            and len(
+                {
+                    renewal_id,
+                    nonce,
+                    link["ql450ReviewId"],
+                    link["ql450Nonce"],
+                }
+            )
+            == 4
             and now_ms > link["previousObservedAtMs"]
         ):
             return fail("HOLD_QL451_FRESH_SCOPED_RENEWAL_ID_REQUIRED")
@@ -174,9 +204,11 @@ def review_renewal342(
             and officer.get("sourceDigest") == _digest(source)
             and officer.get("renewalId") == renewal_id
             and officer.get("challengeNonce") == nonce
-            and officer.get("responseDisposition") in (
+            and officer.get("responseDisposition")
+            in (
                 (RESPONSE_COMPLETE, RESPONSE_UNRESOLVED)
-                if link["priorExceptionOpen"] else (RESPONSE_CONTINUITY,)
+                if link["priorExceptionOpen"]
+                else (RESPONSE_CONTINUITY,)
             )
             and type(officer.get("isolationLock")) is bool
             and type(officer.get("leaseRevoked")) is bool
@@ -221,10 +253,12 @@ def review_renewal342(
             host = verify451(
                 "host",
                 read_host(
-                    request=request, horizon=horizon,
+                    request=request,
+                    horizon=horizon,
                     anchorDigest=_digest(anchor),
                     previousObserverDigest=last_witness,
-                ), pins,
+                ),
+                pins,
             )
             if not (
                 host
@@ -252,17 +286,17 @@ def review_renewal342(
                 return fail("HOLD_QL451_ORIGINAL_HOST_HORIZON_INVALID")
             if index == 1:
                 first_time = host["observedAtMs"]
-            elif host["observedAtMs"] - first_time < (
-                10_000 if index == 2 else 30_000
-            ):
+            elif host["observedAtMs"] - first_time < (10_000 if index == 2 else 30_000):
                 return fail("HOLD_QL451_MINIMUM_10_30_SECOND_HORIZON")
             observer = verify451(
                 "observer",
                 read_observer(
-                    request=request, horizon=horizon,
+                    request=request,
+                    horizon=horizon,
                     hostDigest=_digest(host),
                     previousObserverDigest=last_witness,
-                ), pins,
+                ),
+                pins,
             )
             if not (
                 observer
@@ -290,33 +324,41 @@ def review_renewal342(
             last_seq = observer["sequence"]
             last_time = observer["observedAtMs"]
         response_complete = (
-            officer["responseDisposition"] in (
-                RESPONSE_COMPLETE, RESPONSE_CONTINUITY
-            )
-            and officer["isolationLock"] and officer["leaseRevoked"]
+            officer["responseDisposition"] in (RESPONSE_COMPLETE, RESPONSE_CONTINUITY)
+            and officer["isolationLock"]
+            and officer["leaseRevoked"]
             and officer["watchdogArmed"]
         )
         renewed = response_complete and all(
             h["receiverState"] == w["receiverState"] == "OFF"
-            and h["isolationLock"] and h["leaseRevoked"]
-            and h["watchdogArmed"] and w["isolationConfirmed"]
+            and h["isolationLock"]
+            and h["leaseRevoked"]
+            and h["watchdogArmed"]
+            and w["isolationConfirmed"]
             for h, w in observations
         )
         classification = CLASS_RENEWED if renewed else CLASS_EXCEPTION
         decision = DECISION_RENEWED if renewed else DECISION_EXCEPTION
-        renewal_digest = _digest({
-            "prior": prior_digest, "source": _digest(source),
-            "response": _digest(officer), "anchor": _digest(anchor),
-            "hostDigests": [_digest(h) for h, _ in observations],
-            "observerDigests": [_digest(w) for _, w in observations],
-            "classification": classification, "renewalId": renewal_id,
-        })
+        renewal_digest = _digest(
+            {
+                "prior": prior_digest,
+                "source": _digest(source),
+                "response": _digest(officer),
+                "anchor": _digest(anchor),
+                "hostDigests": [_digest(h) for h, _ in observations],
+                "observerDigests": [_digest(w) for _, w in observations],
+                "classification": classification,
+                "renewalId": renewal_id,
+            }
+        )
         boundary = verify451(
             "closureAuthority",
             read_closure_authority(
-                request=request, renewalDigest=renewal_digest,
+                request=request,
+                renewalDigest=renewal_digest,
                 classification=classification,
-            ), pins,
+            ),
+            pins,
         )
         if not (
             boundary
@@ -360,14 +402,10 @@ def review_renewal342(
                 return fail("HOLD_QL451_THREE_MASTER_REASSESSMENT_VETO", not renewed)
             reports.append(vote)
         report_digest = _digest(reports)
-        if not isinstance(dual_owners, dict) or set(dual_owners) != {
-            "owner", "ownerReviewer"
-        }:
+        if not isinstance(dual_owners, dict) or set(dual_owners) != {"owner", "ownerReviewer"}:
             return fail("HOLD_QL451_TWO_ORIGINAL_OWNER_VOTES_REQUIRED", not renewed)
         owners = []
-        for role, identity in zip(
-            ("owner", "ownerReviewer"), link["ownerIds"], strict=True
-        ):
+        for role, identity in zip(("owner", "ownerReviewer"), link["ownerIds"], strict=True):
             body = verify451(role, dual_owners[role], pins)
             if not (
                 body
@@ -385,49 +423,64 @@ def review_renewal342(
                 and body.get("closureAuthorized") is False
                 and type(body.get("reviewedAtMs")) is int
                 and max(report["reviewedAtMs"] for report in reports)
-                <= body["reviewedAtMs"] <= final_now_ms
+                <= body["reviewedAtMs"]
+                <= final_now_ms
             ):
                 return fail("HOLD_QL451_DUAL_OWNER_CLOSURE_VETO", not renewed)
             owners.append(body)
         if verify_prior_stability342(monitor, **prior450) != checked:
             return fail("HOLD_QL451_PREDECESSOR_PRIVATE_CUSTODY_CHANGED", not renewed)
         if journal.read(monitor, incident, "PENDING") != pending or any(
-            journal.read(monitor, incident, state) is not None
-            for state in ("RENEWED", "EXCEPTION")
+            journal.read(monitor, incident, state) is not None for state in ("RENEWED", "EXCEPTION")
         ):
             return fail("HOLD_QL451_PENDING_OR_TERMINAL_CONFLICT", not renewed)
         if any(
             final_now_ms - t > 60_000
             for t in (
-                source["observedAtMs"], officer["observedAtMs"],
-                anchor["observedAtMs"], observations[0][0]["observedAtMs"],
-                last_time, boundary["reviewedAtMs"],
+                source["observedAtMs"],
+                officer["observedAtMs"],
+                anchor["observedAtMs"],
+                observations[0][0]["observedAtMs"],
+                last_time,
+                boundary["reviewedAtMs"],
             )
         ):
             return fail("HOLD_QL451_SIGNED_EVIDENCE_EXPIRED", not renewed)
-        signed_evidence_digest = _digest({
-            "prior": prior_digest, "request": req_digest,
-            "source": source, "officer": officer, "anchor": anchor,
-            "hosts": [h for h, _ in observations],
-            "observers": [w for _, w in observations],
-            "boundary": boundary, "masters": reports, "owners": owners,
-            "classification": classification, "reassessmentDecision": decision,
-        })
+        signed_evidence_digest = _digest(
+            {
+                "prior": prior_digest,
+                "request": req_digest,
+                "source": source,
+                "officer": officer,
+                "anchor": anchor,
+                "hosts": [h for h, _ in observations],
+                "observers": [w for _, w in observations],
+                "boundary": boundary,
+                "masters": reports,
+                "owners": owners,
+                "classification": classification,
+                "reassessmentDecision": decision,
+            }
+        )
         terminal = journal.claim(
-            monitor, incident, "RENEWED" if renewed else "EXCEPTION",
-            req_digest, signed_evidence_digest,
+            monitor,
+            incident,
+            "RENEWED" if renewed else "EXCEPTION",
+            req_digest,
+            signed_evidence_digest,
         )
         if not terminal:
             return fail("HOLD_QL451_PROTECTED_TERMINAL_NOT_DURABLE", not renewed)
         return {
             **hold342(RENEWED if renewed else EXCEPTION, not renewed),
-            "accepted": True, "originalIncidentId": incident,
-            "renewalId": renewal_id, "classification": classification,
+            "accepted": True,
+            "originalIncidentId": incident,
+            "renewalId": renewal_id,
+            "classification": classification,
             "reassessmentDecision": decision,
-            "responsePreconditionsEvidenced": (
-                renewed and link["priorExceptionOpen"]
-            ),
-            "independentRenewalAdmitted": True, "masterCount": 3,
+            "responsePreconditionsEvidenced": (renewed and link["priorExceptionOpen"]),
+            "independentRenewalAdmitted": True,
+            "masterCount": 3,
             "renewalEvidenceDigest": renewal_digest,
             "closureBoundaryDigest": boundary_digest,
             "threeMasterDigest": report_digest,
@@ -435,7 +488,8 @@ def review_renewal342(
             "finalReceiptDigest": terminal["receiptDigest"],
             "nextAction": (
                 "SEPARATE_PHYSICAL_OWNER_SUPERVISED_CLOSURE_CEREMONY_REQUIRED"
-                if renewed else "SUPERVISED_RECURRENCE_RESPONSE_CORRECTION_REQUIRED"
+                if renewed
+                else "SUPERVISED_RECURRENCE_RESPONSE_CORRECTION_REQUIRED"
             ),
         }
     except (KeyError, TypeError, ValueError, OSError):
