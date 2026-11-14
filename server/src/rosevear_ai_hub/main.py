@@ -62,6 +62,9 @@ from rosevear_ai_hub.api.master_shell_remediation339 import (
 from rosevear_ai_hub.api.master_shell_renewal334 import (
     router as master_shell_renewal334_router,
 )
+from rosevear_ai_hub.api.master_shell_renewal342 import (
+    router as master_shell_renewal342_router,
+)
 from rosevear_ai_hub.api.master_shell_shutdown333 import (
     router as master_shell_shutdown333_router,
 )
@@ -191,6 +194,7 @@ def create_app() -> FastAPI:
     application.include_router(master_shell_remediation339_router)
     application.include_router(master_shell_disposition340_router)
     application.include_router(master_shell_stability341_router)
+    application.include_router(master_shell_renewal342_router)
     application.include_router(global_search_router)
     # QL-243: default-off, nonproduction-only, authenticated GET health metadata.
     application.include_router(integration_v1_router)
