@@ -41,6 +41,7 @@ const applicationOrder = [
 function inspect(value: unknown): ReconciliationStatus | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const s = value as Record<string, unknown>;
+  const handoff = s.applicationHandoffOrder;
   if (s.schema !== "rosevear.ai-hub.ql452-owner-reconciliation.v1" ||
       s.sourceBuild !== 343 || s.connection !== "HOLD" ||
       s.incidentStatus !== "OPEN_UNVERIFIED" || s.incidentClosed !== false ||
@@ -53,9 +54,9 @@ function inspect(value: unknown): ReconciliationStatus | null {
       s.lastIndependentObservationAt !== null ||
       s.nextMasterHandoff !== "rosevear-comms-hub" ||
       s.connectivityVerified !== false ||
-      !Array.isArray(s.applicationHandoffOrder) ||
-      s.applicationHandoffOrder.length !== applicationOrder.length ||
-      !applicationOrder.every((name, i) => s.applicationHandoffOrder[i] === name) ||
+      !Array.isArray(handoff) ||
+      handoff.length !== applicationOrder.length ||
+      !applicationOrder.every((name, i) => handoff[i] === name) ||
       typeof s.state !== "string" || typeof s.message !== "string" ||
       typeof s.ql451ProtectedOutcome !== "string" ||
       typeof s.independentExceptionFollowUp !== "string" ||
