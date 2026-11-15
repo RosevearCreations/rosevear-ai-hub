@@ -37,7 +37,7 @@ $eventSource = 'Rosevear AI Hub Release Adoption'
 if (-not [Diagnostics.EventLog]::SourceExists($eventSource)) {
     New-EventLog -LogName Application -Source $eventSource
 }
-$action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument ('-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "{0}" -Apply' -f (Join-Path $PSScriptRoot 'hub-auto-update.ps1'))
+$action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument ('-WindowStyle Hidden -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "{0}" -Apply' -f (Join-Path $PSScriptRoot 'hub-auto-update.ps1'))
 $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(5) -RepetitionInterval (New-TimeSpan -Hours 1)
 $settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Hours 2) -StartWhenAvailable
 $principal = New-ScheduledTaskPrincipal -UserId $identity -LogonType Interactive -RunLevel Highest
