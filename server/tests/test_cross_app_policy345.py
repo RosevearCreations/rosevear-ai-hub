@@ -26,8 +26,12 @@ def keys_and_pins():
 def resource(app, tier):
     kind = next(k for k, value in p.RESOURCE_MATRIX[app].items() if value == tier)
     metadata = {
-        "app": app, "kind": kind, "resourceId": "row00001",
-        "ownerId": None, "tenantId": None, "companyId": None,
+        "app": app,
+        "kind": kind,
+        "resourceId": "row00001",
+        "ownerId": None,
+        "tenantId": None,
+        "companyId": None,
         "classification": tier,
     }
     if tier == "USER_SCOPED":
@@ -60,11 +64,16 @@ def assertion(app, tier, action, metadata):
 def request(app, tier, action="read"):
     keys, pins = keys_and_pins()
     meta = resource(app, tier)
-    principal = signed(keys[assertion(app, tier, action, meta)["issuer"]],
-                       assertion(app, tier, action, meta))
+    principal = signed(
+        keys[assertion(app, tier, action, meta)["issuer"]], assertion(app, tier, action, meta)
+    )
     return {
-        "principal": principal, "resource": meta, "action": action,
-        "audience": app, "now_ms": NOW, "trusted_issuer_pins": pins,
+        "principal": principal,
+        "resource": meta,
+        "action": action,
+        "audience": app,
+        "now_ms": NOW,
+        "trusted_issuer_pins": pins,
     }, keys
 
 
@@ -100,8 +109,7 @@ def test_anonymous_only_reads_public_server_resource(app):
     assert yes["activationAuthorized"] is False
     assert yes["crossAppConnectivityVerified"] is False
     assert p.evaluate_policy345(action="write", **args)["allowed"] is False
-    for tier in ("USER_SCOPED", "TENANT_SCOPED", "OPERATOR_SCOPED",
-                 "MASTER_GOVERNANCE"):
+    for tier in ("USER_SCOPED", "TENANT_SCOPED", "OPERATOR_SCOPED", "MASTER_GOVERNANCE"):
         args["resource"] = resource(app, tier)
         assert p.evaluate_policy345(action="read", **args)["allowed"] is False
 
@@ -122,10 +130,14 @@ def test_independent_scoped_signed_assertions_each_app(app, tier, action):
     assert outcome["requiresDurableSessionReplayJournal"] is True
 
 
-@pytest.mark.parametrize("tier,field", [
-    ("USER_SCOPED", "ownerId"), ("TENANT_SCOPED", "tenantId"),
-    ("OPERATOR_SCOPED", "companyId"),
-])
+@pytest.mark.parametrize(
+    "tier,field",
+    [
+        ("USER_SCOPED", "ownerId"),
+        ("TENANT_SCOPED", "tenantId"),
+        ("OPERATOR_SCOPED", "companyId"),
+    ],
+)
 def test_cross_user_tenant_company_is_denied_even_with_valid_signature(tier, field):
     args, _keys = request("iCamp", tier)
     args["resource"][field] = "OtherIdentity0001"
