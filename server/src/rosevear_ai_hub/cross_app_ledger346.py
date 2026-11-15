@@ -15,7 +15,6 @@ from typing import Any
 
 from rosevear_ai_hub.cross_app_security344 import (
     ORDER,
-    SCHEMA,
     validate_handoff344,
 )
 from rosevear_ai_hub.master_shell_acceptance319 import _digest, _native
