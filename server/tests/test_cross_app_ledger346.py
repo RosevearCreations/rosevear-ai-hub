@@ -11,9 +11,9 @@ from rosevear_ai_hub.cross_app_ledger346 import (
     ACK_SCHEMA,
     DurableSignedMailbox346,
 )
+from rosevear_ai_hub.cross_app_security344 import MESSAGE, ORDER, SCHEMA
 from rosevear_ai_hub.master_shell_acceptance319 import _digest
 from test_master_shell_acceptance322 import signed, signer
-from rosevear_ai_hub.cross_app_security344 import ORDER, SCHEMA, MESSAGE
 
 NOW = 2_200_000
 
