@@ -2,18 +2,19 @@
    Based on owner-approved Workshop Operations visual reference.
    Scoped to .master-command-ui: no unsafe global theme switch. */
 .master-command-ui {
-  --mc-bg: #06111f;
-  --mc-rail: #071522;
-  --mc-card: #0b2132;
-  --mc-card-raised: #0e293d;
-  --mc-border: #20435a;
-  --mc-text: #eff5fb;
-  --mc-muted: #a6b9cc;
-  --mc-purple: #9c39ff;
-  --mc-blue: #169cf0;
-  --mc-green: #00c895;
-  --mc-amber: #f5b52f;
-  --mc-red: #f36a76;
+  /* Build 407: rosevear-master-instrument.v1 — exact shared Master palette. */
+  --mc-bg: #050b16;
+  --mc-rail: #081625;
+  --mc-card: #0b1c2d;
+  --mc-card-raised: #0d2135;
+  --mc-border: rgba(121, 156, 196, .2);
+  --mc-text: #eef6ff;
+  --mc-muted: #8ca3b8;
+  --mc-purple: #9a46ff;
+  --mc-blue: #31a9ff;
+  --mc-green: #2ed58f;
+  --mc-amber: #ffbd4a;
+  --mc-red: #ff5c72;
   color: var(--mc-text);
   background: var(--mc-bg);
   border: 1px solid var(--mc-border);
