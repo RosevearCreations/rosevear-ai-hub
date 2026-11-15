@@ -49,9 +49,7 @@ FIELDS = {
     "createdAtMs",
     "expiresAtMs",
 }
-CONTRACT_DIGEST = _digest({
-    "order": ORDER, "tiers": TIERS, "message": MESSAGE, "schema": SCHEMA
-})
+CONTRACT_DIGEST = _digest({"order": ORDER, "tiers": TIERS, "message": MESSAGE, "schema": SCHEMA})
 
 
 def hold_handoff344(reason: str) -> dict[str, Any]:
@@ -81,9 +79,7 @@ def validate_handoff344(
         and isinstance(sender_pins, dict)
         and set(sender_pins) == set(ORDER)
         and all(
-            isinstance(pin, tuple)
-            and len(pin) == 2
-            and _public_ed25519(*pin)
+            isinstance(pin, tuple) and len(pin) == 2 and _public_ed25519(*pin)
             for pin in sender_pins.values()
         )
         and len({pin[0] for pin in sender_pins.values()}) == len(ORDER)
