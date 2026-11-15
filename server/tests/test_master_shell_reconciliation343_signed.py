@@ -27,13 +27,16 @@ def review(monkeypatch, tmp_path, **options):
     return data
 
 
-@pytest.mark.parametrize("options", [
-    {},
-    {"prior_exception": True},
-    {"host_on": True},
-    {"divergence": True},
-    {"response_unresolved": True, "prior_exception": True},
-])
+@pytest.mark.parametrize(
+    "options",
+    [
+        {},
+        {"prior_exception": True},
+        {"host_on": True},
+        {"divergence": True},
+        {"response_unresolved": True, "prior_exception": True},
+    ],
+)
 def test_authentic_original_history_stays_open(monkeypatch, tmp_path, options):
     data = review(monkeypatch, tmp_path, **options)
     result = q.reconcile_ql451_outcome343(Ree(), **data)
@@ -49,18 +52,20 @@ def test_authentic_original_history_stays_open(monkeypatch, tmp_path, options):
     assert result["followUpClosureVerified"] is False
     assert result["originalHostFollowUp"] == "NOT_VERIFIED_CURRENT_PHYSICAL_OFF"
     assert result["unresolvedException"] is bool(
-        options.get("host_on") or options.get("divergence")
-        or options.get("response_unresolved")
+        options.get("host_on") or options.get("divergence") or options.get("response_unresolved")
     )
 
 
-@pytest.mark.parametrize("path", [
-    ("result451", "finalReceiptDigest", "0" * 64),
-    ("result451", "physicalReceiverCurrentlyOff", True),
-    ("result451", "incidentStatus", "CLOSED"),
-    ("request451", "priorQl450Digest", "0" * 64),
-    ("request451", "challengeNonce", "QL450SameNonce"),
-])
+@pytest.mark.parametrize(
+    "path",
+    [
+        ("result451", "finalReceiptDigest", "0" * 64),
+        ("result451", "physicalReceiverCurrentlyOff", True),
+        ("result451", "incidentStatus", "CLOSED"),
+        ("request451", "priorQl450Digest", "0" * 64),
+        ("request451", "challengeNonce", "QL450SameNonce"),
+    ],
+)
 def test_original_record_tampering_blocks(monkeypatch, tmp_path, path):
     data = review(monkeypatch, tmp_path)
     item, key, value = path
