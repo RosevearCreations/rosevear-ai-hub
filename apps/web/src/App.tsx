@@ -66,6 +66,7 @@ import { Ql448OwnerRemediationPanel } from "./Ql448OwnerRemediationPanel";
 import { Ql449OwnerDispositionPanel } from "./Ql449OwnerDispositionPanel";
 import { Ql450OwnerStabilityPanel } from "./Ql450OwnerStabilityPanel";
 import { Ql451OwnerRenewalPanel } from "./Ql451OwnerRenewalPanel";
+import { Ql452OwnerReconciliationPanel } from "./Ql452OwnerReconciliationPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -547,6 +548,13 @@ export function App() {
             <summary>QL-451 original-host recurrence response and independently anchored OFF renewal (read-only)</summary>
             <p>Signed historical review cannot close the incident or prove present receiver OFF.</p>
             <Ql451OwnerRenewalPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-452 protected renewal reconciliation and original OFF exception follow-up (read-only)</summary>
+            <p>Reconciled signed history cannot prove present OFF, activation or closure.</p>
+            <Ql452OwnerReconciliationPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
