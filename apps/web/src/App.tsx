@@ -67,6 +67,7 @@ import { Ql449OwnerDispositionPanel } from "./Ql449OwnerDispositionPanel";
 import { Ql450OwnerStabilityPanel } from "./Ql450OwnerStabilityPanel";
 import { Ql451OwnerRenewalPanel } from "./Ql451OwnerRenewalPanel";
 import { Ql452OwnerReconciliationPanel } from "./Ql452OwnerReconciliationPanel";
+import { Ql453OwnerFollowupPanel } from "./Ql453OwnerFollowupPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -555,6 +556,13 @@ export function App() {
             <summary>QL-452 protected renewal reconciliation and original OFF exception follow-up (read-only)</summary>
             <p>Reconciled signed history cannot prove present OFF, activation or closure.</p>
             <Ql452OwnerReconciliationPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-453 signed original-host exception follow-up, OFF readback expiry and three-Master drift (read-only)</summary>
+            <p>Expiry escalation and security-tier linkage do not prove physical OFF or live app connectivity.</p>
+            <Ql453OwnerFollowupPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
