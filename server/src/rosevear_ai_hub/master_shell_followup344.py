@@ -49,9 +49,7 @@ def verify453(
     role: str, envelope: Any, pins: dict[str, tuple[bytes, str]]
 ) -> dict[str, Any] | None:
     if not (
-        role in pins
-        and isinstance(envelope, dict)
-        and isinstance(envelope.get("payload"), dict)
+        role in pins and isinstance(envelope, dict) and isinstance(envelope.get("payload"), dict)
     ):
         return None
     payload = envelope["payload"]
@@ -82,17 +80,18 @@ def audit_signed_followup344(
         and isinstance(request, dict)
         and set(request)
         == {
-            "action", "incidentId", "historicalReceiptDigest",
-            "historicalEvidenceDigest", "followupId", "challengeNonce"
+            "action",
+            "incidentId",
+            "historicalReceiptDigest",
+            "historicalEvidenceDigest",
+            "followupId",
+            "challengeNonce",
         }
         and isinstance(signed_masters, dict)
         and set(signed_masters) == set(MASTERS)
         and isinstance(pins, dict)
         and set(pins) == set(ROLES)
-        and all(
-            isinstance(p, tuple) and len(p) == 2
-            and _public_ed25519(*p) for p in pins.values()
-        )
+        and all(isinstance(p, tuple) and len(p) == 2 and _public_ed25519(*p) for p in pins.values())
         and len({p[0] for p in pins.values()}) == len(ROLES)
         and len({p[1] for p in pins.values()}) == len(ROLES)
         and type(now_ms) is int
@@ -139,8 +138,10 @@ def audit_signed_followup344(
             and host.get("historicalReceiptDigest") == receipt
             and host.get("hostMachineId") == "DESKTOP-AE894KC"
             and host.get("receiverState") in ("OFF", "ON")
-            and all(type(host.get(k)) is bool for k in
-                    ("isolationLock", "leaseRevoked", "watchdogArmed"))
+            and all(
+                type(host.get(k)) is bool
+                for k in ("isolationLock", "leaseRevoked", "watchdogArmed")
+            )
             and type(host.get("sequence")) is int
             and host["sequence"] > 0
             and type(host.get("observedAtMs")) is int
@@ -171,8 +172,7 @@ def audit_signed_followup344(
             return hold344("HOLD_QL453_ON_DIVERGENCE_OR_ISOLATION_EXCEPTION")
         owner = verify453("owner", signed_owner, pins)
         owner_decision = (
-            REVIEW_EXCEPTION if history.get("unresolvedException") is True
-            else REVIEW_CONTINUITY
+            REVIEW_EXCEPTION if history.get("unresolvedException") is True else REVIEW_CONTINUITY
         )
         if not (
             owner
@@ -192,13 +192,15 @@ def audit_signed_followup344(
             and observer["observedAtMs"] <= owner["reviewedAtMs"] <= now_ms
         ):
             return hold344("HOLD_QL453_SIGNED_OWNER_FOLLOWUP_VETO")
-        readback_digest = _digest({
-            "historicalEvidenceDigest": evidence,
-            "requestDigest": req_digest,
-            "hostDigest": _digest(host),
-            "observerDigest": _digest(observer),
-            "ownerDigest": _digest(owner),
-        })
+        readback_digest = _digest(
+            {
+                "historicalEvidenceDigest": evidence,
+                "requestDigest": req_digest,
+                "hostDigest": _digest(host),
+                "observerDigest": _digest(observer),
+                "ownerDigest": _digest(owner),
+            }
+        )
         previous_master_digest = None
         last_reviewed = owner["reviewedAtMs"]
         for master in MASTERS:
