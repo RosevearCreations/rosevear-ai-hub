@@ -10,6 +10,7 @@ protected seven-app public key pins and the receiving application identity.
 
 import json
 import sqlite3
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -76,18 +77,31 @@ class DurableSignedMailbox346:
         db.execute("PRAGMA synchronous=FULL")
         return db
 
+    @contextmanager
+    def _session(self):
+        db = self._connect()
+        try:
+            with db:
+                yield db
+        finally:
+            db.close()
+
     def enroll(self) -> None:
         """An explicit trusted local installation step, not an HTTP operation."""
         self.path.parent.mkdir(parents=True, exist_ok=True)
         if self.path.is_symlink():
             raise ValueError("Mailbox path cannot be a symlink")
-        with sqlite3.connect(self.path, timeout=5) as db:
+        if not self.path.exists():
+            with sqlite3.connect(self.path, timeout=5) as provisional:
+                provisional.execute("PRAGMA user_version=1")
+        with self._session() as db:
             db.execute("PRAGMA journal_mode=WAL")
             db.execute("PRAGMA synchronous=FULL")
             db.execute(
                 """CREATE TABLE IF NOT EXISTS mailbox346 (
                     direction TEXT NOT NULL CHECK(direction IN ('OUT','IN')),
                     message_id TEXT NOT NULL,
+                    nonce TEXT NOT NULL,
                     source TEXT NOT NULL,
                     destination TEXT NOT NULL,
                     envelope_digest TEXT NOT NULL,
@@ -99,7 +113,8 @@ class DurableSignedMailbox346:
                     next_at INTEGER NOT NULL,
                     lease_until INTEGER,
                     ack_digest TEXT,
-                    PRIMARY KEY (direction, message_id)
+                    PRIMARY KEY (direction, message_id),
+                    UNIQUE (direction, nonce)
                 )"""
             )
             db.execute(
@@ -125,7 +140,7 @@ class DurableSignedMailbox346:
             return reject("HOLD_QL455_INVALID_SIGNED_OUTBOUND")
         payload = envelope["payload"]
         try:
-            with self._connect() as db:
+            with self._session() as db:
                 db.execute("BEGIN IMMEDIATE")
                 if db.execute(
                     "SELECT 1 FROM mailbox346 WHERE direction='OUT' AND message_id=?",
@@ -134,11 +149,12 @@ class DurableSignedMailbox346:
                     return reject("HOLD_QL455_DURABLE_REPLAY")
                 db.execute(
                     """INSERT INTO mailbox346
-                    (direction,message_id,source,destination,envelope_digest,
+                    (direction,message_id,nonce,source,destination,envelope_digest,
                      evidence_digest,envelope,state,attempts,next_at)
-                    VALUES ('OUT',?,?,?,?,?,?,'PENDING',0,?)""",
+                    VALUES ('OUT',?,?,?,?,?,?,?,'PENDING',0,?)""",
                     (
                         payload["messageId"],
+                        payload["nonce"],
                         payload["source"],
                         payload["destination"],
                         _digest(envelope),
@@ -172,7 +188,7 @@ class DurableSignedMailbox346:
         payload = envelope["payload"]
         digest = _digest(envelope)
         try:
-            with self._connect() as db:
+            with self._session() as db:
                 db.execute("BEGIN IMMEDIATE")
                 row = db.execute(
                     """SELECT envelope_digest FROM mailbox346
@@ -187,11 +203,12 @@ class DurableSignedMailbox346:
                     }
                 db.execute(
                     """INSERT INTO mailbox346
-                    (direction,message_id,source,destination,envelope_digest,
+                    (direction,message_id,nonce,source,destination,envelope_digest,
                      evidence_digest,envelope,state,attempts,next_at)
-                    VALUES ('IN',?,?,?,?,?,?,'RECEIVED',0,?)""",
+                    VALUES ('IN',?,?,?,?,?,?,?,'RECEIVED',0,?)""",
                     (
                         payload["messageId"],
+                        payload["nonce"],
                         payload["source"],
                         payload["destination"],
                         digest,
@@ -215,7 +232,7 @@ class DurableSignedMailbox346:
         if not _valid_time(now_ms):
             return reject("HOLD_QL455_INVALID_CLOCK")
         try:
-            with self._connect() as db:
+            with self._session() as db:
                 db.execute("BEGIN IMMEDIATE")
                 row = db.execute(
                     """SELECT message_id, envelope, attempts FROM mailbox346
@@ -262,7 +279,7 @@ class DurableSignedMailbox346:
         if not _valid_time(now_ms):
             return reject("HOLD_QL455_INVALID_CLOCK")
         try:
-            with self._connect() as db:
+            with self._session() as db:
                 db.execute("BEGIN IMMEDIATE")
                 rows = db.execute(
                     """SELECT message_id,attempts FROM mailbox346
@@ -330,7 +347,7 @@ class DurableSignedMailbox346:
         ):
             return reject("HOLD_QL455_SIGNED_ACK_INVALID_OR_EXPIRED")
         try:
-            with self._connect() as db:
+            with self._session() as db:
                 db.execute("BEGIN IMMEDIATE")
                 row = db.execute(
                     """SELECT source,destination,envelope_digest,evidence_digest,
@@ -376,7 +393,7 @@ class DurableSignedMailbox346:
     def counts(self) -> dict[str, Any]:
         """Aggregates only; never returns signed envelopes or private metadata."""
         try:
-            with self._connect() as db:
+            with self._session() as db:
                 rows = db.execute(
                     "SELECT direction,state,COUNT(*) FROM mailbox346 "
                     "GROUP BY direction,state"
