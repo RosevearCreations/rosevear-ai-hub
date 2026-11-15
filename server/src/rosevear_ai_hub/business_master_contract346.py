@@ -94,8 +94,7 @@ def validate_business_master346(
         and type(body["createdAtMs"]) is int
         and type(body["expiresAtMs"]) is int
         and 0 <= now_ms - body["createdAtMs"] <= 60_000
-        and body["createdAtMs"] < body["expiresAtMs"]
-        <= body["createdAtMs"] + 60_000
+        and body["createdAtMs"] < body["expiresAtMs"] <= body["createdAtMs"] + 60_000
         and now_ms < body["expiresAtMs"]
     ):
         return {**denied, "state": "HOLD_QL455_BRAND_ROUTE_SCOPE_OR_EXPIRY"}
