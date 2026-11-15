@@ -125,8 +125,7 @@ class DurableSignedMailbox346:
                 )"""
             )
             db.execute(
-                "CREATE INDEX IF NOT EXISTS mailbox346_due "
-                "ON mailbox346(direction,state,next_at)"
+                "CREATE INDEX IF NOT EXISTS mailbox346_due ON mailbox346(direction,state,next_at)"
             )
             db.commit()
 
@@ -341,8 +340,7 @@ class DurableSignedMailbox346:
             and type(ack["issuedAtMs"]) is int
             and type(ack["expiresAtMs"]) is int
             and 0 <= now_ms - ack["issuedAtMs"] <= MAX_ACK_AGE_MS
-            and ack["issuedAtMs"] < ack["expiresAtMs"]
-            <= ack["issuedAtMs"] + MAX_ACK_AGE_MS
+            and ack["issuedAtMs"] < ack["expiresAtMs"] <= ack["issuedAtMs"] + MAX_ACK_AGE_MS
             and now_ms < ack["expiresAtMs"]
         ):
             return reject("HOLD_QL455_SIGNED_ACK_INVALID_OR_EXPIRED")
@@ -375,8 +373,7 @@ class DurableSignedMailbox346:
                     (_digest(envelope), ack["messageId"]),
                 )
                 db.execute(
-                    "INSERT INTO ack346(message_id,envelope_digest,received_at) "
-                    "VALUES(?,?,?)",
+                    "INSERT INTO ack346(message_id,envelope_digest,received_at) VALUES(?,?,?)",
                     (ack["messageId"], _digest(envelope), now_ms),
                 )
             return {
@@ -395,8 +392,7 @@ class DurableSignedMailbox346:
         try:
             with self._session() as db:
                 rows = db.execute(
-                    "SELECT direction,state,COUNT(*) FROM mailbox346 "
-                    "GROUP BY direction,state"
+                    "SELECT direction,state,COUNT(*) FROM mailbox346 GROUP BY direction,state"
                 ).fetchall()
             return {
                 **reject("QL455_PROTECTED_LOCAL_LEDGER_COUNTS_NO_LIVE_LINK"),
