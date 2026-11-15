@@ -109,9 +109,7 @@ def reconcile_ql451_outcome343(
         terminal_stage = "RENEWED" if renewed else "EXCEPTION"
         pending = journal451.read(monitor, incident, "PENDING")
         terminal = journal451.read(monitor, incident, terminal_stage)
-        conflict = journal451.read(
-            monitor, incident, "EXCEPTION" if renewed else "RENEWED"
-        )
+        conflict = journal451.read(monitor, incident, "EXCEPTION" if renewed else "RENEWED")
         if not (
             result451.get("accepted") is True
             and result451.get("state") == (RENEWED if renewed else EXCEPTION)
@@ -148,12 +146,15 @@ def reconcile_ql451_outcome343(
             and len(request451["renewalId"]) >= 12
             and isinstance(request451.get("challengeNonce"), str)
             and len(request451["challengeNonce"]) >= 12
-            and len({
-                request451["renewalId"],
-                request451["challengeNonce"],
-                link["ql450ReviewId"],
-                link["ql450Nonce"],
-            }) == 4
+            and len(
+                {
+                    request451["renewalId"],
+                    request451["challengeNonce"],
+                    link["ql450ReviewId"],
+                    link["ql450Nonce"],
+                }
+            )
+            == 4
         ):
             return hold343("HOLD_QL452_RECEIPT_OR_PREDECESSOR_DIGEST_MISMATCH")
 
@@ -183,10 +184,13 @@ def reconcile_ql451_outcome343(
             and officer.get("responseDisposition")
             in (
                 (RESPONSE_COMPLETE, "SIGNED_RESPONSE_UNRESOLVED_KEEP_HOLD")
-                if link["priorExceptionOpen"] else (RESPONSE_CONTINUITY,)
+                if link["priorExceptionOpen"]
+                else (RESPONSE_CONTINUITY,)
             )
-            and all(type(officer.get(k)) is bool for k in
-                    ("isolationLock", "leaseRevoked", "watchdogArmed"))
+            and all(
+                type(officer.get(k)) is bool
+                for k in ("isolationLock", "leaseRevoked", "watchdogArmed")
+            )
             and type(officer.get("observedAtMs")) is int
             and source["observedAtMs"] < officer["observedAtMs"]
             and anchor.get("requestDigest") == req_digest
@@ -231,8 +235,10 @@ def reconcile_ql451_outcome343(
                 and host.get("previousHostDigest") == previous_host
                 and host.get("previousObserverDigest") == previous_observer
                 and host.get("receiverState") in ("ON", "OFF")
-                and all(type(host.get(k)) is bool for k in
-                        ("isolationLock", "leaseRevoked", "watchdogArmed"))
+                and all(
+                    type(host.get(k)) is bool
+                    for k in ("isolationLock", "leaseRevoked", "watchdogArmed")
+                )
                 and type(host.get("sequence")) is int
                 and host["sequence"] > sequence
                 and type(host.get("observedAtMs")) is int
@@ -266,27 +272,32 @@ def reconcile_ql451_outcome343(
 
         historical_renewed = (
             officer["responseDisposition"] in (RESPONSE_COMPLETE, RESPONSE_CONTINUITY)
-            and officer["isolationLock"] and officer["leaseRevoked"]
+            and officer["isolationLock"]
+            and officer["leaseRevoked"]
             and officer["watchdogArmed"]
             and all(
                 h["receiverState"] == w["receiverState"] == "OFF"
-                and h["isolationLock"] and h["leaseRevoked"] and h["watchdogArmed"]
+                and h["isolationLock"]
+                and h["leaseRevoked"]
+                and h["watchdogArmed"]
                 and w["isolationConfirmed"]
                 for h, w in observations
             )
         )
         if historical_renewed != renewed:
             return hold343("HOLD_QL452_RENEWAL_EXCEPTION_MISCLASSIFICATION")
-        evidence_digest = _digest({
-            "prior": prior_digest,
-            "source": _digest(source),
-            "response": _digest(officer),
-            "anchor": _digest(anchor),
-            "hostDigests": [_digest(h) for h, _ in observations],
-            "observerDigests": [_digest(w) for _, w in observations],
-            "classification": classification,
-            "renewalId": renewal_id,
-        })
+        evidence_digest = _digest(
+            {
+                "prior": prior_digest,
+                "source": _digest(source),
+                "response": _digest(officer),
+                "anchor": _digest(anchor),
+                "hostDigests": [_digest(h) for h, _ in observations],
+                "observerDigests": [_digest(w) for _, w in observations],
+                "classification": classification,
+                "renewalId": renewal_id,
+            }
+        )
         boundary = verify451("closureAuthority", signed451["closureAuthority"], pins451)
         if not (
             boundary
@@ -355,42 +366,46 @@ def reconcile_ql451_outcome343(
             ):
                 return hold343("HOLD_QL452_DUAL_ORIGINAL_OWNER_CLOSURE_BOUNDARY")
             owners.append(owner)
-        signed_digest = _digest({
-            "prior": prior_digest,
-            "request": req_digest,
-            "source": source,
-            "officer": officer,
-            "anchor": anchor,
-            "hosts": [h for h, _ in observations],
-            "observers": [w for _, w in observations],
-            "boundary": boundary,
-            "masters": reports,
-            "owners": owners,
-            "classification": classification,
-            "reassessmentDecision": DECISION_RENEWED if renewed else DECISION_EXCEPTION,
-        })
+        signed_digest = _digest(
+            {
+                "prior": prior_digest,
+                "request": req_digest,
+                "source": source,
+                "officer": officer,
+                "anchor": anchor,
+                "hosts": [h for h, _ in observations],
+                "observers": [w for _, w in observations],
+                "boundary": boundary,
+                "masters": reports,
+                "owners": owners,
+                "classification": classification,
+                "reassessmentDecision": DECISION_RENEWED if renewed else DECISION_EXCEPTION,
+            }
+        )
         if terminal["evidenceDigest"] != signed_digest:
             return hold343("HOLD_QL452_PROTECTED_TERMINAL_EVIDENCE_MISMATCH")
         # Historical reconciliation is NOT an independent physical check now.
         status = hold343("QL452_HISTORICAL_RENEWAL_RECONCILED_INCIDENT_OPEN_HOLD")
-        status.update({
-            "accepted": True,
-            "historicalQl451Verified": True,
-            "threeMasterGovernanceVerified": True,
-            "unresolvedException": not renewed,
-            "classification": classification,
-            "originalIncidentId": incident,
-            "historicalReceiptDigest": terminal["receiptDigest"],
-            "historicalEvidenceDigest": signed_digest,
-            "followUpClosureVerified": False,
-            "recurrencePreventionOutcome": (
-                "EXCEPTION_OPEN_CORRECTIVE_RESPONSE_AND_FRESH_OFF_FOLLOWUP_REQUIRED"
-                if not renewed else
-                "RENEWAL_HISTORY_RECONCILED_FRESH_OFF_AND_OWNER_REVIEW_REQUIRED"
-            ),
-            "originalHostFollowUp": "NOT_VERIFIED_CURRENT_PHYSICAL_OFF",
-            "nextMasterHandoff": "rosevear-comms-hub",
-        })
+        status.update(
+            {
+                "accepted": True,
+                "historicalQl451Verified": True,
+                "threeMasterGovernanceVerified": True,
+                "unresolvedException": not renewed,
+                "classification": classification,
+                "originalIncidentId": incident,
+                "historicalReceiptDigest": terminal["receiptDigest"],
+                "historicalEvidenceDigest": signed_digest,
+                "followUpClosureVerified": False,
+                "recurrencePreventionOutcome": (
+                    "EXCEPTION_OPEN_CORRECTIVE_RESPONSE_AND_FRESH_OFF_FOLLOWUP_REQUIRED"
+                    if not renewed
+                    else "RENEWAL_HISTORY_RECONCILED_FRESH_OFF_AND_OWNER_REVIEW_REQUIRED"
+                ),
+                "originalHostFollowUp": "NOT_VERIFIED_CURRENT_PHYSICAL_OFF",
+                "nextMasterHandoff": "rosevear-comms-hub",
+            }
+        )
         return status
     except (KeyError, TypeError, ValueError, OSError):
         return hold343("HOLD_QL452_INCOMPLETE_TAMPERED_OR_UNREADABLE_EVIDENCE")
