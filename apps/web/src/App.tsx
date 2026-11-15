@@ -68,6 +68,7 @@ import { Ql450OwnerStabilityPanel } from "./Ql450OwnerStabilityPanel";
 import { Ql451OwnerRenewalPanel } from "./Ql451OwnerRenewalPanel";
 import { Ql452OwnerReconciliationPanel } from "./Ql452OwnerReconciliationPanel";
 import { Ql453OwnerFollowupPanel } from "./Ql453OwnerFollowupPanel";
+import { Ql454OwnerPolicyPanel } from "./Ql454OwnerPolicyPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -563,6 +564,13 @@ export function App() {
             <summary>QL-453 signed original-host exception follow-up, OFF readback expiry and three-Master drift (read-only)</summary>
             <p>Expiry escalation and security-tier linkage do not prove physical OFF or live app connectivity.</p>
             <Ql453OwnerFollowupPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-454 canonical six-tier policy and scoped seven-app resource matrix (read-only)</summary>
+            <p>Source-only role policy. Tenant RLS, issuers, runtime federation and physical receiver OFF remain unverified.</p>
+            <Ql454OwnerPolicyPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
