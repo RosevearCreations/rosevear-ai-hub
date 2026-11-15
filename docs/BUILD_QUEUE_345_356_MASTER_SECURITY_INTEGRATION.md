@@ -25,11 +25,11 @@ A rollout must carry \`schemaVersion\`, source/receiver identity, \`correlationI
 
 T0–T4 cannot grant T5. Even a signed T4 event with a verified envelope does not mean message *delivered*, user *authorized*, or physical receiver *OFF*. Default every missing custody/transport/status to \`NOT_VERIFIED\` / \`HOLD\`.
 
-## Twelve substantial follow-on builds — owner-approved planning queue, not started
+## Twelve gated build proposals — Build 345 in source implementation, Builds 346–356 queued
 
 | AI Hub build / QL | Principal deliverables | Seven-app acceptance / negative tests |
 |---|---|---|
-| **345 / QL-454** | Central security-tier policy-as-code; trusted principal/tenant assertions; explicit resource scope matrix; role separation across Masters, SaaS shells and internal brands. | Every app exports RBAC matrix; deny-by-default tests for anonymous, cross-tenant, role escalation and T4→T5; no global superuser token. |
+| **345 / QL-454** | **Source implementation in progress:** signed principal and six-tier policy evaluator, exact resource/tenant/company scope, owner audit registry. Does not enroll live issuers or activate cross-app enforcement. | Synthetic seven-app negative tests and exact production CI gate; all seven real app APIs/RLS must independently adopt and verify later. |
 | **346 / QL-455** | Versioned event schemas, signed outbox/inbox and durable nonce replay journal; retry/backoff, idempotency, delivery ACK, dead-letter handling and audit. | All seven ingest schema test fixtures; duplicate/stale/forged messages rejected; recoverable outage tests; delivery separately measured, no live rollout without keys. |
 | **347 / QL-456** | Per-app identity registration, scoped service accounts, key rotation windows, revocation propagation, certificate/key custody and expiry alarms. | Three Masters attest separate public identities; every downstream app proves revoked/expired/wrong-audience denial; key rotation dry-run and rollback. |
 | **348 / QL-457** | Tenant isolation audit of iCamp and YW, separate internal-company Rosie/Devil boundaries, Postgres row-level policies, storage rules and audit trails. | Cross-tenant query/storage tests across every role and relevant object, data migrations safely reversible, zero leakage; independently audited environment. |
