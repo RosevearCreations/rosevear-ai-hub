@@ -114,7 +114,7 @@ if (& $ApiProbe) {
     Write-RecoveryLog "Starting API."
     # Reuse the launcher proven during the October power-outage recovery. It
     # verifies the running Hub identity/version and refuses duplicate startups.
-    & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'restart-hub-backend.ps1') -Action Start -RepoRoot $Root
+    & powershell.exe -WindowStyle Hidden -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'restart-hub-backend.ps1') -Action Start -RepoRoot $Root
     if ($LASTEXITCODE -ne 0) {
         Write-RecoveryLog "ERROR verified API launcher failed; no retry or DB writes."
         exit 2
@@ -157,7 +157,7 @@ if (-not $SkipCamera) {
         Write-RecoveryLog "WARNING go2rtc offline (check-only)."
     } elseif ((Test-Path $Go2RTC) -and (Test-Path $Go2RTCLauncher)) {
         try {
-            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $Go2RTCLauncher
+            & powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File $Go2RTCLauncher
             if ($LASTEXITCODE -ne 0) { throw "go2rtc launcher returned $LASTEXITCODE" }
             Write-RecoveryLog "go2rtc startup attempted; verify camera streams separately."
         } catch {
