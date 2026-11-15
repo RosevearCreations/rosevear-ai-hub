@@ -15,13 +15,14 @@ if ($Install -and $Remove) { throw 'Choose -Install or -Remove, not both.' }
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
 $runner = Join-Path $PSScriptRoot 'start-hub-lan-gateway.ps1'
 if (-not (Test-Path -LiteralPath $runner)) { throw 'Gateway recovery entry point is missing.' }
-$argsExpected = '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "{0}"' -f $runner
+$argsLegacy = '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "{0}"' -f $runner
+$argsExpected = '-WindowStyle Hidden ' + $argsLegacy
 $task = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
 if ($task) {
     $actions = @($task.Actions)
     $owned = ($actions.Count -eq 1 -and
         [IO.Path]::GetFileName([string]$actions[0].Execute) -ieq 'powershell.exe' -and
-        [string]$actions[0].Arguments -ceq $argsExpected -and
+        [string]$actions[0].Arguments -cin @($argsLegacy, $argsExpected) -and
         [string]$task.Principal.UserId -ieq $identity)
     if (-not $owned) { throw 'HOLD: existing task is not the exact Hub gateway task; leaving it unchanged.' }
 }

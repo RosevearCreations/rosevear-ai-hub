@@ -69,6 +69,7 @@ import { Ql451OwnerRenewalPanel } from "./Ql451OwnerRenewalPanel";
 import { Ql452OwnerReconciliationPanel } from "./Ql452OwnerReconciliationPanel";
 import { Ql453OwnerFollowupPanel } from "./Ql453OwnerFollowupPanel";
 import { Ql454OwnerPolicyPanel } from "./Ql454OwnerPolicyPanel";
+import { Ql455OwnerMailboxPanel } from "./Ql455OwnerMailboxPanel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -571,6 +572,12 @@ export function App() {
             <summary>QL-454 canonical six-tier policy and scoped seven-app resource matrix (read-only)</summary>
             <p>Source-only role policy. Tenant RLS, issuers, runtime federation and physical receiver OFF remain unverified.</p>
             <Ql454OwnerPolicyPanel />
+          </details>
+        )}
+        {section === "System" && user.role === "owner" && (
+          <details className="hub-historical-checks">
+            <summary>QL-455 durable signed seven-app inbox, outbox and ACK readiness (read-only)</summary>
+            <Ql455OwnerMailboxPanel />
           </details>
         )}
         {section === "System" && canAdminister && <HubUpdatePanel />}
