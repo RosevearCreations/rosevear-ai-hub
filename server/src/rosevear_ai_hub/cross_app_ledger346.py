@@ -57,9 +57,7 @@ def reject(reason: str) -> dict[str, Any]:
 
 def _validate_envelope(envelope: Any, pins: dict, now_ms: int) -> dict[str, Any]:
     if envelope.get("payload", {}).get("schema") == BUSINESS_SCHEMA:
-        return validate_business_master346(
-            envelope, sender_pins=pins, now_ms=now_ms
-        )
+        return validate_business_master346(envelope, sender_pins=pins, now_ms=now_ms)
     return validate_handoff344(envelope, sender_pins=pins, now_ms=now_ms)
 
 
