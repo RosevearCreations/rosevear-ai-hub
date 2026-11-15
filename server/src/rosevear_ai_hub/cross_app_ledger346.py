@@ -14,10 +14,11 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
-from rosevear_ai_hub.cross_app_security344 import (
-    ORDER,
-    validate_handoff344,
+from rosevear_ai_hub.business_master_contract346 import (
+    SCHEMA as BUSINESS_SCHEMA,
 )
+from rosevear_ai_hub.business_master_contract346 import validate_business_master346
+from rosevear_ai_hub.cross_app_security344 import ORDER, validate_handoff344
 from rosevear_ai_hub.master_shell_acceptance319 import _digest, _native
 
 ACK_SCHEMA = "rosevear.cross-app.persisted-ack346.v1"
@@ -52,6 +53,14 @@ def reject(reason: str) -> dict[str, Any]:
         "closureAuthorized": False,
         "physicalReceiverCurrentlyOff": False,
     }
+
+
+def _validate_envelope(envelope: Any, pins: dict, now_ms: int) -> dict[str, Any]:
+    if envelope.get("payload", {}).get("schema") == BUSINESS_SCHEMA:
+        return validate_business_master346(
+            envelope, sender_pins=pins, now_ms=now_ms
+        )
+    return validate_handoff344(envelope, sender_pins=pins, now_ms=now_ms)
 
 
 def _valid_time(value: Any) -> bool:
@@ -134,7 +143,7 @@ class DurableSignedMailbox346:
     ) -> dict[str, Any]:
         if not _valid_sender(envelope) or not _valid_time(now_ms):
             return reject("HOLD_QL455_INVALID_SOURCE_ENVELOPE")
-        proof = validate_handoff344(envelope, sender_pins=pins, now_ms=now_ms)
+        proof = _validate_envelope(envelope, pins, now_ms)
         if proof["accepted"] is not True:
             return reject("HOLD_QL455_INVALID_SIGNED_OUTBOUND")
         payload = envelope["payload"]
@@ -181,7 +190,7 @@ class DurableSignedMailbox346:
     ) -> dict[str, Any]:
         if not (_valid_sender(envelope) and local_app in ORDER and _valid_time(now_ms)):
             return reject("HOLD_QL455_UNTRUSTED_INBOX")
-        proof = validate_handoff344(envelope, sender_pins=pins, now_ms=now_ms)
+        proof = _validate_envelope(envelope, pins, now_ms)
         if proof["accepted"] is not True or proof["destination"] != local_app:
             return reject("HOLD_QL455_INBOX_ROUTE_OR_SIGNATURE")
         payload = envelope["payload"]
