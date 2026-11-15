@@ -70,13 +70,15 @@ def case(monkeypatch, tmp_path, *, unresolved=False, receiver="OFF", drift=False
         "reviewedAtMs": 2_202_000,
     }
     signed_masters = {}
-    readback = _digest({
-        "historicalEvidenceDigest": history["historicalEvidenceDigest"],
-        "requestDigest": rd,
-        "hostDigest": _digest(host),
-        "observerDigest": _digest(observer),
-        "ownerDigest": _digest(owner),
-    })
+    readback = _digest(
+        {
+            "historicalEvidenceDigest": history["historicalEvidenceDigest"],
+            "requestDigest": rd,
+            "hostDigest": _digest(host),
+            "observerDigest": _digest(observer),
+            "ownerDigest": _digest(owner),
+        }
+    )
     last = None
     for i, master in enumerate(q.MASTERS):
         vote = {
