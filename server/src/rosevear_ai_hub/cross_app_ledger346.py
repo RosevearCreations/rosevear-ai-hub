@@ -107,9 +107,7 @@ class DurableSignedMailbox346:
                 """CREATE TABLE IF NOT EXISTS ack346 (
                     message_id TEXT PRIMARY KEY,
                     envelope_digest TEXT NOT NULL,
-                    received_at INTEGER NOT NULL,
-                    FOREIGN KEY (message_id)
-                    REFERENCES mailbox346(message_id)
+                    received_at INTEGER NOT NULL
                 )"""
             )
             db.execute(
@@ -229,6 +227,16 @@ class DurableSignedMailbox346:
                 if row is None:
                     return reject("QL455_NO_DUE_MESSAGES")
                 message_id, envelope, attempts = row
+                try:
+                    expires_at = json.loads(envelope)["payload"]["expiresAtMs"]
+                except (KeyError, TypeError, ValueError):
+                    expires_at = 0
+                if type(expires_at) is not int or now_ms >= expires_at:
+                    db.execute(
+                        "UPDATE mailbox346 SET state='DEAD' WHERE direction='OUT' AND message_id=?",
+                        (message_id,),
+                    )
+                    return reject("HOLD_QL455_OUTBOUND_EXPIRED_DEAD_LETTER")
                 if attempts >= MAX_ATTEMPTS:
                     db.execute(
                         "UPDATE mailbox346 SET state='DEAD' WHERE direction='OUT' AND message_id=?",
@@ -327,15 +335,17 @@ class DurableSignedMailbox346:
                 db.execute("BEGIN IMMEDIATE")
                 row = db.execute(
                     """SELECT source,destination,envelope_digest,evidence_digest,
-                    attempts,state FROM mailbox346
+                    attempts,state,lease_until FROM mailbox346
                     WHERE direction='OUT' AND message_id=?""",
                     (ack["messageId"],),
                 ).fetchone()
                 if not row:
                     return reject("HOLD_QL455_ACK_UNKNOWN_MESSAGE")
-                source, dest, digest, evidence, attempts, state = row
+                source, dest, digest, evidence, attempts, state, lease_until = row
                 if not (
                     state == "LEASED"
+                    and type(lease_until) is int
+                    and now_ms < lease_until
                     and ack["source"] == dest
                     and ack["destination"] == source
                     and ack["attempt"] == attempts
