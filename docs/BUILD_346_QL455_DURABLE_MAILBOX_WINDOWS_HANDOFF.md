@@ -15,7 +15,7 @@
 - All messages pass the existing seven-key pinned QL-453 strict adjacent-hop
   original signed envelope. Shared QL-454 T0–T5 identity policy remains separate;
   tenants and private customer content do not enter the governance envelope.
-  **Only a short read-only OPEN/HOLD governance envelope is accepted.**
+  **Only restricted read-only OPEN/HOLD governance or brand-health envelopes are accepted.**
 - \`GET /api/v1/system/master-shell-346-mailbox\` only presents fixed non-live
   owner readiness in Master Instrument. No HTTP POST to enroll a mailbox,
   register public keys, send messages, create ACKs, or control devices.
@@ -24,6 +24,19 @@
   Real network delivery, authenticated transport, durable recipient identity
   enrollment, full per-app SDK integration, and cross-tenant RLS tests are
   separate HOLD acceptance gates.
+
+## Business-to-Master communication contract
+
+`business_master_contract346.py` accepts a **separate signed, short-lived
+read-only brand-health envelope** for each direction between Devil n Dove or
+Rosie Dazzlers and **each of the three Masters**. Its only event classes are
+`business.health.readonly.v1` and `master.health.readonly.v1`; tenant/customer
+IDs, booking/order payloads, changes to payment state, device commands and
+T5 receiver privileges are strictly forbidden. This is **12 source-level
+routing pairs with durable local inbox/outbox acceptance tests**, not an
+installed HTTP transport or proof that a remote app actually received a message.
+Recipient enrollment, live sender→receiver transport, real signed ACK and
+operator trace verification remain separate owner-gated rollout requirements.
 
 ## Windows: stop five-minute PowerShell focus theft
 
