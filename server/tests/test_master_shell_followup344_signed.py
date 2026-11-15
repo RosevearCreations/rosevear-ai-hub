@@ -12,8 +12,8 @@ from test_master_shell_acceptance322 import Ree, signed, signer
 from test_master_shell_reconciliation343_signed import review
 
 
-def case(monkeypatch, tmp_path, *, prior_exception=False, receiver="OFF", drift=False):
-    previous = review(monkeypatch, tmp_path / "old", prior_exception=prior_exception)
+def case(monkeypatch, tmp_path, *, unresolved=False, receiver="OFF", drift=False):
+    previous = review(monkeypatch, tmp_path / "old", host_on=unresolved)
     history = reconcile_ql451_outcome343(Ree(), **previous)
     assert history["accepted"] is True, history
     monkeypatch.setattr(q, "_on_ree", lambda _: True)
@@ -62,7 +62,7 @@ def case(monkeypatch, tmp_path, *, prior_exception=False, receiver="OFF", drift=
         "followupId": request["followupId"],
         "challengeNonce": request["challengeNonce"],
         "reviewDecision": (
-            q.REVIEW_EXCEPTION if prior_exception else q.REVIEW_CONTINUITY
+            q.REVIEW_EXCEPTION if history["unresolvedException"] else q.REVIEW_CONTINUITY
         ),
         "closureAuthorized": False,
         "activationAuthorized": False,
@@ -110,17 +110,17 @@ def case(monkeypatch, tmp_path, *, prior_exception=False, receiver="OFF", drift=
     return args
 
 
-@pytest.mark.parametrize("previous_exception", [False, True])
+@pytest.mark.parametrize("unresolved", [False, True])
 def test_signed_owner_and_three_master_historical_review_still_hold(
-    monkeypatch, tmp_path, previous_exception
+    monkeypatch, tmp_path, unresolved
 ):
-    args = case(monkeypatch, tmp_path, prior_exception=previous_exception)
+    args = case(monkeypatch, tmp_path, unresolved=unresolved)
     result = q.audit_signed_followup344(Ree(), **args)
     assert result["accepted"] is True, result
     assert result["independentOffHistoricallyReviewed"] is True
     assert result["threeMasterCount"] == 3
     assert result["masterHandoffVerified"] is True
-    assert result["escalationRequired"] is previous_exception
+    assert result["escalationRequired"] is unresolved
     assert result["connection"] == "HOLD"
     assert result["incidentStatus"] == "OPEN"
     assert result["incidentClosed"] is False
