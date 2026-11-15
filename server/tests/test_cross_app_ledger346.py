@@ -81,18 +81,17 @@ def test_durable_outbox_persist_claim_and_signed_ack(tmp_path):
     )
     assert received["accepted"] is True
     assert received["messageDelivered"] is False
-    accepted = mailbox.accept_signed_ack(
-        ack_for(keys, body), pins=pins, now_ms=NOW + 2_000
-    )
+    accepted = mailbox.accept_signed_ack(ack_for(keys, body), pins=pins, now_ms=NOW + 2_000)
     assert accepted["accepted"] is True
     assert accepted["historicalAckVerified"] is True
     assert accepted["messageDelivered"] is False
     assert accepted["physicalReceiverCurrentlyOff"] is False
     assert accepted["activationAuthorized"] is False
     assert mailbox.counts()["counts"] == {"IN_RECEIVED": 1, "OUT_ACKED": 1}
-    assert mailbox.accept_signed_ack(
-        ack_for(keys, body), pins=pins, now_ms=NOW + 2_000
-    )["accepted"] is False
+    assert (
+        mailbox.accept_signed_ack(ack_for(keys, body), pins=pins, now_ms=NOW + 2_000)["accepted"]
+        is False
+    )
     reopened = DurableSignedMailbox346(mailbox.path)
     assert reopened.counts()["counts"] == {"IN_RECEIVED": 1, "OUT_ACKED": 1}
     assert reopened.claim_due(now_ms=NOW + 2_000)["accepted"] is False
@@ -103,12 +102,8 @@ def test_idempotent_inbox_and_durable_outbox_replay(tmp_path):
     envelope = signed(keys[body["source"]], body)
     assert mailbox.stage_outbound(envelope, pins=pins, now_ms=NOW)["accepted"]
     assert not mailbox.stage_outbound(envelope, pins=pins, now_ms=NOW)["accepted"]
-    first = mailbox.receive_inbound(
-        envelope, local_app=body["destination"], pins=pins, now_ms=NOW
-    )
-    second = mailbox.receive_inbound(
-        envelope, local_app=body["destination"], pins=pins, now_ms=NOW
-    )
+    first = mailbox.receive_inbound(envelope, local_app=body["destination"], pins=pins, now_ms=NOW)
+    second = mailbox.receive_inbound(envelope, local_app=body["destination"], pins=pins, now_ms=NOW)
     assert first["accepted"] is True and first["idempotent"] is False
     assert second["accepted"] is True and second["idempotent"] is True
     changed = deepcopy(body)
@@ -161,9 +156,7 @@ def test_inbound_invalid_signed_messages_fail_closed(tmp_path, bad):
         envelope = signed(keys[body["destination"]], body)
     else:
         now_ms = NOW + 60_000
-    result = mailbox.receive_inbound(
-        envelope, local_app=local_app, pins=pins, now_ms=now_ms
-    )
+    result = mailbox.receive_inbound(envelope, local_app=local_app, pins=pins, now_ms=now_ms)
     assert result["accepted"] is False
     assert not mailbox.counts()["counts"]
 
@@ -174,17 +167,15 @@ def test_ack_forgery_expiry_and_foreign_reference_denied(tmp_path):
     assert mailbox.stage_outbound(envelope, pins=pins, now_ms=NOW)["accepted"]
     assert mailbox.claim_due(now_ms=NOW)["accepted"]
     incorrect = ack_for(keys, body, recipient="rosiedazzlers")
-    assert mailbox.accept_signed_ack(
-        incorrect, pins=pins, now_ms=NOW + 2_000
-    )["accepted"] is False
+    assert mailbox.accept_signed_ack(incorrect, pins=pins, now_ms=NOW + 2_000)["accepted"] is False
     foreign = deepcopy(body)
     foreign["messageId"] = "NotTheOriginalMessageId"
-    assert not mailbox.accept_signed_ack(
-        ack_for(keys, foreign), pins=pins, now_ms=NOW + 2_000
-    )["accepted"]
-    assert not mailbox.accept_signed_ack(
-        ack_for(keys, body), pins=pins, now_ms=NOW + 27_000
-    )["accepted"]
+    assert not mailbox.accept_signed_ack(ack_for(keys, foreign), pins=pins, now_ms=NOW + 2_000)[
+        "accepted"
+    ]
+    assert not mailbox.accept_signed_ack(ack_for(keys, body), pins=pins, now_ms=NOW + 27_000)[
+        "accepted"
+    ]
     assert mailbox.counts()["counts"] == {"OUT_LEASED": 1}
 
 
@@ -192,12 +183,12 @@ def test_missing_enrollment_and_expired_outbox_never_transmit(tmp_path):
     mailbox, keys, pins, body = fixture(tmp_path)
     blank = DurableSignedMailbox346(tmp_path / "absent.db")
     assert blank.counts()["ledgerEnrolled"] is False
-    assert not blank.stage_outbound(
-        signed(keys[body["source"]], body), pins=pins, now_ms=NOW
-    )["accepted"]
-    assert mailbox.stage_outbound(
-        signed(keys[body["source"]], body), pins=pins, now_ms=NOW
-    )["accepted"]
+    assert not blank.stage_outbound(signed(keys[body["source"]], body), pins=pins, now_ms=NOW)[
+        "accepted"
+    ]
+    assert mailbox.stage_outbound(signed(keys[body["source"]], body), pins=pins, now_ms=NOW)[
+        "accepted"
+    ]
     assert not mailbox.claim_due(now_ms=NOW + 55_000)["accepted"]
     assert mailbox.counts()["counts"] == {"OUT_DEAD": 1}
 
@@ -205,8 +196,6 @@ def test_missing_enrollment_and_expired_outbox_never_transmit(tmp_path):
 @pytest.mark.parametrize("source", ORDER[:-1])
 def test_every_adjacent_seven_app_hop_is_scoped_and_no_remote_send(tmp_path, source):
     mailbox, keys, pins, body = fixture(tmp_path, source=source)
-    result = mailbox.stage_outbound(
-        signed(keys[source], body), pins=pins, now_ms=NOW
-    )
+    result = mailbox.stage_outbound(signed(keys[source], body), pins=pins, now_ms=NOW)
     assert result["accepted"] is True, result
     assert result["messageDelivered"] is False
