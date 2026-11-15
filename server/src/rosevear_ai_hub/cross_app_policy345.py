@@ -34,62 +34,104 @@ ACTIONS = {
 # and enforce database RLS before integrating this source-only evaluator.
 RESOURCE_MATRIX = {
     "ai-data-platform": {
-        "public_status": "PUBLIC_READ", "user_profile": "USER_SCOPED",
-        "tenant_metrics": "TENANT_SCOPED", "operations_audit": "OPERATOR_SCOPED",
+        "public_status": "PUBLIC_READ",
+        "user_profile": "USER_SCOPED",
+        "tenant_metrics": "TENANT_SCOPED",
+        "operations_audit": "OPERATOR_SCOPED",
         "master_handoff": "MASTER_GOVERNANCE",
     },
     "rosevear-ai-hub": {
-        "public_status": "PUBLIC_READ", "user_profile": "USER_SCOPED",
-        "local_workspace": "TENANT_SCOPED", "operations_audit": "OPERATOR_SCOPED",
+        "public_status": "PUBLIC_READ",
+        "user_profile": "USER_SCOPED",
+        "local_workspace": "TENANT_SCOPED",
+        "operations_audit": "OPERATOR_SCOPED",
         "master_handoff": "MASTER_GOVERNANCE",
         "original_host_receiver": "ORIGINAL_HOST_OWNER_CEREMONY",
     },
     "rosevear-comms-hub": {
-        "public_status": "PUBLIC_READ", "user_profile": "USER_SCOPED",
-        "brand_inbox": "TENANT_SCOPED", "operator_task": "OPERATOR_SCOPED",
+        "public_status": "PUBLIC_READ",
+        "user_profile": "USER_SCOPED",
+        "brand_inbox": "TENANT_SCOPED",
+        "operator_task": "OPERATOR_SCOPED",
         "master_handoff": "MASTER_GOVERNANCE",
     },
     "iCamp": {
-        "camp_public_site": "PUBLIC_READ", "camper_profile": "USER_SCOPED",
+        "camp_public_site": "PUBLIC_READ",
+        "camper_profile": "USER_SCOPED",
         "camp_reservation": "TENANT_SCOPED",
         "camp_operator_ledger": "OPERATOR_SCOPED",
         "master_handoff": "MASTER_GOVERNANCE",
     },
     "YW": {
-        "yard_public_service": "PUBLIC_READ", "worker_profile": "USER_SCOPED",
-        "yard_job": "TENANT_SCOPED", "yard_payroll": "OPERATOR_SCOPED",
+        "yard_public_service": "PUBLIC_READ",
+        "worker_profile": "USER_SCOPED",
+        "yard_job": "TENANT_SCOPED",
+        "yard_payroll": "OPERATOR_SCOPED",
         "master_handoff": "MASTER_GOVERNANCE",
     },
     "devilndove": {
-        "store_public_product": "PUBLIC_READ", "customer_profile": "USER_SCOPED",
+        "store_public_product": "PUBLIC_READ",
+        "customer_profile": "USER_SCOPED",
         "store_order": "TENANT_SCOPED",
         "store_financial_ledger": "OPERATOR_SCOPED",
         "master_handoff": "MASTER_GOVERNANCE",
     },
     "rosiedazzlers": {
         "detail_public_package": "PUBLIC_READ",
-        "customer_profile": "USER_SCOPED", "detail_booking": "TENANT_SCOPED",
+        "customer_profile": "USER_SCOPED",
+        "detail_booking": "TENANT_SCOPED",
         "detail_financial_ledger": "OPERATOR_SCOPED",
         "master_handoff": "MASTER_GOVERNANCE",
     },
 }
 ASSERTION_FIELDS = {
-    "schema", "issuer", "audience", "subjectId", "role", "tier", "tenantId",
-    "companyId", "sessionId", "scopes", "issuedAtMs", "expiresAtMs",
+    "schema",
+    "issuer",
+    "audience",
+    "subjectId",
+    "role",
+    "tier",
+    "tenantId",
+    "companyId",
+    "sessionId",
+    "scopes",
+    "issuedAtMs",
+    "expiresAtMs",
 }
 RESOURCE_FIELDS = {
-    "app", "kind", "resourceId", "ownerId", "tenantId", "companyId", "classification",
+    "app",
+    "kind",
+    "resourceId",
+    "ownerId",
+    "tenantId",
+    "companyId",
+    "classification",
 }
 VOTE_FIELDS = {
-    "schema", "masterId", "assertionDigest", "resourceDigest", "policyDigest",
-    "decision", "incidentStatus", "connection", "activationAuthorized",
-    "closureAuthorized", "issuedAtMs", "expiresAtMs",
+    "schema",
+    "masterId",
+    "assertionDigest",
+    "resourceDigest",
+    "policyDigest",
+    "decision",
+    "incidentStatus",
+    "connection",
+    "activationAuthorized",
+    "closureAuthorized",
+    "issuedAtMs",
+    "expiresAtMs",
 }
-POLICY_DIGEST = _digest({
-    "schema": SCHEMA, "voteSchema": VOTE_SCHEMA, "order": ORDER,
-    "tiers": TIERS, "resources": RESOURCE_MATRIX,
-    "roles": ROLE_BY_TIER, "actions": ACTIONS,
-})
+POLICY_DIGEST = _digest(
+    {
+        "schema": SCHEMA,
+        "voteSchema": VOTE_SCHEMA,
+        "order": ORDER,
+        "tiers": TIERS,
+        "resources": RESOURCE_MATRIX,
+        "roles": ROLE_BY_TIER,
+        "actions": ACTIONS,
+    }
+)
 
 
 def _name(value: Any) -> bool:
@@ -121,10 +163,7 @@ def _valid_pins(pins: Any) -> bool:
     return (
         isinstance(pins, dict)
         and set(pins) == set(ORDER)
-        and all(
-            isinstance(p, tuple) and len(p) == 2 and _public_ed25519(*p)
-            for p in pins.values()
-        )
+        and all(isinstance(p, tuple) and len(p) == 2 and _public_ed25519(*p) for p in pins.values())
         and len({p[0] for p in pins.values()}) == len(ORDER)
         and len({p[1] for p in pins.values()}) == len(ORDER)
     )
@@ -241,7 +280,9 @@ def evaluate_policy345(
         and _name(assertion["subjectId"])
         and _name(assertion["sessionId"])
         and _age(
-            assertion["issuedAtMs"], assertion["expiresAtMs"], now_ms,
+            assertion["issuedAtMs"],
+            assertion["expiresAtMs"],
+            now_ms,
             MAX_ASSERTION_AGE_MS,
         )
         and isinstance(assertion["scopes"], list)
@@ -299,7 +340,9 @@ def evaluate_policy345(
                 and vote["activationAuthorized"] is False
                 and vote["closureAuthorized"] is False
                 and _age(
-                    vote["issuedAtMs"], vote["expiresAtMs"], now_ms,
+                    vote["issuedAtMs"],
+                    vote["expiresAtMs"],
+                    now_ms,
                     MAX_VOTE_AGE_MS,
                 )
             ):
