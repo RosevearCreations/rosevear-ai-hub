@@ -56,6 +56,9 @@ from rosevear_ai_hub.api.master_shell_issuance331 import (
 from rosevear_ai_hub.api.master_shell_readiness330 import (
     router as master_shell_readiness330_router,
 )
+from rosevear_ai_hub.api.master_shell_reconciliation343 import (
+    router as master_shell_reconciliation343_router,
+)
 from rosevear_ai_hub.api.master_shell_remediation339 import (
     router as master_shell_remediation339_router,
 )
@@ -64,9 +67,6 @@ from rosevear_ai_hub.api.master_shell_renewal334 import (
 )
 from rosevear_ai_hub.api.master_shell_renewal342 import (
     router as master_shell_renewal342_router,
-)
-from rosevear_ai_hub.api.master_shell_reconciliation343 import (
-    router as master_shell_reconciliation343_router,
 )
 from rosevear_ai_hub.api.master_shell_shutdown333 import (
     router as master_shell_shutdown333_router,
