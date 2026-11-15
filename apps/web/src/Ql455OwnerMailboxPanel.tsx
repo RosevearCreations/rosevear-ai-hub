@@ -36,6 +36,8 @@ const tiers = ["PUBLIC_READ", "USER_SCOPED", "TENANT_SCOPED", "OPERATOR_SCOPED",
 function trustworthy(data: unknown): MailboxReadout | null {
   if (!data || typeof data !== "object" || Array.isArray(data)) return null;
   const r = data as Record<string, unknown>;
+  const applicationOrder = r.applicationOrder;
+  const securityTiers = r.securityTiers;
   if (r.schema !== "rosevear.ai-hub.ql455-owner-mailbox.v1" ||
       r.sourceBuild !== 346 || typeof r.state !== "string" ||
       r.outboxEnrolled !== false || r.inboxEnrolled !== false ||
@@ -53,12 +55,12 @@ function trustworthy(data: unknown): MailboxReadout | null {
       typeof r.message !== "string" ||
       typeof r.handoffContractDigest !== "string" ||
       !/^[0-9a-f]{64}$/.test(r.handoffContractDigest) ||
-      !Array.isArray(r.applicationOrder) ||
-      r.applicationOrder.length !== order.length ||
-      !order.every((id, i) => r.applicationOrder[i] === id) ||
-      !Array.isArray(r.securityTiers) ||
-      r.securityTiers.length !== tiers.length ||
-      !tiers.every((id, i) => r.securityTiers[i] === id)) return null;
+      !Array.isArray(applicationOrder) ||
+      applicationOrder.length !== order.length ||
+      !order.every((id, i) => applicationOrder[i] === id) ||
+      !Array.isArray(securityTiers) ||
+      securityTiers.length !== tiers.length ||
+      !tiers.every((id, i) => securityTiers[i] === id)) return null;
   return r as MailboxReadout;
 }
 
