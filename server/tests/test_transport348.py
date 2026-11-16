@@ -5,7 +5,7 @@ import json
 import ssl
 import threading
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pytest
@@ -38,7 +38,7 @@ CAPABILITY = "business.health.readonly"
 
 
 def _private_cert(key, subject, ca_cert, ca_key, *, is_ca=False, is_server=False):
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     builder = (
         x509.CertificateBuilder()
         .subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, subject)]))
