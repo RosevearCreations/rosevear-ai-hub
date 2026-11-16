@@ -2,12 +2,22 @@
 import hashlib
 from dataclasses import replace
 
+import pytest
+
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 from rosevear_ai_hub.service_identity347 import (
-    BODY_FIELDS, Channel347, NonceLedger347, PublicKey347, Registry347,
-    SCHEMA, ENDPOINT, _canonical, _digest, allowed_route347, negotiate347,
+    ENDPOINT,
+    SCHEMA,
+    Channel347,
+    NonceLedger347,
+    PublicKey347,
+    Registry347,
+    _canonical,
+    _digest,
+    allowed_route347,
+    negotiate347,
     verify_readonly_delivery347,
 )
 
@@ -117,27 +127,19 @@ def test_revoked_keys_and_missing_nonce_journal(tmp_path):
     private, registry, ledger, body, env = fixture(tmp_path)
     revoked = Registry347((replace(registry.records[0], revoked_at_ms=NOW - 1),))
     assert not evaluate(revoked, ledger, body, env)["accepted"]
-    assert not evaluate(registry, NonceLedger347(tmp_path / "no-ledger.sqlite"), body, env)["accepted"]
+    missing = NonceLedger347(tmp_path / "no-ledger.sqlite")
+    assert not evaluate(registry, missing, body, env)["accepted"]
 
 
 def test_rotation_policy_and_independent_key_pin(tmp_path):
     private, registry, ledger, body, env = fixture(tmp_path)
     key = registry.records[0]
-    try:
+    with pytest.raises(ValueError):
         Registry347((replace(key, active_until_ms=NOW + 91 * 86_400_000),))
-        assert False, "overlong rotation must fail"
-    except ValueError:
-        pass
-    try:
+    with pytest.raises(ValueError):
         Registry347((key, replace(key, key_id="another-issuer-key")))
-        assert False, "reused pins must fail"
-    except ValueError:
-        pass
-    try:
+    with pytest.raises(ValueError):
         Registry347((replace(key, pin_sha256="0" * 64),))
-        assert False, "untrusted pin must fail"
-    except ValueError:
-        pass
 
 
 def test_sensitive_payload_and_t5_stay_denied(tmp_path):
