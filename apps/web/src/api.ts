@@ -3154,3 +3154,44 @@ export function requestHubUpdate(): Promise<{
     consent: true, confirmation: "START VERIFIED UPDATE",
   });
 }
+
+/** QL-458 server-provided read-only operating intent, never live link inference. */
+export interface ServerShell349Snapshot {
+  schema: "rosevear.hub.ql458-server-shell-readiness.v1";
+  sourceBuild: 349;
+  serverShell: "ai-data-platform";
+  automationHost: string;
+  verifiedLocalOwnerManifest: boolean;
+  enrollmentReason: string;
+  protocolPreferred: "1.1";
+  protocolLegacyCompatible: "1.0";
+  modules: Array<{
+    id: string;
+    role: string;
+    desiredEnabled: boolean | null;
+    theme: "instrument" | "nebula" | "aurora";
+    runtimeState: "NOT_VERIFIED";
+    independentRelease: true;
+  }>;
+  applications: Array<{
+    id: string;
+    kind: "slave-shell" | "business";
+    signedPeerIntentPresent: boolean;
+    connectivity: "UNVERIFIED";
+    latencyMs: null;
+    errorCount: null;
+    lastVerifiedAckUtc: null;
+    capabilities: string[];
+  }>;
+  receiver: string;
+  incident: "OPEN";
+  activationAuthorized: false;
+  physicalReceiverCurrentlyOff: false;
+  messageDelivered: false;
+  crossAppConnectivityVerified: false;
+  configurationTogglesAreNotServiceControl: true;
+}
+
+export function getServerShell349(signal?: AbortSignal): Promise<ServerShell349Snapshot> {
+  return authJson("GET", "/api/v1/system/server-shell-349", undefined, signal);
+}
