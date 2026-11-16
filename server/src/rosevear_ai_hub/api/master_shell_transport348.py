@@ -44,7 +44,9 @@ def read_transport_readiness348(
         "physicalReceiverCurrentlyOff": False,
         "mode": "OWNER_REVIEW_REQUIRED_DISABLED",
         "allowedCapabilityTypes": [
-            "governance.readonly", "business.health.readonly", "master.health.readonly"
+            "governance.readonly",
+            "business.health.readonly",
+            "master.health.readonly",
         ],
         "unaffectedVercelApps": ["ai-data-platform", "iCamp", "YW"],
         "message": (
