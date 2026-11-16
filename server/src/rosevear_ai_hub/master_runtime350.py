@@ -16,7 +16,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 from rosevear_ai_hub.master_shell349 import ORIGINAL_HOST, SLAVE_SHELLS, load_local_manifest349
-from rosevear_ai_hub.master_supervisor350 import CustodyJournal350, SERVICES350
+from rosevear_ai_hub.master_supervisor350 import SERVICES350, CustodyJournal350
 from rosevear_ai_hub.service_identity347 import (
     PublicKey347,
     Registry347,
@@ -158,7 +158,8 @@ def owner_shell_snapshot350(
         "schema": "rosevear.hub.three-master-observability350.v1",
         "sourceBuild": 350, "serverShell": "ai-data-platform",
         "originalHost": ORIGINAL_HOST, "originalHostVerified": original_host,
-        "signedManifestVerified": enabled, "signedSlaveRegistryVerified": enabled and registry is not None,
+        "signedManifestVerified": enabled,
+        "signedSlaveRegistryVerified": enabled and registry is not None,
         "protocolPreferred": "1.1", "protocolLegacyCompatible": "1.0",
         "modules": [
             {
