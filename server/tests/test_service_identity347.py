@@ -1,4 +1,5 @@
 """Build 347: signed service admission, 1.0/1.1 mixed peer compatibility."""
+
 import hashlib
 from dataclasses import replace
 
@@ -29,32 +30,69 @@ CAPABILITY = "business.health.readonly"
 def fixture(tmp_path, *, capability=CAPABILITY, sender=SENDER, recipient=RECIPIENT, proto="1.1"):
     private = Ed25519PrivateKey.generate()
     der = private.public_key().public_bytes(Encoding.DER, PublicFormat.SubjectPublicKeyInfo)
-    key = PublicKey347(sender, "issuer-key-2026", der, hashlib.sha256(der).hexdigest(),
-                       NOW - 100_000, NOW + 100_000)
+    key = PublicKey347(
+        sender,
+        "issuer-key-2026",
+        der,
+        hashlib.sha256(der).hexdigest(),
+        NOW - 100_000,
+        NOW + 100_000,
+    )
     registry = Registry347((key,))
     ledger = NonceLedger347(tmp_path / "nonce.sqlite")
     assert ledger.enroll()
-    body = {"eventType": {
-        "business.health.readonly": "business.health.readonly.v1",
-        "master.health.readonly": "master.health.readonly.v1",
-        "governance.readonly": "governance.open_hold.handoff.v1",
-    }[capability], "evidenceDigest": "b" * 64, "connection": "HOLD",
-        "incidentStatus": "OPEN_HOLD"}
-    p = {"schema": SCHEMA, "protocolVersion": proto, "issuer": sender,
-         "audience": recipient, "keyId": key.key_id, "nonce": "nonce-private-001",
-         "messageId": "message-private-001", "capability": capability,
-         "method": "POST", "path": ENDPOINT, "bodyDigest": _digest(body),
-         "issuedAtMs": NOW - 1000, "expiresAtMs": NOW + 10_000}
+    body = {
+        "eventType": {
+            "business.health.readonly": "business.health.readonly.v1",
+            "master.health.readonly": "master.health.readonly.v1",
+            "governance.readonly": "governance.open_hold.handoff.v1",
+        }[capability],
+        "evidenceDigest": "b" * 64,
+        "connection": "HOLD",
+        "incidentStatus": "OPEN_HOLD",
+    }
+    p = {
+        "schema": SCHEMA,
+        "protocolVersion": proto,
+        "issuer": sender,
+        "audience": recipient,
+        "keyId": key.key_id,
+        "nonce": "nonce-private-001",
+        "messageId": "message-private-001",
+        "capability": capability,
+        "method": "POST",
+        "path": ENDPOINT,
+        "bodyDigest": _digest(body),
+        "issuedAtMs": NOW - 1000,
+        "expiresAtMs": NOW + 10_000,
+    }
     env = {"payload": p, "signature": private.sign(_canonical(p)).hex()}
     return private, registry, ledger, body, env
 
 
-def evaluate(registry, ledger, body, env, *, tls=True, now=NOW, versions=("1.1",),
-             caps=(CAPABILITY,), peer=SENDER, recipient=RECIPIENT):
+def evaluate(
+    registry,
+    ledger,
+    body,
+    env,
+    *,
+    tls=True,
+    now=NOW,
+    versions=("1.1",),
+    caps=(CAPABILITY,),
+    peer=SENDER,
+    recipient=RECIPIENT,
+):
     return verify_readonly_delivery347(
-        envelope=env, body=body, registry=registry, ledger=ledger,
-        channel=Channel347(tls, peer, recipient), peer_protocols=versions,
-        peer_capabilities=caps, now_ms=now)
+        envelope=env,
+        body=body,
+        registry=registry,
+        ledger=ledger,
+        channel=Channel347(tls, peer, recipient),
+        peer_protocols=versions,
+        peer_capabilities=caps,
+        now_ms=now,
+    )
 
 
 def resign(private, env):
@@ -73,27 +111,60 @@ def test_protocol_11_independent_business_master_and_replay(tmp_path):
 
 
 def test_missing_peer_only_its_capability_on_hold():
-    assert not negotiate347(issuer=SENDER, audience=RECIPIENT,
-                            capability=CAPABILITY, peer_protocols=["1.0"],
-                            peer_capabilities=[CAPABILITY])["accepted"]
-    assert negotiate347(issuer="ai-data-platform", audience="rosevear-ai-hub",
-                        capability="governance.readonly", peer_protocols=["1.0"],
-                        peer_capabilities=["governance.readonly"])["protocolVersion"] == "1.0"
-    assert negotiate347(issuer="ai-data-platform", audience="rosevear-ai-hub",
-                        capability="governance.readonly", peer_protocols=["1.0", "1.1"],
-                        peer_capabilities=["governance.readonly"])["protocolVersion"] == "1.1"
-    assert not negotiate347(issuer=SENDER, audience=RECIPIENT,
-                            capability="customer.read", peer_protocols=["1.1"],
-                            peer_capabilities=["customer.read"])["accepted"]
+    assert not negotiate347(
+        issuer=SENDER,
+        audience=RECIPIENT,
+        capability=CAPABILITY,
+        peer_protocols=["1.0"],
+        peer_capabilities=[CAPABILITY],
+    )["accepted"]
+    assert (
+        negotiate347(
+            issuer="ai-data-platform",
+            audience="rosevear-ai-hub",
+            capability="governance.readonly",
+            peer_protocols=["1.0"],
+            peer_capabilities=["governance.readonly"],
+        )["protocolVersion"]
+        == "1.0"
+    )
+    assert (
+        negotiate347(
+            issuer="ai-data-platform",
+            audience="rosevear-ai-hub",
+            capability="governance.readonly",
+            peer_protocols=["1.0", "1.1"],
+            peer_capabilities=["governance.readonly"],
+        )["protocolVersion"]
+        == "1.1"
+    )
+    assert not negotiate347(
+        issuer=SENDER,
+        audience=RECIPIENT,
+        capability="customer.read",
+        peer_protocols=["1.1"],
+        peer_capabilities=["customer.read"],
+    )["accepted"]
     assert not allowed_route347("iCamp", "devilndove", "business.health.readonly")
 
 
 def test_legacy_governance_signed_sender(tmp_path):
     key, registry, ledger, body, env = fixture(
-        tmp_path, capability="governance.readonly",
-        sender="ai-data-platform", recipient="rosevear-ai-hub", proto="1.0")
-    result = evaluate(registry, ledger, body, env, versions=("1.0",),
-                      caps=("governance.readonly",), peer="ai-data-platform")
+        tmp_path,
+        capability="governance.readonly",
+        sender="ai-data-platform",
+        recipient="rosevear-ai-hub",
+        proto="1.0",
+    )
+    result = evaluate(
+        registry,
+        ledger,
+        body,
+        env,
+        versions=("1.0",),
+        caps=("governance.readonly",),
+        peer="ai-data-platform",
+    )
     assert result["accepted"] and result["protocolVersion"] == "1.0"
     assert not result["crossAppConnectivityVerified"]
 
