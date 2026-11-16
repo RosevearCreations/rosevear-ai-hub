@@ -11,7 +11,6 @@ import hashlib
 import http.client
 import json
 import re
-import socket
 import sqlite3
 import ssl
 from dataclasses import dataclass
@@ -27,18 +26,18 @@ from rosevear_ai_hub.service_identity347 import (
     ENDPOINT,
     FIELDS,
     MAX_AGE_MS,
-    SCHEMA as SCHEMA347,
-    _id,
     Channel347,
     NonceLedger347,
     Registry347,
     _canonical,
     _digest,
+    _id,
     _sha,
     hold347,
     negotiate347,
     verify_readonly_delivery347,
 )
+from rosevear_ai_hub.service_identity347 import SCHEMA as SCHEMA347
 
 ACK_SCHEMA = "rosevear.service.readonly-pilot-ack348.v1"
 ACK_FIELDS = frozenset(
@@ -422,7 +421,7 @@ def deliver_mtls_pilot348(
             "protocolVersion": p["protocolVersion"],
         }
     except (
-        OSError, ssl.SSLError, socket.timeout, ValueError, TypeError,
+        TimeoutError, OSError, ssl.SSLError, ValueError, TypeError,
         http.client.HTTPException, json.JSONDecodeError
     ):
         return hold347("HOLD_QL457_TLS_NETWORK_OR_ACK_UNVERIFIED")
