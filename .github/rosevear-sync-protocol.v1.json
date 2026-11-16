@@ -1,0 +1,21 @@
+{
+  "schema": "rosevear.sync.protocol.v1",
+  "build": 347,
+  "protocols": [
+    "1.0",
+    "1.1"
+  ],
+  "preferredProtocol": "1.1",
+  "independentDeployments": true,
+  "majorVersionChangeRequiredForBreaking": true,
+  "legacyCapability": "governance.readonly",
+  "additiveCapabilities": [
+    "business.health.readonly",
+    "master.health.readonly"
+  ],
+  "unknownCapability": "HOLD_DEPENDENT_ROUTE_ONLY",
+  "transportState": "NOT_ENROLLED",
+  "physicalReceiverAuthority": "DENIED",
+  "peerReleaseRequired": false,
+  "sourceOfPolicy": "ai-data-platform Build 408"
+}
