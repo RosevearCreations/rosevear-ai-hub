@@ -99,9 +99,9 @@ from rosevear_ai_hub.api.profiles import router as profiles_router
 from rosevear_ai_hub.api.providers import router as providers_router
 from rosevear_ai_hub.api.release_update_control import router as release_update_control_router
 from rosevear_ai_hub.api.resources import router as resources_router
-from rosevear_ai_hub.api.server_shell349 import router as server_shell349_router
 from rosevear_ai_hub.api.secrets import router as secrets_router
 from rosevear_ai_hub.api.security_posture import router as security_posture_router
+from rosevear_ai_hub.api.server_shell349 import router as server_shell349_router
 from rosevear_ai_hub.api.speech import router as speech_router
 from rosevear_ai_hub.api.tools import router as tools_router
 from rosevear_ai_hub.api.tts import router as tts_router

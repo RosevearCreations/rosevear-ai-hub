@@ -16,13 +16,12 @@ from typing import Any
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
-from rosevear_ai_hub.service_identity347 import _canonical, _digest, _sha
+from rosevear_ai_hub.service_identity347 import Registry347, _canonical, _digest, _sha
 from rosevear_ai_hub.transport348 import (
     PeerEnrollment348,
     PilotAckJournal348,
     verify_signed_ack348,
 )
-from rosevear_ai_hub.service_identity347 import Registry347
 
 SCHEMA349 = "rosevear.hub.original-host-enrollment349.v1"
 ORIGINAL_HOST = "DESKTOP-AE894KC"
@@ -227,7 +226,9 @@ def capability_snapshot349(enrollment: dict[str, Any]) -> dict[str, Any]:
             {
                 "id": name,
                 "role": ("server-shell", "automation-runtime", "communications")[i],
-                "desiredEnabled": local_modules[name]["desiredEnabled"] if name in local_modules else None,
+                "desiredEnabled": (
+                    local_modules[name]["desiredEnabled"] if name in local_modules else None
+                ),
                 "theme": local_modules[name]["theme"] if name in local_modules else "instrument",
                 "runtimeState": "NOT_VERIFIED",
                 "independentRelease": True,
