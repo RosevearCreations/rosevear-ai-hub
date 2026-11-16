@@ -58,7 +58,8 @@ from rosevear_ai_hub.api.master_shell_issuance331 import (
 )
 from rosevear_ai_hub.api.master_shell_mailbox346 import (
     router as master_shell_mailbox346_router,
-)from rosevear_ai_hub.api.master_shell_transport348 import (
+)
+from rosevear_ai_hub.api.master_shell_transport348 import (
     router as master_shell_transport348_router,
 )
 
