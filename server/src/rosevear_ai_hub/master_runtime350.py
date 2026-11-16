@@ -42,18 +42,26 @@ def _load_blob(path: Path | None, maximum: int) -> bytes | None:
 
 
 def load_owner_registry350(
-    *, path: Path | None, owner_key: bytes | None, owner_pin: str | None,
-    enrollment: dict[str, Any], now_ms: int, machine_name: str,
+    *,
+    path: Path | None,
+    owner_key: bytes | None,
+    owner_pin: str | None,
+    enrollment: dict[str, Any],
+    now_ms: int,
+    machine_name: str,
 ) -> Registry347 | None:
     """Signed local public registry, never remote key self-enrollment."""
     raw = _load_blob(path, MAX_FILE_BYTES)
     if not (
         raw is not None
-        and type(owner_key) is bytes and len(owner_key) == 32
-        and type(owner_pin) is str and _sha(owner_pin)
+        and type(owner_key) is bytes
+        and len(owner_key) == 32
+        and type(owner_pin) is str
+        and _sha(owner_pin)
         and hashlib.sha256(owner_key).hexdigest() == owner_pin
         and enrollment.get("accepted") is True
-        and type(machine_name) is str and machine_name.upper() == ORIGINAL_HOST
+        and type(machine_name) is str
+        and machine_name.upper() == ORIGINAL_HOST
     ):
         return None
     try:
@@ -68,9 +76,14 @@ def load_owner_registry350(
             return None
         p = config["payload"]
         if not (
-            set(p) == {
-                "schema", "originalHost", "manifestDigest", "issuedAtMs",
-                "expiresAtMs", "keys",
+            set(p)
+            == {
+                "schema",
+                "originalHost",
+                "manifestDigest",
+                "issuedAtMs",
+                "expiresAtMs",
+                "keys",
             }
             and p["schema"] == REGISTRY_SCHEMA350
             and p["originalHost"] == ORIGINAL_HOST
@@ -80,7 +93,8 @@ def load_owner_registry350(
             and 0 <= now_ms - p["issuedAtMs"] <= 30 * 86_400_000
             and p["issuedAtMs"] < p["expiresAtMs"] <= p["issuedAtMs"] + 30 * 86_400_000
             and now_ms < p["expiresAtMs"]
-            and type(p["keys"]) is list and len(p["keys"]) <= 8
+            and type(p["keys"]) is list
+            and len(p["keys"]) <= 8
         ):
             return None
         Ed25519PublicKey.from_public_bytes(owner_key).verify(
@@ -91,9 +105,14 @@ def load_owner_registry350(
         for key in p["keys"]:
             if not (
                 type(key) is dict
-                and set(key) == {
-                    "issuer", "keyId", "publicDerBase64", "activeFromMs",
-                    "activeUntilMs", "revokedAtMs",
+                and set(key)
+                == {
+                    "issuer",
+                    "keyId",
+                    "publicDerBase64",
+                    "activeFromMs",
+                    "activeUntilMs",
+                    "revokedAtMs",
                 }
                 and type(key["issuer"]) is str
                 and key["issuer"] in SLAVE_SHELLS
@@ -105,24 +124,38 @@ def load_owner_registry350(
             public_der = base64.b64decode(key["publicDerBase64"], validate=True)
             entries.append(
                 PublicKey347(
-                    issuer=key["issuer"], key_id=key["keyId"],
-                    public_der=public_der, pin_sha256=hashlib.sha256(public_der).hexdigest(),
-                    active_from_ms=key["activeFromMs"], active_until_ms=key["activeUntilMs"],
+                    issuer=key["issuer"],
+                    key_id=key["keyId"],
+                    public_der=public_der,
+                    pin_sha256=hashlib.sha256(public_der).hexdigest(),
+                    active_from_ms=key["activeFromMs"],
+                    active_until_ms=key["activeUntilMs"],
                     revoked_at_ms=key["revokedAtMs"],
                 )
             )
         return Registry347(tuple(entries))
     except (
-        InvalidSignature, ValueError, TypeError, KeyError, AttributeError,
-        OSError, UnicodeError, OverflowError, binascii.Error,
+        InvalidSignature,
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        OSError,
+        UnicodeError,
+        OverflowError,
+        binascii.Error,
     ):
         return None
 
 
 def owner_shell_snapshot350(
-    enrollment: dict[str, Any], *, custody: CustodyJournal350 | None,
-    telemetry: TelemetryJournal350 | None, registry: Registry347 | None,
-    now_ms: int, machine_name: str,
+    enrollment: dict[str, Any],
+    *,
+    custody: CustodyJournal350 | None,
+    telemetry: TelemetryJournal350 | None,
+    registry: Registry347 | None,
+    now_ms: int,
+    machine_name: str,
 ) -> dict[str, Any]:
     """No network request, Windows service action, or self-asserted CONNECTED."""
     accepted = enrollment.get("accepted") is True
@@ -138,56 +171,65 @@ def owner_shell_snapshot350(
         peer = by_peer.get(peer_id)
         evidence = (
             telemetry.recent(
-                peer_id=peer_id, manifest_digest=manifest_digest,
-                pin=peer["tlsLeafPin"], now_ms=now_ms, registry=registry,
+                peer_id=peer_id,
+                manifest_digest=manifest_digest,
+                pin=peer["tlsLeafPin"],
+                now_ms=now_ms,
+                registry=registry,
             )
-            if peer and telemetry and registry and manifest_digest else None
+            if peer and telemetry and registry and manifest_digest
+            else None
         )
-        applications.append({
-            "id": peer_id, "role": "slave-shell",
-            "connected": evidence is not None,
-            "state": evidence["state"] if evidence else "UNVERIFIED",
-            "latencyMs": evidence["latencyMs"] if evidence else None,
-            "uptimeSec": evidence["uptimeSec"] if evidence else None,
-            "recentErrors": evidence["recentErrors"] if evidence else None,
-            "queueLag": evidence["queueLag"] if evidence else None,
-            "observedAtMs": evidence["observedAtMs"] if evidence else None,
-            "proof": evidence["proof"] if evidence else "NO_FRESH_AUTHENTICATED_SAMPLE",
-        })
+        applications.append(
+            {
+                "id": peer_id,
+                "role": "slave-shell",
+                "connected": evidence is not None,
+                "state": evidence["state"] if evidence else "UNVERIFIED",
+                "latencyMs": evidence["latencyMs"] if evidence else None,
+                "uptimeSec": evidence["uptimeSec"] if evidence else None,
+                "recentErrors": evidence["recentErrors"] if evidence else None,
+                "queueLag": evidence["queueLag"] if evidence else None,
+                "observedAtMs": evidence["observedAtMs"] if evidence else None,
+                "proof": evidence["proof"] if evidence else "NO_FRESH_AUTHENTICATED_SAMPLE",
+            }
+        )
     return {
         "schema": "rosevear.hub.three-master-observability350.v1",
-        "sourceBuild": 350, "serverShell": "ai-data-platform",
-        "originalHost": ORIGINAL_HOST, "originalHostVerified": original_host,
+        "sourceBuild": 350,
+        "serverShell": "ai-data-platform",
+        "originalHost": ORIGINAL_HOST,
+        "originalHostVerified": original_host,
         "signedManifestVerified": enabled,
         "signedSlaveRegistryVerified": enabled and registry is not None,
-        "protocolPreferred": "1.1", "protocolLegacyCompatible": "1.0",
+        "protocolPreferred": "1.1",
+        "protocolLegacyCompatible": "1.0",
         "modules": [
             {
-                "id": module, "serviceName": SERVICES350[module],
+                "id": module,
+                "serviceName": SERVICES350[module],
                 "role": ("server-shell", "local-automation", "communications")[i],
                 "theme": by_module[module]["theme"] if module in by_module else "instrument",
                 "desiredEnabled": (
                     by_module[module]["desiredEnabled"] if module in by_module else None
                 ),
-                "runtimeState": (
-                    observed[module]["state"] if module in observed else "UNVERIFIED"
-                ),
-                "observedAtMs": (
-                    observed[module]["observedAtMs"] if module in observed else None
-                ),
+                "runtimeState": (observed[module]["state"] if module in observed else "UNVERIFIED"),
+                "observedAtMs": (observed[module]["observedAtMs"] if module in observed else None),
                 "actionPolicy": "LOCAL_SIGNED_OWNER_PERMIT_ONLY",
                 "independentRelease": True,
             }
             for i, module in enumerate(SERVICES350)
         ],
         "applications": applications,
-        "liveAutomationHostVerified": enabled and len(observed) == len(SERVICES350)
+        "liveAutomationHostVerified": enabled
+        and len(observed) == len(SERVICES350)
         and all(v["state"] == "RUNNING" for v in observed.values()),
         "supervisorLoopInstalledVerified": False,
         "serviceStartupTaskInstalledVerified": False,
         "globalConnectivityVerified": False,
         "receiver": "UNKNOWN_REQUIRES_FRESH_INDEPENDENT_OFF",
-        "incidentStatus": "OPEN", "activationAuthorized": False,
+        "incidentStatus": "OPEN",
+        "activationAuthorized": False,
         "physicalReceiverCurrentlyOff": False,
         "webServiceMutationAvailable": False,
         "message": (
@@ -206,8 +248,12 @@ def installed_shell_snapshot350() -> dict[str, Any]:
     pin = os.environ.get("ROSEVEAR_QL458_OWNER_KEY_PIN")
     enrollment = load_local_manifest349(
         Path(manifest) if manifest else None,
-        Path(key_path) if key_path else None, pin, now_ms, host,
+        Path(key_path) if key_path else None,
+        pin,
+        now_ms,
+        host,
     )
+
     def _journal_path(name: str) -> Path | None:
         value = os.environ.get(name)
         return Path(value) if value else None
@@ -215,8 +261,11 @@ def installed_shell_snapshot350() -> dict[str, Any]:
     key = _load_blob(Path(key_path), 32) if key_path else None
     registry = load_owner_registry350(
         path=_journal_path("ROSEVEAR_QL459_REGISTRY_PATH"),
-        owner_key=key, owner_pin=pin, enrollment=enrollment,
-        now_ms=now_ms, machine_name=host,
+        owner_key=key,
+        owner_pin=pin,
+        enrollment=enrollment,
+        now_ms=now_ms,
+        machine_name=host,
     )
     custody_path = _journal_path("ROSEVEAR_QL459_CUSTODY_DB")
     telemetry_path = _journal_path("ROSEVEAR_QL459_TELEMETRY_DB")
@@ -224,5 +273,7 @@ def installed_shell_snapshot350() -> dict[str, Any]:
         enrollment,
         custody=CustodyJournal350(custody_path) if custody_path else None,
         telemetry=TelemetryJournal350(telemetry_path) if telemetry_path else None,
-        registry=registry, now_ms=now_ms, machine_name=host,
+        registry=registry,
+        now_ms=now_ms,
+        machine_name=host,
     )

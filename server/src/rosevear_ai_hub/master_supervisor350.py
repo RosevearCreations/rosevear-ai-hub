@@ -72,8 +72,15 @@ def verify_permit350(
     if not (
         set(p)
         == {
-            "schema", "originalHost", "manifestDigest", "moduleId", "serviceName",
-            "action", "nonce", "issuedAtMs", "expiresAtMs",
+            "schema",
+            "originalHost",
+            "manifestDigest",
+            "moduleId",
+            "serviceName",
+            "action",
+            "nonce",
+            "issuedAtMs",
+            "expiresAtMs",
         }
         and p["schema"] == SCHEMA350
         and p["originalHost"] == ORIGINAL_HOST
@@ -88,12 +95,12 @@ def verify_permit350(
         and type(p["issuedAtMs"]) is int
         and type(p["expiresAtMs"]) is int
         and p["issuedAtMs"] <= now_ms < p["expiresAtMs"]
-        and 0 <= now_ms - p["issuedAtMs"] <= (
-            RECOVERY_GRANT_MS if p["action"] == "recover" else SHORT_PERMIT_MS
-        )
-        and 0 < p["expiresAtMs"] - p["issuedAtMs"] <= (
-            RECOVERY_GRANT_MS if p["action"] == "recover" else SHORT_PERMIT_MS
-        )
+        and 0
+        <= now_ms - p["issuedAtMs"]
+        <= (RECOVERY_GRANT_MS if p["action"] == "recover" else SHORT_PERMIT_MS)
+        and 0
+        < p["expiresAtMs"] - p["issuedAtMs"]
+        <= (RECOVERY_GRANT_MS if p["action"] == "recover" else SHORT_PERMIT_MS)
     ):
         return _hold("HOLD_SCOPE_NONCE_ACTION_OR_EXPIRY")
     module = next(m for m in enrollment["payload"]["modules"] if m["id"] == p["moduleId"])
@@ -190,7 +197,8 @@ class CustodyJournal350:
         """Unique commands; bounded shared per-module recovery quota and cooldown."""
         attempt = (
             grant_id + "-" + str(now_ms // RECOVERY_COOLDOWN_MS)
-            if action == "recover" else grant_id
+            if action == "recover"
+            else grant_id
         )
         if not self.path.is_file() or self.path.is_symlink():
             return None
@@ -234,9 +242,11 @@ class CustodyJournal350:
             return False
 
     def observe(self, module: str, manifest_digest: str, state: str, now_ms: int) -> bool:
-        if module not in MASTER_MODULES or state not in (
-            "RUNNING", "STOPPED", "TRANSITIONING", "UNKNOWN"
-        ) or not _sha(manifest_digest):
+        if (
+            module not in MASTER_MODULES
+            or state not in ("RUNNING", "STOPPED", "TRANSITIONING", "UNKNOWN")
+            or not _sha(manifest_digest)
+        ):
             return False
         try:
             with sqlite3.connect(self.path, timeout=3) as db:
@@ -267,8 +277,10 @@ class CustodyJournal350:
         return {
             module: {"state": state, "observedAtMs": at}
             for module, digest, at, state in rows
-            if module in MASTER_MODULES and digest == manifest_digest
-            and type(at) is int and 0 <= now_ms - at <= FRESH_OBSERVATION_MS
+            if module in MASTER_MODULES
+            and digest == manifest_digest
+            and type(at) is int
+            and 0 <= now_ms - at <= FRESH_OBSERVATION_MS
             and state in ("RUNNING", "STOPPED", "TRANSITIONING", "UNKNOWN")
         }
 
@@ -286,8 +298,12 @@ def apply_local_action350(
 ) -> dict[str, Any]:
     """Production caller MUST run locally with Windows admin & protected permit files."""
     verified = verify_permit350(
-        enrollment=enrollment, permit=permit, owner_public=owner_public,
-        owner_pin=owner_pin, now_ms=now_ms, machine_name=machine_name,
+        enrollment=enrollment,
+        permit=permit,
+        owner_public=owner_public,
+        owner_pin=owner_pin,
+        now_ms=now_ms,
+        machine_name=machine_name,
     )
     if not verified["accepted"]:
         return verified
@@ -317,14 +333,19 @@ def apply_local_action350(
     return {
         "accepted": state == ("RUNNING" if action == "start" else "STOPPED"),
         "reason": "SCM_VERIFIED_" + state if state != "UNVERIFIED" else "HOLD_SCM_UNVERIFIED",
-        "executed": True, "moduleId": module, "observedState": state,
+        "executed": True,
+        "moduleId": module,
+        "observedState": state,
         "receiverActivationAuthorized": False,
     }
 
 
 def observe_local_modules350(
-    enrollment: dict[str, Any], journal: CustodyJournal350,
-    controller: WindowsServices350, now_ms: int, machine_name: str,
+    enrollment: dict[str, Any],
+    journal: CustodyJournal350,
+    controller: WindowsServices350,
+    now_ms: int,
+    machine_name: str,
 ) -> dict[str, Any]:
     """Read-only SCM observations; no implicit recovery, no start/stop, no network."""
     if not (
