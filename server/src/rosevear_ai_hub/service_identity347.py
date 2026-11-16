@@ -11,8 +11,9 @@ import json
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from cryptography.hazmat.primitives.serialization import load_der_public_key
 
@@ -226,7 +227,8 @@ def verify_readonly_delivery347(*, envelope: Any, body: Any,
     if not (type(envelope) is dict and set(envelope) == {"payload", "signature"}
             and type(envelope["payload"]) is dict
             and set(envelope["payload"]) == FIELDS
-            and type(body) is dict and set(body) == BODY_FIELDS):
+            and type(body) is dict and set(body) == BODY_FIELDS
+            and all(type(body.get(k)) is str for k in BODY_FIELDS)):
         return hold347("HOLD_QL456_UNRECOGNIZED_SIGNED_SCHEMA")
     p = envelope["payload"]
     issuer, audience, capability = p.get("issuer"), p.get("audience"), p.get("capability")
@@ -236,6 +238,7 @@ def verify_readonly_delivery347(*, envelope: Any, body: Any,
             and p["nonce"] != p["messageId"]
             and p.get("schema") == SCHEMA
             and p.get("method") == "POST" and p.get("path") == ENDPOINT
+            and type(capability) is str
             and p.get("bodyDigest") == _digest(body)
             and body.get("connection") == "HOLD"
             and body.get("incidentStatus") == "OPEN_HOLD"
@@ -269,7 +272,7 @@ def verify_readonly_delivery347(*, envelope: Any, body: Any,
     try:
         public = load_der_public_key(key.public_der)
         public.verify(bytes.fromhex(sig), _canonical(p))
-    except (TypeError, ValueError, Exception) as exc:
+    except (InvalidSignature, TypeError, ValueError):
         # Only an Ed25519 verification failure should reach here; no exception detail leaks.
         return hold347("HOLD_QL456_INVALID_ED25519_SIGNATURE")
     if not ledger.claim(issuer, p["nonce"], p["messageId"], now_ms):
