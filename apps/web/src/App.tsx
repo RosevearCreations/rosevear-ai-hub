@@ -70,6 +70,7 @@ import { Ql452OwnerReconciliationPanel } from "./Ql452OwnerReconciliationPanel";
 import { Ql453OwnerFollowupPanel } from "./Ql453OwnerFollowupPanel";
 import { Ql454OwnerPolicyPanel } from "./Ql454OwnerPolicyPanel";
 import { Ql455OwnerMailboxPanel } from "./Ql455OwnerMailboxPanel";
+import { ServerShell349Panel } from "./ServerShell349Panel";
 import { ReleaseAcceptancePanel } from "./ReleaseAcceptancePanel";
 import { ReleaseObservabilityPanel } from "./ReleaseObservabilityPanel";
 import { InstalledHubAdoptionPanel } from "./InstalledHubAdoptionPanel";
@@ -580,6 +581,7 @@ export function App() {
             <Ql455OwnerMailboxPanel />
           </details>
         )}
+        {section === "System" && user.role === "owner" && <ServerShell349Panel />}
         {section === "System" && canAdminister && <HubUpdatePanel />}
         {section === "System" && canAdminister && <WindowsFirstActivation246Panel />}
         {section === "System" && <HubVitalCards health={health} ollama={ollama} />}
