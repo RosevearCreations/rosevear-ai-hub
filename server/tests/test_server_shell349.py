@@ -95,9 +95,7 @@ def test_invalid_peer_scope_is_denied_even_with_valid_signature():
     trusted_pin = hashlib.sha256(trusted).hexdigest()
     manifest["payload"]["peers"][0]["capabilities"] = ["receiver.original_host.activate"]
     manifest["signature"] = private.sign(_canonical(manifest["payload"])).hex()
-    assert not verify_manifest349(
-        manifest, trusted, trusted_pin, now, ORIGINAL_HOST
-    )["accepted"]
+    assert not verify_manifest349(manifest, trusted, trusted_pin, now, ORIGINAL_HOST)["accepted"]
 
 
 def test_no_remote_enrollment_or_anonymous_api():

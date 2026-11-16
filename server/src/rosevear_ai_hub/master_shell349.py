@@ -91,8 +91,7 @@ def verify_manifest349(
     for peer in p["peers"]:
         if not (
             type(peer) is dict
-            and set(peer)
-            == {"id", "hostname", "port", "tlsLeafPin", "capabilities", "protocols"}
+            and set(peer) == {"id", "hostname", "port", "tlsLeafPin", "capabilities", "protocols"}
             and type(peer["id"]) is str
             and peer["id"] in PEERS
             and peer["id"] != "rosevear-ai-hub"
