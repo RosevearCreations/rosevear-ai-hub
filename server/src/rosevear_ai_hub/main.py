@@ -90,6 +90,9 @@ from rosevear_ai_hub.api.master_shell_stability341 import (
 from rosevear_ai_hub.api.master_shell_transport348 import (
     router as master_shell_transport348_router,
 )
+from rosevear_ai_hub.api.master_shell_transport348 import (
+    router as master_shell_transport348_router,
+)
 from rosevear_ai_hub.api.master_shell_witness332 import (
     router as master_shell_witness332_router,
 )
