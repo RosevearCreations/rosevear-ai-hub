@@ -34,7 +34,7 @@ FRESH_OBSERVATION_MS = 120_000
 SHORT_PERMIT_MS = 60_000
 RECOVERY_GRANT_MS = 24 * 60 * 60_000
 NONCE_RE = re.compile(r"^[A-Za-z0-9_-]{24,128}$")
-SC_STATE_RE = re.compile(r"\\bSTATE\\s*:\\s*([1-7])\\s+([A-Z_]+)")
+SC_STATE_RE = re.compile(r"\bSTATE\s*:\s*([1-7])\s+([A-Z_]+)")
 
 
 def _hold(reason: str) -> dict[str, Any]:

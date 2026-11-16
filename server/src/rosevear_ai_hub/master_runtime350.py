@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import hashlib
 import json
 import os
@@ -113,7 +114,7 @@ def load_owner_registry350(
         return Registry347(tuple(entries))
     except (
         InvalidSignature, ValueError, TypeError, KeyError, AttributeError,
-        OSError, UnicodeError, OverflowError,
+        OSError, UnicodeError, OverflowError, binascii.Error,
     ):
         return None
 

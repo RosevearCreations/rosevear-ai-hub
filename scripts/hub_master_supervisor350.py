@@ -19,7 +19,7 @@ import sys
 import time
 from pathlib import Path
 
-from rosevear_ai_hub.master_shell349 import MASTER_MODULES, load_local_manifest349
+from rosevear_ai_hub.master_shell349 import load_local_manifest349
 from rosevear_ai_hub.master_supervisor350 import (
     CustodyJournal350,
     WindowsServices350,
@@ -93,7 +93,9 @@ def run() -> int:
             except (OSError, UnicodeError, ValueError):
                 print("HOLD_INVALID_PERMIT")
                 return 2
-            if args.watch and permit.get("payload", {}).get("action") != "recover":
+            if args.watch and (type(permit) is not dict or
+                type(permit.get("payload")) is not dict or
+                permit["payload"].get("action") != "recover"):
                 print("HOLD_WATCH_CAN_ONLY_RECOVER")
                 return 2
             verdict = apply_local_action350(

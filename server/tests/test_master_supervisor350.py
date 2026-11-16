@@ -1,7 +1,6 @@
 """QL-459 signed local Windows services, recovery budget and read-only custody."""
 
 import hashlib
-import json
 import sqlite3
 import subprocess
 import types
