@@ -44,7 +44,8 @@ def _private_cert(key, subject, ca_cert, ca_key, *, is_ca=False, is_server=False
         .subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, subject)]))
         .issuer_name(
             x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, subject)])
-            if is_ca else ca_cert.subject
+            if is_ca
+            else ca_cert.subject
         )
         .public_key(key.public_key())
         .serial_number(x509.random_serial_number())
@@ -108,13 +109,19 @@ def pilot(tmp_path):
             serialization.PublicFormat.SubjectPublicKeyInfo,
         )
         return PublicKey347(
-            app, kid, der, hashlib.sha256(der).hexdigest(),
-            now_ms - 50_000, now_ms + 50_000,
+            app,
+            kid,
+            der,
+            hashlib.sha256(der).hexdigest(),
+            now_ms - 50_000,
+            now_ms + 50_000,
         )
 
     registry = Registry347(
-        (record(signer_source, SOURCE, "source-service-001"),
-         record(signer_target, TARGET, "target-service-001"))
+        (
+            record(signer_source, SOURCE, "source-service-001"),
+            record(signer_target, TARGET, "target-service-001"),
+        )
     )
     inbound_ledger = NonceLedger347(tmp_path / "inbound347.sqlite")
     outbound_acks = PilotAckJournal348(tmp_path / "ack348.sqlite")
@@ -258,8 +265,11 @@ def test_real_mtls_loopback_signed_ack_and_durable_replay(pilot):
         assert result["crossAppConnectivityVerified"] is False
         assert seen and seen[0]["pilotInboundVerified"] is True
         assert verify_signed_ack348(
-            ack=seen[0]["ack"], envelope=pilot["envelope"],
-            body=pilot["body"], peer=peer, registry=pilot["registry"],
+            ack=seen[0]["ack"],
+            envelope=pilot["envelope"],
+            body=pilot["body"],
+            peer=peer,
+            registry=pilot["registry"],
             now_ms=pilot["now_ms"],
         )
         again = _send(pilot, peer)
@@ -320,18 +330,30 @@ def test_ack_rejects_tampering_and_expiry(pilot):
     ack["signature"] = p["target_signer"].sign(_canonical(ack["payload"])).hex()
     peer = replace(p["peer"], port=12345)
     assert verify_signed_ack348(
-        ack=ack, envelope=p["envelope"], body=p["body"],
-        peer=peer, registry=p["registry"], now_ms=p["now_ms"],
+        ack=ack,
+        envelope=p["envelope"],
+        body=p["body"],
+        peer=peer,
+        registry=p["registry"],
+        now_ms=p["now_ms"],
     )
     ack["payload"]["messageDigest"] = "0" * 64
     assert not verify_signed_ack348(
-        ack=ack, envelope=p["envelope"], body=p["body"],
-        peer=peer, registry=p["registry"], now_ms=p["now_ms"],
+        ack=ack,
+        envelope=p["envelope"],
+        body=p["body"],
+        peer=peer,
+        registry=p["registry"],
+        now_ms=p["now_ms"],
     )
     ack["payload"]["messageDigest"] = _digest(p["envelope"])
     assert not verify_signed_ack348(
-        ack=ack, envelope=p["envelope"], body=p["body"],
-        peer=peer, registry=p["registry"], now_ms=p["now_ms"] + 31_000,
+        ack=ack,
+        envelope=p["envelope"],
+        body=p["body"],
+        peer=peer,
+        registry=p["registry"],
+        now_ms=p["now_ms"] + 31_000,
     )
 
 
@@ -342,8 +364,11 @@ def test_private_payload_or_receiver_commands_remain_denied(pilot):
     bad["customerId"] = "not-permitted"
     assert not deliver_mtls_pilot348(
         peer=replace(pilot["peer"], port=12345),
-        envelope=pilot["envelope"], body=bad, registry=pilot["registry"],
-        ack_journal=pilot["outbound"], now_ms=pilot["now_ms"],
+        envelope=pilot["envelope"],
+        body=bad,
+        registry=pilot["registry"],
+        ack_journal=pilot["outbound"],
+        now_ms=pilot["now_ms"],
     )["accepted"]
     bad_peer = replace(
         pilot["peer"], port=12345, peer_capabilities=("receiver.original_host.activate",)
