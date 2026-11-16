@@ -3195,3 +3195,53 @@ export interface ServerShell349Snapshot {
 export function getServerShell349(signal?: AbortSignal): Promise<ServerShell349Snapshot> {
   return authJson("GET", "/api/v1/system/server-shell-349", undefined, signal);
 }
+
+/** QL-459 authenticated, source-only module observations. Browser never controls SCM. */
+export interface ServerShell350Snapshot {
+  schema: "rosevear.hub.three-master-observability350.v1";
+  sourceBuild: 350;
+  serverShell: "ai-data-platform";
+  originalHost: string;
+  originalHostVerified: boolean;
+  signedManifestVerified: boolean;
+  signedSlaveRegistryVerified: boolean;
+  protocolPreferred: "1.1";
+  protocolLegacyCompatible: "1.0";
+  modules: Array<{
+    id: string;
+    serviceName: string;
+    role: string;
+    theme: "instrument" | "nebula" | "aurora";
+    desiredEnabled: boolean | null;
+    runtimeState: "RUNNING" | "STOPPED" | "TRANSITIONING" | "UNKNOWN" | "UNVERIFIED";
+    observedAtMs: number | null;
+    actionPolicy: "LOCAL_SIGNED_OWNER_PERMIT_ONLY";
+    independentRelease: true;
+  }>;
+  applications: Array<{
+    id: "iCamp" | "YW";
+    role: "slave-shell";
+    connected: boolean;
+    state: "HEALTHY" | "DEGRADED" | "UNHEALTHY" | "UNVERIFIED";
+    latencyMs: number | null;
+    uptimeSec: number | null;
+    recentErrors: number | null;
+    queueLag: number | null;
+    observedAtMs: number | null;
+    proof: "FRESH_PINNED_MTLS_AND_ED25519_JOURNAL" | "NO_FRESH_AUTHENTICATED_SAMPLE";
+  }>;
+  liveAutomationHostVerified: boolean;
+  supervisorLoopInstalledVerified: false;
+  serviceStartupTaskInstalledVerified: false;
+  globalConnectivityVerified: false;
+  receiver: "UNKNOWN_REQUIRES_FRESH_INDEPENDENT_OFF";
+  incidentStatus: "OPEN";
+  activationAuthorized: false;
+  physicalReceiverCurrentlyOff: false;
+  webServiceMutationAvailable: false;
+  message: string;
+}
+
+export function getServerShell350(signal?: AbortSignal): Promise<ServerShell350Snapshot> {
+  return authJson("GET", "/api/v1/system/server-shell-350", undefined, signal);
+}
