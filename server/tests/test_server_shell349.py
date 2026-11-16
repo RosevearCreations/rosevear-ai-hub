@@ -89,7 +89,7 @@ def test_signature_tamper_wrong_host_expiry_and_untrusted_key_denied():
 
 def test_invalid_peer_scope_is_denied_even_with_valid_signature():
     now = 1700000000000
-    manifest, pub, pin = _signed(now)
+    manifest, _, _ = _signed(now)
     private = Ed25519PrivateKey.generate()
     trusted = private.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
     trusted_pin = hashlib.sha256(trusted).hexdigest()

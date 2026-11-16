@@ -92,7 +92,6 @@ from rosevear_ai_hub.api.master_shell_transport348 import (
 from rosevear_ai_hub.api.master_shell_witness332 import (
     router as master_shell_witness332_router,
 )
-from rosevear_ai_hub.api.server_shell349 import router as server_shell349_router
 from rosevear_ai_hub.api.mqtt import router as mqtt_router
 from rosevear_ai_hub.api.notifications import router as notifications_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
@@ -100,6 +99,7 @@ from rosevear_ai_hub.api.profiles import router as profiles_router
 from rosevear_ai_hub.api.providers import router as providers_router
 from rosevear_ai_hub.api.release_update_control import router as release_update_control_router
 from rosevear_ai_hub.api.resources import router as resources_router
+from rosevear_ai_hub.api.server_shell349 import router as server_shell349_router
 from rosevear_ai_hub.api.secrets import router as secrets_router
 from rosevear_ai_hub.api.security_posture import router as security_posture_router
 from rosevear_ai_hub.api.speech import router as speech_router
