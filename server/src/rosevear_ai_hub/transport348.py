@@ -41,8 +41,18 @@ from rosevear_ai_hub.service_identity347 import SCHEMA as SCHEMA347
 
 ACK_SCHEMA = "rosevear.service.readonly-pilot-ack348.v1"
 ACK_FIELDS = frozenset(
-    ("schema", "issuer", "audience", "keyId", "messageId", "messageDigest",
-     "bodyDigest", "status", "issuedAtMs", "expiresAtMs")
+    (
+        "schema",
+        "issuer",
+        "audience",
+        "keyId",
+        "messageId",
+        "messageDigest",
+        "bodyDigest",
+        "status",
+        "issuedAtMs",
+        "expiresAtMs",
+    )
 )
 MAX_ACK_MS = 60_000
 MAX_WIRE_BYTES = 8192
@@ -329,7 +339,8 @@ def deliver_mtls_pilot348(
         and envelope["payload"].get("method") == "POST"
         and envelope["payload"].get("path") == ENDPOINT
         and envelope["payload"].get("bodyDigest") == _digest(body)
-        and body["eventType"] == {
+        and body["eventType"]
+        == {
             "governance.readonly": "governance.open_hold.handoff.v1",
             "business.health.readonly": "business.health.readonly.v1",
             "master.health.readonly": "master.health.readonly.v1",
@@ -378,12 +389,8 @@ def deliver_mtls_pilot348(
         ctx.minimum_version = ssl.TLSVersion.TLSv1_2
         ctx.verify_mode = ssl.CERT_REQUIRED
         ctx.check_hostname = True
-        ctx.load_cert_chain(
-            certfile=str(peer.client_cert_file), keyfile=str(peer.client_key_file)
-        )
-        conn = http.client.HTTPSConnection(
-            peer.hostname, peer.port, timeout=5, context=ctx
-        )
+        ctx.load_cert_chain(certfile=str(peer.client_cert_file), keyfile=str(peer.client_key_file))
+        conn = http.client.HTTPSConnection(peer.hostname, peer.port, timeout=5, context=ctx)
         conn.connect()
         if not _tls_peer_pin348(conn.sock, peer.server_cert_pin):
             return hold347("HOLD_QL457_SERVER_CERTIFICATE_PIN_MISMATCH")
@@ -404,13 +411,11 @@ def deliver_mtls_pilot348(
             return hold347("HOLD_QL457_NO_SIGNED_ACK")
         ack = result["ack"]
         if not verify_signed_ack348(
-            ack=ack, envelope=envelope, body=body, peer=peer, registry=registry,
-            now_ms=now_ms
+            ack=ack, envelope=envelope, body=body, peer=peer, registry=registry, now_ms=now_ms
         ):
             return hold347("HOLD_QL457_INVALID_RECIPIENT_ACK")
         if not ack_journal.claim(
-            peer.source, peer.destination, p["messageId"], _digest(envelope),
-            _digest(ack), now_ms
+            peer.source, peer.destination, p["messageId"], _digest(envelope), _digest(ack), now_ms
         ):
             return hold347("HOLD_QL457_ACK_REPLAY_OR_DURABILITY_FAILURE")
         return {
@@ -421,8 +426,13 @@ def deliver_mtls_pilot348(
             "protocolVersion": p["protocolVersion"],
         }
     except (
-        TimeoutError, OSError, ssl.SSLError, ValueError, TypeError,
-        http.client.HTTPException, json.JSONDecodeError
+        TimeoutError,
+        OSError,
+        ssl.SSLError,
+        ValueError,
+        TypeError,
+        http.client.HTTPException,
+        json.JSONDecodeError,
     ):
         return hold347("HOLD_QL457_TLS_NETWORK_OR_ACK_UNVERIFIED")
     finally:
