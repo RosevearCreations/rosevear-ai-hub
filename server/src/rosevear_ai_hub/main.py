@@ -92,6 +92,7 @@ from rosevear_ai_hub.api.master_shell_transport348 import (
 from rosevear_ai_hub.api.master_shell_witness332 import (
     router as master_shell_witness332_router,
 )
+from rosevear_ai_hub.api.server_shell349 import router as server_shell349_router
 from rosevear_ai_hub.api.mqtt import router as mqtt_router
 from rosevear_ai_hub.api.notifications import router as notifications_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
@@ -215,6 +216,7 @@ def create_app() -> FastAPI:
     application.include_router(master_shell_policy345_router)
     application.include_router(master_shell_mailbox346_router)
     application.include_router(master_shell_transport348_router)
+    application.include_router(server_shell349_router)
     application.include_router(global_search_router)
     # QL-243: default-off, nonproduction-only, authenticated GET health metadata.
     application.include_router(integration_v1_router)
