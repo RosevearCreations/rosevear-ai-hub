@@ -23,8 +23,12 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, load_der_public_key
 
 from rosevear_ai_hub.service_identity347 import (
+    BODY_FIELDS,
     ENDPOINT,
     FIELDS,
+    MAX_AGE_MS,
+    SCHEMA as SCHEMA347,
+    _id,
     Channel347,
     NonceLedger347,
     Registry347,
@@ -316,15 +320,32 @@ def deliver_mtls_pilot348(
         and type(envelope["payload"]) is dict
         and set(envelope["payload"]) == FIELDS
         and type(body) is dict
+        and set(body) == BODY_FIELDS
+        and all(type(body.get(k)) is str for k in BODY_FIELDS)
+        and body["connection"] == "HOLD"
+        and body["incidentStatus"] == "OPEN_HOLD"
+        and _sha(body["evidenceDigest"])
         and envelope["payload"].get("issuer") == peer.source
         and envelope["payload"].get("audience") == peer.destination
         and envelope["payload"].get("method") == "POST"
         and envelope["payload"].get("path") == ENDPOINT
         and envelope["payload"].get("bodyDigest") == _digest(body)
+        and body["eventType"] == {
+            "governance.readonly": "governance.open_hold.handoff.v1",
+            "business.health.readonly": "business.health.readonly.v1",
+            "master.health.readonly": "master.health.readonly.v1",
+        }.get(envelope["payload"].get("capability"))
+        and _id(envelope["payload"].get("messageId"))
+        and _id(envelope["payload"].get("nonce"))
+        and envelope["payload"]["messageId"] != envelope["payload"]["nonce"]
+        and envelope["payload"].get("schema") == SCHEMA347
         and envelope["payload"].get("issuedAtMs") is not None
         and type(envelope["payload"].get("issuedAtMs")) is int
         and type(envelope["payload"].get("expiresAtMs")) is int
-        and envelope["payload"]["issuedAtMs"] <= now_ms < envelope["payload"]["expiresAtMs"]
+        and 0 <= now_ms - envelope["payload"]["issuedAtMs"] <= MAX_AGE_MS
+        and envelope["payload"]["issuedAtMs"] < envelope["payload"]["expiresAtMs"]
+        and envelope["payload"]["expiresAtMs"] <= envelope["payload"]["issuedAtMs"] + MAX_AGE_MS
+        and now_ms < envelope["payload"]["expiresAtMs"]
     ):
         return hold347("HOLD_QL457_NO_APPROVED_ENROLLED_PILOT")
     p = envelope["payload"]
@@ -346,6 +367,12 @@ def deliver_mtls_pilot348(
         )
     except (InvalidSignature, TypeError, ValueError, KeyError, AttributeError):
         return hold347("HOLD_QL457_SENDER_SIGNATURE_INVALID")
+    try:
+        payload = _canonical({"envelope": envelope, "body": body})
+    except (TypeError, ValueError):
+        return hold347("HOLD_QL457_NONCANONICAL_PAYLOAD")
+    if len(payload) > MAX_WIRE_BYTES:
+        return hold347("HOLD_QL457_MESSAGE_TOO_LARGE")
     conn = None
     try:
         ctx = ssl.create_default_context(cafile=str(peer.ca_file))
@@ -361,9 +388,6 @@ def deliver_mtls_pilot348(
         conn.connect()
         if not _tls_peer_pin348(conn.sock, peer.server_cert_pin):
             return hold347("HOLD_QL457_SERVER_CERTIFICATE_PIN_MISMATCH")
-        payload = _canonical({"envelope": envelope, "body": body})
-        if len(payload) > MAX_WIRE_BYTES:
-            return hold347("HOLD_QL457_MESSAGE_TOO_LARGE")
         conn.request(
             "POST",
             ENDPOINT,
