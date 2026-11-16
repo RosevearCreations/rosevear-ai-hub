@@ -264,7 +264,7 @@ def test_real_mtls_loopback_signed_ack_and_durable_replay(pilot):
         )
         again = _send(pilot, peer)
         assert again["accepted"] is False
-        assert again["pilotSignedAckVerified"] is not True if "pilotSignedAckVerified" in again else True
+        assert again.get("pilotSignedAckVerified") is not True
         assert not seen[-1].get("pilotInboundVerified")
     finally:
         server.shutdown()
