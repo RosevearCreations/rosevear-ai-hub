@@ -42,6 +42,22 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\boot-hub-unatt
 
 Install prompts once for the SAME Windows user password and registers both tasks DISABLED. The pinned VM UUID and Ollama executable path contain no passwords and are stored locally in the owner's profile, not Git. An error/HOLD means stop and inspect; never invent a VM or reset the original one. The current original host is not touched by GitHub CI.
 
+## Build 356.1 field hotfix — resume an existing owner pin
+
+The first installer used to write the non-secret pinned configuration BEFORE prompting for the Windows password. A cancelled credential prompt or interrupted task registration could leave that valid file behind, even when no new tasks were registered. Re-running -Install would then stop with HOLD_PRIOR_PINNED_CONFIG_REQUIRES_OWNER_REVIEW.
+
+The repaired installer REUSES a pre-existing pin only when all four expected fields, the original existing VirtualBox Home Assistant UUID/EFI, and the absolute currently running Ollama executable all match the on-device evidence. If anything differs, it still HOLDs and NEVER overwrites, deletes, or re-pins the file. A new pin is written with CreateNew, not overwrite.
+
+From the actual original host, same elevated Windows account, after refreshing a verified clean main checkout:
+
+~~~powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-hub-unattended356.ps1 -Inspect
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\boot-hub-unattended356.ps1 -CheckOnly
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-hub-unattended356.ps1 -Install
+~~~
+
+Expected when prior pin matches: EXISTING_OWNER_PIN_MATCHES_VM_AND_OLLAMA followed by Windows account password prompt and INSTALLED_DISABLED. Run -Inspect before considering -Enable. If it still HOLDs, do not rename/remove the pin or create a second VM; inspect locally with owner supervision, with secrets/absolute private paths kept off GitHub and chat.
+
 ## Stage 2 — enable once and test without an interactive logon
 
 After inspecting the local results, in the original elevated owner session:
