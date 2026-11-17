@@ -18,7 +18,6 @@ from typing import Any
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
-from rosevear_ai_hub.master_acceptance353 import verify_reboot_ceremony353
 from rosevear_ai_hub.master_shell349 import ORIGINAL_HOST
 from rosevear_ai_hub.master_transport352 import (
     _verify_registry_signature,

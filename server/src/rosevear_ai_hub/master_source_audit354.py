@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any
 
 from rosevear_ai_hub.master_acceptance353 import verify_comms_audit_link353
-from rosevear_ai_hub.master_shell349 import ORIGINAL_HOST
 from rosevear_ai_hub.master_transport352 import (
     MasterDeliveryLedger352,
     _on_original_host352,
