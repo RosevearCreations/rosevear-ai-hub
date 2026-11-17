@@ -255,7 +255,8 @@ def verify_certificate_rotation_plan354(
     ):
         return hold
     return {**hold, "state": "OWNER_SIGNED_CANDIDATE_PLAN_ONLY",
-            "ownerSignedPlanVerified": True}
+            "ownerSignedPlanVerified": True,
+            "candidateTlsLeafPin": p["candidateTlsLeafPin"]}
 
 
 def probe_candidate_mtls354(
