@@ -30,8 +30,14 @@ WITNESS_SCHEMA352 = "rosevear.hub.signed-original-host-witness352.v1"
 TASK_NAME352 = "Rosevear Three-Master Observer QL460"
 MAX_WITNESS_AGE_MS = 120_000
 TASK_FIELDS352 = {
-    "name", "state", "principal", "trigger", "command", "arguments",
-    "lastRunTimeUtc", "lastTaskResult",
+    "name",
+    "state",
+    "principal",
+    "trigger",
+    "command",
+    "arguments",
+    "lastRunTimeUtc",
+    "lastTaskResult",
 }
 
 
@@ -59,7 +65,11 @@ if (@($t.Actions).Count -ne 1 -or @($t.Triggers).Count -ne 1) { throw 'HOLD_TASK
     try:
         result = subprocess.run(
             ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
-            check=False, capture_output=True, text=True, timeout=12, shell=False,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=12,
+            shell=False,
         )
         if result.returncode != 0 or len(result.stdout) > 8192:
             return None
@@ -82,7 +92,8 @@ def valid_task352(task: Any) -> bool:
         and type(command) is str
         and PureWindowsPath(command).name.lower() in ("python.exe", "pythonw.exe")
         and PureWindowsPath(command).is_absolute()
-        and type(args) is str and args.count("--watch") == 1
+        and type(args) is str
+        and args.count("--watch") == 1
         and "--recovery-grants" not in args
         and "hub_master_supervisor350.py" in args
         and type(task["lastRunTimeUtc"]) is str
@@ -105,12 +116,17 @@ def _task_run_matches_boot352(value: str, boot_ms: int, observed_ms: int) -> boo
 
 
 def build_local_receipt352(
-    *, enrollment: dict[str, Any], task: dict[str, Any],
-    private_key: Ed25519PrivateKey, now_ms: int,
+    *,
+    enrollment: dict[str, Any],
+    task: dict[str, Any],
+    private_key: Ed25519PrivateKey,
+    now_ms: int,
 ) -> dict[str, Any] | None:
     """Owner-run local ceremony only; never callable from an HTTP handler."""
     if not (
-        _host() and enrollment.get("accepted") is True and valid_task352(task)
+        _host()
+        and enrollment.get("accepted") is True
+        and valid_task352(task)
         and isinstance(private_key, Ed25519PrivateKey)
         and type(now_ms) is int
     ):
@@ -134,21 +150,34 @@ def build_local_receipt352(
 
 
 def verify_signed_witness352(
-    *, receipt: Any, public_key: bytes, independent_pin: str,
-    owner_pin: str, manifest_digest: str, now_ms: int,
+    *,
+    receipt: Any,
+    public_key: bytes,
+    independent_pin: str,
+    owner_pin: str,
+    manifest_digest: str,
+    now_ms: int,
 ) -> dict[str, Any]:
     hold = {
-        "verified": False, "status": "HOLD_NO_FRESH_INDEPENDENTLY_PINNED_HOST_RECEIPT",
-        "bootMs": None, "taskState": "UNVERIFIED",
-        "taskAutostartProven": False, "independentThirdPartyWitness": False,
+        "verified": False,
+        "status": "HOLD_NO_FRESH_INDEPENDENTLY_PINNED_HOST_RECEIPT",
+        "bootMs": None,
+        "taskState": "UNVERIFIED",
+        "taskAutostartProven": False,
+        "independentThirdPartyWitness": False,
         "receiverActivationAuthorized": False,
     }
     if not (
-        type(receipt) is dict and set(receipt) == {"payload", "signature"}
+        type(receipt) is dict
+        and set(receipt) == {"payload", "signature"}
         and type(receipt["payload"]) is dict
-        and type(receipt["signature"]) is str and len(receipt["signature"]) == 128
-        and type(public_key) is bytes and len(public_key) == 32
-        and _sha(independent_pin) and _sha(owner_pin) and _sha(manifest_digest)
+        and type(receipt["signature"]) is str
+        and len(receipt["signature"]) == 128
+        and type(public_key) is bytes
+        and len(public_key) == 32
+        and _sha(independent_pin)
+        and _sha(owner_pin)
+        and _sha(manifest_digest)
         and independent_pin != owner_pin
         and hashlib.sha256(public_key).hexdigest() == independent_pin
         and type(now_ms) is int
@@ -156,44 +185,62 @@ def verify_signed_witness352(
         return hold
     p = receipt["payload"]
     if not (
-        set(p) == {
-            "schema", "originalHost", "manifestDigest", "bootMs",
-            "observedAtMs", "task", "receiverActivationAuthorized",
+        set(p)
+        == {
+            "schema",
+            "originalHost",
+            "manifestDigest",
+            "bootMs",
+            "observedAtMs",
+            "task",
+            "receiverActivationAuthorized",
         }
         and p["schema"] == WITNESS_SCHEMA352
         and p["originalHost"] == ORIGINAL_HOST
         and p["manifestDigest"] == manifest_digest
         and p["receiverActivationAuthorized"] is False
-        and type(p["bootMs"]) is int and type(p["observedAtMs"]) is int
+        and type(p["bootMs"]) is int
+        and type(p["observedAtMs"]) is int
         and 0 <= now_ms - p["observedAtMs"] <= MAX_WITNESS_AGE_MS
         and 0 <= p["observedAtMs"] - p["bootMs"] <= 365 * 86_400_000
         and valid_task352(p["task"])
         and _task_run_matches_boot352(
-            p["task"]["lastRunTimeUtc"], p["bootMs"], p["observedAtMs"],
+            p["task"]["lastRunTimeUtc"],
+            p["bootMs"],
+            p["observedAtMs"],
         )
     ):
         return hold
     try:
         Ed25519PublicKey.from_public_bytes(public_key).verify(
-            bytes.fromhex(receipt["signature"]), _canonical(p),
+            bytes.fromhex(receipt["signature"]),
+            _canonical(p),
         )
     except (InvalidSignature, ValueError, TypeError):
         return hold
     return {
         **hold,
-        "verified": True, "status": "SIGNED_LOCAL_INSTALL_AND_BOOT_OBSERVATION",
-        "bootMs": p["bootMs"], "taskState": p["task"]["state"],
+        "verified": True,
+        "status": "SIGNED_LOCAL_INSTALL_AND_BOOT_OBSERVATION",
+        "bootMs": p["bootMs"],
+        "taskState": p["task"]["state"],
         "taskAutostartProven": False,
     }
 
 
 def local_signed_witness_status352(
-    *, enrollment: dict[str, Any], now_ms: int,
+    *,
+    enrollment: dict[str, Any],
+    now_ms: int,
 ) -> dict[str, Any]:
     hold = {
-        "verified": False, "status": "HOLD_NO_FRESH_INDEPENDENTLY_PINNED_HOST_RECEIPT",
-        "taskAutostartProven": False, "independentThirdPartyWitness": False,
-        "receiverActivationAuthorized": False, "bootMs": None, "taskState": "UNVERIFIED",
+        "verified": False,
+        "status": "HOLD_NO_FRESH_INDEPENDENTLY_PINNED_HOST_RECEIPT",
+        "taskAutostartProven": False,
+        "independentThirdPartyWitness": False,
+        "receiverActivationAuthorized": False,
+        "bootMs": None,
+        "taskState": "UNVERIFIED",
     }
     if not (_host() and enrollment.get("accepted") is True):
         return hold
@@ -212,8 +259,11 @@ def local_signed_witness_status352(
         receipt = json.loads(paths[0].read_text(encoding="utf-8"))
         public = paths[1].read_bytes()
         return verify_signed_witness352(
-            receipt=receipt, public_key=public, independent_pin=pin,
-            owner_pin=owner_pin, manifest_digest=_digest(enrollment["payload"]),
+            receipt=receipt,
+            public_key=public,
+            independent_pin=pin,
+            owner_pin=owner_pin,
+            manifest_digest=_digest(enrollment["payload"]),
             now_ms=now_ms,
         )
     except (OSError, UnicodeError, ValueError, TypeError):
