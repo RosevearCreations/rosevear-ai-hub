@@ -294,6 +294,12 @@ def key_rotation_readiness353(registry: Registry347 | None, now_ms: int) -> dict
                 return hold
     return {
         **hold,
-        "state": "HOLD_PEER_KEYS_MISSING" if missing else "ROTATION_DUE" if due else "PINNED_KEYS_VALID",
+        "state": (
+            "HOLD_PEER_KEYS_MISSING"
+            if missing
+            else "ROTATION_DUE"
+            if due
+            else "PINNED_KEYS_VALID"
+        ),
         "peerKeys": per_service,
     }
