@@ -234,6 +234,21 @@ jobs:
           foreach ($part in @('showvminfo', 'startvm', '--type headless', 'hub-recovery.ps1', 'start-hub-lan-gateway.ps1', '127.0.0.1:11434', 'HOLD_VM_STATE_REQUIRES_OWNER_REVIEW')) {
             if (-not $worker.Contains($part)) { throw "Missing guarded boot worker: $part" }
           }
+      - name: Build 356.2 actual Windows five-minute indefinite trigger construction
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $boot = New-ScheduledTaskTrigger -AtStartup
+          if ($boot.CimClass.CimClassName -ne 'MSFT_TaskBootTrigger') { throw 'BAD_BOOT_TRIGGER_CLASS' }
+          $rec = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(2) -RepetitionInterval (New-TimeSpan -Minutes 5)
+          if ($rec.CimClass.CimClassName -ne 'MSFT_TaskTimeTrigger') { throw 'BAD_TIME_TRIGGER_CLASS' }
+          if ([string]$rec.Repetition.Interval -ne 'PT5M') { throw 'BAD_RECOVERY_INTERVAL' }
+          if (-not [string]::IsNullOrWhiteSpace([string]$rec.Repetition.Duration)) { throw 'UNEXPECTED_RECOVERY_EXPIRY' }
+          $content = Get-Content -LiteralPath 'scripts/install-hub-unattended356.ps1' -Raw
+          foreach ($needle in @('Get-KnownTask -Name $recoveryName -TriggerKind ''Time''', 'HOLD_WINDOWS_RECOVERY_TRIGGER_NOT_INDEFINITE', 'New-ScheduledTaskTrigger -Once')) {
+            if (-not $content.Contains($needle)) { throw "MISSING_RECOVERY_GUARD: $needle" }
+          }
+          if ($content.Contains('New-ScheduledTaskTrigger -Daily')) { throw 'AMBIGUOUS_DAILY_REPETITION_PARAMETERS' }
       - name: Verify Build 077 supervised bootstrap recovery routing
         shell: pwsh
         run: ./scripts/test-hub-recovery-mode.ps1

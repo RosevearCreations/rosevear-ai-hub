@@ -19,7 +19,7 @@ Normal Windows reboots MUST recover approved components WITHOUT a human signing 
 The new one-time installer creates two exact, initially DISABLED Windows Scheduled Tasks, both using the SAME original Windows server account with a password stored in Windows Task Scheduler, not in GitHub, task arguments or program logs. These use batch logon, not Interactive or AtLogon.
 
 1. Rosevear AI Hub Unattended Boot — At Windows startup.
-2. Rosevear AI Hub Unattended Recovery — every five minutes using a daily repeating trigger.
+2. Rosevear AI Hub Unattended Recovery — a one-time Windows time trigger with an **indefinite** five-minute repetition pattern (no repetition duration). This survives ordinary reboot without needing a daily trigger, Windows sign-in, or a manually renewed end date.
 
 Both invoke scripts/boot-hub-unattended356.ps1 -Run. The worker:
 - Pins the original existing Home Assistant VirtualBox VM by its UUID and checks its EFI firmware. Starts ONLY that original guest headlessly when powered off/saved; already-running guest is not duplicated; aborted/unknown state remains HOLD.
@@ -57,6 +57,24 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-hub-un
 ~~~
 
 Expected when prior pin matches: EXISTING_OWNER_PIN_MATCHES_VM_AND_OLLAMA followed by Windows account password prompt and INSTALLED_DISABLED. Run -Inspect before considering -Enable. If it still HOLDs, do not rename/remove the pin or create a second VM; inspect locally with owner supervision, with secrets/absolute private paths kept off GitHub and chat.
+
+## Build 356.2 field hotfix — correct Windows PowerShell trigger parameter set
+
+Owner field evidence from DESKTOP-AE894KC: the original VM pin and local Ollama path both validated, the first retry printed EXISTING_OWNER_PIN_MATCHES_VM_AND_OLLAMA, but -Install then failed with AmbiguousParameterSet. The failing code combined New-ScheduledTaskTrigger -Daily with -RepetitionInterval and -RepetitionDuration. Microsoft documents that repetition switches are only valid for the **-Once** parameter set. The corrected installer creates a one-time TimeTrigger with a five-minute repetition interval and intentionally NO duration (Windows repeats indefinitely); its Get-KnownTask readback confirms TimeTrigger/interval/no duration and password-backed principal before enablement.
+
+The Windows CI now does a REAL in-memory `New-ScheduledTaskTrigger -Once` construction and validates its CIM repetition fields. This is better than merely parsing source, but is not a physical startup/Task Scheduler credential test. **No test task is registered in CI**.
+
+At the original host, **keep the existing non-secret pin and any unrelated untracked package-lock.json**. From the already checked-out main repository, first verify working tree and fetch the corrected production code only if origin is correct (fast-forward; no reset/clean/stash):
+
+~~~powershell
+git status --short --branch
+git pull --ff-only origin main
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-hub-unattended356.ps1 -Inspect
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\boot-hub-unattended356.ps1 -CheckOnly
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-hub-unattended356.ps1 -Install
+~~~
+
+Proceed ONLY if the installer reports INSTALLED_DISABLED and follow with -Inspect; refrain from -Enable and real reboot until both task identities, password principal, five-minute trigger, guest/camera/HA/MQTT/HTTPS dependencies and backup acceptance are independently checked. If Windows rejects the stored account password or batch logon, record only the bounded HOLD error; do not paste credentials.
 
 ## Stage 2 — enable once and test without an interactive logon
 
