@@ -210,6 +210,7 @@ def verify_comms_audit_link353(
         and p["auditRecord"]["eventDigest"] == p["eventDigest"]
         and p["auditRecord"]["actorRole"] == "owner"
         and p["auditRecord"]["outcome"] == "ACKNOWLEDGED"
+        and type(p["auditRecord"]["ownerAuditId"]) is str
         and p["auditRecord"]["ownerAuditId"] in permitted_owner_audit_ids
         and type(p["auditRecord"]["occurredAtMs"]) is int
         and event_payload["issuedAtMs"]

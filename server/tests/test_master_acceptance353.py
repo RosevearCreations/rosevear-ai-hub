@@ -1,7 +1,6 @@
 """Build 353 / QL-462 independently pinned ceremony and Master pilot limits."""
 
 import hashlib
-import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
 

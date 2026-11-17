@@ -25,7 +25,7 @@ from rosevear_ai_hub.master_registry352 import load_master_registry352
 from rosevear_ai_hub.master_shell349 import ORIGINAL_HOST, load_local_manifest349
 from rosevear_ai_hub.master_transport352 import MasterDeliveryLedger352
 from rosevear_ai_hub.models import User
-from rosevear_ai_hub.service_identity347 import _digest, _sha
+from rosevear_ai_hub.service_identity347 import _digest
 
 router = APIRouter(prefix="/api/v1/system/server-shell-353", tags=["server-shell353"])
 
