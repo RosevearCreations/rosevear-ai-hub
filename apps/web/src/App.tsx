@@ -17,7 +17,8 @@ import { AuditView } from "./AuditView";
 import { AuthView } from "./AuthView";
 import { CameraView } from "./CameraView";
 import { CardHelp, CommandPalette, type ShellDensity, type ShellTheme } from "./CommandShell";
-import { loadShellTheme, parseShellTheme, saveShellTheme } from "./shellThemePreference";
+import { loadShellTheme, parseShellTheme, saveShellTheme, MASTER_THEME_CHOICES } from "./shellThemePreference";
+import "./masterThemes467.css";
 import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
 import { SystemWorkspaceGuide } from "./SystemWorkspaceGuide";
 import { SystemConsoleRefresh } from "./SystemConsoleRefresh";
@@ -355,6 +356,7 @@ export function App() {
               <option value="dark">Dark Mode</option>
               <option value="standard">Standard</option>
               <option value="high-contrast">High contrast</option>
+              {MASTER_THEME_CHOICES.filter(item => item.id !== "high-contrast").map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
             </select>
           </label>
           <button type="button" className="hub-theme-toggle"
