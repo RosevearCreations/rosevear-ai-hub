@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getServerShell350, type ServerShell350Snapshot } from "./api";
+import { getServerShell350, getServerShell351, type ServerShell350Snapshot, type ServerShell351Snapshot } from "./api";
 import { MasterCommandVisualSystem } from "./MasterCommandVisualSystem";
 import "./serverShell349.css";
 
@@ -28,8 +28,26 @@ function authenticContract(data: unknown): data is ServerShell350Snapshot {
           slaves[i]?.proof === "FRESH_PINNED_MTLS_AND_ED25519_JOURNAL")));
 }
 
+function matchesQl460(value: unknown): value is ServerShell351Snapshot {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const o = value as Record<string, unknown>;
+  return o.schema === "rosevear.hub.unified-operator-readiness351.v1" &&
+    o.sourceBuild === 351 && o.serverShell === "ai-data-platform" &&
+    o.physicalReceiverCurrentlyOff === false &&
+    o.receiverActivationAuthorized === false &&
+    o.webMutationAvailable === false &&
+    o.installationVerified === false &&
+    o.rebootAcceptanceVerified === false &&
+    o.issueAlertDeliveryVerified === false &&
+    typeof o.eventBus === "object" && o.eventBus !== null &&
+    typeof o.homeAutomation === "object" && o.homeAutomation !== null &&
+    typeof o.bootWitness === "object" && o.bootWitness !== null &&
+    Array.isArray(o.issues);
+}
+
 export function ServerShell350Panel() {
   const [snapshot, setSnapshot] = useState<ServerShell350Snapshot | null>(null);
+  const [ql460, setQl460] = useState<ServerShell351Snapshot | null>(null);
   const [notice, setNotice] = useState("No original-host observation has been loaded.");
   const [busy, setBusy] = useState(false);
   const [theme, setTheme] = useState<Record<string, Skin>>({});
@@ -41,6 +59,7 @@ export function ServerShell350Panel() {
     const controller = new AbortController();
     pending.current = controller;
     setSnapshot(null);
+    setQl460(null);
     setBusy(true);
     try {
       const response: unknown = await getServerShell350(controller.signal);
@@ -49,6 +68,12 @@ export function ServerShell350Panel() {
         setNotice("Invalid source contract: all runtime and peer states are HOLD.");
       } else {
         setSnapshot(response);
+        try {
+          const next: unknown = await getServerShell351(controller.signal);
+          if (pending.current === controller && matchesQl460(next)) setQl460(next);
+        } catch {
+          // No QL-460 evidence is equivalent to HOLD, never a successful connection.
+        }
         setNotice(response.signedManifestVerified
           ? "Signed original-host configuration verified. Live states require fresh source evidence."
           : "HOLD: no verified original-host signed enrollment and observation.");
@@ -62,14 +87,16 @@ export function ServerShell350Panel() {
   const modules = snapshot?.modules ?? [];
   const peers = snapshot?.applications ?? [];
   return <MasterCommandVisualSystem
-    title="Three-Master Server Command Centre"
+    title="Unified Three-Master Server Command Centre"
     subtitle="AI Data Platform shell · Windows AI Hub runtime · Comms Hub · independent Slave monitoring"
-    release="350"
+    release="351"
     currentPath="#master350"
     navigation={[
       { id: "master", label: "Master modules", href: "#master350" },
       { id: "slaves", label: "YW + iCamp", href: "#slaves350" },
       { id: "evidence", label: "Supervisor custody", href: "#custody350" },
+      { id: "issues", label: "Master events & issue alerts", href: "#issues351" },
+      { id: "automation", label: "Home automation", href: "#automation351" },
     ]}
     kpis={snapshot ? [
       { id: "host", icon: "⌂", label: "Original Windows host",
@@ -155,6 +182,41 @@ export function ServerShell350Panel() {
         ? "VERIFIED" : "NOT VERIFIED"} · Receiver state: UNKNOWN · incident OPEN.</p>
       <p>Actual 24/7 operation must be installed and proven on the original Windows PC.
         Source CI success is not a runtime health check.</p>
+    </section>
+    <section id="issues351" className="mc-panel shell349">
+      <h3>Master event bus & verified issue alerts · QL-460</h3>
+      <p>Events come only from the original-host protected local journals. A local hash chain
+        detects alteration but does not independently attest a Windows reboot.</p>
+      <p>Ledger: <strong>{ql460?.eventBus.integrity ?? "HOLD"}</strong> ·
+        Delivery of outbound alerts: NOT VERIFIED ·
+        Owner acknowledgement: NOT ENABLED</p>
+      <div className="shell349-status-grid">
+        {(ql460?.issues ?? []).map((issue, index) =>
+          <article className="shell349-status" key={issue.source + "-" + index}>
+            <strong>{issue.source}</strong>
+            <small>{issue.severity}</small>
+            <p>Observed: {issue.state}</p>
+            <p>Evidence: {issue.evidenceDigest.slice(0, 16)}…</p>
+            <p>Disposition: {issue.disposition}</p>
+          </article>
+        )}
+      </div>
+      {!(ql460?.issues.length) && <p>No current verified issue alerts. This is not proof of healthy or connected services.</p>}
+    </section>
+    <section id="automation351" className="mc-panel shell349">
+      <h3>Home automation · read-only health</h3>
+      <p>Home Assistant authenticated API: <strong>{ql460?.homeAutomation.state ?? "UNVERIFIED"}</strong></p>
+      <p>Evidence: {ql460?.homeAutomation.proof ?? "NO_AUTHENTICATED_READONLY_API_RESPONSE"}</p>
+      <p>No device controls, scenes, switches or receiver activation are available from this Server Shell.</p>
+    </section>
+    <section id="boot351" className="mc-panel shell349">
+      <h3>Windows installation & reboot acceptance</h3>
+      <p>Boot observations: <strong>{ql460?.bootWitness.distinctBoots ?? 0}</strong> ·
+        Source: {ql460?.bootWitness.observation ?? "HOLD"}</p>
+      <p>Observer task installed: NOT VERIFIED · Automatic launch after reboot: NOT VERIFIED ·
+        Independent reboot acceptance: NOT VERIFIED.</p>
+      <p>Windows installation requires the owner to run the disabled-first QL-460 installer locally
+        and then separately approve enabling it. GitHub CI cannot install it on the original PC.</p>
     </section>
   </MasterCommandVisualSystem>;
 }
