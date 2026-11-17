@@ -3399,3 +3399,58 @@ export interface ServerShell353Snapshot {
 export function getServerShell353(signal?: AbortSignal): Promise<ServerShell353Snapshot> {
   return authJson("GET", "/api/v1/system/server-shell-353", undefined, signal);
 }
+
+/** QL-463 owner-only source evidence; never implies live Windows or peer acceptance. */
+export interface ServerShell354Snapshot {
+  schema: "rosevear.hub.master-acceptance354.v1";
+  sourceBuild: 354;
+  serverShell: "ai-data-platform";
+  originalHost: string;
+  witnessEnrollment: {
+    state: string;
+    ownerPinnedEnrollmentVerified: boolean;
+    independentWitnessKeyVerified: boolean;
+    independentReviewerKeyVerified: boolean;
+    originalHostRuntimeVerified: false;
+    physicalReceiverAuthorized: false;
+  };
+  rebootCorroboration: {
+    state: string;
+    signedTwoBootsCorroborated: boolean;
+    unattendedTaskStartupVerified: false;
+    continuous24HourUptimeVerified: false;
+    physicalReceiverAuthorized: false;
+  };
+  peerSinks: {
+    "ai-data-platform": "UNVERIFIED" | "PEER_SIGNED_SINK_ONLY";
+    "rosevear-comms-hub": "UNVERIFIED" | "PEER_SIGNED_SINK_ONLY";
+  };
+  certificateRotation: {
+    state: string;
+    ownerSignedPlanVerified: boolean;
+    candidateTlsHandshakeVerified: false;
+    certificateActivated: false;
+    automaticKeyRotationAuthorized: false;
+    physicalReceiverAuthorized: false;
+  };
+  commsAudit: {
+    state: string;
+    integrity: string;
+    corroboratedCount: number;
+    independentHumanReadVerified: false;
+    latestMessageId: string | null;
+  };
+  liveThreeMasterMtlSPilotVerified: false;
+  independentHumanReadVerified: false;
+  unattendedWindowsRecoveryVerified: false;
+  receiverActivationAuthorized: false;
+  physicalReceiverCurrentlyOff: false;
+  incidentStatus: "OPEN";
+  webMutationAvailable: false;
+  protocolPreferred: "1.1";
+  protocolLegacyCompatible: "1.0";
+}
+
+export function getServerShell354(signal?: AbortSignal): Promise<ServerShell354Snapshot> {
+  return authJson("GET", "/api/v1/system/server-shell-354", undefined, signal);
+}
