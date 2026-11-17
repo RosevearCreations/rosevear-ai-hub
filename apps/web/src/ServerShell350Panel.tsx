@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getServerShell350, getServerShell351, getServerShell352, type ServerShell350Snapshot, type ServerShell351Snapshot, type ServerShell352Snapshot } from "./api";
+import { getServerShell350, getServerShell351, getServerShell352, getServerShell353, type ServerShell350Snapshot, type ServerShell351Snapshot, type ServerShell352Snapshot, type ServerShell353Snapshot } from "./api";
 import { MasterCommandVisualSystem } from "./MasterCommandVisualSystem";
 import "./serverShell349.css";
 
@@ -66,10 +66,35 @@ function matchesQl461(value: unknown): value is ServerShell352Snapshot {
     Array.isArray(transport.latest);
 }
 
+function matchesQl462(value: unknown): value is ServerShell353Snapshot {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const d = value as Record<string, unknown>;
+  if (d.schema !== "rosevear.hub.owner-acceptance353.v1" ||
+      d.sourceBuild !== 353 || d.serverShell !== "ai-data-platform" ||
+      d.physicalReceiverCurrentlyOff !== false ||
+      d.receiverActivationAuthorized !== false ||
+      d.webMutationAvailable !== false ||
+      typeof d.rebootCeremony !== "object" || d.rebootCeremony === null ||
+      typeof d.operatorAudit !== "object" || d.operatorAudit === null ||
+      typeof d.pilot !== "object" || d.pilot === null ||
+      typeof d.keyRotation !== "object" || d.keyRotation === null) return false;
+  const c = d.rebootCeremony as Record<string, unknown>;
+  const a = d.operatorAudit as Record<string, unknown>;
+  const p = d.pilot as Record<string, unknown>;
+  const k = d.keyRotation as Record<string, unknown>;
+  return c.automaticStartupIndependentlyProven === false &&
+    c.physicalReceiverAuthorized === false &&
+    a.humanReadIndependentlyWitnessed === false &&
+    p.livePeerCurrentlyConnected === false &&
+    k.automaticKeyActivationAuthorized === false &&
+    Array.isArray(k.peerKeys);
+}
+
 export function ServerShell350Panel() {
   const [snapshot, setSnapshot] = useState<ServerShell350Snapshot | null>(null);
   const [ql460, setQl460] = useState<ServerShell351Snapshot | null>(null);
   const [ql461, setQl461] = useState<ServerShell352Snapshot | null>(null);
+  const [ql462, setQl462] = useState<ServerShell353Snapshot | null>(null);
   const [notice, setNotice] = useState("No original-host observation has been loaded.");
   const [busy, setBusy] = useState(false);
   const [theme, setTheme] = useState<Record<string, Skin>>({});
@@ -83,6 +108,7 @@ export function ServerShell350Panel() {
     setSnapshot(null);
     setQl460(null);
     setQl461(null);
+    setQl462(null);
     setBusy(true);
     try {
       const response: unknown = await getServerShell350(controller.signal);
@@ -97,6 +123,10 @@ export function ServerShell350Panel() {
           const custody: unknown = await getServerShell352(controller.signal);
           if (pending.current === controller && matchesQl461(custody)) {
             setQl461(custody);
+          }
+          const acceptance: unknown = await getServerShell353(controller.signal);
+          if (pending.current === controller && matchesQl462(acceptance)) {
+            setQl462(acceptance);
           }
         } catch {
           // No QL-460 evidence is equivalent to HOLD, never a successful connection.
@@ -116,7 +146,7 @@ export function ServerShell350Panel() {
   return <MasterCommandVisualSystem
     title="Unified Three-Master Server Command Centre"
     subtitle="AI Data Platform shell · Windows AI Hub runtime · Comms Hub · independent Slave monitoring"
-    release="352"
+    release="353"
     currentPath="#master350"
     navigation={[
       { id: "master", label: "Master modules", href: "#master350" },
@@ -125,6 +155,7 @@ export function ServerShell350Panel() {
       { id: "issues", label: "Master events & issue alerts", href: "#issues351" },
       { id: "automation", label: "Home automation", href: "#automation351" },
       { id: "receipts", label: "Host witness & operator ACK", href: "#witness352" },
+      { id: "acceptance", label: "Acceptance & Master pilot", href: "#acceptance353" },
     ]}
     kpis={snapshot ? [
       { id: "host", icon: "⌂", label: "Original Windows host",
