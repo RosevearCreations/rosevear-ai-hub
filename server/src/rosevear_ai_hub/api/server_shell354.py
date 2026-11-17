@@ -139,8 +139,12 @@ def local_acceptance_snapshot354(*, now_ms: int, machine_name: str) -> dict[str,
     rotation_package = _read_protected353(
         os.environ.get("ROSEVEAR_QL463_CERT_PLAN_PATH"),
     )
-    if type(rotation_package) is dict and registry is not None:
-        peer_id = rotation_package.get("payload", {}).get("peer")
+    if (
+        type(rotation_package) is dict
+        and type(rotation_package.get("payload")) is dict
+        and registry is not None
+    ):
+        peer_id = rotation_package["payload"].get("peer")
         matching_peers = [
             x for x in enrollment["payload"]["peers"] if x["id"] == peer_id
         ]
