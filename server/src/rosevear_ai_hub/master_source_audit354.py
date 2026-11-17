@@ -14,8 +14,8 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from rosevear_ai_hub.master_acceptance353 import verify_comms_audit_link353
 import rosevear_ai_hub.master_transport352 as transport352
+from rosevear_ai_hub.master_acceptance353 import verify_comms_audit_link353
 from rosevear_ai_hub.master_transport352 import MasterDeliveryLedger352
 from rosevear_ai_hub.service_identity347 import Registry347, _canonical, _digest, _sha
 
