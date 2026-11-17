@@ -37,16 +37,28 @@ def test_source_only_event_chain_and_issues(monkeypatch, tmp_path: Path):
     manifest = "a" * 64
     evidence = hashlib.sha256(_canonical(["svc", "STOPPED", now])).hexdigest()
     assert journal.append(
-        source="rosevear-ai-hub", kind="module.observed", state="STOPPED",
-        evidence_sha=evidence, observed_ms=now, manifest_sha=manifest,
+        source="rosevear-ai-hub",
+        kind="module.observed",
+        state="STOPPED",
+        evidence_sha=evidence,
+        observed_ms=now,
+        manifest_sha=manifest,
     )
     assert not journal.append(
-        source="rosevear-ai-hub", kind="module.observed", state="STOPPED",
-        evidence_sha=evidence, observed_ms=now, manifest_sha=manifest,
+        source="rosevear-ai-hub",
+        kind="module.observed",
+        state="STOPPED",
+        evidence_sha=evidence,
+        observed_ms=now,
+        manifest_sha=manifest,
     )
     assert not journal.append(
-        source="physical-receiver", kind="module.observed", state="RUNNING",
-        evidence_sha=evidence, observed_ms=now, manifest_sha=manifest,
+        source="physical-receiver",
+        kind="module.observed",
+        state="RUNNING",
+        evidence_sha=evidence,
+        observed_ms=now,
+        manifest_sha=manifest,
     )
     result = journal.recent(manifest_sha=manifest, now_ms=now)
     assert result["integrity"] == "LOCAL_HASH_CHAIN_VALID"
@@ -66,9 +78,12 @@ def test_corrupt_earlier_event_holds_all_later_events(monkeypatch, tmp_path: Pat
     now = 1_800_000_000_000
     for n in range(2):
         assert bus.append(
-            source=MASTER_MODULES[n], kind="module.observed",
-            state="RUNNING", evidence_sha=("a" if n == 0 else "b") * 64,
-            observed_ms=now + n, manifest_sha="d" * 64,
+            source=MASTER_MODULES[n],
+            kind="module.observed",
+            state="RUNNING",
+            evidence_sha=("a" if n == 0 else "b") * 64,
+            observed_ms=now + n,
+            manifest_sha="d" * 64,
         )
     with sqlite3.connect(bus.path) as db:
         db.execute("UPDATE master_events351 SET evidence_sha = ? WHERE seq = 1", ("c" * 64,))
@@ -83,7 +98,10 @@ def test_post_boot_witness_never_proves_task_autostart(monkeypatch, tmp_path: Pa
     values = {m: "RUNNING" for m in MASTER_MODULES}
     for boot_ms in (now - 2_000_000, now - 1_000):
         assert boot.record(
-            boot_ms=boot_ms, observed_ms=now, manifest_sha="d" * 64, states=values,
+            boot_ms=boot_ms,
+            observed_ms=now,
+            manifest_sha="d" * 64,
+            states=values,
         )
     result = boot.summary(manifest_sha="d" * 64, now_ms=now)
     assert result["distinctBoots"] == 2
@@ -105,15 +123,23 @@ def test_scoped_original_host_observations_feed_event_bus(monkeypatch, tmp_path:
     boot = BootWitness351(tmp_path / "boot.sqlite")
     assert custody.initialize() and bus.initialize() and boot.initialize()
     assert not publish_module_observations351(
-        enrollment=enrollment, custody=custody, bus=bus, boot=boot,
-        boot_ms=now - 100_000, now_ms=now,
+        enrollment=enrollment,
+        custody=custody,
+        bus=bus,
+        boot=boot,
+        boot_ms=now - 100_000,
+        now_ms=now,
     )
     for name in MASTER_MODULES:
         state = "STOPPED" if name == MASTER_MODULES[0] else "RUNNING"
         assert custody.observe(name, digest, state, now)
     assert publish_module_observations351(
-        enrollment=enrollment, custody=custody, bus=bus, boot=boot,
-        boot_ms=now - 100_000, now_ms=now,
+        enrollment=enrollment,
+        custody=custody,
+        bus=bus,
+        boot=boot,
+        boot_ms=now - 100_000,
+        now_ms=now,
     )
     assert len(bus.recent(manifest_sha=digest, now_ms=now)["events"]) == 3
     assert len(bus.recent(manifest_sha=digest, now_ms=now)["issues"]) == 1
@@ -126,8 +152,10 @@ async def test_home_assistant_get_health_only_no_actuators():
             return "API running."
 
     runtime = HomeAssistantRuntime(
-        client=Healthy(), base_url="https://ha.example.test",
-        url_configured=True, token_configured=True,
+        client=Healthy(),
+        base_url="https://ha.example.test",
+        url_configured=True,
+        token_configured=True,
     )
     assert _home_url_allowed351("https://ha.example.test")
     assert not _home_url_allowed351("http://ha.example.test")
@@ -135,9 +163,12 @@ async def test_home_assistant_get_health_only_no_actuators():
     result = await home_readonly_status351(runtime, original_host_verified=True)
     assert result["state"] == "AVAILABLE"
     assert result["physicalDeviceControlAuthorized"] is False
-    assert (await home_readonly_status351(
-        runtime, original_host_verified=False,
-    ))["state"] == "UNVERIFIED"
+    assert (
+        await home_readonly_status351(
+            runtime,
+            original_host_verified=False,
+        )
+    )["state"] == "UNVERIFIED"
 
 
 def test_owner_only_get_and_windows_installer_controls():
