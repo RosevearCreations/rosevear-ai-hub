@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getServerShell350, getServerShell351, type ServerShell350Snapshot, type ServerShell351Snapshot } from "./api";
+import { getServerShell350, getServerShell351, getServerShell352, type ServerShell350Snapshot, type ServerShell351Snapshot, type ServerShell352Snapshot } from "./api";
 import { MasterCommandVisualSystem } from "./MasterCommandVisualSystem";
 import "./serverShell349.css";
 
@@ -45,9 +45,31 @@ function matchesQl460(value: unknown): value is ServerShell351Snapshot {
     Array.isArray(o.issues);
 }
 
+function matchesQl461(value: unknown): value is ServerShell352Snapshot {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const d = value as Record<string, unknown>;
+  if (d.schema !== "rosevear.hub.master-custody-status352.v1" ||
+      d.sourceBuild !== 352 || d.serverShell !== "ai-data-platform" ||
+      d.physicalReceiverCurrentlyOff !== false ||
+      d.receiverActivationAuthorized !== false ||
+      d.endToEndOperatorDeliveryVerified !== false ||
+      d.webMutationAvailable !== false ||
+      d.liveMasterPeerHealthVerified !== false ||
+      typeof d.installationWitness !== "object" ||
+      typeof d.masterTransport !== "object" ||
+      d.installationWitness === null || d.masterTransport === null) return false;
+  const witness = d.installationWitness as Record<string, unknown>;
+  const transport = d.masterTransport as Record<string, unknown>;
+  return witness.taskAutostartProven === false &&
+    witness.independentThirdPartyWitness === false &&
+    transport.operatorAckMeansHumanVerified === false &&
+    Array.isArray(transport.latest);
+}
+
 export function ServerShell350Panel() {
   const [snapshot, setSnapshot] = useState<ServerShell350Snapshot | null>(null);
   const [ql460, setQl460] = useState<ServerShell351Snapshot | null>(null);
+  const [ql461, setQl461] = useState<ServerShell352Snapshot | null>(null);
   const [notice, setNotice] = useState("No original-host observation has been loaded.");
   const [busy, setBusy] = useState(false);
   const [theme, setTheme] = useState<Record<string, Skin>>({});
@@ -60,6 +82,7 @@ export function ServerShell350Panel() {
     pending.current = controller;
     setSnapshot(null);
     setQl460(null);
+    setQl461(null);
     setBusy(true);
     try {
       const response: unknown = await getServerShell350(controller.signal);
@@ -71,6 +94,10 @@ export function ServerShell350Panel() {
         try {
           const next: unknown = await getServerShell351(controller.signal);
           if (pending.current === controller && matchesQl460(next)) setQl460(next);
+          const custody: unknown = await getServerShell352(controller.signal);
+          if (pending.current === controller && matchesQl461(custody)) {
+            setQl461(custody);
+          }
         } catch {
           // No QL-460 evidence is equivalent to HOLD, never a successful connection.
         }
@@ -89,7 +116,7 @@ export function ServerShell350Panel() {
   return <MasterCommandVisualSystem
     title="Unified Three-Master Server Command Centre"
     subtitle="AI Data Platform shell · Windows AI Hub runtime · Comms Hub · independent Slave monitoring"
-    release="351"
+    release="352"
     currentPath="#master350"
     navigation={[
       { id: "master", label: "Master modules", href: "#master350" },
@@ -97,6 +124,7 @@ export function ServerShell350Panel() {
       { id: "evidence", label: "Supervisor custody", href: "#custody350" },
       { id: "issues", label: "Master events & issue alerts", href: "#issues351" },
       { id: "automation", label: "Home automation", href: "#automation351" },
+      { id: "receipts", label: "Host witness & operator ACK", href: "#witness352" },
     ]}
     kpis={snapshot ? [
       { id: "host", icon: "⌂", label: "Original Windows host",
@@ -217,6 +245,35 @@ export function ServerShell350Panel() {
         Independent reboot acceptance: NOT VERIFIED.</p>
       <p>Windows installation requires the owner to run the disabled-first QL-460 installer locally
         and then separately approve enabling it. GitHub CI cannot install it on the original PC.</p>
+    </section>
+    <section id="witness352" className="mc-panel shell349">
+      <h3>Original-host signed installation & reboot receipts · QL-461</h3>
+      <p>Evidence: <strong>{ql461?.installationWitness.status ??
+        "HOLD_NO_FRESH_INDEPENDENTLY_PINNED_HOST_RECEIPT"}</strong></p>
+      <p>Locally signed receipt: {ql461?.installationWitness.verified
+        ? "Signature verified" : "NOT VERIFIED"} ·
+        Task state: {ql461?.installationWitness.taskState ?? "UNVERIFIED"}</p>
+      <p>Task autostart after reboot: NOT INDEPENDENTLY VERIFIED ·
+        Third-party witness: NOT AVAILABLE · Physical receiver: UNKNOWN</p>
+      <h3>Three-Master transport & operator alerts</h3>
+      <p>Durable source ledger: <strong>{ql461?.masterTransport.stage ?? "HOLD"}</strong></p>
+      <p>Queued: {ql461?.masterTransport.queued ?? 0} ·
+        Peer-signed transport receipts: {ql461?.masterTransport.transportAcked ?? 0} ·
+        Comms-signed owner audit ACKs: {ql461?.masterTransport.operatorAcked ?? 0}</p>
+      <p>These counts describe validated historical receipts, not currently connected peers
+        or independent confirmation that a person read an alert.</p>
+      <div className="shell349-status-grid">
+        {(ql461?.masterTransport.latest ?? []).map(item =>
+          <article className="shell349-status" key={item.messageId}>
+            <strong>{item.audience}</strong>
+            <small>{item.stage}</small>
+            <p>{item.eventType}</p>
+            <p>Message: {item.messageId.slice(0, 18)}…</p>
+          </article>
+        )}
+      </div>
+      <p>Delivery remains separate from operator acknowledgement. Browser mutations,
+        task changes and physical device controls are disabled.</p>
     </section>
   </MasterCommandVisualSystem>;
 }

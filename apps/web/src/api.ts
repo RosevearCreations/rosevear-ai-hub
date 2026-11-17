@@ -3301,3 +3301,47 @@ export interface ServerShell351Snapshot {
 export function getServerShell351(signal?: AbortSignal): Promise<ServerShell351Snapshot> {
   return authJson("GET", "/api/v1/system/server-shell-351", undefined, signal);
 }
+
+/** QL-461 signed witness and Master peer transport evidence, source-only. */
+export interface ServerShell352Snapshot {
+  schema: "rosevear.hub.master-custody-status352.v1";
+  sourceBuild: 352;
+  serverShell: "ai-data-platform";
+  originalHost: string;
+  signedOriginalHostEnrollment: boolean;
+  installationWitness: {
+    verified: boolean;
+    status: string;
+    bootMs: number | null;
+    taskState: "Ready" | "Running" | "UNVERIFIED";
+    taskAutostartProven: false;
+    independentThirdPartyWitness: false;
+    receiverActivationAuthorized: false;
+  };
+  masterTransport: {
+    stage: string;
+    queued: number;
+    transportAcked: number;
+    operatorAcked: number;
+    latest: Array<{
+      messageId: string;
+      audience: string;
+      eventType: string;
+      stage: "QUEUED" | "TRANSPORT_ACKED" | "OPERATOR_ACKED";
+      updatedAtMs: number;
+    }>;
+    operatorAckMeansHumanVerified: false;
+  };
+  liveMasterPeerHealthVerified: false;
+  endToEndOperatorDeliveryVerified: false;
+  physicalReceiverCurrentlyOff: false;
+  receiverActivationAuthorized: false;
+  originalIncidentStatus: "OPEN";
+  webMutationAvailable: false;
+  protocolPreferred: "1.1";
+  protocolLegacyCompatible: "1.0";
+}
+
+export function getServerShell352(signal?: AbortSignal): Promise<ServerShell352Snapshot> {
+  return authJson("GET", "/api/v1/system/server-shell-352", undefined, signal);
+}
