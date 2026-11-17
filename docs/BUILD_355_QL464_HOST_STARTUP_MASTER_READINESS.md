@@ -45,6 +45,21 @@ Verify Windows service startup **Automatic** and recovery policies individually 
 
 **Proposed boot dependency order for the owner to confirm:** Windows + Hyper-V Home Assistant VM; trusted OS network/Tailscale + broker/Caddy; installed Hub backend/API and local UI; optional Ollama/camera services; independently authorized AI Data and Comms *workers*; owner-signed and live-ACK peer transports. Remote Vercel/Cloudflare application deployments do not start as Windows processes.
 
+## Safe PowerShell-assisted checkout refresh (owner-controlled)
+
+After the **main** release passes all code checks, use a planned maintenance window and first inspect each existing local checkout. Updating a Git checkout is NOT the same as updating installed Windows services, schema migrations, environment variables, or the running process.
+
+```powershell
+# Run in each VERIFIED clean checkout separately, never against an unknown path.
+git status --short --branch
+git remote -v
+git rev-parse HEAD
+# Only if the working tree is clean, correct origin verified, and main is checked out:
+git pull --ff-only origin main
+```
+
+Do not force reset, stash unreviewed changes, run unattended package installers, or pull a running host checkout during the startup test. Refresh installed Hub packages, service executable paths, Node dependencies, databases and the separately authorized AI Data/Comms workers only through their supervised release procedures. Record before/after source commits, installed runtime identity and rollback path. On a dirty checkout, STOP and preserve local changes.
+
 ## Remaining gates before we approve a startup test
 
 - Inspect the real host task actions/triggers and service identities. Resolve any service MISSING/Manual/Disabled or absent recovery policy individually.
