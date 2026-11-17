@@ -416,4 +416,4 @@ export function ServerShell350Panel() {
         Physical receiver: UNKNOWN / activation denied</p>
     </section>
   </MasterCommandVisualSystem>;
-
+}
