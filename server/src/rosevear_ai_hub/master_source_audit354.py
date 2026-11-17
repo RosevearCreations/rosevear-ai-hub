@@ -26,9 +26,14 @@ MAX_CAPTURE_BYTES354 = 16_384
 
 
 def verify_source_crosscheck354(
-    *, package: Any, local_bus: dict[str, Any],
-    delivery: dict[str, Any], registry: Registry347,
-    manifest_sha: str, owner_audit_id: str, now_ms: int,
+    *,
+    package: Any,
+    local_bus: dict[str, Any],
+    delivery: dict[str, Any],
+    registry: Registry347,
+    manifest_sha: str,
+    owner_audit_id: str,
+    now_ms: int,
 ) -> dict[str, Any]:
     hold = {
         "state": "HOLD_NO_COMMS_AND_ORIGINAL_HOST_SOURCE_CORROBORATION",
@@ -38,8 +43,12 @@ def verify_source_crosscheck354(
         "sourceEvidenceDigest": None,
     }
     if not (
-        type(package) is dict and set(package) == {
-            "event", "operatorAck", "signedAudit",
+        type(package) is dict
+        and set(package)
+        == {
+            "event",
+            "operatorAck",
+            "signedAudit",
         }
         and type(package["event"]) is dict
         and type(local_bus) is dict
@@ -50,7 +59,8 @@ def verify_source_crosscheck354(
         and type(delivery.get("latest")) is list
         and isinstance(registry, Registry347)
         and _sha(manifest_sha)
-        and type(owner_audit_id) is str and 12 <= len(owner_audit_id) <= 128
+        and type(owner_audit_id) is str
+        and 12 <= len(owner_audit_id) <= 128
         and all(ch.isalnum() or ch in "-_" for ch in owner_audit_id)
         and type(now_ms) is int
     ):
@@ -83,14 +93,18 @@ def verify_source_crosscheck354(
     ):
         return hold
     signed = verify_comms_audit_link353(
-        event_payload=event, operator_ack=package["operatorAck"],
-        signed_audit=package["signedAudit"], registry=registry,
-        now_ms=now_ms, permitted_owner_audit_ids=frozenset((owner_audit_id,)),
+        event_payload=event,
+        operator_ack=package["operatorAck"],
+        signed_audit=package["signedAudit"],
+        registry=registry,
+        now_ms=now_ms,
+        permitted_owner_audit_ids=frozenset((owner_audit_id,)),
     )
     if signed["commsSignedAuditLinked"] is not True:
         return hold
     return {
-        **hold, "state": "SIGNED_COMMS_AUDIT_AND_ORIGINAL_HOST_SOURCE_MATCH",
+        **hold,
+        "state": "SIGNED_COMMS_AUDIT_AND_ORIGINAL_HOST_SOURCE_MATCH",
         "twoSourceDigestCorroborated": True,
         "messageId": event["messageId"],
         "sourceEvidenceDigest": event["sourceEvidenceDigest"],
@@ -128,13 +142,20 @@ class MasterSourceAuditLedger354:
             return False
 
     def capture(
-        self, *, package: dict[str, Any], local_bus: dict[str, Any],
-        outbox: MasterDeliveryLedger352, registry: Registry347,
-        manifest_sha: str, owner_audit_id: str, now_ms: int,
+        self,
+        *,
+        package: dict[str, Any],
+        local_bus: dict[str, Any],
+        outbox: MasterDeliveryLedger352,
+        registry: Registry347,
+        manifest_sha: str,
+        owner_audit_id: str,
+        now_ms: int,
     ) -> bool:
         if not (
             _on_original_host352()
-            and self.path.is_file() and not self.path.is_symlink()
+            and self.path.is_file()
+            and not self.path.is_symlink()
             and isinstance(outbox, MasterDeliveryLedger352)
             and type(package) is dict
         ):
@@ -143,20 +164,29 @@ class MasterSourceAuditLedger354:
         if len(text.encode("utf-8")) > MAX_CAPTURE_BYTES354:
             return False
         delivery = outbox.status(
-            manifest_sha=manifest_sha, now_ms=now_ms, registry=registry,
+            manifest_sha=manifest_sha,
+            now_ms=now_ms,
+            registry=registry,
         )
         proof = verify_source_crosscheck354(
-            package=package, local_bus=local_bus,
-            delivery=delivery, registry=registry,
-            manifest_sha=manifest_sha, owner_audit_id=owner_audit_id,
+            package=package,
+            local_bus=local_bus,
+            delivery=delivery,
+            registry=registry,
+            manifest_sha=manifest_sha,
+            owner_audit_id=owner_audit_id,
             now_ms=now_ms,
         )
         if proof["twoSourceDigestCorroborated"] is not True:
             return False
         data = [
-            proof["messageId"], manifest_sha, _digest(package["event"]),
-            proof["sourceEvidenceDigest"], _digest(package),
-            owner_audit_id, now_ms,
+            proof["messageId"],
+            manifest_sha,
+            _digest(package["event"]),
+            proof["sourceEvidenceDigest"],
+            _digest(package),
+            owner_audit_id,
+            now_ms,
         ]
         try:
             with sqlite3.connect(self.path, timeout=3, isolation_level=None) as db:
@@ -173,16 +203,20 @@ class MasterSourceAuditLedger354:
                     return False
                 seq = len(rows) + 1
                 prev = rows[-1][-1] if rows else "0" * 64
-                entry = hashlib.sha256(
-                    _canonical([seq, *data, prev])
-                ).hexdigest()
+                entry = hashlib.sha256(_canonical([seq, *data, prev])).hexdigest()
                 db.execute(
                     "INSERT INTO source_audit354 VALUES (?,?,?,?,?,?,?,?,?,?)",
                     (
-                        seq, proof["messageId"], manifest_sha,
+                        seq,
+                        proof["messageId"],
+                        manifest_sha,
                         _digest(package["event"]),
-                        proof["sourceEvidenceDigest"], text,
-                        owner_audit_id, now_ms, prev, entry,
+                        proof["sourceEvidenceDigest"],
+                        text,
+                        owner_audit_id,
+                        now_ms,
+                        prev,
+                        entry,
                     ),
                 )
                 db.execute("COMMIT")
@@ -191,8 +225,12 @@ class MasterSourceAuditLedger354:
             return False
 
     def summary(
-        self, *, manifest_sha: str, registry: Registry347 | None,
-        outbox: MasterDeliveryLedger352 | None, now_ms: int,
+        self,
+        *,
+        manifest_sha: str,
+        registry: Registry347 | None,
+        outbox: MasterDeliveryLedger352 | None,
+        now_ms: int,
     ) -> dict[str, Any]:
         hold = {
             "state": "HOLD_NO_VERIFIED_DURABLE_SOURCE_AUDIT",
@@ -206,12 +244,15 @@ class MasterSourceAuditLedger354:
             and isinstance(registry, Registry347)
             and isinstance(outbox, MasterDeliveryLedger352)
             and type(now_ms) is int
-            and self.path.is_file() and not self.path.is_symlink()
+            and self.path.is_file()
+            and not self.path.is_symlink()
         ):
             return hold
         try:
             with sqlite3.connect(
-                f"file:{self.path}?mode=ro", uri=True, timeout=3,
+                f"file:{self.path}?mode=ro",
+                uri=True,
+                timeout=3,
             ) as db:
                 rows = db.execute(
                     """SELECT seq, message_id, manifest_sha, event_sha,
@@ -224,7 +265,9 @@ class MasterSourceAuditLedger354:
         if not rows or len(rows) > 2000 or not _chain_valid354(rows):
             return hold
         delivery = outbox.status(
-            manifest_sha=manifest_sha, now_ms=now_ms, registry=registry,
+            manifest_sha=manifest_sha,
+            now_ms=now_ms,
+            registry=registry,
         )
         if delivery["stage"] != "SIGNED_HISTORICAL_ACKS_NOT_CURRENT_PEER_HEALTH":
             return hold
@@ -238,7 +281,8 @@ class MasterSourceAuditLedger354:
                     event_payload=package["event"],
                     operator_ack=package["operatorAck"],
                     signed_audit=package["signedAudit"],
-                    registry=registry, now_ms=captured,
+                    registry=registry,
+                    now_ms=captured,
                     permitted_owner_audit_ids=frozenset((owner_id,)),
                 )
                 if not (
@@ -255,7 +299,8 @@ class MasterSourceAuditLedger354:
         except (ValueError, TypeError, KeyError):
             return hold
         return {
-            **hold, "state": "SIGNED_HISTORICAL_TWO_SOURCE_CUSTODY_ONLY",
+            **hold,
+            "state": "SIGNED_HISTORICAL_TWO_SOURCE_CUSTODY_ONLY",
             "integrity": "LOCAL_HASH_CHAIN_AND_SIGNED_COMMS_VERIFIED",
             "corroboratedCount": len(rows),
             "latestMessageId": rows[-1][1],
@@ -267,10 +312,17 @@ def _chain_valid354(rows: list[tuple[Any, ...]]) -> bool:
     for i, row in enumerate(rows, 1):
         seq, msg, manifest, event_sha, source, raw, owner, when, before, after = row
         if not (
-            type(seq) is int and seq == i and _sha(msg) and _sha(manifest)
-            and _sha(event_sha) and _sha(source) and type(raw) is str
-            and type(owner) is str and type(when) is int
-            and before == previous and _sha(after)
+            type(seq) is int
+            and seq == i
+            and _sha(msg)
+            and _sha(manifest)
+            and _sha(event_sha)
+            and _sha(source)
+            and type(raw) is str
+            and type(owner) is str
+            and type(when) is int
+            and before == previous
+            and _sha(after)
         ):
             return False
         try:
@@ -285,10 +337,19 @@ def _chain_valid354(rows: list[tuple[Any, ...]]) -> bool:
         except (ValueError, TypeError, KeyError):
             return False
         expected = hashlib.sha256(
-            _canonical([
-                seq, msg, manifest, event_sha, source, _digest(package),
-                owner, when, before,
-            ])
+            _canonical(
+                [
+                    seq,
+                    msg,
+                    manifest,
+                    event_sha,
+                    source,
+                    _digest(package),
+                    owner,
+                    when,
+                    before,
+                ]
+            )
         ).hexdigest()
         if expected != after:
             return False
