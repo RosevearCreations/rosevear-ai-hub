@@ -8,7 +8,6 @@ No HTTP mutation endpoint or cross-app remote command is exposed.
 from __future__ import annotations
 
 import hashlib
-import json
 import os
 import platform
 import sqlite3
@@ -266,7 +265,7 @@ class BootWitness351:
             boot: v for boot, v in grouped.items() if set(v) == set(MASTER_MODULES)
         }
         current = max(complete) if complete else None
-        if current is None or not any(
+        if current is None or not all(
             0 <= now_ms - at <= FRESH_MS for at, _ in complete[current].values()
         ):
             return base

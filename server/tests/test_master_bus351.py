@@ -109,7 +109,8 @@ def test_scoped_original_host_observations_feed_event_bus(monkeypatch, tmp_path:
         boot_ms=now - 100_000, now_ms=now,
     )
     for name in MASTER_MODULES:
-        assert custody.observe(name, digest, "STOPPED" if name == MASTER_MODULES[0] else "RUNNING", now)
+        state = "STOPPED" if name == MASTER_MODULES[0] else "RUNNING"
+        assert custody.observe(name, digest, state, now)
     assert publish_module_observations351(
         enrollment=enrollment, custody=custody, bus=bus, boot=boot,
         boot_ms=now - 100_000, now_ms=now,
