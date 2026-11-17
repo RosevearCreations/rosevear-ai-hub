@@ -278,7 +278,6 @@ def _chain_valid354(rows: list[tuple[Any, ...]]) -> bool:
             package = json.loads(raw)
             if (
                 type(package) is not dict
-                or _digest(package) != hashlib.sha256(_canonical(package)).hexdigest()
                 or _digest(package["event"]) != event_sha
                 or package["event"]["messageId"] != msg
                 or package["event"]["sourceEvidenceDigest"] != source

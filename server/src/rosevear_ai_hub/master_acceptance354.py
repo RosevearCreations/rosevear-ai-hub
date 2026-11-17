@@ -260,17 +260,22 @@ def verify_certificate_rotation_plan354(
 
 
 def probe_candidate_mtls354(
-    *, plan: dict[str, Any], peer: dict[str, Any],
+    *, signed_plan: Any, owner_public: bytes, owner_pin: str,
+    manifest_digest: str, now_ms: int, peer: dict[str, Any],
     ca_file: Path, client_cert_file: Path, client_key_file: Path,
 ) -> dict[str, Any]:
-    """Explicit original-host CLI only: no HTTP or service changes, no dynamic URL."""
+    """Explicit original-host CLI only: owner-signed exact peer, no HTTP/control."""
     hold = {
         "state": "HOLD_NO_CANDIDATE_MTLS_HANDSHAKE",
         "candidateTlsHandshakeVerified": False,
         "certificateActivated": False,
     }
+    plan = verify_certificate_rotation_plan354(
+        signed_plan=signed_plan, owner_public=owner_public, owner_pin=owner_pin,
+        manifest_digest=manifest_digest, peer=peer, now_ms=now_ms,
+    )
     if not (
-        plan.get("ownerSignedPlanVerified") is True
+        plan["ownerSignedPlanVerified"] is True
         and peer.get("id") in PEER_SINKS
         and type(peer.get("hostname")) is str
         and type(peer.get("port")) is int and 1 <= peer["port"] <= 65535
