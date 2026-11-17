@@ -3454,3 +3454,52 @@ export interface ServerShell354Snapshot {
 export function getServerShell354(signal?: AbortSignal): Promise<ServerShell354Snapshot> {
   return authJson("GET", "/api/v1/system/server-shell-354", undefined, signal);
 }
+
+/** QL-464 original-host readiness: local unsigned inventory cannot prove autonomous boot. */
+export interface ServerShell355Snapshot {
+  schema: "rosevear.hub.startup-readiness355.v1";
+  sourceBuild: 355;
+  serverShell: "ai-data-platform";
+  originalHost: string;
+  identifiedOriginalHost: boolean;
+  inventoryFreshButUnsigned: boolean;
+  inventoryIsIndependentBootProof: false;
+  operationalReadiness: "HOLD_PRE_REBOOT_TEST";
+  nextOwnerAction: string;
+  continuousMonitor: {
+    configuredTask: string;
+    taskState: string;
+    actualUnattendedRecoveryVerified: false;
+    twentyFourHourContinuityVerified: false;
+  };
+  masterServices: Array<{
+    id: string; serviceName: string;
+    observedState: "RUNNING_SOURCE_OBSERVATION" | "UNVERIFIED";
+    windowsStartMode: string; windowsServiceState: string;
+    autonomousBootProven: false;
+    independentRuntimeActivationProven: false;
+  }>;
+  windowsTasks: Array<{
+    name: string; state: string; trigger: string; automaticBootProven: false;
+  }>;
+  peerHealth: Array<{
+    id: string; historicalSignedSink: boolean; currentlyConnected: false; state: string;
+  }>;
+  certificateRotation: {
+    priorPlanState: string; rotationCompleted: false;
+    newManifestAndSignedPeerAckVerified: false;
+    automaticCertificateActivationAuthorized: false;
+  };
+  requiredDependencies: Array<{id:string; status:string}>;
+  preRebootGates: string[];
+  protocolPreferred: "1.1";
+  protocolLegacyCompatible: "1.0";
+  receiverActivationAuthorized: false;
+  physicalReceiverCurrentlyOff: false;
+  incidentStatus: "OPEN";
+  webMutationAvailable: false;
+}
+
+export function getServerShell355(signal?: AbortSignal): Promise<ServerShell355Snapshot> {
+  return authJson("GET", "/api/v1/system/server-shell-355", undefined, signal);
+}

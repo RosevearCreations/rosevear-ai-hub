@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getServerShell350, getServerShell351, getServerShell352, getServerShell353, getServerShell354, type ServerShell350Snapshot, type ServerShell351Snapshot, type ServerShell352Snapshot, type ServerShell353Snapshot, type ServerShell354Snapshot } from "./api";
+import { getServerShell350, getServerShell351, getServerShell352, getServerShell353, getServerShell354, getServerShell355, type ServerShell350Snapshot, type ServerShell351Snapshot, type ServerShell352Snapshot, type ServerShell353Snapshot, type ServerShell354Snapshot, type ServerShell355Snapshot } from "./api";
 import { MasterCommandVisualSystem } from "./MasterCommandVisualSystem";
 import "./serverShell349.css";
 
@@ -113,12 +113,31 @@ function matchesQl463(value: unknown): value is ServerShell354Snapshot {
     witness.originalHostRuntimeVerified === false;
 }
 
+
+function matchesQl464(value: unknown): value is ServerShell355Snapshot {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const d = value as Record<string, unknown>;
+  return d.schema === "rosevear.hub.startup-readiness355.v1" &&
+    d.sourceBuild === 355 && d.serverShell === "ai-data-platform" &&
+    d.operationalReadiness === "HOLD_PRE_REBOOT_TEST" &&
+    d.inventoryIsIndependentBootProof === false &&
+    d.receiverActivationAuthorized === false &&
+    d.physicalReceiverCurrentlyOff === false &&
+    d.webMutationAvailable === false && Array.isArray(d.masterServices) &&
+    d.masterServices.length === 3 && Array.isArray(d.peerHealth) &&
+    d.peerHealth.length === 2 &&
+    d.peerHealth.every(p => p.currentlyConnected === false) &&
+    Array.isArray(d.windowsTasks) &&
+    d.windowsTasks.every(t => t.automaticBootProven === false);
+}
+
 export function ServerShell350Panel() {
   const [snapshot, setSnapshot] = useState<ServerShell350Snapshot | null>(null);
   const [ql460, setQl460] = useState<ServerShell351Snapshot | null>(null);
   const [ql461, setQl461] = useState<ServerShell352Snapshot | null>(null);
   const [ql462, setQl462] = useState<ServerShell353Snapshot | null>(null);
   const [ql463, setQl463] = useState<ServerShell354Snapshot | null>(null);
+  const [ql464, setQl464] = useState<ServerShell355Snapshot | null>(null);
   const [notice, setNotice] = useState("No original-host observation has been loaded.");
   const [busy, setBusy] = useState(false);
   const [theme, setTheme] = useState<Record<string, Skin>>({});
@@ -134,6 +153,7 @@ export function ServerShell350Panel() {
     setQl461(null);
     setQl462(null);
     setQl463(null);
+    setQl464(null);
     setBusy(true);
     try {
       const response: unknown = await getServerShell350(controller.signal);
@@ -157,6 +177,10 @@ export function ServerShell350Panel() {
           if (pending.current === controller && matchesQl463(enrolled)) {
             setQl463(enrolled);
           }
+          const readiness: unknown = await getServerShell355(controller.signal);
+          if (pending.current === controller && matchesQl464(readiness)) {
+            setQl464(readiness);
+          }
         } catch {
           // No QL-460 evidence is equivalent to HOLD, never a successful connection.
         }
@@ -175,7 +199,7 @@ export function ServerShell350Panel() {
   return <MasterCommandVisualSystem
     title="Unified Three-Master Server Command Centre"
     subtitle="AI Data Platform shell · Windows AI Hub runtime · Comms Hub · independent Slave monitoring"
-    release="354"
+    release="355"
     currentPath="#master350"
     navigation={[
       { id: "master", label: "Master modules", href: "#master350" },
@@ -186,6 +210,7 @@ export function ServerShell350Panel() {
       { id: "receipts", label: "Host witness & operator ACK", href: "#witness352" },
       { id: "acceptance", label: "Acceptance & Master pilot", href: "#acceptance353" },
       { id: "custody", label: "Signed peer & certificate evidence", href: "#custody354" },
+      { id: "startup", label: "Windows boot preflight · QL-464", href: "#startup355" },
     ]}
     kpis={snapshot ? [
       { id: "host", icon: "⌂", label: "Original Windows host",
@@ -414,6 +439,55 @@ export function ServerShell350Panel() {
       <p>Automatic certificate activation: DISABLED ·
         Candidate handshake: separately verified by owner-run original-host CLI ·
         Physical receiver: UNKNOWN / activation denied</p>
+    </section>
+
+    <section id="startup355" className="mc-panel shell349">
+      <h3>Original Windows Master server — startup & recovery preflight · QL-464</h3>
+      <p>Operational acceptance: <strong>{ql464?.operationalReadiness ??
+        "HOLD_PRE_REBOOT_TEST"}</strong> · Original host: {ql464?.identifiedOriginalHost
+        ? "SIGNED SOURCE IDENTIFIED" : "UNVERIFIED"} ·
+        Local PowerShell inventory: {ql464?.inventoryFreshButUnsigned
+        ? "FRESH BUT UNSIGNED" : "NOT AVAILABLE / STALE"}</p>
+      <p>Windows boot recovery, sustained uptime and operator-witnessed restart are not proven.
+        No Windows service, task, key, network or physical receiver controls exist here.</p>
+      <h4>Three Master Windows workers — do not confuse status with startup proof</h4>
+      <div className="shell349-status-grid">
+        {(ql464?.masterServices ?? []).map(service => <article className="shell349-status" key={service.id}>
+          <strong>{service.id}</strong><small>{service.serviceName}</small>
+          <p>Source observation: {service.observedState}</p>
+          <p>Windows state: {service.windowsServiceState} · startup mode: {service.windowsStartMode}</p>
+          <p>Autonomous reboot recovery: NOT VERIFIED</p>
+        </article>)}
+      </div>
+      <h4>Windows startup tasks</h4>
+      <div className="shell349-status-grid">
+        {(ql464?.windowsTasks ?? []).map(task => <article className="shell349-status" key={task.name}>
+          <strong>{task.name}</strong><small>{task.state}</small>
+          <p>Trigger: {task.trigger}</p><p>Boot start independently proven: NO</p>
+        </article>)}
+      </div>
+      <p>Continuous QL-460 observer: {ql464?.continuousMonitor.taskState ?? "UNKNOWN"}.
+        A task existing or being enabled does not prove that it ran after power recovery.</p>
+      <h4>Independent peer health and certificate rollover</h4>
+      <div className="shell349-status-grid">
+        {(ql464?.peerHealth ?? []).map(peer => <article className="shell349-status" key={peer.id}>
+          <strong>{peer.id}</strong><small>{peer.state}</small>
+          <p>Historical signed sink: {peer.historicalSignedSink ? "RECORDED" : "UNVERIFIED"}</p>
+          <p>Live peer connectivity: NOT VERIFIED</p>
+        </article>)}
+      </div>
+      <p>Certificate rotation: {ql464?.certificateRotation.priorPlanState ?? "HOLD"} ·
+        New certificate deployed and cross-checked with signed peer ACK: NOT VERIFIED.</p>
+      <h4>Local dependencies to inspect before a reboot</h4>
+      <div className="shell349-status-grid">
+        {(ql464?.requiredDependencies ?? []).map(dep => <article className="shell349-status" key={dep.id}>
+          <strong>{dep.id.replace(/-/g, " ")}</strong><small>{dep.status}</small>
+        </article>)}
+      </div>
+      <p>Run the source-controlled read-only <code>scripts/inspect-master-startup355.ps1</code>
+        on the original Windows PC, inspect the JSON privately, then complete a supervised
+        boot ceremony. This dashboard never marks historical receipts or PowerShell inventory
+        as physical-host Production GREEN.</p>
     </section>
   </MasterCommandVisualSystem>;
 }
