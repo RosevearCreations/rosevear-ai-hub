@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getServerShell350, getServerShell351, getServerShell352, getServerShell353, type ServerShell350Snapshot, type ServerShell351Snapshot, type ServerShell352Snapshot, type ServerShell353Snapshot } from "./api";
+import { getServerShell350, getServerShell351, getServerShell352, getServerShell353, getServerShell354, type ServerShell350Snapshot, type ServerShell351Snapshot, type ServerShell352Snapshot, type ServerShell353Snapshot, type ServerShell354Snapshot } from "./api";
 import { MasterCommandVisualSystem } from "./MasterCommandVisualSystem";
 import "./serverShell349.css";
 
@@ -90,11 +90,35 @@ function matchesQl462(value: unknown): value is ServerShell353Snapshot {
     Array.isArray(k.peerKeys);
 }
 
+function matchesQl463(value: unknown): value is ServerShell354Snapshot {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const d = value as Record<string, unknown>;
+  if (d.schema !== "rosevear.hub.master-acceptance354.v1" ||
+      d.sourceBuild !== 354 || d.serverShell !== "ai-data-platform" ||
+      d.physicalReceiverCurrentlyOff !== false ||
+      d.receiverActivationAuthorized !== false ||
+      d.webMutationAvailable !== false ||
+      d.liveThreeMasterMtlSPilotVerified !== false ||
+      d.unattendedWindowsRecoveryVerified !== false ||
+      d.independentHumanReadVerified !== false ||
+      typeof d.witnessEnrollment !== "object" || d.witnessEnrollment === null ||
+      typeof d.rebootCorroboration !== "object" || d.rebootCorroboration === null ||
+      typeof d.peerSinks !== "object" || d.peerSinks === null ||
+      typeof d.certificateRotation !== "object" || d.certificateRotation === null ||
+      typeof d.commsAudit !== "object" || d.commsAudit === null) return false;
+  const cert = d.certificateRotation as Record<string, unknown>;
+  const witness = d.witnessEnrollment as Record<string, unknown>;
+  return cert.certificateActivated === false &&
+    cert.automaticKeyRotationAuthorized === false &&
+    witness.originalHostRuntimeVerified === false;
+}
+
 export function ServerShell350Panel() {
   const [snapshot, setSnapshot] = useState<ServerShell350Snapshot | null>(null);
   const [ql460, setQl460] = useState<ServerShell351Snapshot | null>(null);
   const [ql461, setQl461] = useState<ServerShell352Snapshot | null>(null);
   const [ql462, setQl462] = useState<ServerShell353Snapshot | null>(null);
+  const [ql463, setQl463] = useState<ServerShell354Snapshot | null>(null);
   const [notice, setNotice] = useState("No original-host observation has been loaded.");
   const [busy, setBusy] = useState(false);
   const [theme, setTheme] = useState<Record<string, Skin>>({});
@@ -109,6 +133,7 @@ export function ServerShell350Panel() {
     setQl460(null);
     setQl461(null);
     setQl462(null);
+    setQl463(null);
     setBusy(true);
     try {
       const response: unknown = await getServerShell350(controller.signal);
@@ -128,6 +153,10 @@ export function ServerShell350Panel() {
           if (pending.current === controller && matchesQl462(acceptance)) {
             setQl462(acceptance);
           }
+          const enrolled: unknown = await getServerShell354(controller.signal);
+          if (pending.current === controller && matchesQl463(enrolled)) {
+            setQl463(enrolled);
+          }
         } catch {
           // No QL-460 evidence is equivalent to HOLD, never a successful connection.
         }
@@ -146,7 +175,7 @@ export function ServerShell350Panel() {
   return <MasterCommandVisualSystem
     title="Unified Three-Master Server Command Centre"
     subtitle="AI Data Platform shell · Windows AI Hub runtime · Comms Hub · independent Slave monitoring"
-    release="353"
+    release="354"
     currentPath="#master350"
     navigation={[
       { id: "master", label: "Master modules", href: "#master350" },
@@ -156,6 +185,7 @@ export function ServerShell350Panel() {
       { id: "automation", label: "Home automation", href: "#automation351" },
       { id: "receipts", label: "Host witness & operator ACK", href: "#witness352" },
       { id: "acceptance", label: "Acceptance & Master pilot", href: "#acceptance353" },
+      { id: "custody", label: "Signed peer & certificate evidence", href: "#custody354" },
     ]}
     kpis={snapshot ? [
       { id: "host", icon: "⌂", label: "Original Windows host",
@@ -352,5 +382,38 @@ export function ServerShell350Panel() {
         )}
       </div>
     </section>
+    <section id="custody354" className="mc-panel shell349">
+      <h3>Original-host independent boot witness enrollment · QL-463</h3>
+      <p>Owner-scoped witness and reviewer keys: <strong>{ql463?.witnessEnrollment.state ??
+        "HOLD_NO_OWNER_ENROLLED_INDEPENDENT_BOOT_WITNESSES"}</strong></p>
+      <p>Two-boot source corroboration: <strong>{ql463?.rebootCorroboration.state ??
+        "HOLD_NO_ENROLLED_TWO_BOOT_CORROBORATION"}</strong></p>
+      <p>Unattended recovery and continuous Windows uptime: NOT PROVEN</p>
+      <h3>Peer sink evidence — live network status not inferred</h3>
+      <div className="shell349-status-grid">
+        <article className="shell349-status">
+          <strong>AI Data Platform sink</strong>
+          <small>{ql463?.peerSinks["ai-data-platform"] ?? "UNVERIFIED"}</small>
+          <p>Requires exact signed event, original-host delivery ACK and peer certificate pin</p>
+        </article>
+        <article className="shell349-status">
+          <strong>Rosevear Comms Hub sink</strong>
+          <small>{ql463?.peerSinks["rosevear-comms-hub"] ?? "UNVERIFIED"}</small>
+          <p>Independent receiving service deployment and signed sink receipt required</p>
+        </article>
+      </div>
+      <h3>Durable Comms audit cross-check</h3>
+      <p>Custody: <strong>{ql463?.commsAudit.state ??
+        "HOLD_NO_VERIFIED_DURABLE_SOURCE_AUDIT"}</strong></p>
+      <p>Two-source records: {ql463?.commsAudit.corroboratedCount ?? 0} ·
+        Integrity: {ql463?.commsAudit.integrity ?? "HOLD"}</p>
+      <p>A signed Comms assertion is not independent human acknowledgement.</p>
+      <h3>Master certificate rotation acceptance</h3>
+      <p>Owner-approved candidate: <strong>{ql463?.certificateRotation.state ??
+        "HOLD_NO_OWNER_SIGNED_CERTIFICATE_ROTATION_PLAN"}</strong></p>
+      <p>Automatic certificate activation: DISABLED ·
+        Candidate handshake: separately verified by owner-run original-host CLI ·
+        Physical receiver: UNKNOWN / activation denied</p>
+    </section>
   </MasterCommandVisualSystem>;
-}
+
