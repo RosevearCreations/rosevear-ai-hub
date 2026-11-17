@@ -39,20 +39,30 @@ router = APIRouter(prefix="/api/v1/system/server-shell-354", tags=["server-shell
 
 def _hold354(now_ms: int) -> dict[str, Any]:
     witness = verify_witness_enrollment354(
-        signed_enrollment=None, owner_public=b"", owner_pin="",
-        witness_public=b"", reviewer_public=b"",
-        manifest_digest="", now_ms=now_ms, machine_name="",
+        signed_enrollment=None,
+        owner_public=b"",
+        owner_pin="",
+        witness_public=b"",
+        reviewer_public=b"",
+        manifest_digest="",
+        now_ms=now_ms,
+        machine_name="",
     )
     reboot = verify_enrolled_reboot354(
-        enrollment_result=witness, ceremony_result={},
+        enrollment_result=witness,
+        ceremony_result={},
     )
     audit = {
         "state": "HOLD_NO_VERIFIED_DURABLE_SOURCE_AUDIT",
-        "integrity": "HOLD", "corroboratedCount": 0,
-        "independentHumanReadVerified": False, "latestMessageId": None,
+        "integrity": "HOLD",
+        "corroboratedCount": 0,
+        "independentHumanReadVerified": False,
+        "latestMessageId": None,
     }
     return acceptance_summary354(
-        witness=witness, reboot=reboot, sink_results=[],
+        witness=witness,
+        reboot=reboot,
+        sink_results=[],
         rotation={
             "state": "HOLD_NO_OWNER_SIGNED_CERTIFICATE_ROTATION_PLAN",
             "ownerSignedPlanVerified": False,
@@ -75,7 +85,11 @@ def local_acceptance_snapshot354(*, now_ms: int, machine_name: str) -> dict[str,
     if not (manifest_path and owner_path and owner_pin):
         return hold
     enrollment = load_local_manifest349(
-        Path(manifest_path), Path(owner_path), owner_pin, now_ms, machine_name,
+        Path(manifest_path),
+        Path(owner_path),
+        owner_pin,
+        now_ms,
+        machine_name,
     )
     if enrollment.get("accepted") is not True:
         return hold
@@ -86,16 +100,18 @@ def local_acceptance_snapshot354(*, now_ms: int, machine_name: str) -> dict[str,
     if owner is None or witness_key is None or reviewer_key is None:
         return hold
     witness = verify_witness_enrollment354(
-        signed_enrollment=_read_protected353(
-            os.environ.get("ROSEVEAR_QL463_WITNESS_ENROLL_PATH")
-        ),
-        owner_public=owner, owner_pin=owner_pin,
-        witness_public=witness_key, reviewer_public=reviewer_key,
-        manifest_digest=manifest_sha, now_ms=now_ms,
+        signed_enrollment=_read_protected353(os.environ.get("ROSEVEAR_QL463_WITNESS_ENROLL_PATH")),
+        owner_public=owner,
+        owner_pin=owner_pin,
+        witness_public=witness_key,
+        reviewer_public=reviewer_key,
+        manifest_digest=manifest_sha,
+        now_ms=now_ms,
         machine_name=machine_name,
     )
     older = local_acceptance_snapshot353(
-        now_ms=now_ms, machine_name=machine_name,
+        now_ms=now_ms,
+        machine_name=machine_name,
     )
     reboot = verify_enrolled_reboot354(
         enrollment_result=witness,
@@ -104,37 +120,42 @@ def local_acceptance_snapshot354(*, now_ms: int, machine_name: str) -> dict[str,
     registry_path = os.environ.get("ROSEVEAR_QL461_MASTER_REGISTRY_PATH")
     registry = (
         load_master_registry352(
-            path=Path(registry_path), owner_public=owner,
-            owner_pin=owner_pin, enrollment=enrollment,
-            now_ms=now_ms, machine_name=machine_name,
+            path=Path(registry_path),
+            owner_public=owner,
+            owner_pin=owner_pin,
+            enrollment=enrollment,
+            now_ms=now_ms,
+            machine_name=machine_name,
         )
-        if registry_path else None
+        if registry_path
+        else None
     )
     outbox_path = os.environ.get("ROSEVEAR_QL461_OUTBOX_DB")
     sinks = []
-    if (
-        registry is not None and outbox_path
-        and witness["ownerPinnedEnrollmentVerified"] is True
-    ):
+    if registry is not None and outbox_path and witness["ownerPinnedEnrollmentVerified"] is True:
         for app_id, variable in (
             ("ai-data-platform", "ROSEVEAR_QL463_AIDP_SINK_PACKAGE_PATH"),
             ("rosevear-comms-hub", "ROSEVEAR_QL463_COMMS_SINK_PACKAGE_PATH"),
         ):
-            matches = [
-                x for x in enrollment["payload"]["peers"] if x["id"] == app_id
-            ]
+            matches = [x for x in enrollment["payload"]["peers"] if x["id"] == app_id]
             package = _read_protected353(
-                os.environ.get(variable), max_bytes=16_384,
+                os.environ.get(variable),
+                max_bytes=16_384,
             )
             if len(matches) == 1 and crosscheck_peer_outbox354(
-                outbox_path=Path(outbox_path), package=package,
-                manifest_digest=manifest_sha, peer=matches[0],
-                registry=registry, now_ms=now_ms,
+                outbox_path=Path(outbox_path),
+                package=package,
+                manifest_digest=manifest_sha,
+                peer=matches[0],
+                registry=registry,
+                now_ms=now_ms,
             ):
-                sinks.append({
-                    "peer": app_id,
-                    "signedPeerSinkReceiptVerified": True,
-                })
+                sinks.append(
+                    {
+                        "peer": app_id,
+                        "signedPeerSinkReceiptVerified": True,
+                    }
+                )
     rotation = hold["certificateRotation"]
     rotation_package = _read_protected353(
         os.environ.get("ROSEVEAR_QL463_CERT_PLAN_PATH"),
@@ -145,14 +166,15 @@ def local_acceptance_snapshot354(*, now_ms: int, machine_name: str) -> dict[str,
         and registry is not None
     ):
         peer_id = rotation_package["payload"].get("peer")
-        matching_peers = [
-            x for x in enrollment["payload"]["peers"] if x["id"] == peer_id
-        ]
+        matching_peers = [x for x in enrollment["payload"]["peers"] if x["id"] == peer_id]
         if len(matching_peers) == 1:
             rotation = verify_certificate_rotation_plan354(
-                signed_plan=rotation_package, owner_public=owner,
-                owner_pin=owner_pin, manifest_digest=manifest_sha,
-                peer=matching_peers[0], now_ms=now_ms,
+                signed_plan=rotation_package,
+                owner_public=owner,
+                owner_pin=owner_pin,
+                manifest_digest=manifest_sha,
+                peer=matching_peers[0],
+                now_ms=now_ms,
             )
             # A signed plan is not proof of a live TLS connection or activation.
             rotation.pop("candidateTlsLeafPin", None)
@@ -166,8 +188,11 @@ def local_acceptance_snapshot354(*, now_ms: int, machine_name: str) -> dict[str,
             now_ms=now_ms,
         )
     return acceptance_summary354(
-        witness=witness, reboot=reboot, sink_results=sinks,
-        rotation=rotation, audit=audit,
+        witness=witness,
+        reboot=reboot,
+        sink_results=sinks,
+        rotation=rotation,
+        audit=audit,
     )
 
 
