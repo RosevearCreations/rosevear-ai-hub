@@ -70,7 +70,7 @@ if ($Install) {
  $action = New-ScheduledTaskAction -Execute $PythonExecutable -Argument $expectedArgs
  $trigger = New-ScheduledTaskTrigger -AtStartup
  $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
- $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Seconds 0) -RestartCount 0
+ $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Seconds 0) -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 10)
  Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -ErrorAction Stop | Out-Null
  Disable-ScheduledTask -TaskName $TaskName -ErrorAction Stop | Out-Null
  Write-Output "TASK_INSTALLED_DISABLED_REQUIRES_SEPARATE_OWNER_ENABLE_AND_REBOOT_TEST"
