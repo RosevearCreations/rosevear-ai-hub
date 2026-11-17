@@ -27,30 +27,20 @@ $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principalName = $identity.Name
 $psExe = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
 $arguments = '-WindowStyle Hidden -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + $worker + '" -Run'
+. (Join-Path $PSScriptRoot 'HubUnattendedTaskIdentity357.ps1')
+$script:identityReports = @{}
+$script:inspectionOnly = [bool]$Inspect -or (-not $Install -and -not $Enable -and -not $Disable)
 if (-not (Test-Path -LiteralPath $worker -PathType Leaf)) {
     throw 'HOLD_APPROVED_BOOT_WORKER_NOT_INSTALLED'
 }
 function Get-KnownTask([string]$Name, [string]$TriggerKind) {
     $task = Get-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue
-    if (-not $task) { return $null }
-    $a = @($task.Actions)
-    $tr = @($task.Triggers)
-    $kind = 'MSFT_Task' + $TriggerKind + 'Trigger'
-    $good = (
-        $task.TaskPath -eq '\' -and
-        $a.Count -eq 1 -and
-        [IO.Path]::GetFullPath([string]$a[0].Execute) -ieq $psExe -and
-        [string]$a[0].Arguments -ceq $arguments -and
-        $tr.Count -eq 1 -and
-        $tr[0].CimClass.CimClassName -eq $kind -and
-        ($TriggerKind -ne 'Time' -or (
-            [string]$tr[0].Repetition.Interval -eq 'PT5M' -and
-            [string]::IsNullOrWhiteSpace([string]$tr[0].Repetition.Duration)
-        )) -and
-        [string]$task.Principal.UserId -ieq $principalName -and
-        [string]$task.Principal.LogonType -eq 'Password'
-    )
-    if (-not $good) { throw ('HOLD_UNRECOGNIZED_TASK_' + $Name) }
+    $report = Test-HubUnattendedTaskIdentity357 -Task $task -TriggerKind $TriggerKind -ExpectedExecutable $psExe -ExpectedArguments $arguments -ExpectedUserId $principalName
+    $script:identityReports[$Name] = $report
+    if (-not $report.identityVerified -and -not $script:inspectionOnly) {
+        # Keep strict authority on Enable/Disable; never modify an unknown task.
+        throw ('HOLD_UNRECOGNIZED_TASK_' + $Name + '_' + $report.reasonCodes[0])
+    }
     return $task
 }
 function Assert-Elevated {
@@ -193,7 +183,18 @@ if ($Inspect -or (-not $Enable -and -not $Disable)) {
         schema='rosevear.hub.unattended-task-install356.v1'
         bootTaskState=$(if ($bootTask) { [string]$bootTask.State } else { 'NOT_INSTALLED' })
         recoveryTaskState=$(if ($recoveryTask) { [string]$recoveryTask.State } else { 'NOT_INSTALLED' })
-        sameUserPasswordPrincipal=$(if ($bootTask -and $recoveryTask) { $true } else { $false })
+        sameUserPasswordPrincipal=$(
+            [bool]($script:identityReports[$bootName].checks.principalSameSid -and
+                $script:identityReports[$bootName].checks.passwordBatchLogon -and
+                $script:identityReports[$recoveryName].checks.principalSameSid -and
+                $script:identityReports[$recoveryName].checks.passwordBatchLogon)
+        )
+        bootIdentityVerified=[bool]$script:identityReports[$bootName].identityVerified
+        recoveryIdentityVerified=[bool]$script:identityReports[$recoveryName].identityVerified
+        bootMismatchCodes=@($script:identityReports[$bootName].reasonCodes)
+        recoveryMismatchCodes=@($script:identityReports[$recoveryName].reasonCodes)
+        bootCheckFlags=$script:identityReports[$bootName].checks
+        recoveryCheckFlags=$script:identityReports[$recoveryName].checks
         pinnedConfigurationPresent=(Test-Path -LiteralPath $cfgPath -PathType Leaf)
         originalHost='DESKTOP-AE894KC'
         rebootPersistenceProven=$false
