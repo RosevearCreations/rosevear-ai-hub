@@ -3,7 +3,6 @@
 import json
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 POLICY = ROOT / "docs" / "contracts" / "ql467-three-master-enrollment358.json"
 
