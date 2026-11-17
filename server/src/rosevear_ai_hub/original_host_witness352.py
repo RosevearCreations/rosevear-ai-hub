@@ -12,9 +12,8 @@ import json
 import os
 import platform
 import subprocess
-import time
+from datetime import UTC, datetime
 from pathlib import Path, PureWindowsPath
-from datetime import datetime, timezone
 from typing import Any
 
 import psutil
@@ -99,7 +98,7 @@ def _task_run_matches_boot352(value: str, boot_ms: int, observed_ms: int) -> boo
         stamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
         if stamp.tzinfo is None:
             return False
-        at_ms = round(stamp.astimezone(timezone.utc).timestamp() * 1000)
+        at_ms = round(stamp.astimezone(UTC).timestamp() * 1000)
         return boot_ms <= at_ms <= observed_ms
     except (ValueError, OverflowError, OSError, TypeError):
         return False
