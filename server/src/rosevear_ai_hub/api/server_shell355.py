@@ -1,4 +1,5 @@
 """QL-464 original-host startup readiness (owner-only, no lifecycle operations)."""
+
 from __future__ import annotations
 
 import os

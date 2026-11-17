@@ -3,6 +3,7 @@
 Read-only classifications. PowerShell observations are *unsigned* and never prove
 a real unattended reboot, live remote peer, activated certificate, or OFF receiver.
 """
+
 from __future__ import annotations
 
 from typing import Any
