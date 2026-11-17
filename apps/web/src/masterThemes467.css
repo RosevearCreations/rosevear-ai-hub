@@ -1,0 +1,107 @@
+/* QL-467: shared three-Master eight-theme palette. Display-only, no automation. */
+
+.app-shell[data-theme="instrument"],.auth-shell[data-theme="instrument"] {
+ --shell-paper:#081625;--shell-ink:#eef6ff;--shell-muted:#b4c5d7;
+ --shell-border:#9a46ff;--shell-selected:#0b1c2d;--shell-accent:#9a46ff;
+ color:#eef6ff;background:#050b16;color-scheme:dark;
+}
+.app-shell[data-theme="instrument"] .content {background:#050b16;color:#eef6ff}
+.app-shell[data-theme="instrument"] .content .panel {background:#0b1c2d;color:#eef6ff;border-color:#9a46ff}
+.app-shell[data-theme="instrument"] .master-command-ui {
+ --mc-bg:#050b16;--mc-rail:#081625;--mc-card:#0b1c2d;
+ --mc-text:#eef6ff;--mc-muted:#b4c5d7;--mc-purple:#9a46ff;
+ background:#050b16;color:#eef6ff;
+}
+
+
+.app-shell[data-theme="nebula"],.auth-shell[data-theme="nebula"] {
+ --shell-paper:#211134;--shell-ink:#f9eeff;--shell-muted:#e2c7f8;
+ --shell-border:#d27dfd;--shell-selected:#281848;--shell-accent:#d27dfd;
+ color:#f9eeff;background:#130923;color-scheme:dark;
+}
+.app-shell[data-theme="nebula"] .content {background:#130923;color:#f9eeff}
+.app-shell[data-theme="nebula"] .content .panel {background:#281848;color:#f9eeff;border-color:#d27dfd}
+.app-shell[data-theme="nebula"] .master-command-ui {
+ --mc-bg:#130923;--mc-rail:#211134;--mc-card:#281848;
+ --mc-text:#f9eeff;--mc-muted:#e2c7f8;--mc-purple:#d27dfd;
+ background:#130923;color:#f9eeff;
+}
+
+
+.app-shell[data-theme="meadow"],.auth-shell[data-theme="meadow"] {
+ --shell-paper:#113a36;--shell-ink:#e8fff5;--shell-muted:#b9e2d4;
+ --shell-border:#66ddb4;--shell-selected:#17493f;--shell-accent:#66ddb4;
+ color:#e8fff5;background:#061b1b;color-scheme:dark;
+}
+.app-shell[data-theme="meadow"] .content {background:#061b1b;color:#e8fff5}
+.app-shell[data-theme="meadow"] .content .panel {background:#17493f;color:#e8fff5;border-color:#66ddb4}
+.app-shell[data-theme="meadow"] .master-command-ui {
+ --mc-bg:#061b1b;--mc-rail:#113a36;--mc-card:#17493f;
+ --mc-text:#e8fff5;--mc-muted:#b9e2d4;--mc-purple:#66ddb4;
+ background:#061b1b;color:#e8fff5;
+}
+
+
+.app-shell[data-theme="copper"],.auth-shell[data-theme="copper"] {
+ --shell-paper:#2b1c1a;--shell-ink:#fff3e9;--shell-muted:#ead2c5;
+ --shell-border:#f6b46d;--shell-selected:#362624;--shell-accent:#f6b46d;
+ color:#fff3e9;background:#181018;color-scheme:dark;
+}
+.app-shell[data-theme="copper"] .content {background:#181018;color:#fff3e9}
+.app-shell[data-theme="copper"] .content .panel {background:#362624;color:#fff3e9;border-color:#f6b46d}
+.app-shell[data-theme="copper"] .master-command-ui {
+ --mc-bg:#181018;--mc-rail:#2b1c1a;--mc-card:#362624;
+ --mc-text:#fff3e9;--mc-muted:#ead2c5;--mc-purple:#f6b46d;
+ background:#181018;color:#fff3e9;
+}
+
+
+.app-shell[data-theme="arctic"],.auth-shell[data-theme="arctic"] {
+ --shell-paper:#0d3450;--shell-ink:#edfbff;--shell-muted:#c6ecf8;
+ --shell-border:#78dcff;--shell-selected:#154461;--shell-accent:#78dcff;
+ color:#edfbff;background:#071b30;color-scheme:dark;
+}
+.app-shell[data-theme="arctic"] .content {background:#071b30;color:#edfbff}
+.app-shell[data-theme="arctic"] .content .panel {background:#154461;color:#edfbff;border-color:#78dcff}
+.app-shell[data-theme="arctic"] .master-command-ui {
+ --mc-bg:#071b30;--mc-rail:#0d3450;--mc-card:#154461;
+ --mc-text:#edfbff;--mc-muted:#c6ecf8;--mc-purple:#78dcff;
+ background:#071b30;color:#edfbff;
+}
+
+
+.app-shell[data-theme="solar"],.auth-shell[data-theme="solar"] {
+ --shell-paper:#352819;--shell-ink:#fff8e5;--shell-muted:#ead8ac;
+ --shell-border:#ffcd68;--shell-selected:#423321;--shell-accent:#ffcd68;
+ color:#fff8e5;background:#201911;color-scheme:dark;
+}
+.app-shell[data-theme="solar"] .content {background:#201911;color:#fff8e5}
+.app-shell[data-theme="solar"] .content .panel {background:#423321;color:#fff8e5;border-color:#ffcd68}
+.app-shell[data-theme="solar"] .master-command-ui {
+ --mc-bg:#201911;--mc-rail:#352819;--mc-card:#423321;
+ --mc-text:#fff8e5;--mc-muted:#ead8ac;--mc-purple:#ffcd68;
+ background:#201911;color:#fff8e5;
+}
+
+
+.app-shell[data-theme="graphite"],.auth-shell[data-theme="graphite"] {
+ --shell-paper:#192933;--shell-ink:#eaf9ff;--shell-muted:#bfdee6;
+ --shell-border:#55e3e6;--shell-selected:#203843;--shell-accent:#55e3e6;
+ color:#eaf9ff;background:#0b141c;color-scheme:dark;
+}
+.app-shell[data-theme="graphite"] .content {background:#0b141c;color:#eaf9ff}
+.app-shell[data-theme="graphite"] .content .panel {background:#203843;color:#eaf9ff;border-color:#55e3e6}
+.app-shell[data-theme="graphite"] .master-command-ui {
+ --mc-bg:#0b141c;--mc-rail:#192933;--mc-card:#203843;
+ --mc-text:#eaf9ff;--mc-muted:#bfdee6;--mc-purple:#55e3e6;
+ background:#0b141c;color:#eaf9ff;
+}
+
+/* Readability at desktop, tablet, mobile, and native date widgets. */
+.app-shell[data-theme] :is(input[type="date"],input[type="datetime-local"],input[type="month"],input[type="time"],select){
+  min-height:44px;max-width:100%;width:auto;font:inherit;color-scheme:dark;
+}
+.app-shell[data-theme] .hub-quick-appearance select{min-width:min(190px,100%);background:var(--shell-paper);color:var(--shell-ink);border:1px solid var(--shell-accent)}
+.app-shell[data-theme] .master-command-ui :is(.mc-launcher,.mc-rail-item,.mc-kpi){overflow-wrap:anywhere;min-width:0}
+@media(max-width:650px){.app-shell[data-theme] .hub-topbar-account{flex-wrap:wrap;gap:10px}}
+@media(forced-colors:active){.app-shell[data-theme] .hub-quick-appearance select{forced-color-adjust:auto;border:2px solid CanvasText}}
