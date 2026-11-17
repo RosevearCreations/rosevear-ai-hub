@@ -3245,3 +3245,59 @@ export interface ServerShell350Snapshot {
 export function getServerShell350(signal?: AbortSignal): Promise<ServerShell350Snapshot> {
   return authJson("GET", "/api/v1/system/server-shell-350", undefined, signal);
 }
+
+/** QL-460 source-only operator evidence; no browser POST or physical control. */
+export interface ServerShell351Snapshot {
+  schema: "rosevear.hub.unified-operator-readiness351.v1";
+  sourceBuild: 351;
+  serverShell: "ai-data-platform";
+  modules: ServerShell350Snapshot["modules"];
+  applications: ServerShell350Snapshot["applications"];
+  bootWitness: {
+    observation: string;
+    distinctBoots: number;
+    rebootPersistenceVerified: false;
+    taskAutostartVerified: false;
+    supervisorInstalledVerified: false;
+  };
+  eventBus: {
+    integrity: "LOCAL_HASH_CHAIN_VALID" | "HOLD";
+    events: Array<{
+      seq: number;
+      source: string;
+      kind: string;
+      state: string;
+      observedAtMs: number;
+      evidenceDigest: string;
+    }>;
+    issues: ServerShell351Snapshot["issues"];
+  };
+  issues: Array<{
+    source: string;
+    state: string;
+    severity: "WARNING" | "CRITICAL";
+    observedAtMs: number;
+    evidenceDigest: string;
+    disposition: "OPEN_UNACKNOWLEDGED";
+  }>;
+  homeAutomation: {
+    state: "UNVERIFIED" | "AVAILABLE" | "UNAVAILABLE";
+    proof: string;
+    checkedAtMs: number | null;
+    physicalDeviceControlAuthorized: false;
+    entityInventoryExposed: false;
+  };
+  issueAlertDeliveryVerified: false;
+  installationVerified: false;
+  rebootAcceptanceVerified: false;
+  physicalReceiverCurrentlyOff: false;
+  receiverActivationAuthorized: false;
+  incidentStatus: "OPEN";
+  webMutationAvailable: false;
+  protocolPreferred: "1.1";
+  protocolLegacyCompatible: "1.0";
+}
+
+export function getServerShell351(signal?: AbortSignal): Promise<ServerShell351Snapshot> {
+  return authJson("GET", "/api/v1/system/server-shell-351", undefined, signal);
+}
