@@ -4,7 +4,7 @@ import base64
 import hashlib
 import importlib.util
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -31,7 +31,7 @@ def fixture():
     fingerprint = hashlib.sha256(
         public.public_bytes(Encoding.Raw, PublicFormat.Raw)
     ).hexdigest()
-    now = datetime.now(timezone.utc).replace(microsecond=0)
+    now = datetime.now(UTC).replace(microsecond=0)
     def fmt(value: datetime) -> str:
         return value.isoformat().replace("+00:00", "Z")
     nonce = "a" * 32
