@@ -3,7 +3,7 @@
 import base64
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -36,7 +36,6 @@ from rosevear_ai_hub.service_identity347 import (
     _canonical,
     _digest,
 )
-
 
 NOW = 1_800_000_000_000
 MANIFEST_SHA = "a" * 64
@@ -235,7 +234,7 @@ def test_fresh_independent_original_host_signature_and_reboot_order(monkeypatch)
         "command": r"C:\Rosevear\venv\Scripts\python.exe",
         "arguments": r'-u "C:\Rosevear\scripts\hub_master_supervisor350.py" --watch',
         "lastRunTimeUtc": datetime.fromtimestamp(
-            (NOW - 30000) / 1000, timezone.utc,
+            (NOW - 30000) / 1000, UTC,
         ).isoformat(),
         "lastTaskResult": 267009,
     }
