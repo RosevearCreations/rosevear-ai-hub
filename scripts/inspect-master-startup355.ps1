@@ -69,14 +69,58 @@ $ports = [ordered]@{}
 foreach ($port in @(8765,5173,8443,1883,11434,1984)) {
     $ports[[string]$port] = Get-LoopbackListener -Port $port
 }
-$vmStatus = 'HYPERV_VM_AUTOSTART_NOT_CONFIRMED'
-if (Get-Command Get-VM -ErrorAction SilentlyContinue) {
-    foreach ($candidate in @('Home Assistant','HomeAssistant','Home Assistant OS')) {
-        try {
-            $vm = Get-VM -Name $candidate -ErrorAction Stop
-            $vmStatus = if ($vm.AutomaticStartAction -eq 'Start') { 'KNOWN_VM_AUTO_START_CONFIGURED_NOT_BOOT_PROOF' } else { 'KNOWN_VM_AUTOSTART_NOT_CONFIGURED' }
-            break
-        } catch { }
+$vmStatus = 'VIRTUALBOX_NOT_VERIFIED'
+$vbox = Join-Path ([Environment]::GetFolderPath('ProgramFiles')) 'Oracle\VirtualBox\VBoxManage.exe'
+if (Test-Path -LiteralPath $vbox -PathType Leaf) {
+    try {
+        $vmInfo = @(& $vbox showvminfo 'Home Assistant' --machinereadable 2>$null)
+        if ($LASTEXITCODE -eq 0) {
+            $efi = @($vmInfo | Where-Object { $_ -match '(?i)^firmware="efi"
+$report = [ordered]@{
+    schema='rosevear.hub.windows-startup-inventory355.v1'
+    originalHost='DESKTOP-AE894KC'
+    observedAtMs=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+    source='UNSIGNED_LOCAL_READ_ONLY_INSPECTION'
+    tasks=@($taskNames | ForEach-Object { Get-FixedTask -Name $_ })
+    services=@($serviceNames | ForEach-Object { Get-FixedService -Name $_ })
+    machineConfigurationPresent=$machineConfig
+    localListeners=$ports
+    homeAssistantVM=$vmStatus
+    independentBootWitnessVerified=$false
+    peerMtlSAndAckVerified=$false
+    certificateRotationComplete=$false
+    physicalReceiverOffVerified=$false
+    changesMade=$false
+}
+$report | ConvertTo-Json -Depth 8 -Compress
+ }).Count -eq 1
+            $running = @($vmInfo | Where-Object { $_ -match '^VMState="running"
+$report = [ordered]@{
+    schema='rosevear.hub.windows-startup-inventory355.v1'
+    originalHost='DESKTOP-AE894KC'
+    observedAtMs=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+    source='UNSIGNED_LOCAL_READ_ONLY_INSPECTION'
+    tasks=@($taskNames | ForEach-Object { Get-FixedTask -Name $_ })
+    services=@($serviceNames | ForEach-Object { Get-FixedService -Name $_ })
+    machineConfigurationPresent=$machineConfig
+    localListeners=$ports
+    homeAssistantVM=$vmStatus
+    independentBootWitnessVerified=$false
+    peerMtlSAndAckVerified=$false
+    certificateRotationComplete=$false
+    physicalReceiverOffVerified=$false
+    changesMade=$false
+}
+$report | ConvertTo-Json -Depth 8 -Compress
+ }).Count -eq 1
+            $vmStatus = if (-not $efi) { 'VIRTUALBOX_GUEST_EFI_NOT_VERIFIED' }
+                elseif ($running) { 'VIRTUALBOX_GUEST_RUNNING_NOT_BOOT_PROOF' }
+                else { 'VIRTUALBOX_GUEST_REGISTERED_NOT_RUNNING' }
+        } else {
+            $vmStatus = 'VIRTUALBOX_GUEST_NOT_AVAILABLE_TO_THIS_USER'
+        }
+    } catch {
+        $vmStatus = 'VIRTUALBOX_INSPECTION_UNAVAILABLE'
     }
 }
 $report = [ordered]@{
