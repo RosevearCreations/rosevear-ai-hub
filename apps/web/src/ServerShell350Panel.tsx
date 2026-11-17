@@ -306,5 +306,51 @@ export function ServerShell350Panel() {
       <p>Delivery remains separate from operator acknowledgement. Browser mutations,
         task changes and physical device controls are disabled.</p>
     </section>
+    <section id="acceptance353" className="mc-panel shell349">
+      <h3>Original-host reboot acceptance · QL-462</h3>
+      <p>Two-boot ceremony: <strong>{ql462?.rebootCeremony.state ??
+        "HOLD_NO_VALID_INDEPENDENT_REBOOT_CORROBORATION"}</strong></p>
+      <p>Signed sequence: {ql462?.rebootCeremony.signedSequenceVerified
+        ? "VERIFIED" : "NOT VERIFIED"} ·
+        Reviewer signature: {ql462?.rebootCeremony.independentReviewerAssertionVerified
+        ? "VERIFIED" : "NOT VERIFIED"}</p>
+      <p>Unattended automatic startup: NOT PROVEN ·
+        Continuous 24-hour operation: NOT PROVEN ·
+        Physical receiver authorization: DENIED</p>
+      <h3>Three-Master mTLS pilot</h3>
+      <div className="shell349-status-grid">
+        <article className="shell349-status">
+          <strong>AI Data Platform</strong>
+          <small>{ql462?.pilot.aiDataPlatform ?? "UNVERIFIED"}</small>
+          <p>Peer-signed historical pilot receipt, not current connectivity</p>
+        </article>
+        <article className="shell349-status">
+          <strong>Rosevear Comms Hub</strong>
+          <small>{ql462?.pilot.commsHub ?? "UNVERIFIED"}</small>
+          <p>Peer-signed historical pilot receipt, not current connectivity</p>
+        </article>
+      </div>
+      <p>Pilot outcome: <strong>{ql462?.pilot.state ??
+        "HOLD_NO_VERIFIED_MASTER_MTLS_PILOT"}</strong></p>
+      <h3>Comms operator audit link</h3>
+      <p>Signed audit: <strong>{ql462?.operatorAudit.state ??
+        "HOLD_NO_VERIFIED_COMMS_SOURCE_AUDIT_LINK"}</strong></p>
+      <p>Confirmation that a human independently read the alert: NOT PROVEN.
+        Comms source records must be independently inspected.</p>
+      <h3>Master signing key rotation</h3>
+      <p>Registry: <strong>{ql462?.keyRotation.state ??
+        "HOLD_NO_OWNER_SIGNED_MASTER_REGISTRY"}</strong> ·
+        Automatic key activation: DISABLED</p>
+      <div className="shell349-status-grid">
+        {(ql462?.keyRotation.peerKeys ?? []).map(key =>
+          <article className="shell349-status" key={key.id}>
+            <strong>{key.id}</strong><small>{key.state}</small>
+            <p>Active pinned generations: {key.activeGenerations}</p>
+            <p>Nearest key expiry: {key.expiryWithinDays === null
+              ? "unknown" : key.expiryWithinDays + " days"}</p>
+          </article>
+        )}
+      </div>
+    </section>
   </MasterCommandVisualSystem>;
 }
