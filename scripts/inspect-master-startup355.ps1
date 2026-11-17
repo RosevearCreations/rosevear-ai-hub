@@ -75,44 +75,8 @@ if (Test-Path -LiteralPath $vbox -PathType Leaf) {
     try {
         $vmInfo = @(& $vbox showvminfo 'Home Assistant' --machinereadable 2>$null)
         if ($LASTEXITCODE -eq 0) {
-            $efi = @($vmInfo | Where-Object { $_ -match '(?i)^firmware="efi"
-$report = [ordered]@{
-    schema='rosevear.hub.windows-startup-inventory355.v1'
-    originalHost='DESKTOP-AE894KC'
-    observedAtMs=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
-    source='UNSIGNED_LOCAL_READ_ONLY_INSPECTION'
-    tasks=@($taskNames | ForEach-Object { Get-FixedTask -Name $_ })
-    services=@($serviceNames | ForEach-Object { Get-FixedService -Name $_ })
-    machineConfigurationPresent=$machineConfig
-    localListeners=$ports
-    homeAssistantVM=$vmStatus
-    independentBootWitnessVerified=$false
-    peerMtlSAndAckVerified=$false
-    certificateRotationComplete=$false
-    physicalReceiverOffVerified=$false
-    changesMade=$false
-}
-$report | ConvertTo-Json -Depth 8 -Compress
- }).Count -eq 1
-            $running = @($vmInfo | Where-Object { $_ -match '^VMState="running"
-$report = [ordered]@{
-    schema='rosevear.hub.windows-startup-inventory355.v1'
-    originalHost='DESKTOP-AE894KC'
-    observedAtMs=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
-    source='UNSIGNED_LOCAL_READ_ONLY_INSPECTION'
-    tasks=@($taskNames | ForEach-Object { Get-FixedTask -Name $_ })
-    services=@($serviceNames | ForEach-Object { Get-FixedService -Name $_ })
-    machineConfigurationPresent=$machineConfig
-    localListeners=$ports
-    homeAssistantVM=$vmStatus
-    independentBootWitnessVerified=$false
-    peerMtlSAndAckVerified=$false
-    certificateRotationComplete=$false
-    physicalReceiverOffVerified=$false
-    changesMade=$false
-}
-$report | ConvertTo-Json -Depth 8 -Compress
- }).Count -eq 1
+            $efi = @($vmInfo | Where-Object { $_ -match '(?i)^firmware="efi"$' }).Count -eq 1
+            $running = @($vmInfo | Where-Object { $_ -match '^VMState="running"$' }).Count -eq 1
             $vmStatus = if (-not $efi) { 'VIRTUALBOX_GUEST_EFI_NOT_VERIFIED' }
                 elseif ($running) { 'VIRTUALBOX_GUEST_RUNNING_NOT_BOOT_PROOF' }
                 else { 'VIRTUALBOX_GUEST_REGISTERED_NOT_RUNNING' }
