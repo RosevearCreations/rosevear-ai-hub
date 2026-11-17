@@ -1,5 +1,7 @@
 # Rosevear AI Hub Build 355 / QL-464 — original-host continuous recovery and Master startup preflight
 
+> **Update after the original PC inventory:** Build 355 was read-only and did not implement autonomous boot. The current Home Assistant guest uses **VirtualBox, not Hyper-V**. The Windows Startup and LAN Gateway tasks are sign-in-triggered; the five-minute Recovery task was created with an interactive-user requirement. An enabled repeating task is therefore not proof of pre-login recovery. See [Build 356 / QL-465 — one-time unattended boot and recovery installer](BUILD_356_QL465_UNATTENDED_WINDOWS_BOOT.md). Once accepted and enabled on the PC, normal boots and recovery must require no manual PowerShell. The source change alone does NOT install those tasks.
+
 ## Release boundary
 
 **Source CODE GREEN is NOT autonomous Windows HOST GREEN.** This change is Hub-only; other Master code and remote apps remain independently deployed. This release adds a fail-closed readiness API and PowerShell preflight; **no Windows task, service, VM, local port, Tailscale, certificate, receiver or PowerShell session is modified by a GitHub release**. The Comms private receiver remains supervised TEST only, not a background autostart service. Read-only protocol 1.1 remains backward compatible with 1.0.
@@ -41,9 +43,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-three-
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\hub-recovery.ps1 -CheckOnly -SkipCamera
 ```
 
-Verify Windows service startup **Automatic** and recovery policies individually for the three genuine installed worker services if they have been independently authorized and configured. Do not run automatic service installation or flip a module enabled without the separate QL-459 signed action grant and AI Data Platform independent custodian requirements. Verify the Hyper-V Home Assistant VM's *Automatic Start Action*, Mosquitto, Ollama, Caddy HTTPS 8443 and Tailscale, but keep physical automation and Comms private receiver controls outside this preflight. `Rosevear AI Server Startup` is a documented obsolete task with a missing script path; do not re-enable it.
+Verify Windows service startup **Automatic** and recovery policies individually for the three genuine installed worker services if they have been independently authorized and configured. Do not run automatic service installation or flip a module enabled without the separate QL-459 signed action grant and AI Data Platform independent custodian requirements. Verify the original VirtualBox Home Assistant guest and its headless startup, MQTT inside that guest, Ollama, Caddy HTTPS 8443 and Tailscale, but keep physical automation and Comms private receiver controls outside this preflight. `Rosevear AI Server Startup` is a documented obsolete task with a missing script path; do not re-enable it.
 
-**Proposed boot dependency order for the owner to confirm:** Windows + Hyper-V Home Assistant VM; trusted OS network/Tailscale + broker/Caddy; installed Hub backend/API and local UI; optional Ollama/camera services; independently authorized AI Data and Comms *workers*; owner-signed and live-ACK peer transports. Remote Vercel/Cloudflare application deployments do not start as Windows processes.
+**Proposed boot dependency order for the owner to confirm:** Windows + original VirtualBox Home Assistant VM; trusted OS network/Tailscale + broker/Caddy; installed Hub backend/API and local UI; optional Ollama/camera services; independently authorized AI Data and Comms *workers*; owner-signed and live-ACK peer transports. Remote Vercel/Cloudflare application deployments do not start as Windows processes.
 
 ## Safe PowerShell-assisted checkout refresh (owner-controlled)
 
@@ -68,6 +70,6 @@ Do not force reset, stash unreviewed changes, run unattended package installers,
 - Complete a supervised planned maintenance window and record genuine preboot/postboot task history, SCM start mode/status, fresh health on ports, signed witness/reviewer receipts, independent peer ACK, backup/rollback and 24-hour continuity. No simulated acceptance.
 - Keep receiver UNKNOWN, incident OPEN, activation DENIED until source-specific signed evidence authorizes any change.
 
-## Next proposed Build 356 / QL-465
+## Build 356 / QL-465 companion
 
-Original-host supervised installation and rollback ceremony with explicit owner-signed auto-start policy and separately verified Windows service/worker acceptance. Do not begin this rollout from GitHub CI or without actual original-host evidence.
+Build 356 provides staged, password-backed unattended original-host boot/recovery tasks for the already-authorized Hub, original VirtualBox Home Assistant guest, pinned Ollama and guarded Caddy gateway. It does not authorize or install the separate AI Data Platform or Comms Windows workers, activate the Comms private receiver, or claim a live reboot test. [Read the one-time setup and rollback instructions](BUILD_356_QL465_UNATTENDED_WINDOWS_BOOT.md).
