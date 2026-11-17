@@ -1,0 +1,39 @@
+{
+  "schema": "rosevear.hub.ql467.master-enrollment358.v1",
+  "asOf": "2026-11-17",
+  "originalHost": "DESKTOP-AE894KC",
+  "sourceOnly": true,
+  "globalProductionReady": false,
+  "changesMade": false,
+  "lockstepReleaseRequired": false,
+  "hub": {
+    "originalWindowsTasksObservedInstalled": true,
+    "exactTaskIdentityVerified": true,
+    "tasksEnabled": false,
+    "physicalPreloginBootProven": false,
+    "independentWitnessVerified": false,
+    "guestMqttCameraContinuityVerified": false
+  },
+  "aiDataPlatform": {
+    "windowsServiceDetectedOnHost": false,
+    "separateWorkerInstallationIndependentlyVerified": false,
+    "ownerAndCustodianApprovalsVerified": false,
+    "independentMtlSAndSignedAckVerified": false,
+    "autoStartAuthorized": false
+  },
+  "commsHub": {
+    "windowsServiceDetectedOnHost": false,
+    "distinctNonReceiverWorkerInstallContractVerified": false,
+    "ownerAndCustodianApprovalsVerified": false,
+    "independentMtlSAndSignedAckVerified": false,
+    "autoStartAuthorized": false,
+    "privateQL340CTestReceiver": "OFF_UNAUTHORIZED_NO_AUTOSTART"
+  },
+  "approvalGates": [
+    "Separate original-host worker identity and explicitly owner-authorized installer for each peer",
+    "Independent owner/custodian provenance and pinned device identity; no secret values in GitHub",
+    "Explicit signed mTLS service-to-service HELLO/ACK receipts from actual host; no source-only claims",
+    "Off-host backup, test reboot witness and rollback plan with independent device observations",
+    "Do not enable QL340C Comms private TEST receiver or obsolete Rosevear AI Server Startup"
+  ]
+}
