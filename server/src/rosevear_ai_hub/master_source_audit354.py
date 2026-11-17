@@ -15,10 +15,8 @@ from pathlib import Path
 from typing import Any
 
 from rosevear_ai_hub.master_acceptance353 import verify_comms_audit_link353
-from rosevear_ai_hub.master_transport352 import (
-    MasterDeliveryLedger352,
-    _on_original_host352,
-)
+import rosevear_ai_hub.master_transport352 as transport352
+from rosevear_ai_hub.master_transport352 import MasterDeliveryLedger352
 from rosevear_ai_hub.service_identity347 import Registry347, _canonical, _digest, _sha
 
 AUDIT_SCHEMA354 = "rosevear.hub.two-source-audit-ledger354.v1"
@@ -153,7 +151,7 @@ class MasterSourceAuditLedger354:
         now_ms: int,
     ) -> bool:
         if not (
-            _on_original_host352()
+            transport352._on_original_host352()
             and self.path.is_file()
             and not self.path.is_symlink()
             and isinstance(outbox, MasterDeliveryLedger352)
