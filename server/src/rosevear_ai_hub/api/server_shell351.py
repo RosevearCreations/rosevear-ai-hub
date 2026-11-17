@@ -61,13 +61,13 @@ def _read_local_evidence351(*, now_ms: int, host: str) -> dict[str, Any]:
     return {
         "boot": (
             BootWitness351(Path(boot_path)).summary(manifest_sha=digest, now_ms=now_ms)
-            if boot_path else hold["boot"]
+            if boot_path
+            else hold["boot"]
         ),
         "bus": (
-            MasterEventBus351(Path(event_path)).recent(
-                manifest_sha=digest, now_ms=now_ms
-            )
-            if event_path else hold["bus"]
+            MasterEventBus351(Path(event_path)).recent(manifest_sha=digest, now_ms=now_ms)
+            if event_path
+            else hold["bus"]
         ),
     }
 
@@ -77,13 +77,14 @@ def _home_url_allowed351(value: str | None) -> bool:
         return False
     parsed = urlparse(value)
     return parsed.scheme == "https" or (
-        parsed.scheme == "http"
-        and parsed.hostname in ("127.0.0.1", "localhost", "::1")
+        parsed.scheme == "http" and parsed.hostname in ("127.0.0.1", "localhost", "::1")
     )
 
 
 async def home_readonly_status351(
-    runtime: HomeAssistantRuntime, *, original_host_verified: bool,
+    runtime: HomeAssistantRuntime,
+    *,
+    original_host_verified: bool,
 ) -> dict[str, Any]:
     """Live authenticated GET /api only, no devices or safety control actions."""
     hold = {
@@ -94,7 +95,8 @@ async def home_readonly_status351(
         "entityInventoryExposed": False,
     }
     if not (
-        original_host_verified and runtime.client is not None
+        original_host_verified
+        and runtime.client is not None
         and _home_url_allowed351(runtime.base_url)
     ):
         return hold
@@ -128,8 +130,7 @@ async def get_server_shell351(
     home = await home_readonly_status351(
         runtime,
         original_host_verified=(
-            existing["signedManifestVerified"] is True
-            and existing["originalHostVerified"] is True
+            existing["signedManifestVerified"] is True and existing["originalHostVerified"] is True
         ),
     )
     return {
