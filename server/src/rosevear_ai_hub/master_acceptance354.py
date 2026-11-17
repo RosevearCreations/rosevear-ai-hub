@@ -8,7 +8,9 @@ mutation, service control, key issuance or physical receiver authorization.
 from __future__ import annotations
 
 import hashlib
+import json
 import socket
+import sqlite3
 import ssl
 from pathlib import Path
 from typing import Any
@@ -310,6 +312,56 @@ def probe_candidate_mtls354(
                 }
     except (OSError, ssl.SSLError, ValueError, TypeError):
         return hold
+
+
+def crosscheck_peer_outbox354(
+    *, outbox_path: Path, package: Any, manifest_digest: str,
+    registry: Registry347, now_ms: int,
+) -> bool:
+    """Require stored original-host peer ACK to equal the signed sink evidence."""
+    if not (
+        isinstance(outbox_path, Path)
+        and outbox_path.is_file() and not outbox_path.is_symlink()
+        and type(package) is dict
+        and set(package) == {"event", "deliveryAck", "signedSink"}
+        and type(package["event"]) is dict
+        and type(package["event"].get("payload")) is dict
+        and _sha(manifest_digest)
+        and isinstance(registry, Registry347)
+        and type(now_ms) is int
+    ):
+        return False
+    event = package["event"]["payload"]
+    if not _sha(event.get("messageId")):
+        return False
+    try:
+        with sqlite3.connect(
+            f"file:{outbox_path}?mode=ro", uri=True, timeout=3,
+        ) as db:
+            row = db.execute(
+                """SELECT manifest_sha, signed_event, stage, delivery_ack_sha
+                FROM master_delivery352 WHERE message_id=?""",
+                (event["messageId"],),
+            ).fetchone()
+        if not (
+            row and row[0] == manifest_digest
+            and row[2] in ("TRANSPORT_ACKED", "OPERATOR_ACKED")
+            and type(row[1]) is str and type(row[3]) is str
+            and json.loads(row[1]) == package["event"]
+            and json.loads(row[3]) == package["deliveryAck"]
+        ):
+            return False
+    except (sqlite3.Error, OSError, ValueError, TypeError):
+        return False
+    return verify_signed_peer_sink354(
+        signed_sink=package["signedSink"],
+        signed_event=package["event"],
+        signed_delivery_ack=package["deliveryAck"],
+        registry=registry,
+        manifest_digest=manifest_digest,
+        peer_tls_pin=package["signedSink"]["payload"].get("tlsLeafPin", ""),
+        now_ms=now_ms,
+    )["signedPeerSinkReceiptVerified"] is True
 
 
 def acceptance_summary354(
