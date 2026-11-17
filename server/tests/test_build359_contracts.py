@@ -21,13 +21,14 @@ def test_shared_sixteen_theme_contract_preserves_read_only_authority():
     assert catalog["build359Extension"]["sharedThemeCount"] == 16
     assert catalog["build359Extension"]["sameCatalogueForAllMasters"]
     assert catalog["build359Extension"]["newThemeIds"] == [
-        "aurora", "amber-night", "orchid", "daylight"
+        "aurora",
+        "amber-night",
+        "orchid",
+        "daylight",
     ]
     assert len(catalog["themeIds"]) == len(catalog["themes"]) == 16
     assert len(set(catalog["themeIds"])) == 16
-    assert catalog["masters"] == [
-        "ai-data-platform", "rosevear-ai-hub", "rosevear-comms-hub"
-    ]
+    assert catalog["masters"] == ["ai-data-platform", "rosevear-ai-hub", "rosevear-comms-hub"]
 
 
 def test_branch_auditor_cannot_delete_or_force_merge():

@@ -28,12 +28,12 @@ def fixture():
     secret = Ed25519PrivateKey.generate()  # Ephemeral test fixture; never written.
     public = secret.public_key()
     pem = public.public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo)
-    fingerprint = hashlib.sha256(
-        public.public_bytes(Encoding.Raw, PublicFormat.Raw)
-    ).hexdigest()
+    fingerprint = hashlib.sha256(public.public_bytes(Encoding.Raw, PublicFormat.Raw)).hexdigest()
     now = datetime.now(UTC).replace(microsecond=0)
+
     def fmt(value: datetime) -> str:
         return value.isoformat().replace("+00:00", "Z")
+
     nonce = "a" * 32
     earlier = now - timedelta(minutes=3)
     previous = w.ZERO
@@ -127,9 +127,7 @@ def test_wrong_pin_commit_and_external_probe_are_rejected():
     data = fixture()
     v, payload, signature, witness, pem, fingerprint, commit, now = data
     with pytest.raises(ValueError, match="HOLD_OWNER_TRUST_PIN_MISMATCH"):
-        v.verify(
-            json.dumps(payload).encode(), signature, witness, pem, "0" * 64, commit, now=now
-        )
+        v.verify(json.dumps(payload).encode(), signature, witness, pem, "0" * 64, commit, now=now)
     with pytest.raises(ValueError, match="HOLD_UNTRUSTED_SOURCE_COMMIT"):
         v.verify(
             json.dumps(payload).encode(), signature, witness, pem, fingerprint, "d" * 40, now=now
