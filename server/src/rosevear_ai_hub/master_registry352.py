@@ -30,7 +30,7 @@ def load_master_registry352(
 ) -> Registry347 | None:
     """No accepting remote self-asserted keys and no private signing keys in registry."""
     if not (
-        type(path) is Path and path.is_file() and not path.is_symlink()
+        isinstance(path, Path) and path.is_file() and not path.is_symlink()
         and path.stat().st_size <= 32_768
         and type(owner_public) is bytes and len(owner_public) == 32
         and _sha(owner_pin)
