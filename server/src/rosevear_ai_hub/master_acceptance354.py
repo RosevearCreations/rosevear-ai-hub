@@ -316,7 +316,7 @@ def probe_candidate_mtls354(
 
 def crosscheck_peer_outbox354(
     *, outbox_path: Path, package: Any, manifest_digest: str,
-    registry: Registry347, now_ms: int,
+    peer: dict[str, Any], registry: Registry347, now_ms: int,
 ) -> bool:
     """Require stored original-host peer ACK to equal the signed sink evidence."""
     if not (
@@ -326,13 +326,21 @@ def crosscheck_peer_outbox354(
         and set(package) == {"event", "deliveryAck", "signedSink"}
         and type(package["event"]) is dict
         and type(package["event"].get("payload")) is dict
+        and type(package.get("signedSink")) is dict
+        and type(package["signedSink"].get("payload")) is dict
+        and type(peer) is dict and peer.get("id") in PEER_SINKS
+        and _sha(peer.get("tlsLeafPin"))
         and _sha(manifest_digest)
         and isinstance(registry, Registry347)
         and type(now_ms) is int
     ):
         return False
     event = package["event"]["payload"]
-    if not _sha(event.get("messageId")):
+    if not (
+        _sha(event.get("messageId"))
+        and event.get("audience") == peer["id"]
+        and package["signedSink"]["payload"].get("issuer") == peer["id"]
+    ):
         return False
     try:
         with sqlite3.connect(
@@ -359,7 +367,7 @@ def crosscheck_peer_outbox354(
         signed_delivery_ack=package["deliveryAck"],
         registry=registry,
         manifest_digest=manifest_digest,
-        peer_tls_pin=package["signedSink"]["payload"].get("tlsLeafPin", ""),
+        peer_tls_pin=peer["tlsLeafPin"],
         now_ms=now_ms,
     )["signedPeerSinkReceiptVerified"] is True
 
