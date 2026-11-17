@@ -19,6 +19,13 @@ import sys
 import time
 from pathlib import Path
 
+import psutil
+
+from rosevear_ai_hub.master_bus351 import (
+    BootWitness351,
+    MasterEventBus351,
+    publish_module_observations351,
+)
 from rosevear_ai_hub.master_shell349 import load_local_manifest349
 from rosevear_ai_hub.master_supervisor350 import (
     CustodyJournal350,
@@ -50,6 +57,16 @@ def run() -> int:
         print("HOLD_LOCAL_CONFIGURATION_MISSING")
         return 2
     journal = CustodyJournal350(Path(journal_value))
+    event_path = os.environ.get("ROSEVEAR_QL460_EVENT_DB")
+    boot_path = os.environ.get("ROSEVEAR_QL460_BOOT_DB")
+    bus = MasterEventBus351(Path(event_path)) if event_path else None
+    boot = BootWitness351(Path(boot_path)) if boot_path else None
+    if args.watch and (bus is None or boot is None):
+        print("HOLD_QL460_DURABLE_BUS_OR_BOOT_PATH_MISSING")
+        return 2
+    if (bus and not bus.initialize()) or (boot and not boot.initialize()):
+        print("HOLD_QL460_JOURNALS_UNAVAILABLE")
+        return 2
     controller = WindowsServices350()
     if not journal.initialize():
         print("HOLD_DURABLE_JOURNAL_UNAVAILABLE")
@@ -71,6 +88,16 @@ def run() -> int:
         )
         print(json.dumps(result, sort_keys=True))
         if not result["observed"]:
+            return 2
+        if bus is not None and boot is not None and not publish_module_observations351(
+            enrollment=enrollment,
+            custody=journal,
+            bus=bus,
+            boot=boot,
+            boot_ms=int(psutil.boot_time() * 1000),
+            now_ms=now,
+        ):
+            print("HOLD_QL460_BUS_OR_BOOT_WITNESS_UNAVAILABLE")
             return 2
         grants = (
             list(args.recovery_grants.glob("*.json"))
