@@ -4,8 +4,12 @@ from fastapi.testclient import TestClient
 from rosevear_ai_hub.api.server_shell355 import local_readiness_snapshot355, router
 from rosevear_ai_hub.main import app
 from rosevear_ai_hub.master_readiness355 import (
-    INVENTORY_SCHEMA355, MASTER_ORDER355, SERVICES350, TASKS355,
-    readiness_snapshot355, trusted_shape355,
+    INVENTORY_SCHEMA355,
+    MASTER_ORDER355,
+    SERVICES350,
+    TASKS355,
+    readiness_snapshot355,
+    trusted_shape355,
 )
 
 NOW = 1_800_000_000_000
@@ -78,7 +82,8 @@ def test_stale_wrong_host_forged_and_malformed_samples_hold():
     assert not trusted_shape355({**good, "observedAtMs": NOW - 120_001}, now_ms=NOW)
     assert not trusted_shape355({**good, "originalHost": "OTHER"}, now_ms=NOW)
     assert not trusted_shape355({**good, "tasks": []}, now_ms=NOW)
-    assert not trusted_shape355({**good, "services": [{**good["services"][0], "state": "GREEN"}]}, now_ms=NOW)
+    forged_services = [{**good["services"][0], "state": "GREEN"}]
+    assert not trusted_shape355({**good, "services": forged_services}, now_ms=NOW)
     assert _evaluate({**good, "observedAtMs": NOW - 120_001})["inventoryFreshButUnsigned"] is False
     offhost = _evaluate(good, original=False)
     assert offhost["identifiedOriginalHost"] is False

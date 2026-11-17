@@ -104,14 +104,22 @@ def readiness_snapshot355(
         "trigger": inv_tasks.get(name, {}).get("trigger", "UNKNOWN"),
         "automaticBootProven": False,
     } for name in TASKS355]
-    prior_sinks = source354.get("peerSinks", {}) if source354.get("schema") == "rosevear.hub.master-acceptance354.v1" else {}
+    prior_sinks = (
+        source354.get("peerSinks", {})
+        if source354.get("schema") == "rosevear.hub.master-acceptance354.v1"
+        else {}
+    )
     peer_health = [{
         "id": peer,
         "historicalSignedSink": prior_sinks.get(peer) == "PEER_SIGNED_SINK_ONLY",
         "currentlyConnected": False,
         "state": "HOLD_LIVE_SIGNED_PEER_HEALTH_REQUIRED",
     } for peer in PEERS355]
-    prior_cert = source354.get("certificateRotation", {}) if source354.get("schema") == "rosevear.hub.master-acceptance354.v1" else {}
+    prior_cert = (
+        source354.get("certificateRotation", {})
+        if source354.get("schema") == "rosevear.hub.master-acceptance354.v1"
+        else {}
+    )
     rotation_state = prior_cert.get("state") if type(prior_cert) is dict else None
     return {
         "schema": SCHEMA355,
@@ -125,7 +133,9 @@ def readiness_snapshot355(
         "nextOwnerAction": "REVIEW_LOCAL_PREFLIGHT_BEFORE_ANY_REBOOT",
         "continuousMonitor": {
             "configuredTask": "Rosevear Three-Master Observer QL460",
-            "taskState": inv_tasks.get("Rosevear Three-Master Observer QL460", {}).get("state", "UNKNOWN"),
+            "taskState": inv_tasks.get("Rosevear Three-Master Observer QL460", {}).get(
+                "state", "UNKNOWN"
+            ),
             "actualUnattendedRecoveryVerified": False,
             "twentyFourHourContinuityVerified": False,
         },
@@ -133,19 +143,33 @@ def readiness_snapshot355(
         "windowsTasks": tasks,
         "peerHealth": peer_health,
         "certificateRotation": {
-            "priorPlanState": rotation_state if type(rotation_state) is str else "HOLD_NO_VERIFIED_PLAN",
+            "priorPlanState": (
+                rotation_state if type(rotation_state) is str else "HOLD_NO_VERIFIED_PLAN"
+            ),
             "rotationCompleted": False,
             "newManifestAndSignedPeerAckVerified": False,
             "automaticCertificateActivationAuthorized": False,
         },
         "requiredDependencies": [
             {"id": "hyperv-home-assistant", "status": "REQUIRES_LOCAL_VM_AUTOSTART_INSPECTION"},
-            {"id": "mosquitto", "status": inv_services.get("Mosquitto", {}).get("state", "UNKNOWN")},
+            {
+                "id": "mosquitto",
+                "status": inv_services.get("Mosquitto", {}).get("state", "UNKNOWN"),
+            },
             {"id": "ollama", "status": inv_services.get("Ollama", {}).get("state", "UNKNOWN")},
             {"id": "caddy", "status": inv_services.get("Caddy", {}).get("state", "UNKNOWN")},
-            {"id": "tailscale", "status": inv_services.get("Tailscale", {}).get("state", "UNKNOWN")},
-            {"id": "hub-api-web-camera", "status": "REQUIRES_ORIGINAL_HOST_HEALTH_AND_RECOVERY_TEST"},
-            {"id": "external-master-apps", "status": "DEPLOY_INDEPENDENTLY_DO_NOT_AUTO_START_RECEIVER"},
+            {
+                "id": "tailscale",
+                "status": inv_services.get("Tailscale", {}).get("state", "UNKNOWN"),
+            },
+            {
+                "id": "hub-api-web-camera",
+                "status": "REQUIRES_ORIGINAL_HOST_HEALTH_AND_RECOVERY_TEST",
+            },
+            {
+                "id": "external-master-apps",
+                "status": "DEPLOY_INDEPENDENTLY_DO_NOT_AUTO_START_RECEIVER",
+            },
         ],
         "preRebootGates": [
             "CHECK_WINDOWS_SERVICE_INSTALL_AND_AUTOMATIC_MODE",
