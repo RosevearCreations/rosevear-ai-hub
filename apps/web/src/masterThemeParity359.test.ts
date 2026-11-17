@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { MASTER_THEME_CHOICES, parseShellTheme } from "./shellThemePreference";
@@ -9,9 +10,9 @@ type Palette = {
   text: string; accent: string; muted: string;
 };
 const manifest = JSON.parse(
-  readFileSync(new URL("../../../.github/rosevear-master-themes.v2.json", import.meta.url), "utf8"),
+  readFileSync(resolve(process.cwd(), "../../.github/rosevear-master-themes.v2.json"), "utf8"),
 ) as { themeIds: string[]; themes: Palette[]; build359Extension: { sharedThemeCount: number; newThemeIds: string[] } };
-const css = readFileSync(new URL("./masterThemes467.css", import.meta.url), "utf8");
+const css = readFileSync(resolve(process.cwd(), "src/masterThemes467.css"), "utf8");
 const expectedNew = ["aurora", "amber-night", "orchid", "daylight"];
 
 function luminance(hex: string): number {
