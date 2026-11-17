@@ -116,16 +116,21 @@ def verify_reboot_ceremony353(
         )
         if result["verified"] is not True:
             return hold
-    p = _signed_payload353(
-        signed_ceremony, independent_reviewer_public, independent_reviewer_pin
-    )
+    p = _signed_payload353(signed_ceremony, independent_reviewer_public, independent_reviewer_pin)
     if not (
         type(p) is dict
         and set(p)
         == {
-            "schema", "originalHost", "manifestDigest", "beforeReceiptDigest",
-            "afterReceiptDigest", "beforeBootMs", "afterBootMs",
-            "reviewerRole", "reviewedAtMs", "physicalReceiverAuthorized",
+            "schema",
+            "originalHost",
+            "manifestDigest",
+            "beforeReceiptDigest",
+            "afterReceiptDigest",
+            "beforeBootMs",
+            "afterBootMs",
+            "reviewerRole",
+            "reviewedAtMs",
+            "physicalReceiverAuthorized",
         }
         and p["schema"] == CEREMONY_SCHEMA353
         and p["originalHost"] == ORIGINAL_HOST
@@ -189,9 +194,17 @@ def verify_comms_audit_link353(
     if not (
         set(p)
         == {
-            "schema", "protocolVersion", "issuer", "audience", "keyId",
-            "messageId", "eventDigest", "ackDigest", "auditRecord",
-            "issuedAtMs", "expiresAtMs",
+            "schema",
+            "protocolVersion",
+            "issuer",
+            "audience",
+            "keyId",
+            "messageId",
+            "eventDigest",
+            "ackDigest",
+            "auditRecord",
+            "issuedAtMs",
+            "expiresAtMs",
         }
         and p["schema"] == AUDIT_SCHEMA353
         and p["protocolVersion"] == "1.1"
@@ -203,8 +216,12 @@ def verify_comms_audit_link353(
         and type(p["auditRecord"]) is dict
         and set(p["auditRecord"])
         == {
-            "messageId", "eventDigest", "ownerAuditId", "actorRole",
-            "outcome", "occurredAtMs",
+            "messageId",
+            "eventDigest",
+            "ownerAuditId",
+            "actorRole",
+            "outcome",
+            "occurredAtMs",
         }
         and p["auditRecord"]["messageId"] == p["messageId"]
         and p["auditRecord"]["eventDigest"] == p["eventDigest"]
@@ -216,8 +233,7 @@ def verify_comms_audit_link353(
         and event_payload["issuedAtMs"]
         <= p["auditRecord"]["occurredAtMs"]
         <= operator_ack["payload"]["issuedAtMs"]
-        and _digest(p["auditRecord"])
-        == operator_ack["payload"]["actorAuditDigest"]
+        and _digest(p["auditRecord"]) == operator_ack["payload"]["actorAuditDigest"]
         and type(p["issuedAtMs"]) is int
         and type(p["expiresAtMs"]) is int
         and operator_ack["payload"]["issuedAtMs"] <= p["issuedAtMs"] <= now_ms
@@ -257,30 +273,40 @@ def key_rotation_readiness353(registry: Registry347 | None, now_ms: int) -> dict
     for issuer in MASTER_MODULES:
         keys = [x for x in records if x.issuer == issuer]
         if not keys:
-            per_service.append({
-                "id": issuer, "state": "HOLD_NO_KEY",
-                "activeGenerations": 0, "expiryWithinDays": None,
-            })
+            per_service.append(
+                {
+                    "id": issuer,
+                    "state": "HOLD_NO_KEY",
+                    "activeGenerations": 0,
+                    "expiryWithinDays": None,
+                }
+            )
             continue
         active = [
-            x for x in keys if x.active_from_ms <= now_ms < x.active_until_ms
+            x
+            for x in keys
+            if x.active_from_ms <= now_ms < x.active_until_ms
             and (x.revoked_at_ms is None or now_ms < x.revoked_at_ms)
         ]
         remaining = min((x.active_until_ms - now_ms for x in active), default=None)
         pending = any(now_ms < x.active_from_ms for x in keys)
-        per_service.append({
-            "id": issuer,
-            "state": (
-                "EXPIRED_OR_REVOKED" if not active
-                else "ROTATION_DUE" if remaining is not None and remaining <= ROTATION_ALERT_MS
-                else "ACTIVE_PINNED_GENERATIONS"
-            ),
-            "activeGenerations": len(active),
-            "expiryWithinDays": (
-                round(remaining / 86_400_000, 1) if remaining is not None else None
-            ),
-            "futureKeyEnrolled": pending,
-        })
+        per_service.append(
+            {
+                "id": issuer,
+                "state": (
+                    "EXPIRED_OR_REVOKED"
+                    if not active
+                    else "ROTATION_DUE"
+                    if remaining is not None and remaining <= ROTATION_ALERT_MS
+                    else "ACTIVE_PINNED_GENERATIONS"
+                ),
+                "activeGenerations": len(active),
+                "expiryWithinDays": (
+                    round(remaining / 86_400_000, 1) if remaining is not None else None
+                ),
+                "futureKeyEnrolled": pending,
+            }
+        )
     missing = any(x["state"] in ("HOLD_NO_KEY", "EXPIRED_OR_REVOKED") for x in per_service)
     due = any(x["state"] == "ROTATION_DUE" for x in per_service)
     for a in records:
@@ -295,11 +321,7 @@ def key_rotation_readiness353(registry: Registry347 | None, now_ms: int) -> dict
     return {
         **hold,
         "state": (
-            "HOLD_PEER_KEYS_MISSING"
-            if missing
-            else "ROTATION_DUE"
-            if due
-            else "PINNED_KEYS_VALID"
+            "HOLD_PEER_KEYS_MISSING" if missing else "ROTATION_DUE" if due else "PINNED_KEYS_VALID"
         ),
         "peerKeys": per_service,
     }

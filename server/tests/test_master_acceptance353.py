@@ -70,7 +70,9 @@ def _host_task(boot_ms: int, observed: int) -> dict:
 
 
 def _host_receipt(
-    signer: Ed25519PrivateKey, boot_ms: int, observed: int,
+    signer: Ed25519PrivateKey,
+    boot_ms: int,
+    observed: int,
 ) -> dict:
     payload = {
         "schema": WITNESS_SCHEMA352,
@@ -123,23 +125,23 @@ def test_signed_two_boot_reviewer_ceremony_is_not_automatic_startup_proof():
     assert valid["continuous24HourOperationVerified"] is False
     assert valid["physicalReceiverAuthorized"] is False
     assert valid["bootCount"] == 2
-    assert not verify_reboot_ceremony353(
-        **{**kwargs, "owner_pin": reviewer_pin}
-    )["signedSequenceVerified"]
-    assert not verify_reboot_ceremony353(
-        **{**kwargs, "now_ms": NOW + 180_000}
-    )["signedSequenceVerified"]
+    assert not verify_reboot_ceremony353(**{**kwargs, "owner_pin": reviewer_pin})[
+        "signedSequenceVerified"
+    ]
+    assert not verify_reboot_ceremony353(**{**kwargs, "now_ms": NOW + 180_000})[
+        "signedSequenceVerified"
+    ]
     forged = {
         **receipt,
         "payload": {**receipt["payload"], "afterBootMs": NOW - 90_000},
     }
-    assert not verify_reboot_ceremony353(
-        **{**kwargs, "signed_ceremony": forged}
-    )["signedSequenceVerified"]
+    assert not verify_reboot_ceremony353(**{**kwargs, "signed_ceremony": forged})[
+        "signedSequenceVerified"
+    ]
     wrong_boot = _host_receipt(host_key, NOW - 3_600_000, NOW - 5_000)
-    assert not verify_reboot_ceremony353(
-        **{**kwargs, "after_receipt": wrong_boot}
-    )["signedSequenceVerified"]
+    assert not verify_reboot_ceremony353(**{**kwargs, "after_receipt": wrong_boot})[
+        "signedSequenceVerified"
+    ]
 
 
 def _registry() -> tuple[Registry347, dict[str, Ed25519PrivateKey]]:
@@ -154,7 +156,8 @@ def _registry() -> tuple[Registry347, dict[str, Ed25519PrivateKey]]:
     records = []
     for issuer, key in keys.items():
         pub = key.public_key().public_bytes(
-            Encoding.DER, PublicFormat.SubjectPublicKeyInfo,
+            Encoding.DER,
+            PublicFormat.SubjectPublicKeyInfo,
         )
         records.append(
             PublicKey347(
@@ -235,16 +238,16 @@ def test_comms_audit_record_requires_exact_owner_allowlist_and_signatures(monkey
     assert not verify_comms_audit_link353(
         **{**kwargs, "permitted_owner_audit_ids": frozenset({"other-owner"})}
     )["commsSignedAuditLinked"]
-    assert not verify_comms_audit_link353(
-        **{**kwargs, "now_ms": NOW + 100_000}
-    )["commsSignedAuditLinked"]
+    assert not verify_comms_audit_link353(**{**kwargs, "now_ms": NOW + 100_000})[
+        "commsSignedAuditLinked"
+    ]
     forged = {
         **signed_audit,
         "payload": {**signed_audit["payload"], "messageId": "d" * 64},
     }
-    assert not verify_comms_audit_link353(
-        **{**kwargs, "signed_audit": forged}
-    )["commsSignedAuditLinked"]
+    assert not verify_comms_audit_link353(**{**kwargs, "signed_audit": forged})[
+        "commsSignedAuditLinked"
+    ]
 
 
 def test_owner_reviewed_rotation_gates_missing_and_expiring_peers():
@@ -253,9 +256,7 @@ def test_owner_reviewed_rotation_gates_missing_and_expiring_peers():
     assert status["state"] == "PINNED_KEYS_VALID"
     assert len(status["peerKeys"]) == 3
     assert status["automaticKeyActivationAuthorized"] is False
-    missing = Registry347(
-        tuple(x for x in registry.records if x.issuer != "rosevear-comms-hub")
-    )
+    missing = Registry347(tuple(x for x in registry.records if x.issuer != "rosevear-comms-hub"))
     assert key_rotation_readiness353(missing, NOW)["state"] == "HOLD_PEER_KEYS_MISSING"
     soon = Registry347(
         tuple(
@@ -283,7 +284,8 @@ def test_owner_only_acceptance_endpoint_and_no_remote_mutations():
     for verb in ("post", "put", "patch", "delete"):
         assert getattr(client, verb)(route).status_code in (401, 403, 405)
     summary = local_acceptance_snapshot353(
-        now_ms=NOW, machine_name="WRONG-HOST",
+        now_ms=NOW,
+        machine_name="WRONG-HOST",
     )
     assert summary["rebootCeremony"]["signedSequenceVerified"] is False
     assert summary["pilot"]["livePeerCurrentlyConnected"] is False

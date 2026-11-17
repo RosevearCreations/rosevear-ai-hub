@@ -124,15 +124,11 @@ def local_acceptance_snapshot353(*, now_ms: int, machine_name: str) -> dict[str,
     reviewer_public = _read_key353(os.environ.get("ROSEVEAR_QL462_REVIEWER_PUB_PATH"))
     if witness_public is not None and reviewer_public is not None:
         reboot = verify_reboot_ceremony353(
-            signed_ceremony=_read_protected353(
-                os.environ.get("ROSEVEAR_QL462_CEREMONY_PATH")
-            ),
+            signed_ceremony=_read_protected353(os.environ.get("ROSEVEAR_QL462_CEREMONY_PATH")),
             before_receipt=_read_protected353(
                 os.environ.get("ROSEVEAR_QL462_PREBOOT_RECEIPT_PATH")
             ),
-            after_receipt=_read_protected353(
-                os.environ.get("ROSEVEAR_QL461_RECEIPT_PATH")
-            ),
+            after_receipt=_read_protected353(os.environ.get("ROSEVEAR_QL461_RECEIPT_PATH")),
             host_witness_public=witness_public,
             host_witness_pin=os.environ.get("ROSEVEAR_QL461_WITNESS_PUB_PIN", ""),
             independent_reviewer_public=reviewer_public,
@@ -151,26 +147,32 @@ def local_acceptance_snapshot353(*, now_ms: int, machine_name: str) -> dict[str,
             now_ms=now_ms,
             registry=registry,
         )
-        if outbox_path else {"stage": "HOLD", "latest": []}
+        if outbox_path
+        else {"stage": "HOLD", "latest": []}
     )
     pilots = [
-        x for x in status["latest"]
-        if x["eventType"] == "master.health"
-        and x["stage"] in ("TRANSPORT_ACKED", "OPERATOR_ACKED")
+        x
+        for x in status["latest"]
+        if x["eventType"] == "master.health" and x["stage"] in ("TRANSPORT_ACKED", "OPERATOR_ACKED")
     ]
-    data_status = "SIGNED_PEER_ACK_STORED" if any(
-        x["audience"] == "ai-data-platform" for x in pilots
-    ) else "UNVERIFIED"
-    comms_status = "SIGNED_PEER_ACK_STORED" if any(
-        x["audience"] == "rosevear-comms-hub" for x in pilots
-    ) else "UNVERIFIED"
+    data_status = (
+        "SIGNED_PEER_ACK_STORED"
+        if any(x["audience"] == "ai-data-platform" for x in pilots)
+        else "UNVERIFIED"
+    )
+    comms_status = (
+        "SIGNED_PEER_ACK_STORED"
+        if any(x["audience"] == "rosevear-comms-hub" for x in pilots)
+        else "UNVERIFIED"
+    )
     pilot = {
         **hold["pilot"],
         "state": (
             "BOTH_PEER_SIGNED_ACKS_STORED_NOT_LIVE_CONNECTED"
             if data_status != "UNVERIFIED" and comms_status != "UNVERIFIED"
             else "PARTIAL_PILOT_SIGNED_ACKS_STORED"
-            if pilots else hold["pilot"]["state"]
+            if pilots
+            else hold["pilot"]["state"]
         ),
         "aiDataPlatform": data_status,
         "commsHub": comms_status,
@@ -198,8 +200,7 @@ def local_acceptance_snapshot353(*, now_ms: int, machine_name: str) -> dict[str,
             permitted_owner_audit_ids=frozenset((allowed_owner,)),
         )
         if candidate["commsSignedAuditLinked"] and any(
-            x["messageId"] == candidate["messageId"]
-            and x["stage"] == "OPERATOR_ACKED"
+            x["messageId"] == candidate["messageId"] and x["stage"] == "OPERATOR_ACKED"
             for x in status["latest"]
         ):
             audit = candidate
