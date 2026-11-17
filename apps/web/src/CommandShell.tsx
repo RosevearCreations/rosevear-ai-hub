@@ -4,7 +4,7 @@ import { filterShellSections, workspaceFinderHint } from "./workspaceFinderModel
 export { filterShellSections } from "./workspaceFinderModel";
 
 export type ShellDensity = "comfortable" | "compact";
-export type ShellTheme = "standard" | "dark" | "instrument" | "nebula" | "meadow" | "high-contrast" | "copper" | "arctic" | "solar" | "graphite";
+export type ShellTheme = "standard" | "dark" | "instrument" | "nebula" | "meadow" | "high-contrast" | "copper" | "arctic" | "solar" | "graphite" | "crimson" | "emerald" | "ultraviolet" | "steel";
 
 export function CommandPalette({
   open, sections, current, onOpen, onClose, onChoose,
