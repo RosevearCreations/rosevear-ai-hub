@@ -13,7 +13,8 @@ import os
 import platform
 import subprocess
 import time
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
+from datetime import datetime, timezone
 from typing import Any
 
 import psutil
@@ -76,20 +77,32 @@ def valid_task352(task: Any) -> bool:
     args = task["arguments"]
     return (
         task["name"] == TASK_NAME352
-        and task["state"] == "Ready"
+        and task["state"] in ("Ready", "Running")
         and task["principal"] in ("SYSTEM", "S-1-5-18")
         and task["trigger"] == "MSFT_TaskBootTrigger"
         and type(command) is str
-        and Path(command).name.lower() in ("python.exe", "pythonw.exe")
-        and Path(command).is_absolute()
+        and PureWindowsPath(command).name.lower() in ("python.exe", "pythonw.exe")
+        and PureWindowsPath(command).is_absolute()
         and type(args) is str and args.count("--watch") == 1
         and "--recovery-grants" not in args
         and "hub_master_supervisor350.py" in args
         and type(task["lastRunTimeUtc"]) is str
         and len(task["lastRunTimeUtc"]) <= 48
         and type(task["lastTaskResult"]) is int
-        and task["lastTaskResult"] == 0
+        and task["lastTaskResult"] in (0, 267009)
     )
+
+
+def _task_run_matches_boot352(value: str, boot_ms: int, observed_ms: int) -> bool:
+    """Actual Task Scheduler last run must be after this boot and before capture."""
+    try:
+        stamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if stamp.tzinfo is None:
+            return False
+        at_ms = round(stamp.astimezone(timezone.utc).timestamp() * 1000)
+        return boot_ms <= at_ms <= observed_ms
+    except (ValueError, OverflowError, OSError, TypeError):
+        return False
 
 
 def build_local_receipt352(
@@ -104,7 +117,10 @@ def build_local_receipt352(
     ):
         return None
     boot_ms = round(psutil.boot_time() * 1000)
-    if not 0 <= now_ms - boot_ms <= 365 * 86_400_000:
+    if not (
+        0 <= now_ms - boot_ms <= 365 * 86_400_000
+        and _task_run_matches_boot352(task["lastRunTimeUtc"], boot_ms, now_ms)
+    ):
         return None
     payload = {
         "schema": WITNESS_SCHEMA352,
@@ -153,6 +169,9 @@ def verify_signed_witness352(
         and 0 <= now_ms - p["observedAtMs"] <= MAX_WITNESS_AGE_MS
         and 0 <= p["observedAtMs"] - p["bootMs"] <= 365 * 86_400_000
         and valid_task352(p["task"])
+        and _task_run_matches_boot352(
+            p["task"]["lastRunTimeUtc"], p["bootMs"], p["observedAtMs"],
+        )
     ):
         return hold
     try:
