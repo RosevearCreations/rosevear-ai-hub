@@ -90,24 +90,69 @@ if ($Install) {
     if (-not (Test-Path -LiteralPath $ollamaPath -PathType Leaf)) {
         throw 'HOLD_OLLAMA_BINARY_MISSING'
     }
-    if (Test-Path -LiteralPath $cfgPath) {
-        throw 'HOLD_PRIOR_PINNED_CONFIG_REQUIRES_OWNER_REVIEW'
+    # A failed or cancelled earlier enrollment may have written the non-secret
+    # pin before Task Scheduler tasks existed. Reuse ONLY an exact pinned match:
+    # never delete, overwrite, re-pin, or print the previous configuration.
+    $writeNewPin = -not (Test-Path -LiteralPath $cfgPath)
+    if (-not $writeNewPin) {
+        if (-not (Test-Path -LiteralPath $cfgPath -PathType Leaf)) {
+            throw 'HOLD_PRIOR_PINNED_CONFIG_NOT_A_FILE'
+        }
+        $savedFile = Get-Item -LiteralPath $cfgPath -ErrorAction Stop
+        if ($savedFile.Length -lt 2 -or $savedFile.Length -gt 8192 -or
+            ($savedFile.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw 'HOLD_PRIOR_PINNED_CONFIG_UNTRUSTED'
+        }
+        try {
+            $savedPin = Get-Content -LiteralPath $cfgPath -Raw -ErrorAction Stop |
+                ConvertFrom-Json -ErrorAction Stop
+            $keys = @($savedPin.PSObject.Properties.Name | Sort-Object)
+            $expectedKeys = @('ollamaExecutable','schema','vmName','vmUuid')
+            if (($keys -join '|') -cne ($expectedKeys -join '|')) {
+                throw 'CONFIG_FIELDS_INVALID'
+            }
+            if ([string]$savedPin.schema -cne 'rosevear.hub.autonomous-boot356.v1' -or
+                [string]$savedPin.vmName -cne 'Home Assistant' -or
+                [string]$savedPin.vmUuid -notmatch '^[0-9a-fA-F-]{36}$' -or
+                [string]$savedPin.vmUuid -ine $uuid -or
+                -not [IO.Path]::IsPathRooted([string]$savedPin.ollamaExecutable) -or
+                [IO.Path]::GetFullPath([string]$savedPin.ollamaExecutable) -ine
+                    [IO.Path]::GetFullPath($ollamaPath)) {
+                throw 'CONFIG_PIN_MISMATCH'
+            }
+        } catch {
+            throw 'HOLD_PRIOR_PINNED_CONFIG_MISMATCH_NO_OVERWRITE'
+        }
+        Write-Output 'EXISTING_OWNER_PIN_MATCHES_VM_AND_OLLAMA; continuing without file changes.'
     }
-    # The pin includes NO secrets. Store it in the server owner's local profile.
-    New-Item -ItemType Directory -Path (Split-Path -Parent $cfgPath) -Force | Out-Null
-    $cfg = @{
-        schema='rosevear.hub.autonomous-boot356.v1'
-        vmName='Home Assistant'
-        vmUuid=$uuid
-        ollamaExecutable=$ollamaPath
-    }
-    $cfg | ConvertTo-Json -Compress | Set-Content -LiteralPath $cfgPath -Encoding UTF8
     $credential = Get-Credential -UserName $principalName -Message 'Enter the server Windows account PASSWORD (not PIN) once for pre-login Task Scheduler startup'
     if (-not $credential -or $credential.UserName -ine $principalName) {
         throw 'HOLD_CREDENTIAL_MUST_MATCH_VM_OWNER'
     }
     $plain = $credential.GetNetworkCredential().Password
     if ([string]::IsNullOrEmpty($plain)) { throw 'HOLD_WINDOWS_PASSWORD_REQUIRED' }
+    if ($writeNewPin) {
+        # Create once, atomically; never replace a pin another process wrote.
+        $cfgDir = Split-Path -Parent $cfgPath
+        New-Item -ItemType Directory -Path $cfgDir -Force | Out-Null
+        $cfg = @{
+            schema='rosevear.hub.autonomous-boot356.v1'
+            vmName='Home Assistant'
+            vmUuid=$uuid
+            ollamaExecutable=$ollamaPath
+        }
+        $json = $cfg | ConvertTo-Json -Compress
+        $bytes = [Text.UTF8Encoding]::new($false).GetBytes($json)
+        $stream = $null
+        try {
+            $stream = [IO.File]::Open($cfgPath, 'CreateNew', 'Write', 'None')
+            $stream.Write($bytes, 0, $bytes.Length)
+        } catch {
+            throw 'HOLD_CONFIG_CREATE_NEW_FAILED_NO_OVERWRITE'
+        } finally {
+            if ($null -ne $stream) { $stream.Dispose() }
+        }
+    }
     $action = New-ScheduledTaskAction -Execute $psExe -Argument $arguments -WorkingDirectory $root
     $settings = New-ScheduledTaskSettingsSet -Disable -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 10) -RestartCount 2 -RestartInterval (New-TimeSpan -Minutes 5) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
     $boot = New-ScheduledTaskTrigger -AtStartup
