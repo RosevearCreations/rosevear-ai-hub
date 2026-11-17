@@ -124,6 +124,7 @@ def _verify_registry_signature(
 
 def verify_event352(
     signed: Any, *, registry: Registry347, manifest_sha: str, now_ms: int,
+    allow_expired: bool = False,
 ) -> dict[str, Any]:
     hold = {"verified": False, "reason": "HOLD_UNSIGNED_STALE_OR_UNENROLLED_MASTER_EVENT"}
     if not (
@@ -151,9 +152,11 @@ def verify_event352(
         and p["nonce"].isascii()
         and all(c.isalnum() or c in "-_" for c in p["nonce"])
         and type(p["issuedAtMs"]) is int and type(p["expiresAtMs"]) is int
-        and 0 <= now_ms - p["issuedAtMs"] <= MAX_EVENT_AGE_MS
+        and 0 <= now_ms - p["issuedAtMs"] <= (
+            7 * 86_400_000 if allow_expired else MAX_EVENT_AGE_MS
+        )
         and p["issuedAtMs"] < p["expiresAtMs"] <= p["issuedAtMs"] + MAX_EVENT_AGE_MS
-        and now_ms < p["expiresAtMs"]
+        and (allow_expired or now_ms < p["expiresAtMs"])
         and _verify_registry_signature(
             signed=signed, issuer=p["issuer"], key_id=p["keyId"],
             registry=registry, at_ms=now_ms, issued_at_ms=p["issuedAtMs"],
@@ -190,6 +193,7 @@ def verify_ack352(
         and p["status"] == ("ACKNOWLEDGED" if operator_ack else "RECEIVED")
         and type(p["issuedAtMs"]) is int and type(p["expiresAtMs"]) is int
         and expected_event["issuedAtMs"] <= p["issuedAtMs"] <= now_ms
+        and p["issuedAtMs"] - expected_event["issuedAtMs"] <= 7 * 86_400_000
         and 0 <= now_ms - p["issuedAtMs"] <= MAX_EVENT_AGE_MS
         and p["issuedAtMs"] < p["expiresAtMs"] <= p["issuedAtMs"] + MAX_EVENT_AGE_MS
         and now_ms < p["expiresAtMs"]
@@ -298,6 +302,7 @@ class MasterDeliveryLedger352:
             signed_event = json.loads(entry[1])
             valid_event = verify_event352(
                 signed_event, registry=registry, manifest_sha=manifest_sha, now_ms=now_ms,
+                allow_expired=operator_ack,
             )
             if not valid_event["verified"]:
                 return False
@@ -320,7 +325,9 @@ class MasterDeliveryLedger352:
                     f"""UPDATE master_delivery352 SET stage=?, {field}=?, updated_ms=?
                     WHERE message_id=? AND stage=? AND manifest_sha=?""",
                     (
-                        target_stage, receipt["digest"], now_ms,
+                        target_stage,
+                        json.dumps(signed_ack, sort_keys=True, separators=(",", ":")),
+                        now_ms,
                         message_id, entry[2], manifest_sha,
                     ),
                 ).rowcount
@@ -332,7 +339,9 @@ class MasterDeliveryLedger352:
         except (ValueError, KeyError, TypeError, sqlite3.Error, OSError):
             return False
 
-    def status(self, *, manifest_sha: str, now_ms: int) -> dict[str, Any]:
+    def status(
+        self, *, manifest_sha: str, now_ms: int, registry: Registry347 | None = None,
+    ) -> dict[str, Any]:
         base = {
             "stage": "HOLD", "queued": 0, "transportAcked": 0,
             "operatorAcked": 0, "latest": [],
@@ -340,6 +349,7 @@ class MasterDeliveryLedger352:
         }
         if not (
             _sha(manifest_sha) and type(now_ms) is int
+            and isinstance(registry, Registry347)
             and self.path.is_file() and not self.path.is_symlink()
         ):
             return base
@@ -359,24 +369,56 @@ class MasterDeliveryLedger352:
             try:
                 event = json.loads(raw)
                 p = event["payload"]
+                proof = verify_event352(
+                    event, registry=registry, manifest_sha=manifest_sha,
+                    now_ms=now_ms, allow_expired=True,
+                )
                 if not (
-                    p["messageId"] == msg and p["audience"] == audience
+                    proof["verified"]
+                    and p["messageId"] == msg and p["audience"] == audience
                     and p["eventType"] == etype and p["manifestDigest"] == manifest_sha
                     and stage in ("QUEUED", "TRANSPORT_ACKED", "OPERATOR_ACKED")
                     and type(updated) is int and updated <= now_ms
-                    and (stage == "QUEUED" or _sha(delivery))
-                    and (stage != "OPERATOR_ACKED" or _sha(operator))
+                    and (
+                        stage == "QUEUED"
+                        or (
+                            type(delivery) is str
+                            and verify_ack352(
+                                json.loads(delivery), expected_event=p,
+                                registry=registry,
+                                now_ms=min(
+                                    now_ms,
+                                    json.loads(delivery)["payload"]["issuedAtMs"] + 1,
+                                ),
+                            )["verified"]
+                        )
+                    )
+                    and (
+                        stage != "OPERATOR_ACKED"
+                        or (
+                            type(operator) is str
+                            and verify_ack352(
+                                json.loads(operator), expected_event=p,
+                                registry=registry,
+                                now_ms=min(
+                                    now_ms,
+                                    json.loads(operator)["payload"]["issuedAtMs"] + 1,
+                                ),
+                                operator_ack=True,
+                            )["verified"]
+                        )
+                    )
                 ):
                     return base
                 output.append({
                     "messageId": msg, "audience": audience,
                     "eventType": etype, "stage": stage, "updatedAtMs": updated,
                 })
-            except (KeyError, TypeError, ValueError):
+            except (KeyError, TypeError, ValueError, AttributeError):
                 return base
         return {
             **base,
-            "stage": "LOCALLY_RECORDED_EVIDENCE_NOT_LIVE_DELIVERY_PROOF",
+            "stage": "SIGNED_HISTORICAL_ACKS_NOT_CURRENT_PEER_HEALTH",
             "queued": sum(v["stage"] == "QUEUED" for v in output),
             "transportAcked": sum(v["stage"] == "TRANSPORT_ACKED" for v in output),
             "operatorAcked": sum(v["stage"] == "OPERATOR_ACKED" for v in output),
