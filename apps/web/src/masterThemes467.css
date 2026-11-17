@@ -1,4 +1,4 @@
-/* QL-467: shared three-Master twelve-theme palette. Display-only, no automation. */
+/* QL-467: shared three-Master sixteen-theme palette. Display-only, no automation. */
 
 .app-shell[data-theme="instrument"],.auth-shell[data-theme="instrument"] {
  --shell-paper:#081625;--shell-ink:#eef6ff;--shell-muted:#b4c5d7;
@@ -141,3 +141,103 @@
 .app-shell[data-theme="steel"] .content{background:#0c1218;color:#f1f7fb}
 .app-shell[data-theme="steel"] .content .panel{background:#23313d;color:#f1f7fb;border-color:#8fc7e8}
 .app-shell[data-theme="steel"] .master-command-ui{--mc-bg:#0c1218;--mc-rail:#18232d;--mc-card:#23313d;--mc-text:#f1f7fb;--mc-muted:#c0d0dc;--mc-purple:#8fc7e8;background:#0c1218;color:#f1f7fb}
+
+/* QL-468 shared Master theme: Aurora Signal. Presentation-only. */
+.app-shell[data-theme="aurora"],.auth-shell[data-theme="aurora"]{
+ --shell-paper:#123749;--shell-ink:#eafcff;--shell-muted:#b5e2e9;
+ --shell-border:#60e8df;--shell-selected:#194b5c;--shell-accent:#60e8df;
+ color:#eafcff;background:#061c28;color-scheme:dark;
+}
+.app-shell[data-theme="aurora"] .content{background:#061c28;color:#eafcff}
+.app-shell[data-theme="aurora"] .content .panel{background:#194b5c;color:#eafcff;border-color:#60e8df}
+.app-shell[data-theme="aurora"] .master-command-ui{
+ --mc-bg:#061c28;--mc-rail:#123749;--mc-card:#194b5c;
+ --mc-text:#eafcff;--mc-muted:#b5e2e9;--mc-purple:#60e8df;
+ background:#061c28;color:#eafcff;
+}
+
+
+/* QL-468 shared Master theme: Amber Night. Presentation-only. */
+.app-shell[data-theme="amber-night"],.auth-shell[data-theme="amber-night"]{
+ --shell-paper:#352417;--shell-ink:#fff5e6;--shell-muted:#ecd3b5;
+ --shell-border:#ffc274;--shell-selected:#4a3020;--shell-accent:#ffc274;
+ color:#fff5e6;background:#21150e;color-scheme:dark;
+}
+.app-shell[data-theme="amber-night"] .content{background:#21150e;color:#fff5e6}
+.app-shell[data-theme="amber-night"] .content .panel{background:#4a3020;color:#fff5e6;border-color:#ffc274}
+.app-shell[data-theme="amber-night"] .master-command-ui{
+ --mc-bg:#21150e;--mc-rail:#352417;--mc-card:#4a3020;
+ --mc-text:#fff5e6;--mc-muted:#ecd3b5;--mc-purple:#ffc274;
+ background:#21150e;color:#fff5e6;
+}
+
+
+/* QL-468 shared Master theme: Orchid Circuit. Presentation-only. */
+.app-shell[data-theme="orchid"],.auth-shell[data-theme="orchid"]{
+ --shell-paper:#291838;--shell-ink:#fff3ff;--shell-muted:#e1c3ed;
+ --shell-border:#eea4ff;--shell-selected:#3a264e;--shell-accent:#eea4ff;
+ color:#fff3ff;background:#170d23;color-scheme:dark;
+}
+.app-shell[data-theme="orchid"] .content{background:#170d23;color:#fff3ff}
+.app-shell[data-theme="orchid"] .content .panel{background:#3a264e;color:#fff3ff;border-color:#eea4ff}
+.app-shell[data-theme="orchid"] .master-command-ui{
+ --mc-bg:#170d23;--mc-rail:#291838;--mc-card:#3a264e;
+ --mc-text:#fff3ff;--mc-muted:#e1c3ed;--mc-purple:#eea4ff;
+ background:#170d23;color:#fff3ff;
+}
+
+
+/* QL-468 shared Master theme: Daylight Control. Presentation-only. */
+.app-shell[data-theme="daylight"],.auth-shell[data-theme="daylight"]{
+ --shell-paper:#ffffff;--shell-ink:#142d48;--shell-muted:#415a76;
+ --shell-border:#005bb5;--shell-selected:#dce9f8;--shell-accent:#005bb5;
+ color:#142d48;background:#edf4fd;color-scheme:light;
+}
+.app-shell[data-theme="daylight"] .content{background:#edf4fd;color:#142d48}
+.app-shell[data-theme="daylight"] .content .panel{background:#dce9f8;color:#142d48;border-color:#005bb5}
+.app-shell[data-theme="daylight"] .master-command-ui{
+ --mc-bg:#edf4fd;--mc-rail:#ffffff;--mc-card:#dce9f8;
+ --mc-text:#142d48;--mc-muted:#415a76;--mc-purple:#005bb5;
+ background:#edf4fd;color:#142d48;
+}
+
+/* QL-468: input lengths, native date widgets and contrast across all 16 Masters skins. */
+.app-shell[data-theme] :is(.panel,.master-command-ui,.hub-owner-preferences) :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select){
+  box-sizing:border-box;min-width:0;max-width:100%;width:min(100%,40rem);
+  padding:.65rem .8rem;line-height:1.45;min-height:46px;
+  border:1px solid var(--shell-accent);border-radius:10px;
+  background:var(--shell-paper);color:var(--shell-ink);
+  font-size:max(16px,1rem);
+}
+.app-shell[data-theme] :is(.panel,.master-command-ui,.hub-owner-preferences) textarea{
+  min-height:7rem;max-height:32rem;resize:vertical;overflow-wrap:anywhere;
+}
+.app-shell[data-theme] :is(.panel,.master-command-ui,.hub-owner-preferences) :is(input[type="date"],input[type="datetime-local"],input[type="time"],input[type="month"]){
+  width:min(100%,22rem);color-scheme:dark;min-height:46px;
+}
+.app-shell[data-theme="daylight"] :is(input,textarea,select){color-scheme:light}
+.app-shell[data-theme="daylight"] :is(.panel,.master-command-ui,.hub-owner-preferences) :is(input,select,textarea){
+  background:#fff;color:#142d48;border-color:#426c9e;
+}
+.app-shell[data-theme] :is(.panel,.master-command-ui,.hub-owner-preferences) :is(input,select,textarea):focus-visible{
+  outline:3px solid var(--shell-accent);outline-offset:2px;
+}
+.app-shell[data-theme] :is(.panel,.master-command-ui,.hub-owner-preferences) :is(label,.hub-search-header,.hub-owner-preferences-editor,.hub-owner-view-list){
+  min-width:0;max-width:100%;overflow-wrap:anywhere;
+}
+.app-shell[data-theme] :is(.panel,.master-command-ui,.hub-owner-preferences) :is(button,select){
+  white-space:normal;min-height:44px;
+}
+.app-shell[data-theme] .panel,
+.app-shell[data-theme] .master-command-ui{
+  min-width:0;overflow-wrap:anywhere;
+}
+.app-shell[data-theme] :is(.hub-owner-preferences-editor,.hub-owner-preferences-actions){
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:.75rem;align-items:end;
+}
+@media(max-width:650px){
+ .app-shell[data-theme] :is(.panel,.master-command-ui,.hub-owner-preferences) :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){width:100%}
+}
+@media(forced-colors:active){
+ .app-shell[data-theme] :is(input,select,textarea){forced-color-adjust:auto;border:2px solid CanvasText}
+}
