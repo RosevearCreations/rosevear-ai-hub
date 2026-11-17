@@ -20,10 +20,7 @@ def _inventory():
         "schema": INVENTORY_SCHEMA355,
         "originalHost": "DESKTOP-AE894KC",
         "observedAtMs": NOW - 2000,
-        "tasks": [
-            {"name": name, "state": "READY", "trigger": "BOOT"}
-            for name in TASKS355
-        ],
+        "tasks": [{"name": name, "state": "READY", "trigger": "BOOT"} for name in TASKS355],
         "services": [
             {"name": name, "state": "RUNNING", "startMode": "AUTOMATIC"}
             for name in list(SERVICES350.values())
@@ -57,9 +54,11 @@ def _source354():
 
 def _evaluate(sample=None, *, now=NOW, original=True):
     return readiness_snapshot355(
-        source350=_source350(), source354=_source354(),
+        source350=_source350(),
+        source354=_source354(),
         inventory=_inventory() if sample is None else sample,
-        now_ms=now, original_host=original,
+        now_ms=now,
+        original_host=original,
     )
 
 
@@ -94,8 +93,11 @@ def test_missing_signed_original_host_evidence_cannot_show_running():
     source = _source350()
     source["signedManifestVerified"] = False
     result = readiness_snapshot355(
-        source350=source, source354={},
-        inventory=_inventory(), now_ms=NOW, original_host=True,
+        source350=source,
+        source354={},
+        inventory=_inventory(),
+        now_ms=NOW,
+        original_host=True,
     )
     assert all(s["observedState"] == "UNVERIFIED" for s in result["masterServices"])
     assert all(not p["historicalSignedSink"] for p in result["peerHealth"])
