@@ -245,7 +245,7 @@ jobs:
           if ([string]$rec.Repetition.Interval -ne 'PT5M') { throw 'BAD_RECOVERY_INTERVAL' }
           if (-not [string]::IsNullOrWhiteSpace([string]$rec.Repetition.Duration)) { throw 'UNEXPECTED_RECOVERY_EXPIRY' }
           $content = Get-Content -LiteralPath 'scripts/install-hub-unattended356.ps1' -Raw
-          foreach ($needle in @("Get-KnownTask -Name "+'$recoveryName'+" -TriggerKind 'Time'", 'HOLD_WINDOWS_RECOVERY_TRIGGER_NOT_INDEFINITE', 'New-ScheduledTaskTrigger -Once')) {
+          foreach ($needle in @('Get-KnownTask -Name $recoveryName -TriggerKind ''Time''', 'HOLD_WINDOWS_RECOVERY_TRIGGER_NOT_INDEFINITE', 'New-ScheduledTaskTrigger -Once')) {
             if (-not $content.Contains($needle)) { throw "MISSING_RECOVERY_GUARD: $needle" }
           }
           if ($content.Contains('New-ScheduledTaskTrigger -Daily')) { throw 'AMBIGUOUS_DAILY_REPETITION_PARAMETERS' }
