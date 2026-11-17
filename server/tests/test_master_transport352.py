@@ -261,7 +261,7 @@ def test_fresh_independent_original_host_signature_and_reboot_order(monkeypatch)
         owner_pin="0" * 64, manifest_digest=manifest_sha, now_ms=NOW,
     )["verified"]
     task["lastRunTimeUtc"] = datetime.fromtimestamp(
-        (NOW - 70000) / 1000, timezone.utc,
+        (NOW - 70000) / 1000, UTC,
     ).isoformat()
     assert witness.build_local_receipt352(
         enrollment=enrollment, task=task, private_key=private, now_ms=NOW,
