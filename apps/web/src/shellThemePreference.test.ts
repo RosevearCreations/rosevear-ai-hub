@@ -8,7 +8,7 @@ describe("Build 232 explicit low-glare Dark Mode preference", () => {
     expect(parseShellTheme(null)).toBe("dark");
     expect(parseShellTheme("unknown")).toBe("dark");
     expect(parseShellTheme("light")).toBe("dark");
-    for (const name of ["instrument","nebula","meadow","high-contrast","copper","arctic","solar","graphite","crimson","emerald","ultraviolet","steel"]) {
+    for (const name of ["instrument","nebula","meadow","high-contrast","copper","arctic","solar","graphite","crimson","emerald","ultraviolet","steel","aurora","amber-night","orchid","daylight"]) {
       expect(parseShellTheme(name)).toBe(name);
     }
     expect(loadShellTheme()).toBe("dark");

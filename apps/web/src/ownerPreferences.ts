@@ -1,4 +1,5 @@
 import type { ShellDensity, ShellTheme } from "./CommandShell";
+import { MASTER_THEME_CHOICES } from "./shellThemePreference";
 
 export type SavedOwnerView = {
   name: string;
@@ -38,7 +39,7 @@ export function parseOwnerPreferences(raw: string, ownerId: number): OwnerPrefer
     if (!exactKeys(item, ["name", "density", "theme", "startSection"]) ||
       typeof item.name !== "string" || item.name.trim().length < 1 || item.name.length > 48 ||
       !["comfortable", "compact"].includes(String(item.density)) ||
-      !["standard", "dark", "high-contrast"].includes(String(item.theme)) ||
+      !(["standard", "dark"].includes(String(item.theme)) || MASTER_THEME_CHOICES.some(choice => choice.id === item.theme)) ||
       !sections.includes(item.startSection as typeof sections[number])) {
       throw new Error("Saved view includes unsupported values.");
     }
