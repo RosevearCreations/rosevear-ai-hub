@@ -27,7 +27,6 @@ def test_unattended_tasks_require_explicit_owner_enrollment():
     assert "Rosevear AI Server Startup" not in source
 
 
-
 def test_partial_install_pin_can_be_resumed_only_after_exact_match():
     source = src("install-hub-unattended356.ps1")
     for required in (
@@ -44,6 +43,7 @@ def test_partial_install_pin_can_be_resumed_only_after_exact_match():
     assert "HOLD_PRIOR_PINNED_CONFIG_REQUIRES_OWNER_REVIEW" not in source
     assert "Remove-Item -LiteralPath $cfgPath" not in source
     assert "Set-Content -LiteralPath $cfgPath" not in source
+
 
 def test_unattended_worker_reuses_only_existing_guarded_launchers():
     source = src("boot-hub-unattended356.ps1")
