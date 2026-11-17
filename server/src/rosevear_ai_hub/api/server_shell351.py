@@ -127,6 +127,15 @@ async def get_server_shell351(
     now_ms = int(time.time() * 1000)
     existing = installed_shell_snapshot350()
     evidence = _read_local_evidence351(now_ms=now_ms, host=host)
+    desired_states = {item["id"]: item["desiredEnabled"] for item in existing["modules"]}
+    actionable_issues = [
+        item for item in evidence["bus"]["issues"]
+        if not (
+            item["source"] in desired_states
+            and desired_states[item["source"]] is False
+            and item["state"] == "STOPPED"
+        )
+    ]
     home = await home_readonly_status351(
         runtime,
         original_host_verified=(
@@ -142,7 +151,7 @@ async def get_server_shell351(
         "bootWitness": evidence["boot"],
         "eventBus": evidence["bus"],
         "homeAutomation": home,
-        "issues": evidence["bus"]["issues"],
+        "issues": actionable_issues,
         "issueAlertDeliveryVerified": False,
         "installationVerified": False,
         "rebootAcceptanceVerified": False,
