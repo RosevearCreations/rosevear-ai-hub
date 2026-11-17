@@ -36,10 +36,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Signed three-Master event and ACK custody")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--enqueue-issues", action="store_true")
+    mode.add_argument("--enqueue-pilot", action="store_true")
     mode.add_argument("--deliver", help="Deliver exact queued SHA-256 message ID")
     mode.add_argument("--operator-ack", type=Path, help="Signed Comms operator ACK receipt file")
     mode.add_argument("--status", action="store_true")
     parser.add_argument("--message-id", help="SHA-256 event ID for operator-ack")
+    parser.add_argument(
+        "--pilot-audience", choices=("ai-data-platform", "rosevear-comms-hub"),
+        help="One independently enrolled Master peer, no broadcast",
+    )
     args = parser.parse_args()
     if os.name != "nt" or platform.node().upper() != ORIGINAL_HOST:
         print("HOLD_ORIGINAL_WINDOWS_HOST_ONLY")
@@ -96,7 +101,7 @@ def main() -> int:
         )
         print("COMMS_SIGNED_OPERATOR_AUDIT_ACK_STORED" if ok else "HOLD_OPERATOR_ACK")
         return 0 if ok else 2
-    if args.enqueue_issues:
+    if args.enqueue_issues or args.enqueue_pilot:
         key_path = os.environ.get("ROSEVEAR_QL461_MASTER_SIGNING_KEY_PATH")
         key_id = os.environ.get("ROSEVEAR_QL461_MASTER_SIGNING_KEY_ID")
         bus_path = os.environ.get("ROSEVEAR_QL460_EVENT_DB")
@@ -118,6 +123,51 @@ def main() -> int:
         )
         if evidence["integrity"] != "LOCAL_HASH_CHAIN_VALID":
             return 2
+        if args.enqueue_pilot:
+            if not args.pilot_audience:
+                print("HOLD_PILOT_MUST_SELECT_EXACT_PEER")
+                return 2
+            peers = [
+                p for p in enrollment["payload"]["peers"]
+                if p["id"] == args.pilot_audience
+                and p["protocols"] == ["1.1"]
+                and "master.health.readonly" in p["capabilities"]
+            ]
+            if len(peers) != 1 or not any(
+                registry.resolve(args.pilot_audience, key.key_id, at_ms=now)
+                for key in registry.records
+                if key.issuer == args.pilot_audience
+            ):
+                print("HOLD_PILOT_PEER_NOT_INDEPENDENTLY_ENROLLED")
+                return 2
+            originals = [
+                e for e in evidence["events"]
+                if e["source"] == "rosevear-ai-hub"
+                and e["kind"] == "module.observed"
+            ]
+            if not originals:
+                print("HOLD_NO_FRESH_ORIGINAL_HOST_SOURCE_EVENT")
+                return 2
+            signed = signed_event352(
+                private_key=private,
+                key_id=key_id,
+                audience=args.pilot_audience,
+                event_type="master.health",
+                source_evidence_sha=originals[0]["evidenceDigest"],
+                severity="INFO",
+                manifest_sha=manifest_sha,
+                now_ms=now,
+                nonce=secrets.token_urlsafe(32),
+            )
+            if signed is None or not journal.queue(
+                signed=signed, registry=registry,
+                manifest_sha=manifest_sha, now_ms=now,
+            ):
+                print("HOLD_PILOT_NOT_QUEUED_OR_REPLAY")
+                return 2
+            print("ONE_SIGNED_PILOT_QUEUED_NO_NETWORK_DELIVERY")
+            print(signed["payload"]["messageId"])
+            return 0
         queued = 0
         for issue in evidence["issues"][:12]:
             signed = signed_event352(

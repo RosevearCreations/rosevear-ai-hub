@@ -3345,3 +3345,57 @@ export interface ServerShell352Snapshot {
 export function getServerShell352(signal?: AbortSignal): Promise<ServerShell352Snapshot> {
   return authJson("GET", "/api/v1/system/server-shell-352", undefined, signal);
 }
+
+/** Build 353 original-host reviewer assertion, historical Master pilot and key rotation. */
+export interface ServerShell353Snapshot {
+  schema: "rosevear.hub.owner-acceptance353.v1";
+  sourceBuild: 353;
+  serverShell: "ai-data-platform";
+  originalHost: string;
+  signedOriginalHostEnrollment: boolean;
+  rebootCeremony: {
+    state: string;
+    signedSequenceVerified: boolean;
+    independentReviewerAssertionVerified: boolean;
+    automaticStartupIndependentlyProven: false;
+    continuous24HourOperationVerified: false;
+    physicalReceiverAuthorized: false;
+    bootCount: number;
+  };
+  pilot: {
+    state: string;
+    aiDataPlatform: "UNVERIFIED" | "SIGNED_PEER_ACK_STORED";
+    commsHub: "UNVERIFIED" | "SIGNED_PEER_ACK_STORED";
+    livePeerCurrentlyConnected: false;
+    deliveryReceiptsOnly: true;
+  };
+  operatorAudit: {
+    state: string;
+    commsSignedAuditLinked: boolean;
+    humanReadIndependentlyWitnessed: false;
+    messageId: string | null;
+  };
+  keyRotation: {
+    state: string;
+    peerKeys: Array<{
+      id: string;
+      state: string;
+      activeGenerations: number;
+      expiryWithinDays: number | null;
+      futureKeyEnrolled?: boolean;
+    }>;
+    automaticKeyActivationAuthorized: false;
+    keyMaterialExposed: false;
+    livePeerEnrollmentVerified: false;
+  };
+  receiverActivationAuthorized: false;
+  physicalReceiverCurrentlyOff: false;
+  incidentStatus: "OPEN";
+  webMutationAvailable: false;
+  protocolPreferred: "1.1";
+  protocolLegacyCompatible: "1.0";
+}
+
+export function getServerShell353(signal?: AbortSignal): Promise<ServerShell353Snapshot> {
+  return authJson("GET", "/api/v1/system/server-shell-353", undefined, signal);
+}
