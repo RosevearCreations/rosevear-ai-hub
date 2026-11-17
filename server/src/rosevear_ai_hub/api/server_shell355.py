@@ -26,7 +26,8 @@ def local_readiness_snapshot355(*, now_ms: int, machine_name: str) -> dict[str, 
             os.environ.get("ROSEVEAR_QL464_STARTUP_INVENTORY_PATH"),
             max_bytes=16_384,
         )
-        if real_host else None
+        if real_host
+        else None
     )
     return readiness_snapshot355(
         source350=installed_shell_snapshot350(),

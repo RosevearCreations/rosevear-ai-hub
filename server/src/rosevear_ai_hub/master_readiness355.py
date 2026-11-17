@@ -75,7 +75,8 @@ def readiness_snapshot355(
     inv_services = {s["name"]: s for s in inv.get("services", [])}
     inv_tasks = {t["name"]: t for t in inv.get("tasks", [])}
     prior_modules = {
-        m.get("id"): m for m in source350.get("modules", [])
+        m.get("id"): m
+        for m in source350.get("modules", [])
         if type(m) is dict and type(m.get("id")) is str
     }
     services = []
@@ -85,36 +86,45 @@ def readiness_snapshot355(
         prior = prior_modules.get(module_id, {})
         sample_ms = prior.get("observedAtMs")
         fresh_source = (
-            identified and type(sample_ms) is int
+            identified
+            and type(sample_ms) is int
             and 0 <= now_ms - sample_ms <= MAX_SAMPLE_AGE_MS
             and prior.get("runtimeState") == "RUNNING"
         )
-        services.append({
-            "id": module_id,
-            "serviceName": name,
-            "observedState": "RUNNING_SOURCE_OBSERVATION" if fresh_source else "UNVERIFIED",
-            "windowsStartMode": local.get("startMode", "UNKNOWN"),
-            "windowsServiceState": local.get("state", "UNKNOWN"),
-            "autonomousBootProven": False,
-            "independentRuntimeActivationProven": False,
-        })
-    tasks = [{
-        "name": name,
-        "state": inv_tasks.get(name, {}).get("state", "UNKNOWN"),
-        "trigger": inv_tasks.get(name, {}).get("trigger", "UNKNOWN"),
-        "automaticBootProven": False,
-    } for name in TASKS355]
+        services.append(
+            {
+                "id": module_id,
+                "serviceName": name,
+                "observedState": "RUNNING_SOURCE_OBSERVATION" if fresh_source else "UNVERIFIED",
+                "windowsStartMode": local.get("startMode", "UNKNOWN"),
+                "windowsServiceState": local.get("state", "UNKNOWN"),
+                "autonomousBootProven": False,
+                "independentRuntimeActivationProven": False,
+            }
+        )
+    tasks = [
+        {
+            "name": name,
+            "state": inv_tasks.get(name, {}).get("state", "UNKNOWN"),
+            "trigger": inv_tasks.get(name, {}).get("trigger", "UNKNOWN"),
+            "automaticBootProven": False,
+        }
+        for name in TASKS355
+    ]
     prior_sinks = (
         source354.get("peerSinks", {})
         if source354.get("schema") == "rosevear.hub.master-acceptance354.v1"
         else {}
     )
-    peer_health = [{
-        "id": peer,
-        "historicalSignedSink": prior_sinks.get(peer) == "PEER_SIGNED_SINK_ONLY",
-        "currentlyConnected": False,
-        "state": "HOLD_LIVE_SIGNED_PEER_HEALTH_REQUIRED",
-    } for peer in PEERS355]
+    peer_health = [
+        {
+            "id": peer,
+            "historicalSignedSink": prior_sinks.get(peer) == "PEER_SIGNED_SINK_ONLY",
+            "currentlyConnected": False,
+            "state": "HOLD_LIVE_SIGNED_PEER_HEALTH_REQUIRED",
+        }
+        for peer in PEERS355
+    ]
     prior_cert = (
         source354.get("certificateRotation", {})
         if source354.get("schema") == "rosevear.hub.master-acceptance354.v1"
