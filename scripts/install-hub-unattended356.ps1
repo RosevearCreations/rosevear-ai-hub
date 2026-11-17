@@ -43,6 +43,10 @@ function Get-KnownTask([string]$Name, [string]$TriggerKind) {
         [string]$a[0].Arguments -ceq $arguments -and
         $tr.Count -eq 1 -and
         $tr[0].CimClass.CimClassName -eq $kind -and
+        ($TriggerKind -ne 'Time' -or (
+            [string]$tr[0].Repetition.Interval -eq 'PT5M' -and
+            [string]::IsNullOrWhiteSpace([string]$tr[0].Repetition.Duration)
+        )) -and
         [string]$task.Principal.UserId -ieq $principalName -and
         [string]$task.Principal.LogonType -eq 'Password'
     )
@@ -156,7 +160,20 @@ if ($Install) {
     $action = New-ScheduledTaskAction -Execute $psExe -Argument $arguments -WorkingDirectory $root
     $settings = New-ScheduledTaskSettingsSet -Disable -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 10) -RestartCount 2 -RestartInterval (New-TimeSpan -Minutes 5) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
     $boot = New-ScheduledTaskTrigger -AtStartup
-    $recur = New-ScheduledTaskTrigger -Daily -At '00:00' -RepetitionInterval (New-TimeSpan -Minutes 5) -RepetitionDuration (New-TimeSpan -Hours 23 -Minutes 55)
+    # RepetitionInterval/Duration belong ONLY to the -Once parameter set.
+    # The omitted duration makes this recurrence indefinite per the Windows
+    # Task Scheduler RepetitionPattern.Duration contract.
+    try {
+        $recur = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(2) -RepetitionInterval (New-TimeSpan -Minutes 5) -ErrorAction Stop
+    } catch {
+        throw 'HOLD_WINDOWS_RECOVERY_TRIGGER_CONSTRUCTION_FAILED'
+    }
+    if ($null -eq $recur -or
+        [string]$recur.CimClass.CimClassName -ne 'MSFT_TaskTimeTrigger' -or
+        [string]$recur.Repetition.Interval -ne 'PT5M' -or
+        -not [string]::IsNullOrWhiteSpace([string]$recur.Repetition.Duration)) {
+        throw 'HOLD_WINDOWS_RECOVERY_TRIGGER_NOT_INDEFINITE'
+    }
     try {
         Register-ScheduledTask -TaskName $bootName -Action $action -Trigger $boot -Settings $settings -User $principalName -Password $plain -ErrorAction Stop | Out-Null
         Register-ScheduledTask -TaskName $recoveryName -Action $action -Trigger $recur -Settings $settings -User $principalName -Password $plain -ErrorAction Stop | Out-Null
@@ -170,7 +187,7 @@ if ($Install) {
     exit 0
 }
 $bootTask = Get-KnownTask -Name $bootName -TriggerKind 'Boot'
-$recoveryTask = Get-KnownTask -Name $recoveryName -TriggerKind 'Daily'
+$recoveryTask = Get-KnownTask -Name $recoveryName -TriggerKind 'Time'
 if ($Inspect -or (-not $Enable -and -not $Disable)) {
     [pscustomobject]@{
         schema='rosevear.hub.unattended-task-install356.v1'

@@ -14,7 +14,7 @@ def test_unattended_tasks_require_explicit_owner_enrollment():
     for required in (
         "Get-Credential",
         "New-ScheduledTaskTrigger -AtStartup",
-        "New-ScheduledTaskTrigger -Daily",
+        "New-ScheduledTaskTrigger -Once",
         "-Password $plain",
         "Disable-ScheduledTask",
         "Enable-ScheduledTask",
@@ -23,6 +23,9 @@ def test_unattended_tasks_require_explicit_owner_enrollment():
     ):
         assert required in source
     assert "LogonType Interactive" not in source
+    assert "New-ScheduledTaskTrigger -Daily" not in source
+    assert "Get-KnownTask -Name $recoveryName -TriggerKind 'Time'" in source
+    assert "HOLD_WINDOWS_RECOVERY_TRIGGER_NOT_INDEFINITE" in source
     assert "schtasks.exe /Create" not in source
     assert "Rosevear AI Server Startup" not in source
 
