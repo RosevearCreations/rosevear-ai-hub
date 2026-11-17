@@ -11,7 +11,11 @@ export const MASTER_THEME_CHOICES: readonly {id:ShellTheme;label:string}[] = [
   {id:"copper",label:"Copper Workshop"},
   {id:"arctic",label:"Arctic Blue"},
   {id:"solar",label:"Solar Gold"},
-  {id:"graphite",label:"Graphite Cyan"}
+  {id:"graphite",label:"Graphite Cyan"},
+  {id:"crimson",label:"Crimson Forge"},
+  {id:"emerald",label:"Emerald Circuit"},
+  {id:"ultraviolet",label:"Ultraviolet Grid"},
+  {id:"steel",label:"Steel Command"}
 ];
 
 export function parseShellTheme(value: string | null): ShellTheme {
