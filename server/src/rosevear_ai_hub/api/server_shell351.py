@@ -129,7 +129,8 @@ async def get_server_shell351(
     evidence = _read_local_evidence351(now_ms=now_ms, host=host)
     desired_states = {item["id"]: item["desiredEnabled"] for item in existing["modules"]}
     actionable_issues = [
-        item for item in evidence["bus"]["issues"]
+        item
+        for item in evidence["bus"]["issues"]
         if not (
             item["source"] in desired_states
             and desired_states[item["source"]] is False
