@@ -3540,3 +3540,40 @@ export interface ServerShell361Snapshot {
 export function getServerShell361(signal?: AbortSignal): Promise<ServerShell361Snapshot> {
   return authJson("GET", "/api/v1/system/server-shell-361", undefined, signal);
 }
+
+
+/** QL-471: local historical signed-at-intake claims, never live operational proof. */
+export interface ServerShell362Snapshot {
+  schema: "rosevear.hub.ql471.signed-history-dashboard362.v1";
+  sourceBuild: 362;
+  originalHost: "DESKTOP-AE894KC";
+  serverShell: "ai-data-platform";
+  sourceCommit: string;
+  ledgerIntegrity: "HOLD_UNAVAILABLE" | "LOCAL_HASH_CHAIN_ONLY_NOT_INDEPENDENTLY_ANCHORED";
+  historyCount: number;
+  drills: Array<{
+    drillId: string;
+    eventsRecorded: number;
+    pairedClaimTimeline: boolean;
+    lastObservedAt: string | null;
+    scopes: string[];
+    physicalRecoveryIndependentlyVerified: false;
+  }>;
+  lastRecordedAt: string | null;
+  latestChainHash: string | null;
+  signedClaimsAreLiveMeasurements: false;
+  signaturesReverifiedAtRead: false;
+  physicalUnattendedProductionGreen: false;
+  threeMasterWorkerProductionGreen: false;
+  commsPrivateReceiverAuthorized: false;
+  pilotInstallAuthorized: false;
+  webMutationAvailable: false;
+  masterPilotReadiness: Record<
+    "ai-data-platform" | "rosevear-comms-hub",
+    "HOLD_INDEPENDENT_OWNER_INSTALL_AND_SIGNED_ACK"
+  >;
+}
+
+export function getServerShell362(signal?: AbortSignal): Promise<ServerShell362Snapshot> {
+  return authJson("GET", "/api/v1/system/server-shell-362", undefined, signal);
+}
