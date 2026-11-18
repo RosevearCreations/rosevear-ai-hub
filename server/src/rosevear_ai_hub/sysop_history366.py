@@ -3,6 +3,7 @@
 Opt-in CLI writes only after independently pinned Build 365 signature verification.
 Local signed claims are NOT a live peer link, physical reboot or install authority.
 """
+
 from __future__ import annotations
 
 import json
@@ -207,33 +208,37 @@ def summary366(path: Path | None, *, now_ms: int, original_host: bool) -> dict[s
             if not isinstance(metrics, dict) or set(metrics) != set(FIELDS):
                 raise ValueError("HOLD_SYSOP366_LEDGER_METRICS")
             ids.add((row["app_id"], row["event_id"]))
-            clean.append({
-                "appId": row["app_id"],
-                "eventKind": row["event_kind"],
-                "observedAtMs": row["observed_ms"],
-                "claimedStatus": row["state"],
-                "sourceCommit": row["source_commit"],
-                "metrics": metrics,
-                "processUptimeSec": row["process_uptime_sec"],
-                "restartCount": row["restart_count"],
-                "bootTimeMs": row["boot_time_ms"],
-                "liveAuthenticatedTransportVerified": False,
-                "physicalRebootIndependentlyWitnessed": False,
-            })
+            clean.append(
+                {
+                    "appId": row["app_id"],
+                    "eventKind": row["event_kind"],
+                    "observedAtMs": row["observed_ms"],
+                    "claimedStatus": row["state"],
+                    "sourceCommit": row["source_commit"],
+                    "metrics": metrics,
+                    "processUptimeSec": row["process_uptime_sec"],
+                    "restartCount": row["restart_count"],
+                    "bootTimeMs": row["boot_time_ms"],
+                    "liveAuthenticatedTransportVerified": False,
+                    "physicalRebootIndependentlyWitnessed": False,
+                }
+            )
         result["historyCount"] = len(clean)
         result["journalStatus"] = "LOCAL_SIGNED_CLAIM_HISTORY_ONLY"
         result["events"] = clean[:24]
         sources = []
         for name in APPS:
             events = [x for x in clean if x["appId"] == name]
-            sources.append({
-                "appId": name,
-                "recordCount": len(events),
-                "lastClaimedAtMs": events[0]["observedAtMs"] if events else None,
-                "freshSignedSourceOnly": bool(
-                    events and now_ms - events[0]["observedAtMs"] <= 90_000
-                ),
-            })
+            sources.append(
+                {
+                    "appId": name,
+                    "recordCount": len(events),
+                    "lastClaimedAtMs": events[0]["observedAtMs"] if events else None,
+                    "freshSignedSourceOnly": bool(
+                        events and now_ms - events[0]["observedAtMs"] <= 90_000
+                    ),
+                }
+            )
         result["sources"] = sources
     except (OSError, sqlite3.Error, ValueError, TypeError, KeyError):
         result["journalStatus"] = "HOLD_PRIVATE_LEDGER_INVALID_OR_MISSING"
