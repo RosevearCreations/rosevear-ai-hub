@@ -55,11 +55,19 @@ def signed_payload364(
     if not isinstance(package, dict) or set(package) != expected_keys:
         raise ValueError("HOLD_QL473_PACKAGE_SHAPE")
     payload = package["payload"]
-    if not isinstance(payload, dict) or set(payload) != keys or payload["schema"] != expected_schema:
+    if (
+        not isinstance(payload, dict)
+        or set(payload) != keys
+        or payload["schema"] != expected_schema
+    ):
         raise ValueError("HOLD_QL473_PAYLOAD_SHAPE")
     if len(canonical(package)) > 8192:
         raise ValueError("HOLD_QL473_PACKAGE_OVERSIZE")
-    signature = package["signature"] if expected_schema == READBACK_SCHEMA else package["signatures"]
+    signature = (
+        package["signature"]
+        if expected_schema == READBACK_SCHEMA
+        else package["signatures"]
+    )
     return payload, signature
 
 
@@ -228,7 +236,9 @@ def verify_three_master364(
     ):
         raise ValueError("HOLD_QL473_PILOT_TIME_WINDOW")
     for service in SERVICES:
-        verify_signature364(payload, signatures[service], public_keys[service], pinned_keys[service])
+        verify_signature364(
+            payload, signatures[service], public_keys[service], pinned_keys[service]
+        )
     return {
         "threeDistinctPeerSignaturesVerified": True,
         "claimedPeerVersions": payload["peerVersions"],
@@ -301,7 +311,7 @@ def review364(
         return result
     now = datetime.fromtimestamp(now_ms / 1000, tz=UTC)
     try:
-        anchored = verified_anchor363(
+        verified_anchor363(
             ledger, anchor, anchor_key, anchor_pin, expected_commit, now
         )
         result["anchorStatus"] = "SIGNED_ANCHOR_CLAIM_VERIFIED"
@@ -319,7 +329,10 @@ def review364(
         return result
     try:
         excluded = {anchor_pin, readback_pin}
-        excluded.update(e["signerKeyFingerprint"] for e in verify_ledger(ledger, expected_commit)["events"])
+        excluded.update(
+            e["signerKeyFingerprint"]
+            for e in verify_ledger(ledger, expected_commit)["events"]
+        )
         verified_pilot = verify_three_master364(
             pilot, peer_keys, peer_pins, expected_commit, now, excluded
         )
