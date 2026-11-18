@@ -1,0 +1,53 @@
+{
+  "schema": "rosevear.hub.ql470.worker-enrollment-plan361.v1",
+  "targetOriginalHost": "DESKTOP-AE894KC",
+  "sourceOnly": true,
+  "installerIncluded": false,
+  "automaticServiceInstall": false,
+  "automaticStartupAuthorized": false,
+  "ownerAndCustodianApprovalReceived": false,
+  "physicalReceiverCurrentlyOffIndependentlyProven": false,
+  "ql340cPrivateReceiverState": "HOLD_UNAUTHORIZED_KEEP_OFF",
+  "rollbackRequiresSeparateOwnerApproval": true,
+  "modules": [
+    {
+      "module": "rosevear-ai-hub",
+      "windowsService": "Rosevear-AIHub",
+      "mode": "EXISTING_TASKS_INSPECTION_ONLY",
+      "manualOwnerRunbook": "install-hub-unattended356.ps1 -Inspect",
+      "installAuthorized": false,
+      "rollbackVerified": false
+    },
+    {
+      "module": "ai-data-platform",
+      "windowsService": "Rosevear-AIDataPlatform",
+      "mode": "NO_PROVISIONER_OR_SERVICE_CHANGE",
+      "installAuthorized": false,
+      "independentPeerSignerEnrolled": false,
+      "pinnedMtlsVerified": false,
+      "durableAckVerified": false,
+      "rollbackVerified": false
+    },
+    {
+      "module": "rosevear-comms-hub",
+      "windowsService": "Rosevear-CommsHub",
+      "mode": "NON_RECEIVER_WORKER_REQUIRES_SEPARATE_APPROVAL",
+      "installAuthorized": false,
+      "independentPeerSignerEnrolled": false,
+      "pinnedMtlsVerified": false,
+      "durableAckVerified": false,
+      "rollbackVerified": false
+    }
+  ],
+  "sequence": [
+    "INDEPENDENT_OWNER_APPROVAL",
+    "ORIGINAL_HOST_BACKUP_RESTORE_PROOF",
+    "VERIFY_APPROVED_WORKER_INSTALLER_AND_VERSION",
+    "VERIFY_DISABLED_FIRST_SERVICE_IDENTITY",
+    "PIN_MTLS_CREDENTIAL_CUSTODY",
+    "LOCAL_SUPERVISED_ONE_PEER_TEST",
+    "VERIFY_DURABLE_SIGNED_ACK_AND_REPLAY",
+    "OWNER_SIGNED_ROLLBACK_AND_RECOVERY",
+    "SEPARATE_FINAL_RUNTIME_ACCEPTANCE"
+  ]
+}
