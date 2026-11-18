@@ -3,6 +3,7 @@
 Independent off-host readback is supplied as a private separate file, not
 retrieved from a network by the Hub. Signing keys and endpoints remain private.
 """
+
 from __future__ import annotations
 
 import os
@@ -88,9 +89,7 @@ def local_review364(
             for service in SERVICES
         },
         peer_pins={
-            service: os.environ.get(
-                "ROSEVEAR_QL473_PEER_" + tags[service] + "_PUBLIC_PIN", ""
-            )
+            service: os.environ.get("ROSEVEAR_QL473_PEER_" + tags[service] + "_PUBLIC_PIN", "")
             if original and expected
             else ""
             for service in SERVICES
