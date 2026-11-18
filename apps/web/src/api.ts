@@ -3652,3 +3652,50 @@ export function getServerShell364(signal?: AbortSignal): Promise<ServerShell364S
   return authJson("GET", "/api/v1/system/server-shell-364", undefined, signal);
 }
 
+/** Build 365: independently pinned source claims, never a confirmed live seven-app link. */
+export interface Sysop365Snapshot {
+  schema: "rosevear.hub.sysop-seven-app365.v1";
+  sourceBuild: 365;
+  serverShell: "ai-data-platform";
+  originalHost: "DESKTOP-AE894KC";
+  acceptedSignedSourceSnapshots: number;
+  verifiedLiveConnections: 0;
+  liveSevenAppStatisticsVerified: false;
+  originalHostAutonomousBootVerified: false;
+  commsPrivateReceiverAuthorized: false;
+  webMutationAvailable: false;
+  nextStep: string;
+  apps: Array<{
+    appId: string;
+    accepted: boolean;
+    reason: string;
+    connected: false;
+    state?: "HEALTHY" | "DEGRADED" | "UNHEALTHY" | "UNKNOWN";
+    sourceCommit?: string;
+    issuedAtMs?: number;
+    metricsWindowSeconds?: number;
+    metrics?: {
+      requests: number | null;
+      serverErrors: number | null;
+      jobsCompleted: number | null;
+      jobsFailed: number | null;
+      queueDepth: number | null;
+      latencyP95Ms: number | null;
+      activeSessions: number | null;
+    };
+    sysop?: {
+      eventKind: string;
+      observedAtMs: number;
+      processUptimeSec: number | null;
+      restartCount: number | null;
+      lastRestartAtMs: number | null;
+      bootTimeMs: number | null;
+    };
+    liveAuthenticatedTransportVerified?: false;
+    physicalRebootIndependentlyWitnessed?: false;
+  }>;
+}
+
+export function getSysop365(signal?: AbortSignal): Promise<Sysop365Snapshot> {
+  return authJson("GET", "/api/v1/system/sysop-statistics-365", undefined, signal);
+}
