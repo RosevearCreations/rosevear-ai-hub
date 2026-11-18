@@ -48,19 +48,19 @@ def signed_payload364(
     expected_schema: str,
     keys: frozenset[str],
 ) -> tuple[dict[str, Any], Any]:
-    if (
-        not isinstance(package, dict)
-        or set(package) != {"payload", "signatures"}
-        if expected_schema == PILOT_SCHEMA
-        else not isinstance(package, dict) or set(package) != {"payload", "signature"}
-    ):
+    expected_keys = (
+        {"payload", "signatures"} if expected_schema == PILOT_SCHEMA
+        else {"payload", "signature"}
+    )
+    if not isinstance(package, dict) or set(package) != expected_keys:
         raise ValueError("HOLD_QL473_PACKAGE_SHAPE")
     payload = package["payload"]
     if not isinstance(payload, dict) or set(payload) != keys or payload["schema"] != expected_schema:
         raise ValueError("HOLD_QL473_PAYLOAD_SHAPE")
     if len(canonical(package)) > 8192:
         raise ValueError("HOLD_QL473_PACKAGE_OVERSIZE")
-    return payload, package.get("signature") if expected_schema == READBACK_SCHEMA else package.get("signatures")
+    signature = package["signature"] if expected_schema == READBACK_SCHEMA else package["signatures"]
+    return payload, signature
 
 
 def require_source364(payload: dict[str, Any], expected_commit: str) -> None:
