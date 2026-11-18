@@ -3,6 +3,7 @@
 All verification is offline/read-only. Valid signatures establish assertions by pinned
 keys, not physical off-host durability, real mutual TLS, reboot, ACK, or authority.
 """
+
 from __future__ import annotations
 
 import base64
@@ -25,23 +26,39 @@ SAFE_VERSION = re.compile(r"[A-Za-z0-9][A-Za-z0-9._+-]{0,63}\Z")
 IDENT = re.compile(r"[A-Za-z0-9_-]{12,64}\Z")
 READBACK_KEYS = frozenset(
     {
-        "schema", "originalHost", "sourceCommit", "ledgerSha256",
-        "anchorPayloadSha256", "ledgerHeadSha256", "ledgerCount",
-        "readbackId", "readbackAt", "independentKeyFingerprint",
-        "offHostStorageReadbackClaimed", "workerPilotAuthorized",
+        "schema",
+        "originalHost",
+        "sourceCommit",
+        "ledgerSha256",
+        "anchorPayloadSha256",
+        "ledgerHeadSha256",
+        "ledgerCount",
+        "readbackId",
+        "readbackAt",
+        "independentKeyFingerprint",
+        "offHostStorageReadbackClaimed",
+        "workerPilotAuthorized",
         "receiverActivationAuthorized",
     }
 )
 PILOT_KEYS = frozenset(
     {
-        "schema", "originalHost", "sourceCommit", "challenge",
-        "drillId", "observedAt", "issuedAt", "peerVersions",
-        "claimedBoundedMtls", "claimedSignedPeerAcks", "claimedRollbackReady",
-        "performedOnOriginalHostClaimed", "automaticStartupAuthorized",
+        "schema",
+        "originalHost",
+        "sourceCommit",
+        "challenge",
+        "drillId",
+        "observedAt",
+        "issuedAt",
+        "peerVersions",
+        "claimedBoundedMtls",
+        "claimedSignedPeerAcks",
+        "claimedRollbackReady",
+        "performedOnOriginalHostClaimed",
+        "automaticStartupAuthorized",
         "ql340cReceiverAuthorized",
     }
 )
-
 
 def signed_payload364(
     package: Any,
@@ -49,8 +66,7 @@ def signed_payload364(
     keys: frozenset[str],
 ) -> tuple[dict[str, Any], Any]:
     expected_keys = (
-        {"payload", "signatures"} if expected_schema == PILOT_SCHEMA
-        else {"payload", "signature"}
+        {"payload", "signatures"} if expected_schema == PILOT_SCHEMA else {"payload", "signature"}
     )
     if not isinstance(package, dict) or set(package) != expected_keys:
         raise ValueError("HOLD_QL473_PACKAGE_SHAPE")
@@ -64,9 +80,7 @@ def signed_payload364(
     if len(canonical(package)) > 8192:
         raise ValueError("HOLD_QL473_PACKAGE_OVERSIZE")
     signature = (
-        package["signature"]
-        if expected_schema == READBACK_SCHEMA
-        else package["signatures"]
+        package["signature"] if expected_schema == READBACK_SCHEMA else package["signatures"]
     )
     return payload, signature
 
@@ -138,10 +152,7 @@ def verify_readback364(
     copied = verify_ledger(copied_ledger, expected_commit)
     if not original["events"] or canonical(original) != canonical(copied):
         raise ValueError("HOLD_QL473_COPIED_LEDGER_DIFFERS")
-    if (
-        not isinstance(signed_anchor, dict)
-        or not isinstance(signed_anchor.get("payload"), dict)
-    ):
+    if not isinstance(signed_anchor, dict) or not isinstance(signed_anchor.get("payload"), dict):
         raise ValueError("HOLD_QL473_ANCHOR_UNAVAILABLE")
     anchor = signed_anchor["payload"]
     payload, signature = signed_payload364(readback, READBACK_SCHEMA, READBACK_KEYS)
@@ -219,8 +230,10 @@ def verify_three_master364(
         or any(
             payload[key] is not True
             for key in (
-                "claimedBoundedMtls", "claimedSignedPeerAcks",
-                "claimedRollbackReady", "performedOnOriginalHostClaimed",
+                "claimedBoundedMtls",
+                "claimedSignedPeerAcks",
+                "claimedRollbackReady",
+                "performedOnOriginalHostClaimed",
             )
         )
         or payload["automaticStartupAuthorized"] is not False
@@ -243,9 +256,7 @@ def verify_three_master364(
         "threeDistinctPeerSignaturesVerified": True,
         "claimedPeerVersions": payload["peerVersions"],
         "claimedObservationAt": payload["observedAt"],
-        "claimedChallengeDigest": hashlib.sha256(
-            payload["challenge"].encode("ascii")
-        ).hexdigest(),
+        "claimedChallengeDigest": hashlib.sha256(payload["challenge"].encode("ascii")).hexdigest(),
         "liveMtlsIndependentlyObserved": False,
         "realSignedPeerAckIndependentlyProven": False,
         "workerInstallationAuthorized": False,
@@ -311,16 +322,13 @@ def review364(
         return result
     now = datetime.fromtimestamp(now_ms / 1000, tz=UTC)
     try:
-        verified_anchor363(
-            ledger, anchor, anchor_key, anchor_pin, expected_commit, now
-        )
+        verified_anchor363(ledger, anchor, anchor_key, anchor_pin, expected_commit, now)
         result["anchorStatus"] = "SIGNED_ANCHOR_CLAIM_VERIFIED"
     except (ValueError, TypeError, KeyError, OverflowError):
         return result
     try:
         verified = verify_readback364(
-            ledger, copy, anchor, readback, readback_key,
-            readback_pin, expected_commit, now
+            ledger, copy, anchor, readback, readback_key, readback_pin, expected_commit, now
         )
         result["readbackStatus"] = "SIGNED_INDEPENDENT_READBACK_CLAIM_VERIFIED_NOT_STORAGE_PROOF"
         result["independentReadbackClaimVerified"] = verified["signedReadbackClaimVerified"]
@@ -330,8 +338,7 @@ def review364(
     try:
         excluded = {anchor_pin, readback_pin}
         excluded.update(
-            e["signerKeyFingerprint"]
-            for e in verify_ledger(ledger, expected_commit)["events"]
+            e["signerKeyFingerprint"] for e in verify_ledger(ledger, expected_commit)["events"]
         )
         verified_pilot = verify_three_master364(
             pilot, peer_keys, peer_pins, expected_commit, now, excluded
