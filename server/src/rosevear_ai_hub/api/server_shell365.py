@@ -48,9 +48,7 @@ def local_statistics365(*, machine_name: str, windows_host: bool, now_ms: int) -
             keys[app] = protected_key364(os.environ.get(prefix + "PUBLIC_KEY_PATH"))
             pins[app] = os.environ.get(prefix + "PUBLIC_KEY_PIN", "")
             commits[app] = os.environ.get(prefix + "SOURCE_COMMIT", "")
-    return seven_app_summary365(
-        inputs, keys, pins, commits, now_ms=now_ms, original_host=original
-    )
+    return seven_app_summary365(inputs, keys, pins, commits, now_ms=now_ms, original_host=original)
 
 
 @router.get("")
