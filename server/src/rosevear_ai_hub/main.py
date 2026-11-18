@@ -230,7 +230,7 @@ def create_app() -> FastAPI:
     application.include_router(server_shell353_router)
     application.include_router(server_shell354_router)
     application.include_router(server_shell355_router)
-    application.include_router(server_shell361_router
+    application.include_router(server_shell361_router)
     application.include_router(global_search_router)
     # QL-243: default-off, nonproduction-only, authenticated GET health metadata.
     application.include_router(integration_v1_router)
