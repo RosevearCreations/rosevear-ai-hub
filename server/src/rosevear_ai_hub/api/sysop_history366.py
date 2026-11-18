@@ -2,6 +2,7 @@
 
 Only a deliberate local CLI can append to the SQLite journal. The browser cannot.
 """
+
 from __future__ import annotations
 
 import os
