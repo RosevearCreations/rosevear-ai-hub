@@ -20,9 +20,7 @@ COMMIT = "a" * 40
 
 
 def sample():
-    boot = datetime.fromtimestamp((NOW - 3600000) / 1000, tz=UTC).isoformat().replace(
-        "+00:00", "Z"
-    )
+    boot = datetime.fromtimestamp((NOW - 3600000) / 1000, tz=UTC).isoformat().replace("+00:00", "Z")
     return {
         "schema": SCHEMA,
         "source": "UNSIGNED_LOCAL_INVENTORY_ONLY",
@@ -130,8 +128,9 @@ def test_plan_requires_separate_owner_approval_and_disabled_first():
     from pathlib import Path
 
     plan = json.loads(
-        (Path(__file__).resolve().parents[2] / "docs/contracts/ql470-worker-enrollment361.json")
-        .read_text(encoding="utf-8")
+        (
+            Path(__file__).resolve().parents[2] / "docs/contracts/ql470-worker-enrollment361.json"
+        ).read_text(encoding="utf-8")
     )
     assert plan["automaticStartupAuthorized"] is False
     assert plan["automaticServiceInstall"] is False
