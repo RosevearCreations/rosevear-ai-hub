@@ -14,7 +14,7 @@
       "module": "rosevear-ai-hub",
       "windowsService": "Rosevear-AIHub",
       "mode": "EXISTING_TASKS_INSPECTION_ONLY",
-      "manualOwnerRunbook": "inspect-hub-unattended356.ps1 -Inspect",
+      "manualOwnerRunbook": "install-hub-unattended356.ps1 -Inspect",
       "installAuthorized": false,
       "rollbackVerified": false
     },
