@@ -2,6 +2,7 @@
 
 Synthetic keys and made-up metrics are test fixtures, never production field proof.
 """
+
 import hashlib
 import json
 import sqlite3
@@ -108,9 +109,7 @@ def test_replay_id_nonce_and_bad_signature_fail_without_second_row(tmp_path):
     # Signing after mutation ensures duplicate nonce, not signature tamper, is the failure.
     key = Ed25519PrivateKey.generate()
     pem2 = key.public_key().public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo)
-    pin2 = hashlib.sha256(
-        key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
-    ).hexdigest()
+    pin2 = hashlib.sha256(key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)).hexdigest()
     item2["signature"] = key.sign(canonical(item2["payload"])).hex()
     with pytest.raises(ValueError, match="HOLD_SYSOP366_DUPLICATE_EVENT_OR_NONCE"):
         intake(path, item2, pem2, pin2)
@@ -146,9 +145,10 @@ def test_invalid_path_and_expiry_cannot_append(tmp_path):
     path.symlink_to(tmp_path / "not-our-target")
     with pytest.raises(ValueError, match="HOLD_SYSOP366_UNSAFE_LEDGER_PATH"):
         intake(path, item, pem, pin)
-    assert summary366(tmp_path / "missing.db", now_ms=NOW, original_host=True)[
-        "journalStatus"
-    ] == "HOLD_PRIVATE_LEDGER_INVALID_OR_MISSING"
+    assert (
+        summary366(tmp_path / "missing.db", now_ms=NOW, original_host=True)["journalStatus"]
+        == "HOLD_PRIVATE_LEDGER_INVALID_OR_MISSING"
+    )
 
 
 def test_owner_only_no_browser_mutation_no_field_green():
