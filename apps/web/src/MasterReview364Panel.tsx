@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getServerShell364, type ServerShell364Snapshot } from "./api";
+import { SevenAppSysop365Panel } from "./SevenAppSysop365Panel";
 
 export function trustedReview364(value: unknown): value is ServerShell364Snapshot {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -120,5 +121,6 @@ export function MasterReview364Panel() {
           <small>Live connected: NO · Owner-approved install: NO · Independent rollback: NO</small>
         </article>)}
     </div>
+    <SevenAppSysop365Panel />
   </section>;
 }
