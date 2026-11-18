@@ -3,6 +3,7 @@
 No public key, secret or path comes from browser query. No auto-install,
 reboot, worker activation, receiver activation or other state change.
 """
+
 from __future__ import annotations
 
 import os
@@ -45,12 +46,14 @@ def local_custody363(
     expected = os.environ.get("ROSEVEAR_QL472_EXPECTED_COMMIT", "") if original else ""
     if not isinstance(expected, str) or not HEX40.fullmatch(expected):
         expected = ""
+
     def protected(env: str, limit: int) -> Any:
         return (
             _read_protected353(os.environ.get(env), max_bytes=limit)
             if original and expected
             else None
         )
+
     return review363(
         ledger=protected("ROSEVEAR_QL471_LEDGER_PATH", 262144),
         anchor=protected("ROSEVEAR_QL472_ANCHOR_PACKAGE_PATH", 8192),
@@ -60,7 +63,8 @@ def local_custody363(
             else None
         ),
         pin=os.environ.get("ROSEVEAR_QL472_CUSTODIAN_PUBLIC_PIN", "")
-        if original and expected else "",
+        if original and expected
+        else "",
         expected_commit=expected,
         telemetry=protected("ROSEVEAR_QL470_TELEMETRY_PATH", 16384),
         now_ms=now_ms,
