@@ -1,0 +1,39 @@
+{
+  "schema": "rosevear.hub.feature-progress.v366",
+  "policy": "EARNED_INDEPENDENT_REBASELINE_NO_AUTOMATIC_INCREASE",
+  "baselineSourceFeaturePercent": 59,
+  "baselineFieldAcceptancePercent": 18,
+  "baselineOverallReadinessPercent": 45,
+  "build": 366,
+  "targetSourceFeaturePercentAfterAllGreen": 64,
+  "targetFieldAcceptancePercent": 18,
+  "targetOverallReadinessPercent": 48,
+  "gate": "dev PR + isolated main PR + protected main push ALL SIX checks success",
+  "completionPoints": [
+    {
+      "module": "durable-signed-aggregate-journal",
+      "points": 1
+    },
+    {
+      "module": "persistent-event-nonce-replay-rejection",
+      "points": 1
+    },
+    {
+      "module": "bounded-retention-and-source-rollup",
+      "points": 1
+    },
+    {
+      "module": "original-host-owner-only-read-api",
+      "points": 1
+    },
+    {
+      "module": "seven-app-sysop-history-console",
+      "points": 1
+    }
+  ],
+  "liveSevenAppLinksProven": 0,
+  "physicalUnattendedBootProven": false,
+  "privateCommsQl340cReceiverAuthorized": false,
+  "method": "Owner planning estimate; field evidence separate; no increment unless actual code/tested source passes release",
+  "sourceOfTruth": "Rosevear_AI_Hub_Independent_Source_of_Truth_Build365_2026-11-18.docx"
+}
