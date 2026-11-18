@@ -3613,3 +3613,42 @@ export interface ServerShell363Snapshot {
 export function getServerShell363(signal?: AbortSignal): Promise<ServerShell363Snapshot> {
   return authJson("GET", "/api/v1/system/server-shell-363", undefined, signal);
 }
+
+/** Build 364: signed acceptance claims remain read-only, not live service authority. */
+export interface ServerShell364Snapshot {
+  schema: "rosevear.hub.ql473.cross-module-acceptance364.v1";
+  sourceBuild: 364;
+  originalHost: "DESKTOP-AE894KC";
+  serverShell: "ai-data-platform";
+  sourceFeatureCoverageEstimate: 73;
+  featureCoverageBaseline: 68;
+  estimatedSourceFeatureGainPoints: 5;
+  fieldAcceptanceEstimate: 25;
+  estimatedOverallReadiness: 56;
+  progressIsPlanningEstimateNotRuntimeProof: true;
+  anchorStatus: string;
+  readbackStatus: string;
+  peerPilotStatus: string;
+  independentReadbackClaimVerified: boolean;
+  copiedLedgerContentMatched: boolean;
+  distinctThreeMasterSignedClaimsVerified: boolean;
+  liveThreeMasterPilotIndependentlyVerified: false;
+  offHostStorageIndependentlyProven: false;
+  originalHostUnattendedRecoveryVerified: false;
+  physicalUnattendedProductionGreen: false;
+  threeMasterWorkerProductionGreen: false;
+  commsPrivateReceiverAuthorized: false;
+  workerAutomaticStartupAuthorized: false;
+  webMutationAvailable: false;
+  workerReviews: Array<{
+    worker: string;
+    readOnlySignedClaimStatus: string;
+    liveConnectedVerified: false;
+    ownerPilotInstallationApproved: false;
+    realRollbackWitnessed: false;
+  }>;
+}
+export function getServerShell364(signal?: AbortSignal): Promise<ServerShell364Snapshot> {
+  return authJson("GET", "/api/v1/system/server-shell-364", undefined, signal);
+}
+

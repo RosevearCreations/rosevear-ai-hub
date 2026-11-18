@@ -1,0 +1,60 @@
+{
+  "schema": "rosevear.hub.feature-progress.v364",
+  "policy": "EVIDENCE_GATED_NO_AUTOMATIC_PERCENT_INCREASE",
+  "baselineBuild": 363,
+  "baselineSourceFeatureCoveragePercent": 68,
+  "targetSourceGainPerFutureBuildPoints": {
+    "minimum": 5,
+    "maximum": 10,
+    "meaning": "planning target, never a guaranteed or fabricated result"
+  },
+  "currentBuild": 364,
+  "currentBuildSourceFeatureGainPoints": 5,
+  "estimatedSourceFeatureCoverageAfterMainGreen": 73,
+  "independentlyValidatedPhysicalFieldAcceptancePercent": 25,
+  "estimatedOverallReadinessAfterMainGreen": 56,
+  "overallFormula": "round(0.65 * 73 + 0.35 * 25) = 56; planning proxy, not a readiness certification",
+  "originalHostPhysicalProductionGreen": false,
+  "sevenAppOrThreeMasterLiveVerified": false,
+  "ratingRules": [
+    "Increment source feature coverage only for distinct implemented/tested user-visible or functional modules",
+    "Never count documentation-only tasks or cosmetic revisions as substantive completed features",
+    "Require backend, web, Windows, docs, backup and budget CI GREEN on protected main",
+    "Require separately witnessed Windows, HA/MQTT/camera, peer mTLS and backup testing to raise field acceptance",
+    "When evidence does not support a five-point gain, preserve lower percentage and explain shortfall",
+    "Avoid double-counting the same work in later builds; source and field readiness are separate"
+  ],
+  "acceptedSourceMilestones": [
+    {
+      "name": "readback-copy-digest",
+      "points": 1,
+      "validation": "exact QL471 source/copy canonical ledger matching, anchor binding, tampering rejection",
+      "status": "CODE_IMPLEMENTED_PENDING_MAIN_CI"
+    },
+    {
+      "name": "second-custodian-signature",
+      "points": 1,
+      "validation": "separate Ed25519 pinned readback signer, distinct from ledger and anchor signers",
+      "status": "CODE_IMPLEMENTED_PENDING_MAIN_CI"
+    },
+    {
+      "name": "three-party-pilot-evidence",
+      "points": 1,
+      "validation": "separate Hub/AI Data/Comms signed scoped challenge receipts, freshness and authority gates",
+      "status": "CODE_IMPLEMENTED_PENDING_MAIN_CI"
+    },
+    {
+      "name": "original-host-read-only-api",
+      "points": 1,
+      "validation": "owner-only GET, fixed protected server paths, no activation, offhost fail-closed",
+      "status": "CODE_IMPLEMENTED_PENDING_MAIN_CI"
+    },
+    {
+      "name": "cross-module-acceptance-ui-and-tests",
+      "points": 1,
+      "validation": "three worker cards, credible HOLD labels, new rejection regressions",
+      "status": "CODE_IMPLEMENTED_PENDING_MAIN_CI"
+    }
+  ],
+  "noClaimOfIndependentOffHostReadbackOrLivePeer": true
+}
