@@ -3577,3 +3577,42 @@ export interface ServerShell362Snapshot {
 export function getServerShell362(signal?: AbortSignal): Promise<ServerShell362Snapshot> {
   return authJson("GET", "/api/v1/system/server-shell-362", undefined, signal);
 }
+
+
+/** QL-472 independent historical signed anchor and correlated UNSIGNED reboot metadata. */
+export interface ServerShell363Snapshot {
+  schema: "rosevear.hub.ql472.anchor-and-drill-status363.v1";
+  sourceBuild: 363;
+  originalHost: "DESKTOP-AE894KC";
+  serverShell: "ai-data-platform";
+  anchorStatus: string;
+  independentCustodianSignatureVerified: boolean;
+  offHostStorageIndependentlyVerified: false;
+  anchorHeadSha256: string | null;
+  anchorIssuedAt: string | null;
+  historyEntryCount: number;
+  rebootCorrelation: {
+    state: string;
+    freshUnsignedWindowsSample: boolean;
+    pairedIndependentSignerClaims: boolean;
+    bootBoundaryChronologicallyCorrelated: boolean;
+    physicalRebootIndependentlyProven: false;
+    authenticatedGuestRuntimeIndependentlyProven: false;
+  };
+  workerReviews: Array<{
+    worker: string;
+    fieldClaimCount: number;
+    escalation: string;
+    pilotInstallAuthorized: false;
+    sourceEvidenceMeansLivePeer: false;
+    signedPeerAckIndependentlyVerified: false;
+    rollbackIndependentlyWitnessed: false;
+  }>;
+  physicalUnattendedProductionGreen: false;
+  threeMasterWorkerProductionGreen: false;
+  commsPrivateReceiverAuthorized: false;
+  webMutationAvailable: false;
+}
+export function getServerShell363(signal?: AbortSignal): Promise<ServerShell363Snapshot> {
+  return authJson("GET", "/api/v1/system/server-shell-363", undefined, signal);
+}
