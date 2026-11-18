@@ -90,10 +90,7 @@ def trusted_local_telemetry361(value: Any, *, now_ms: int, expected_commit: str)
             task.get("state") not in TASK_STATES
             or task.get("exactTaskIdentityIndependentlyVerified") is not False
             or (task.get("lastResult") is not None and type(task.get("lastResult")) is not int)
-            or (
-                task.get("lastRunUtc") is not None
-                and _date(task.get("lastRunUtc")) is None
-            )
+            or (task.get("lastRunUtc") is not None and _date(task.get("lastRunUtc")) is None)
         ):
             return False
     for service in services:
@@ -176,13 +173,16 @@ def acceptance361(
         and type(field_report.get("scopeStatuses")) is dict
         and set(field_report["scopeStatuses"]) == set(SCOPES)
         and all(
-            type(s) is dict and type(s.get("status")) is str
-            and s["status"] in (
+            type(s) is dict
+            and type(s.get("status")) is str
+            and s["status"]
+            in (
                 "SIGNED_CLAIMS_CORRELATED_NOT_PHYSICAL_APPROVAL",
                 "SIGNED_CLAIM_NOT_INDEPENDENT_PHYSICAL_PROOF",
             )
-            or (type(s) is dict and type(s.get("status")) is str
-                and s["status"].startswith("HOLD_"))
+            or (
+                type(s) is dict and type(s.get("status")) is str and s["status"].startswith("HOLD_")
+            )
             for s in field_report["scopeStatuses"].values()
         )
     )
