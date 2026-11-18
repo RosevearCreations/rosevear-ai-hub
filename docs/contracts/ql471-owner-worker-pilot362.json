@@ -1,0 +1,60 @@
+{
+  "schema": "rosevear.hub.ql471.owner-worker-pilot362.v1",
+  "originalHost": "DESKTOP-AE894KC",
+  "sourceOnly": true,
+  "physicalRuntimeVerified": false,
+  "allMasterWorkerProductionGreen": false,
+  "receiverQl340cActivationAuthorized": false,
+  "noBrowserMutations": true,
+  "supportedWorkerScopes": [
+    "ai-data-worker",
+    "comms-worker"
+  ],
+  "signers": {
+    "independentPerScope": true,
+    "trustPinsMustBeOwnerValidatedOutsideRepository": true,
+    "keysCreatedByHubSource": false,
+    "fieldSignaturesReverifiedAtDashboardRead": false
+  },
+  "mandatorySteps": [
+    "OWNER_APPROVES_SINGLE_NAMED_WORKER_AND_EXACT_VERSION",
+    "INDEPENDENT_CUSTODIAN_APPROVES_INSTALLER_AND_SERVICE_ACCOUNT",
+    "ORIGINAL_WINDOWS_HOST_BACKUP_AND_ISOLATED_RESTORE_WITNESSED",
+    "SUPERVISED_DISABLED_FIRST_SERVICE_INSTALL",
+    "UNMODIFIED_CREDENTIAL_VAULT_AND_PINNED_MTLS_TRUST",
+    "ONE_LOCAL_READ_ONLY_PEER_BOOT_AND_SIGNED_ACK_PILOT",
+    "DURABLE_REPLAY_REJECTION_AND_CROSS_APP_AUDIT_REVIEW",
+    "SEPARATE_OPERATOR_CONTROLLED_ROLLBACK_AND_RECEIPT",
+    "INDEPENDENT_POST_REBOOT_RUNTIME_ACCEPTANCE"
+  ],
+  "peers": [
+    {
+      "id": "ai-data-platform",
+      "windowsService": "Rosevear-AIDataPlatform",
+      "installerVerified": false,
+      "ownerApprovalVerified": false,
+      "signedAckVerified": false,
+      "rollbackVerified": false,
+      "autoStartAuthorized": false,
+      "pilotReady": false,
+      "state": "HOLD_INDEPENDENT_OWNER_INSTALL_AND_SIGNED_ACK"
+    },
+    {
+      "id": "rosevear-comms-hub",
+      "windowsService": "Rosevear-CommsHub",
+      "installerVerified": false,
+      "ownerApprovalVerified": false,
+      "signedAckVerified": false,
+      "rollbackVerified": false,
+      "autoStartAuthorized": false,
+      "privateReceiverOffIndependentlyVerified": false,
+      "pilotReady": false,
+      "state": "HOLD_INDEPENDENT_OWNER_INSTALL_AND_SIGNED_ACK"
+    }
+  ],
+  "noTaskEnable": true,
+  "noReboot": true,
+  "noServiceInstall": true,
+  "noReceiverEnable": true,
+  "changesMade": false
+}
