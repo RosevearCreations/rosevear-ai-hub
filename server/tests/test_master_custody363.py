@@ -73,9 +73,10 @@ def anchor_fixture(ledger):
         "receiverActivationAuthorized": False,
         "physicalRuntimeIndependentlyVerified": False,
     }
-    envelope = {"payload": payload, "signature": base64.b64encode(
-        private.sign(canonical(payload))
-    ).decode()}
+    envelope = {
+        "payload": payload,
+        "signature": base64.b64encode(private.sign(canonical(payload))).decode(),
+    }
     return envelope, public, pin
 
 
@@ -89,14 +90,22 @@ def telemetry():
         "observedAtMs": NOW_MS - 1000,
         "lastWindowsBootUtc": stamps(start),
         "tasks": [
-            {"name": name, "state": "DISABLED", "lastRunUtc": None,
-             "lastResult": None, "exactTaskIdentityIndependentlyVerified": False}
-            for name in ("Rosevear AI Hub Unattended Boot",
-                         "Rosevear AI Hub Unattended Recovery")
+            {
+                "name": name,
+                "state": "DISABLED",
+                "lastRunUtc": None,
+                "lastResult": None,
+                "exactTaskIdentityIndependentlyVerified": False,
+            }
+            for name in ("Rosevear AI Hub Unattended Boot", "Rosevear AI Hub Unattended Recovery")
         ],
         "masterServices": [
-            {"name": name, "state": "NOT_INSTALLED",
-             "startMode": "NOT_INSTALLED", "signedServiceEnrollmentVerified": False}
+            {
+                "name": name,
+                "state": "NOT_INSTALLED",
+                "startMode": "NOT_INSTALLED",
+                "signedServiceEnrollmentVerified": False,
+            }
             for name in ("Rosevear-AIHub", "Rosevear-AIDataPlatform", "Rosevear-CommsHub")
         ],
         "recentTaskSchedulerEventIds": [],
@@ -124,12 +133,13 @@ def test_tampered_ledger_signature_wrong_pin_and_stale_anchor_fail_closed():
     anchor, pem, pin = anchor_fixture(ledger)
     with pytest.raises(ValueError, match="HOLD_QL472_INDEPENDENT_TRUST_PIN_REQUIRED"):
         verified_anchor363(ledger, anchor, pem, "0" * 64, COMMIT, NOW)
-    changed = {"payload": {**anchor["payload"], "nonce": "c" * 32},
-               "signature": anchor["signature"]}
+    changed = {
+        "payload": {**anchor["payload"], "nonce": "c" * 32},
+        "signature": anchor["signature"],
+    }
     with pytest.raises(ValueError, match="HOLD_QL472_SIGNATURE_INVALID"):
         verified_anchor363(ledger, changed, pem, pin, COMMIT, NOW)
-    changed = {"payload": {**anchor["payload"], "ledgerCount": 1},
-               "signature": anchor["signature"]}
+    changed = {"payload": {**anchor["payload"], "ledgerCount": 1}, "signature": anchor["signature"]}
     with pytest.raises(ValueError, match="HOLD_QL472_LEDGER_HASH_OR_COUNT_CHANGED"):
         verified_anchor363(ledger, changed, pem, pin, COMMIT, NOW)
     with pytest.raises(ValueError, match="HOLD_QL472_ANCHOR_STALE_OR_FUTURE"):
@@ -138,32 +148,33 @@ def test_tampered_ledger_signature_wrong_pin_and_stale_anchor_fail_closed():
 
 def test_original_host_boot_correlates_only_unsigned_observation():
     ledger = ledger_sample()
-    result = original_host_correlation363(
-        ledger, telemetry(), COMMIT, NOW_MS, original_host=True
-    )
+    result = original_host_correlation363(ledger, telemetry(), COMMIT, NOW_MS, original_host=True)
     assert result["freshUnsignedWindowsSample"]
     assert result["pairedIndependentSignerClaims"]
     assert result["bootBoundaryChronologicallyCorrelated"]
     assert not result["physicalRebootIndependentlyProven"]
     assert not result["authenticatedGuestRuntimeIndependentlyProven"]
-    remote = original_host_correlation363(
-        ledger, telemetry(), COMMIT, NOW_MS, original_host=False
-    )
+    remote = original_host_correlation363(ledger, telemetry(), COMMIT, NOW_MS, original_host=False)
     assert not remote["freshUnsignedWindowsSample"]
     stale = telemetry()
     stale["observedAtMs"] = NOW_MS - 120_001
-    assert not original_host_correlation363(
-        ledger, stale, COMMIT, NOW_MS, original_host=True
-    )["freshUnsignedWindowsSample"]
+    assert not original_host_correlation363(ledger, stale, COMMIT, NOW_MS, original_host=True)[
+        "freshUnsignedWindowsSample"
+    ]
 
 
 def test_worker_review_never_permits_service_or_comms_receiver():
     ledger = ledger_sample()
     anchor, pem, pin = anchor_fixture(ledger)
     result = review363(
-        ledger=ledger, anchor=anchor, public_pem=pem, pin=pin,
-        expected_commit=COMMIT, telemetry=telemetry(),
-        now_ms=NOW_MS, original_host=True,
+        ledger=ledger,
+        anchor=anchor,
+        public_pem=pem,
+        pin=pin,
+        expected_commit=COMMIT,
+        telemetry=telemetry(),
+        now_ms=NOW_MS,
+        original_host=True,
     )
     assert result["independentCustodianSignatureVerified"]
     assert result["rebootCorrelation"]["bootBoundaryChronologicallyCorrelated"]
@@ -176,9 +187,14 @@ def test_worker_review_never_permits_service_or_comms_receiver():
     assert all(not w["pilotInstallAuthorized"] for w in result["workerReviews"])
     assert result["workerReviews"][1]["escalation"] == "REVIEW_MISSING_SIGNED_WORKER_EVIDENCE"
     offhost = review363(
-        ledger=ledger, anchor=anchor, public_pem=pem, pin=pin,
-        expected_commit=COMMIT, telemetry=telemetry(),
-        now_ms=NOW_MS, original_host=False,
+        ledger=ledger,
+        anchor=anchor,
+        public_pem=pem,
+        pin=pin,
+        expected_commit=COMMIT,
+        telemetry=telemetry(),
+        now_ms=NOW_MS,
+        original_host=False,
     )
     assert not offhost["independentCustodianSignatureVerified"]
     assert offhost["anchorStatus"] == "HOLD_ORIGINAL_HOST_ONLY"
@@ -191,8 +207,6 @@ def test_owner_only_get_has_no_service_install_endpoints():
     assert client.get(url).status_code in (401, 403)
     for method in ("post", "put", "patch", "delete"):
         assert getattr(client, method)(url).status_code in (401, 403, 405)
-    out = local_custody363(
-        machine_name="OFFHOST", windows_host=False, now_ms=NOW_MS
-    )
+    out = local_custody363(machine_name="OFFHOST", windows_host=False, now_ms=NOW_MS)
     assert out["anchorStatus"] == "HOLD_ORIGINAL_HOST_ONLY"
     assert not out["webMutationAvailable"]
