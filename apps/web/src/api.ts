@@ -3503,3 +3503,40 @@ export interface ServerShell355Snapshot {
 export function getServerShell355(signal?: AbortSignal): Promise<ServerShell355Snapshot> {
   return authJson("GET", "/api/v1/system/server-shell-355", undefined, signal);
 }
+
+
+/** QL-470: owner-only source observations; never infer operational authority. */
+export interface ServerShell361Snapshot {
+  schema: "rosevear.hub.ql470.acceptance-dashboard361.v1";
+  sourceBuild: 361;
+  serverShell: "ai-data-platform";
+  originalHost: "DESKTOP-AE894KC";
+  sourceCommit: string | null;
+  localTelemetryFreshButUnsigned: boolean;
+  lastWindowsBootUtc: string | null;
+  taskHistoryEventsSampled: number;
+  taskSchedulerHistoryIsNamedTaskProof: false;
+  tasks: Array<{
+    name: string; observedState: string; lastRunUtc: string | null;
+    lastResult: number | null; identityVerified: false; unattendedBootProven: false;
+  }>;
+  masterServices: Array<{
+    name: string; observedState: string; startMode: string;
+    enrollmentApproved: false; peerSignedAckVerified: false; rollbackReady: false;
+  }>;
+  fieldEvidence: Record<"reboot" | "guest" | "ai-data-worker" | "comms-worker", string>;
+  fieldReportShapeOnly: boolean;
+  authenticatedDeviceRuntimeVerified: false;
+  independentSignedMasterWorkerAckVerified: false;
+  liveMasterConnectivityVerified: false;
+  physicalUnattendedProductionGreen: false;
+  threeMasterWorkerProductionGreen: false;
+  commsPrivateReceiverAuthorized: false;
+  webMutationAvailable: false;
+  nextStep: string;
+  holdCodes: string[];
+}
+
+export function getServerShell361(signal?: AbortSignal): Promise<ServerShell361Snapshot> {
+  return authJson("GET", "/api/v1/system/server-shell-361", undefined, signal);
+}
