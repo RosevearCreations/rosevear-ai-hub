@@ -4,6 +4,7 @@ import {
   type ServerShell361Snapshot,
 } from "./api";
 import "./serverShell349.css";
+import { SignedHistory362 } from "./SignedHistory362";
 
 export function trustedAcceptance361(value: unknown): value is ServerShell361Snapshot {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -144,5 +145,6 @@ export function AcceptanceDashboard361() {
         <ul>{snapshot.holdCodes.map(code => <li key={code}>{code}</li>)}</ul>
       </details>
     </>}
+    <SignedHistory362 />
   </section>;
 }
