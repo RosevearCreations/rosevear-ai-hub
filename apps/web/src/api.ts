@@ -3699,3 +3699,44 @@ export interface Sysop365Snapshot {
 export function getSysop365(signal?: AbortSignal): Promise<Sysop365Snapshot> {
   return authJson("GET", "/api/v1/system/sysop-statistics-365", undefined, signal);
 }
+
+/** Build366: bounded signed aggregate history; never automatically connects/restarts. */
+export interface SysopHistory366Snapshot {
+  schema: "rosevear.hub.sysop-history366.v1";
+  sourceBuild: 366;
+  originalHost: "DESKTOP-AE894KC";
+  serverShell: "ai-data-platform";
+  journalStatus:
+    | "HOLD_NOT_ORIGINAL_HOST_OR_UNCONFIGURED"
+    | "HOLD_PRIVATE_LEDGER_INVALID_OR_MISSING"
+    | "LOCAL_SIGNED_CLAIM_HISTORY_ONLY";
+  historyCount: number;
+  sources: Array<{
+    appId: string;
+    recordCount: number;
+    lastClaimedAtMs: number | null;
+    freshSignedSourceOnly: boolean;
+  }>;
+  events: Array<{
+    appId: string;
+    eventKind: string;
+    observedAtMs: number;
+    claimedStatus: string;
+    sourceCommit: string;
+    metrics: Record<string, number | null>;
+    processUptimeSec: number | null;
+    restartCount: number | null;
+    bootTimeMs: number | null;
+    liveAuthenticatedTransportVerified: false;
+    physicalRebootIndependentlyWitnessed: false;
+  }>;
+  liveConnectedSourceCount: 0;
+  liveAuthenticatedTransportVerified: false;
+  physicalRebootIndependentlyWitnessed: false;
+  threeMasterRuntimeGreen: false;
+  commsPrivateReceiverAuthorized: false;
+  webMutationAvailable: false;
+}
+export function getSysopHistory366(signal?: AbortSignal): Promise<SysopHistory366Snapshot> {
+  return authJson("GET", "/api/v1/system/sysop-history-366", undefined, signal);
+}
