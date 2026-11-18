@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 from typing import Any
 
@@ -112,25 +113,25 @@ def append_verified366(
         payload["sysop"]["restartCount"],
         payload["sysop"]["bootTimeMs"],
     )
-    with _connect_write(path) as db:
-        db.execute("BEGIN IMMEDIATE")
-        try:
+    with closing(_connect_write(path)) as db:
+        with db:
+            try:
+                db.execute(
+                    """INSERT INTO observations
+                    (app_id,event_id,nonce,source_commit,issued_ms,observed_ms,
+                     event_kind,state,metrics_json,process_uptime_sec,restart_count,boot_time_ms)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    row,
+                )
+            except sqlite3.IntegrityError as error:
+                raise ValueError("HOLD_SYSOP366_DUPLICATE_EVENT_OR_NONCE") from error
+            db.execute("DELETE FROM observations WHERE issued_ms < ?", (now_ms - RETENTION_MS,))
             db.execute(
-                """INSERT INTO observations
-                (app_id,event_id,nonce,source_commit,issued_ms,observed_ms,
-                 event_kind,state,metrics_json,process_uptime_sec,restart_count,boot_time_ms)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
-                row,
+                """DELETE FROM observations WHERE id IN
+                (SELECT id FROM observations ORDER BY id DESC LIMIT -1 OFFSET ?)""",
+                (MAX_RECORDS,),
             )
-        except sqlite3.IntegrityError as error:
-            raise ValueError("HOLD_SYSOP366_DUPLICATE_EVENT_OR_NONCE") from error
-        db.execute("DELETE FROM observations WHERE issued_ms < ?", (now_ms - RETENTION_MS,))
-        db.execute(
-            """DELETE FROM observations WHERE id IN
-            (SELECT id FROM observations ORDER BY id DESC LIMIT -1 OFFSET ?)""",
-            (MAX_RECORDS,),
-        )
-        new_count = db.execute("SELECT COUNT(*) FROM observations").fetchone()[0]
+            new_count = db.execute("SELECT COUNT(*) FROM observations").fetchone()[0]
     return {
         "status": "PERSISTED_SIGNED_SOURCE_CLAIM_ONLY",
         "appId": app_id,
