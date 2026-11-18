@@ -8,7 +8,7 @@ All outputs are read-only and fail closed; no lifecycle controls.
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from rosevear_ai_hub.master_shell349 import ORIGINAL_HOST
@@ -38,7 +38,7 @@ def _date(value: Any) -> datetime | None:
     if type(value) is not str or not ALLOWED_UTC.fullmatch(value):
         return None
     try:
-        return datetime.fromisoformat(value[:-1] + "+00:00").astimezone(timezone.utc)
+        return datetime.fromisoformat(value[:-1] + "+00:00").astimezone(UTC)
     except ValueError:
         return None
 
@@ -213,7 +213,11 @@ def acceptance361(
         "sourceBuild": 361,
         "serverShell": "ai-data-platform",
         "originalHost": ORIGINAL_HOST,
-        "sourceCommit": expected_commit if type(expected_commit) is str and HEX40.fullmatch(expected_commit) else None,
+        "sourceCommit": (
+            expected_commit
+            if type(expected_commit) is str and HEX40.fullmatch(expected_commit)
+            else None
+        ),
         "localTelemetryFreshButUnsigned": bool(valid),
         "lastWindowsBootUtc": source.get("lastWindowsBootUtc"),
         "taskHistoryEventsSampled": len(source.get("recentTaskSchedulerEventIds", [])),
