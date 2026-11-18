@@ -113,8 +113,8 @@ from rosevear_ai_hub.api.server_shell362 import router as server_shell362_router
 from rosevear_ai_hub.api.server_shell363 import router as server_shell363_router
 from rosevear_ai_hub.api.server_shell364 import router as server_shell364_router
 from rosevear_ai_hub.api.server_shell365 import router as server_shell365_router
-from rosevear_ai_hub.api.sysop_history366 import router as sysop_history366_router
 from rosevear_ai_hub.api.speech import router as speech_router
+from rosevear_ai_hub.api.sysop_history366 import router as sysop_history366_router
 from rosevear_ai_hub.api.tools import router as tools_router
 from rosevear_ai_hub.api.tts import router as tts_router
 from rosevear_ai_hub.api.voice import router as voice_router
