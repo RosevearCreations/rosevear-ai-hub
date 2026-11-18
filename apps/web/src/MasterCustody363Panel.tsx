@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getServerShell363, type ServerShell363Snapshot } from "./api";
+import { MasterReview364Panel } from "./MasterReview364Panel";
 
 export function isTrustedReview363(value: unknown): value is ServerShell363Snapshot {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -112,5 +113,6 @@ export function MasterCustody363Panel() {
         </article>)}
       </div>
     </>}
+    <MasterReview364Panel />
   </section>;
 }
