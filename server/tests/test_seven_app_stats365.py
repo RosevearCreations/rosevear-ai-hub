@@ -22,9 +22,7 @@ COMMIT = "a" * 40
 
 def sample(app_id="yw", *, kind="HEARTBEAT"):
     private = Ed25519PrivateKey.generate()
-    public = private.public_key().public_bytes(
-        Encoding.PEM, PublicFormat.SubjectPublicKeyInfo
-    )
+    public = private.public_key().public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo)
     pin = hashlib.sha256(
         private.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
     ).hexdigest()
@@ -115,15 +113,9 @@ def test_wrong_identity_privacy_unbounded_stale_and_forged_stats_hold():
     ]
     for record in bad:
         assert not verify_peer365(record, pem, pin, "rosiedazzlers", COMMIT, NOW)["accepted"]
-    assert not verify_peer365(envelope, pem, pin, "rosiedazzlers", COMMIT, NOW + 120000)[
-        "accepted"
-    ]
-    assert not verify_peer365(envelope, pem, "c" * 64, "rosiedazzlers", COMMIT, NOW)[
-        "accepted"
-    ]
-    assert not verify_peer365(envelope, pem, pin, "rosiedazzlers", "b" * 40, NOW)[
-        "accepted"
-    ]
+    assert not verify_peer365(envelope, pem, pin, "rosiedazzlers", COMMIT, NOW + 120000)["accepted"]
+    assert not verify_peer365(envelope, pem, "c" * 64, "rosiedazzlers", COMMIT, NOW)["accepted"]
+    assert not verify_peer365(envelope, pem, pin, "rosiedazzlers", "b" * 40, NOW)["accepted"]
 
 
 def test_only_original_hub_may_report_windows_boot_observation():
@@ -136,9 +128,7 @@ def test_only_original_hub_may_report_windows_boot_observation():
 
 def test_unenrolled_seven_app_feed_cannot_claim_connection_or_restart_authority():
     records, keys, pins, commits = {}, {}, {}, {}
-    report = seven_app_summary365(
-        records, keys, pins, commits, now_ms=NOW, original_host=True
-    )
+    report = seven_app_summary365(records, keys, pins, commits, now_ms=NOW, original_host=True)
     assert len(report["apps"]) == 7
     assert report["acceptedSignedSourceSnapshots"] == 0
     assert report["verifiedLiveConnections"] == 0
@@ -150,14 +140,22 @@ def test_unenrolled_seven_app_feed_cannot_claim_connection_or_restart_authority(
 
     envelope, pem, pin = sample("yw")
     report = seven_app_summary365(
-        {"yw": envelope}, {"yw": pem}, {"yw": pin}, {"yw": COMMIT},
-        now_ms=NOW, original_host=True,
+        {"yw": envelope},
+        {"yw": pem},
+        {"yw": pin},
+        {"yw": COMMIT},
+        now_ms=NOW,
+        original_host=True,
     )
     assert report["acceptedSignedSourceSnapshots"] == 1
     assert report["verifiedLiveConnections"] == 0
     offhost = seven_app_summary365(
-        {"yw": envelope}, {"yw": pem}, {"yw": pin}, {"yw": COMMIT},
-        now_ms=NOW, original_host=False,
+        {"yw": envelope},
+        {"yw": pem},
+        {"yw": pin},
+        {"yw": COMMIT},
+        now_ms=NOW,
+        original_host=False,
     )
     assert offhost["acceptedSignedSourceSnapshots"] == 0
     assert all(item["reason"] == "HOLD_NOT_ORIGINAL_WINDOWS_HOST" for item in offhost["apps"])
@@ -170,7 +168,5 @@ def test_owner_endpoint_has_no_browser_misuse_or_direct_device_actions():
     assert client.get(url).status_code in (401, 403)
     for method in ("post", "put", "patch", "delete"):
         assert getattr(client, method)(url).status_code in (401, 403, 405)
-    offhost = local_statistics365(
-        machine_name="NOT_ORIGINAL", windows_host=False, now_ms=NOW
-    )
+    offhost = local_statistics365(machine_name="NOT_ORIGINAL", windows_host=False, now_ms=NOW)
     assert offhost["verifiedLiveConnections"] == 0
