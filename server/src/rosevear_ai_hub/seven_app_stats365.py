@@ -90,9 +90,9 @@ MAX_COUNTER = 2_147_483_647
 
 
 def canonical(value: dict[str, Any]) -> bytes:
-    return json.dumps(
-        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
-    ).encode("ascii")
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode(
+        "ascii"
+    )
 
 
 def _bounded_number(value: Any) -> bool:
@@ -156,25 +156,16 @@ def verify_peer365(
         or sysop["eventKind"] not in EVENTS
         or type(sysop["observedAtMs"]) is not int
         or not 0 <= p["issuedAtMs"] - sysop["observedAtMs"] <= MAX_AGE_MS
-        or not all(
-            _bounded_number(sysop[key])
-            for key in ("processUptimeSec", "restartCount")
-        )
+        or not all(_bounded_number(sysop[key]) for key in ("processUptimeSec", "restartCount"))
         or not all(
             value is None or (type(value) is int and 0 <= value <= now_ms + 2000)
             for value in (sysop["lastRestartAtMs"], sysop["bootTimeMs"])
         )
-        or (
-            sysop["bootTimeMs"] is not None
-            and sysop["bootTimeMs"] > sysop["observedAtMs"]
-        )
+        or (sysop["bootTimeMs"] is not None and sysop["bootTimeMs"] > sysop["observedAtMs"])
         or sysop["rebootIsIndependentlyWitnessed"] is not False
         or (
             app_id != "rosevear-ai-hub"
-            and (
-                sysop["bootTimeMs"] is not None
-                or sysop["eventKind"] == "HOST_BOOT_OBSERVED"
-            )
+            and (sysop["bootTimeMs"] is not None or sysop["eventKind"] == "HOST_BOOT_OBSERVED")
         )
         or p["dataClass"] != "NON_SENSITIVE_AGGREGATE"
         or p["tenantId"] is not None
