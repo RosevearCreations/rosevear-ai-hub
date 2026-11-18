@@ -171,7 +171,8 @@ def verify_ledger(value: Any, commit: str) -> dict[str, Any]:
     """Check local tamper-evident linkage, NOT immutable custody or reverified signatures."""
     hex_value(commit, HEX40, "HOLD_QL471_SOURCE_REQUIRED")
     if (
-        not isinstance(value, dict) or set(value) != {"schema", "originalHost", "sourceCommit", "events"}
+        not isinstance(value, dict)
+        or set(value) != {"schema", "originalHost", "sourceCommit", "events"}
         or value["schema"] != LEDGER_SCHEMA or value["originalHost"] != HOST
         or value["sourceCommit"] != commit or not isinstance(value["events"], list)
         or len(value["events"]) > MAX_EVENTS
@@ -195,7 +196,10 @@ def verify_ledger(value: Any, commit: str) -> dict[str, Any]:
         for key in ("signerKeyFingerprint", "receiptSha256", "evidenceSha256", "signatureSha256"):
             hex_value(event[key], HEX64, "HOLD_QL471_LEDGER_DIGEST")
         utc(event["observedAt"])
-        if event["eventId"] in event_ids or (event["signerKeyFingerprint"], event["nonce"]) in nonces:
+        if (
+            event["eventId"] in event_ids
+            or (event["signerKeyFingerprint"], event["nonce"]) in nonces
+        ):
             raise ValueError("HOLD_QL471_REPLAY_DUPLICATE")
         if event["previousSha256"] != previous:
             raise ValueError("HOLD_QL471_LEDGER_CHAIN_BROKEN")
