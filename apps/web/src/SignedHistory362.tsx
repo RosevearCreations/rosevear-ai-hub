@@ -4,6 +4,7 @@ import { getServerShell362, type ServerShell362Snapshot } from "./api";
 export function trustedHistory362(value: unknown): value is ServerShell362Snapshot {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const r = value as Record<string, unknown>;
+  const pilots = r.masterPilotReadiness as Record<string, unknown> | null;
   return r.schema === "rosevear.hub.ql471.signed-history-dashboard362.v1" &&
     r.sourceBuild === 362 && r.originalHost === "DESKTOP-AE894KC" &&
     r.serverShell === "ai-data-platform" &&
@@ -18,9 +19,10 @@ export function trustedHistory362(value: unknown): value is ServerShell362Snapsh
       r.ledgerIntegrity === "LOCAL_HASH_CHAIN_ONLY_NOT_INDEPENDENTLY_ANCHORED") &&
     typeof r.historyCount === "number" && r.historyCount >= 0 &&
     r.historyCount <= 48 && Array.isArray(r.drills) && r.drills.length <= 12 &&
-    typeof r.masterPilotReadiness === "object" && r.masterPilotReadiness !== null &&
-    r.masterPilotReadiness["ai-data-platform"] === "HOLD_INDEPENDENT_OWNER_INSTALL_AND_SIGNED_ACK" &&
-    r.masterPilotReadiness["rosevear-comms-hub"] ===
+    typeof pilots === "object" && pilots !== null &&
+    !Array.isArray(pilots) &&
+    pilots["ai-data-platform"] === "HOLD_INDEPENDENT_OWNER_INSTALL_AND_SIGNED_ACK" &&
+    pilots["rosevear-comms-hub"] ===
       "HOLD_INDEPENDENT_OWNER_INSTALL_AND_SIGNED_ACK" &&
     r.drills.every((d: Record<string, unknown>) =>
       typeof d.drillId === "string" &&
