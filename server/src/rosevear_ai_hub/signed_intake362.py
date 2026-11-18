@@ -108,7 +108,7 @@ def verify_claim(
         raise ValueError("HOLD_QL471_RECEIPT_SCHEMA")
     scope = claim["scope"]
     if (
-        claim["schema"] != CLAIM_SCHEMA or scope not in CHECKS
+        claim["schema"] != CLAIM_SCHEMA or not isinstance(scope, str) or scope not in CHECKS
         or claim["host"] != HOST or claim["sourceCommit"] != expected_commit
     ):
         raise ValueError("HOLD_QL471_SOURCE_HOST_SCOPE")
@@ -169,6 +169,7 @@ def empty_ledger(commit: str) -> dict[str, Any]:
 
 def verify_ledger(value: Any, commit: str) -> dict[str, Any]:
     """Check local tamper-evident linkage, NOT immutable custody or reverified signatures."""
+    hex_value(commit, HEX40, "HOLD_QL471_SOURCE_REQUIRED")
     if (
         not isinstance(value, dict) or set(value) != {"schema", "originalHost", "sourceCommit", "events"}
         or value["schema"] != LEDGER_SCHEMA or value["originalHost"] != HOST
@@ -184,7 +185,8 @@ def verify_ledger(value: Any, commit: str) -> dict[str, Any]:
             raise ValueError("HOLD_QL471_LEDGER_EVENT_SCHEMA")
         if (
             type(event["sequence"]) is not int or event["sequence"] != i
-            or event["sourceCommit"] != commit or event["scope"] not in CHECKS
+            or event["sourceCommit"] != commit or type(event["scope"]) is not str
+            or event["scope"] not in CHECKS
             or not all(isinstance(event[k], str) and IDENT.fullmatch(event[k])
                        for k in ("drillId", "eventId"))
         ):
