@@ -3,6 +3,7 @@
 Private ledger is selected only by original-host server configuration. The
 browser cannot upload raw evidence or authorize any task/worker or receiver.
 """
+
 from __future__ import annotations
 
 import os
