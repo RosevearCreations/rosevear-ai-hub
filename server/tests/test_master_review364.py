@@ -1,4 +1,5 @@
 """Build 364 QL-473: offline cryptographic readback and peer-claim regressions."""
+
 import base64
 import hashlib
 import json
@@ -138,17 +139,29 @@ def sample():
 
 def readback(data):
     return verify_readback364(
-        data["ledger"], data["copy"], data["anchor"], data["readback"],
-        data["readback_key"], data["readback_pin"], COMMIT, NOW,
+        data["ledger"],
+        data["copy"],
+        data["anchor"],
+        data["readback"],
+        data["readback_key"],
+        data["readback_pin"],
+        COMMIT,
+        NOW,
     )
 
 
 def pilot(data):
     return verify_three_master364(
-        data["pilot"], data["peer_keys"], data["peer_pins"], COMMIT, NOW,
-        {data["anchor_pin"], data["readback_pin"], *(
-            e["signerKeyFingerprint"] for e in data["ledger"]["events"]
-        )},
+        data["pilot"],
+        data["peer_keys"],
+        data["peer_pins"],
+        COMMIT,
+        NOW,
+        {
+            data["anchor_pin"],
+            data["readback_pin"],
+            *(e["signerKeyFingerprint"] for e in data["ledger"]["events"]),
+        },
     )
 
 
@@ -206,8 +219,12 @@ def test_bad_peer_pins_replay_claims_expiry_and_authority_are_hold():
     data = sample()
     with pytest.raises(ValueError, match="HOLD_QL473_PILOT_TIME_WINDOW"):
         verify_three_master364(
-            data["pilot"], data["peer_keys"], data["peer_pins"],
-            COMMIT, NOW + timedelta(hours=1), set(),
+            data["pilot"],
+            data["peer_keys"],
+            data["peer_pins"],
+            COMMIT,
+            NOW + timedelta(hours=1),
+            set(),
         )
 
 
