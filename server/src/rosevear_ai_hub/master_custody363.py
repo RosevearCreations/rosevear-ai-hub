@@ -29,10 +29,19 @@ ANCHOR_SCHEMA = "rosevear.hub.ql472.independent-anchor363.v1"
 DASH_SCHEMA = "rosevear.hub.ql472.anchor-and-drill-status363.v1"
 ANCHOR_KEYS = frozenset(
     {
-        "schema", "originalHost", "sourceCommit", "ledgerSha256",
-        "ledgerHeadSha256", "ledgerCount", "custodianRole",
-        "custodianPin", "nonce", "issuedAt", "offHostCopyClaimed",
-        "workerPilotAuthorized", "receiverActivationAuthorized",
+        "schema",
+        "originalHost",
+        "sourceCommit",
+        "ledgerSha256",
+        "ledgerHeadSha256",
+        "ledgerCount",
+        "custodianRole",
+        "custodianPin",
+        "nonce",
+        "issuedAt",
+        "offHostCopyClaimed",
+        "workerPilotAuthorized",
+        "receiverActivationAuthorized",
         "physicalRuntimeIndependentlyVerified",
     }
 )
@@ -52,7 +61,8 @@ def verified_anchor363(
     if not verified["events"]:
         raise ValueError("HOLD_QL472_NO_SIGNED_CLAIMS_TO_ANCHOR")
     if (
-        not isinstance(anchor, dict) or set(anchor) != {"payload", "signature"}
+        not isinstance(anchor, dict)
+        or set(anchor) != {"payload", "signature"}
         or not isinstance(anchor["payload"], dict)
         or set(anchor["payload"]) != ANCHOR_KEYS
     ):
@@ -141,11 +151,8 @@ def original_host_correlation363(
         "physicalRebootIndependentlyProven": False,
         "authenticatedGuestRuntimeIndependentlyProven": False,
     }
-    if (
-        not original_host
-        or not trusted_local_telemetry361(
-            telemetry, now_ms=now_ms, expected_commit=expected_commit
-        )
+    if not original_host or not trusted_local_telemetry361(
+        telemetry, now_ms=now_ms, expected_commit=expected_commit
     ):
         return hold
     result = {**hold, "freshUnsignedWindowsSample": True}
@@ -161,10 +168,9 @@ def original_host_correlation363(
         ends = [e for e in events if e["scope"] == "reboot-after"]
         for before in starts:
             for after in ends:
-                if (
-                    before["signerKeyFingerprint"] != after["signerKeyFingerprint"]
-                    and utc(before["observedAt"]) < utc(after["observedAt"])
-                ):
+                if before["signerKeyFingerprint"] != after["signerKeyFingerprint"] and utc(
+                    before["observedAt"]
+                ) < utc(after["observedAt"]):
                     result["pairedIndependentSignerClaims"] = True
                     if utc(before["observedAt"]) < boot < utc(after["observedAt"]):
                         result["bootBoundaryChronologicallyCorrelated"] = True
