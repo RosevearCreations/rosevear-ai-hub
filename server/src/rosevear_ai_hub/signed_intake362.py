@@ -3,6 +3,7 @@
 Signed statements are NOT independent verification that the physical Windows PC,
 devices or Master workers actually operated. No lifecycle/receiver actions exist.
 """
+
 from __future__ import annotations
 
 import base64
@@ -29,26 +30,65 @@ CHECKS = {
     "reboot-before": frozenset(("backupReviewed", "taskStatesInspected", "supervisorPresent")),
     "reboot-after": frozenset(("offHostWitnessClaimed", "preLoginHttpsClaimed", "recoveryClaimed")),
     "guest": frozenset(
-        ("homeAssistantAuthClaimed", "mqttAckClaimed", "cameraPlaybackClaimed",
-         "offlineBackupRestoreClaimed")
+        (
+            "homeAssistantAuthClaimed",
+            "mqttAckClaimed",
+            "cameraPlaybackClaimed",
+            "offlineBackupRestoreClaimed",
+        )
     ),
     "ai-data-worker": frozenset(
-        ("ownerPilotPermitClaimed", "disabledFirstInstallClaimed", "mtlsClaimed",
-         "peerAckClaimed", "rollbackClaimed")
+        (
+            "ownerPilotPermitClaimed",
+            "disabledFirstInstallClaimed",
+            "mtlsClaimed",
+            "peerAckClaimed",
+            "rollbackClaimed",
+        )
     ),
     "comms-worker": frozenset(
-        ("ownerPilotPermitClaimed", "disabledFirstInstallClaimed", "mtlsClaimed",
-         "peerAckClaimed", "rollbackClaimed", "privateQl340cReceiverOffClaimed")
+        (
+            "ownerPilotPermitClaimed",
+            "disabledFirstInstallClaimed",
+            "mtlsClaimed",
+            "peerAckClaimed",
+            "rollbackClaimed",
+            "privateQl340cReceiverOffClaimed",
+        )
     ),
 }
 CLAIM_KEYS = frozenset(
-    ("schema", "scope", "host", "sourceCommit", "drillId", "eventId", "nonce",
-     "observedAt", "issuedAt", "evidenceSha256", "signerKeyFingerprint", "checks")
+    (
+        "schema",
+        "scope",
+        "host",
+        "sourceCommit",
+        "drillId",
+        "eventId",
+        "nonce",
+        "observedAt",
+        "issuedAt",
+        "evidenceSha256",
+        "signerKeyFingerprint",
+        "checks",
+    )
 )
 EVENT_KEYS = frozenset(
-    ("sequence", "drillId", "eventId", "scope", "observedAt", "sourceCommit",
-     "signerKeyFingerprint", "nonce", "receiptSha256", "evidenceSha256",
-     "signatureSha256", "previousSha256", "sha256")
+    (
+        "sequence",
+        "drillId",
+        "eventId",
+        "scope",
+        "observedAt",
+        "sourceCommit",
+        "signerKeyFingerprint",
+        "nonce",
+        "receiptSha256",
+        "evidenceSha256",
+        "signatureSha256",
+        "previousSha256",
+        "sha256",
+    )
 )
 
 
@@ -108,8 +148,11 @@ def verify_claim(
         raise ValueError("HOLD_QL471_RECEIPT_SCHEMA")
     scope = claim["scope"]
     if (
-        claim["schema"] != CLAIM_SCHEMA or not isinstance(scope, str) or scope not in CHECKS
-        or claim["host"] != HOST or claim["sourceCommit"] != expected_commit
+        claim["schema"] != CLAIM_SCHEMA
+        or not isinstance(scope, str)
+        or scope not in CHECKS
+        or claim["host"] != HOST
+        or claim["sourceCommit"] != expected_commit
     ):
         raise ValueError("HOLD_QL471_SOURCE_HOST_SCOPE")
     for field in ("drillId", "eventId"):
@@ -130,7 +173,8 @@ def verify_claim(
     observed, issued = utc(claim["observedAt"]), utc(claim["issuedAt"])
     current = now or datetime.now(UTC)
     if (
-        observed > issued or issued > current + timedelta(minutes=2)
+        observed > issued
+        or issued > current + timedelta(minutes=2)
         or current - observed > timedelta(hours=24)
         or issued - observed > timedelta(hours=2)
     ):
@@ -151,19 +195,26 @@ def verify_claim(
     except Exception as error:
         raise ValueError("HOLD_QL471_SIGNATURE_INVALID") from error
     return {
-        "drillId": claim["drillId"], "eventId": claim["eventId"],
-        "scope": scope, "observedAt": claim["observedAt"],
-        "sourceCommit": expected_commit, "signerKeyFingerprint": pin,
-        "nonce": claim["nonce"], "receiptSha256": hashlib.sha256(receipt).hexdigest(),
-        "evidenceSha256": digest, "signatureSha256": hashlib.sha256(signature).hexdigest(),
+        "drillId": claim["drillId"],
+        "eventId": claim["eventId"],
+        "scope": scope,
+        "observedAt": claim["observedAt"],
+        "sourceCommit": expected_commit,
+        "signerKeyFingerprint": pin,
+        "nonce": claim["nonce"],
+        "receiptSha256": hashlib.sha256(receipt).hexdigest(),
+        "evidenceSha256": digest,
+        "signatureSha256": hashlib.sha256(signature).hexdigest(),
     }
 
 
 def empty_ledger(commit: str) -> dict[str, Any]:
     hex_value(commit, HEX40, "HOLD_QL471_SOURCE_REQUIRED")
     return {
-        "schema": LEDGER_SCHEMA, "originalHost": HOST,
-        "sourceCommit": commit, "events": [],
+        "schema": LEDGER_SCHEMA,
+        "originalHost": HOST,
+        "sourceCommit": commit,
+        "events": [],
     }
 
 
@@ -173,8 +224,10 @@ def verify_ledger(value: Any, commit: str) -> dict[str, Any]:
     if (
         not isinstance(value, dict)
         or set(value) != {"schema", "originalHost", "sourceCommit", "events"}
-        or value["schema"] != LEDGER_SCHEMA or value["originalHost"] != HOST
-        or value["sourceCommit"] != commit or not isinstance(value["events"], list)
+        or value["schema"] != LEDGER_SCHEMA
+        or value["originalHost"] != HOST
+        or value["sourceCommit"] != commit
+        or not isinstance(value["events"], list)
         or len(value["events"]) > MAX_EVENTS
     ):
         raise ValueError("HOLD_QL471_LEDGER_SCHEMA_SOURCE")
@@ -185,11 +238,15 @@ def verify_ledger(value: Any, commit: str) -> dict[str, Any]:
         if not isinstance(event, dict) or set(event) != EVENT_KEYS:
             raise ValueError("HOLD_QL471_LEDGER_EVENT_SCHEMA")
         if (
-            type(event["sequence"]) is not int or event["sequence"] != i
-            or event["sourceCommit"] != commit or type(event["scope"]) is not str
+            type(event["sequence"]) is not int
+            or event["sequence"] != i
+            or event["sourceCommit"] != commit
+            or type(event["scope"]) is not str
             or event["scope"] not in CHECKS
-            or not all(isinstance(event[k], str) and IDENT.fullmatch(event[k])
-                       for k in ("drillId", "eventId"))
+            or not all(
+                isinstance(event[k], str) and IDENT.fullmatch(event[k])
+                for k in ("drillId", "eventId")
+            )
         ):
             raise ValueError("HOLD_QL471_LEDGER_EVENT_INVALID")
         hex_value(event["nonce"], HEX32, "HOLD_QL471_LEDGER_NONCE")
@@ -236,15 +293,22 @@ def append_claim(ledger: dict[str, Any], item: dict[str, Any]) -> dict[str, Any]
 def dashboard(ledger: Any, expected_commit: str) -> dict[str, Any]:
     """Report historical signed-at-intake claims without claiming live pilot readiness."""
     result = {
-        "schema": DASH_SCHEMA, "sourceBuild": 362, "originalHost": HOST,
-        "serverShell": "ai-data-platform", "sourceCommit": expected_commit,
-        "ledgerIntegrity": "HOLD_UNAVAILABLE", "historyCount": 0,
-        "drills": [], "lastRecordedAt": None, "latestChainHash": None,
+        "schema": DASH_SCHEMA,
+        "sourceBuild": 362,
+        "originalHost": HOST,
+        "serverShell": "ai-data-platform",
+        "sourceCommit": expected_commit,
+        "ledgerIntegrity": "HOLD_UNAVAILABLE",
+        "historyCount": 0,
+        "drills": [],
+        "lastRecordedAt": None,
+        "latestChainHash": None,
         "signedClaimsAreLiveMeasurements": False,
         "signaturesReverifiedAtRead": False,
         "physicalUnattendedProductionGreen": False,
         "threeMasterWorkerProductionGreen": False,
-        "commsPrivateReceiverAuthorized": False, "pilotInstallAuthorized": False,
+        "commsPrivateReceiverAuthorized": False,
+        "pilotInstallAuthorized": False,
         "webMutationAvailable": False,
         "masterPilotReadiness": {
             "ai-data-platform": "HOLD_INDEPENDENT_OWNER_INSTALL_AND_SIGNED_ACK",
@@ -263,20 +327,28 @@ def dashboard(ledger: Any, expected_commit: str) -> dict[str, Any]:
         before = [e for e in records if e["scope"] == "reboot-before"]
         after = [e for e in records if e["scope"] == "reboot-after"]
         paired = bool(
-            before and after and
-            utc(before[-1]["observedAt"]) < utc(after[-1]["observedAt"]) and
-            before[-1]["signerKeyFingerprint"] != after[-1]["signerKeyFingerprint"]
+            before
+            and after
+            and utc(before[-1]["observedAt"]) < utc(after[-1]["observedAt"])
+            and before[-1]["signerKeyFingerprint"] != after[-1]["signerKeyFingerprint"]
         )
-        drills.append({
-            "drillId": name, "eventsRecorded": len(records), "pairedClaimTimeline": paired,
-            "lastObservedAt": max((e["observedAt"] for e in records), default=None),
-            "scopes": sorted({e["scope"] for e in records}),
-            "physicalRecoveryIndependentlyVerified": False,
-        })
-    result.update({
-        "ledgerIntegrity": "LOCAL_HASH_CHAIN_ONLY_NOT_INDEPENDENTLY_ANCHORED",
-        "historyCount": len(events), "drills": drills,
-        "lastRecordedAt": events[-1]["observedAt"] if events else None,
-        "latestChainHash": events[-1]["sha256"] if events else ZERO,
-    })
+        drills.append(
+            {
+                "drillId": name,
+                "eventsRecorded": len(records),
+                "pairedClaimTimeline": paired,
+                "lastObservedAt": max((e["observedAt"] for e in records), default=None),
+                "scopes": sorted({e["scope"] for e in records}),
+                "physicalRecoveryIndependentlyVerified": False,
+            }
+        )
+    result.update(
+        {
+            "ledgerIntegrity": "LOCAL_HASH_CHAIN_ONLY_NOT_INDEPENDENTLY_ANCHORED",
+            "historyCount": len(events),
+            "drills": drills,
+            "lastRecordedAt": events[-1]["observedAt"] if events else None,
+            "latestChainHash": events[-1]["sha256"] if events else ZERO,
+        }
+    )
     return result
