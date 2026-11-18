@@ -93,6 +93,10 @@ export function SevenAppSysop365Panel() {
     return () => controller.current?.abort();
   }, [refresh]);
 
+  const rows: Sysop365Snapshot["apps"] = model?.apps ?? IDs.map(appId => ({
+    appId, accepted: false, connected: false, reason: "HOLD_NOT_YET_REVIEWED",
+  }));
+
   return <section id="sysop-seven-app365" className="mc-panel shell349"
     aria-label="Seven application source statistics and Sysop observations">
     <div className="shell349-toolbar">
@@ -110,9 +114,7 @@ export function SevenAppSysop365Panel() {
       Physical Windows unattended reboot: <strong>NOT VERIFIED</strong>.
       Private Comms receiver: <strong>NOT AUTHORIZED</strong>.</p>
     <div className="shell349-status-grid">
-      {(model?.apps ?? IDs.map(id => ({
-        appId: id, accepted: false, connected: false, reason: "HOLD_NOT_YET_REVIEWED",
-      }))).map(app => <article key={app.appId} className="shell349-status">
+      {rows.map(app => <article key={app.appId} className="shell349-status">
         <strong>{labels[app.appId]}</strong>
         <p>{app.accepted ? "Signed source claim only" : app.reason}</p>
         <small>Live authenticated transport: NOT VERIFIED</small>
