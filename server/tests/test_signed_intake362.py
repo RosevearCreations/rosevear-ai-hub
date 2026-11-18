@@ -66,7 +66,12 @@ def accepted(fix, *, payload=None):
     claim, sig, evidence, pub, pins, now = fix
     return verify_claim(
         json.dumps(payload if payload is not None else claim).encode(),
-        sig, evidence, pub, pins, COMMIT, now=now,
+        sig,
+        evidence,
+        pub,
+        pins,
+        COMMIT,
+        now=now,
     )
 
 
@@ -95,8 +100,13 @@ def test_tampering_and_missing_check_is_hold():
         accepted(fix, payload=changed)
     with pytest.raises(ValueError, match="HOLD_QL471_EVIDENCE_TAMPERED"):
         verify_claim(
-            json.dumps(claim).encode(), sig, evidence + b"TAMPER", pub,
-            pins, COMMIT, now=now,
+            json.dumps(claim).encode(),
+            sig,
+            evidence + b"TAMPER",
+            pub,
+            pins,
+            COMMIT,
+            now=now,
         )
 
 
@@ -105,13 +115,23 @@ def test_untrusted_signer_wrong_source_old_event_and_same_keys_hold():
     claim, sig, evidence, pub, pins, now = fix
     with pytest.raises(ValueError, match="HOLD_QL471_SOURCE_HOST_SCOPE"):
         verify_claim(
-            json.dumps(claim).encode(), sig, evidence, pub,
-            pins, "b" * 40, now=now,
+            json.dumps(claim).encode(),
+            sig,
+            evidence,
+            pub,
+            pins,
+            "b" * 40,
+            now=now,
         )
     with pytest.raises(ValueError, match="HOLD_QL471_STALE_OR_FUTURE_CLAIM"):
         verify_claim(
-            json.dumps(claim).encode(), sig, evidence, pub,
-            pins, COMMIT, now=now + timedelta(hours=25),
+            json.dumps(claim).encode(),
+            sig,
+            evidence,
+            pub,
+            pins,
+            COMMIT,
+            now=now + timedelta(hours=25),
         )
     other = {**pins, "comms-worker": pins["guest"]}
     with pytest.raises(ValueError, match="HOLD_QL471_INDEPENDENT_SIGNERS_REQUIRED"):
@@ -119,8 +139,13 @@ def test_untrusted_signer_wrong_source_old_event_and_same_keys_hold():
     wrong = {**pins, "guest": "c" * 64}
     with pytest.raises(ValueError, match="HOLD_QL471_PIN_NOT_TRUSTED"):
         verify_claim(
-            json.dumps(claim).encode(), sig, evidence, pub,
-            wrong, COMMIT, now=now,
+            json.dumps(claim).encode(),
+            sig,
+            evidence,
+            pub,
+            wrong,
+            COMMIT,
+            now=now,
         )
 
 
