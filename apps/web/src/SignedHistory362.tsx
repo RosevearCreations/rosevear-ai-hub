@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { getServerShell362, type ServerShell362Snapshot } from "./api";
+import { MasterCustody363Panel } from "./MasterCustody363Panel";
 
 export function trustedHistory362(value: unknown): value is ServerShell362Snapshot {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -122,5 +123,6 @@ export function SignedHistory362() {
         Compare against an independently saved trusted anchor; the local hash chain
         alone cannot prove immutability.</p>
     </>}
+  <MasterCustody363Panel />
   </section>;
 }
