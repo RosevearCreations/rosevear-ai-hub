@@ -143,6 +143,7 @@ def verify_peer365(
         or not 0 <= now_ms - p["issuedAtMs"] <= MAX_AGE_MS
         or not p["issuedAtMs"] < p["expiresAtMs"] <= p["issuedAtMs"] + MAX_AGE_MS
         or now_ms >= p["expiresAtMs"]
+        or type(p["state"]) is not str
         or p["state"] not in ("HEALTHY", "DEGRADED", "UNHEALTHY", "UNKNOWN")
         or type(p["metricsWindowSeconds"]) is not int
         or not 60 <= p["metricsWindowSeconds"] <= 86400
@@ -151,6 +152,7 @@ def verify_peer365(
         or not all(_bounded_number(value) for value in stats.values())
         or type(sysop) is not dict
         or set(sysop) != SYSOP_FIELDS
+        or type(sysop["eventKind"]) is not str
         or sysop["eventKind"] not in EVENTS
         or type(sysop["observedAtMs"]) is not int
         or not 0 <= p["issuedAtMs"] - sysop["observedAtMs"] <= MAX_AGE_MS
@@ -161,6 +163,10 @@ def verify_peer365(
         or not all(
             value is None or (type(value) is int and 0 <= value <= now_ms + 2000)
             for value in (sysop["lastRestartAtMs"], sysop["bootTimeMs"])
+        )
+        or (
+            sysop["bootTimeMs"] is not None
+            and sysop["bootTimeMs"] > sysop["observedAtMs"]
         )
         or sysop["rebootIsIndependentlyWitnessed"] is not False
         or (
