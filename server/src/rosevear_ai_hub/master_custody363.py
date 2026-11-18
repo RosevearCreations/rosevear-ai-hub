@@ -18,7 +18,6 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat,
 
 from rosevear_ai_hub.master_acceptance361 import trusted_local_telemetry361
 from rosevear_ai_hub.signed_intake362 import (
-    HEX40,
     HEX64,
     HOST,
     canonical,
