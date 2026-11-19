@@ -1,4 +1,5 @@
 """Build367 synthetic contracts; no real network, tokens, host or Master acknowledgments."""
+
 from __future__ import annotations
 
 import hashlib
@@ -44,14 +45,21 @@ def source(app_id="ai-data-platform", *, event="event-for-build-367-source"):
         "state": "UNKNOWN",
         "metricsWindowSeconds": 60,
         "metrics": {
-            "requests": 10, "serverErrors": None, "jobsCompleted": 2,
-            "jobsFailed": 0, "queueDepth": None,
-            "latencyP95Ms": 42, "activeSessions": None,
+            "requests": 10,
+            "serverErrors": None,
+            "jobsCompleted": 2,
+            "jobsFailed": 0,
+            "queueDepth": None,
+            "latencyP95Ms": 42,
+            "activeSessions": None,
         },
         "sysop": {
-            "eventKind": "HEARTBEAT", "observedAtMs": NOW - 1100,
-            "processUptimeSec": 600, "restartCount": None,
-            "lastRestartAtMs": None, "bootTimeMs": None,
+            "eventKind": "HEARTBEAT",
+            "observedAtMs": NOW - 1100,
+            "processUptimeSec": 600,
+            "restartCount": None,
+            "lastRestartAtMs": None,
+            "bootTimeMs": None,
             "rebootIsIndependentlyWitnessed": False,
         },
         "dataClass": "NON_SENSITIVE_AGGREGATE",
@@ -82,37 +90,56 @@ def test_private_network_only_and_exact_hardcoded_read_path():
 def test_signed_live_get_validation_and_no_network_side_effect():
     envelope, pem, pin = source()
     response = httpx.Response(
-        200, headers={"content-type": "application/json"},
+        200,
+        headers={"content-type": "application/json"},
         content=json.dumps(envelope).encode("utf-8"),
     )
-    assert validate_get367(
-        response, app_id="ai-data-platform", public_key=pem,
-        pin=pin, expected_commit=COMMIT, now_ms=NOW,
-    )["payload"]["appId"] == "ai-data-platform"
+    assert (
+        validate_get367(
+            response,
+            app_id="ai-data-platform",
+            public_key=pem,
+            pin=pin,
+            expected_commit=COMMIT,
+            now_ms=NOW,
+        )["payload"]["appId"]
+        == "ai-data-platform"
+    )
     with pytest.raises(ValueError, match="HOLD_WRONG_SCOPE_STALE_OR_PRIVACY"):
         validate_get367(
-            response, app_id="ai-data-platform", public_key=pem,
-            pin=pin, expected_commit=COMMIT, now_ms=NOW + 100000,
+            response,
+            app_id="ai-data-platform",
+            public_key=pem,
+            pin=pin,
+            expected_commit=COMMIT,
+            now_ms=NOW + 100000,
         )
     with pytest.raises(ValueError, match="HOLD_FORGED_STATISTICS"):
         bad = json.loads(json.dumps(envelope))
         bad["payload"]["metrics"]["requests"] = 999999
         validate_get367(
-            httpx.Response(200, headers={"content-type": "application/json"},
-                           content=json.dumps(bad).encode()),
-            app_id="ai-data-platform", public_key=pem,
-            pin=pin, expected_commit=COMMIT, now_ms=NOW,
+            httpx.Response(
+                200, headers={"content-type": "application/json"}, content=json.dumps(bad).encode()
+            ),
+            app_id="ai-data-platform",
+            public_key=pem,
+            pin=pin,
+            expected_commit=COMMIT,
+            now_ms=NOW,
         )
     for response in (
         httpx.Response(302, headers={"location": "https://example.org/"}),
         httpx.Response(200, headers={"content-type": "text/html"}, text="<b>not json</b>"),
-        httpx.Response(200, headers={"content-type": "application/json"},
-                       content=b"x" * 20000),
+        httpx.Response(200, headers={"content-type": "application/json"}, content=b"x" * 20000),
     ):
         with pytest.raises(ValueError, match="HOLD_SYSOP367_"):
             validate_get367(
-                response, app_id="ai-data-platform", public_key=pem,
-                pin=pin, expected_commit=COMMIT, now_ms=NOW,
+                response,
+                app_id="ai-data-platform",
+                public_key=pem,
+                pin=pin,
+                expected_commit=COMMIT,
+                now_ms=NOW,
             )
 
 
@@ -120,8 +147,13 @@ def test_durable_signed_receipts_replay_and_readback_remain_master_hold(tmp_path
     db = tmp_path / "private-journal.db"
     env, pem, pin = source()
     kwargs = {
-        "journal": db, "app_id": "ai-data-platform", "envelope": env,
-        "public_key": pem, "pin": pin, "expected_commit": COMMIT, "now_ms": NOW,
+        "journal": db,
+        "app_id": "ai-data-platform",
+        "envelope": env,
+        "public_key": pem,
+        "pin": pin,
+        "expected_commit": COMMIT,
+        "now_ms": NOW,
     }
     with pytest.raises(ValueError, match="HOLD_SYSOP367_TLS_NOT_AUTHENTICATED"):
         record_transport_receipt367(**kwargs, transport_authenticated=False)
@@ -147,7 +179,9 @@ def test_durable_signed_receipts_replay_and_readback_remain_master_hold(tmp_path
 
 def test_read_api_is_owner_only_seven_sources_and_no_control_actions():
     result = local_live367(
-        machine_name="NOT-REE-SERVER", windows_host=False, now_ms=NOW,
+        machine_name="NOT-REE-SERVER",
+        windows_host=False,
+        now_ms=NOW,
     )
     assert result["verifiedTlsSignedReceiptCount"] == 0
     assert [s["appId"] for s in result["sources"]] == list(APPS)
