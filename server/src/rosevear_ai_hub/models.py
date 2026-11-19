@@ -852,3 +852,51 @@ class CameraWallPreference(TimestampMixin, Base):
     favorite_camera_ids: Mapped[list[int]] = mapped_column(JSON, nullable=False, default=list)
     compact: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+
+class NetworkScope368(TimestampMixin, Base):
+    """Separately signed, expiring owner consent for one bounded private segment."""
+
+    __tablename__ = "network_scopes368"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    cidr: Mapped[str] = mapped_column(String(18), nullable=False, unique=True)
+    label: Mapped[str] = mapped_column(String(80), nullable=False, default="")
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    nonce_digest: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    signature_digest: Mapped[str] = mapped_column(String(64), nullable=False)
+    approved_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+
+class NetworkDevice368(TimestampMixin, Base):
+    """Local claims only; decision cannot change real network access or devices."""
+
+    __tablename__ = "network_devices368"
+    __table_args__ = (UniqueConstraint("source", "source_id"),)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source: Mapped[str] = mapped_column(String(24), nullable=False)
+    source_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    decision: Mapped[str] = mapped_column(String(24), nullable=False, default="needs_review")
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+
+class NetworkObservation368(Base):
+    """Append-only owner-entered IP/lease history; never a live device proof."""
+
+    __tablename__ = "network_observations368"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    device_id: Mapped[int] = mapped_column(
+        ForeignKey("network_devices368.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    scope_id: Mapped[int] = mapped_column(
+        ForeignKey("network_scopes368.id", ondelete="RESTRICT"), nullable=False
+    )
+    ip: Mapped[str] = mapped_column(String(15), nullable=False)
+    lease_ref: Mapped[str] = mapped_column(String(40), nullable=False, default="")
+    observed_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
