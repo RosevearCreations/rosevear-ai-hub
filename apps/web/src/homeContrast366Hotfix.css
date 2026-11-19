@@ -1,0 +1,53 @@
+/* Build 366.1 — Home Operations dark-surface runtime repair.
+   Keep dark surfaces consistent even if legacy Build 138 light styles are loaded
+   later than the Build 262 theme fix. Daylight and High Contrast stay independent.
+   Display-only: no device, service, security or startup changes. */
+.app-shell[data-theme]:not([data-theme="daylight"]):not([data-theme="high-contrast"]) .content .home-operations-hub {
+  --home-surface: var(--m-panel, var(--shell-paper, #101826));
+  --home-raised: var(--m-panel-alt, var(--shell-selected, #233a52));
+  --home-ink: var(--m-text, var(--shell-ink, #eef5ff));
+  --home-muted: var(--m-muted, var(--shell-muted, #c1d3e7));
+  --home-border: var(--m-outline, var(--shell-border, #64809e));
+  background: var(--home-surface) !important;
+  color: var(--home-ink) !important;
+  border-color: var(--home-border);
+  color-scheme: dark;
+}
+.app-shell:is([data-theme="dark"],[data-theme="standard"]) .content {
+  background: var(--m-bg, #070b13) !important;
+  color: var(--m-text, #eef5ff);
+}
+.app-shell[data-theme]:not([data-theme="daylight"]):not([data-theme="high-contrast"]) .content .home-operations-hub :is(.home-ops-heading h3,.home-ops-heading p,.home-ops-routes h4,.home-ops-room-toolbar h4,.home-ops-room-toolbar p,.home-ops-room-toolbar label,.home-ops-health-card h4,.home-ops-health-card p,.home-ops-rooms h5) {
+  color: var(--home-ink) !important;
+}
+.app-shell[data-theme]:not([data-theme="daylight"]):not([data-theme="high-contrast"]) .content .home-operations-hub :is(.home-ops-eyebrow,.home-ops-health-card small,.home-ops-room-grid small,.home-ops-footnote) {
+  color: var(--home-muted) !important;
+}
+.app-shell[data-theme]:not([data-theme="daylight"]):not([data-theme="high-contrast"]) .content .home-operations-hub :is(.home-ops-help,.home-ops-health-card,.home-ops-room-grid article,.home-ops-route-grid button) {
+  background: var(--home-raised) !important;
+  color: var(--home-ink);
+  border-color: var(--home-border);
+}
+.app-shell[data-theme]:not([data-theme="daylight"]):not([data-theme="high-contrast"]) .content .home-operations-hub .home-ops-observation {
+  background: var(--home-raised) !important;
+  color: var(--home-ink) !important;
+  border-left-color: var(--shell-accent, #8fdcf0);
+}
+.app-shell[data-theme]:not([data-theme="daylight"]):not([data-theme="high-contrast"]) .content .home-operations-hub :is(.home-ops-contexts button,.home-ops-room-toolbar select) {
+  background: var(--home-raised) !important;
+  color: var(--home-ink) !important;
+  border-color: var(--home-border);
+}
+.app-shell[data-theme]:not([data-theme="daylight"]):not([data-theme="high-contrast"]) .content .home-operations-hub :is(.home-ops-routes,.home-ops-rooms) {
+  border-top-color: var(--home-border);
+}
+.app-shell[data-theme]:not([data-theme="daylight"]):not([data-theme="high-contrast"]) .content .home-operations-hub :is(button,select,summary):focus-visible {
+  outline: 3px solid var(--shell-accent, #edc9ff);
+  outline-offset: 3px;
+}
+@media (forced-colors: active) {
+  .app-shell[data-theme] .content .home-operations-hub {
+    background: Canvas !important;
+    color: CanvasText !important;
+  }
+}
