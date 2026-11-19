@@ -126,7 +126,8 @@ def validate_get367(
     """Validate only an exact-size, signed and fresh read-only aggregate."""
     if response.status_code != 200 or response.is_redirect:
         raise ValueError("HOLD_SYSOP367_SOURCE_HTTP")
-    if response.headers.get("content-type", "").split(";", 1)[0].strip().lower() != "application/json":
+    content_type = response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+    if content_type != "application/json":
         raise ValueError("HOLD_SYSOP367_SOURCE_CONTENT_TYPE")
     # Strictly bounded streaming so the remote producer cannot force an unbounded read.
     data = bytearray()
@@ -205,7 +206,9 @@ def collect_once367(app_id: str, *, now_ms: int | None = None) -> dict[str, Any]
     _safe_path(journal, create=True)
     now = int(time.time() * 1000) if now_ms is None else now_ms
     try:
-        with httpx.Client(verify=context, trust_env=False, follow_redirects=False, timeout=5.0) as client:
+        with httpx.Client(
+            verify=context, trust_env=False, follow_redirects=False, timeout=5.0
+        ) as client:
             with client.stream(
                 "GET", url,
                 headers={"x-rosevear-telemetry-token": token, "accept": "application/json"},
