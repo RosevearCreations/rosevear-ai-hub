@@ -864,7 +864,9 @@ class NetworkScope368(TimestampMixin, Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     nonce_digest: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     signature_digest: Mapped[str] = mapped_column(String(64), nullable=False)
-    approved_by_user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
+    approved_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
     approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
