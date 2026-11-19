@@ -9,7 +9,6 @@ import argparse
 import json
 import os
 import platform
-import sys
 from typing import Any
 
 import httpx
@@ -36,7 +35,9 @@ def _required(name: str) -> str:
     return value
 
 
-def collect_once(*, now_ms: int | None = None, transport: httpx.BaseTransport | None = None) -> dict[str, Any]:
+def collect_once(
+    *, now_ms: int | None = None, transport: httpx.BaseTransport | None = None
+) -> dict[str, Any]:
     if os.name != "nt" or platform.node().upper() != ORIGINAL_HOST:
         raise ValueError("HOLD_SYSOP423_NOT_ORIGINAL_WINDOWS_HOST")
     intake_url = _required("ROSEVEAR_SYSOP423_AIDP_INTAKE_URL")
@@ -58,7 +59,13 @@ def collect_once(*, now_ms: int | None = None, transport: httpx.BaseTransport | 
                     headers={"x-rosevear-telemetry-token": token, "accept": "application/json"},
                 )
                 if response.status_code != 200:
-                    results.append({"appId": app_id, "state": "HOLD_SOURCE_HTTP", "status": response.status_code})
+                    results.append(
+                        {
+                            "appId": app_id,
+                            "state": "HOLD_SOURCE_HTTP",
+                            "status": response.status_code,
+                        }
+                    )
                     continue
                 if len(response.content) > 16_384:
                     results.append({"appId": app_id, "state": "HOLD_SOURCE_OVERSIZE"})
@@ -85,7 +92,13 @@ def collect_once(*, now_ms: int | None = None, transport: httpx.BaseTransport | 
                     content=json.dumps(envelope, separators=(",", ":")),
                 )
                 if sent.status_code != 202:
-                    results.append({"appId": app_id, "state": "HOLD_AIDP_INTAKE", "status": sent.status_code})
+                    results.append(
+                        {
+                            "appId": app_id,
+                            "state": "HOLD_AIDP_INTAKE",
+                            "status": sent.status_code,
+                        }
+                    )
                     continue
                 forwarded += 1
                 results.append({"appId": app_id, "state": "SIGNED_SOURCE_FORWARDED"})
