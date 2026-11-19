@@ -92,6 +92,8 @@ jobs:
         run: node scripts/build-261-contract.test.mjs
       - name: Build 262 Dark Mode contrast, client source and read-only runtime HOLD contract
         run: node scripts/build-262-contract.test.mjs
+      - name: Build 367 private signed transport and 20-build home network roadmap contract
+        run: node --test scripts/build-367-contract.test.mjs
       - name: Build 366.1 Home dark contrast and theme isolation regression
         run: node --test scripts/home-contrast-366-1.test.mjs
       - name: Build 263 original Windows launcher, distinct signed restart candidate and Comms TEST HOLD contract
