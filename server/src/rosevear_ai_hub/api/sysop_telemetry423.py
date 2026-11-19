@@ -4,7 +4,6 @@ This endpoint is not an actuator and never proves an independently witnessed reb
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import platform
@@ -45,7 +44,9 @@ def _private_key(path_text: str | None) -> Ed25519PrivateKey:
     return key
 
 
-def build_sysop_telemetry423(*, now_ms: int, machine_name: str, windows_host: bool) -> dict[str, Any]:
+def build_sysop_telemetry423(
+    *, now_ms: int, machine_name: str, windows_host: bool
+) -> dict[str, Any]:
     if not windows_host or machine_name.upper() != ORIGINAL_HOST:
         raise ValueError("HOLD_SYSOP423_NOT_ORIGINAL_WINDOWS_HOST")
     commit = os.environ.get("ROSEVEAR_SYSOP_TELEMETRY_SOURCE_COMMIT", "")
