@@ -25,7 +25,6 @@ from rosevear_ai_hub.api.chat import router as chat_router
 from rosevear_ai_hub.api.confirmations import router as confirmations_router
 from rosevear_ai_hub.api.device_discovery import router as device_discovery_router
 from rosevear_ai_hub.api.device_registry import router as device_registry_router
-from rosevear_ai_hub.api.network_trust368 import router as network_trust368_router
 from rosevear_ai_hub.api.frigate import router as frigate_router
 from rosevear_ai_hub.api.global_search import router as global_search_router
 from rosevear_ai_hub.api.home_assistant import router as home_assistant_router
@@ -95,6 +94,7 @@ from rosevear_ai_hub.api.master_shell_witness332 import (
     router as master_shell_witness332_router,
 )
 from rosevear_ai_hub.api.mqtt import router as mqtt_router
+from rosevear_ai_hub.api.network_trust368 import router as network_trust368_router
 from rosevear_ai_hub.api.notifications import router as notifications_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
