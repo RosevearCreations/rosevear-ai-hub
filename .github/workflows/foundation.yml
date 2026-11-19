@@ -92,6 +92,8 @@ jobs:
         run: node scripts/build-261-contract.test.mjs
       - name: Build 262 Dark Mode contrast, client source and read-only runtime HOLD contract
         run: node scripts/build-262-contract.test.mjs
+      - name: Build 368 signed network trust, no-scan and score contracts
+        run: node --test scripts/build-368-contract.test.mjs
       - name: Build 367 private signed transport and 20-build home network roadmap contract
         run: node --test scripts/build-367-contract.test.mjs
       - name: Build 366.1 Home dark contrast and theme isolation regression

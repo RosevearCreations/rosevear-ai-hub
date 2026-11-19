@@ -3771,3 +3771,40 @@ export interface SysopLive367Snapshot {
 export function getSysopLive367(signal?: AbortSignal): Promise<SysopLive367Snapshot> {
   return authJson("GET", "/api/v1/system/sysop-live-367", undefined, signal);
 }
+
+// Build 368: private owner-only manual trust registry. This API never discovers devices.
+export type NetworkTrust368State = {
+  schema: "rosevear.network-trust.v368";
+  mode: "MANUAL_REVIEW_ONLY";
+  backgroundScanEnabled: false;
+  networkProbesPerformed: 0;
+  liveDevicePresenceVerified: false;
+  scopeSigningReady: boolean;
+  scopes: Array<{ id: number; cidr: string; label: string; expiryMs: number;
+    active: boolean; revision: number }>;
+  devices: Array<{ id: number; source: string; sourceId: string; decision: string;
+    revision: number; riskFlags: string[];
+    history: Array<{ ip: string; leaseRef: string; observedAt: string;
+      provenance: "OWNER_ENTERED_UNVERIFIED" }> }>;
+};
+export type NetworkTrust368Scope = {
+  cidr: string; label: string; expiry_ms: number; nonce: string;
+  signature: string; expected_revision: number;
+};
+export function getNetworkTrust368(): Promise<NetworkTrust368State> {
+  return authJson<NetworkTrust368State>("GET", "/api/v1/network-trust-368/state");
+}
+export function approveNetworkScope368(scope: NetworkTrust368Scope): Promise<unknown> {
+  return authJson("PUT", "/api/v1/network-trust-368/scope", scope);
+}
+export function recordNetworkClaim368(input: {
+  source: "ha_device" | "ha_entity" | "camera" | "mqtt" | "manual";
+  source_id: string; ip: string; lease_ref: string;
+}): Promise<unknown> {
+  return authJson("POST", "/api/v1/network-trust-368/observation", input);
+}
+export function decideNetworkIdentity368(device_id: number, decision:
+    "needs_review" | "trusted" | "monitor" | "blocked", expected_revision: number): Promise<unknown> {
+  return authJson("PUT", "/api/v1/network-trust-368/decision",
+    { device_id, decision, expected_revision });
+}

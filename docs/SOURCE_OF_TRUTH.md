@@ -349,3 +349,10 @@ A verified TLS GET, a signed-file sample, a CI-green branch and an actual physic
 ## 19. Theme, layout, device and accessibility acceptance
 
 All available Master themes must retain readable backgrounds, foregrounds and focus outlines. No stark white Home Operations panel when Dark Mode is selected. Every form should have bounded field widths, sensible labels, date/time pickers, consistent timezones, usable error messages, touch-target sizes, keyboard navigation, zoom, screen-reader semantics and desktop/tablet/mobile acceptance. **Daylight and High Contrast remain independent user-selectable modes.** Cosmetic CI green alone cannot replace actual client/browser review.
+
+
+## Build 368 — Private network trust and safe identity (source implementation, 2026-11-19)
+
+Build 368 establishes an owner-only manual IPv4 trust/observation registry and independently signed /24–/32 private CIDR approvals. A review signature is checked against a separately provisioned Ed25519 public-key pin. Observations store source IDs, local IP/lease history, collision warnings and audit receipts, but never independently certify device presence, assign an identity to a physical machine, execute a scan, or enable control. No app, private receiver, Windows service, router, Home Assistant, camera or MQTT credential is changed or connected by this GitHub source release.
+
+Source progress is tracked in docs/contracts/hub-feature-progress368.json (security 60%, network discovery/topology 28%, estimated expanded source 41.8%, blended planning 33.5%); original-host runtime acceptance remains a separate HOLD pending field key and device verification. The governed next build is 369 Whole-home Home Assistant inventory reconciliation, with 19 queued builds remaining (369–387). Full operator setup, rollback and checks are in docs/BUILD_368_PRIVATE_NETWORK_TRUST_AND_DEVICE_IDENTITY.md.
