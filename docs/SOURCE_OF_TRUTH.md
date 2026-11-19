@@ -314,3 +314,38 @@ When considering a feature, ask:
 > Does this make the Hub more useful, private, safe, understandable, and replaceable—or does it create another vendor lock-in or hidden dependency?
 
 Prefer the former.
+
+## 16. 2026 household network expansion — owner-directed
+
+Rosevear AI Hub must **prioritize useful household and workshop operations**, rather than allowing repeated Master evidence panels to crowd out day-to-day Home, Devices, Cameras, Workshop, Automations, Network and System screens.
+
+A common permissioned **device and source identity graph** should connect relevant screens without exposing unrelated business/household data or issuing universal network commands. Each inventory item needs a verified source (Home Assistant, MQTT, owner-approved vendor adapter, camera registry or explicit manual entry), last-seen/freshness, compatibility, room/workspace, availability and permission class. Missing devices must be explicitly displayed as **unidentified, missing, offline, unsupported or not yet enrolled**—never silently marked healthy or guessed. A network map must distinguish registered sources from discovered but unapproved hosts; no surprise LAN scanning.
+
+First-party bridge priorities, subject to actual compatible hardware, firmware, owner consent and provider auth:
+- **Home Assistant** is authoritative for household entity/device states, approved scenes and safe automation outcomes.
+- **Amazon Alexa**, **Apple Home/HomeKit/Matter**, **Samsung SmartThings**, and supported Zigbee/Z-Wave/Thread/Bluetooth/MQTT integrations have independent scope, opt-in enrollment, source provenance, revocation and offline handling. Do not claim blanket vendor compatibility, hidden account access or cloud independence where it does not exist.
+- **Creality printer**, owner-described as "Creality Pro 5" (exact model and firmware must be confirmed), should have read-only process and job monitoring using an actually supported approved interface such as an existing print controller bridge; never send remote heating, movement, start/stop or emergency actions from generic AI.
+- **Other workshop machinery** (3D printers, CNC, laser, kiln, forge, casting, ventilation) may expose owner-approved process status, safety alerts, environmental readings and maintenance tasks only; no autonomous hazardous machine control.
+- **Network sequencing** may describe the safe startup and dependency relationships of Home Assistant VM, Caddy, MQTT, cameras, Ollama and the AI Hub. Any reboot, firewall, IP/DHCP, DNS, Tailscale or router change remains owner-supervised and reversible.
+- **Household grocery board** should track lists, quantities, pantry needs, approved family collaborators and pickup plans. Do not place orders, spend money or share shopping identities without a separate confirmation and provider consent.
+- Calendar, chores, user support, helpdesk and incidents should use shared identity and audit patterns without becoming shadow authorities for iCamp, Yard Workers, Rosie or Devil n Dove.
+
+## 17. Completion measurement, backlog and source/field separation
+
+Effective 2026-11-19, use `docs/contracts/hub-feature-progress367.json` as the **new 24-module scoped planning baseline**, not the previous narrower or sample business-category percentages. The original 15 Hub-native categories in the owner Build363 Word review averaged 68%; Build366 targeted 64% under a different narrower scope. Those cannot be directly compared with newly added vendor, network, printer and household features.
+
+For each in-scope module: assign an explicit 0–100 source coverage estimate, reason, applicable source/tests, distinct field-acceptance evidence, owner, blocker and next-build milestone. Overall feature estimate = arithmetic mean of 24 applicable module scores; delegated storefront, payroll, tax, invoices and accounting remain **N/A**, not fabricated zeros. Score field acceptance separately; define the blended planning estimate as 65% source and 35% field. The Build367 expanded 24-module baseline is **41.3%** source, **18%** field and **33.1%** blended. These are management estimates and do not prove device connectivity or independent security review.
+
+Adding a new applicable module must increase the denominator and may reduce completion. Do not advance the score just because a PR merged, a screenshot looks good or a build number changed. Target **5–10 source-feature percentage points per build within identified target modules**, only when enough complete implementation/test scope was delivered. Existing scores may decrease after a feature review discovers broken/unsupported workflows or a requirement is widened; document that transparently.
+
+The next **exactly 20 numbered build proposals are Builds 368–387**, listed with acceptance and safety controls in `docs/BUILD_QUEUE_368_387_HOME_NETWORK_MASTERS.md`. Reconcile this queue and scorecard after each owner-approved build; queue length counts explicit numbered proposals only, not an invented total number of builds to reach 100%.
+
+## 18. Master, Slave Shell and field authority boundaries
+
+Three Masters are **AI Data Platform**, **Rosevear AI Hub** (original Windows runtime) and **Rosevear Comms Hub**. Governed Slave Shells are **YW** and **iCamp**; direct company applications are **Rosie Dazzlers** and **Devil n Dove**. The Hub may independently inspect sanitized aggregate signed sources and persist local read receipts. It must not claim shared runtime or message connection unless a genuine independent signed end-to-end peer delivery/ACK, source identity, TLS transport, replay journal and owner decision have all been independently accepted.
+
+A verified TLS GET, a signed-file sample, a CI-green branch and an actual physical original-host boot are **different** evidence classes. Build367 implements an operator-run private TLS + Ed25519 source receipt and a read-only owner console; it does not enroll other providers, start workers or authorize the Comms QL-340C private receiver. A later explicit original-host ceremony and independent witness are required for receiver and autonomous boot acceptance. Default every unknown permission and runtime state to HOLD.
+
+## 19. Theme, layout, device and accessibility acceptance
+
+All available Master themes must retain readable backgrounds, foregrounds and focus outlines. No stark white Home Operations panel when Dark Mode is selected. Every form should have bounded field widths, sensible labels, date/time pickers, consistent timezones, usable error messages, touch-target sizes, keyboard navigation, zoom, screen-reader semantics and desktop/tablet/mobile acceptance. **Daylight and High Contrast remain independent user-selectable modes.** Cosmetic CI green alone cannot replace actual client/browser review.
