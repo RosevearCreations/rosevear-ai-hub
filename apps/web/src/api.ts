@@ -3746,3 +3746,28 @@ export interface SysopHistory366Snapshot {
 export function getSysopHistory366(signal?: AbortSignal): Promise<SysopHistory366Snapshot> {
   return authJson("GET", "/api/v1/system/sysop-history-366", undefined, signal);
 }
+
+/** Build 367: independently pinned private TLS GET receipts, not live Master ACKs. */
+export interface SysopLive367Snapshot {
+  schema: "rosevear.hub.live-sources367.v1";
+  sourceBuild: 367;
+  originalHost: "DESKTOP-AE894KC";
+  serverShell: "ai-data-platform";
+  status: "HOLD_NOT_ORIGINAL_HOST_OR_UNCONFIGURED" | "HOLD_NO_VALID_TLS_RECEIPT_LEDGER" | "LOCAL_TLS_SIGNED_SOURCE_RECEIPTS_ONLY";
+  sources: Array<{
+    appId: string;
+    receiptCount: number;
+    lastTlsSignedReceiptMs: number | null;
+    freshTlsSignedSourceOnly: boolean;
+  }>;
+  verifiedTlsSignedReceiptCount: number;
+  verifiedThreeMasterDeliveryAcks: 0;
+  threeMasterRuntimeGreen: false;
+  allSevenLiveConnected: false;
+  commsPrivateReceiverAuthorized: false;
+  physicalBootIndependentlyWitnessed: false;
+  webMutationsEnabled: false;
+}
+export function getSysopLive367(signal?: AbortSignal): Promise<SysopLive367Snapshot> {
+  return authJson("GET", "/api/v1/system/sysop-live-367", undefined, signal);
+}
