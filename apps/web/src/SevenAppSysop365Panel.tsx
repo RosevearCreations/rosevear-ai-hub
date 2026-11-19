@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getSysop365, type Sysop365Snapshot } from "./api";
 import { SysopTimeline366 } from "./SysopTimeline366";
+import { SysopLive367 } from "./SysopLive367";
 
 const IDs = [
   "ai-data-platform",
@@ -133,6 +134,7 @@ export function SevenAppSysop365Panel() {
     </div>
     <p>Never interpret a missing statistic as zero. No browser restart, install, key
       enrollment, device operation or messaging activation is available here.</p>
+    <SysopLive367 />
     <SysopTimeline366 />
   </section>;
 }
