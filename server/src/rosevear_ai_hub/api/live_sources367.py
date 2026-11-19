@@ -2,6 +2,7 @@
 
 No browser polling of peers, no saved credentials, no network side effects.
 """
+
 from __future__ import annotations
 
 import os
@@ -22,11 +23,7 @@ router = APIRouter(prefix="/api/v1/system/sysop-live-367", tags=["sysop367"])
 
 def local_live367(*, machine_name: str, windows_host: bool, now_ms: int) -> dict[str, Any]:
     original = windows_host and machine_name.upper() == ORIGINAL_HOST
-    private = (
-        os.environ.get("ROSEVEAR_SYSOP366_PRIVATE_JOURNAL_PATH")
-        if original
-        else None
-    )
+    private = os.environ.get("ROSEVEAR_SYSOP366_PRIVATE_JOURNAL_PATH") if original else None
     return summary367(Path(private) if private else None, now_ms=now_ms, original_host=original)
 
 
