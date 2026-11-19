@@ -26,7 +26,13 @@ MAX_KEY_BYTES = 8192
 
 
 def _canonical(value: dict[str, Any]) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
+    canonical = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    return canonical.encode("ascii")
 
 
 def _private_key(path_text: str | None) -> Ed25519PrivateKey:
