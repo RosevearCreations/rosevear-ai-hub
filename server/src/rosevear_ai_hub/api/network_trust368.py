@@ -86,9 +86,7 @@ def verify_owner_scope(payload: ScopeInput, now_ms: int) -> str:
         key = serialization.load_pem_public_key(raw)
         if not isinstance(key, Ed25519PublicKey):
             raise ValueError("Owner key must be Ed25519.")
-        public_raw = key.public_bytes(
-            serialization.Encoding.Raw, serialization.PublicFormat.Raw
-        )
+        public_raw = key.public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
         if not hmac.compare_digest(hashlib.sha256(public_raw).hexdigest(), pin):
             raise ValueError("Owner key pin mismatch.")
         key.verify(
@@ -166,7 +164,11 @@ class DecisionInput(BaseModel):
 
 def _active_scope(db: Session, ip: str, now: datetime) -> NetworkScope368 | None:
     for scope in db.scalars(select(NetworkScope368).order_by(NetworkScope368.id)).all():
-        expiry = scope.expires_at.replace(tzinfo=UTC) if scope.expires_at.tzinfo is None else scope.expires_at
+        expiry = (
+            scope.expires_at.replace(tzinfo=UTC)
+            if scope.expires_at.tzinfo is None
+            else scope.expires_at
+        )
         if expiry > now and ipaddress.IPv4Address(ip) in bounded_private_network(scope.cidr):
             return scope
     return None
@@ -174,8 +176,10 @@ def _active_scope(db: Session, ip: str, now: datetime) -> NetworkScope368 | None
 
 def _risks(db: Session, device: NetworkDevice368) -> list[str]:
     observations = db.scalars(
-        select(NetworkObservation368).where(NetworkObservation368.device_id == device.id)
-        .order_by(NetworkObservation368.id.desc()).limit(50)
+        select(NetworkObservation368)
+        .where(NetworkObservation368.device_id == device.id)
+        .order_by(NetworkObservation368.id.desc())
+        .limit(50)
     ).all()
     if not observations:
         return ["NO_OBSERVATION"]
@@ -184,10 +188,13 @@ def _risks(db: Session, device: NetworkDevice368) -> list[str]:
     if any(row.ip != latest.ip for row in observations[1:]):
         flags.append("IDENTITY_IP_CHANGED_REVIEW")
     other = db.scalars(
-        select(NetworkObservation368).where(
+        select(NetworkObservation368)
+        .where(
             NetworkObservation368.ip == latest.ip,
             NetworkObservation368.device_id != device.id,
-        ).order_by(NetworkObservation368.id.desc()).limit(50)
+        )
+        .order_by(NetworkObservation368.id.desc())
+        .limit(50)
     ).all()
     # Historical DHCP lease reuse is a warning, not proof of spoofing.
     if other:
@@ -206,10 +213,14 @@ def _state(db: Session) -> dict[str, object]:
     ).all()
     grouped: dict[int, list[dict[str, object]]] = {}
     for item in observations:
-        grouped.setdefault(item.device_id, []).append({
-            "ip": item.ip, "leaseRef": item.lease_ref, "observedAt": item.observed_at.isoformat(),
-            "provenance": "OWNER_ENTERED_UNVERIFIED",
-        })
+        grouped.setdefault(item.device_id, []).append(
+            {
+                "ip": item.ip,
+                "leaseRef": item.lease_ref,
+                "observedAt": item.observed_at.isoformat(),
+                "provenance": "OWNER_ENTERED_UNVERIFIED",
+            }
+        )
     return {
         "schema": "rosevear.network-trust.v368",
         "mode": "MANUAL_REVIEW_ONLY",
@@ -220,18 +231,29 @@ def _state(db: Session) -> dict[str, object]:
             os.environ.get("ROSEVEAR_NETWORK368_OWNER_PUBLIC_KEY_PATH")
             and os.environ.get("ROSEVEAR_NETWORK368_OWNER_PUBLIC_KEY_PIN")
         ),
-        "scopes": [{
-            "id": row.id, "cidr": row.cidr, "label": row.label,
-            "expiryMs": int(row.expires_at.replace(tzinfo=UTC).timestamp() * 1000),
-            "active": row.expires_at.replace(tzinfo=UTC) > now,
-            "revision": row.revision,
-        } for row in scopes],
-        "devices": [{
-            "id": row.id, "source": row.source, "sourceId": row.source_id,
-            "decision": row.decision, "revision": row.revision,
-            "history": grouped.get(row.id, []),
-            "riskFlags": _risks(db, row),
-        } for row in devices],
+        "scopes": [
+            {
+                "id": row.id,
+                "cidr": row.cidr,
+                "label": row.label,
+                "expiryMs": int(row.expires_at.replace(tzinfo=UTC).timestamp() * 1000),
+                "active": row.expires_at.replace(tzinfo=UTC) > now,
+                "revision": row.revision,
+            }
+            for row in scopes
+        ],
+        "devices": [
+            {
+                "id": row.id,
+                "source": row.source,
+                "sourceId": row.source_id,
+                "decision": row.decision,
+                "revision": row.revision,
+                "history": grouped.get(row.id, []),
+                "riskFlags": _risks(db, row),
+            }
+            for row in devices
+        ],
     }
 
 
@@ -269,8 +291,12 @@ def approve_scope(payload: ScopeInput, owner: Owner, db: DB) -> dict[str, object
     row.approved_at = now
     db.flush()
     record_audit_event(
-        db, actor_user_id=owner.id, event_type="network368.scope.approved",
-        object_type="network_scope", object_id=str(row.id), action="approve",
+        db,
+        actor_user_id=owner.id,
+        event_type="network368.scope.approved",
+        object_type="network_scope",
+        object_id=str(row.id),
+        action="approve",
         arguments={"cidr": row.cidr, "revision": row.revision},
         result={"signed": True, "network_scanned": False},
     )
@@ -284,28 +310,39 @@ def add_observation(payload: ObservationInput, owner: Owner, db: DB) -> dict[str
     scope = _active_scope(db, payload.ip, now)
     if scope is None:
         raise HTTPException(status_code=403, detail="No current signed scope covers this IP.")
-    row = db.scalar(select(NetworkDevice368).where(
-        NetworkDevice368.source == payload.source,
-        NetworkDevice368.source_id == payload.source_id,
-    ))
+    row = db.scalar(
+        select(NetworkDevice368).where(
+            NetworkDevice368.source == payload.source,
+            NetworkDevice368.source_id == payload.source_id,
+        )
+    )
     if row is None:
         row = NetworkDevice368(
-            source=payload.source, source_id=payload.source_id,
-            decision="needs_review", revision=1,
+            source=payload.source,
+            source_id=payload.source_id,
+            decision="needs_review",
+            revision=1,
         )
         db.add(row)
         db.flush()
     elif row.decision == "trusted":
         # An incoming claim must not silently inherit trust from an old address.
-        last = db.scalar(select(NetworkObservation368).where(
-            NetworkObservation368.device_id == row.id
-        ).order_by(NetworkObservation368.id.desc()).limit(1))
+        last = db.scalar(
+            select(NetworkObservation368)
+            .where(NetworkObservation368.device_id == row.id)
+            .order_by(NetworkObservation368.id.desc())
+            .limit(1)
+        )
         if last is not None and last.ip != payload.ip:
             row.decision = "needs_review"
             row.revision += 1
     obs = NetworkObservation368(
-        device_id=row.id, scope_id=scope.id, ip=payload.ip,
-        lease_ref=payload.lease_ref, observed_by_user_id=owner.id, observed_at=now,
+        device_id=row.id,
+        scope_id=scope.id,
+        ip=payload.ip,
+        lease_ref=payload.lease_ref,
+        observed_by_user_id=owner.id,
+        observed_at=now,
     )
     db.add(obs)
     db.flush()
@@ -314,8 +351,12 @@ def add_observation(payload: ObservationInput, owner: Owner, db: DB) -> dict[str
         row.decision = "needs_review"
         row.revision += 1
     record_audit_event(
-        db, actor_user_id=owner.id, event_type="network368.claim.recorded",
-        object_type="network_device", object_id=str(row.id), action="record",
+        db,
+        actor_user_id=owner.id,
+        event_type="network368.claim.recorded",
+        object_type="network_device",
+        object_id=str(row.id),
+        action="record",
         arguments={"source": row.source, "riskFlags": risks},
         result={"provenance": "OWNER_ENTERED_UNVERIFIED", "network_scanned": False},
     )
@@ -332,12 +373,18 @@ def review_decision(payload: DecisionInput, owner: Owner, db: DB) -> dict[str, o
         raise HTTPException(status_code=409, detail="Identity changed; refresh first.")
     flags = _risks(db, row)
     if payload.decision == "trusted" and flags:
-        raise HTTPException(status_code=409, detail="Cannot trust an identity with unresolved risk.")
+        raise HTTPException(
+            status_code=409, detail="Cannot trust an identity with unresolved risk."
+        )
     row.decision = payload.decision
     row.revision += 1
     record_audit_event(
-        db, actor_user_id=owner.id, event_type="network368.identity.reviewed",
-        object_type="network_device", object_id=str(row.id), action="review",
+        db,
+        actor_user_id=owner.id,
+        event_type="network368.identity.reviewed",
+        object_type="network_device",
+        object_id=str(row.id),
+        action="review",
         arguments={"decision": row.decision, "revision": row.revision},
         result={"device_adopted": False, "controls_enabled": False},
     )
