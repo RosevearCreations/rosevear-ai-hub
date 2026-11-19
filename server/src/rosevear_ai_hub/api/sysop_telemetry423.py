@@ -2,6 +2,7 @@
 
 This endpoint is not an actuator and never proves an independently witnessed reboot.
 """
+
 from __future__ import annotations
 
 import json
