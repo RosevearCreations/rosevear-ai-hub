@@ -123,18 +123,6 @@ jobs:
           cache: pip
       - name: Install backend and development dependencies
         run: python -m pip install --upgrade pip && pip install -e ".[dev]"
-      - name: Build 368 temporary formatting diagnostic (remove before final merge)
-        shell: bash
-        run: |
-          ruff format server/src/rosevear_ai_hub/api/network_trust368.py server/src/rosevear_ai_hub/models.py server/src/rosevear_ai_hub/main.py server/tests/test_network_trust368.py
-          python - <<'PY'
-          import base64
-          from pathlib import Path
-          for path in ('server/src/rosevear_ai_hub/api/network_trust368.py', 'server/src/rosevear_ai_hub/models.py', 'server/src/rosevear_ai_hub/main.py', 'server/tests/test_network_trust368.py'):
-              encoded = base64.b64encode(Path(path).read_bytes()).decode('ascii')
-              for offset in range(0, len(encoded), 1600):
-                  print('FORMAT368|' + path + '|' + str(offset // 1600) + '|' + encoded[offset:offset + 1600])
-          PY
       - name: Lint
         run: ruff check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
       - name: Format check
