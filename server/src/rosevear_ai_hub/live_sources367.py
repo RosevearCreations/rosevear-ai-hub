@@ -20,7 +20,6 @@ from urllib.parse import urlsplit
 
 import httpx
 
-from rosevear_ai_hub.api.server_shell364 import protected_key364
 from rosevear_ai_hub.api.server_shell365 import TAG
 from rosevear_ai_hub.master_shell349 import ORIGINAL_HOST
 from rosevear_ai_hub.seven_app_stats365 import APPS, HEX40, HEX64, verify_peer365
@@ -41,7 +40,6 @@ DDL = """CREATE TABLE IF NOT EXISTS verified_tls_sources367 (
     source_commit TEXT NOT NULL,
     received_ms INTEGER NOT NULL,
     issued_ms INTEGER NOT NULL,
-    PRIMARYKEY_UNUSED TEXT DEFAULT NULL,
     UNIQUE(app_id,event_id)
 )"""
 # Only non-sensitive event identifiers/metadata; no URL, IP, keys, token or raw JSON.
