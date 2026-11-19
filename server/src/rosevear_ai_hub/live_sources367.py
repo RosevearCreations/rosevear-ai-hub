@@ -3,6 +3,7 @@
 This module NEVER schedules polling, activates Comms, controls devices, or claims
 that an HTTPS fetch is an independently verified three-Master delivery ACK.
 """
+
 from __future__ import annotations
 
 import ipaddress
@@ -161,9 +162,13 @@ def record_transport_receipt367(
         raise ValueError("HOLD_SYSOP367_TLS_NOT_AUTHENTICATED")
     # The original journal enforces durable nonce/event replay protection and privacy.
     append_verified366(
-        journal, app_id=app_id, signed_envelope=envelope,
-        public_key_pem=public_key, trusted_pin=pin,
-        expected_commit=expected_commit, now_ms=now_ms,
+        journal,
+        app_id=app_id,
+        signed_envelope=envelope,
+        public_key_pem=public_key,
+        trusted_pin=pin,
+        expected_commit=expected_commit,
+        now_ms=now_ms,
     )
     safe = _safe_path(journal, create=False)
     with closing(sqlite3.connect(str(safe), timeout=5)) as db:
@@ -173,8 +178,13 @@ def record_transport_receipt367(
                 """INSERT INTO verified_tls_sources367
                    (app_id,event_id,source_commit,received_ms,issued_ms)
                    VALUES (?,?,?,?,?)""",
-                (app_id, envelope["payload"]["eventId"], expected_commit,
-                 now_ms, envelope["payload"]["issuedAtMs"]),
+                (
+                    app_id,
+                    envelope["payload"]["eventId"],
+                    expected_commit,
+                    now_ms,
+                    envelope["payload"]["issuedAtMs"],
+                ),
             )
             db.execute(
                 "DELETE FROM verified_tls_sources367 WHERE received_ms < ?",
@@ -210,18 +220,28 @@ def collect_once367(app_id: str, *, now_ms: int | None = None) -> dict[str, Any]
             verify=context, trust_env=False, follow_redirects=False, timeout=5.0
         ) as client:
             with client.stream(
-                "GET", url,
+                "GET",
+                url,
                 headers={"x-rosevear-telemetry-token": token, "accept": "application/json"},
             ) as response:
                 envelope = validate_get367(
-                    response, app_id=app_id, public_key=key,
-                    pin=pin, expected_commit=commit, now_ms=now,
+                    response,
+                    app_id=app_id,
+                    public_key=key,
+                    pin=pin,
+                    expected_commit=commit,
+                    now_ms=now,
                 )
     except (httpx.HTTPError, ssl.SSLError):
         raise ValueError("HOLD_SYSOP367_PRIVATE_TLS_FETCH_FAILED") from None
     return record_transport_receipt367(
-        journal, app_id=app_id, envelope=envelope,
-        public_key=key, pin=pin, expected_commit=commit, now_ms=now,
+        journal,
+        app_id=app_id,
+        envelope=envelope,
+        public_key=key,
+        pin=pin,
+        expected_commit=commit,
+        now_ms=now,
         transport_authenticated=True,
     )
 
@@ -229,12 +249,19 @@ def collect_once367(app_id: str, *, now_ms: int | None = None) -> dict[str, Any]
 def summary367(journal: Path | None, *, now_ms: int, original_host: bool) -> dict[str, Any]:
     """Only records local signed TLS GET receipts; never asserts Master CONNECTED."""
     result: dict[str, Any] = {
-        "schema": SCHEMA, "sourceBuild": 367,
-        "originalHost": ORIGINAL_HOST, "serverShell": "ai-data-platform",
+        "schema": SCHEMA,
+        "sourceBuild": 367,
+        "originalHost": ORIGINAL_HOST,
+        "serverShell": "ai-data-platform",
         "status": "HOLD_NOT_ORIGINAL_HOST_OR_UNCONFIGURED",
         "sources": [
-            {"appId": name, "receiptCount": 0, "lastTlsSignedReceiptMs": None,
-             "freshTlsSignedSourceOnly": False} for name in APPS
+            {
+                "appId": name,
+                "receiptCount": 0,
+                "lastTlsSignedReceiptMs": None,
+                "freshTlsSignedSourceOnly": False,
+            }
+            for name in APPS
         ],
         "verifiedTlsSignedReceiptCount": 0,
         "verifiedThreeMasterDeliveryAcks": 0,
@@ -253,22 +280,32 @@ def summary367(journal: Path | None, *, now_ms: int, original_host: bool) -> dic
                 """SELECT app_id, event_id, source_commit, received_ms
                    FROM verified_tls_sources367 ORDER BY id DESC LIMIT 2048"""
             ).fetchall()
-        ids: set[tuple[str,str]] = set()
+        ids: set[tuple[str, str]] = set()
         buckets: dict[str, list[int]] = {name: [] for name in APPS}
         for app_id, event_id, commit, received in rows:
-            if (app_id not in APPS or not isinstance(event_id,str)
-                or (app_id,event_id) in ids or not isinstance(received,int)
-                or received > now_ms + 2000 or received < now_ms - 7 * 86_400_000
-                or not isinstance(commit,str) or HEX40.fullmatch(commit) is None):
+            if (
+                app_id not in APPS
+                or not isinstance(event_id, str)
+                or (app_id, event_id) in ids
+                or not isinstance(received, int)
+                or received > now_ms + 2000
+                or received < now_ms - 7 * 86_400_000
+                or not isinstance(commit, str)
+                or HEX40.fullmatch(commit) is None
+            ):
                 raise ValueError("HOLD_SYSOP367_RECEIPT_INVALID")
-            ids.add((app_id,event_id))
+            ids.add((app_id, event_id))
             buckets[app_id].append(received)
         result["sources"] = [
-            {"appId": name, "receiptCount": len(buckets[name]),
-             "lastTlsSignedReceiptMs": max(buckets[name]) if buckets[name] else None,
-             "freshTlsSignedSourceOnly": bool(
-                 buckets[name] and now_ms - max(buckets[name]) <= TTL_MS
-             )} for name in APPS
+            {
+                "appId": name,
+                "receiptCount": len(buckets[name]),
+                "lastTlsSignedReceiptMs": max(buckets[name]) if buckets[name] else None,
+                "freshTlsSignedSourceOnly": bool(
+                    buckets[name] and now_ms - max(buckets[name]) <= TTL_MS
+                ),
+            }
+            for name in APPS
         ]
         result["verifiedTlsSignedReceiptCount"] = len(rows)
         result["status"] = "LOCAL_TLS_SIGNED_SOURCE_RECEIPTS_ONLY"
