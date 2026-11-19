@@ -6,6 +6,7 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import "./styles.css";
 import "./midnight-theme.css";
 import "./modern2026.css";
+import "./homeContrast366Hotfix.css";
 
 const root = document.getElementById("root");
 
