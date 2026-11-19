@@ -34,6 +34,7 @@ from rosevear_ai_hub.api.integration_v1 import router as integration_v1_router
 from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.knowledge_reviews import router as knowledge_reviews_router
+from rosevear_ai_hub.api.live_sources367 import router as live_sources367_router
 from rosevear_ai_hub.api.maintenance_actions import router as maintenance_actions_router
 from rosevear_ai_hub.api.master_shell_continuity335 import (
     router as master_shell_continuity335_router,
@@ -115,7 +116,6 @@ from rosevear_ai_hub.api.server_shell364 import router as server_shell364_router
 from rosevear_ai_hub.api.server_shell365 import router as server_shell365_router
 from rosevear_ai_hub.api.speech import router as speech_router
 from rosevear_ai_hub.api.sysop_history366 import router as sysop_history366_router
-from rosevear_ai_hub.api.live_sources367 import router as live_sources367_router
 from rosevear_ai_hub.api.sysop_telemetry423 import router as sysop_telemetry423_router
 from rosevear_ai_hub.api.tools import router as tools_router
 from rosevear_ai_hub.api.tts import router as tts_router
