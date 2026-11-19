@@ -25,6 +25,7 @@ from rosevear_ai_hub.api.chat import router as chat_router
 from rosevear_ai_hub.api.confirmations import router as confirmations_router
 from rosevear_ai_hub.api.device_discovery import router as device_discovery_router
 from rosevear_ai_hub.api.device_registry import router as device_registry_router
+from rosevear_ai_hub.api.network_trust368 import router as network_trust368_router
 from rosevear_ai_hub.api.frigate import router as frigate_router
 from rosevear_ai_hub.api.global_search import router as global_search_router
 from rosevear_ai_hub.api.home_assistant import router as home_assistant_router
@@ -266,6 +267,7 @@ def create_app() -> FastAPI:
     application.include_router(camera_reviews_router)
     application.include_router(device_registry_router)
     application.include_router(device_discovery_router)
+    application.include_router(network_trust368_router)
     application.include_router(workshop_router, dependencies=[Depends(require_authenticated)])
     application.include_router(workshop_jobs_router, dependencies=[Depends(require_authenticated)])
     application.include_router(
