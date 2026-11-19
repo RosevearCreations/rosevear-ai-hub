@@ -1,6 +1,3 @@
-import hashlib
-from pathlib import Path
-
 import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -8,7 +5,9 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from rosevear_ai_hub.api import sysop_telemetry423
 
 
-def test_build423_hub_source_is_signed_non_authorizing_and_boot_is_only_observed(tmp_path, monkeypatch):
+def test_build423_hub_source_is_signed_non_authorizing_and_boot_is_only_observed(
+    tmp_path, monkeypatch
+):
     private = Ed25519PrivateKey.generate()
     key_path = tmp_path / "hub423.pem"
     key_path.write_bytes(
@@ -32,7 +31,10 @@ def test_build423_hub_source_is_signed_non_authorizing_and_boot_is_only_observed
     assert payload["authorizesAction"] is False
     assert payload["sysop"]["bootTimeMs"] == 1_799_999_000_000
     assert payload["sysop"]["rebootIsIndependentlyWitnessed"] is False
-    private.public_key().verify(bytes.fromhex(envelope["signature"]), sysop_telemetry423._canonical(payload))
+    private.public_key().verify(
+        bytes.fromhex(envelope["signature"]),
+        sysop_telemetry423._canonical(payload),
+    )
 
 
 def test_build423_hub_source_fails_closed_off_original_host(monkeypatch):
