@@ -13,165 +13,205 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 
 ## Proposed build queue
 
-### Build 368 — 368
+### Build 368 — Private network trust foundation & safe device identity
 
-**Deliver:** Private network trust foundation & safe device identity
+**Deliver:** Owner-approved local device identity registry; trusted network segments, lease/IP history, device provenance; review-only privacy-safe discovery policy..
 
-**Completion slices:** Owner-approved local device identity registry; trusted network segments, lease/IP history, device provenance; review-only privacy-safe discovery policy.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Tracked modules:** Security/roles; network discovery
 
-**Acceptance / security gate:** Security/roles; network discovery
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-### Build 369 — 369
+**Acceptance / security gate:** No background subnet scan; signed owner scope, least privilege, spoof/rogue-device negative tests.
 
-**Deliver:** Whole-home Home Assistant inventory reconciliation
+### Build 369 — Whole-home Home Assistant inventory reconciliation
 
-**Completion slices:** Unify Home Assistant areas, entities, devices, MQTT IDs, duplicate/missing/renamed states; claim-first device onboarding with source and last-seen.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Deliver:** Unify Home Assistant areas, entities, devices, MQTT IDs, duplicate/missing/renamed states; claim-first device onboarding with source and last-seen..
 
-**Acceptance / security gate:** Home Assistant inventory; other provider coverage
+**Tracked modules:** Home Assistant inventory; other provider coverage
 
-### Build 370 — 370
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-**Deliver:** Creality Pro 5 3D-printer process observability
+**Acceptance / security gate:** Owner recognizes actual missing devices across room views; unknown remains unknown and no forced adoption.
 
-**Completion slices:** Confirm exact Creality printer model and current firmware; offer read-only adapter capability for approved OctoPrint/Moonraker/Creality path; expose print progress, temperatures, job history, pause/offline and safe owner alerts.. Target +5–10 module points only after source tests and applicable operator evidence.
+### Build 370 — Creality Pro 5 3D-printer process observability
 
-**Acceptance / security gate:** Maker process monitoring; workshop registry
+**Deliver:** Confirm exact Creality printer model and current firmware; offer read-only adapter capability for approved OctoPrint/Moonraker/Creality path; expose print progress, temperatures, job history, pause/offline and safe owner alerts..
 
-### Build 371 — 371
+**Tracked modules:** Maker process monitoring; workshop registry
 
-**Deliver:** MQTT, Zigbee, Z-Wave, Thread and Bluetooth provenance
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-**Completion slices:** Read-only Home Assistant/MQTT bridge inventory, protocol compatibility, connection health and duplicate-link triage; scoped topic and permission map.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Acceptance / security gate:** Confirm exact printer model, use genuine process readings; no remote heating, motor motion or uncontrolled start/stop.
 
-**Acceptance / security gate:** MQTT/sensors; other provider coverage
+### Build 371 — MQTT, Zigbee, Z-Wave, Thread and Bluetooth provenance
 
-### Build 372 — 372
+**Deliver:** Read-only Home Assistant/MQTT bridge inventory, protocol compatibility, connection health and duplicate-link triage; scoped topic and permission map..
 
-**Deliver:** Alexa voice interoperability and consent
+**Tracked modules:** MQTT/sensors; other provider coverage
 
-**Completion slices:** Document/implement owner-approved Alexa-to-Home Assistant exposure policy, per-entity allowlists, consent and voice audit; fallback states when cloud service unavailable.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-**Acceptance / security gate:** Alexa integration; safe automations
+**Acceptance / security gate:** No arbitrary MQTT publishing, pairing, radio commands or credential scraping; real device reconciliation per available protocol.
 
-### Build 373 — 373
+### Build 372 — Alexa voice interoperability and consent
 
-**Deliver:** Apple Home, HomeKit and Matter bridging
+**Deliver:** Document/implement owner-approved Alexa-to-Home Assistant exposure policy, per-entity allowlists, consent and voice audit; fallback states when cloud service unavailable..
 
-**Completion slices:** Inventory Home Assistant HomeKit Bridge and Matter devices, Apple Home visibility, pairing custody and iOS permissions; private-device status linking.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Tracked modules:** Alexa integration; safe automations
 
-**Acceptance / security gate:** Apple Home/Matter; phone/tablet UX
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-### Build 374 — 374
+**Acceptance / security gate:** Use a supported Alexa/provider path, owner account permission and consent; no purchases, locks, security alarms or hazardous machinery.
 
-**Deliver:** Samsung SmartThings and cross-platform device coverage
+### Build 373 — Apple Home, HomeKit and Matter bridging
 
-**Completion slices:** Owner-gated SmartThings connection/permission review, room/device matching, stale vendor state and Android/Tizen access survey; read-only first.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Deliver:** Inventory Home Assistant HomeKit Bridge and Matter devices, Apple Home visibility, pairing custody and iOS permissions; private-device status linking..
 
-**Acceptance / security gate:** Samsung SmartThings; other vendor coverage
+**Tracked modules:** Apple Home/Matter; phone/tablet UX
 
-### Build 375 — 375
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-**Deliver:** Cameras, doorbells and event reliability
+**Acceptance / security gate:** Owner-supervised supported hardware pairing; zero HomeKit credentials in browser and revoke/rollback support.
 
-**Completion slices:** Combine supported local RTSP/ONVIF/go2rtc/Frigate capabilities, vendor doorbells, privacy-controlled streams, events and offline cues.. Target +5–10 module points only after source tests and applicable operator evidence.
+### Build 374 — Samsung SmartThings and cross-platform device coverage
 
-**Acceptance / security gate:** Cameras/doorbells; network health
+**Deliver:** Owner-gated SmartThings connection/permission review, room/device matching, stale vendor state and Android/Tizen access survey; read-only first..
 
-### Build 376 — 376
+**Tracked modules:** Samsung SmartThings; other vendor coverage
 
-**Deliver:** Safe automation sequencing and dependency orchestration
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-**Completion slices:** Home Assistant rule graph, event causality, rate limits, dry-run previews, manual approvals and recovery when network/provider fails.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Acceptance / security gate:** Supported vendor auth, approved device scope and clean credential revocation; no unapproved cross-platform commands.
 
-**Acceptance / security gate:** Safe automations; network sequencing
+### Build 375 — Cameras, doorbells and event reliability
 
-### Build 377 — 377
+**Deliver:** Combine supported local RTSP/ONVIF/go2rtc/Frigate capabilities, vendor doorbells, privacy-controlled streams, events and offline cues..
 
-**Deliver:** Workshop process-health command centre
+**Tracked modules:** Cameras/doorbells; network health
 
-**Completion slices:** Read-only task and machine dashboards for 3D printing, CNC, laser engraving, kilns, casting, ventilation, sensors and maintenance; owner-supplied measurements only.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-**Acceptance / security gate:** Maker process monitoring; workshop inventory
+**Acceptance / security gate:** Actual moving video and permission tests; vendor limitations and offline cameras cannot count as healthy.
 
-### Build 378 — 378
+### Build 376 — Safe automation sequencing and dependency orchestration
 
-**Deliver:** Grocery ordering board and pantry
+**Deliver:** Home Assistant rule graph, event causality, rate limits, dry-run previews, manual approvals and recovery when network/provider fails..
 
-**Completion slices:** Shared household grocery wish list, pantry quantity/expiration, recurring essentials, price notes, family approvals, printable/pickup list.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Tracked modules:** Safe automations; network sequencing
 
-**Acceptance / security gate:** Grocery/pantry board; household tasks
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-### Build 379 — 379
+**Acceptance / security gate:** Deterministic no-double-fire tests and exact-action approvals; never automate kilns, lasers, CNC, locks or safety systems.
 
-**Deliver:** Family calendar, chores and reminders
+### Build 377 — Workshop process-health command centre
 
-**Completion slices:** Private household schedules, tasks, supplies, appointments, recurring chores and reminder evidence; family-specific role permissions.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Deliver:** Read-only task and machine dashboards for 3D printing, CNC, laser engraving, kilns, casting, ventilation, sensors and maintenance; owner-supplied measurements only..
 
-**Acceptance / security gate:** Household calendar/chores; notifications
+**Tracked modules:** Maker process monitoring; workshop inventory
 
-### Build 380 — 380
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-**Deliver:** Private AI helper across home and workshop
+**Acceptance / security gate:** Live sensor readings only where actually installed, with source timestamps; monitoring/alerts not machine control.
 
-**Completion slices:** Connect approved household knowledge and manuals to local Ollama chat, bounded voice, citations, per-device context and offline graceful fallback.. Target +5–10 module points only after source tests and applicable operator evidence.
+### Build 378 — Grocery ordering board and pantry
 
-**Acceptance / security gate:** Local AI chat/voice; knowledge/search
+**Deliver:** Shared household grocery wish list, pantry quantity/expiration, recurring essentials, price notes, family approvals, printable/pickup list..
 
-### Build 381 — 381
+**Tracked modules:** Grocery/pantry board; household tasks
 
-**Deliver:** Resilient Windows boot, network sequencing & local recovery
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-**Completion slices:** Verify Home Assistant VM, MQTT, Caddy, Ollama, go2rtc, Vite/API dependencies and private IP reservation; staged health/failover, rollback and pre-login evidence.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Acceptance / security gate:** Accessible grocery-board create/edit/merge/print tests, family role scoping; no automatic orders or payments.
 
-**Acceptance / security gate:** Network sequencing; backup/Windows recovery
+### Build 379 — Family calendar, chores and reminders
 
-### Build 382 — 382
+**Deliver:** Private household schedules, tasks, supplies, appointments, recurring chores and reminder evidence; family-specific role permissions..
 
-**Deliver:** Zero-trust security, secrets & independent restore
+**Tracked modules:** Household calendar/chores; notifications
 
-**Completion slices:** Role/tenant/network policies, MFA feasibility, secure token and TLS key rotation, dependency/SBOM reviews, backup retention and offline restore drill.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-**Acceptance / security gate:** Security/access; privacy/audit; backup
+**Acceptance / security gate:** Timezone/date pickers, safe household roles, notification acknowledgments and missed-event negative tests.
 
-### Build 383 — 383
+### Build 380 — Private AI helper across home and workshop
 
-**Deliver:** Three-Master actual signed peer delivery
+**Deliver:** Connect approved household knowledge and manuals to local Ollama chat, bounded voice, citations, per-device context and offline graceful fallback..
 
-**Completion slices:** Owner-enroll independent AI Data Platform, AI Hub and Comms principals, per-peer private CA and Ed25519 pins, signed delivery ACK, replay journal and source-bound uptime.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Tracked modules:** Local AI chat/voice; knowledge/search
 
-**Acceptance / security gate:** Three-Master communications
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-### Build 384 — 384
+**Acceptance / security gate:** Local model fallback, citation checks, consented voice; no LLM-driven hazardous or security controls.
 
-**Deliver:** Seven-application governed intake and analytics
+### Build 381 — Resilient Windows boot, network sequencing & local recovery
 
-**Completion slices:** Verify signed non-identifying statistics from YW, iCamp, Rosie, Devil plus three Masters; tenant/role data contracts, source-of-truth dashboards and performance.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Deliver:** Verify Home Assistant VM, MQTT, Caddy, Ollama, go2rtc, Vite/API dependencies and private IP reservation; staged health/failover, rollback and pre-login evidence..
 
-**Acceptance / security gate:** Seven-app governance; three-Master integration
+**Tracked modules:** Network sequencing; backup/Windows recovery
 
-### Build 385 — 385
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-**Deliver:** IT service desk, performance and process monitoring
+**Acceptance / security gate:** Supervised reboot, real HA VM/MQTT/Caddy/Ollama/go2rtc recovery and off-device HTTPS; no blind firewall or router modifications.
 
-**Completion slices:** Service/process uptime, reboots, alerts, diagnostics, support tickets, complaints, evidence/SLA history, LAN health and budget visibility.. Target +5–10 module points only after source tests and applicable operator evidence.
+### Build 382 — Zero-trust security, secrets & independent restore
 
-**Acceptance / security gate:** IT ops/support; network health
+**Deliver:** Role/tenant/network policies, MFA feasibility, secure token and TLS key rotation, dependency/SBOM reviews, backup retention and offline restore drill..
 
-### Build 386 — 386
+**Tracked modules:** Security/access; privacy/audit; backup
 
-**Deliver:** Unified sixteen-theme cosmetic and accessibility acceptance
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-**Completion slices:** Complete shared Master theme parity, fix white-on-white panels, text field lengths, date/time inputs, validation, responsive forms, keyboard, contrast and zoom.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Acceptance / security gate:** Independent security denial tests, secret rotation and real off-machine restore rehearsal, least privilege throughout.
 
-**Acceptance / security gate:** Themes/accessibility; phone/tablet UX; admin UX
+### Build 383 — Three-Master actual signed peer delivery
 
-### Build 387 — 387
+**Deliver:** Owner-enroll independent AI Data Platform, AI Hub and Comms principals, per-peer private CA and Ed25519 pins, signed delivery ACK, replay journal and source-bound uptime..
 
-**Deliver:** End-to-end household and Masters acceptance campaign
+**Tracked modules:** Three-Master communications
 
-**Completion slices:** Demonstrate real whole-house discovery, a verified printer job monitor, a camera stream, grocery list, safe automation, Master ACK, backups and cross-device restoration.. Target +5–10 module points only after source tests and applicable operator evidence.
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
 
-**Acceptance / security gate:** All 24 Hub-native metrics
+**Acceptance / security gate:** Real source identities, owner-approved pinned private TLS plus separately signed end-to-end Master ACK and rollback; QL-340C still separately gated.
+
+### Build 384 — Seven-application governed intake and analytics
+
+**Deliver:** Verify signed non-identifying statistics from YW, iCamp, Rosie, Devil plus three Masters; tenant/role data contracts, source-of-truth dashboards and performance..
+
+**Tracked modules:** Seven-app governance; three-Master integration
+
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
+
+**Acceptance / security gate:** All seven actual source producers, tenant/redaction checks, real ACK/replay protection, no fabricated CONNECTED.
+
+### Build 385 — IT service desk, performance and process monitoring
+
+**Deliver:** Service/process uptime, reboots, alerts, diagnostics, support tickets, complaints, evidence/SLA history, LAN health and budget visibility..
+
+**Tracked modules:** IT ops/support; network health
+
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
+
+**Acceptance / security gate:** Real process counters, diagnostic evidence and permissioned incident follow-up; no fabricated SLA or automatic restart.
+
+### Build 386 — Unified sixteen-theme cosmetic and accessibility acceptance
+
+**Deliver:** Complete shared Master theme parity, fix white-on-white panels, text field lengths, date/time inputs, validation, responsive forms, keyboard, contrast and zoom..
+
+**Tracked modules:** Themes/accessibility; phone/tablet UX; admin UX
+
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
+
+**Acceptance / security gate:** 16-theme desktop/tablet/phone visual tests, text input widths, date picker usability, WCAG contrast and keyboard focus.
+
+### Build 387 — End-to-end household and Masters acceptance campaign
+
+**Deliver:** Demonstrate real whole-house discovery, a verified printer job monitor, a camera stream, grocery list, safe automation, Master ACK, backups and cross-device restoration..
+
+**Tracked modules:** All 24 Hub-native metrics
+
+**Target:** +5–10 points within the targeted module(s), only after coded acceptance and applicable field evidence.
+
+**Acceptance / security gate:** Actual household run-through, independent original-host witnesses, backup/restore, role separation, security review; no auto 100%.
 
 ## Dependency and rollback sequence
 - **368–371:** Trust/identity before network discovery, whole-home inventory, printer and radio protocol bridges. Do not scan all devices to "find everything" without a bounded owner consent scope.
