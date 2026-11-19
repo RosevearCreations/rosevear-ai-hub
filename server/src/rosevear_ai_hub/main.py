@@ -94,6 +94,7 @@ from rosevear_ai_hub.api.master_shell_witness332 import (
     router as master_shell_witness332_router,
 )
 from rosevear_ai_hub.api.mqtt import router as mqtt_router
+from rosevear_ai_hub.api.network_trust368 import router as network_trust368_router
 from rosevear_ai_hub.api.notifications import router as notifications_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
@@ -266,6 +267,7 @@ def create_app() -> FastAPI:
     application.include_router(camera_reviews_router)
     application.include_router(device_registry_router)
     application.include_router(device_discovery_router)
+    application.include_router(network_trust368_router)
     application.include_router(workshop_router, dependencies=[Depends(require_authenticated)])
     application.include_router(workshop_jobs_router, dependencies=[Depends(require_authenticated)])
     application.include_router(
