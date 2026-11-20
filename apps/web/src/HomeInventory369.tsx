@@ -6,6 +6,7 @@ import {
 } from "./api";
 
 type ReviewDecision = "unclaimed" | "claimed" | "investigate" | "unsupported";
+const reviewDecisions: ReviewDecision[] = ["claimed", "investigate", "unsupported", "unclaimed"];
 
 /** One owner-initiated HA snapshot, not a LAN scan or a physical-device verifier. */
 export function HomeInventory369({ role }: { role: AuthRole }) {
@@ -142,8 +143,7 @@ export function HomeInventory369({ role }: { role: AuthRole }) {
                     : "No HA presence evidence (manual note)"}</p>
                   <p>Review: {item.claim} · revision {item.revision}</p>
                   <div className="device-registry-match-actions">
-                    {(["claimed", "investigate", "unsupported", "unclaimed"]
-                      as ReviewDecision[]).map((decision) => (
+                    {reviewDecisions.map((decision) => (
                       <button type="button" key={decision}
                         disabled={busy || item.claim === decision
                           || (decision === "claimed" &&
