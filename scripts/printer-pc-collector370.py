@@ -104,7 +104,7 @@ def windows_usb_registry_devices() -> list[dict[str, object]]:
     import winreg
 
     rows: list[dict[str, object]] = []
-    root = r"SYSTEM\\CurrentControlSet\\Enum\\USB"
+    root = r"SYSTEM\CurrentControlSet\Enum\USB"
     try:
         with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, root) as usb:
             for index in range(winreg.QueryInfoKey(usb)[0]):
