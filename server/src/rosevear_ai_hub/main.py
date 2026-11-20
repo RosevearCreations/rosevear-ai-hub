@@ -30,6 +30,7 @@ from rosevear_ai_hub.api.global_search import router as global_search_router
 from rosevear_ai_hub.api.home_assistant import router as home_assistant_router
 from rosevear_ai_hub.api.home_assistant_controls import router as home_assistant_controls_router
 from rosevear_ai_hub.api.home_assistant_scenes import router as home_assistant_scenes_router
+from rosevear_ai_hub.api.home_inventory369 import router as home_inventory369_router
 from rosevear_ai_hub.api.integration_v1 import router as integration_v1_router
 from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
@@ -268,6 +269,7 @@ def create_app() -> FastAPI:
     application.include_router(device_registry_router)
     application.include_router(device_discovery_router)
     application.include_router(network_trust368_router)
+    application.include_router(home_inventory369_router)
     application.include_router(workshop_router, dependencies=[Depends(require_authenticated)])
     application.include_router(workshop_jobs_router, dependencies=[Depends(require_authenticated)])
     application.include_router(
