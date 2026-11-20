@@ -47,7 +47,11 @@ def reconcile371(db: Session, now_ms: int) -> dict[str, object]:
             },
         }
     current = records[0]
-    previous = records[1] if len(records) > 1 and records[1].collector_id == current.collector_id else None
+    previous = (
+        records[1]
+        if len(records) > 1 and records[1].collector_id == current.collector_id
+        else None
+    )
     current_payload = json.loads(current.payload_json)
     earlier_payload = json.loads(previous.payload_json) if previous else {"devices": []}
     current_items = {
