@@ -92,6 +92,8 @@ jobs:
         run: node scripts/build-261-contract.test.mjs
       - name: Build 262 Dark Mode contrast, client source and read-only runtime HOLD contract
         run: node scripts/build-262-contract.test.mjs
+      - name: Build 371 supervised workshop enrollment and camera safety contract
+        run: node --test scripts/build-371-contract.test.mjs
       - name: Build 370 signed printer-PC gateway source contract
         run: node --test scripts/build-370-contract.test.mjs
       - name: Build 369 owner-only HA reconciliation and source-of-truth contract

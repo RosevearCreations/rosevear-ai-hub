@@ -232,3 +232,19 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 **References:** `docs/SOURCE_OF_TRUTH.md`, `docs/contracts/hub-feature-progress367.json`, `docs/BUILD_367_SIGNED_PRIVATE_PEERS_AND_ENROLLMENT.md`. No assertion that source code can log into personal Alexa/Apple/Samsung accounts automatically.
 
 **Next after Build 367:** **Build 368 — Private network trust foundation & safe device identity**. **20 explicitly proposed builds remain** (368 through 387). This is the current numbered queue, not a claim that the Hub reaches 100% at 387.
+
+## Owner's 2026-11-20 Build 371 priority override
+
+Build 371 has been explicitly reassigned to **Windows Printer-PC Agent Enrollment,
+USB Device Identity Reconciliation & Supervised First Live Telemetry Acceptance**
+with a local two-camera snapshot option and NO existing Raspberry Pi or OctoPrint.
+The formerly scheduled Build 371 MQTT/Zigbee/Z-Wave/Thread/Bluetooth provenance
+was **not implemented** by that reassignment and remains an unnumbered
+tracked future goal. Do not count it as complete, and reassign its build slot
+before promising end-to-end protocol coverage.
+
+Master Recommendation PDF goals remain proposed, including bounded offline
+queue, original-host and cloud signed ACK, full camera streaming, YW/iCamp
+operator incident journey, and independent outage simulation. See
+`docs/MASTER_RECOMMENDATIONS_2026-11-20_GOAL_REGISTER.md` for priority and
+evidence boundaries. Next numbered Build 372; 16 numbered builds remain.
