@@ -959,3 +959,18 @@ class HomeInventoryChange369(Base):
     before_value: Mapped[str] = mapped_column(String(120), nullable=False, default="")
     after_value: Mapped[str] = mapped_column(String(120), nullable=False, default="")
     captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class WorkshopGatewayReceipt370(Base):
+    """Read-only signed printer-PC receipt; no physical status attestation."""
+
+    __tablename__ = "workshop_gateway_receipts370"
+    __table_args__ = (UniqueConstraint("collector_id", "nonce"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    collector_id: Mapped[str] = mapped_column(String(40), nullable=False)
+    nonce: Mapped[str] = mapped_column(String(32), nullable=False)
+    observed_at_ms: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    expires_at_ms: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    payload_json: Mapped[str] = mapped_column(Text, nullable=False)
