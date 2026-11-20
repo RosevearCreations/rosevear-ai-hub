@@ -1,0 +1,193 @@
+{
+  "schema": "rosevear.hub.feature-progress.v369",
+  "build": 369,
+  "asOf": "2026-11-19",
+  "basis": "Provisional repository source estimate for Build369 owner-triggered HA registry snapshots, not original-host live HA evidence",
+  "expansionPolicy": "New requirements enlarge denominator; never force +5-10 global points per build",
+  "oldBuild366NarrowScopeSourceTargetPercent": 64,
+  "oldBuild366NarrowScopeFieldTargetPercent": 18,
+  "sourceModuleCount": 24,
+  "weighting": "Equal-weight Hub-native categories; delegated payroll/accounting/HST/storefront remain excluded",
+  "estimatedExpandedScopeSourcePercent": 42.4,
+  "fieldAcceptancePlanningEstimatePercent": 18,
+  "blendedWeights": {
+    "source": 0.65,
+    "field": 0.35
+  },
+  "estimatedExpandedOverallPercent": 33.9,
+  "sourcesReviewed": [
+    "docs/SOURCE_OF_TRUTH.md",
+    "docs/BUILD_365_SEVEN_APP_SYSOP_STATISTICS_INTAKE.md",
+    "docs/BUILD_366_DURABLE_SYSOP_STATS_JOURNAL.md",
+    "Rosevear_AI_Hub_Build363_Source_of_Truth_2026-11-18.docx",
+    "server/src/rosevear_ai_hub",
+    "apps/web/src"
+  ],
+  "scorePolicy": "Source-level improvement only after protected six-check CI; field acceptance and HA hardware verification unchanged.",
+  "modules": [
+    {
+      "id": "local-ai-chat-and-voice",
+      "estimatedSourceCoveragePercent": 72,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Ollama/chat/voice source exists; live device/voice acceptance incomplete"
+    },
+    {
+      "id": "knowledge-search-and-citations",
+      "estimatedSourceCoveragePercent": 71,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Document indexing, retrieval and citations in source; local corpus acceptance incomplete"
+    },
+    {
+      "id": "home-assistant-device-inventory",
+      "estimatedSourceCoveragePercent": 70,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Owner-triggered complete registry/state capture, exact identity claims, missing/renamed/room drift, snapshots and MQTT note reconciliation; original home field proof remains HOLD"
+    },
+    {
+      "id": "safe-automations-and-scenes",
+      "estimatedSourceCoveragePercent": 59,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Allowlisted scenes and deterministic rules; physical-action approval still gated"
+    },
+    {
+      "id": "mqtt-and-sensors",
+      "estimatedSourceCoveragePercent": 62,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "MQTT integration and guardrails exist; device/topic inventory incomplete"
+    },
+    {
+      "id": "cameras-and-doorbells",
+      "estimatedSourceCoveragePercent": 54,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "go2rtc/ONVIF and review tooling; real camera streams not yet registered"
+    },
+    {
+      "id": "workshop-registry-and-jobs",
+      "estimatedSourceCoveragePercent": 48,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Equipment/jobs/maintenance source exists; real stock and activity links incomplete"
+    },
+    {
+      "id": "maker-process-monitoring",
+      "estimatedSourceCoveragePercent": 18,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Generic maintenance exists, but Creality/3D print cycle telemetry not field integrated"
+    },
+    {
+      "id": "network-discovery-and-topology",
+      "estimatedSourceCoveragePercent": 33,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "HA-only area/device/entity linkage and source provenance across snapshots; no LAN scan, router discovery or physical-device certification"
+    },
+    {
+      "id": "network-sequencing-and-recovery",
+      "estimatedSourceCoveragePercent": 36,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Windows guarded recovery exists; supervised first-boot proof and dependency orchestration incomplete"
+    },
+    {
+      "id": "alexa-integration",
+      "estimatedSourceCoveragePercent": 6,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "No independently verified Alexa account/device workflow"
+    },
+    {
+      "id": "apple-home-and-matter",
+      "estimatedSourceCoveragePercent": 9,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "No independently accepted Apple Home/Matter bridge inventory"
+    },
+    {
+      "id": "samsung-smartthings",
+      "estimatedSourceCoveragePercent": 7,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "No independently accepted Samsung SmartThings integration"
+    },
+    {
+      "id": "other-provider-device-coverage",
+      "estimatedSourceCoveragePercent": 19,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Various generic adapters; broad third-party vendor acceptance missing"
+    },
+    {
+      "id": "grocery-order-and-pantry-board",
+      "estimatedSourceCoveragePercent": 3,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "New requested household planning workflow not implemented"
+    },
+    {
+      "id": "household-calendar-and-chores",
+      "estimatedSourceCoveragePercent": 14,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Notification/task foundations exist; household scheduling incomplete"
+    },
+    {
+      "id": "three-master-signed-communications",
+      "estimatedSourceCoveragePercent": 46,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Signed source/guarded readback plus Build367 opt-in TLS intake; no real signed Master ACK"
+    },
+    {
+      "id": "seven-application-governance",
+      "estimatedSourceCoveragePercent": 31,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Seven app identities and source claims supported; field-connected sources unverified"
+    },
+    {
+      "id": "security-roles-and-access",
+      "estimatedSourceCoveragePercent": 60,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Owner-only trust API, pinned signed approvals and replay guard; no independent field key or pentest proof"
+    },
+    {
+      "id": "backup-and-windows-recovery",
+      "estimatedSourceCoveragePercent": 52,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Backup, recovery tasks and manuals; original-host witness and off-machine restore incomplete"
+    },
+    {
+      "id": "privacy-audit-and-consent",
+      "estimatedSourceCoveragePercent": 66,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Privacy policy, audit and strict read-only transport; live operational consent review incomplete"
+    },
+    {
+      "id": "themes-accessibility-and-controls",
+      "estimatedSourceCoveragePercent": 57,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Multi-theme UI and recent contrast repair; 16-theme device matrix incomplete"
+    },
+    {
+      "id": "mobile-and-tablet-experience",
+      "estimatedSourceCoveragePercent": 60,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Responsive PWA and windows client source; real cross-device usability incomplete"
+    },
+    {
+      "id": "it-ops-and-support",
+      "estimatedSourceCoveragePercent": 65,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "System monitoring, timelines and docs; owner helpdesk and incident automation incomplete"
+    }
+  ],
+  "delegatedOutOfScope": [
+    "standalone storefront",
+    "payroll",
+    "HST/tax filings",
+    "accounting ledger",
+    "customer invoicing",
+    "social publishing engine",
+    "paid supplier orders"
+  ],
+  "activeHolds": [
+    "No real original-host verified three-Master signed transport/ACK",
+    "No complete seven-peer live enrollment",
+    "Comms QL-340C receiver not authorized",
+    "Unverified camera streams and maker machine integrations",
+    "No independently signed pre-login reboot and offline restore acceptance",
+    "Build368 owner key, LAN scope and real original-host field evidence unprovisioned",
+    "Build369 original Windows Home Assistant snapshot, owner claim review and MQTT field reconciliation have not been witnessed"
+  ],
+  "futureBuildCount": 18,
+  "nextBuild": 370
+}

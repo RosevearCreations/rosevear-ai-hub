@@ -900,3 +900,62 @@ class NetworkObservation368(Base):
         ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
     )
     observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class HomeInventorySnapshot369(Base):
+    """Owner-triggered HA registry snapshot; no provider modification."""
+
+    __tablename__ = "home_inventory_snapshots369"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    captured_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    area_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    device_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    entity_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    mqtt_reference_count: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class HomeInventoryIdentity369(Base):
+    """Reviewed HA registry references and manual MQTT notes, not physical identities."""
+
+    __tablename__ = "home_inventory_identities369"
+    __table_args__ = (UniqueConstraint("source", "source_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source: Mapped[str] = mapped_column(String(16), nullable=False)
+    source_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    area_id: Mapped[str] = mapped_column(String(120), nullable=False, default="")
+    related_device_id: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    presence: Mapped[str] = mapped_column(String(32), nullable=False)
+    claim: Mapped[str] = mapped_column(String(16), nullable=False, default="unclaimed")
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_source_seen_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    last_checked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_snapshot_id: Mapped[int] = mapped_column(
+        ForeignKey("home_inventory_snapshots369.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+
+
+class HomeInventoryChange369(Base):
+    """Bounded append-only changes to names, rooms and source availability."""
+
+    __tablename__ = "home_inventory_changes369"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    snapshot_id: Mapped[int] = mapped_column(
+        ForeignKey("home_inventory_snapshots369.id", ondelete="RESTRICT"), nullable=False
+    )
+    source: Mapped[str] = mapped_column(String(16), nullable=False)
+    source_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    before_value: Mapped[str] = mapped_column(String(120), nullable=False, default="")
+    after_value: Mapped[str] = mapped_column(String(120), nullable=False, default="")
+    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
