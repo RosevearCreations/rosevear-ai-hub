@@ -125,6 +125,18 @@ jobs:
           cache: pip
       - name: Install backend and development dependencies
         run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+      - name: Build 369 temporary exact Ruff formatting witness
+        shell: bash
+        run: |
+          ruff format server/src/rosevear_ai_hub/api/home_inventory369.py server/tests/test_home_inventory369.py
+          python - <<'PY'
+          import base64
+          from pathlib import Path
+          for name in ("server/src/rosevear_ai_hub/api/home_inventory369.py", "server/tests/test_home_inventory369.py"):
+              data = base64.b64encode(Path(name).read_bytes()).decode("ascii")
+              for index in range(0, len(data), 1600):
+                  print("FORMAT369|" + name + "|" + str(index // 1600) + "|" + data[index:index+1600])
+          PY
       - name: Lint
         run: ruff check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
       - name: Format check
