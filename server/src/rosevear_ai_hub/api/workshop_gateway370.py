@@ -145,7 +145,8 @@ def validate370(envelope: Envelope370, now_ms: int) -> Payload370:
         ):
             raise ValueError("HOLD_WORKSHOP371_BAD_PNP_PROVENANCE")
         if device.port_name is not None and device.kind not in (
-            "usb_interface", "camera_interface"
+            "usb_interface",
+            "camera_interface",
         ):
             raise ValueError("HOLD_WORKSHOP371_PORT_WITHOUT_PNP_PROVENANCE")
         if device.kind == "octoprint" and device.proof != "octoprint_loopback":
