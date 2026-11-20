@@ -127,6 +127,10 @@ jobs:
           cache: pip
       - name: Install backend and development dependencies
         run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+      - name: Build 370 temporary formatted-file diagnostic
+        run: |
+          ruff format server/src/rosevear_ai_hub/api/workshop_gateway370.py server/tests/test_workshop_gateway370.py
+          python -c 'import pathlib,base64; paths=["server/src/rosevear_ai_hub/api/workshop_gateway370.py","server/tests/test_workshop_gateway370.py"]; [print("FORMATTED370:"+p+":"+base64.b64encode(pathlib.Path(p).read_bytes()).decode()) for p in paths]'
       - name: Lint
         run: ruff check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
       - name: Format check
