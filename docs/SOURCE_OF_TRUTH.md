@@ -361,3 +361,8 @@ Source progress is tracked in docs/contracts/hub-feature-progress368.json (secur
 ## Build 369 — Whole-home Home Assistant inventory reconciliation (2026-11-19)
 
 Owner-triggered read-only Home Assistant area/device/entity registry and state capture, with durable exact source identity history, room and rename differences, registry-only and unavailable status, unclaimed owner reviews, prior-approved MQTT topic notes and incomplete-snapshot HOLD. Device names or unavailability do not authorize physical access, device pairing, or source deletion. No background LAN scan, MQTT read, Home Assistant write or original Windows-host field acceptance is implied. The Source of Truth release assessment is recorded in `docs/contracts/hub-feature-progress369.json` with full field runbook `docs/BUILD_369_HOME_ASSISTANT_INVENTORY_RECONCILIATION.md`. Next proposed Build 370; 18 planned builds remain (370–387).
+
+
+## Build 370 — Read-only printer-PC observation gateway (2026-11-20)
+
+The local Windows printer PC, not the Creality printer, is the potential network source. New optional one-shot collector enumerates Windows COM interfaces and installed printer queues, adds unverified equipment notes, optionally reads local OctoPrint GET API, and pushes Ed25519 signed private HTTPS receipts to a pinned Hub receiver. Owner-only dashboard shows source identity and staleness; no serial commands, laser operations, USB camera streams, printing, cutting, controller collision or unattended agent installation. Original printer PC and Hub key enrollment remain FIELD_HOLD. Source coverage estimates: docs/contracts/hub-feature-progress370.json; operator runbook: docs/BUILD_370_PRINTER_PC_READ_ONLY_GATEWAY.md. Next Build371, 17 planned builds remaining.
