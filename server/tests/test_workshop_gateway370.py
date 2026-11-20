@@ -32,12 +32,18 @@ def prepared(tmp_path, monkeypatch):
     private = Ed25519PrivateKey.generate()
     public = private.public_key()
     public_path = tmp_path / "source.pub.pem"
-    public_path.write_bytes(public.public_bytes(
-        serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo,
-    ))
-    pin = hashlib.sha256(public.public_bytes(
-        serialization.Encoding.Raw, serialization.PublicFormat.Raw,
-    )).hexdigest()
+    public_path.write_bytes(
+        public.public_bytes(
+            serialization.Encoding.PEM,
+            serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+    )
+    pin = hashlib.sha256(
+        public.public_bytes(
+            serialization.Encoding.Raw,
+            serialization.PublicFormat.Raw,
+        )
+    ).hexdigest()
     monkeypatch.setenv("ROSEVEAR_WORKSHOP370_PUBLIC_KEY_PATH", str(public_path))
     monkeypatch.setenv("ROSEVEAR_WORKSHOP370_PUBLIC_KEY_PIN", pin)
     monkeypatch.setenv("ROSEVEAR_WORKSHOP370_COLLECTOR_ID", "printer-pc")
@@ -46,20 +52,36 @@ def prepared(tmp_path, monkeypatch):
 
 def signed(private, *, nonce="a" * 32, observed=None, devices=None):
     moment = observed or int(time.time() * 1000)
-    payload = Payload370.model_validate({
-        "schema": "rosevear.hub.workshop-gateway.v370",
-        "collector_id": "printer-pc", "observed_at_ms": moment,
-        "expires_at_ms": moment + 60000, "nonce": nonce,
-        "mode": "READ_ONLY_LOCAL_WINDOWS_OBSERVATION",
-        "commands_sent": 0, "physical_devices_verified": False,
-        "devices": devices if devices is not None else [
-            {"kind": "serial", "device_id": "COM7",
-             "label": "Windows serial interface COM7",
-             "presence": "enumerated", "proof": "windows_registry"},
-            {"kind": "manual_note", "device_id": "cricut",
-             "label": "Cricut Maker 3", "presence": "unverified", "proof": "owner_note"},
-        ],
-    })
+    payload = Payload370.model_validate(
+        {
+            "schema": "rosevear.hub.workshop-gateway.v370",
+            "collector_id": "printer-pc",
+            "observed_at_ms": moment,
+            "expires_at_ms": moment + 60000,
+            "nonce": nonce,
+            "mode": "READ_ONLY_LOCAL_WINDOWS_OBSERVATION",
+            "commands_sent": 0,
+            "physical_devices_verified": False,
+            "devices": devices
+            if devices is not None
+            else [
+                {
+                    "kind": "serial",
+                    "device_id": "COM7",
+                    "label": "Windows serial interface COM7",
+                    "presence": "enumerated",
+                    "proof": "windows_registry",
+                },
+                {
+                    "kind": "manual_note",
+                    "device_id": "cricut",
+                    "label": "Cricut Maker 3",
+                    "presence": "unverified",
+                    "proof": "owner_note",
+                },
+            ],
+        }
+    )
     return {
         "payload": payload.model_dump(mode="json", exclude_unset=True),
         "signature": private.sign(canonical370(payload)).hex(),
@@ -70,9 +92,16 @@ def test_signed_receipt_first_read_owner_only_and_replay(tmp_path, monkeypatch):
     client, sessions, private = prepared(tmp_path, monkeypatch)
     url = "/api/v1/workshop-gateway-370"
     assert client.get(url + "/status").status_code == 401
-    assert client.post("/api/v1/auth/bootstrap", json={
-        "username": "owner", "password": "owner-password-123",
-    }).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/bootstrap",
+            json={
+                "username": "owner",
+                "password": "owner-password-123",
+            },
+        ).status_code
+        == 201
+    )
     assert client.get(url + "/status").json()["state"] == "HOLD_NOT_ENROLLED"
     packet = signed(private)
     assert client.post(url + "/receipt", json=packet).status_code == 202
@@ -85,9 +114,11 @@ def test_signed_receipt_first_read_owner_only_and_replay(tmp_path, monkeypatch):
     assert report["devices"][1]["presence"] == "unverified"
     with sessions() as db:
         assert len(db.scalars(select(WorkshopGatewayReceipt370)).all()) == 1
-        assert db.scalars(select(AuditEvent).where(
-            AuditEvent.event_type == "workshop370.signed_source_received",
-        )).all()
+        assert db.scalars(
+            select(AuditEvent).where(
+                AuditEvent.event_type == "workshop370.signed_source_received",
+            )
+        ).all()
 
 
 def test_forged_stale_unpinned_and_false_machine_attestation(tmp_path, monkeypatch):
@@ -97,18 +128,44 @@ def test_forged_stale_unpinned_and_false_machine_attestation(tmp_path, monkeypat
     forged = json.loads(json.dumps(packet))
     forged["payload"]["devices"][0]["device_id"] = "COM9"
     assert client.post(url, json=forged).status_code == 403
-    assert client.post(url, json=signed(
-        private, observed=int(time.time() * 1000) - 180000,
-    )).status_code == 403
-    invalid = signed(private, nonce="b" * 32, devices=[{
-        "kind": "manual_note", "device_id": "laser", "label": "Laser",
-        "presence": "reported_printing", "proof": "owner_note",
-    }])
+    assert (
+        client.post(
+            url,
+            json=signed(
+                private,
+                observed=int(time.time() * 1000) - 180000,
+            ),
+        ).status_code
+        == 403
+    )
+    invalid = signed(
+        private,
+        nonce="b" * 32,
+        devices=[
+            {
+                "kind": "manual_note",
+                "device_id": "laser",
+                "label": "Laser",
+                "presence": "reported_printing",
+                "proof": "owner_note",
+            }
+        ],
+    )
     assert client.post(url, json=invalid).status_code == 403
-    not_proven = signed(private, nonce="c" * 32, devices=[{
-        "kind": "serial", "device_id": "COM7", "label": "Port COM7",
-        "presence": "enumerated", "proof": "windows_registry", "nozzle_c": 210,
-    }])
+    not_proven = signed(
+        private,
+        nonce="c" * 32,
+        devices=[
+            {
+                "kind": "serial",
+                "device_id": "COM7",
+                "label": "Port COM7",
+                "presence": "enumerated",
+                "proof": "windows_registry",
+                "nozzle_c": 210,
+            }
+        ],
+    )
     assert client.post(url, json=not_proven).status_code == 403
     monkeypatch.setenv("ROSEVEAR_WORKSHOP370_PUBLIC_KEY_PIN", "f" * 64)
     assert client.post(url, json=packet).status_code == 403
