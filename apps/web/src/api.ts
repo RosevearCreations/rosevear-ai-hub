@@ -3867,3 +3867,35 @@ export type WorkshopGateway370Report = {
 export function getWorkshopGateway370(): Promise<WorkshopGateway370Report> {
   return authJson("GET", "/api/v1/workshop-gateway-370/status");
 }
+
+export type WorkshopEnrollment371Report = {
+  state: "HOLD_NO_SIGNED_RECEIPT" | "HOLD_STALE_SOURCE" |
+    "HOLD_NEEDS_SECOND_RECEIPT" | "HOLD_NO_USB_PNP_OBSERVATION" |
+    "SOURCE_REGISTRY_RECONCILED";
+  collectorId: string | null;
+  sourceFresh: boolean;
+  lastObservedAtMs: number | null;
+  receivedCount: number;
+  gates: {
+    signedReceipt: boolean;
+    repeatReceipt: boolean;
+    usbRegistryObserved: boolean;
+    physicalDeviceConfirmed: false;
+    cameraFeedVerified: false;
+    remoteMasterAck: false;
+  };
+  devices: Array<{
+    kind: "usb_interface" | "camera_interface";
+    deviceId: string;
+    label: string;
+    previousPort: string | null;
+    currentPort: string | null;
+    transition: "absent_from_latest_registry" | "unverified_stale" |
+      "first_observed" | "com_port_changed" | "observed_in_both";
+    evidence: "windows_pnp_registry";
+    physicallyVerified: false;
+  }>;
+};
+export function getWorkshopEnrollment371(): Promise<WorkshopEnrollment371Report> {
+  return authJson("GET", "/api/v1/workshop-enrollment-371/reconciliation");
+}
