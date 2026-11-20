@@ -3846,3 +3846,24 @@ export function reviewHomeIdentity369(
   return authJson("PUT", "/api/v1/home-inventory-369/claim",
     { identity_id, decision, expected_revision });
 }
+
+
+// Build 370: signed printer-PC source report; owner read-only.
+export type WorkshopGateway370Report = {
+  schema: "rosevear.hub.workshop-report.v370";
+  state: "HOLD_NOT_ENROLLED" | "SOURCE_RECEIVED" | "HOLD_STALE_REPORT";
+  sourceIsLive: boolean; physicalDevicesVerified: false; commandsSent: 0;
+  receipt: null | {
+    collectorId: string; observedAtMs: number; receivedAt: string; ageSeconds: number;
+  };
+  devices: Array<{
+    kind: "serial" | "printer_queue" | "octoprint" | "manual_note";
+    device_id: string; label: string;
+    presence: "enumerated" | "reported_idle" | "reported_printing" | "unverified";
+    proof: "windows_registry" | "octoprint_loopback" | "owner_note";
+    progress_percent?: number | null; nozzle_c?: number | null; bed_c?: number | null;
+  }>;
+};
+export function getWorkshopGateway370(): Promise<WorkshopGateway370Report> {
+  return authJson("GET", "/api/v1/workshop-gateway-370/status");
+}
