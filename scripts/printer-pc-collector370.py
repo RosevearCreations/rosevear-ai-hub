@@ -92,6 +92,71 @@ def windows_registry_devices() -> list[dict[str, object]]:
     return rows
 
 
+
+def windows_usb_registry_devices() -> list[dict[str, object]]:
+    """List bounded Windows USB PnP identities; do not open USB or COM handles.
+
+    A hashed PnP instance may change if a device without its own serial number
+    is plugged into another socket. Never claim physical identity from it.
+    """
+    if os.name != "nt":
+        return []
+    import winreg
+
+    rows: list[dict[str, object]] = []
+    root = r"SYSTEM\\CurrentControlSet\\Enum\\USB"
+    try:
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, root) as usb:
+            for index in range(winreg.QueryInfoKey(usb)[0]):
+                vendor = winreg.EnumKey(usb, index)
+                if not re.fullmatch(r"VID_[0-9A-Fa-f]{4}&PID_[0-9A-Fa-f]{4}.*", vendor):
+                    continue
+                with winreg.OpenKey(usb, vendor) as family:
+                    for child in range(min(winreg.QueryInfoKey(family)[0], 16)):
+                        instance = winreg.EnumKey(family, child)
+                        with winreg.OpenKey(family, instance) as item:
+                            def field(name: str) -> str:
+                                try:
+                                    return str(winreg.QueryValueEx(item, name)[0])
+                                except OSError:
+                                    return ""
+
+                            item_class = field("Class").lower()
+                            raw_label = field("FriendlyName") or field("DeviceDesc")
+                            try:
+                                label = sanitized(raw_label) if raw_label else "USB peripheral"
+                            except ValueError:
+                                label = "USB peripheral"
+                            is_camera = item_class == "camera" or (
+                                item_class == "image"
+                                and any(word in label.lower() for word in ("camera", "webcam"))
+                            )
+                            prefix = "camera" if is_camera else "usb"
+                            stable_hash = hashlib.sha256(
+                                (vendor + "/" + instance).encode("utf-8")
+                            ).hexdigest()[:20]
+                            row: dict[str, object] = {
+                                "kind": "camera_interface" if is_camera else "usb_interface",
+                                "device_id": prefix + "-" + stable_hash,
+                                "label": label,
+                                "presence": "enumerated",
+                                "proof": "windows_pnp_registry",
+                            }
+                            try:
+                                with winreg.OpenKey(item, "Device Parameters") as params:
+                                    port = str(winreg.QueryValueEx(params, "PortName")[0])
+                                    if re.fullmatch(r"COM[1-9][0-9]{0,3}", port):
+                                        row["port_name"] = port
+                            except OSError:
+                                pass
+                            rows.append(row)
+                            if len(rows) >= 24:
+                                return sorted(rows, key=lambda entry: str(entry["device_id"]))
+    except OSError:
+        pass
+    return sorted(rows, key=lambda entry: str(entry["device_id"]))
+
+
 def optional_octoprint() -> dict[str, object] | None:
     key = os.environ.get("ROSEVEAR_WORKSHOP370_OCTOPRINT_KEY")
     if not key:
@@ -144,8 +209,11 @@ def optional_octoprint() -> dict[str, object] | None:
         return None
 
 
-def payload(collector_id: str, now_ms: int) -> dict[str, object]:
+def payload(collector_id: str, now_ms: int, include_usb: bool = False) -> dict[str, object]:
     devices = windows_registry_devices()
+    if include_usb:
+        devices.extend(windows_usb_registry_devices())
+    devices = devices[:40]
     devices.extend({
         "kind": "manual_note", "device_id": name, "label": label,
         "presence": "unverified", "proof": "owner_note",
@@ -245,6 +313,7 @@ def main() -> int:
     parser.add_argument("--collector-id", default="printer-pc")
     parser.add_argument("--push-url")
     parser.add_argument("--ca-file", type=Path)
+    parser.add_argument("--include-usb", action="store_true", help="Read hashed Windows USB PnP registry identities")
     args = parser.parse_args()
     if args.init_key:
         create_key(args.init_key)
@@ -255,7 +324,7 @@ def main() -> int:
         raise ValueError("--key is required.")
     if not re.fullmatch(r"[A-Za-z0-9_-]{3,40}", args.collector_id):
         raise ValueError("Invalid collector ID.")
-    envelope = sign(payload(args.collector_id, int(time.time() * 1000)), args.key)
+    envelope = sign(payload(args.collector_id, int(time.time() * 1000), args.include_usb), args.key)
     if args.push_url:
         if args.ca_file is None:
             raise ValueError("--ca-file required for authenticated HTTPS delivery.")
