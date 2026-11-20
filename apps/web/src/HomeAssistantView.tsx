@@ -17,6 +17,7 @@ import { DeviceCameraRecoveryPanel } from "./DeviceCameraRecoveryPanel";
 import { DeviceDiscoveryInbox } from "./DeviceDiscoveryInbox";
 import { DeviceRegistry360 } from "./DeviceRegistry360";
 import { NetworkTrust368 } from "./NetworkTrust368";
+import { HomeInventory369 } from "./HomeInventory369";
 import { HomeAssistantDiscoveryPanel } from "./HomeAssistantDiscoveryPanel";
 import { SceneDraftWorkbench } from "./SceneDraftWorkbench";
 import { HomeOperationsRoomsPanel } from "./HomeOperationsRoomsPanel";
@@ -184,6 +185,7 @@ export function HomeAssistantView({ currentUser }: { currentUser: AuthUser }) {
       {actionMessage ? <p className="runtime-status" role="status">{actionMessage}</p> : null}
 
       <NetworkTrust368 role={currentUser.role} />
+      <HomeInventory369 role={currentUser.role} />
       <DeviceDiscoveryInbox role={currentUser.role} />
       <DeviceRegistry360 role={currentUser.role} browser={browser} policy={policy}
         onRefreshInventory={() => refresh()} />

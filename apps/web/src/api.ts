@@ -3808,3 +3808,41 @@ export function decideNetworkIdentity368(device_id: number, decision:
   return authJson("PUT", "/api/v1/network-trust-368/decision",
     { device_id, decision, expected_revision });
 }
+
+// Build 369: owner-only read-only Home Assistant registry snapshots and exact-ID reviews.
+export type HomeInventory369Report = {
+  schema: "rosevear.hub.home-inventory.v369";
+  mode: "OWNER_INITIATED_READ_ONLY_CAPTURE";
+  physicalDevicesVerified: false;
+  providerWritesPerformed: 0;
+  lastCapture: null | {
+    id: number; capturedAt: string; areaCount: number; deviceCount: number;
+    entityCount: number; mqttReferenceCount: number;
+  };
+  counts: { identities: number; unclaimed: number; missing: number;
+    unavailable: number; duplicateCandidates: number };
+  identities: Array<{
+    id: number; source: "ha_device" | "ha_entity" | "mqtt"; sourceId: string;
+    name: string; areaId: string; relatedDeviceId: string; presence: string;
+    claim: "unclaimed" | "claimed" | "investigate" | "unsupported";
+    revision: number; lastSourceSeenAt: string | null;
+    lastCheckedAt: string; possibleNameDuplicate: boolean;
+  }>;
+  changes: Array<{
+    kind: string; source: string; sourceId: string; before: string;
+    after: string; capturedAt: string;
+  }>;
+};
+export function getHomeInventory369(): Promise<HomeInventory369Report> {
+  return authJson("GET", "/api/v1/home-inventory-369/report");
+}
+export function captureHomeInventory369(): Promise<HomeInventory369Report> {
+  return authJson("POST", "/api/v1/home-inventory-369/capture", {});
+}
+export function reviewHomeIdentity369(
+  identity_id: number, decision: "unclaimed" | "claimed" | "investigate" | "unsupported",
+  expected_revision: number,
+): Promise<HomeInventory369Report> {
+  return authJson("PUT", "/api/v1/home-inventory-369/claim",
+    { identity_id, decision, expected_revision });
+}
