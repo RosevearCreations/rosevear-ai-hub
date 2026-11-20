@@ -41,10 +41,13 @@ def prepared(tmp_path, monkeypatch):
     monkeypatch.setenv("ROSEVEAR_WORKSHOP370_PUBLIC_KEY_PIN", hashlib.sha256(raw).hexdigest())
     monkeypatch.setenv("ROSEVEAR_WORKSHOP370_COLLECTOR_ID", "printer-pc")
     client = TestClient(app)
-    assert client.post(
-        "/api/v1/auth/bootstrap",
-        json={"username": "owner", "password": "owner-password-123"},
-    ).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/bootstrap",
+            json={"username": "owner", "password": "owner-password-123"},
+        ).status_code
+        == 201
+    )
     return client, sessions, private
 
 
@@ -116,13 +119,15 @@ def test_stale_status_keeps_missing_id_unverified(tmp_path, monkeypatch):
                 received_at=datetime.now(UTC),
                 payload_json=json.dumps(
                     {
-                        "devices": [{
-                            "kind": "camera_interface",
-                            "device_id": "camera-" + "b" * 20,
-                            "label": "USB camera",
-                            "presence": "enumerated",
-                            "proof": "windows_pnp_registry",
-                        }]
+                        "devices": [
+                            {
+                                "kind": "camera_interface",
+                                "device_id": "camera-" + "b" * 20,
+                                "label": "USB camera",
+                                "presence": "enumerated",
+                                "proof": "windows_pnp_registry",
+                            }
+                        ]
                     }
                 ),
             )
