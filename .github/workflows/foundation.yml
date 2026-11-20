@@ -131,6 +131,9 @@ jobs:
         run: python -m pip install --upgrade pip && pip install -e ".[dev]"
       - name: Lint
         run: ruff check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
+      - name: Build 371 temporary formatter diff review
+        run: |
+          ruff format --diff server/src/rosevear_ai_hub/api/workshop_enrollment371.py server/src/rosevear_ai_hub/api/workshop_gateway370.py server/tests/test_workshop_enrollment371.py || true
       - name: Format check
         run: ruff format --check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
       - name: Test
