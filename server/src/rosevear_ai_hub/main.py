@@ -31,7 +31,6 @@ from rosevear_ai_hub.api.home_assistant import router as home_assistant_router
 from rosevear_ai_hub.api.home_assistant_controls import router as home_assistant_controls_router
 from rosevear_ai_hub.api.home_assistant_scenes import router as home_assistant_scenes_router
 from rosevear_ai_hub.api.home_inventory369 import router as home_inventory369_router
-from rosevear_ai_hub.api.workshop_gateway370 import router as workshop_gateway370_router
 from rosevear_ai_hub.api.integration_v1 import router as integration_v1_router
 from rosevear_ai_hub.api.knowledge import router as knowledge_router
 from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
@@ -124,6 +123,7 @@ from rosevear_ai_hub.api.tools import router as tools_router
 from rosevear_ai_hub.api.tts import router as tts_router
 from rosevear_ai_hub.api.voice import router as voice_router
 from rosevear_ai_hub.api.workshop import router as workshop_router
+from rosevear_ai_hub.api.workshop_gateway370 import router as workshop_gateway370_router
 from rosevear_ai_hub.api.workshop_jobs import router as workshop_jobs_router
 from rosevear_ai_hub.api.workshop_maintenance import router as workshop_maintenance_router
 from rosevear_ai_hub.auth import require_authenticated, require_roles
