@@ -64,7 +64,8 @@ def _clean(value: Any, *, size: int, required: bool = False) -> str:
 
 
 def _snapshot_entries(
-    registry: dict[str, Any], states: list[dict[str, Any]],
+    registry: dict[str, Any],
+    states: list[dict[str, Any]],
     mqtt: list[DeviceRegistryAnnotation],
 ) -> tuple[dict[tuple[str, str], dict[str, str]], dict[str, int]]:
     if not isinstance(registry, dict):
@@ -128,8 +129,11 @@ def _snapshot_entries(
             area = devices[device_id]["area"]
         state = seen_states.get(key)
         status = (
-            "registry_only" if state is None else
-            "unavailable" if state in {"unavailable", "unknown"} else "reported"
+            "registry_only"
+            if state is None
+            else "unavailable"
+            if state in {"unavailable", "unknown"}
+            else "reported"
         )
         entities[identity] = {
             "name": (
@@ -206,8 +210,7 @@ def _flagged_duplicate_names(rows: list[HomeInventoryIdentity369]) -> set[int]:
         # kinds can be linked and should not be counted as separate devices.
         names.setdefault((row.source, row.area_id, clean_name), []).append(row.id)
     return {
-        identity for same_name in names.values() if len(same_name) > 1
-        for identity in same_name
+        identity for same_name in names.values() if len(same_name) > 1 for identity in same_name
     }
 
 
@@ -216,9 +219,9 @@ def _report(db: Session) -> dict[str, Any]:
         select(HomeInventorySnapshot369).order_by(HomeInventorySnapshot369.id.desc()).limit(1)
     )
     rows = db.scalars(
-        select(HomeInventoryIdentity369).order_by(
-            HomeInventoryIdentity369.source, HomeInventoryIdentity369.source_id
-        ).limit(LIMIT)
+        select(HomeInventoryIdentity369)
+        .order_by(HomeInventoryIdentity369.source, HomeInventoryIdentity369.source_id)
+        .limit(LIMIT)
     ).all()
     duplicates = _flagged_duplicate_names(rows)
     changes = db.scalars(
@@ -229,7 +232,9 @@ def _report(db: Session) -> dict[str, Any]:
         "mode": "OWNER_INITIATED_READ_ONLY_CAPTURE",
         "physicalDevicesVerified": False,
         "providerWritesPerformed": 0,
-        "lastCapture": None if latest is None else {
+        "lastCapture": None
+        if latest is None
+        else {
             "id": latest.id,
             "capturedAt": latest.captured_at.isoformat(),
             "areaCount": latest.area_count,
@@ -256,16 +261,24 @@ def _report(db: Session) -> dict[str, Any]:
                 "claim": row.claim,
                 "revision": row.revision,
                 "lastSourceSeenAt": row.last_source_seen_at.isoformat()
-                if row.last_source_seen_at else None,
+                if row.last_source_seen_at
+                else None,
                 "lastCheckedAt": row.last_checked_at.isoformat(),
                 "possibleNameDuplicate": row.id in duplicates,
-            } for row in rows
+            }
+            for row in rows
         ],
-        "changes": [{
-            "kind": row.kind, "source": row.source, "sourceId": row.source_id,
-            "before": row.before_value, "after": row.after_value,
-            "capturedAt": row.captured_at.isoformat(),
-        } for row in changes],
+        "changes": [
+            {
+                "kind": row.kind,
+                "source": row.source,
+                "sourceId": row.source_id,
+                "before": row.before_value,
+                "after": row.after_value,
+                "capturedAt": row.captured_at.isoformat(),
+            }
+            for row in changes
+        ],
     }
 
 
@@ -277,7 +290,9 @@ def get_report(_owner: Owner, db: DB, response: Response) -> dict[str, Any]:
 
 @router.post("/capture")
 async def capture(
-    _owner: Owner, db: DB, runtime: HomeAssistantRuntimeDependency,
+    _owner: Owner,
+    db: DB,
+    runtime: HomeAssistantRuntimeDependency,
 ) -> dict[str, Any]:
     if runtime.client is None:
         raise HTTPException(status_code=503, detail="Home Assistant not configured.")
@@ -288,8 +303,10 @@ async def capture(
     except HomeAssistantError as exc:
         raise HTTPException(status_code=503, detail="Home Assistant snapshot unavailable.") from exc
     mqtt = db.scalars(
-        select(DeviceRegistryAnnotation).where(DeviceRegistryAnnotation.source == "mqtt")
-        .order_by(DeviceRegistryAnnotation.id).limit(251)
+        select(DeviceRegistryAnnotation)
+        .where(DeviceRegistryAnnotation.source == "mqtt")
+        .order_by(DeviceRegistryAnnotation.id)
+        .limit(251)
     ).all()
     try:
         entries, counts = _snapshot_entries(registry, states, mqtt)
@@ -321,22 +338,34 @@ async def capture(
     db.flush()
 
     def event(row: HomeInventoryIdentity369, kind: str, before: str, after: str) -> None:
-        db.add(HomeInventoryChange369(
-            snapshot_id=snapshot.id, source=row.source, source_id=row.source_id,
-            kind=kind, before_value=before[:120], after_value=after[:120],
-            captured_at=now,
-        ))
+        db.add(
+            HomeInventoryChange369(
+                snapshot_id=snapshot.id,
+                source=row.source,
+                source_id=row.source_id,
+                kind=kind,
+                before_value=before[:120],
+                after_value=after[:120],
+                captured_at=now,
+            )
+        )
 
     for key, details in sorted(entries.items()):
         row = by_id.get(key)
         if row is None:
             row = HomeInventoryIdentity369(
-                source=key[0], source_id=key[1],
-                name=details["name"], area_id=details["area"],
-                related_device_id=details["device"], presence=details["presence"],
-                claim="unclaimed", revision=1, first_seen_at=now,
+                source=key[0],
+                source_id=key[1],
+                name=details["name"],
+                area_id=details["area"],
+                related_device_id=details["device"],
+                presence=details["presence"],
+                claim="unclaimed",
+                revision=1,
+                first_seen_at=now,
                 last_source_seen_at=now if key[0] != "mqtt" else None,
-                last_checked_at=now, last_snapshot_id=snapshot.id,
+                last_checked_at=now,
+                last_snapshot_id=snapshot.id,
             )
             db.add(row)
             db.flush()
@@ -371,10 +400,17 @@ async def capture(
         row.revision += 1
 
     record_audit_event(
-        db, actor_user_id=_owner.id, event_type="ha369.snapshot.reconciled",
-        object_type="home_inventory", object_id=str(snapshot.id), action="read_only_capture",
-        arguments={"areaCount": counts["areas"], "deviceCount": counts["devices"],
-                   "entityCount": counts["entities"]},
+        db,
+        actor_user_id=_owner.id,
+        event_type="ha369.snapshot.reconciled",
+        object_type="home_inventory",
+        object_id=str(snapshot.id),
+        action="read_only_capture",
+        arguments={
+            "areaCount": counts["areas"],
+            "deviceCount": counts["devices"],
+            "entityCount": counts["entities"],
+        },
         result={"providerWritesPerformed": 0, "physicalDevicesVerified": False},
     )
     db.commit()
@@ -393,8 +429,12 @@ def claim(payload: ClaimInput, _owner: Owner, db: DB) -> dict[str, Any]:
     row.claim = payload.decision
     row.revision += 1
     record_audit_event(
-        db, actor_user_id=_owner.id, event_type="ha369.identity.reviewed",
-        object_type="home_inventory", object_id=str(row.id), action="review",
+        db,
+        actor_user_id=_owner.id,
+        event_type="ha369.identity.reviewed",
+        object_type="home_inventory",
+        object_id=str(row.id),
+        action="review",
         arguments={"source": row.source, "decision": row.claim, "revision": row.revision},
         result={"providerWritesPerformed": 0, "physicalDevicesVerified": False},
     )
