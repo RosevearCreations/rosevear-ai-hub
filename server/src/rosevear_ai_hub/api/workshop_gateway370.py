@@ -2,6 +2,7 @@
 
 No COM ports, printers, lasers, cameras, cutters or physical devices are controlled.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -76,7 +77,9 @@ class Envelope370(BaseModel):
 
 def canonical370(payload: Payload370) -> bytes:
     return json.dumps(
-        payload.model_dump(mode="json", exclude_unset=True), sort_keys=True, separators=(",", ":"),
+        payload.model_dump(mode="json", exclude_unset=True),
+        sort_keys=True,
+        separators=(",", ":"),
         ensure_ascii=True,
     ).encode("ascii")
 
@@ -116,7 +119,8 @@ def validate370(envelope: Envelope370, now_ms: int) -> Payload370:
         raise ValueError("HOLD_WORKSHOP370_DUPLICATE_DEVICE_ID")
     for device in payload.devices:
         if device.kind == "serial" and not (
-            device.proof == "windows_registry" and device.presence == "enumerated"
+            device.proof == "windows_registry"
+            and device.presence == "enumerated"
             and re.fullmatch(r"COM[1-9][0-9]{0,3}", device.device_id)
         ):
             raise ValueError("HOLD_WORKSHOP370_BAD_SERIAL_PROVENANCE")
@@ -130,9 +134,9 @@ def validate370(envelope: Envelope370, now_ms: int) -> Payload370:
             raise ValueError("HOLD_WORKSHOP370_NOT_A_PHYSICAL_DEVICE")
         if device.kind == "octoprint" and device.proof != "octoprint_loopback":
             raise ValueError("HOLD_WORKSHOP370_BAD_OCTOPRINT_SOURCE")
-        if device.kind != "octoprint" and any(v is not None for v in (
-            device.progress_percent, device.nozzle_c, device.bed_c
-        )):
+        if device.kind != "octoprint" and any(
+            v is not None for v in (device.progress_percent, device.nozzle_c, device.bed_c)
+        ):
             raise ValueError("HOLD_WORKSHOP370_METRICS_NOT_VERIFIED")
     try:
         trusted_key370().verify(bytes.fromhex(envelope.signature), canonical370(payload))
@@ -143,8 +147,7 @@ def validate370(envelope: Envelope370, now_ms: int) -> Payload370:
 
 def report370(db: Session, now_ms: int) -> dict[str, object]:
     latest = db.scalar(
-        select(WorkshopGatewayReceipt370).order_by(WorkshopGatewayReceipt370.id.desc())
-        .limit(1)
+        select(WorkshopGatewayReceipt370).order_by(WorkshopGatewayReceipt370.id.desc()).limit(1)
     )
     base: dict[str, object] = {
         "schema": "rosevear.hub.workshop-report.v370",
@@ -153,17 +156,23 @@ def report370(db: Session, now_ms: int) -> dict[str, object]:
     }
     if latest is None:
         return {
-            **base, "state": "HOLD_NOT_ENROLLED", "sourceIsLive": False,
-            "receipt": None, "devices": [],
+            **base,
+            "state": "HOLD_NOT_ENROLLED",
+            "sourceIsLive": False,
+            "receipt": None,
+            "devices": [],
         }
     age = max(0, (now_ms - latest.observed_at_ms) // 1000)
     fresh = age <= 300 and now_ms <= latest.expires_at_ms
     return {
-        **base, "state": "SOURCE_RECEIVED" if fresh else "HOLD_STALE_REPORT",
+        **base,
+        "state": "SOURCE_RECEIVED" if fresh else "HOLD_STALE_REPORT",
         "sourceIsLive": fresh,
         "receipt": {
-            "collectorId": latest.collector_id, "observedAtMs": latest.observed_at_ms,
-            "receivedAt": latest.received_at.isoformat(), "ageSeconds": age,
+            "collectorId": latest.collector_id,
+            "observedAtMs": latest.observed_at_ms,
+            "receivedAt": latest.received_at.isoformat(),
+            "ageSeconds": age,
         },
         "devices": json.loads(latest.payload_json)["devices"],
     }
@@ -176,20 +185,34 @@ def receive370(envelope: Envelope370, db: DB, response: Response) -> dict[str, o
         payload = validate370(envelope, int(time.time() * 1000))
     except ValueError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
-    if db.scalar(select(WorkshopGatewayReceipt370.id).where(
-        WorkshopGatewayReceipt370.collector_id == payload.collector_id,
-        WorkshopGatewayReceipt370.nonce == payload.nonce,
-    )) is not None:
+    if (
+        db.scalar(
+            select(WorkshopGatewayReceipt370.id).where(
+                WorkshopGatewayReceipt370.collector_id == payload.collector_id,
+                WorkshopGatewayReceipt370.nonce == payload.nonce,
+            )
+        )
+        is not None
+    ):
         raise HTTPException(status_code=409, detail="HOLD_WORKSHOP370_REPLAY")
-    db.add(WorkshopGatewayReceipt370(
-        collector_id=payload.collector_id, nonce=payload.nonce,
-        observed_at_ms=payload.observed_at_ms, expires_at_ms=payload.expires_at_ms,
-        received_at=datetime.now(UTC), payload_json=canonical370(payload).decode("ascii"),
-    ))
+    db.add(
+        WorkshopGatewayReceipt370(
+            collector_id=payload.collector_id,
+            nonce=payload.nonce,
+            observed_at_ms=payload.observed_at_ms,
+            expires_at_ms=payload.expires_at_ms,
+            received_at=datetime.now(UTC),
+            payload_json=canonical370(payload).decode("ascii"),
+        )
+    )
     record_audit_event(
-        db, actor_user_id=None, event_type="workshop370.signed_source_received",
-        object_type="workshop_gateway", object_id=payload.collector_id,
-        action="store_read_only_observation", arguments={"count": len(payload.devices)},
+        db,
+        actor_user_id=None,
+        event_type="workshop370.signed_source_received",
+        object_type="workshop_gateway",
+        object_id=payload.collector_id,
+        action="store_read_only_observation",
+        arguments={"count": len(payload.devices)},
         result={"status": "accepted", "actuations": 0},
     )
     db.commit()
