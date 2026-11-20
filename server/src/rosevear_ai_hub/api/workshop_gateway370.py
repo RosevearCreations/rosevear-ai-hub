@@ -31,7 +31,9 @@ from rosevear_ai_hub.models import User, WorkshopGatewayReceipt370
 router = APIRouter(prefix="/api/v1/workshop-gateway-370", tags=["workshop-gateway"])
 Owner = Annotated[User, Depends(require_roles("owner"))]
 DB = Annotated[Session, Depends(get_session)]
-Kind = Literal["serial", "printer_queue", "octoprint", "manual_note", "usb_interface", "camera_interface"]
+Kind = Literal[
+    "serial", "printer_queue", "octoprint", "manual_note", "usb_interface", "camera_interface"
+]
 Presence = Literal["enumerated", "reported_idle", "reported_printing", "unverified"]
 Proof = Literal["windows_registry", "octoprint_loopback", "owner_note", "windows_pnp_registry"]
 TEXT = re.compile(r"^[A-Za-z0-9 _.,():/-]{1,96}$")
@@ -137,7 +139,9 @@ def validate370(envelope: Envelope370, now_ms: int) -> Payload370:
             device.proof == "windows_pnp_registry"
             and device.presence == "enumerated"
             and re.fullmatch(r"(usb|camera)-[0-9a-f]{20}", device.device_id)
-            and device.device_id.startswith("camera-" if device.kind == "camera_interface" else "usb-")
+            and device.device_id.startswith(
+                "camera-" if device.kind == "camera_interface" else "usb-"
+            )
         ):
             raise ValueError("HOLD_WORKSHOP371_BAD_PNP_PROVENANCE")
         if device.port_name is not None and device.kind not in (
