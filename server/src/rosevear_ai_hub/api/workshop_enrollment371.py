@@ -27,9 +27,7 @@ USB_KINDS = {"usb_interface", "camera_interface"}
 def reconcile371(db: Session, now_ms: int) -> dict[str, object]:
     records = list(
         db.scalars(
-            select(WorkshopGatewayReceipt370)
-            .order_by(WorkshopGatewayReceipt370.id.desc())
-            .limit(2)
+            select(WorkshopGatewayReceipt370).order_by(WorkshopGatewayReceipt370.id.desc()).limit(2)
         ).all()
     )
     if not records:
@@ -41,17 +39,18 @@ def reconcile371(db: Session, now_ms: int) -> dict[str, object]:
             "receivedCount": 0,
             "devices": [],
             "gates": {
-                "signedReceipt": False, "repeatReceipt": False,
-                "usbRegistryObserved": False, "physicalDeviceConfirmed": False,
-                "cameraFeedVerified": False, "remoteMasterAck": False,
+                "signedReceipt": False,
+                "repeatReceipt": False,
+                "usbRegistryObserved": False,
+                "physicalDeviceConfirmed": False,
+                "cameraFeedVerified": False,
+                "remoteMasterAck": False,
             },
         }
     current = records[0]
-    previous = (
-        records[1]
-        if len(records) > 1 and records[1].collector_id == current.collector_id
-        else None
-    )
+    previous = None
+    if len(records) > 1 and records[1].collector_id == current.collector_id:
+        previous = records[1]
     current_payload = json.loads(current.payload_json)
     earlier_payload = json.loads(previous.payload_json) if previous else {"devices": []}
     current_items = {
@@ -85,16 +84,18 @@ def reconcile371(db: Session, now_ms: int) -> dict[str, object]:
             transition = "observed_in_both"
         entry = latest or older
         assert entry is not None
-        rows.append({
-            "kind": entry["kind"],
-            "deviceId": entry["device_id"],
-            "label": entry["label"],
-            "currentPort": latest.get("port_name") if latest else None,
-            "previousPort": older.get("port_name") if older else None,
-            "transition": transition,
-            "evidence": "windows_pnp_registry",
-            "physicallyVerified": False,
-        })
+        rows.append(
+            {
+                "kind": entry["kind"],
+                "deviceId": entry["device_id"],
+                "label": entry["label"],
+                "currentPort": latest.get("port_name") if latest else None,
+                "previousPort": older.get("port_name") if older else None,
+                "transition": transition,
+                "evidence": "windows_pnp_registry",
+                "physicallyVerified": False,
+            }
+        )
     if not fresh:
         state = "HOLD_STALE_SOURCE"
     elif previous is None:
