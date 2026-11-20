@@ -18,7 +18,7 @@ import sys
 import time
 from pathlib import Path
 from urllib.parse import urlsplit
-from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener, urlopen
+from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -98,10 +98,11 @@ def optional_octoprint() -> dict[str, object] | None:
         return None
     headers = {"X-Api-Key": key, "Accept": "application/json"}
     values: dict[str, object] = {}
+    opener = build_opener(NoRedirect())
     try:
         for endpoint in ("job", "printer"):
             request = Request("http://127.0.0.1:5000/api/" + endpoint, headers=headers)
-            with urlopen(request, timeout=3) as response:
+            with opener.open(request, timeout=3) as response:
                 if response.status != 200 or response.headers.get_content_type() != "application/json":
                     return None
                 data = response.read(8193)
