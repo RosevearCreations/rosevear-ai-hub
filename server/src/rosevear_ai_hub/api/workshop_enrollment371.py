@@ -69,8 +69,10 @@ def reconcile371(db: Session, now_ms: int) -> dict[str, object]:
     for key in sorted(set(current_items) | set(earlier_items)):
         latest = current_items.get(key)
         older = earlier_items.get(key)
-        if latest is None:
-            transition = "absent_from_latest_registry" if fresh else "unverified_stale"
+        if not fresh:
+            transition = "unverified_stale"
+        elif latest is None:
+            transition = "absent_from_latest_registry"
         elif older is None:
             transition = "first_observed"
         elif latest.get("port_name") != older.get("port_name"):
