@@ -76,7 +76,7 @@ class Envelope370(BaseModel):
 
 def canonical370(payload: Payload370) -> bytes:
     return json.dumps(
-        payload.model_dump(mode="json"), sort_keys=True, separators=(",", ":"),
+        payload.model_dump(mode="json", exclude_unset=True), sort_keys=True, separators=(",", ":"),
         ensure_ascii=True,
     ).encode("ascii")
 
