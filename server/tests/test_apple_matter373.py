@@ -20,11 +20,13 @@ class FakeHA:
             "areas": [{"area_id": "kitchen", "name": "Kitchen"}],
             "devices": [
                 {
-                    "id": "matterA", "name": "Kitchen Sensor",
+                    "id": "matterA",
+                    "name": "Kitchen Sensor",
                     "identifiers": [["matter", "secret-001"]],
                 },
                 {
-                    "id": "hkA", "name": "Kitchen Sensor",
+                    "id": "hkA",
+                    "name": "Kitchen Sensor",
                     "identifiers": [["homekit_controller", "pin-999"]],
                 },
                 {"id": "other", "name": "Ordinary Lamp", "identifiers": [["mqtt", "one"]]},
@@ -82,8 +84,7 @@ def test_owner_inspection_review_conflict_and_offline_revocation(tmp_path):
     assert data["providerWritesPerformed"] == 0
     review = {"device_id": "matterA", "decision": "reviewed", "expected_revision": 0}
     assert (
-        client.put(base + "/review", json={**review, "owner_confirmed": False}).status_code
-        == 422
+        client.put(base + "/review", json={**review, "owner_confirmed": False}).status_code == 422
     )
     ok = client.put(base + "/review", json={**review, "owner_confirmed": True})
     assert ok.status_code == 200, ok.text
@@ -92,10 +93,15 @@ def test_owner_inspection_review_conflict_and_offline_revocation(tmp_path):
     assert client.get(base + "/report").json()["reviews"][0]["decision"] == "reviewed"
     ha.offline = True
     assert client.get(base + "/inspect").status_code == 503
-    revoked = client.put(base + "/review", json={
-        "device_id": "matterA", "decision": "revoked", "expected_revision": 1,
-        "owner_confirmed": True,
-    })
+    revoked = client.put(
+        base + "/review",
+        json={
+            "device_id": "matterA",
+            "decision": "revoked",
+            "expected_revision": 1,
+            "owner_confirmed": True,
+        },
+    )
     assert revoked.status_code == 200
     assert client.get(base + "/report").json()["reviews"][0]["decision"] == "revoked"
 
@@ -103,10 +109,18 @@ def test_owner_inspection_review_conflict_and_offline_revocation(tmp_path):
 def test_incomplete_or_unsupported_ha_fails_closed(tmp_path):
     client, ha = setup(tmp_path)
     base = "/api/v1/apple-matter-373"
-    assert client.put(base + "/review", json={
-        "device_id": "other", "decision": "reviewed", "expected_revision": 0,
-        "owner_confirmed": True,
-    }).status_code == 409
+    assert (
+        client.put(
+            base + "/review",
+            json={
+                "device_id": "other",
+                "decision": "reviewed",
+                "expected_revision": 0,
+                "owner_confirmed": True,
+            },
+        ).status_code
+        == 409
+    )
     ha.registry["devices"].append(deepcopy(ha.registry["devices"][0]))
     assert client.get(base + "/inspect").status_code == 422
     assert client.get(base + "/report").status_code == 200
@@ -114,17 +128,40 @@ def test_incomplete_or_unsupported_ha_fails_closed(tmp_path):
 
 def test_non_owner_forbidden(tmp_path):
     client, _ = setup(tmp_path)
-    assert client.post("/api/v1/auth/users", json={
-        "username": "viewer", "password": "viewer-password-123", "role": "read_only",
-    }).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/users",
+            json={
+                "username": "viewer",
+                "password": "viewer-password-123",
+                "role": "read_only",
+            },
+        ).status_code
+        == 201
+    )
     assert client.post("/api/v1/auth/logout").status_code == 200
-    assert client.post("/api/v1/auth/login", json={
-        "username": "viewer", "password": "viewer-password-123",
-    }).status_code == 200
+    assert (
+        client.post(
+            "/api/v1/auth/login",
+            json={
+                "username": "viewer",
+                "password": "viewer-password-123",
+            },
+        ).status_code
+        == 200
+    )
     base = "/api/v1/apple-matter-373"
     assert client.get(base + "/report").status_code == 403
     assert client.get(base + "/inspect").status_code == 403
-    assert client.put(base + "/review", json={
-        "device_id": "matterA", "decision": "reviewed", "expected_revision": 0,
-        "owner_confirmed": True,
-    }).status_code == 403
+    assert (
+        client.put(
+            base + "/review",
+            json={
+                "device_id": "matterA",
+                "decision": "reviewed",
+                "expected_revision": 0,
+                "owner_confirmed": True,
+            },
+        ).status_code
+        == 403
+    )
