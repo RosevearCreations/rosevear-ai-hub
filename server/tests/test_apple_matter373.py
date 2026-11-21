@@ -19,8 +19,14 @@ class FakeHA:
         self.registry = {
             "areas": [{"area_id": "kitchen", "name": "Kitchen"}],
             "devices": [
-                {"id": "matterA", "name": "Kitchen Sensor", "identifiers": [["matter", "secret-001"]]},
-                {"id": "hkA", "name": "Kitchen Sensor", "identifiers": [["homekit_controller", "pin-999"]]},
+                {
+                    "id": "matterA", "name": "Kitchen Sensor",
+                    "identifiers": [["matter", "secret-001"]],
+                },
+                {
+                    "id": "hkA", "name": "Kitchen Sensor",
+                    "identifiers": [["homekit_controller", "pin-999"]],
+                },
                 {"id": "other", "name": "Ordinary Lamp", "identifiers": [["mqtt", "one"]]},
             ],
             "entities": [
@@ -75,7 +81,10 @@ def test_owner_inspection_review_conflict_and_offline_revocation(tmp_path):
     assert "other" not in [x["deviceId"] for x in data["items"]]
     assert data["providerWritesPerformed"] == 0
     review = {"device_id": "matterA", "decision": "reviewed", "expected_revision": 0}
-    assert client.put(base + "/review", json={**review, "owner_confirmed": False}).status_code == 422
+    assert (
+        client.put(base + "/review", json={**review, "owner_confirmed": False}).status_code
+        == 422
+    )
     ok = client.put(base + "/review", json={**review, "owner_confirmed": True})
     assert ok.status_code == 200, ok.text
     assert ok.json()["manualProviderStepRequired"] is True
