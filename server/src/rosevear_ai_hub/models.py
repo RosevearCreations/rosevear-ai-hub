@@ -975,3 +975,19 @@ class WorkshopGatewayReceipt370(Base):
     expires_at_ms: Mapped[int] = mapped_column(BigInteger, nullable=False)
     received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     payload_json: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class AlexaConsent372(Base):
+    """Owner-approved local intent; NOT actual Alexa exposure or an Amazon token."""
+
+    __tablename__ = "alexa_consents372"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    entity_id: Mapped[str] = mapped_column(String(127), unique=True, nullable=False)
+    decision: Mapped[str] = mapped_column(String(16), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    reviewed_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

@@ -53,7 +53,7 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 
 **Acceptance / security gate:** No arbitrary MQTT publishing, pairing, radio commands or credential scraping; real device reconciliation per available protocol.
 
-### Build 372 — Alexa voice interoperability and consent
+### Build 372 — Alexa voice interoperability and consent (SOURCE IMPLEMENTED; FIELD HOLD)
 
 **Deliver:** Document/implement owner-approved Alexa-to-Home Assistant exposure policy, per-entity allowlists, consent and voice audit; fallback states when cloud service unavailable..
 
