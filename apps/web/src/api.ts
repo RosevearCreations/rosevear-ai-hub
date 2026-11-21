@@ -3951,3 +3951,52 @@ export function reviewAlexaConsent372(payload: {
 }> {
   return authJson("PUT", "/api/v1/alexa-consent-372/review", payload);
 }
+
+
+// Build 373: read-only HA-derived Apple Home / Matter custody; no pairing or writes.
+export type AppleMatter373Report = {
+  schema: "rosevear.hub.apple-matter.v373";
+  state: "HOLD_NOT_INSPECTED";
+  haInventoryVerified: false;
+  appleHomeAccountVerified: false;
+  bridgePairingVerified: false;
+  matterCommissioningVerified: false;
+  providerWritesPerformed: 0;
+  reviews: Array<{deviceId: string; decision: "reviewed" | "revoked";
+    revision: number; reviewedAt: string}>;
+};
+export type AppleMatter373Inspection = {
+  schema: "rosevear.hub.apple-matter.v373";
+  state: "HA_REGISTRY_ONLY";
+  checkedAt: string;
+  haInventoryVerified: true;
+  appleHomeAccountVerified: false;
+  bridgePairingVerified: false;
+  matterCommissioningVerified: false;
+  providerWritesPerformed: 0;
+  count: number;
+  possibleDuplicateNames: number;
+  limitations: string[];
+  items: Array<{
+    deviceId: string; name: string; areaId: string;
+    kind: "matter" | "homekit_device" | "homekit_bridge_reference";
+    sourceDomains: string[]; physicalPairingVerified: false;
+    appleHomeVisibilityVerified: false; ownerReviewIsProviderPairing: false;
+    possibleDuplicateName: boolean;
+    localReview: "reviewed" | "revoked" | "unreviewed";
+    revision: number;
+  }>;
+};
+export function getAppleMatter373Report(): Promise<AppleMatter373Report> {
+  return authJson("GET", "/api/v1/apple-matter-373/report");
+}
+export function inspectAppleMatter373(): Promise<AppleMatter373Inspection> {
+  return authJson("GET", "/api/v1/apple-matter-373/inspect");
+}
+export function reviewAppleMatter373(payload: {
+  device_id: string; decision: "reviewed" | "revoked";
+  expected_revision: number; owner_confirmed: boolean;
+}): Promise<{deviceId: string; decision: string; revision: number;
+  providerWritesPerformed: 0; manualProviderStepRequired: true}> {
+  return authJson("PUT", "/api/v1/apple-matter-373/review", payload);
+}

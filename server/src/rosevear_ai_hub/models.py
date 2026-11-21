@@ -991,3 +991,18 @@ class AlexaConsent372(Base):
     )
     reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class AppleMatterReview373(Base):
+    """Local review of HA provider identity, not an Apple pairing or credential."""
+
+    __tablename__ = "apple_matter_reviews373"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    device_id: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    decision: Mapped[str] = mapped_column(String(16), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    reviewed_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
