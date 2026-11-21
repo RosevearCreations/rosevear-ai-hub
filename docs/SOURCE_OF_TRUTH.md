@@ -376,3 +376,7 @@ The owner-uploaded `Rosevear_Three_Master_Application_Review(3).pdf` is a **prop
 ## Build 372 — Alexa owner-consent and real HA exposure review (2026-11-21)
 
 Build372 adds owner-only, opt-in Home Assistant Alexa exposure readback, an owner-reviewed 30-day local allowlist restricted to unambiguous safe lights, expiry and audit, unexpected exposure and auto-discovery warnings, and explicit field HOLD where Amazon and voice activation cannot be verified. No Amazon login, HA exposure changes, voice recordings, network scan or physical controls are performed by the Hub. Source score: docs/contracts/hub-feature-progress372.json. Operational and rollback guide: docs/BUILD_372_ALEXA_EXPOSURE_CONSENT.md. Next Build373, 15 numbered builds (373–387) plus the still-displaced radio/bridge goal remain.
+
+## Build 373 — Apple Home, HomeKit and Matter HA source reconciliation (2026-11-21)
+
+Owner-only Home Assistant registry provider markers and exact HA device IDs; duplicate name alerts, local audited reviewed/revoked decisions, safe migration 0034 and no pairing credentials or provider writes. No Apple Home export/visibility or Matter commissioning claimed. Real bridge configuration, iOS permissions, Thread border router, independent physical pairing and local Windows installation remain FIELD_HOLD. Source contract docs/contracts/hub-feature-progress373.json; field guide docs/BUILD_373_APPLE_HOME_MATTER_CUSTODY.md. Next Build374 SmartThings; 14 numbered builds (374–387) remain plus displaced original radio/bridge goal.

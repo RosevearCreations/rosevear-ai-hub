@@ -63,7 +63,7 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 
 **Acceptance / security gate:** Use a supported Alexa/provider path, owner account permission and consent; no purchases, locks, security alarms or hazardous machinery.
 
-### Build 373 — Apple Home, HomeKit and Matter bridging
+### Build 373 — Apple Home, HomeKit and Matter bridging (SOURCE IMPLEMENTED; FIELD HOLD)
 
 **Deliver:** Inventory Home Assistant HomeKit Bridge and Matter devices, Apple Home visibility, pairing custody and iOS permissions; private-device status linking..
 
