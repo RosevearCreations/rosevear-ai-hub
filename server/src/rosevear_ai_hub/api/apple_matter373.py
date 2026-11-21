@@ -88,23 +88,27 @@ def _classified(registry: dict) -> list[dict]:
         if not markers:
             continue
         kind = (
-            "matter" if "matter" in markers else
-            "homekit_device" if "homekit_controller" in markers else
-            "homekit_bridge_reference"
+            "matter"
+            if "matter" in markers
+            else "homekit_device"
+            if "homekit_controller" in markers
+            else "homekit_bridge_reference"
         )
-        result.append({
-            "deviceId": did,
-            "name": _safe_label(
-                device.get("name_by_user") or device.get("name"),
-                "Unnamed HA device",
-            ),
-            "areaId": _safe_label(device.get("area_id"), ""),
-            "kind": kind,
-            "sourceDomains": sorted(markers),
-            "physicalPairingVerified": False,
-            "appleHomeVisibilityVerified": False,
-            "ownerReviewIsProviderPairing": False,
-        })
+        result.append(
+            {
+                "deviceId": did,
+                "name": _safe_label(
+                    device.get("name_by_user") or device.get("name"),
+                    "Unnamed HA device",
+                ),
+                "areaId": _safe_label(device.get("area_id"), ""),
+                "kind": kind,
+                "sourceDomains": sorted(markers),
+                "physicalPairingVerified": False,
+                "appleHomeVisibilityVerified": False,
+                "ownerReviewIsProviderPairing": False,
+            }
+        )
     names: dict[str, int] = {}
     for item in result:
         key = item["name"].casefold()
@@ -115,9 +119,11 @@ def _classified(registry: dict) -> list[dict]:
 
 
 def _rows(db: Session) -> list[AppleMatterReview373]:
-    return list(db.scalars(
-        select(AppleMatterReview373).order_by(AppleMatterReview373.device_id).limit(500)
-    ).all())
+    return list(
+        db.scalars(
+            select(AppleMatterReview373).order_by(AppleMatterReview373.device_id).limit(500)
+        ).all()
+    )
 
 
 def _local_row(row: AppleMatterReview373) -> dict:
