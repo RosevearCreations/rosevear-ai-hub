@@ -121,7 +121,6 @@ class HomeAssistantClient:
             "entities": results[command_types[2]],
         }
 
-
     async def alexa_exposure_report(self) -> dict[str, Any]:
         """Read actual HA-managed Alexa exposure and default discovery settings.
 
@@ -130,10 +129,12 @@ class HomeAssistantClient:
         """
         try:
             async with self._websocket_connect(
-                self.websocket_url, open_timeout=self.timeout_seconds,
+                self.websocket_url,
+                open_timeout=self.timeout_seconds,
                 close_timeout=self.timeout_seconds,
             ) as websocket:
                 await self._authenticate_websocket(websocket)
+
                 async def read(command_id: int, command: dict[str, Any]) -> Any:
                     await websocket.send(json.dumps({"id": command_id, **command}))
                     message = await self._recv_matching_result(websocket, command_id)
@@ -142,10 +143,13 @@ class HomeAssistantClient:
                     return message.get("result")
 
                 listed = await read(1, {"type": "homeassistant/expose_entity/list"})
-                default = await read(2, {
-                    "type": "homeassistant/expose_new_entities/get",
-                    "assistant": "cloud.alexa",
-                })
+                default = await read(
+                    2,
+                    {
+                        "type": "homeassistant/expose_new_entities/get",
+                        "assistant": "cloud.alexa",
+                    },
+                )
                 if not isinstance(listed, dict) or not isinstance(default, dict):
                     raise HomeAssistantRequestError("Incomplete HA Alexa exposure report.")
                 exposed = listed.get("exposed_entities")
@@ -157,10 +161,13 @@ class HomeAssistantClient:
                     for key, value in exposed.items()
                 ):
                     raise HomeAssistantRequestError("Unbounded HA Alexa exposure response.")
-                return {"exposed_entities": {
-                    key: {"cloud.alexa": value.get("cloud.alexa") is True}
-                    for key, value in exposed.items()
-                }, "expose_new": exposure_flag}
+                return {
+                    "exposed_entities": {
+                        key: {"cloud.alexa": value.get("cloud.alexa") is True}
+                        for key, value in exposed.items()
+                    },
+                    "expose_new": exposure_flag,
+                }
         except HomeAssistantError:
             raise
         except TimeoutError as exc:

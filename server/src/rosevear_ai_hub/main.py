@@ -8,8 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from rosevear_ai_hub import __version__
-from rosevear_ai_hub.api.audit import router as audit_router
 from rosevear_ai_hub.api.alexa_consent372 import router as alexa_consent372_router
+from rosevear_ai_hub.api.audit import router as audit_router
 from rosevear_ai_hub.api.automations import router as automations_router
 from rosevear_ai_hub.api.backup_inventory import router as backup_inventory_router
 from rosevear_ai_hub.api.business import router as business_router
