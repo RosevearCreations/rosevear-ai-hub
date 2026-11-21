@@ -3,6 +3,7 @@
 Reads Home Assistant's official Alexa exposure registry; stores only local owner
 intent and audit evidence. Nothing links Amazon, records speech or turns on devices.
 """
+
 from __future__ import annotations
 
 import re
@@ -169,20 +170,23 @@ async def inspect(
             drift = "REVIEWED_NOT_EXPOSED"
         else:
             drift = "ALIGNED_OR_UNREVIEWED"
-        items.append({
-            "entityId": eid,
-            "name": str(item.get("name") or item.get("original_name") or eid)[:120],
-            "areaId": str(item.get("area_id") or "")[:120],
-            "eligible": allowed,
-            "reason": reason,
-            "desiredApproved": permitted,
-            "haAlexaExposed": exposed,
-            "drift": drift,
-            "revision": local.revision if local else 0,
-            "expiresAt": local.expires_at.isoformat() if local else None,
-        })
+        items.append(
+            {
+                "entityId": eid,
+                "name": str(item.get("name") or item.get("original_name") or eid)[:120],
+                "areaId": str(item.get("area_id") or "")[:120],
+                "eligible": allowed,
+                "reason": reason,
+                "desiredApproved": permitted,
+                "haAlexaExposed": exposed,
+                "drift": drift,
+                "revision": local.revision if local else 0,
+                "expiresAt": local.expires_at.isoformat() if local else None,
+            }
+        )
     missing = sorted(
-        eid for eid, details in raw.items()
+        eid
+        for eid, details in raw.items()
         if eid not in seen and isinstance(details, dict) and details.get("cloud.alexa") is True
     )
     # Exact HA exposure registry is not evidence of a linked Amazon account or
@@ -225,9 +229,13 @@ async def review(
             registry = await runtime.client.registry_snapshot()
             entries, names = _candidate_registry(registry)
         except HomeAssistantError as exc:
-            raise HTTPException(status_code=503, detail="Home Assistant source unavailable.") from exc
+            raise HTTPException(
+                status_code=503, detail="Home Assistant source unavailable."
+            ) from exc
         except ValueError as exc:
-            raise HTTPException(status_code=422, detail="Home Assistant source incomplete.") from exc
+            raise HTTPException(
+                status_code=422, detail="Home Assistant source incomplete."
+            ) from exc
         item = next((x for x in entries if x.get("entity_id") == payload.entity_id), None)
         if item is None:
             raise HTTPException(status_code=409, detail="Entity absent from live HA registry.")
@@ -249,8 +257,11 @@ async def review(
     existing.expires_at = now + timedelta(days=30) if payload.decision == "approved" else now
     db.flush()
     record_audit_event(
-        db, actor_user_id=actor.id, event_type="alexa372.consent.reviewed",
-        object_type="alexa_consent", object_id=existing.entity_id,
+        db,
+        actor_user_id=actor.id,
+        event_type="alexa372.consent.reviewed",
+        object_type="alexa_consent",
+        object_id=existing.entity_id,
         action=payload.decision,
         arguments={"entity_id": existing.entity_id, "revision": existing.revision},
         result={"ok": True, "provider_mutated": False, "speech_captured": False},
@@ -272,12 +283,18 @@ def audit(_owner: Owner, db: DB, response: Response) -> dict:
     events = db.scalars(
         select(AuditEvent)
         .where(AuditEvent.event_type == "alexa372.consent.reviewed")
-        .order_by(AuditEvent.id.desc()).limit(50)
+        .order_by(AuditEvent.id.desc())
+        .limit(50)
     ).all()
     return {
         "type": "OWNER_CONSENT_AUDIT_NOT_VOICE_TRANSCRIPTS",
-        "events": [{
-            "entityId": event.object_id, "decision": event.action,
-            "at": event.created_at.isoformat(), "actorId": event.actor_user_id,
-        } for event in events],
+        "events": [
+            {
+                "entityId": event.object_id,
+                "decision": event.action,
+                "at": event.created_at.isoformat(),
+                "actorId": event.actor_user_id,
+            }
+            for event in events
+        ],
     }
