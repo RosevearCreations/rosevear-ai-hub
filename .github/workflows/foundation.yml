@@ -134,7 +134,16 @@ jobs:
       - name: Lint
         run: ruff check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
       - name: Build 373 CI-exact formatter witness (temporary)
-        run: ruff format --diff server/src/rosevear_ai_hub/api/apple_matter373.py server/tests/test_apple_matter373.py server/alembic/versions/0034_apple_matter373.py || true
+        run: |
+          ruff format server/src/rosevear_ai_hub/api/apple_matter373.py server/tests/test_apple_matter373.py server/alembic/versions/0034_apple_matter373.py
+          echo 'FORMATTED_APPLE_API_373_BEGIN'
+          base64 -w0 server/src/rosevear_ai_hub/api/apple_matter373.py
+          echo
+          echo 'FORMATTED_APPLE_API_373_END'
+          echo 'FORMATTED_APPLE_TEST_373_BEGIN'
+          base64 -w0 server/tests/test_apple_matter373.py
+          echo
+          echo 'FORMATTED_APPLE_TEST_373_END'
       - name: Format check
         run: ruff format --check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
       - name: Test
