@@ -3899,3 +3899,59 @@ export type WorkshopEnrollment371Report = {
 export function getWorkshopEnrollment371(): Promise<WorkshopEnrollment371Report> {
   return authJson("GET", "/api/v1/workshop-enrollment-371/reconciliation");
 }
+
+
+// Build 372: Home Assistant Alexa exposure reconciliation. No provider writes.
+export type AlexaConsent372LocalReport = {
+  schema: "rosevear.hub.alexa-consent.v372";
+  status: "HOLD_PROVIDER_NOT_INSPECTED";
+  providerExposureVerified: false;
+  alexaAccountLinked: null;
+  voiceInvocationVerified: false;
+  providerWritesPerformed: 0;
+  consents: Array<{
+    entityId: string; decision: "approved" | "revoked"; revision: number;
+    reviewedAt: string; expiresAt: string; effectiveApproval: boolean;
+  }>;
+};
+export type AlexaConsent372Inspection = {
+  schema: "rosevear.hub.alexa-consent.v372";
+  status: "HA_SETTINGS_READBACK_ONLY";
+  providerExposureVerified: true;
+  alexaAccountLinked: null;
+  voiceInvocationVerified: false;
+  providerWritesPerformed: 0;
+  checkedAt: string; automaticExposureEnabled: boolean;
+  readbackCount: number; driftCount: number;
+  exposedWithoutInventory: string[];
+  items: Array<{
+    entityId: string; name: string; areaId: string;
+    eligible: boolean; reason: string; desiredApproved: boolean;
+    haAlexaExposed: boolean;
+    drift: "EXPOSED_WITHOUT_CURRENT_APPROVAL" | "REVIEWED_NOT_EXPOSED" |
+      "ALIGNED_OR_UNREVIEWED";
+    revision: number; expiresAt: string | null;
+  }>;
+};
+export type AlexaConsent372Audit = {
+  type: "OWNER_CONSENT_AUDIT_NOT_VOICE_TRANSCRIPTS";
+  events: Array<{entityId: string; decision: string; at: string; actorId: number | null}>;
+};
+export function getAlexaConsent372Report(): Promise<AlexaConsent372LocalReport> {
+  return authJson("GET", "/api/v1/alexa-consent-372/report");
+}
+export function inspectAlexaConsent372(): Promise<AlexaConsent372Inspection> {
+  return authJson("GET", "/api/v1/alexa-consent-372/inspect");
+}
+export function getAlexaConsent372Audit(): Promise<AlexaConsent372Audit> {
+  return authJson("GET", "/api/v1/alexa-consent-372/audit");
+}
+export function reviewAlexaConsent372(payload: {
+  entity_id: string; decision: "approved" | "revoked";
+  expected_revision: number; owner_confirmed: boolean;
+}): Promise<{
+  entityId: string; decision: string; revision: number;
+  expiresAt: string; providerWritesPerformed: 0; manualHomeAssistantStepRequired: true;
+}> {
+  return authJson("PUT", "/api/v1/alexa-consent-372/review", payload);
+}
