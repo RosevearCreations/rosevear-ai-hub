@@ -131,6 +131,24 @@ jobs:
           cache: pip
       - name: Install backend and development dependencies
         run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+      - name: Build 372 TEMP exact format witness (remove before merge)
+        shell: bash
+        run: |
+          ruff check --fix server/src/rosevear_ai_hub/api/alexa_consent372.py server/src/rosevear_ai_hub/main.py server/tests/test_alexa_consent372.py || true
+          ruff format server/src/rosevear_ai_hub/api/alexa_consent372.py server/src/rosevear_ai_hub/main.py server/src/rosevear_ai_hub/integrations/home_assistant.py server/src/rosevear_ai_hub/models.py server/tests/test_alexa_consent372.py
+          python - <<'PY'
+          from pathlib import Path
+          import base64
+          paths = [
+              "server/src/rosevear_ai_hub/api/alexa_consent372.py",
+              "server/src/rosevear_ai_hub/main.py",
+              "server/src/rosevear_ai_hub/integrations/home_assistant.py",
+              "server/src/rosevear_ai_hub/models.py",
+              "server/tests/test_alexa_consent372.py",
+          ]
+          for path in paths:
+              print("B372BEGIN:" + path + ":" + base64.b64encode(Path(path).read_bytes()).decode("ascii") + ":B372END")
+          PY
       - name: Lint
         run: ruff check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
       - name: Format check
