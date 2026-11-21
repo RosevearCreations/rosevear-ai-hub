@@ -211,7 +211,9 @@ async def review(
         except ValueError as exc:
             raise HTTPException(status_code=422, detail="HOLD_INCOMPLETE_HA_REGISTRY") from exc
         if not any(item["deviceId"] == payload.device_id for item in current):
-            raise HTTPException(status_code=409, detail="Device not in current supported HA registry.")
+            raise HTTPException(
+                status_code=409, detail="Device not in current supported HA registry."
+            )
         if len(_rows(db)) >= 500 and existing is None:
             raise HTTPException(status_code=409, detail="Review registry full.")
     elif existing is None:
