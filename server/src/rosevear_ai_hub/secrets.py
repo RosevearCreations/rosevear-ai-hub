@@ -32,6 +32,12 @@ class SecretDefinition:
 
 SECRET_DEFINITIONS: tuple[SecretDefinition, ...] = (
     SecretDefinition(
+        secret_key="smartthings.read_token",
+        display_name="SmartThings read token",
+        description="Short-lived owner-scoped GET-only SmartThings diagnostic token.",
+        environment_variable="",
+    ),
+    SecretDefinition(
         secret_key="home_assistant.token",
         display_name="Home Assistant token",
         description="Long-lived token used by the Home Assistant connector in Build 021.",
