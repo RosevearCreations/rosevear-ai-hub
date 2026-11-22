@@ -1034,4 +1034,3 @@ class SmartThingsCapture374(Base):
     location_count: Mapped[int] = mapped_column(Integer, nullable=False)
     room_count: Mapped[int] = mapped_column(Integer, nullable=False)
     digest_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
-
