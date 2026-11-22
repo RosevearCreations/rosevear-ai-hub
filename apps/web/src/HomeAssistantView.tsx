@@ -22,6 +22,7 @@ import { WorkshopGateway370 } from "./WorkshopGateway370";
 import { WorkshopEnrollment371 } from "./WorkshopEnrollment371";
 import { AlexaConsent372 } from "./AlexaConsent372";
 import { AppleMatter373 } from "./AppleMatter373";
+import { SmartThings374 } from "./SmartThings374";
 import { HomeAssistantDiscoveryPanel } from "./HomeAssistantDiscoveryPanel";
 import { SceneDraftWorkbench } from "./SceneDraftWorkbench";
 import { HomeOperationsRoomsPanel } from "./HomeOperationsRoomsPanel";
@@ -192,6 +193,7 @@ export function HomeAssistantView({ currentUser }: { currentUser: AuthUser }) {
       <HomeInventory369 role={currentUser.role} />
       <AlexaConsent372 role={currentUser.role} />
       <AppleMatter373 role={currentUser.role} />
+      <SmartThings374 role={currentUser.role} />
       <WorkshopGateway370 role={currentUser.role} />
       <WorkshopEnrollment371 role={currentUser.role} />
       <DeviceDiscoveryInbox role={currentUser.role} />
