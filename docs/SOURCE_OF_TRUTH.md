@@ -405,3 +405,17 @@ docs/contracts/hub-feature-progress375.json are the source references.
 Next Build 376 Safe Automation Sequencing. Builds 376–387 are 12 future
 numbered proposals plus the deferred radio/bridge goal.
 
+## Build 376 — Safe automation DAG preview and causal rehearsal (2026-11-22)
+
+Owner-only dependency graph plans with pinned existing rule hashes, exact
+review-only approval, invalidation on edits, simulated provider failure,
+durable cause replay guard, plan-specific cooldown, local audit and no
+device commands. New protected API and private Automations UI; additive
+migration 0037. Existing Event Engine untouched. Source report:
+docs/BUILD_376_SAFE_AUTOMATION_SEQUENCE.md and
+docs/contracts/hub-feature-progress376.json. Live provider execution and
+original host field evidence remain HOLD. Runtime events from other apps
+are NOT source code or Git branch changes. Next Build 377 Workshop Process
+Health Command Centre. Remaining numbered builds 377–387 = 11, plus
+displaced radio/bridge task still open.
+

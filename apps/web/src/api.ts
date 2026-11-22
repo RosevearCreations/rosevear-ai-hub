@@ -4119,3 +4119,57 @@ export function bindCameraReliability375(payload: {
 }): Promise<{mapping: CameraReliability375Binding; providerWritesPerformed: 0}> {
   return authJson("PUT", "/api/v1/camera-reliability-375/binding", payload);
 }
+
+// Build 376 — source-version-pinned, owner-only orchestration SIMULATION.
+export type Sequence376Step = { automation_id: number; depends_on: number[] };
+export type Sequence376Plan = {
+  id: number; title: string; steps: Sequence376Step[];
+  cooldownSeconds: number; revision: number; sourceHash: string;
+  approvedHash: string | null; approvedAt: string | null;
+  mode: "SIMULATION_ONLY_NO_ACTIONS"; executionEnabled: false;
+};
+export type Sequence376Preview = {
+  schema: "rosevear.hub.automation-sequence.v376";
+  plan: Sequence376Plan; order: number[]; state: string;
+  sourceHash: string | null; sourceVersionPinned: boolean;
+  readyForSimulation: boolean; blockers: string[];
+  orderedRules: Array<{
+    automationId: number; name: string; enabled: boolean; triggerType: string;
+    toolKeys: string[]; sourceHash: string;
+  }>;
+  manualApprovalIsNotExecutionPermission: true;
+  physicalActionsAllowed: false;
+  externalAppMessagesAreRuntimeObservationsNotGitCommits: true;
+};
+export function getSequence376Plans(): Promise<{plans: Sequence376Plan[];
+  executorConnected: false}> {
+  return authJson("GET", "/api/v1/automation-sequencing-376/plans");
+}
+export function createSequence376(payload: {
+  title: string; steps: Sequence376Step[];
+  cooldown_seconds: number; expected_revision: number;
+}): Promise<Sequence376Plan> {
+  return authJson("POST", "/api/v1/automation-sequencing-376/plans", payload);
+}
+export function getSequence376PlanPreview(id: number): Promise<Sequence376Preview> {
+  return authJson("GET", "/api/v1/automation-sequencing-376/plans/" +
+    encodeURIComponent(String(id)) + "/preview");
+}
+export function approveSequence376(id: number, payload: {
+  expected_revision: number; expected_source_hash: string; owner_confirmed: boolean;
+}): Promise<Sequence376Plan> {
+  return authJson("PUT", "/api/v1/automation-sequencing-376/plans/" +
+    encodeURIComponent(String(id)) + "/approve", payload);
+}
+export type Sequence376SimulationResult = {
+  state: "SIMULATED_ONLY" | "HELD" | "REPLAY_HELD";
+  reasonCodes?: string[]; reason?: string; order?: number[];
+  causeSha256: string; deviceActions: 0; providerWrites?: 0;
+};
+export function simulateSequence376(id: number, payload: {
+  cause_id: string; expected_revision: number;
+  unavailable_sources: Array<"home_assistant" | "mqtt" | "frigate" | "external_app">;
+}): Promise<Sequence376SimulationResult> {
+  return authJson("POST", "/api/v1/automation-sequencing-376/plans/" +
+    encodeURIComponent(String(id)) + "/simulate", payload);
+}
