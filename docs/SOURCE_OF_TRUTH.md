@@ -392,3 +392,16 @@ See docs/BUILD_374_SMARTTHINGS_PROVIDER_SCOPE.md and
 docs/contracts/hub-feature-progress374.json. Next Build375 cameras/doorbells;
 13 numbered proposals (375–387) plus deferred radio/bridge scope remain.
 
+## Build 375 — Camera/doorbell/event reliability, source accepted pending CI (2026-11-22)
+
+Owner-only readback merges existing go2rtc/ONVIF camera probe status with local
+Frigate config/event freshness, quarantines duplicate/future/invalid event metadata,
+separates offline vs quiet/no-event, and supports audited local owner identity
+mapping (doorbell candidate) and bounded metadata-only history with migration
+0036. No raw media, provider write, or automatic event polling. Physical
+moving video, clip playback, sound, doorbell chime and original-host install
+remain FIELD_HOLD. docs/BUILD_375_CAMERA_EVENT_RELIABILITY.md and
+docs/contracts/hub-feature-progress375.json are the source references.
+Next Build 376 Safe Automation Sequencing. Builds 376–387 are 12 future
+numbered proposals plus the deferred radio/bridge goal.
+
