@@ -833,7 +833,6 @@ class SmartThingsCapture374(Base):
     digest_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
 
 
-
 class DeviceRegistryMatchReview(TimestampMixin, Base):
     """Proposed relationship review, not a linkage or consolidation operation."""
 
