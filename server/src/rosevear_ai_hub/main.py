@@ -294,7 +294,9 @@ def create_app() -> FastAPI:
     application.include_router(audit_router)
     application.include_router(notifications_router)
     application.include_router(automations_router, dependencies=[Depends(require_authenticated)])
-    application.include_router(automation_sequencing376_router, dependencies=[Depends(require_authenticated)])
+    application.include_router(
+        automation_sequencing376_router, dependencies=[Depends(require_authenticated)]
+    )
     protected = [Depends(require_authenticated)]
     application.include_router(ollama_router, dependencies=protected)
     application.include_router(providers_router, dependencies=protected)
