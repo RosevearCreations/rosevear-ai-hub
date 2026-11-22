@@ -73,7 +73,7 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 
 **Acceptance / security gate:** Owner-supervised supported hardware pairing; zero HomeKit credentials in browser and revoke/rollback support.
 
-### Build 374 — Samsung SmartThings and cross-platform device coverage
+### Build 374 — Samsung SmartThings and cross-platform device coverage (SOURCE IMPLEMENTED; FIELD HOLD)
 
 **Deliver:** Owner-gated SmartThings connection/permission review, room/device matching, stale vendor state and Android/Tizen access survey; read-only first..
 

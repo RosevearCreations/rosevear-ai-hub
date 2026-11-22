@@ -805,6 +805,34 @@ class DeviceRegistryAnnotation(TimestampMixin, Base):
     reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
+class SmartThingsReview374(Base):
+    """Local reviewed/excluded provider identity, not Samsung authorization."""
+
+    __tablename__ = "smartthings_reviews374"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    device_id: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    decision: Mapped[str] = mapped_column(String(16), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    reviewed_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class SmartThingsCapture374(Base):
+    """Metadata-only successful GET receipt: no device details or tokens."""
+
+    __tablename__ = "smartthings_captures374"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    checked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    device_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    location_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    room_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    digest_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+
+
 class DeviceRegistryMatchReview(TimestampMixin, Base):
     """Proposed relationship review, not a linkage or consolidation operation."""
 

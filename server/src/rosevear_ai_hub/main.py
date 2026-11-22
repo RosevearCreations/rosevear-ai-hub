@@ -118,6 +118,7 @@ from rosevear_ai_hub.api.server_shell362 import router as server_shell362_router
 from rosevear_ai_hub.api.server_shell363 import router as server_shell363_router
 from rosevear_ai_hub.api.server_shell364 import router as server_shell364_router
 from rosevear_ai_hub.api.server_shell365 import router as server_shell365_router
+from rosevear_ai_hub.api.smartthings374 import router as smartthings374_router
 from rosevear_ai_hub.api.speech import router as speech_router
 from rosevear_ai_hub.api.sysop_history366 import router as sysop_history366_router
 from rosevear_ai_hub.api.sysop_telemetry423 import router as sysop_telemetry423_router
@@ -276,6 +277,7 @@ def create_app() -> FastAPI:
     application.include_router(home_inventory369_router)
     application.include_router(alexa_consent372_router)
     application.include_router(apple_matter373_router)
+    application.include_router(smartthings374_router)
     application.include_router(workshop_gateway370_router)
     application.include_router(workshop_enrollment371_router)
     application.include_router(workshop_router, dependencies=[Depends(require_authenticated)])
