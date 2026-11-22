@@ -4004,3 +4004,60 @@ export function reviewAppleMatter373(payload: {
   providerWritesPerformed: 0; manualProviderStepRequired: true}> {
   return authJson("PUT", "/api/v1/apple-matter-373/review", payload);
 }
+
+
+// Build 374: owner-gated, manual SmartThings inventory. No provider commands.
+export type SmartThings374Report = {
+  schema: "rosevear.hub.smartthings.v374";
+  configured: boolean;
+  status: "HOLD_NO_TOKEN" | "HOLD_NOT_INSPECTED" | "STALE" | "RECENT_MANUAL_READ";
+  lastCheckedAt: string | null;
+  ageSeconds: number | null;
+  lastDeviceCount: number | null;
+  commandsSent: 0;
+  androidTizenVerified: false;
+  oauthAppVerified: false;
+  reviews: Array<{deviceId: string; decision: "reviewed" | "excluded";
+    revision: number; reviewedAt: string}>;
+};
+export type SmartThings374Inspection = {
+  schema: "rosevear.hub.smartthings.v374";
+  status: "PROVIDER_READ_ONLY_NOT_FIELD_CERTIFIED";
+  checkedAt: string;
+  haState: "HOLD_HA_NOT_CONFIGURED" | "HOLD_HA_UNAVAILABLE" | "HA_REGISTRY_READ_ONLY";
+  deviceCount: number;
+  locationCount: number;
+  roomCount: number;
+  exactHaCount: number;
+  nameOnlyCount: number;
+  duplicateNameCount: number;
+  commandsSent: 0;
+  androidTizenVerified: false;
+  oauthAppVerified: false;
+  devices: Array<{
+    deviceId: string; name: string; locationName: string; roomName: string;
+    vendorType: string; exactHaId: string | null; haNameCandidates: number;
+    localReview: "reviewed" | "excluded" | "unreviewed";
+    revision: number; physicalVerified: false;
+    androidTizenVerified: false; repeatedName: boolean;
+  }>;
+};
+export function getSmartThings374Report(): Promise<SmartThings374Report> {
+  return authJson("GET", "/api/v1/smartthings-374/report");
+}
+export function inspectSmartThings374(): Promise<SmartThings374Inspection> {
+  return authJson("POST", "/api/v1/smartthings-374/inspect", {});
+}
+export function reviewSmartThings374(payload: {
+  device_id: string; decision: "reviewed" | "excluded";
+  expected_revision: number; owner_confirmed: boolean;
+}): Promise<{deviceId: string; decision: string; revision: number;
+  localOnly: true; commandsSent: 0}> {
+  return authJson("PUT", "/api/v1/smartthings-374/review", payload);
+}
+export function disconnectSmartThings374(payload: {
+  owner_confirmed: boolean;
+}): Promise<{localCredentialDeleted: boolean; providerTokenRevoked: false;
+  commandsSent: 0; manualProviderRevocationRequired: true}> {
+  return authJson("POST", "/api/v1/smartthings-374/disconnect", payload);
+}

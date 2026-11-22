@@ -380,3 +380,15 @@ Build372 adds owner-only, opt-in Home Assistant Alexa exposure readback, an owne
 ## Build 373 — Apple Home, HomeKit and Matter HA source reconciliation (2026-11-21)
 
 Owner-only Home Assistant registry provider markers and exact HA device IDs; duplicate name alerts, local audited reviewed/revoked decisions, safe migration 0034 and no pairing credentials or provider writes. No Apple Home export/visibility or Matter commissioning claimed. Real bridge configuration, iOS permissions, Thread border router, independent physical pairing and local Windows installation remain FIELD_HOLD. Source contract docs/contracts/hub-feature-progress373.json; field guide docs/BUILD_373_APPLE_HOME_MATTER_CUSTODY.md. Next Build374 SmartThings; 14 numbered builds (374–387) remain plus displaced original radio/bridge goal.
+
+## Build 374 — Samsung SmartThings read-only cloud inventory (2026-11-21)
+
+Scoped HTTPS GET devices/locations/rooms, owner-gated encrypted short-lived
+credential, local deletion and review, exact HA identity vs name-only candidate
+reconciliation, stale observation metadata and migration 0035. Live OAuth
+installation, developer plan, Android/Tizen access, original-host operation and
+physical device acceptance remain FIELD_HOLD. Provider writes remain disabled.
+See docs/BUILD_374_SMARTTHINGS_PROVIDER_SCOPE.md and
+docs/contracts/hub-feature-progress374.json. Next Build375 cameras/doorbells;
+13 numbered proposals (375–387) plus deferred radio/bridge scope remain.
+
