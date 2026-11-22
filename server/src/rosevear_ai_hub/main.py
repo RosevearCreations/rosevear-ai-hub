@@ -20,6 +20,7 @@ from rosevear_ai_hub.api.camera_import_reconciliation import (
     router as camera_import_reconciliation_router,
 )
 from rosevear_ai_hub.api.camera_inventory_import import router as camera_inventory_import_router
+from rosevear_ai_hub.api.camera_reliability375 import router as camera_reliability375_router
 from rosevear_ai_hub.api.camera_reviews import router as camera_reviews_router
 from rosevear_ai_hub.api.camera_wall import router as camera_wall_router
 from rosevear_ai_hub.api.cameras import router as cameras_router
@@ -271,6 +272,7 @@ def create_app() -> FastAPI:
     application.include_router(camera_import_reconciliation_router)
     application.include_router(frigate_router)
     application.include_router(camera_reviews_router)
+    application.include_router(camera_reliability375_router)
     application.include_router(device_registry_router)
     application.include_router(device_discovery_router)
     application.include_router(network_trust368_router)
