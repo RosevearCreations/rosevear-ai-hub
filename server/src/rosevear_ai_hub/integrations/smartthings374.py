@@ -3,6 +3,7 @@
 Only fixed-host HTTPS GET requests. No polling, pairing, device commands,
 provider writes, callbacks or background jobs.
 """
+
 from __future__ import annotations
 
 import re
@@ -72,9 +73,13 @@ class SmartThingsReadClient:
             href = link["href"]
             url = urlsplit(href)
             if (
-                url.scheme != "https" or url.netloc != "api.smartthings.com"
-                or url.path != path or url.username is not None
-                or url.password is not None or bool(url.fragment) or len(href) > 512
+                url.scheme != "https"
+                or url.netloc != "api.smartthings.com"
+                or url.path != path
+                or url.username is not None
+                or url.password is not None
+                or bool(url.fragment)
+                or len(href) > 512
             ):
                 raise SmartThingsReadError("HOLD_UNSAFE_PAGINATION")
             params = parse_qs(url.query, keep_blank_values=True)
