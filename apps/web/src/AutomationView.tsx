@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { AutomationOperationsConsole } from "./AutomationOperationsConsole";
+import { AutomationSequencing376 } from "./AutomationSequencing376";
 
 import {
   applyAutomationChange,
@@ -470,6 +471,7 @@ export function AutomationView() {
           )}
         </section>
       ) : null}
+      <AutomationSequencing376 />
     </>
   );
 }

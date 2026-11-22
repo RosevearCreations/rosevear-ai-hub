@@ -93,7 +93,7 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 
 **Acceptance / security gate:** Actual moving video and permission tests; vendor limitations and offline cameras cannot count as healthy.
 
-### Build 376 — Safe automation sequencing and dependency orchestration
+### Build 376 — Safe automation sequencing and dependency orchestration (SOURCE IMPLEMENTED; LIVE ORCHESTRATION HOLD)
 
 **Deliver:** Home Assistant rule graph, event causality, rate limits, dry-run previews, manual approvals and recovery when network/provider fails..
 
