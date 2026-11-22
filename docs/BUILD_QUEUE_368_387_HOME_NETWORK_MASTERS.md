@@ -83,7 +83,7 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 
 **Acceptance / security gate:** Supported vendor auth, approved device scope and clean credential revocation; no unapproved cross-platform commands.
 
-### Build 375 — Cameras, doorbells and event reliability
+### Build 375 — Cameras, doorbells and event reliability (SOURCE IMPLEMENTED; FIELD HOLD)
 
 **Deliver:** Combine supported local RTSP/ONVIF/go2rtc/Frigate capabilities, vendor doorbells, privacy-controlled streams, events and offline cues..
 

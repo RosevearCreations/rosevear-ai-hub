@@ -1034,3 +1034,40 @@ class SmartThingsCapture374(Base):
     location_count: Mapped[int] = mapped_column(Integer, nullable=False)
     room_count: Mapped[int] = mapped_column(Integer, nullable=False)
     digest_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+
+
+class CameraEventBinding375(Base):
+    """Owner-approved identity relation, never vendor pairing or media access."""
+
+    __tablename__ = "camera_event_bindings375"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    camera_id: Mapped[int] = mapped_column(
+        ForeignKey("cameras.id", ondelete="RESTRICT"),
+        unique=True,
+        nullable=False,
+    )
+    frigate_name: Mapped[str] = mapped_column(String(96), unique=True, nullable=False)
+    role: Mapped[str] = mapped_column(String(16), nullable=False)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    reviewed_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class CameraReliabilityCapture375(Base):
+    """Bounded event/transport metadata; no private feeds, IPs or event IDs."""
+
+    __tablename__ = "camera_reliability_captures375"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    checked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    frigate_state: Mapped[str] = mapped_column(String(64), nullable=False)
+    transport_online: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    event_read_available: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    registered_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    event_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    invalid_events: Mapped[int] = mapped_column(Integer, nullable=False)
+    metadata_digest: Mapped[str] = mapped_column(String(64), nullable=False)
