@@ -114,9 +114,7 @@ def build_sysop_telemetry423(
 
 def _authorized(actual: str | None) -> bool:
     expected = os.environ.get("ROSEVEAR_SYSOP_TELEMETRY_READ_TOKEN")
-    return not expected or bool(
-        actual and secrets.compare_digest(actual, expected)
-    )
+    return not expected or bool(actual and secrets.compare_digest(actual, expected))
 
 
 @router.get("")
@@ -136,9 +134,8 @@ def get_sysop_telemetry423(
             "authorizesAction": False,
         }
 
-    if (
-        not x_rosevear_telemetry_challenge
-        or not CHALLENGE_RE.fullmatch(x_rosevear_telemetry_challenge)
+    if not x_rosevear_telemetry_challenge or not CHALLENGE_RE.fullmatch(
+        x_rosevear_telemetry_challenge
     ):
         response.status_code = 400
         return {
