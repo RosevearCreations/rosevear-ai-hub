@@ -392,7 +392,7 @@ See docs/BUILD_374_SMARTTHINGS_PROVIDER_SCOPE.md and
 docs/contracts/hub-feature-progress374.json. Next Build375 cameras/doorbells;
 13 numbered proposals (375–387) plus deferred radio/bridge scope remain.
 
-## Build 375 — Camera/doorbell/event reliability, source accepted pending CI (2026-11-22)
+## Build 375 — Camera/doorbell/event reliability source (2026-11-22)
 
 Owner-only readback merges existing go2rtc/ONVIF camera probe status with local
 Frigate config/event freshness, quarantines duplicate/future/invalid event metadata,
