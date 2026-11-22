@@ -11,8 +11,8 @@ from rosevear_ai_hub import __version__
 from rosevear_ai_hub.api.alexa_consent372 import router as alexa_consent372_router
 from rosevear_ai_hub.api.apple_matter373 import router as apple_matter373_router
 from rosevear_ai_hub.api.audit import router as audit_router
-from rosevear_ai_hub.api.automations import router as automations_router
 from rosevear_ai_hub.api.automation_sequencing376 import router as automation_sequencing376_router
+from rosevear_ai_hub.api.automations import router as automations_router
 from rosevear_ai_hub.api.backup_inventory import router as backup_inventory_router
 from rosevear_ai_hub.api.business import router as business_router
 from rosevear_ai_hub.api.camera_compatibility import router as camera_compatibility_router
@@ -294,6 +294,7 @@ def create_app() -> FastAPI:
     application.include_router(audit_router)
     application.include_router(notifications_router)
     application.include_router(automations_router, dependencies=[Depends(require_authenticated)])
+    application.include_router(automation_sequencing376_router, dependencies=[Depends(require_authenticated)])
     protected = [Depends(require_authenticated)]
     application.include_router(ollama_router, dependencies=protected)
     application.include_router(providers_router, dependencies=protected)
