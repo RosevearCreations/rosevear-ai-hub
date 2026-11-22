@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from rosevear_ai_hub import __version__
 from rosevear_ai_hub.api.alexa_consent372 import router as alexa_consent372_router
 from rosevear_ai_hub.api.apple_matter373 import router as apple_matter373_router
+from rosevear_ai_hub.api.smartthings374 import router as smartthings374_router
 from rosevear_ai_hub.api.audit import router as audit_router
 from rosevear_ai_hub.api.automations import router as automations_router
 from rosevear_ai_hub.api.backup_inventory import router as backup_inventory_router
@@ -276,6 +277,7 @@ def create_app() -> FastAPI:
     application.include_router(home_inventory369_router)
     application.include_router(alexa_consent372_router)
     application.include_router(apple_matter373_router)
+    application.include_router(smartthings374_router)
     application.include_router(workshop_gateway370_router)
     application.include_router(workshop_enrollment371_router)
     application.include_router(workshop_router, dependencies=[Depends(require_authenticated)])
