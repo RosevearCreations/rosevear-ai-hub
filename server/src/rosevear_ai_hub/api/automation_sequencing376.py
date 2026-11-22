@@ -132,14 +132,16 @@ def _source_snapshot(db: Session, steps: list[Step]) -> tuple[str, list[dict]]:
         keys = sorted({action.tool_key for action in rule.actions})
         # Never return action argument values. Source tool categories are only
         # an informational preview; nothing here grants executor permissions.
-        sanitized.append({
-            "automationId": row.id,
-            "name": row.name[:120],
-            "enabled": row.enabled,
-            "triggerType": rule.trigger.type,
-            "toolKeys": keys,
-            "sourceHash": automation_record_hash(row),
-        })
+        sanitized.append(
+            {
+                "automationId": row.id,
+                "name": row.name[:120],
+                "enabled": row.enabled,
+                "triggerType": rule.trigger.type,
+                "toolKeys": keys,
+                "sourceHash": automation_record_hash(row),
+            }
+        )
     digest = hashlib.sha256(
         json.dumps(
             [(r["automationId"], r["sourceHash"]) for r in sanitized],
@@ -180,8 +182,11 @@ def _evaluate(db: Session, plan: AutomationSequence376) -> dict:
         digest, rules = _source_snapshot(db, _steps(plan))
     except HTTPException as exc:
         return {
-            "state": exc.detail, "sourceHash": None, "orderedRules": [],
-            "readyForSimulation": False, "blockers": [exc.detail],
+            "state": exc.detail,
+            "sourceHash": None,
+            "orderedRules": [],
+            "readyForSimulation": False,
+            "blockers": [exc.detail],
         }
     blockers = []
     if digest != plan.source_hash:
@@ -239,7 +244,8 @@ def create_plan(payload: PlanIn, actor: Owner, db: DB) -> dict:
     db.add(row)
     db.flush()
     record_audit_event(
-        db, actor_user_id=actor.id,
+        db,
+        actor_user_id=actor.id,
         event_type="automation376.sequence.created",
         object_type="automation_sequence_plan",
         object_id=str(row.id),
@@ -252,9 +258,7 @@ def create_plan(payload: PlanIn, actor: Owner, db: DB) -> dict:
 
 
 @router.put("/plans/{plan_id}")
-def update_plan(
-    payload: PlanIn, actor: Owner, db: DB, plan_id: int = Path(gt=0)
-) -> dict:
+def update_plan(payload: PlanIn, actor: Owner, db: DB, plan_id: int = Path(gt=0)) -> dict:
     row = _row(db, plan_id, actor)
     if row.revision != payload.expected_revision:
         raise HTTPException(status_code=409, detail="Plan changed; reload first.")
@@ -267,7 +271,8 @@ def update_plan(
     row.approved_at = None
     row.revision += 1
     record_audit_event(
-        db, actor_user_id=actor.id,
+        db,
+        actor_user_id=actor.id,
         event_type="automation376.sequence.updated",
         object_type="automation_sequence_plan",
         object_id=str(row.id),
@@ -297,7 +302,9 @@ def preview(actor: Owner, db: DB, plan_id: int = Path(gt=0)) -> dict:
 
 @router.put("/plans/{plan_id}/approve")
 def approve(
-    payload: ApprovalIn, actor: Owner, db: DB,
+    payload: ApprovalIn,
+    actor: Owner,
+    db: DB,
     plan_id: int = Path(gt=0),
 ) -> dict:
     row = _row(db, plan_id, actor)
@@ -309,17 +316,15 @@ def approve(
     if current["sourceHash"] != payload.expected_source_hash:
         raise HTTPException(status_code=409, detail="Source rule changed since preview.")
     # Do not approve a changed source graph or disabled/unsafe source.
-    blockers = [
-        item for item in current["blockers"]
-        if item != "HOLD_OWNER_APPROVAL_REQUIRED"
-    ]
+    blockers = [item for item in current["blockers"] if item != "HOLD_OWNER_APPROVAL_REQUIRED"]
     if blockers:
         raise HTTPException(status_code=409, detail="Source not safe for dry-run approval.")
     row.approved_hash = current["sourceHash"]
     row.approved_at = datetime.now(UTC)
     row.revision += 1
     record_audit_event(
-        db, actor_user_id=actor.id,
+        db,
+        actor_user_id=actor.id,
         event_type="automation376.sequence.approved_for_simulation",
         object_type="automation_sequence_plan",
         object_id=str(row.id),
@@ -333,7 +338,9 @@ def approve(
 
 @router.post("/plans/{plan_id}/simulate")
 def simulate(
-    payload: SimulationIn, actor: Owner, db: DB,
+    payload: SimulationIn,
+    actor: Owner,
+    db: DB,
     plan_id: int = Path(gt=0),
 ) -> dict:
     row = _row(db, plan_id, actor)
@@ -402,7 +409,8 @@ def simulate(
             "providerWrites": 0,
         }
     record_audit_event(
-        db, actor_user_id=actor.id,
+        db,
+        actor_user_id=actor.id,
         event_type="automation376.sequence.simulated",
         object_type="automation_sequence_plan",
         object_id=str(row.id),
