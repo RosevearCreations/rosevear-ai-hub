@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
-
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
 
