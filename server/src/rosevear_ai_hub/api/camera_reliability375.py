@@ -51,9 +51,7 @@ class BindingIn(BaseModel):
 def _bindings(db: Session) -> list[CameraEventBinding375]:
     return list(
         db.scalars(
-            select(CameraEventBinding375)
-            .order_by(CameraEventBinding375.camera_id)
-            .limit(BOUND)
+            select(CameraEventBinding375).order_by(CameraEventBinding375.camera_id).limit(BOUND)
         ).all()
     )
 
@@ -122,11 +120,10 @@ def _event_health(events: list, known: set[str], now: float) -> dict:
             not isinstance(start, (int, float))
             or not math.isfinite(start)
             or start <= 0
-            or (end is not None and (
-                not isinstance(end, (int, float))
-                or not math.isfinite(end)
-                or end < start
-            ))
+            or (
+                end is not None
+                and (not isinstance(end, (int, float)) or not math.isfinite(end) or end < start)
+            )
         ):
             rejected += 1
             invalid_duration += 1
@@ -169,7 +166,9 @@ def report(_owner: Owner, db: DB, response: Response) -> dict:
     observations = _captures(db)
     return {
         "schema": "rosevear.hub.camera-reliability.v375",
-        "state": "NO_PRIOR_OBSERVATION" if not observations else (
+        "state": "NO_PRIOR_OBSERVATION"
+        if not observations
+        else (
             "STALE_PREVIOUS_OBSERVATION"
             if _age_seconds(observations[0].checked_at, now) > 600
             else "RECENT_LOCAL_OBSERVATION"
@@ -198,19 +197,20 @@ def inspect(actor: Owner, db: DB, response: Response) -> dict:
             if not local.transport_online and item.health == "healthy"
             else item.health
         )
-        local_status.append({
-            "cameraId": item.camera_id,
-            "name": item.display_name[:160],
-            "enabled": item.enabled,
-            "streamConfigured": item.configured,
-            "probeState": effective,
-            "probeAgeSeconds": (
-                _age_seconds(item.last_probe_at, now)
-                if item.last_probe_at else None
-            ),
-            "movingVideoVerified": False,
-            "audioVerified": False,
-        })
+        local_status.append(
+            {
+                "cameraId": item.camera_id,
+                "name": item.display_name[:160],
+                "enabled": item.enabled,
+                "streamConfigured": item.configured,
+                "probeState": effective,
+                "probeAgeSeconds": (
+                    _age_seconds(item.last_probe_at, now) if item.last_probe_at else None
+                ),
+                "movingVideoVerified": False,
+                "audioVerified": False,
+            }
+        )
     frigate_state = "HOLD_FRIGATE_UNAVAILABLE"
     event_read = False
     configured: dict[str, object] = {}
@@ -259,22 +259,24 @@ def inspect(actor: Owner, db: DB, response: Response) -> dict:
         else:
             label = "RECENT_EVENT_METADATA_NOT_VIDEO_PROOF"
         link = bound.get(name)
-        source_status.append({
-            "name": name[:96],
-            "enabled": item.enabled,
-            "detectEnabled": item.detect_enabled,
-            "recordEnabled": item.record_enabled,
-            "snapshotsEnabled": item.snapshots_enabled,
-            "eventState": label,
-            "recentEventCount": observation["count"] if observation else 0,
-            "latestEventEpoch": last,
-            "clipFlagCount": observation["clipFlags"] if observation else 0,
-            "snapshotFlagCount": observation["snapshotFlags"] if observation else 0,
-            "ownerBoundCameraId": link.camera_id if link else None,
-            "ownerRole": link.role if link else None,
-            "movingVideoVerified": False,
-            "doorbellChimeVerified": False,
-        })
+        source_status.append(
+            {
+                "name": name[:96],
+                "enabled": item.enabled,
+                "detectEnabled": item.detect_enabled,
+                "recordEnabled": item.record_enabled,
+                "snapshotsEnabled": item.snapshots_enabled,
+                "eventState": label,
+                "recentEventCount": observation["count"] if observation else 0,
+                "latestEventEpoch": last,
+                "clipFlagCount": observation["clipFlags"] if observation else 0,
+                "snapshotFlagCount": observation["snapshotFlags"] if observation else 0,
+                "ownerBoundCameraId": link.camera_id if link else None,
+                "ownerRole": link.role if link else None,
+                "movingVideoVerified": False,
+                "doorbellChimeVerified": False,
+            }
+        )
     # The capture contains no household names, stream URLs, tokens or raw events.
     digest_input = (
         f"{local.total}:{len(source_status)}:"
@@ -352,9 +354,7 @@ def bind(payload: BindingIn, actor: Owner, db: DB) -> dict:
     if cam is None:
         raise HTTPException(status_code=404, detail="Registered camera not found.")
     existing = db.scalar(
-        select(CameraEventBinding375).where(
-            CameraEventBinding375.camera_id == payload.camera_id
-        )
+        select(CameraEventBinding375).where(CameraEventBinding375.camera_id == payload.camera_id)
     )
     if (existing.revision if existing else 0) != payload.expected_revision:
         raise HTTPException(status_code=409, detail="Camera mapping changed.")
@@ -372,9 +372,7 @@ def bind(payload: BindingIn, actor: Owner, db: DB) -> dict:
         try:
             sources = get_frigate_client().cameras()
         except FrigateError as exc:
-            raise HTTPException(
-                status_code=503, detail="HOLD_FRIGATE_MAPPING_RECHECK"
-            ) from exc
+            raise HTTPException(status_code=503, detail="HOLD_FRIGATE_MAPPING_RECHECK") from exc
         if not any(item.name == payload.frigate_name and item.enabled for item in sources):
             raise HTTPException(status_code=409, detail="Frigate source not enabled.")
         if len(_bindings(db)) >= BOUND and existing is None:
@@ -382,9 +380,7 @@ def bind(payload: BindingIn, actor: Owner, db: DB) -> dict:
     elif existing is None:
         raise HTTPException(status_code=404, detail="No mapping to deactivate.")
     if existing is None:
-        existing = CameraEventBinding375(
-            camera_id=payload.camera_id, revision=0
-        )
+        existing = CameraEventBinding375(camera_id=payload.camera_id, revision=0)
         db.add(existing)
     elif existing.frigate_name != payload.frigate_name:
         raise HTTPException(status_code=409, detail="Deactivate before renaming mapping.")
@@ -396,7 +392,8 @@ def bind(payload: BindingIn, actor: Owner, db: DB) -> dict:
     existing.reviewed_at = datetime.now(UTC)
     db.flush()
     record_audit_event(
-        db, actor_user_id=actor.id,
+        db,
+        actor_user_id=actor.id,
         event_type="camera375.mapping.local",
         object_type="camera_event_binding",
         object_id=str(existing.camera_id),
