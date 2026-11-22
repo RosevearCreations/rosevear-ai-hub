@@ -186,7 +186,7 @@ def test_vendor_rejects_unsafe_page_and_expired_token():
     )
     try:
         asyncio.run(instance.snapshot())
-        assert False, "Unsafe cross-origin page should fail."
+        raise AssertionError("Unsafe cross-origin page should fail.")
     except SmartThingsReadError as exc:
         assert str(exc) == "HOLD_UNSAFE_PAGINATION"
         assert "secret" not in str(exc)
@@ -199,7 +199,7 @@ def test_vendor_rejects_unsafe_page_and_expired_token():
     )
     try:
         asyncio.run(instance.snapshot())
-        assert False, "401 should fail."
+        raise AssertionError("401 should fail.")
     except SmartThingsReadError as exc:
         assert str(exc) == "HOLD_TOKEN_EXPIRED"
         assert "secret" not in str(exc)
