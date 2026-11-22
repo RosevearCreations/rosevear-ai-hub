@@ -1095,9 +1095,7 @@ class AutomationSequenceSimulation376(Base):
     """Hashed cause ledger; unique source replay guard; no device actions."""
 
     __tablename__ = "automation_sequence_simulations376"
-    __table_args__ = (
-        UniqueConstraint("plan_id", "cause_sha256", name="uq_sequence376_one_cause"),
-    )
+    __table_args__ = (UniqueConstraint("plan_id", "cause_sha256", name="uq_sequence376_one_cause"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     plan_id: Mapped[int] = mapped_column(
@@ -1107,4 +1105,3 @@ class AutomationSequenceSimulation376(Base):
     checked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     outcome: Mapped[str] = mapped_column(String(24), nullable=False)
     blocker_count: Mapped[int] = mapped_column(Integer, nullable=False)
-
