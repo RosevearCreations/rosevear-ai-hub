@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { FrigatePanel } from "./FrigatePanel";
+import { CameraReliability375 } from "./CameraReliability375";
 import { CameraCompatibilityWorkbench } from "./CameraCompatibilityWorkbench";
 import { ServerCameraInventory } from "./ServerCameraInventory";
 import { CameraBulkRestorePanel } from "./CameraBulkRestorePanel";
@@ -342,6 +343,7 @@ export function CameraView({ currentUser }: { currentUser: AuthUser }) {
       {canAdminister ? <CameraBulkRestorePanel /> : null}
       <CameraCompatibilityWorkbench canAdminister={canAdminister} />
       <FrigatePanel canAdminister={canAdminister} />
+      <CameraReliability375 role={currentUser.role} />
 
       {message ? <p className="runtime-status" role="status">{message}</p> : null}
 

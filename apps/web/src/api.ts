@@ -4057,3 +4057,65 @@ export function disconnectSmartThings374(payload: {
   commandsSent: 0; manualProviderRevocationRequired: true}> {
   return authJson("POST", "/api/v1/smartthings-374/disconnect", payload);
 }
+
+
+// Build 375 owner-only, manual source health and event reliability.
+export type CameraReliability375Binding = {
+  cameraId: number; frigateName: string; role: "camera" | "doorbell";
+  active: boolean; revision: number; reviewedAt: string;
+};
+export type CameraReliability375Report = {
+  schema: "rosevear.hub.camera-reliability.v375";
+  state: "NO_PRIOR_OBSERVATION" | "STALE_PREVIOUS_OBSERVATION" |
+    "RECENT_LOCAL_OBSERVATION";
+  observationAgeSeconds: number | null;
+  fieldVideoVerified: false;
+  doorbellChimeVerified: false;
+  providerWritesPerformed: 0;
+  bindings: CameraReliability375Binding[];
+  history: Array<{
+    capturedAt: string; frigateState: string; transportOnline: boolean;
+    eventReadAvailable: boolean; registeredCount: number;
+    eventCount: number; invalidEvents: number; metadataDigest: string;
+  }>;
+};
+export type CameraReliability375Inspection = {
+  schema: "rosevear.hub.camera-reliability.v375";
+  checkedAt: string;
+  state: string;
+  transportOnline: boolean;
+  registeredCameras: number; enabledCameras: number;
+  sourceCameras: Array<{
+    name: string; enabled: boolean; detectEnabled: boolean;
+    recordEnabled: boolean; snapshotsEnabled: boolean; eventState: string;
+    recentEventCount: number; latestEventEpoch: number | null;
+    clipFlagCount: number; snapshotFlagCount: number;
+    ownerBoundCameraId: number | null; ownerRole: "camera" | "doorbell" | null;
+    movingVideoVerified: false; doorbellChimeVerified: false;
+  }>;
+  localCameras: Array<{
+    cameraId: number; name: string; enabled: boolean;
+    streamConfigured: boolean; probeState: string;
+    probeAgeSeconds: number | null; movingVideoVerified: false;
+    audioVerified: false;
+  }>;
+  events: {
+    readAvailable: boolean; accepted: number | null; invalid: number | null;
+    duplicateIds: number | null; futureTimestamps: number | null;
+    invalidDurations: number | null; unknownCameraEvents: number | null;
+  };
+  fieldVideoVerified: false; doorbellChimeVerified: false;
+  providerWritesPerformed: 0; limitations: string[];
+};
+export function getCameraReliability375(): Promise<CameraReliability375Report> {
+  return authJson("GET", "/api/v1/camera-reliability-375/report");
+}
+export function inspectCameraReliability375(): Promise<CameraReliability375Inspection> {
+  return authJson("POST", "/api/v1/camera-reliability-375/inspect", {});
+}
+export function bindCameraReliability375(payload: {
+  camera_id: number; frigate_name: string; role: "camera" | "doorbell";
+  active: boolean; expected_revision: number; owner_confirmed: boolean;
+}): Promise<{mapping: CameraReliability375Binding; providerWritesPerformed: 0}> {
+  return authJson("PUT", "/api/v1/camera-reliability-375/binding", payload);
+}
