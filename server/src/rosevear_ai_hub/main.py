@@ -12,6 +12,7 @@ from rosevear_ai_hub.api.alexa_consent372 import router as alexa_consent372_rout
 from rosevear_ai_hub.api.apple_matter373 import router as apple_matter373_router
 from rosevear_ai_hub.api.audit import router as audit_router
 from rosevear_ai_hub.api.automations import router as automations_router
+from rosevear_ai_hub.api.automation_sequencing376 import router as automation_sequencing376_router
 from rosevear_ai_hub.api.backup_inventory import router as backup_inventory_router
 from rosevear_ai_hub.api.business import router as business_router
 from rosevear_ai_hub.api.camera_compatibility import router as camera_compatibility_router
