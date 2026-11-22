@@ -1035,6 +1035,7 @@ class AppleMatterReview373(Base):
     )
     reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
+
 class CameraEventBinding375(Base):
     """Owner-approved identity relation, never vendor pairing or media access."""
 
@@ -1043,7 +1044,8 @@ class CameraEventBinding375(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     camera_id: Mapped[int] = mapped_column(
         ForeignKey("cameras.id", ondelete="RESTRICT"),
-        unique=True, nullable=False,
+        unique=True,
+        nullable=False,
     )
     frigate_name: Mapped[str] = mapped_column(String(96), unique=True, nullable=False)
     role: Mapped[str] = mapped_column(String(16), nullable=False)
@@ -1069,4 +1071,3 @@ class CameraReliabilityCapture375(Base):
     event_count: Mapped[int] = mapped_column(Integer, nullable=False)
     invalid_events: Mapped[int] = mapped_column(Integer, nullable=False)
     metadata_digest: Mapped[str] = mapped_column(String(64), nullable=False)
-
