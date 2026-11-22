@@ -1,4 +1,5 @@
 """Build 374: owner-only SmartThings scoped reads and HA identity comparison."""
+
 from __future__ import annotations
 
 import hashlib
@@ -61,9 +62,11 @@ def safe_label(value: object, fallback: str = "") -> str:
 
 
 def reviews(db: Session) -> list[SmartThingsReview374]:
-    return list(db.scalars(
-        select(SmartThingsReview374).order_by(SmartThingsReview374.device_id).limit(500)
-    ).all())
+    return list(
+        db.scalars(
+            select(SmartThingsReview374).order_by(SmartThingsReview374.device_id).limit(500)
+        ).all()
+    )
 
 
 def summarize(data: dict, registry: dict | None, decisions: dict) -> dict:
@@ -83,8 +86,10 @@ def summarize(data: dict, registry: dict | None, decisions: dict) -> dict:
         lid = entry.get("sourceLocationId")
         rid = entry.get("roomId")
         if (
-            not isinstance(lid, str) or lid not in locations
-            or not isinstance(rid, str) or not IDENTITY.fullmatch(rid)
+            not isinstance(lid, str)
+            or lid not in locations
+            or not isinstance(rid, str)
+            or not IDENTITY.fullmatch(rid)
             or (lid, rid) in rooms
         ):
             raise ValueError("Invalid room.")
@@ -107,8 +112,10 @@ def summarize(data: dict, registry: dict | None, decisions: dict) -> dict:
                 raise ValueError("Invalid HA identifiers.")
             for pair in identifiers:
                 if (
-                    isinstance(pair, (list, tuple)) and len(pair) == 2
-                    and pair[0] == "smartthings" and isinstance(pair[1], str)
+                    isinstance(pair, (list, tuple))
+                    and len(pair) == 2
+                    and pair[0] == "smartthings"
+                    and isinstance(pair[1], str)
                     and IDENTITY.fullmatch(pair[1])
                 ):
                     if pair[1] in ha_ids and ha_ids[pair[1]] != hid:
@@ -122,8 +129,11 @@ def summarize(data: dict, registry: dict | None, decisions: dict) -> dict:
         lid = entry.get("locationId")
         rid = entry.get("roomId")
         if (
-            not isinstance(did, str) or not IDENTITY.fullmatch(did) or did in seen
-            or not isinstance(lid, str) or lid not in locations
+            not isinstance(did, str)
+            or not IDENTITY.fullmatch(did)
+            or did in seen
+            or not isinstance(lid, str)
+            or lid not in locations
             or (rid is not None and (not isinstance(rid, str) or (lid, rid) not in rooms))
         ):
             raise ValueError("Invalid device.")
@@ -132,20 +142,22 @@ def summarize(data: dict, registry: dict | None, decisions: dict) -> dict:
         key = (lid, name.casefold())
         name_counts[key] = name_counts.get(key, 0) + 1
         review = decisions.get(did)
-        out.append({
-            "deviceId": did,
-            "name": name,
-            "locationName": locations[lid],
-            "roomName": rooms.get((lid, rid), "Unassigned"),
-            "vendorType": safe_label(entry.get("type"), "unknown"),
-            "exactHaId": ha_ids.get(did),
-            "haNameCandidates": ha_names.get(name.casefold(), 0),
-            "localReview": review.decision if review else "unreviewed",
-            "revision": review.revision if review else 0,
-            "physicalVerified": False,
-            "androidTizenVerified": False,
-            "_nameKey": key,
-        })
+        out.append(
+            {
+                "deviceId": did,
+                "name": name,
+                "locationName": locations[lid],
+                "roomName": rooms.get((lid, rid), "Unassigned"),
+                "vendorType": safe_label(entry.get("type"), "unknown"),
+                "exactHaId": ha_ids.get(did),
+                "haNameCandidates": ha_names.get(name.casefold(), 0),
+                "localReview": review.decision if review else "unreviewed",
+                "revision": review.revision if review else 0,
+                "physicalVerified": False,
+                "androidTizenVerified": False,
+                "_nameKey": key,
+            }
+        )
     for item in out:
         item["repeatedName"] = name_counts[item.pop("_nameKey")] > 1
     return {
@@ -153,9 +165,7 @@ def summarize(data: dict, registry: dict | None, decisions: dict) -> dict:
         "locationCount": len(locations),
         "roomCount": len(rooms),
         "exactHaCount": sum(x["exactHaId"] is not None for x in out),
-        "nameOnlyCount": sum(
-            x["exactHaId"] is None and x["haNameCandidates"] > 0 for x in out
-        ),
+        "nameOnlyCount": sum(x["exactHaId"] is None and x["haNameCandidates"] > 0 for x in out),
         "duplicateNameCount": sum(x["repeatedName"] for x in out),
     }
 
@@ -163,9 +173,9 @@ def summarize(data: dict, registry: dict | None, decisions: dict) -> dict:
 @router.get("/report")
 def report(_owner: Owner, db: DB, client: Client, response: Response) -> dict:
     response.headers["Cache-Control"] = "no-store"
-    recent = db.scalar(select(SmartThingsCapture374).order_by(
-        SmartThingsCapture374.id.desc()
-    ).limit(1))
+    recent = db.scalar(
+        select(SmartThingsCapture374).order_by(SmartThingsCapture374.id.desc()).limit(1)
+    )
     age = None
     if recent is not None:
         stamp = recent.checked_at
@@ -176,9 +186,13 @@ def report(_owner: Owner, db: DB, client: Client, response: Response) -> dict:
         "schema": "rosevear.hub.smartthings.v374",
         "configured": client is not None,
         "status": (
-            "HOLD_NO_TOKEN" if client is None else
-            "HOLD_NOT_INSPECTED" if age is None else
-            "STALE" if age > 900 else "RECENT_MANUAL_READ"
+            "HOLD_NO_TOKEN"
+            if client is None
+            else "HOLD_NOT_INSPECTED"
+            if age is None
+            else "STALE"
+            if age > 900
+            else "RECENT_MANUAL_READ"
         ),
         "lastCheckedAt": recent.checked_at.isoformat() if recent else None,
         "ageSeconds": age,
@@ -187,8 +201,12 @@ def report(_owner: Owner, db: DB, client: Client, response: Response) -> dict:
         "androidTizenVerified": False,
         "oauthAppVerified": False,
         "reviews": [
-            {"deviceId": row.device_id, "decision": row.decision,
-             "revision": row.revision, "reviewedAt": row.reviewed_at.isoformat()}
+            {
+                "deviceId": row.device_id,
+                "decision": row.decision,
+                "revision": row.revision,
+                "reviewedAt": row.reviewed_at.isoformat(),
+            }
             for row in reviews(db)
         ],
     }
@@ -196,8 +214,11 @@ def report(_owner: Owner, db: DB, client: Client, response: Response) -> dict:
 
 @router.post("/inspect")
 async def inspect(
-    _owner: Owner, db: DB, client: Client,
-    runtime: HomeAssistantRuntimeDependency, response: Response,
+    _owner: Owner,
+    db: DB,
+    client: Client,
+    runtime: HomeAssistantRuntimeDependency,
+    response: Response,
 ) -> dict:
     response.headers["Cache-Control"] = "no-store"
     if client is None:
@@ -220,11 +241,15 @@ async def inspect(
         raise HTTPException(status_code=422, detail="HOLD_INVALID_INVENTORY") from exc
     stamp = datetime.now(UTC)
     ids = sorted(item["deviceId"] for item in result["devices"])
-    db.add(SmartThingsCapture374(
-        checked_at=stamp, device_count=len(ids),
-        location_count=result["locationCount"], room_count=result["roomCount"],
-        digest_sha256=hashlib.sha256("\n".join(ids).encode("ascii")).hexdigest(),
-    ))
+    db.add(
+        SmartThingsCapture374(
+            checked_at=stamp,
+            device_count=len(ids),
+            location_count=result["locationCount"],
+            room_count=result["roomCount"],
+            digest_sha256=hashlib.sha256("\n".join(ids).encode("ascii")).hexdigest(),
+        )
+    )
     db.commit()
     return {
         "schema": "rosevear.hub.smartthings.v374",
@@ -243,9 +268,9 @@ async def inspect(
 async def review(payload: ReviewIn, actor: Owner, db: DB, client: Client) -> dict:
     if not payload.owner_confirmed or not IDENTITY.fullmatch(payload.device_id):
         raise HTTPException(status_code=422, detail="Exact owner confirmation required.")
-    existing = db.scalar(select(SmartThingsReview374).where(
-        SmartThingsReview374.device_id == payload.device_id
-    ))
+    existing = db.scalar(
+        select(SmartThingsReview374).where(SmartThingsReview374.device_id == payload.device_id)
+    )
     if (existing.revision if existing else 0) != payload.expected_revision:
         raise HTTPException(status_code=409, detail="Revision changed; refresh.")
     if payload.decision == "reviewed":
@@ -271,15 +296,23 @@ async def review(payload: ReviewIn, actor: Owner, db: DB, client: Client) -> dic
     existing.reviewed_at = datetime.now(UTC)
     db.flush()
     record_audit_event(
-        db, actor_user_id=actor.id,
-        event_type="smartthings374.local.review", object_type="smartthings_device",
-        object_id=existing.device_id, action=payload.decision,
+        db,
+        actor_user_id=actor.id,
+        event_type="smartthings374.local.review",
+        object_type="smartthings_device",
+        object_id=existing.device_id,
+        action=payload.decision,
         arguments={"device_id": existing.device_id, "revision": existing.revision},
         result={"provider_mutated": False, "commands_sent": 0},
     )
     db.commit()
-    return {"deviceId": existing.device_id, "decision": existing.decision,
-            "revision": existing.revision, "localOnly": True, "commandsSent": 0}
+    return {
+        "deviceId": existing.device_id,
+        "decision": existing.decision,
+        "revision": existing.revision,
+        "localOnly": True,
+        "commandsSent": 0,
+    }
 
 
 @router.post("/disconnect")
@@ -287,5 +320,9 @@ def disconnect(payload: DisconnectIn, actor: Owner, db: DB) -> dict:
     if not payload.owner_confirmed:
         raise HTTPException(status_code=422, detail="Owner confirmation required.")
     deleted = delete_stored_secret(db, actor=actor, secret_key="smartthings.read_token")
-    return {"localCredentialDeleted": deleted, "providerTokenRevoked": False,
-            "commandsSent": 0, "manualProviderRevocationRequired": True}
+    return {
+        "localCredentialDeleted": deleted,
+        "providerTokenRevoked": False,
+        "commandsSent": 0,
+        "manualProviderRevocationRequired": True,
+    }
