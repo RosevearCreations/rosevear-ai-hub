@@ -215,8 +215,9 @@ def inspect(actor: Owner, db: DB, response: Response) -> dict:
     event_read = False
     configured: dict[str, object] = {}
     events = []
-    client = get_frigate_client()
+    client = None
     try:
+        client = get_frigate_client()
         status = client.status()
         if status.online and status.local_only:
             frigate_state = "LOCAL_API_RESPONDED"
@@ -229,7 +230,9 @@ def inspect(actor: Owner, db: DB, response: Response) -> dict:
             cameras = client.cameras()
             if len(cameras) > BOUND:
                 frigate_state = "HOLD_FRIGATE_CAMERA_LIMIT"
-            elif len({x.name for x in cameras}) != len(cameras):
+            elif len({x.name for x in cameras}) != len(cameras) or any(
+                NAME.fullmatch(x.name) is None for x in cameras
+            ):
                 frigate_state = "HOLD_AMBIGUOUS_FRIGATE_IDENTITIES"
             else:
                 configured = {item.name: item for item in cameras}
