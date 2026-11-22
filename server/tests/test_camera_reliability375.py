@@ -23,9 +23,17 @@ from rosevear_ai_hub.models import Camera
 def event(name="front_door", key="e-1", delay=3, *, end=None):
     now = datetime.now(UTC).timestamp()
     return FrigateEvent(
-        event_id=key, camera=name, label="person", sub_label=None,
-        start_time=now - delay, end_time=end, zones=("porch",),
-        has_clip=True, has_snapshot=True, false_positive=False, score=0.91,
+        event_id=key,
+        camera=name,
+        label="person",
+        sub_label=None,
+        start_time=now - delay,
+        end_time=end,
+        zones=("porch",),
+        has_clip=True,
+        has_snapshot=True,
+        false_positive=False,
+        score=0.91,
     )
 
 
@@ -35,12 +43,18 @@ class FakeFrigate:
         self.events = [event()]
         self.sources = [
             FrigateCamera(
-                name="front_door", enabled=True, detect_enabled=True,
-                record_enabled=False, snapshots_enabled=True,
+                name="front_door",
+                enabled=True,
+                detect_enabled=True,
+                record_enabled=False,
+                snapshots_enabled=True,
             ),
             FrigateCamera(
-                name="garage", enabled=True, detect_enabled=False,
-                record_enabled=False, snapshots_enabled=False,
+                name="garage",
+                enabled=True,
+                detect_enabled=False,
+                record_enabled=False,
+                snapshots_enabled=False,
             ),
         ]
         self.calls = []
@@ -50,7 +64,9 @@ class FakeFrigate:
         if not self.online:
             raise FrigateUnavailable("offline")
         return FrigateStatus(
-            online=True, version="test", base_url="http://127.0.0.1:5000",
+            online=True,
+            version="test",
+            base_url="http://127.0.0.1:5000",
             local_only=True,
         )
 
@@ -81,9 +97,13 @@ def setup(tmp_path, monkeypatch):
 
     app.dependency_overrides[get_session] = db_override
     client = TestClient(app)
-    response = client.post("/api/v1/auth/bootstrap", json={
-        "username": "owner", "password": "owner-password-123",
-    })
+    response = client.post(
+        "/api/v1/auth/bootstrap",
+        json={
+            "username": "owner",
+            "password": "owner-password-123",
+        },
+    )
     assert response.status_code == 201
     with sessions() as session:
         row = Camera(
@@ -104,12 +124,19 @@ def setup(tmp_path, monkeypatch):
 
     def dashboard(_actor, _db):
         return SimpleNamespace(
-            total=1, enabled=1, transport_online=False,
-            cameras=[SimpleNamespace(
-                camera_id=camera_id, display_name="Front Door Camera",
-                enabled=True, configured=True, health="healthy",
-                last_probe_at=datetime.now(UTC) - timedelta(hours=1),
-            )],
+            total=1,
+            enabled=1,
+            transport_online=False,
+            cameras=[
+                SimpleNamespace(
+                    camera_id=camera_id,
+                    display_name="Front Door Camera",
+                    enabled=True,
+                    configured=True,
+                    health="healthy",
+                    last_probe_at=datetime.now(UTC) - timedelta(hours=1),
+                )
+            ],
         )
 
     monkeypatch.setattr(camera_reliability375, "camera_dashboard", dashboard)
@@ -126,9 +153,7 @@ def test_manual_inspection_provenance_and_staleness(tmp_path, monkeypatch):
     assert body["state"] == "LOCAL_API_RESPONDED"
     assert body["events"]["accepted"] == 1
     assert body["events"]["invalid"] == 0
-    assert body["sourceCameras"][0]["eventState"] == (
-        "RECENT_EVENT_METADATA_NOT_VIDEO_PROOF"
-    )
+    assert body["sourceCameras"][0]["eventState"] == ("RECENT_EVENT_METADATA_NOT_VIDEO_PROOF")
     assert body["sourceCameras"][1]["eventState"] == "DETECTION_DISABLED"
     assert body["localCameras"][0]["cameraId"] == camera_id
     assert body["localCameras"][0]["probeState"] == "transport_unavailable"
@@ -161,9 +186,7 @@ def test_event_anomaly_and_quiet_room_not_claimed_offline(tmp_path, monkeypatch)
     assert body["events"]["invalidDurations"] == 1
     fake.events = []
     quiet = client.post("/api/v1/camera-reliability-375/inspect").json()
-    assert quiet["sourceCameras"][0]["eventState"] == (
-        "NO_RECENT_EVENTS_NOT_FAILURE"
-    )
+    assert quiet["sourceCameras"][0]["eventState"] == ("NO_RECENT_EVENTS_NOT_FAILURE")
     assert quiet["events"]["accepted"] == 0
 
 
@@ -171,13 +194,23 @@ def test_owner_mapping_requires_source_and_offline_deactivation(tmp_path, monkey
     client, fake, cam_id = setup(tmp_path, monkeypatch)
     path = "/api/v1/camera-reliability-375"
     payload = {
-        "camera_id": cam_id, "frigate_name": "front_door",
-        "role": "doorbell", "active": True, "expected_revision": 0,
+        "camera_id": cam_id,
+        "frigate_name": "front_door",
+        "role": "doorbell",
+        "active": True,
+        "expected_revision": 0,
         "owner_confirmed": True,
     }
-    assert client.put(path + "/binding", json={
-        **payload, "owner_confirmed": False,
-    }).status_code == 422
+    assert (
+        client.put(
+            path + "/binding",
+            json={
+                **payload,
+                "owner_confirmed": False,
+            },
+        ).status_code
+        == 422
+    )
     created = client.put(path + "/binding", json=payload)
     assert created.status_code == 200, created.text
     assert created.json()["mapping"]["role"] == "doorbell"
@@ -192,9 +225,14 @@ def test_owner_mapping_requires_source_and_offline_deactivation(tmp_path, monkey
     assert offline.json()["events"]["readAvailable"] is False
     assert offline.json()["state"] == "HOLD_FRIGATE_UNAVAILABLE"
     assert offline.json()["events"]["accepted"] is None
-    disabled = client.put(path + "/binding", json={
-        **payload, "active": False, "expected_revision": 1,
-    })
+    disabled = client.put(
+        path + "/binding",
+        json={
+            **payload,
+            "active": False,
+            "expected_revision": 1,
+        },
+    )
     assert disabled.status_code == 200
     assert disabled.json()["mapping"]["active"] is False
     assert not any("POST" in call for call in fake.calls)
@@ -202,20 +240,43 @@ def test_owner_mapping_requires_source_and_offline_deactivation(tmp_path, monkey
 
 def test_non_owner_may_not_inspect_or_read_private_history(tmp_path, monkeypatch):
     client, fake, cam_id = setup(tmp_path, monkeypatch)
-    assert client.post("/api/v1/auth/users", json={
-        "username": "viewer", "password": "viewer-password-123",
-        "role": "read_only",
-    }).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/users",
+            json={
+                "username": "viewer",
+                "password": "viewer-password-123",
+                "role": "read_only",
+            },
+        ).status_code
+        == 201
+    )
     assert client.post("/api/v1/auth/logout").status_code == 200
-    assert client.post("/api/v1/auth/login", json={
-        "username": "viewer", "password": "viewer-password-123",
-    }).status_code == 200
+    assert (
+        client.post(
+            "/api/v1/auth/login",
+            json={
+                "username": "viewer",
+                "password": "viewer-password-123",
+            },
+        ).status_code
+        == 200
+    )
     base = "/api/v1/camera-reliability-375"
     assert client.get(base + "/report").status_code == 403
     assert client.post(base + "/inspect").status_code == 403
-    assert client.put(base + "/binding", json={
-        "camera_id": cam_id, "frigate_name": "front_door",
-        "role": "doorbell", "active": True,
-        "expected_revision": 0, "owner_confirmed": True,
-    }).status_code == 403
+    assert (
+        client.put(
+            base + "/binding",
+            json={
+                "camera_id": cam_id,
+                "frigate_name": "front_door",
+                "role": "doorbell",
+                "active": True,
+                "expected_revision": 0,
+                "owner_confirmed": True,
+            },
+        ).status_code
+        == 403
+    )
     assert fake.calls == []
