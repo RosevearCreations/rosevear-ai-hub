@@ -25,12 +25,18 @@ class FakeSmartThings:
         self.fail = None
         self.devices = [
             {
-                "deviceId": "st-one", "label": "Office Light", "locationId": "home",
-                "roomId": "office", "type": "HUB",
+                "deviceId": "st-one",
+                "label": "Office Light",
+                "locationId": "home",
+                "roomId": "office",
+                "type": "HUB",
             },
             {
-                "deviceId": "st-two", "label": "Office Light", "locationId": "home",
-                "roomId": "office", "type": "LAN",
+                "deviceId": "st-two",
+                "label": "Office Light",
+                "locationId": "home",
+                "roomId": "office",
+                "type": "LAN",
             },
         ]
 
@@ -40,9 +46,7 @@ class FakeSmartThings:
         self.calls.append("GET_ONLY")
         return {
             "locations": [{"locationId": "home", "name": "House"}],
-            "rooms": [
-                {"sourceLocationId": "home", "roomId": "office", "name": "Office"}
-            ],
+            "rooms": [{"sourceLocationId": "home", "roomId": "office", "name": "Office"}],
             "devices": deepcopy(self.devices),
         }
 
@@ -52,7 +56,8 @@ class FakeHA:
         return {
             "devices": [
                 {
-                    "id": "ha-one", "name": "Office Light",
+                    "id": "ha-one",
+                    "name": "Office Light",
                     "identifiers": [["smartthings", "st-one"]],
                 },
                 {"id": "ha-two", "name": "Office Light", "identifiers": []},
@@ -74,14 +79,19 @@ def setup(tmp_path):
     app.dependency_overrides[get_session] = db_override
     app.dependency_overrides[get_smartthings_client] = lambda: fake
     app.dependency_overrides[get_home_assistant_runtime] = lambda: HomeAssistantRuntime(
-        client=FakeHA(), base_url="http://ha.test",
-        url_configured=True, token_configured=True,
+        client=FakeHA(),
+        base_url="http://ha.test",
+        url_configured=True,
+        token_configured=True,
     )
     client = TestClient(app)
-    assert client.post(
-        "/api/v1/auth/bootstrap",
-        json={"username": "owner", "password": "owner-password-123"},
-    ).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/bootstrap",
+            json={"username": "owner", "password": "owner-password-123"},
+        ).status_code
+        == 201
+    )
     return client, fake
 
 
@@ -101,22 +111,32 @@ def test_inspect_and_review_do_not_modify_vendor(tmp_path):
     assert data["androidTizenVerified"] is False
     assert client.get(path + "/report").json()["lastDeviceCount"] == 2
     payload = {
-        "device_id": "st-one", "decision": "reviewed",
-        "expected_revision": 0, "owner_confirmed": True,
+        "device_id": "st-one",
+        "decision": "reviewed",
+        "expected_revision": 0,
+        "owner_confirmed": True,
     }
-    assert client.put(
-        path + "/review", json={**payload, "owner_confirmed": False}
-    ).status_code == 422
+    assert (
+        client.put(path + "/review", json={**payload, "owner_confirmed": False}).status_code == 422
+    )
     good = client.put(path + "/review", json=payload)
     assert good.status_code == 200, good.text
     assert good.json()["localOnly"] is True
     assert client.put(path + "/review", json=payload).status_code == 409
     fake.fail = "HOLD_VENDOR_OFFLINE"
     assert client.post(path + "/inspect").status_code == 503
-    assert client.put(path + "/review", json={
-        "device_id": "st-one", "decision": "excluded",
-        "expected_revision": 1, "owner_confirmed": True,
-    }).status_code == 200
+    assert (
+        client.put(
+            path + "/review",
+            json={
+                "device_id": "st-one",
+                "decision": "excluded",
+                "expected_revision": 1,
+                "owner_confirmed": True,
+            },
+        ).status_code
+        == 200
+    )
     assert fake.calls == ["GET_ONLY", "GET_ONLY"]
 
 
@@ -128,23 +148,44 @@ def test_duplicate_identity_fails_closed(tmp_path):
 
 def test_non_owner_forbidden(tmp_path):
     client, fake = setup(tmp_path)
-    assert client.post("/api/v1/auth/users", json={
-        "username": "viewer", "password": "viewer-password-123", "role": "read_only",
-    }).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/users",
+            json={
+                "username": "viewer",
+                "password": "viewer-password-123",
+                "role": "read_only",
+            },
+        ).status_code
+        == 201
+    )
     assert client.post("/api/v1/auth/logout").status_code == 200
-    assert client.post("/api/v1/auth/login", json={
-        "username": "viewer", "password": "viewer-password-123",
-    }).status_code == 200
+    assert (
+        client.post(
+            "/api/v1/auth/login",
+            json={
+                "username": "viewer",
+                "password": "viewer-password-123",
+            },
+        ).status_code
+        == 200
+    )
     path = "/api/v1/smartthings-374"
     assert client.get(path + "/report").status_code == 403
     assert client.post(path + "/inspect").status_code == 403
-    assert client.put(path + "/review", json={
-        "device_id": "st-one", "decision": "reviewed",
-        "expected_revision": 0, "owner_confirmed": True,
-    }).status_code == 403
-    assert client.post(
-        path + "/disconnect", json={"owner_confirmed": True}
-    ).status_code == 403
+    assert (
+        client.put(
+            path + "/review",
+            json={
+                "device_id": "st-one",
+                "decision": "reviewed",
+                "expected_revision": 0,
+                "owner_confirmed": True,
+            },
+        ).status_code
+        == 403
+    )
+    assert client.post(path + "/disconnect", json={"owner_confirmed": True}).status_code == 403
     assert fake.calls == []
 
 
@@ -155,18 +196,19 @@ def test_samsung_client_uses_only_fixed_gets():
         requests.append((request.method, str(request.url)))
         assert request.headers["Authorization"] == "Bearer sample-read-token"
         if request.url.path == "/v1/locations":
-            return httpx.Response(200, json={
-                "items": [{"locationId": "home", "name": "House"}],
-            })
+            return httpx.Response(
+                200,
+                json={
+                    "items": [{"locationId": "home", "name": "House"}],
+                },
+            )
         if request.url.path == "/v1/devices":
             return httpx.Response(200, json={"items": [{"deviceId": "st-one"}]})
         if request.url.path == "/v1/locations/home/rooms":
             return httpx.Response(200, json={"items": []})
         return httpx.Response(500)
 
-    instance = SmartThingsReadClient(
-        "sample-read-token", transport=httpx.MockTransport(handle)
-    )
+    instance = SmartThingsReadClient("sample-read-token", transport=httpx.MockTransport(handle))
     result = asyncio.run(instance.snapshot())
     assert len(result["devices"]) == 1
     assert len(requests) == 3
@@ -176,14 +218,15 @@ def test_samsung_client_uses_only_fixed_gets():
 
 def test_vendor_rejects_unsafe_page_and_expired_token():
     def unsafe(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, json={
-            "items": [],
-            "_links": {"next": {"href": "https://other.invalid/v1/locations"}},
-        })
+        return httpx.Response(
+            200,
+            json={
+                "items": [],
+                "_links": {"next": {"href": "https://other.invalid/v1/locations"}},
+            },
+        )
 
-    instance = SmartThingsReadClient(
-        "secret", transport=httpx.MockTransport(unsafe)
-    )
+    instance = SmartThingsReadClient("secret", transport=httpx.MockTransport(unsafe))
     try:
         asyncio.run(instance.snapshot())
         raise AssertionError("Unsafe cross-origin page should fail.")
@@ -194,9 +237,7 @@ def test_vendor_rejects_unsafe_page_and_expired_token():
     def expired(request: httpx.Request) -> httpx.Response:
         return httpx.Response(401, json={"details": "unexpected bearer secret"})
 
-    instance = SmartThingsReadClient(
-        "secret", transport=httpx.MockTransport(expired)
-    )
+    instance = SmartThingsReadClient("secret", transport=httpx.MockTransport(expired))
     try:
         asyncio.run(instance.snapshot())
         raise AssertionError("401 should fail.")
