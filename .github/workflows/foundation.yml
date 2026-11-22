@@ -133,6 +133,25 @@ jobs:
         run: python -m pip install --upgrade pip && pip install -e ".[dev]"
       - name: Lint
         run: ruff check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
+      - name: Build 376 CI-exact formatter witness TEMPORARY
+        run: |
+          ruff format server/src/rosevear_ai_hub/api/automation_sequencing376.py server/tests/test_automation_sequencing376.py server/src/rosevear_ai_hub/models.py server/alembic/versions/0037_automation_sequences376.py
+          echo SEQ376_FORMAT_API_BEGIN
+          base64 -w0 server/src/rosevear_ai_hub/api/automation_sequencing376.py
+          echo
+          echo SEQ376_FORMAT_API_END
+          echo SEQ376_FORMAT_TEST_BEGIN
+          base64 -w0 server/tests/test_automation_sequencing376.py
+          echo
+          echo SEQ376_FORMAT_TEST_END
+          echo SEQ376_FORMAT_MODEL_BEGIN
+          base64 -w0 server/src/rosevear_ai_hub/models.py
+          echo
+          echo SEQ376_FORMAT_MODEL_END
+          echo SEQ376_FORMAT_MIGRATION_BEGIN
+          base64 -w0 server/alembic/versions/0037_automation_sequences376.py
+          echo
+          echo SEQ376_FORMAT_MIGRATION_END
       - name: Format check
         run: ruff format --check server/src server/tests scripts/hub_release_manager.py scripts/hub_private_backup.py scripts/hub_release_assurance.py server/src/rosevear_ai_hub/release_observability.py server/src/rosevear_ai_hub/release_health_cohorts.py server/src/rosevear_ai_hub/release_incident_triage.py
       - name: Test
