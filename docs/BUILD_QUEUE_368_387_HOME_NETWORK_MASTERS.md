@@ -103,7 +103,7 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 
 **Acceptance / security gate:** Deterministic no-double-fire tests and exact-action approvals; never automate kilns, lasers, CNC, locks or safety systems.
 
-### Build 377 — Workshop process-health command centre
+### Build 377 — Workshop process-health command centre (SOURCE IMPLEMENTED; FIELD HOLD)
 
 **Deliver:** Read-only task and machine dashboards for 3D printing, CNC, laser engraving, kilns, casting, ventilation, sensors and maintenance; owner-supplied measurements only..
 
