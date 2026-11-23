@@ -4,7 +4,10 @@ from __future__ import annotations
 from pathlib import Path
 
 from rosevear_ai_hub.three_master_delivery383 import (
-    PEERS383, private_ip383, peer_preflight383, verified_pair383,
+    PEERS383,
+    peer_preflight383,
+    private_ip383,
+    verified_pair383,
 )
 from rosevear_ai_hub.transport348 import PeerEnrollment348
 
@@ -12,7 +15,15 @@ from rosevear_ai_hub.transport348 import PeerEnrollment348
 def test_only_private_literal_ip_not_dns_or_public():
     for value in ("192.168.68.110", "10.0.0.20", "172.31.0.1", "100.100.100.100"):
         assert private_ip383(value)
-    for value in ("example.com", "8.8.8.8", "127.0.0.1", "169.254.1.1", "::1", "", "192.168.68.110.evil"):
+    for value in (
+        "example.com",
+        "8.8.8.8",
+        "127.0.0.1",
+        "169.254.1.1",
+        "::1",
+        "",
+        "192.168.68.110.evil",
+    ):
         assert not private_ip383(value)
 
 
@@ -21,7 +32,12 @@ def test_missing_peer_and_mixed_receipts_never_green():
     good = {
         "stage": "SIGNED_HISTORICAL_ACKS_NOT_CURRENT_PEER_HEALTH",
         "latest": [
-            {"messageId": messages[p], "audience": p, "eventType": "master.health", "stage": "TRANSPORT_ACKED"}
+            {
+                "messageId": messages[p],
+                "audience": p,
+                "eventType": "master.health",
+                "stage": "TRANSPORT_ACKED",
+            }
             for p in PEERS383
         ],
     }
@@ -30,9 +46,14 @@ def test_missing_peer_and_mixed_receipts_never_green():
     assert verified_pair383(good, messages)["ql340cReceiverAuthorized"] is False
     assert not verified_pair383({**good, "stage": "HOLD"}, messages)["accepted"]
     assert not verified_pair383({**good, "latest": good["latest"][:1]}, messages)["accepted"]
-    assert not verified_pair383({**good, "latest": [good["latest"][0], {**good["latest"][1], "stage": "QUEUED"}]}, messages)["accepted"]
+    queued = {**good, "latest": [good["latest"][0], {**good["latest"][1], "stage": "QUEUED"}]}
+    assert not verified_pair383(queued, messages)["accepted"]
     assert not verified_pair383(good, {**messages, "rosevear-comms-hub": "a" * 64})["accepted"]
-    assert not verified_pair383({**good, "latest": [good["latest"][0], {**good["latest"][1], "audience": "ai-data-platform"}]}, messages)["accepted"]
+    swapped = {
+        **good,
+        "latest": [good["latest"][0], {**good["latest"][1], "audience": "ai-data-platform"}],
+    }
+    assert not verified_pair383(swapped, messages)["accepted"]
 
 
 def test_tls_preflight_needs_both_and_independent_custody(tmp_path: Path):
