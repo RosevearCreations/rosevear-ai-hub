@@ -178,7 +178,11 @@ def _public(item: GroceryItem378, today: date) -> dict:
         item.recurrence_days and last and today >= last + timedelta(days=item.recurrence_days)
     )
     low_stock = item.on_hand_qty < item.min_on_hand_qty
-    expiring = bool(expires and item.on_hand_qty > 0 and date.fromisoformat(expires) <= today + timedelta(days=7))
+    expiring = bool(
+        expires
+        and item.on_hand_qty > 0
+        and date.fromisoformat(expires) <= today + timedelta(days=7)
+    )
     return {
         "id": item.id,
         "name": item.name,
@@ -207,7 +211,9 @@ def _public(item: GroceryItem378, today: date) -> dict:
 @router.get("/board")
 def board(actor: Viewer, db: DB, response: Response) -> dict:
     response.headers["Cache-Control"] = "no-store"
-    items = db.scalars(select(GroceryItem378).order_by(GroceryItem378.id).limit(MAX_ITEMS + 1)).all()
+    items = db.scalars(
+        select(GroceryItem378).order_by(GroceryItem378.id).limit(MAX_ITEMS + 1)
+    ).all()
     truncated = len(items) > MAX_ITEMS
     active = [item for item in items[:MAX_ITEMS] if item.state != "archived"]
     today = datetime.now(UTC).date()
@@ -362,7 +368,9 @@ def receive_item(
         raise HTTPException(status_code=409, detail="Approved, confirmed pickup required.")
     amount = round(payload.received_qty, 2)
     if amount <= 0 or amount > item.wanted_qty or amount + item.on_hand_qty > 10000:
-        raise HTTPException(status_code=409, detail="Receipt exceeds approved quantity or storage limit.")
+        raise HTTPException(
+            status_code=409, detail="Receipt exceeds approved quantity or storage limit."
+        )
     item.on_hand_qty = round(item.on_hand_qty + amount, 2)
     item.wanted_qty = round(item.wanted_qty - amount, 2)
     item.state = "picked_up" if item.wanted_qty == 0 else "draft"
@@ -408,8 +416,13 @@ def merge_items(payload: Merge, actor: Approver, db: DB) -> dict:
     _match_revision(target, payload.target_revision)
     _match_revision(duplicate, payload.duplicate_revision)
     if (target.canonical_name, target.unit) != (duplicate.canonical_name, duplicate.unit):
-        raise HTTPException(status_code=409, detail="Merge requires exact normalized name and unit.")
-    if target.wanted_qty + duplicate.wanted_qty > 10000 or target.on_hand_qty + duplicate.on_hand_qty > 10000:
+        raise HTTPException(
+            status_code=409, detail="Merge requires exact normalized name and unit."
+        )
+    if (
+        target.wanted_qty + duplicate.wanted_qty > 10000
+        or target.on_hand_qty + duplicate.on_hand_qty > 10000
+    ):
         raise HTTPException(status_code=409, detail="Merge exceeds quantity limits.")
     target.wanted_qty = round(target.wanted_qty + duplicate.wanted_qty, 2)
     target.on_hand_qty = round(target.on_hand_qty + duplicate.on_hand_qty, 2)
@@ -437,4 +450,8 @@ def merge_items(payload: Merge, actor: Approver, db: DB) -> dict:
     _emit(db, target, actor, "merged_into", duplicate.id)
     _emit(db, duplicate, actor, "merged_out", target.id)
     db.commit()
-    return {"state": "MERGED_REVIEW_REQUIRED", "target": _public(target, datetime.now(UTC).date()), "archivedId": duplicate.id}
+    return {
+        "state": "MERGED_REVIEW_REQUIRED",
+        "target": _public(target, datetime.now(UTC).date()),
+        "archivedId": duplicate.id,
+    }
