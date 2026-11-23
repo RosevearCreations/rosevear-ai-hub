@@ -28,10 +28,17 @@ Editor = Annotated[User, Depends(require_roles("owner", "administrator", "househ
 DB = Annotated[Session, Depends(get_session)]
 Kind = Literal["appointment", "chore", "task", "supply", "event"]
 Visibility = Literal["household", "private"]
-TIMEZONES = frozenset({
-    "America/Toronto", "America/Vancouver", "America/Edmonton",
-    "America/Winnipeg", "America/Halifax", "America/St_Johns", "UTC"
-})
+TIMEZONES = frozenset(
+    {
+        "America/Toronto",
+        "America/Vancouver",
+        "America/Edmonton",
+        "America/Winnipeg",
+        "America/Halifax",
+        "America/St_Johns",
+        "UTC",
+    }
+)
 MAX_ACTIVE = 250
 
 
@@ -110,9 +117,7 @@ def _assignable(db: Session, actor: User, target_id: int | None) -> int | None:
     if target_id is None:
         return None
     if actor.role == "household_user" and target_id != actor.id:
-        raise HTTPException(
-            status_code=403, detail="Family members may only assign themselves."
-        )
+        raise HTTPException(status_code=403, detail="Family members may only assign themselves.")
     target = db.get(User, target_id)
     if target is None or not target.enabled or target.role == "read_only":
         raise HTTPException(status_code=422, detail="Assignee must be an active household editor.")
@@ -156,13 +161,22 @@ def _revision(plan: FamilyPlan379, expected: int) -> None:
 
 
 def _event(db: Session, plan: FamilyPlan379, actor: User, action: str) -> None:
-    db.add(FamilyPlanEvent379(
-        plan_id=plan.id, actor_user_id=actor.id, action=action,
-        revision=plan.revision, occurred_at=datetime.now(UTC),
-    ))
+    db.add(
+        FamilyPlanEvent379(
+            plan_id=plan.id,
+            actor_user_id=actor.id,
+            action=action,
+            revision=plan.revision,
+            occurred_at=datetime.now(UTC),
+        )
+    )
     record_audit_event(
-        db, actor_user_id=actor.id, event_type="family379." + action,
-        object_type="family_plan", object_id=str(plan.id), action=action,
+        db,
+        actor_user_id=actor.id,
+        event_type="family379." + action,
+        object_type="family_plan",
+        object_id=str(plan.id),
+        action=action,
         arguments={"revision": plan.revision, "visibility": plan.visibility},
         result={"ok": True, "messages_sent": 0, "external_calendar_writes": 0},
     )
@@ -172,15 +186,21 @@ def _public(plan: FamilyPlan379, now: datetime) -> dict:
     due = _utc(plan.due_at_utc)
     reminder = (
         due - timedelta(minutes=plan.reminder_minutes)
-        if plan.reminder_minutes is not None else None
+        if plan.reminder_minutes is not None
+        else None
     )
     is_open = plan.status == "open"
     reminder_due = bool(is_open and reminder and now >= reminder)
     missed = bool(is_open and now > due)
     return {
-        "id": plan.id, "title": plan.title, "kind": plan.kind, "detail": plan.detail,
-        "supplies": plan.supplies, "visibility": plan.visibility,
-        "localDue": plan.local_due, "timezone": plan.timezone,
+        "id": plan.id,
+        "title": plan.title,
+        "kind": plan.kind,
+        "detail": plan.detail,
+        "supplies": plan.supplies,
+        "visibility": plan.visibility,
+        "localDue": plan.local_due,
+        "timezone": plan.timezone,
         "dueAtUtc": due.isoformat(),
         "recurrenceDays": plan.recurrence_days,
         "reminderMinutes": plan.reminder_minutes,
@@ -191,7 +211,8 @@ def _public(plan: FamilyPlan379, now: datetime) -> dict:
             _utc(plan.reminder_ack_at).isoformat() if plan.reminder_ack_at else None
         ),
         "missed": missed,
-        "status": plan.status, "revision": plan.revision,
+        "status": plan.status,
+        "revision": plan.revision,
         "completionCount": plan.completion_count,
         "lastCompletedAt": (
             _utc(plan.last_completed_at).isoformat() if plan.last_completed_at else None
@@ -206,29 +227,37 @@ def _public(plan: FamilyPlan379, now: datetime) -> dict:
 def members(actor: Viewer, db: DB) -> dict:
     """Limit disclosed account roster; no credentials or cross-app identities."""
     if actor.role in {"owner", "administrator"}:
-        people = db.scalars(select(User).where(
-            User.enabled.is_(True), User.role.in_(["owner", "administrator", "household_user"])
-        ).order_by(User.username).limit(100)).all()
+        people = db.scalars(
+            select(User)
+            .where(
+                User.enabled.is_(True), User.role.in_(["owner", "administrator", "household_user"])
+            )
+            .order_by(User.username)
+            .limit(100)
+        ).all()
     elif actor.role == "household_user":
         people = [actor]
     else:
         people = []
-    return {"members": [{"id":user.id, "username":user.username} for user in people]}
+    return {"members": [{"id": user.id, "username": user.username} for user in people]}
 
 
 @router.get("/board")
 def board(actor: Viewer, db: DB, response: Response) -> dict:
     response.headers["Cache-Control"] = "no-store"
-    active = db.scalars(select(FamilyPlan379).where(
-        FamilyPlan379.status != "archived"
-    ).order_by(FamilyPlan379.due_at_utc, FamilyPlan379.id).limit(2000)).all()
+    active = db.scalars(
+        select(FamilyPlan379)
+        .where(FamilyPlan379.status != "archived")
+        .order_by(FamilyPlan379.due_at_utc, FamilyPlan379.id)
+        .limit(2000)
+    ).all()
     visible = [p for p in active if _visible(p, actor)]
     now = datetime.now(UTC)
     displayed = [_public(p, now) for p in visible[:MAX_ACTIVE]]
     ids = {p.id for p in visible}
-    events = db.scalars(select(FamilyPlanEvent379).order_by(
-        FamilyPlanEvent379.id.desc()
-    ).limit(250)).all()
+    events = db.scalars(
+        select(FamilyPlanEvent379).order_by(FamilyPlanEvent379.id.desc()).limit(250)
+    ).all()
     return {
         "schema": "rosevear.hub.family-calendar.v379",
         "timezonePolicy": "IANA_ZONE_EXPLICIT_DST_GAPS_AND_FOLDS_REJECTED",
@@ -236,11 +265,15 @@ def board(actor: Viewer, db: DB, response: Response) -> dict:
         "items": displayed,
         "history": [
             {
-                "id": e.id, "planId": e.plan_id, "action": e.action,
-                "revision": e.revision, "actorUserId": e.actor_user_id,
+                "id": e.id,
+                "planId": e.plan_id,
+                "action": e.action,
+                "revision": e.revision,
+                "actorUserId": e.actor_user_id,
                 "at": _utc(e.occurred_at).isoformat(),
             }
-            for e in events if e.plan_id in ids
+            for e in events
+            if e.plan_id in ids
         ][:40],
         "summary": {
             "active": len(displayed),
@@ -259,26 +292,35 @@ def board(actor: Viewer, db: DB, response: Response) -> dict:
 
 @router.post("/plans", status_code=201)
 def create_plan(payload: PlanInput, actor: Editor, db: DB) -> dict:
-    count = db.scalar(select(func.count(FamilyPlan379.id)).where(
-        FamilyPlan379.status != "archived"
-    ))
+    count = db.scalar(
+        select(func.count(FamilyPlan379.id)).where(FamilyPlan379.status != "archived")
+    )
     if count is not None and count >= MAX_ACTIVE:
         raise HTTPException(status_code=409, detail="Active family plan capacity reached.")
     assignee = _assignable(db, actor, payload.assignee_user_id)
     now = datetime.now(UTC)
     plan = FamilyPlan379(
-        title=payload.title, kind=payload.kind,
-        detail=payload.detail, supplies=payload.supplies,
+        title=payload.title,
+        kind=payload.kind,
+        detail=payload.detail,
+        supplies=payload.supplies,
         visibility=payload.visibility,
-        local_due=payload.local_due, timezone=payload.timezone,
+        local_due=payload.local_due,
+        timezone=payload.timezone,
         due_at_utc=_instant(payload.local_due, payload.timezone),
         recurrence_days=payload.recurrence_days,
         reminder_minutes=payload.reminder_minutes,
-        reminder_ack_at=None, reminder_ack_by_user_id=None,
-        completion_count=0, last_completed_at=None,
-        status="open", revision=1,
-        creator_user_id=actor.id, assignee_user_id=assignee,
-        updated_by_user_id=actor.id, created_at=now, updated_at=now,
+        reminder_ack_at=None,
+        reminder_ack_by_user_id=None,
+        completion_count=0,
+        last_completed_at=None,
+        status="open",
+        revision=1,
+        creator_user_id=actor.id,
+        assignee_user_id=assignee,
+        updated_by_user_id=actor.id,
+        created_at=now,
+        updated_at=now,
     )
     db.add(plan)
     db.flush()
@@ -289,7 +331,10 @@ def create_plan(payload: PlanInput, actor: Editor, db: DB) -> dict:
 
 @router.put("/plans/{plan_id}")
 def update_plan(
-    payload: PlanEdit, actor: Editor, db: DB, plan_id: int = Path(gt=0),
+    payload: PlanEdit,
+    actor: Editor,
+    db: DB,
+    plan_id: int = Path(gt=0),
 ) -> dict:
     plan = _view(db, plan_id, actor)
     _manage(plan, actor)
@@ -318,7 +363,10 @@ def update_plan(
 
 @router.post("/plans/{plan_id}/ack")
 def acknowledge(
-    payload: Decision, actor: Editor, db: DB, plan_id: int = Path(gt=0),
+    payload: Decision,
+    actor: Editor,
+    db: DB,
+    plan_id: int = Path(gt=0),
 ) -> dict:
     plan = _view(db, plan_id, actor)
     _participate(plan, actor)
@@ -342,7 +390,10 @@ def acknowledge(
 
 @router.post("/plans/{plan_id}/complete")
 def complete_plan(
-    payload: Decision, actor: Editor, db: DB, plan_id: int = Path(gt=0),
+    payload: Decision,
+    actor: Editor,
+    db: DB,
+    plan_id: int = Path(gt=0),
 ) -> dict:
     plan = _view(db, plan_id, actor)
     _participate(plan, actor)
@@ -382,7 +433,10 @@ def complete_plan(
 
 @router.post("/plans/{plan_id}/archive")
 def archive_plan(
-    payload: Decision, actor: Editor, db: DB, plan_id: int = Path(gt=0),
+    payload: Decision,
+    actor: Editor,
+    db: DB,
+    plan_id: int = Path(gt=0),
 ) -> dict:
     plan = _view(db, plan_id, actor)
     _manage(plan, actor)
