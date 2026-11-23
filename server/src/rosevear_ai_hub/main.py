@@ -33,6 +33,7 @@ from rosevear_ai_hub.api.device_registry import router as device_registry_router
 from rosevear_ai_hub.api.family_calendar379 import router as family_calendar379_router
 from rosevear_ai_hub.api.frigate import router as frigate_router
 from rosevear_ai_hub.api.global_search import router as global_search_router
+from rosevear_ai_hub.api.governance384 import router as governance384_router
 from rosevear_ai_hub.api.grocery378 import router as grocery378_router
 from rosevear_ai_hub.api.home_assistant import router as home_assistant_router
 from rosevear_ai_hub.api.home_assistant_controls import router as home_assistant_controls_router
@@ -259,6 +260,7 @@ def create_app() -> FastAPI:
     application.include_router(server_shell364_router)
     application.include_router(server_shell365_router)
     application.include_router(sysop_history366_router)
+    application.include_router(governance384_router)
     application.include_router(live_sources367_router)
     application.include_router(sysop_telemetry423_router)
     application.include_router(global_search_router)
