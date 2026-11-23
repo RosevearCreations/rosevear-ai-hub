@@ -129,9 +129,9 @@ def _reserve384(path: Path, *, now_ms: int) -> int:
     with closing(sqlite3.connect(str(safe), timeout=5, isolation_level=None)) as db:
         db.execute("PRAGMA journal_mode=WAL")
         db.execute("PRAGMA synchronous=FULL")
+        db.executescript(DDL384)
         db.execute("BEGIN IMMEDIATE")
         try:
-            db.executescript(DDL384)
             row = db.execute(
                 "SELECT utc_day,calls,last_attempt_ms FROM wu_budget384 WHERE id=1"
             ).fetchone()
@@ -149,7 +149,7 @@ def _reserve384(path: Path, *, now_ms: int) -> int:
             )
             db.execute("COMMIT")
             return used + 1
-        except Exception:
+        except (OSError, ValueError, sqlite3.Error):
             db.execute("ROLLBACK")
             raise
 
@@ -273,6 +273,10 @@ def cached_weather384(
             }
         ):
             raise ValueError("HOLD_WU_CACHE_INVALID")
+        for key, (field, low, high) in WEATHER_FIELDS384.items():
+            _metric384(item["values"][key], low, high)
+        _metric384(item["values"]["humidityPercent"], 0, 100)
+        _metric384(item["values"]["windDirectionDegrees"], 0, 360)
         return {
             **result,
             "status": (
