@@ -9,6 +9,7 @@ const iconPaths: Record<string, string> = {
   Business: "M3 7h18v14H3V7Z M8 7V4h8v3 M3 12h18 M10 12v3h4v-3",
   MQTT: "M12 20v-7 M9 20h6 M12 9a3 3 0 0 0-3 3m6 0a3 3 0 0 0-3-3M5 6a9 9 0 0 0 0 12M19 6a9 9 0 0 1 0 12 M8 8l4-4 4 4",
   Notifications: "M5 17h14l-2-3V9a5 5 0 0 0-10 0v5l-2 3Z M10 20a2 2 0 0 0 4 0",
+  Groceries: "M3 4h2l3 12h11l3-9H7 M9 20h.01 M18 20h.01 M8 16h11",
   System: "M2 12h4l3-7 5 14 3-7h5",
   Workshop: "M3 21 16 8 M13 5l6 6 M15 3l6 6 M5 13 2 16l6 6 3-3",
   Automations: "M4 4h6v6H4z M14 14h6v6h-6z M10 7h4a4 4 0 0 1 4 4v3 M7 10v4a4 4 0 0 0 4 4h3",
