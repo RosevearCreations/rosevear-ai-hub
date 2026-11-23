@@ -98,11 +98,13 @@ def record_manual(payload: ManualReadingIn, actor: Owner, db: DB) -> dict:
     equipment = db.get(WorkshopEquipment, payload.equipment_id)
     if equipment is None or equipment.disabled:
         raise HTTPException(status_code=404, detail="Active registered equipment not found.")
-    count = len(db.scalars(
-        select(WorkshopProcessReading377.id)
-        .where(WorkshopProcessReading377.equipment_id == equipment.id)
-        .limit(MAX_READINGS_PER_EQUIPMENT)
-    ).all())
+    count = len(
+        db.scalars(
+            select(WorkshopProcessReading377.id)
+            .where(WorkshopProcessReading377.equipment_id == equipment.id)
+            .limit(MAX_READINGS_PER_EQUIPMENT)
+        ).all()
+    )
     if count >= MAX_READINGS_PER_EQUIPMENT:
         raise HTTPException(status_code=409, detail="Observation capacity reached; archive safely.")
     row = WorkshopProcessReading377(
@@ -125,9 +127,9 @@ def record_manual(payload: ManualReadingIn, actor: Owner, db: DB) -> dict:
         object_type="workshop_equipment",
         object_id=str(equipment.id),
         action="append_unverified_manual_reading",
-        arguments={"fields": [
-            "operating_state", "progress_percent", "temperature_c", "ventilation"
-        ]},
+        arguments={
+            "fields": ["operating_state", "progress_percent", "temperature_c", "ventilation"]
+        },
         result={"machine_commands": 0, "safety_certified": False},
     )
     db.commit()
@@ -151,8 +153,7 @@ def history(equipment_id: int, actor: Owner, db: DB, response: Response) -> dict
 def _gateway_sources(db: Session, now: datetime) -> list[dict]:
     """Only previously admitted signed receipts; no live network fetch."""
     rows = db.scalars(
-        select(WorkshopGatewayReceipt370)
-        .order_by(WorkshopGatewayReceipt370.id.desc()).limit(20)
+        select(WorkshopGatewayReceipt370).order_by(WorkshopGatewayReceipt370.id.desc()).limit(20)
     ).all()
     seen: set[str] = set()
     result: list[dict] = []
@@ -169,33 +170,34 @@ def _gateway_sources(db: Session, now: datetime) -> list[dict]:
         try:
             payload = json.loads(row.payload_json)
             for device in payload.get("devices", [])[:48]:
-                if (
-                    device.get("kind") != "octoprint"
-                    or device.get("proof") != "octoprint_loopback"
-                ):
+                if device.get("kind") != "octoprint" or device.get("proof") != "octoprint_loopback":
                     continue
-                devices.append({
-                    "label": device["label"],
-                    "presence": device["presence"],
-                    "progressPercent": device.get("progress_percent"),
-                    "nozzleC": device.get("nozzle_c"),
-                    "bedC": device.get("bed_c"),
-                    "source": "SIGNED_WINDOWS_COLLECTOR_OCTOPRINT_READ",
-                    "physicalIdentityVerified": False,
-                })
+                devices.append(
+                    {
+                        "label": device["label"],
+                        "presence": device["presence"],
+                        "progressPercent": device.get("progress_percent"),
+                        "nozzleC": device.get("nozzle_c"),
+                        "bedC": device.get("bed_c"),
+                        "source": "SIGNED_WINDOWS_COLLECTOR_OCTOPRINT_READ",
+                        "physicalIdentityVerified": False,
+                    }
+                )
         except (ValueError, TypeError, KeyError, AttributeError):
             fresh = False
             devices = []
-        result.append({
-            "collectorId": row.collector_id,
-            "observedAt": datetime.fromtimestamp(row.observed_at_ms / 1000, UTC).isoformat(),
-            "expiresAt": datetime.fromtimestamp(row.expires_at_ms / 1000, UTC).isoformat(),
-            "fresh": fresh,
-            "status": "SIGNED_SOURCE_CURRENT" if fresh else "HOLD_STALE_SIGNED_SOURCE",
-            "devices": devices,
-            "boundToWorkshopEquipment": False,
-            "physicalIdentityVerified": False,
-        })
+        result.append(
+            {
+                "collectorId": row.collector_id,
+                "observedAt": datetime.fromtimestamp(row.observed_at_ms / 1000, UTC).isoformat(),
+                "expiresAt": datetime.fromtimestamp(row.expires_at_ms / 1000, UTC).isoformat(),
+                "fresh": fresh,
+                "status": "SIGNED_SOURCE_CURRENT" if fresh else "HOLD_STALE_SIGNED_SOURCE",
+                "devices": devices,
+                "boundToWorkshopEquipment": False,
+                "physicalIdentityVerified": False,
+            }
+        )
     return result
 
 
@@ -221,7 +223,8 @@ def board(actor: Owner, db: DB, response: Response) -> dict:
         for job in db.scalars(
             select(WorkshopJob)
             .where(WorkshopJob.equipment_id.in_(equipment_ids), WorkshopJob.archived.is_(False))
-            .order_by(WorkshopJob.id.desc()).limit(500)
+            .order_by(WorkshopJob.id.desc())
+            .limit(500)
         ):
             assert job.equipment_id is not None
             jobs.setdefault(job.equipment_id, []).append(job)
@@ -253,35 +256,43 @@ def board(actor: Owner, db: DB, response: Response) -> dict:
         elif not fresh:
             risks.append("STALE_OR_FUTURE_MANUAL_READING")
         if (
-            recent and recent.ventilation == "off_reported"
+            recent
+            and recent.ventilation == "off_reported"
             and eq.activity_type in {"laser", "forge", "chemical"}
         ):
             risks.append("VENTILATION_REPORTED_OFF_REVIEW")
         if recent and recent.operating_state == "fault_reported":
             risks.append("FAULT_REPORTED_REVIEW")
         active_jobs = jobs.get(eq.id, [])
-        items.append({
-            "equipmentId": eq.id,
-            "name": eq.name,
-            "equipmentType": eq.equipment_type,
-            "project": eq.project_key,
-            "activity": eq.activity_type,
-            "disabled": eq.disabled,
-            "readiness": eq.readiness_status,
-            "reading": _reading(recent) if recent else None,
-            "readingFresh": bool(fresh),
-            "ageSeconds": round(age) if age is not None else None,
-            "attention": risks,
-            "maintenanceDueAt": _aware(due_at).isoformat() if due_at else None,
-            "jobs": [{
-                "id": j.id, "title": j.title, "status": j.status,
-                "progressPercent": j.progress_percent,
-                "source": "OWNER_JOB_RECORD_NOT_MACHINE_TELEMETRY",
-            } for j in active_jobs[:12]],
-            "activeJobCount": len(active_jobs),
-            "machineControlEnabled": False,
-            "safetyCertified": False,
-        })
+        items.append(
+            {
+                "equipmentId": eq.id,
+                "name": eq.name,
+                "equipmentType": eq.equipment_type,
+                "project": eq.project_key,
+                "activity": eq.activity_type,
+                "disabled": eq.disabled,
+                "readiness": eq.readiness_status,
+                "reading": _reading(recent) if recent else None,
+                "readingFresh": bool(fresh),
+                "ageSeconds": round(age) if age is not None else None,
+                "attention": risks,
+                "maintenanceDueAt": _aware(due_at).isoformat() if due_at else None,
+                "jobs": [
+                    {
+                        "id": j.id,
+                        "title": j.title,
+                        "status": j.status,
+                        "progressPercent": j.progress_percent,
+                        "source": "OWNER_JOB_RECORD_NOT_MACHINE_TELEMETRY",
+                    }
+                    for j in active_jobs[:12]
+                ],
+                "activeJobCount": len(active_jobs),
+                "machineControlEnabled": False,
+                "safetyCertified": False,
+            }
+        )
     return {
         "schema": "rosevear.hub.workshop-process.v377",
         "sampledAt": now.isoformat(),
