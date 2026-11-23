@@ -34,6 +34,7 @@ import { HomeAssistantView } from "./HomeAssistantView";
 import { KnowledgeView } from "./KnowledgeView";
 import { WorkshopView } from "./WorkshopView";
 import { GroceryPantry378 } from "./GroceryPantry378";
+import { FamilyCalendar379 } from "./FamilyCalendar379";
 import { LocalDiagnosticsPanel } from "./LocalDiagnosticsPanel";
 import { PostRebootAcceptancePanel } from "./PostRebootAcceptancePanel";
 import { StartupRecoveryConsole } from "./StartupRecoveryConsole";
@@ -121,6 +122,7 @@ const baseSections = [
   "MQTT",
   "Notifications",
   "Groceries",
+  "Calendar",
   "Search & Help",
   "System",
 ] as const;
@@ -642,6 +644,8 @@ export function App() {
           <BusinessView />
         ) : section === "MQTT" ? (
           <MQTTView currentUser={user} />
+        ) : section === "Calendar" ? (
+          <FamilyCalendar379 role={user.role} currentUserId={user.id} />
         ) : section === "Groceries" ? (
           <GroceryPantry378 role={user.role} />
         ) : section === "Notifications" ? (
