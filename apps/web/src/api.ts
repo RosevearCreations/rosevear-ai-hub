@@ -4226,3 +4226,99 @@ export function recordWorkshopProcess377(payload: {
 }): Promise<WorkshopProcess377Reading> {
   return authJson("POST", "/api/v1/workshop-process-377/observations", payload);
 }
+
+export type GroceryUnit378 = "each" | "pack" | "kg" | "g" | "L" | "mL";
+export interface GroceryItem378 {
+  id: number;
+  name: string;
+  unit: GroceryUnit378;
+  wantedQty: number;
+  onHandQty: number;
+  minOnHandQty: number;
+  recurrenceDays: number | null;
+  lastPickedUpOn: string | null;
+  expiresOn: string | null;
+  pickupOn: string | null;
+  priceNote: string;
+  note: string;
+  state: "draft" | "approved" | "picked_up";
+  revision: number;
+  approvedAt: string | null;
+  approvedByUserId: number | null;
+  lowStock: boolean;
+  expiresSoon: boolean;
+  recurrenceDue: boolean;
+  pickupReady: boolean;
+  manualInventoryOnly: true;
+}
+export interface GroceryBoard378 {
+  schema: "rosevear.hub.grocery.v378";
+  source: "PRIVATE_LOCAL_HOUSEHOLD_ONLY";
+  role: AuthRole;
+  items: GroceryItem378[];
+  duplicateGroups: number[][];
+  history: Array<{
+    id: number; itemId: number; action: string; revision: number;
+    relatedItemId: number | null; actorUserId: number | null; recordedAt: string;
+  }>;
+  summary: {
+    active: number; lowStock: number; expiring: number;
+    recurringDue: number; approvedPickupLines: number;
+  };
+  truncated: boolean;
+  retailerConnected: false;
+  orderingEnabled: false;
+  paymentsEnabled: false;
+  externalMessagesEnabled: false;
+  householdApprovalRequired: true;
+}
+export interface GroceryFields378 {
+  name: string;
+  unit: GroceryUnit378;
+  wanted_qty: number;
+  on_hand_qty: number;
+  min_on_hand_qty: number;
+  recurrence_days: number | null;
+  expires_on: string | null;
+  pickup_on: string | null;
+  price_note: string;
+  note: string;
+}
+export function getGroceryBoard378(signal?: AbortSignal): Promise<GroceryBoard378> {
+  return authJson("GET", "/api/v1/groceries-378/board", undefined, signal);
+}
+export function createGroceryItem378(payload: GroceryFields378): Promise<GroceryItem378> {
+  return authJson("POST", "/api/v1/groceries-378/items", payload);
+}
+export function editGroceryItem378(
+  id: number, expected_revision: number, payload: GroceryFields378,
+): Promise<GroceryItem378> {
+  return authJson("PATCH", "/api/v1/groceries-378/items/" +
+    encodeURIComponent(String(id)), {...payload, expected_revision});
+}
+export function approveGroceryItem378(id: number, revision: number): Promise<GroceryItem378> {
+  return authJson("POST", "/api/v1/groceries-378/items/" +
+    encodeURIComponent(String(id)) + "/approve", {expected_revision: revision, owner_confirmed: true});
+}
+export function receiveGroceryItem378(
+  id: number, revision: number, received_qty: number,
+): Promise<GroceryItem378> {
+  return authJson("POST", "/api/v1/groceries-378/items/" +
+    encodeURIComponent(String(id)) + "/receive",
+    {expected_revision: revision, owner_confirmed: true, received_qty});
+}
+export function archiveGroceryItem378(id: number, revision: number): Promise<{
+  state: "ARCHIVED"; itemId: number; removedFromActiveBoard: true;
+}> {
+  return authJson("POST", "/api/v1/groceries-378/items/" +
+    encodeURIComponent(String(id)) + "/archive",
+    {expected_revision: revision, owner_confirmed: true});
+}
+export function mergeGroceryItems378(target: GroceryItem378, duplicate: GroceryItem378):
+  Promise<{state: "MERGED_REVIEW_REQUIRED"; target: GroceryItem378; archivedId: number}> {
+  return authJson("POST", "/api/v1/groceries-378/merge", {
+    target_id: target.id, duplicate_id: duplicate.id,
+    target_revision: target.revision, duplicate_revision: duplicate.revision,
+    owner_confirmed: true,
+  });
+}
