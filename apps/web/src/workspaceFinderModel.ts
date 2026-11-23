@@ -9,6 +9,7 @@ const WORKSPACE_HINTS: Record<string, { description: string; terms: readonly str
   Business: { description: "Connected business workspaces", terms: ["companies", "operations", "businesses"] },
   MQTT: { description: "MQTT broker and device messages", terms: ["broker", "mqtt messages"] },
   Notifications: { description: "Alerts and reminders", terms: ["alerts", "reminders", "inbox"] },
+  Groceries: { description: "Shared household groceries and pantry", terms: ["shopping", "pantry", "food", "pickup", "grocery", "list"] },
   "Search & Help": { description: "Help and searchable guides", terms: ["help", "guides", "manual", "support"] },
   System: { description: "Health, diagnostics and updates", terms: ["status", "health", "diagnostics", "update", "backup", "restart"] },
   Workshop: { description: "Workshop jobs and maintenance", terms: ["projects", "equipment", "maintenance", "materials"] },
