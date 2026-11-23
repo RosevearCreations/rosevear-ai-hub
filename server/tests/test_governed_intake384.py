@@ -60,7 +60,8 @@ def _packet384(app_id: str, index: int):
 
 def test_governance_never_fabricates_missing_sources(tmp_path):
     path = tmp_path / "governance.sqlite"
-    assert governed_snapshot384(path, now_ms=NOW384, original_host=False)["freshSignedReceipts"] == 0
+    denied = governed_snapshot384(path, now_ms=NOW384, original_host=False)
+    assert denied["freshSignedReceipts"] == 0
     for i, app_id in enumerate(APPS):
         packet, public, pin = _packet384(app_id, i)
         record_transport_receipt367(
