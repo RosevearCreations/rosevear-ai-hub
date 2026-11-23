@@ -129,10 +129,10 @@ from rosevear_ai_hub.api.tts import router as tts_router
 from rosevear_ai_hub.api.voice import router as voice_router
 from rosevear_ai_hub.api.workshop import router as workshop_router
 from rosevear_ai_hub.api.workshop_enrollment371 import router as workshop_enrollment371_router
-from rosevear_ai_hub.api.workshop_process377 import router as workshop_process377_router
 from rosevear_ai_hub.api.workshop_gateway370 import router as workshop_gateway370_router
 from rosevear_ai_hub.api.workshop_jobs import router as workshop_jobs_router
 from rosevear_ai_hub.api.workshop_maintenance import router as workshop_maintenance_router
+from rosevear_ai_hub.api.workshop_process377 import router as workshop_process377_router
 from rosevear_ai_hub.auth import require_authenticated, require_roles
 from rosevear_ai_hub.auth import router as auth_router
 from rosevear_ai_hub.automation_runtime import AutomationEventRuntime
