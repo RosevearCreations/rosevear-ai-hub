@@ -113,7 +113,7 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 
 **Acceptance / security gate:** Live sensor readings only where actually installed, with source timestamps; monitoring/alerts not machine control.
 
-### Build 378 — Grocery ordering board and pantry
+### Build 378 — Grocery ordering board and pantry (SOURCE IMPLEMENTED; FIELD HOLD)
 
 **Deliver:** Shared household grocery wish list, pantry quantity/expiration, recurring essentials, price notes, family approvals, printable/pickup list..
 
