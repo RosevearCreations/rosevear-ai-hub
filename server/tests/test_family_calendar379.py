@@ -8,7 +8,6 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
 
-from rosevear_ai_hub.api.family_calendar379 import _instant
 from rosevear_ai_hub.database import Base, build_engine, get_session
 from rosevear_ai_hub.main import create_app
 from rosevear_ai_hub.models import FamilyPlan379, FamilyPlanEvent379
