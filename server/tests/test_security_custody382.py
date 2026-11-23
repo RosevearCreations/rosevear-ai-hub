@@ -116,7 +116,7 @@ def test_owner_only_and_explicit_reauthentication(tmp_path):
         assert len(events) == 2
         count = db.scalar(select(func.count(HubSession.id)).where(HubSession.revoked_at.is_(None)))
         assert count == 2
-        combined = str([(event.action, event.result_json) for event in events])
+        combined = str([(event.action, event.result) for event in events])
         assert PASSWORD not in combined
 
 
