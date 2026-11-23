@@ -1105,3 +1105,23 @@ class AutomationSequenceSimulation376(Base):
     checked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     outcome: Mapped[str] = mapped_column(String(24), nullable=False)
     blocker_count: Mapped[int] = mapped_column(Integer, nullable=False)
+
+class WorkshopProcessReading377(Base):
+    """Append-only owner-supplied process reading; never a machine safety approval."""
+
+    __tablename__ = "workshop_process_readings377"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    equipment_id: Mapped[int] = mapped_column(
+        ForeignKey("workshop_equipment.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    recorded_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    operating_state: Mapped[str] = mapped_column(String(32), nullable=False)
+    progress_percent: Mapped[float | None] = mapped_column(Float, nullable=True)
+    temperature_c: Mapped[float | None] = mapped_column(Float, nullable=True)
+    ventilation: Mapped[str] = mapped_column(String(24), nullable=False)
+    note: Mapped[str] = mapped_column(String(300), nullable=False, default="")
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
