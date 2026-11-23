@@ -85,10 +85,13 @@ def test_family_editor_owner_approval_and_actual_pickup(tmp_path):
     assert board.json()["orderingEnabled"] is False
     assert board.json()["paymentsEnabled"] is False
     assert board.json()["externalMessagesEnabled"] is False
-    assert client.post(
-        PREFIX + f"/items/{item['id']}/approve",
-        json={"expected_revision": 1, "owner_confirmed": True},
-    ).status_code == 403
+    assert (
+        client.post(
+            PREFIX + f"/items/{item['id']}/approve",
+            json={"expected_revision": 1, "owner_confirmed": True},
+        ).status_code
+        == 403
+    )
 
     login(client, "owner")
     pending = client.post(
@@ -120,16 +123,22 @@ def test_family_editor_owner_approval_and_actual_pickup(tmp_path):
     assert partial.json()["wantedQty"] == 1
     assert partial.json()["state"] == "draft"
     assert partial.json()["approvedAt"] is None
-    assert client.post(
-        receipt_path,
-        json={"expected_revision": 2, "owner_confirmed": True, "received_qty": 1},
-    ).status_code == 409
+    assert (
+        client.post(
+            receipt_path,
+            json={"expected_revision": 2, "owner_confirmed": True, "received_qty": 1},
+        ).status_code
+        == 409
+    )
 
     login(client, "owner")
-    assert client.post(
-        PREFIX + f"/items/{item['id']}/approve",
-        json={"expected_revision": 3, "owner_confirmed": True},
-    ).status_code == 200
+    assert (
+        client.post(
+            PREFIX + f"/items/{item['id']}/approve",
+            json={"expected_revision": 3, "owner_confirmed": True},
+        ).status_code
+        == 200
+    )
     login(client, "family")
     complete = client.post(
         receipt_path,
@@ -203,10 +212,13 @@ def test_edit_invalidates_approval_and_exact_merge_is_audited(tmp_path):
     )
     assert changed.status_code == 200, changed.text
     assert changed.json()["revision"] == 4
-    assert client.patch(
-        PREFIX + f"/items/{first['id']}",
-        json={"expected_revision": 3, "wanted_qty": 4},
-    ).status_code == 409
+    assert (
+        client.patch(
+            PREFIX + f"/items/{first['id']}",
+            json={"expected_revision": 3, "wanted_qty": 4},
+        ).status_code
+        == 409
+    )
 
 
 def test_role_isolation_archive_and_no_hidden_payment(tmp_path):
@@ -215,18 +227,27 @@ def test_role_isolation_archive_and_no_hidden_payment(tmp_path):
     login(client, "auditor")
     assert client.get(PREFIX + "/board").status_code == 200
     assert client.post(PREFIX + "/items", json=new_item("rice")).status_code == 403
-    assert client.patch(
-        PREFIX + f"/items/{item['id']}", json={"expected_revision": 1, "note": "x"}
-    ).status_code == 403
-    assert client.post(
-        PREFIX + f"/items/{item['id']}/archive",
-        json={"expected_revision": 1, "owner_confirmed": True},
-    ).status_code == 403
+    assert (
+        client.patch(
+            PREFIX + f"/items/{item['id']}", json={"expected_revision": 1, "note": "x"}
+        ).status_code
+        == 403
+    )
+    assert (
+        client.post(
+            PREFIX + f"/items/{item['id']}/archive",
+            json={"expected_revision": 1, "owner_confirmed": True},
+        ).status_code
+        == 403
+    )
     login(client, "family")
-    assert client.post(
-        PREFIX + f"/items/{item['id']}/archive",
-        json={"expected_revision": 1, "owner_confirmed": True},
-    ).status_code == 403
+    assert (
+        client.post(
+            PREFIX + f"/items/{item['id']}/archive",
+            json={"expected_revision": 1, "owner_confirmed": True},
+        ).status_code
+        == 403
+    )
     login(client, "owner")
     archived = client.post(
         PREFIX + f"/items/{item['id']}/archive",
@@ -234,9 +255,12 @@ def test_role_isolation_archive_and_no_hidden_payment(tmp_path):
     )
     assert archived.status_code == 200
     assert client.get(PREFIX + "/board").json()["items"] == []
-    assert client.patch(
-        PREFIX + f"/items/{item['id']}", json={"expected_revision": 2, "note": "restore"}
-    ).status_code == 404
+    assert (
+        client.patch(
+            PREFIX + f"/items/{item['id']}", json={"expected_revision": 2, "note": "restore"}
+        ).status_code
+        == 404
+    )
     with factory() as db:
         assert db.get(GroceryItem378, item["id"]) is not None
 
