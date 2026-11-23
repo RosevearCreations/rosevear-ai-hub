@@ -129,6 +129,7 @@ from rosevear_ai_hub.api.tts import router as tts_router
 from rosevear_ai_hub.api.voice import router as voice_router
 from rosevear_ai_hub.api.workshop import router as workshop_router
 from rosevear_ai_hub.api.workshop_enrollment371 import router as workshop_enrollment371_router
+from rosevear_ai_hub.api.workshop_process377 import router as workshop_process377_router
 from rosevear_ai_hub.api.workshop_gateway370 import router as workshop_gateway370_router
 from rosevear_ai_hub.api.workshop_jobs import router as workshop_jobs_router
 from rosevear_ai_hub.api.workshop_maintenance import router as workshop_maintenance_router
@@ -282,6 +283,7 @@ def create_app() -> FastAPI:
     application.include_router(apple_matter373_router)
     application.include_router(smartthings374_router)
     application.include_router(workshop_gateway370_router)
+    application.include_router(workshop_process377_router)
     application.include_router(workshop_enrollment371_router)
     application.include_router(workshop_router, dependencies=[Depends(require_authenticated)])
     application.include_router(workshop_jobs_router, dependencies=[Depends(require_authenticated)])
