@@ -2,6 +2,7 @@
 const iconPaths: Record<string, string> = {
   Home: "m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2Z",
   Chat: "M4 5h16v12H9l-5 4V5Z M7 9h10 M7 13h7",
+  Assistant: "M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z",
   Knowledge: "M12 6c-3-2-6-2-9-1v14c3-1 6-1 9 1m0-14c3-2 6-2 9-1v14c-3-1-6-1-9 1m0-14v14",
   Vault: "M12 2 4 6v6c0 6 4 9 8 10 4-1 8-4 8-10V6L12 2Z M9 12l2 2 4-4",
   Devices: "M5 5h14v14H5z M9 9h6v6H9z M9 1v4 M15 1v4 M9 19v4 M15 19v4 M1 9h4 M19 9h4 M1 15h4 M19 15h4",
