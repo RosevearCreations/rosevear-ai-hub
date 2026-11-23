@@ -144,7 +144,8 @@ export function FamilyCalendar379({
       : createFamilyPlan379(form),
     modifying ? "Plan updated; any earlier reminder acknowledgment was reset." :
       "Family plan created locally. No external message was sent.");
-    if (success) clear();\n    // Preserve the form on failed writes, e.g. invalid DST times.
+    if (success) clear();
+    // Preserve the form on failed writes, e.g. invalid DST times.
   }
   const today = (() => {
     const d = new Date();
