@@ -11,7 +11,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Response
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from rosevear_ai_hub.auth import require_roles
 from rosevear_ai_hub.models import User
