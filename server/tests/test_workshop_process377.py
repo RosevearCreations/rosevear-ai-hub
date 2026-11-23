@@ -140,7 +140,7 @@ def test_invalid_or_missing_source_cannot_be_laundered(tmp_path):
         report(machine_id, temperature_c=2000),
         report(machine_id, observed_at=datetime.now(UTC).replace(tzinfo=None).isoformat()),
         report(machine_id, observed_at=(datetime.now(UTC) + timedelta(days=1)).isoformat()),
-        report(machine_id, note="bad\\nheader"),
+        report(machine_id, note="bad\nheader"),
         report(machine_id, operating_state="unknown", ventilation="unknown",
                progress_percent=None, temperature_c=None, note=""),
     ]
