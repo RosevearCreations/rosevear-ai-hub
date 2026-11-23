@@ -1198,9 +1198,7 @@ class FamilyPlan379(TimestampMixin, Base):
     due_at_utc: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     recurrence_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
     reminder_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    reminder_ack_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    reminder_ack_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     reminder_ack_by_user_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
