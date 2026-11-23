@@ -171,7 +171,10 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(result, sort_keys=True))
         return 0
     except (BackupError, CustodyError, DrillError, OSError, ValueError, KeyError) as exc:
-        print(f"Build382 HOLD_{type(exc).__name__.upper()}: no acceptance published.", file=sys.stderr)
+        print(
+            f"Build382 HOLD_{type(exc).__name__.upper()}: no acceptance published.",
+            file=sys.stderr,
+        )
         return 2
 
 
