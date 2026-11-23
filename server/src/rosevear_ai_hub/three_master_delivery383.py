@@ -15,6 +15,7 @@ from typing import Any
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
+from rosevear_ai_hub import master_transport352
 from rosevear_ai_hub.master_bus351 import MasterEventBus351
 from rosevear_ai_hub.master_transport352 import (
     MasterDeliveryLedger352,
@@ -23,7 +24,6 @@ from rosevear_ai_hub.master_transport352 import (
 )
 from rosevear_ai_hub.service_identity347 import Registry347, _digest
 from rosevear_ai_hub.transport348 import PeerEnrollment348
-from rosevear_ai_hub import master_transport352
 
 PEERS383 = ("ai-data-platform", "rosevear-comms-hub")
 ACCEPTED383 = "BOTH_INDEPENDENT_PINNED_PEER_ACKS_VERIFIED"
