@@ -88,6 +88,20 @@ class ItemPatch(BaseModel):
     price_note: str | None = Field(default=None, max_length=100)
     note: str | None = Field(default=None, max_length=250)
 
+    @field_validator("name")
+    @classmethod
+    def clean_patch_name(cls, value: str | None) -> str | None:
+        return _clean_text(value, 120) if value is not None else None
+
+    @field_validator("price_note", "note")
+    @classmethod
+    def clean_patch_notes(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        if any(ord(char) < 32 for char in value):
+            raise ValueError("Notes must contain printable text only.")
+        return " ".join(value.strip().split())
+
     @model_validator(mode="after")
     def check_fields(self) -> ItemPatch:
         changes = self.model_fields_set - {"expected_revision"}
