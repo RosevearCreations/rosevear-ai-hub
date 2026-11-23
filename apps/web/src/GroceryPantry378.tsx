@@ -130,7 +130,7 @@ export function GroceryPantry378({role}: {role: AuthRole}) {
     [board],
   );
 
-  return <main className="grocery378">
+  return <div className="grocery378">
     <header className="page-header">
       <div>
         <p className="eyebrow">Build 378 · Private household workspace</p>
@@ -364,5 +364,5 @@ export function GroceryPantry378({role}: {role: AuthRole}) {
     </>}
     {error && <p role="alert">{error}</p>}
     {notice && <p role="status">{notice}</p>}
-  </main>;
+  </div>;
 }
