@@ -35,7 +35,7 @@ from rosevear_ai_hub.models import (
     User,
     WorkshopEquipment,
 )
-from rosevear_ai_hub.providers.base import ProviderError, ProviderRequestError
+from rosevear_ai_hub.providers.base import ProviderError
 from rosevear_ai_hub.providers.registry import ProviderRegistry, get_provider_registry
 
 router = APIRouter(prefix="/api/v1/private-helper-380", tags=["private-helper"])
