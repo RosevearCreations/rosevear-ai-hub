@@ -30,8 +30,8 @@ from rosevear_ai_hub.api.confirmations import router as confirmations_router
 from rosevear_ai_hub.api.device_discovery import router as device_discovery_router
 from rosevear_ai_hub.api.device_registry import router as device_registry_router
 from rosevear_ai_hub.api.frigate import router as frigate_router
-from rosevear_ai_hub.api.grocery378 import router as grocery378_router
 from rosevear_ai_hub.api.global_search import router as global_search_router
+from rosevear_ai_hub.api.grocery378 import router as grocery378_router
 from rosevear_ai_hub.api.home_assistant import router as home_assistant_router
 from rosevear_ai_hub.api.home_assistant_controls import router as home_assistant_controls_router
 from rosevear_ai_hub.api.home_assistant_scenes import router as home_assistant_scenes_router
