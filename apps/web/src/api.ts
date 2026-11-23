@@ -4178,3 +4178,51 @@ export function simulateSequence376(id: number, payload: {
   return authJson("POST", "/api/v1/automation-sequencing-376/plans/" +
     encodeURIComponent(String(id)) + "/simulate", payload);
 }
+
+export interface WorkshopProcess377Reading {
+  id: number;
+  equipmentId: number;
+  operatingState: "unknown" | "idle_reported" | "active_reported" | "paused_reported" | "fault_reported";
+  progressPercent: number | null;
+  temperatureC: number | null;
+  ventilation: "unknown" | "on_reported" | "off_reported" | "not_applicable";
+  note: string;
+  observedAt: string;
+  recordedAt: string;
+  source: "OWNER_MANUAL_UNVERIFIED";
+  safetyCertified: false;
+}
+export interface WorkshopProcess377Board {
+  schema: "rosevear.hub.workshop-process.v377";
+  sampledAt: string;
+  equipment: Array<{
+    equipmentId: number; name: string; equipmentType: string; project: string;
+    activity: string; disabled: boolean; readiness: string;
+    reading: WorkshopProcess377Reading | null; readingFresh: boolean;
+    maintenanceDueAt: string | null; attention: string[];
+    jobs: Array<{id: number; title: string; status: string; progressPercent: number}>;
+    activeJobCount: number;
+    machineControlEnabled: false; safetyCertified: false;
+  }>;
+  signedCollectors: Array<{
+    collectorId: string; observedAt: string; fresh: boolean; status: string;
+    devices: Array<{label: string; presence: string; progressPercent: number | null}>;
+    boundToWorkshopEquipment: false; physicalIdentityVerified: false;
+  }>;
+  summary: {registered: number; withFreshManualReading: number; withAttention: number};
+  automaticPolling: false; machineCommandsEnabled: false; fieldSafetyAccepted: false;
+}
+export function getWorkshopProcess377Board(signal?: AbortSignal): Promise<WorkshopProcess377Board> {
+  return authJson("GET", "/api/v1/workshop-process-377/board", undefined, signal);
+}
+export function getWorkshopProcess377History(equipmentId: number): Promise<{readings: WorkshopProcess377Reading[]}> {
+  return authJson("GET", "/api/v1/workshop-process-377/observations/" +
+    encodeURIComponent(String(equipmentId)));
+}
+export function recordWorkshopProcess377(payload: {
+  equipment_id: number; operating_state: WorkshopProcess377Reading["operatingState"];
+  progress_percent: number | null; temperature_c: number | null;
+  ventilation: WorkshopProcess377Reading["ventilation"]; note: string; observed_at: string;
+}): Promise<WorkshopProcess377Reading> {
+  return authJson("POST", "/api/v1/workshop-process-377/observations", payload);
+}
