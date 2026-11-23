@@ -54,9 +54,7 @@ def setup_api(tmp_path):
 
 def login(app, name):
     client = TestClient(app)
-    response = client.post(
-        "/api/v1/auth/login", json={"username": name, "password": PASSWORD}
-    )
+    response = client.post("/api/v1/auth/login", json={"username": name, "password": PASSWORD})
     assert response.status_code == 200, response.text
     return client
 
@@ -89,9 +87,16 @@ def test_owner_only_and_explicit_reauthentication(tmp_path):
     assert unauth.post(API + "/revoke-other-sessions", json=payload()).status_code == 401
     bad = owner.post(API + "/revoke-other-sessions", json=payload("wrong-credential"))
     assert bad.status_code == 403
-    assert owner.post(API + "/revoke-other-sessions", json={
-        "password": PASSWORD, "confirmation": "yes",
-    }).status_code == 422
+    assert (
+        owner.post(
+            API + "/revoke-other-sessions",
+            json={
+                "password": PASSWORD,
+                "confirmation": "yes",
+            },
+        ).status_code
+        == 422
+    )
     assert owner.post(API + "/revoke-other-sessions", json=payload(admin=True)).status_code == 422
     assert second.get("/api/v1/auth/me").status_code == 200
     assert third.get("/api/v1/auth/me").status_code == 200
