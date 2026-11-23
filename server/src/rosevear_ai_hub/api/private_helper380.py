@@ -41,9 +41,7 @@ from rosevear_ai_hub.providers.registry import ProviderRegistry, get_provider_re
 router = APIRouter(prefix="/api/v1/private-helper-380", tags=["private-helper"])
 Owner = Annotated[User, Depends(require_roles("owner", "administrator"))]
 DB = Annotated[Session, Depends(get_session)]
-Retrieval = Annotated[
-    KnowledgeRetrievalService, Depends(get_knowledge_retrieval_service)
-]
+Retrieval = Annotated[KnowledgeRetrievalService, Depends(get_knowledge_retrieval_service)]
 Provider = Annotated[ProviderRegistry, Depends(get_provider_registry)]
 DeviceKind = Literal["home", "workshop"]
 MAX_SOURCES = 8
@@ -181,12 +179,12 @@ def reference_contexts(_actor: Owner, db: DB, response: Response) -> dict:
         select(WorkshopEquipment).order_by(WorkshopEquipment.id).limit(100)
     ).all()
     return {
-        "references": [
-            {"kind": "home", "id": d.id, "name": d.name, "type": d.source}
-            for d in home
-        ] + [
+        "references": [{"kind": "home", "id": d.id, "name": d.name, "type": d.source} for d in home]
+        + [
             {
-                "kind": "workshop", "id": d.id, "name": d.name,
+                "kind": "workshop",
+                "id": d.id,
+                "name": d.name,
                 "type": d.equipment_type,
             }
             for d in workshop
@@ -221,14 +219,18 @@ async def ask_private_helper(
     context = _context(db, payload.context_kind, payload.context_id)
     try:
         result = await retrieval.search(
-            db, payload.question, top_k=MAX_HITS,
+            db,
+            payload.question,
+            top_k=MAX_HITS,
             filters=RetrievalFilters(document_ids=tuple(sorted(selected))),
             mode="auto",
         )
     except (KnowledgeRetrievalError, ProviderError, ValueError):
         # No network needed for deterministic search across existing indexed text.
         result = await retrieval.search(
-            db, payload.question, top_k=MAX_HITS,
+            db,
+            payload.question,
+            top_k=MAX_HITS,
             filters=RetrievalFilters(document_ids=tuple(sorted(selected))),
             mode="keyword",
         )
@@ -264,8 +266,12 @@ async def ask_private_helper(
         response_body.update(answer_part)
     # Do not log private question, answer, document titles or equipment names.
     record_audit_event(
-        db, actor_user_id=actor.id, event_type="private_helper380.readback",
-        object_type="private_helper", object_id=None, action="ask",
+        db,
+        actor_user_id=actor.id,
+        event_type="private_helper380.readback",
+        object_type="private_helper",
+        object_id=None,
+        action="ask",
         arguments={"document_count": len(selected), "context_kind": payload.context_kind},
         result={
             "ok": True,
@@ -301,8 +307,7 @@ async def _local_grounded_answer(
         if context:
             messages[1]["content"] = (
                 f"User-selected registry reference (unverified, not evidence): "
-                f"{context['kind']}: {context['name']}. "
-                + messages[1]["content"]
+                f"{context['kind']}: {context['name']}. " + messages[1]["content"]
             )
         parts: list[str] = []
         size = 0
