@@ -95,7 +95,11 @@ def _valid_row384(row: sqlite3.Row, now_ms: int) -> dict[str, Any]:
         raise ValueError("HOLD_GOVERNANCE_METRICS_TAMPER")
     requests = metrics["requests"]
     errors = metrics["serverErrors"]
-    ratio = round(errors / requests, 4) if requests and errors is not None and errors <= requests else None
+    ratio = (
+        round(errors / requests, 4)
+        if requests and errors is not None and errors <= requests
+        else None
+    )
     return {
         "appId": app,
         "eventId": event_id,
