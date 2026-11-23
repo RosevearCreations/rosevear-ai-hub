@@ -1106,6 +1106,7 @@ class AutomationSequenceSimulation376(Base):
     outcome: Mapped[str] = mapped_column(String(24), nullable=False)
     blocker_count: Mapped[int] = mapped_column(Integer, nullable=False)
 
+
 class WorkshopProcessReading377(Base):
     """Append-only owner-supplied process reading; never a machine safety approval."""
 
