@@ -23,17 +23,72 @@ TaskState = Literal["enabled", "disabled", "missing", "unverified"]
 SCHEMA = "rosevear.hub.boot-sequence381.report.v1"
 
 STAGES = (
-    ("vm", "Pinned Home Assistant VM", (), "Inspect the existing pinned VM and EFI. Never create or reset a guest."),
-    ("mqtt", "Home Assistant MQTT add-on", ("vm",), "Inspect authenticated broker/add-on from Home Assistant; do not install another broker."),
-    ("tailscale", "Tailscale Windows service", (), "Review the existing service; do not change tailnet or network policy blindly."),
-    ("ollama", "Local Ollama", (), "Review the approved pinned local binary and loopback model health."),
-    ("api", "Hub Python API", (), "Check the existing guarded recovery task, release maintenance lock and schema compatibility."),
-    ("web", "Hub web / desktop", ("api",), "Inspect the existing port-5173 process or installed web bundle; refuse duplicate listeners."),
-    ("go2rtc", "Existing go2rtc", (), "Inspect the pinned camera launcher and verify a real authorized stream separately."),
-    ("gateway", "Private Caddy listener", ("api", "web"), "Review the existing Caddy gateway launcher and TLS configuration."),
-    ("ip_reservation", "Private IP reservation", (), "Confirm actual DHCP reservation and address continuity in the authorized router UI; no router changes here."),
-    ("private_https", "Private HTTPS / certificate", ("gateway",), "Test full TLS, certificate hostname and authenticated Hub access on an authorized independent client."),
-    ("off_device", "Off-device pre-login witness", ("private_https", "ip_reservation"), "Witness before Windows sign-in from an independent trusted LAN/Tailscale client."),
+    (
+        "vm",
+        "Pinned Home Assistant VM",
+        (),
+        "Inspect the existing pinned VM and EFI. Never create or reset a guest.",
+    ),
+    (
+        "mqtt",
+        "Home Assistant MQTT add-on",
+        ("vm",),
+        "Inspect authenticated broker/add-on from Home Assistant; do not install another broker.",
+    ),
+    (
+        "tailscale",
+        "Tailscale Windows service",
+        (),
+        "Review the existing service; do not change tailnet or network policy blindly.",
+    ),
+    (
+        "ollama",
+        "Local Ollama",
+        (),
+        "Review the approved pinned local binary and loopback model health.",
+    ),
+    (
+        "api",
+        "Hub Python API",
+        (),
+        "Check the existing guarded recovery task, release maintenance lock and schema compatibility.",
+    ),
+    (
+        "web",
+        "Hub web / desktop",
+        ("api",),
+        "Inspect the existing port-5173 process or installed web bundle; refuse duplicate listeners.",
+    ),
+    (
+        "go2rtc",
+        "Existing go2rtc",
+        (),
+        "Inspect the pinned camera launcher and verify a real authorized stream separately.",
+    ),
+    (
+        "gateway",
+        "Private Caddy listener",
+        ("api", "web"),
+        "Review the existing Caddy gateway launcher and TLS configuration.",
+    ),
+    (
+        "ip_reservation",
+        "Private IP reservation",
+        (),
+        "Confirm actual DHCP reservation and address continuity in the authorized router UI; no router changes here.",
+    ),
+    (
+        "private_https",
+        "Private HTTPS / certificate",
+        ("gateway",),
+        "Test full TLS, certificate hostname and authenticated Hub access on an authorized independent client.",
+    ),
+    (
+        "off_device",
+        "Off-device pre-login witness",
+        ("private_https", "ip_reservation"),
+        "Witness before Windows sign-in from an independent trusted LAN/Tailscale client.",
+    ),
 )
 IDS = tuple(x[0] for x in STAGES)
 
