@@ -1126,3 +1126,59 @@ class WorkshopProcessReading377(Base):
     note: Mapped[str] = mapped_column(String(300), nullable=False, default="")
     observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class GroceryItem378(TimestampMixin, Base):
+    """Household-only pantry and pickup plan, never a merchant order."""
+
+    __tablename__ = "grocery_items378"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    canonical_name: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    unit: Mapped[str] = mapped_column(String(16), nullable=False)
+    wanted_qty: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    on_hand_qty: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    min_on_hand_qty: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    recurrence_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    expires_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    pickup_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_picked_up_on: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    price_note: Mapped[str] = mapped_column(String(100), nullable=False, default="")
+    note: Mapped[str] = mapped_column(String(250), nullable=False, default="")
+    state: Mapped[str] = mapped_column(String(20), nullable=False, default="draft")
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    approved_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    approved_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    created_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    updated_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+
+
+class GroceryEvent378(Base):
+    """Immutable local grocery activity with no payment or retailer data."""
+
+    __tablename__ = "grocery_events378"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    item_id: Mapped[int] = mapped_column(
+        ForeignKey("grocery_items378.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    actor_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    action: Mapped[str] = mapped_column(String(32), nullable=False)
+    item_revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    related_item_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
