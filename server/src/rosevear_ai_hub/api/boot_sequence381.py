@@ -216,16 +216,18 @@ def classify381(payload: Compare381, *, now: datetime | None = None) -> dict:
         else:
             state = "OBSERVED"
         states[key] = state
-        stages.append({
-            "id": key,
-            "label": label,
-            "dependsOn": list(dependencies),
-            "blockedBy": blocked,
-            "reportedObservation": observed,
-            "state": state,
-            "safeManualAction": remediation,
-            "source": "OWNER_IMPORTED_UNSIGNED_LOCAL_OBSERVATION",
-        })
+        stages.append(
+            {
+                "id": key,
+                "label": label,
+                "dependsOn": list(dependencies),
+                "blockedBy": blocked,
+                "reportedObservation": observed,
+                "state": state,
+                "safeManualAction": remediation,
+                "source": "OWNER_IMPORTED_UNSIGNED_LOCAL_OBSERVATION",
+            }
+        )
 
     missing = [x["id"] for x in stages if x["state"] != "OBSERVED"]
     if missing:
