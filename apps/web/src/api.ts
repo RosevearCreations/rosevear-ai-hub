@@ -4390,3 +4390,49 @@ export function archiveFamilyPlan379(
   return authJson("POST", "/api/v1/family-calendar-379/plans/" +
     encodeURIComponent(String(id)) + "/archive", {expected_revision: revision});
 }
+
+export interface PrivateHelperSource380 {
+  documentId: number; filename: string; collection: string;
+  approved: true; indexed: true; localOnly: true;
+}
+export interface PrivateHelperContext380 {
+  kind: "home" | "workshop"; id: number; name: string; type: string;
+}
+export interface PrivateHelperResult380 {
+  schema: "rosevear.hub.private-helper.v380";
+  scope: "OWNER_APPROVED_LOCAL_READ_ONLY";
+  question: string;
+  context: (PrivateHelperContext380 & {
+    observation: string; identity_verified: false; origin: string;
+  }) | null;
+  retrievalMethod: "semantic" | "keyword";
+  retrievalFallback: string | null;
+  model: string; provider: "ollama" | "none";
+  status: "grounded" | "evidence_only" | "insufficient_evidence";
+  answer: string; reason: string;
+  citations: Array<{
+    id: string; documentId: number; chunkId: number; filename: string;
+    page: number | null; location: string | null; quote: string;
+  }>;
+  voiceAutoEnabled: false; remoteProviderCalls: 0;
+  deviceCommands: 0; homeAssistantActions: 0;
+  externalMessages: 0; generatedAt: string;
+}
+export function privateHelperSources380(signal?: AbortSignal): Promise<{
+  sources: PrivateHelperSource380[]; truncated: boolean;
+  approvalAuthority: string; automaticApproval: false;
+}> {
+  return authJson("GET", "/api/v1/private-helper-380/sources", undefined, signal);
+}
+export function privateHelperContexts380(signal?: AbortSignal): Promise<{
+  references: PrivateHelperContext380[];
+  identityVerified: false; source: string;
+}> {
+  return authJson("GET", "/api/v1/private-helper-380/contexts", undefined, signal);
+}
+export function askPrivateHelper380(input: {
+  question: string; document_ids: number[]; model: string;
+  context_kind: "home" | "workshop" | null; context_id: number | null;
+}): Promise<PrivateHelperResult380> {
+  return authJson("POST", "/api/v1/private-helper-380/ask", input);
+}

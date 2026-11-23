@@ -29,6 +29,7 @@ import { SecurityReviewPanel } from "./SecurityReviewPanel";
 import { HubNavIcon } from "./HubNavIcon";
 import { BusinessView } from "./BusinessView";
 import { ChatView } from "./ChatView";
+import { PrivateHelper380 } from "./PrivateHelper380";
 import { ConfirmationsView } from "./ConfirmationsView";
 import { HomeAssistantView } from "./HomeAssistantView";
 import { KnowledgeView } from "./KnowledgeView";
@@ -128,6 +129,7 @@ const baseSections = [
 ] as const;
 type Section =
   | (typeof baseSections)[number]
+  | "Assistant"
   | "Automations"
   | "Workshop"
   | "Users"
@@ -154,7 +156,7 @@ export function App() {
   const authenticatedUser = auth.kind === "ready" && auth.status.authenticated ? auth.status.user : null;
   const allowedSections: Section[] = authenticatedUser &&
     (authenticatedUser.role === "owner" || authenticatedUser.role === "administrator")
-    ? [...baseSections, "Workshop", "Automations", "Confirmations", "Audit", "Secrets", "Tools", "Users"]
+    ? [...baseSections, "Assistant", "Workshop", "Automations", "Confirmations", "Audit", "Secrets", "Tools", "Users"]
     : authenticatedUser ? [...baseSections] : ["Home"];
   const safeNavigation = sanitizeWorkspaceNavigationHistory(navigation, allowedSections);
   const section = safeNavigation.current;
@@ -625,6 +627,8 @@ export function App() {
         {section === "Search & Help" ? (
           <GlobalSearchHelp allowedSections={sections} canAdminister={canAdminister}
             onNavigate={target => setSection(target as Section)} />
+        ) : section === "Assistant" ? (
+          <PrivateHelper380 />
         ) : section === "Chat" ? (
           <ChatView onAskWithCitations={(question) => {
             setKnowledgeQuestion(question);

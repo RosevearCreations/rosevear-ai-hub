@@ -133,7 +133,7 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 
 **Acceptance / security gate:** Timezone/date pickers, safe household roles, notification acknowledgments and missed-event negative tests.
 
-### Build 380 — Private AI helper across home and workshop
+### Build 380 — Private AI helper across home and workshop (SOURCE IMPLEMENTED; FIELD HOLD)
 
 **Deliver:** Connect approved household knowledge and manuals to local Ollama chat, bounded voice, citations, per-device context and offline graceful fallback..
 
