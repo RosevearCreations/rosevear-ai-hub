@@ -9,7 +9,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sqlite3
 import sys
+import tarfile
 import tomllib
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -170,7 +172,16 @@ def main(argv: list[str] | None = None) -> int:
             result = dependency_manifest382(args.repo_root)
         print(json.dumps(result, sort_keys=True))
         return 0
-    except (BackupError, CustodyError, DrillError, OSError, ValueError, KeyError) as exc:
+    except (
+        BackupError,
+        CustodyError,
+        DrillError,
+        OSError,
+        ValueError,
+        KeyError,
+        sqlite3.DatabaseError,
+        tarfile.TarError,
+    ) as exc:
         print(
             f"Build382 HOLD_{type(exc).__name__.upper()}: no acceptance published.",
             file=sys.stderr,
