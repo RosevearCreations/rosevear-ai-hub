@@ -36,6 +36,7 @@ import { KnowledgeView } from "./KnowledgeView";
 import { WorkshopView } from "./WorkshopView";
 import { GroceryPantry378 } from "./GroceryPantry378";
 import { FamilyCalendar379 } from "./FamilyCalendar379";
+import { BootRecovery381 } from "./BootRecovery381";
 import { LocalDiagnosticsPanel } from "./LocalDiagnosticsPanel";
 import { PostRebootAcceptancePanel } from "./PostRebootAcceptancePanel";
 import { StartupRecoveryConsole } from "./StartupRecoveryConsole";
@@ -129,6 +130,7 @@ const baseSections = [
 ] as const;
 type Section =
   | (typeof baseSections)[number]
+  | "Boot Recovery"
   | "Assistant"
   | "Automations"
   | "Workshop"
@@ -156,7 +158,7 @@ export function App() {
   const authenticatedUser = auth.kind === "ready" && auth.status.authenticated ? auth.status.user : null;
   const allowedSections: Section[] = authenticatedUser &&
     (authenticatedUser.role === "owner" || authenticatedUser.role === "administrator")
-    ? [...baseSections, "Assistant", "Workshop", "Automations", "Confirmations", "Audit", "Secrets", "Tools", "Users"]
+    ? [...baseSections, "Assistant", "Boot Recovery", "Workshop", "Automations", "Confirmations", "Audit", "Secrets", "Tools", "Users"]
     : authenticatedUser ? [...baseSections] : ["Home"];
   const safeNavigation = sanitizeWorkspaceNavigationHistory(navigation, allowedSections);
   const section = safeNavigation.current;
@@ -629,6 +631,8 @@ export function App() {
             onNavigate={target => setSection(target as Section)} />
         ) : section === "Assistant" ? (
           <PrivateHelper380 />
+        ) : section === "Boot Recovery" ? (
+          <BootRecovery381 />
         ) : section === "Chat" ? (
           <ChatView onAskWithCitations={(question) => {
             setKnowledgeQuestion(question);

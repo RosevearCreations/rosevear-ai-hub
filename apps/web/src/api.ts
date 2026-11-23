@@ -4433,3 +4433,77 @@ export function askPrivateHelper380(input: {
 }): Promise<PrivateHelperResult380> {
   return authJson("POST", "/api/v1/private-helper-380/ask", input);
 }
+
+export type BootObservation381 = "healthy" | "unavailable" | "unverified";
+export type BootTaskState381 = "enabled" | "disabled" | "missing" | "unverified";
+export interface BootProbe381 {
+  schema: "rosevear.hub.boot-sequence381.report.v1";
+  phase: "before" | "after";
+  captured_at_utc: string;
+  os_boot_at_utc: string;
+  original_host_name_matched: boolean;
+  source: "UNSIGNED_LOCAL_WINDOWS_READ_ONLY";
+  checks: Record<
+    "vm" | "mqtt" | "tailscale" | "ollama" | "api" | "web" |
+    "go2rtc" | "gateway" | "ip_reservation" | "private_https" | "off_device",
+    BootObservation381
+  >;
+  tasks: {
+    boot: BootTaskState381;
+    recovery: BootTaskState381;
+    boot_last_run_after_os_boot: boolean;
+    recovery_last_run_after_os_boot: boolean;
+    task_identity_independently_verified: false;
+  };
+  reboot_independently_verified: false;
+  external_witness_verified: false;
+  operations_performed: false;
+}
+export interface BootStage381 {
+  id: string;
+  label: string;
+  dependsOn: string[];
+  blockedBy: string[];
+  reportedObservation: BootObservation381;
+  state: "OBSERVED" | "DEPENDENCY_HOLD" | "UNVERIFIED" | "UNAVAILABLE";
+  safeManualAction: string;
+  source: "OWNER_IMPORTED_UNSIGNED_LOCAL_OBSERVATION";
+}
+export interface BootClassification381 {
+  schema: "rosevear.hub.boot-sequence381.classification.v1";
+  source: "OWNER_IMPORTED_UNSIGNED_LOCAL_READ_ONLY";
+  phase: "after";
+  capturedAtUtc: string;
+  osBootAtUtc: string;
+  newBootTimeObserved: boolean;
+  taskStates: BootProbe381["tasks"];
+  stages: BootStage381[];
+  blockedStages: string[];
+  holdReasons: string[];
+  fieldAcceptance: "HOLD";
+  independentRemoteWitness: false;
+  taskIdentityVerified: false;
+  unattendedRecoveryCertified: false;
+  productionOriginalHostGreen: false;
+  automaticRestarts: 0;
+  networkChanges: 0;
+  routerChanges: 0;
+  firewallChanges: 0;
+  secretValuesRead: 0;
+}
+export function bootContract381(signal?: AbortSignal): Promise<{
+  schema: string; reportSchema: string;
+  stages: Array<Pick<BootStage381, "id" | "label" | "dependsOn" | "safeManualAction">>;
+  probeScript: string; fieldAcceptance: "HOLD"; liveObservationPerformed: false;
+  offDeviceWitnessRequired: true; ownerSignedIndependentAcceptanceRequired: true;
+  autoRecoveryInstalledByBuild: false;
+}> {
+  return authJson("GET", "/api/v1/system/boot-sequence-381/contract", undefined, signal);
+}
+export function classifyBoot381(
+  before: BootProbe381 | null, after: BootProbe381,
+): Promise<BootClassification381> {
+  return authJson("POST", "/api/v1/system/boot-sequence-381/classify", {
+    before, after,
+  });
+}

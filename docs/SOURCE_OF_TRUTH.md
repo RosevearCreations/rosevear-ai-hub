@@ -480,3 +480,19 @@ operator acceptance: docs/BUILD_380_PRIVATE_HOME_WORKSHOP_HELPER.md. Original
 Windows, Ollama, voice device and actual indexed-source acceptance remain
 FIELD_HOLD. Next Build381 Windows boot/network sequencing/local recovery;
 seven numbered builds 381–387 plus deferred radio/MQTT provenance goal remain.
+
+## Build 381 — Original Windows Boot Sequencing and Local Recovery (2026-11-23 SOURCE IMPLEMENTED; FIELD HOLD)
+
+Reuses approved Build356/357 unattended task and original pinned VM chain, adds
+fixed original-PC read-only pre/post reboot PowerShell probe, owner-only typed
+API and Boot Recovery UI for causal staged analysis of the 11 dependent
+VM/HA MQTT/Tailscale/Ollama/Hub API/web/go2rtc/Caddy/DHCP/TLS/remote-witness
+stages. PowerShell reports are unsigned and never prove independent prelogin
+recovery, authentication, IP reservation, signed task identity or restored
+VM/device/camera function; every classification returns FIELD_HOLD.
+No background probes, restart, newly installed task, network changes,
+secrets, DB migration or cross-Master authority. Windows AST and backend/
+web test coverage described in docs/BUILD_381_WINDOWS_BOOT_RECOVERY.md,
+tracked scope in docs/contracts/hub-feature-progress381.json. Next Build382:
+Zero-Trust Security, Secrets & Independent Restore (six numbered builds
+382–387 plus deferred MQTT/radio bridge-provenance scope).
