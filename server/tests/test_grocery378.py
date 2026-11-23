@@ -247,7 +247,7 @@ def test_input_validation_no_automatic_reordering_and_recurring_due(tmp_path):
         new_item("bad", wanted_qty=-1),
         new_item("bad", unit="GBP"),
         new_item("bad", recurrence_days=0),
-        new_item("bad", on_hand_qty=float("inf")),
+        new_item("bad", on_hand_qty="Infinity"),
         new_item("bad", note="bad\\nheader"),
         new_item("  "),
     ]
