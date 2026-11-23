@@ -26,6 +26,7 @@ import { GlobalSearchHelp } from "./GlobalSearchHelp";
 import { OwnerPreferencesPanel } from "./OwnerPreferencesPanel";
 import { BackupRecoveryWorkbench } from "./BackupRecoveryWorkbench";
 import { SecurityReviewPanel } from "./SecurityReviewPanel";
+import { SecurityCustody382 } from "./SecurityCustody382";
 import { HubNavIcon } from "./HubNavIcon";
 import { BusinessView } from "./BusinessView";
 import { ChatView } from "./ChatView";
@@ -130,6 +131,7 @@ const baseSections = [
 ] as const;
 type Section =
   | (typeof baseSections)[number]
+  | "Security Custody"
   | "Boot Recovery"
   | "Assistant"
   | "Automations"
@@ -158,7 +160,7 @@ export function App() {
   const authenticatedUser = auth.kind === "ready" && auth.status.authenticated ? auth.status.user : null;
   const allowedSections: Section[] = authenticatedUser &&
     (authenticatedUser.role === "owner" || authenticatedUser.role === "administrator")
-    ? [...baseSections, "Assistant", "Boot Recovery", "Workshop", "Automations", "Confirmations", "Audit", "Secrets", "Tools", "Users"]
+    ? [...baseSections, "Assistant", "Boot Recovery", "Workshop", "Automations", "Confirmations", "Audit", "Secrets", "Tools", "Users", ...(authenticatedUser.role === "owner" ? ["Security Custody" as const] : [])]
     : authenticatedUser ? [...baseSections] : ["Home"];
   const safeNavigation = sanitizeWorkspaceNavigationHistory(navigation, allowedSections);
   const section = safeNavigation.current;
@@ -631,6 +633,8 @@ export function App() {
             onNavigate={target => setSection(target as Section)} />
         ) : section === "Assistant" ? (
           <PrivateHelper380 />
+        ) : section === "Security Custody" ? (
+          <SecurityCustody382 />
         ) : section === "Boot Recovery" ? (
           <BootRecovery381 />
         ) : section === "Chat" ? (

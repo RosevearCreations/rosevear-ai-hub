@@ -1,0 +1,10 @@
+.custody382{min-width:0;width:100%;overflow-wrap:anywhere}
+.custody382 .panel{margin-bottom:1rem}
+.custody382-statistics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:.6rem}
+.custody382-statistics>div{border:1px solid var(--border-color,#8886);border-radius:.5rem;padding:.75rem}
+.custody382-statistics dt{font-size:.9rem;opacity:.8}
+.custody382-statistics dd{margin:.3rem 0 0;font-weight:650}
+.custody382-form{display:grid;gap:.9rem;max-width:650px}
+.custody382-form label{display:grid;gap:.3rem}
+.custody382-form input{max-width:100%;box-sizing:border-box}
+.custody382 pre{font-size:.86rem;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--card-background,#8882);padding:.9rem;border-radius:.5rem}

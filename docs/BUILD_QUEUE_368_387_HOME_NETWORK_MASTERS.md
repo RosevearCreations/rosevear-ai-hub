@@ -153,7 +153,7 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 
 **Acceptance / security gate:** Supervised reboot, real HA VM/MQTT/Caddy/Ollama/go2rtc recovery and off-device HTTPS; no blind firewall or router modifications.
 
-### Build 382 — Zero-trust security, secrets & independent restore
+### Build 382 — Zero-trust security, secrets & independent restore (SOURCE IMPLEMENTED; FIELD HOLD)
 
 **Deliver:** Role/tenant/network policies, MFA feasibility, secure token and TLS key rotation, dependency/SBOM reviews, backup retention and offline restore drill..
 

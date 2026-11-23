@@ -13,6 +13,7 @@ const iconPaths: Record<string, string> = {
   Groceries: "M3 4h2l3 12h11l3-9H7 M9 20h.01 M18 20h.01 M8 16h11",
   Calendar: "M4 5h16v16H4z M8 3v4 M16 3v4 M4 10h16 M8 14h3 M13 14h3 M8 18h3",
   "Boot Recovery": "M12 2a10 10 0 1 0 10 10 M12 6v6l4 2 M4 3v5h5",
+  "Security Custody": "M12 2 4 6v6c0 6 4 9 8 10 4-1 8-4 8-10V6L12 2Z M9 12l2 2 4-4",
   System: "M2 12h4l3-7 5 14 3-7h5",
   Workshop: "M3 21 16 8 M13 5l6 6 M15 3l6 6 M5 13 2 16l6 6 3-3",
   Automations: "M4 4h6v6H4z M14 14h6v6h-6z M10 7h4a4 4 0 0 1 4 4v3 M7 10v4a4 4 0 0 0 4 4h3",
