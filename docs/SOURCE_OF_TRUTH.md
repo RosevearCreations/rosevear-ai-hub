@@ -494,3 +494,26 @@ web test coverage described in docs/BUILD_381_WINDOWS_BOOT_RECOVERY.md,
 tracked scope in docs/contracts/hub-feature-progress381.json. Next Build382:
 Zero-Trust Security, Secrets & Independent Restore (six numbered builds
 382–387 plus deferred MQTT/radio bridge-provenance scope).
+
+## Build 382 — Zero-Trust Security, Secret/Credential Custody and Independent Restore (2026-11-23 SOURCE IMPLEMENTED; FIELD HOLD)
+
+New owner-only Security Custody workspace and authenticated backend posture:
+fresh Argon2 password and exact typed consent to revoke other active sessions
+of the SAME owner, preserve current session and other accounts, and record
+sanitized audit metadata; no automatic revocations. Original Build020/032
+encrypted secrets and Build047/050 restoration remain unchanged. The new
+offline CLI verifies a physically separate encrypted copy's SHA-256,
+actually exercises existing authenticated Build050 isolated/deleted scratch
+restoration of the COPY (with SQLite integrity), and reports an unsigned
+metadata-only copy receipt with independent machine witness explicitly false.
+The deterministic Python/web/desktop package declaration inventory is NOT
+a resolved/transitive SBOM, dependency vulnerability scan or production
+security acceptance. 180-day retention is advisory; no pruning, secret/TLS
+key rotation, MFA enrollment, vault activation, service/network change or
+automatic backup/restore is implemented by this build. Real host field
+MFA, Caddy/TLS, secret rotation and independently witnessed off-device
+backup/restore remain HOLD. Acceptance/runbook:
+docs/BUILD_382_ZERO_TRUST_RESTORE.md, scored estimates:
+docs/contracts/hub-feature-progress382.json. Next Build383:
+Three-Master Actual Signed Peer Delivery (five 383–387 remaining plus
+deferred radio/MQTT provenance bridge).
