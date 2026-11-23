@@ -200,7 +200,7 @@ def test_recurrence_uses_local_wall_clock_not_utc_offset(tmp_path):
     response = client.post(
         BASE + "/plans",
         json=plan(
-            local_due="2027-03-06T14:30", timezone="America/Toronto",
+            local_due="2027-03-07T14:30", timezone="America/Toronto",
             recurrence_days=7, assignee_user_id=ids["alice"],
             reminder_minutes=0,
         ),
@@ -215,7 +215,7 @@ def test_recurrence_uses_local_wall_clock_not_utc_offset(tmp_path):
     assert next_.status_code == 200, next_.text
     next_item = next_.json()
     assert next_item["status"] == "open"
-    assert next_item["localDue"] == "2027-03-13T14:30"
+    assert next_item["localDue"] == "2027-03-14T14:30"
     assert next_item["completionCount"] == 1
     assert next_item["reminderAcknowledged"] is False
     assert next_item["dueAtUtc"] != due
