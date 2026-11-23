@@ -128,6 +128,7 @@ from rosevear_ai_hub.api.server_shell365 import router as server_shell365_router
 from rosevear_ai_hub.api.smartthings374 import router as smartthings374_router
 from rosevear_ai_hub.api.speech import router as speech_router
 from rosevear_ai_hub.api.sysop_history366 import router as sysop_history366_router
+from rosevear_ai_hub.api.governance384 import router as governance384_router
 from rosevear_ai_hub.api.sysop_telemetry423 import router as sysop_telemetry423_router
 from rosevear_ai_hub.api.tools import router as tools_router
 from rosevear_ai_hub.api.tts import router as tts_router
@@ -259,6 +260,7 @@ def create_app() -> FastAPI:
     application.include_router(server_shell364_router)
     application.include_router(server_shell365_router)
     application.include_router(sysop_history366_router)
+    application.include_router(governance384_router)
     application.include_router(live_sources367_router)
     application.include_router(sysop_telemetry423_router)
     application.include_router(global_search_router)
