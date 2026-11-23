@@ -51,13 +51,15 @@ STAGES = (
         "api",
         "Hub Python API",
         (),
-        "Check the existing guarded recovery task, release maintenance lock and schema compatibility.",
+        "Check the existing guarded recovery task, release maintenance lock "
+        "and schema compatibility.",
     ),
     (
         "web",
         "Hub web / desktop",
         ("api",),
-        "Inspect the existing port-5173 process or installed web bundle; refuse duplicate listeners.",
+        "Inspect the existing port-5173 process or installed web bundle; "
+        "refuse duplicate listeners.",
     ),
     (
         "go2rtc",
@@ -75,13 +77,15 @@ STAGES = (
         "ip_reservation",
         "Private IP reservation",
         (),
-        "Confirm actual DHCP reservation and address continuity in the authorized router UI; no router changes here.",
+        "Confirm actual DHCP reservation and address continuity in the authorized "
+        "router UI; no router changes here.",
     ),
     (
         "private_https",
         "Private HTTPS / certificate",
         ("gateway",),
-        "Test full TLS, certificate hostname and authenticated Hub access on an authorized independent client.",
+        "Test full TLS, certificate hostname and authenticated Hub access "
+        "on an authorized independent client.",
     ),
     (
         "off_device",
