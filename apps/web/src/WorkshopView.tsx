@@ -19,6 +19,7 @@ import {
 import { WorkshopMaintenancePlanner } from "./WorkshopMaintenancePlanner";
 import { WorkshopJobsPanel } from "./WorkshopJobsPanel";
 import { MaintenanceActionBoard } from "./MaintenanceActionBoard";
+import { WorkshopProcess377 } from "./WorkshopProcess377";
 
 const ACTIVITY_OPTIONS: WorkshopActivity[] = [
   "general", "laser", "cnc", "forge", "electrical", "chemical", "other",
@@ -287,6 +288,7 @@ export function WorkshopView({ role = "read_only" }: { role?: AuthUser["role"] }
           {history.length === 0 && <p>No inspection history recorded.</p>}
         </section>
       )}
+      {(role === "owner" || role === "administrator") && <WorkshopProcess377 />}
       <WorkshopMaintenancePlanner role={role} onChanged={refresh} />
       <WorkshopJobsPanel role={role} />
       <MaintenanceActionBoard role={role} />
