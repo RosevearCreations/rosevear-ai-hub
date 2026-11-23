@@ -297,6 +297,35 @@ jobs:
           if ($src.Contains('Restart-Computer') -or $src.Contains('Enable-ScheduledTask')) {
             throw 'BUILD358_UNAUTHORIZED_TASK_OR_REBOOT_ACTION'
           }
+      - name: Build 381 Windows inspector parser and read-only command boundary
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $path = Resolve-Path 'scripts/inspect-boot-sequence381.ps1'
+          $tokens = $null
+          $issues = $null
+          $ast = [System.Management.Automation.Language.Parser]::ParseFile($path, [ref]$tokens, [ref]$issues)
+          if (@($issues).Count -ne 0) { throw "BUILD381_POWERSHELL_SYNTAX_HOLD: $($issues -join '; ')" }
+          $forbidden = @('Restart-Computer','Stop-Process','Start-Process','Start-Service',
+            'Stop-Service','Enable-ScheduledTask','Register-ScheduledTask','New-ScheduledTask',
+            'Set-ScheduledTask','Start-ScheduledTask','Stop-ScheduledTask','Set-NetFirewallRule',
+            'New-NetFirewallRule','Set-NetIPAddress','New-NetIPAddress','Invoke-Expression',
+            'Remove-Item','Set-Item','Start-VM','Stop-VM')
+          $calls = @($ast.FindAll({
+            param($node)
+            $node -is [System.Management.Automation.Language.CommandAst]
+          }, $true) | ForEach-Object { $_.GetCommandName() })
+          foreach ($name in $calls) {
+            if ($name -in $forbidden) { throw "BUILD381_FORBIDDEN_COMMAND: $name" }
+          }
+          $content = Get-Content -LiteralPath $path -Raw
+          foreach ($required in @('UNSIGNED_LOCAL_WINDOWS_READ_ONLY','127.0.0.1:8765/health',
+            '127.0.0.1:11434/api/version','127.0.0.1:1984/api',
+            'reboot_independently_verified=$false','external_witness_verified=$false',
+            'operations_performed=$false')) {
+            if (-not $content.Contains($required)) { throw "BUILD381_REQUIRED_GUARD_MISSING: $required" }
+          }
+          Write-Output 'Build381 bounded local inspector: syntax, fixed probes, no mutation commands verified.'
       - name: Build 357 Windows in-memory registered-task identity and fail-closed diagnostics
         shell: powershell
         run: |
