@@ -107,9 +107,11 @@ class ItemPatch(BaseModel):
         changes = self.model_fields_set - {"expected_revision"}
         if not changes:
             raise ValueError("At least one field must change.")
-        if any(getattr(self, key) is None for key in changes if key not in {
-            "expires_on", "pickup_on", "recurrence_days"
-        }):
+        if any(
+            getattr(self, key) is None
+            for key in changes
+            if key not in {"expires_on", "pickup_on", "recurrence_days"}
+        ):
             raise ValueError("Required fields cannot be cleared.")
         return self
 
@@ -236,9 +238,7 @@ def board(actor: Viewer, db: DB, response: Response) -> dict:
     for item in active:
         matches.setdefault((item.canonical_name, item.unit), []).append(item.id)
     duplicate_groups = [ids for ids in matches.values() if len(ids) > 1]
-    events = db.scalars(
-        select(GroceryEvent378).order_by(GroceryEvent378.id.desc()).limit(60)
-    ).all()
+    events = db.scalars(select(GroceryEvent378).order_by(GroceryEvent378.id.desc()).limit(60)).all()
     return {
         "schema": "rosevear.hub.grocery.v378",
         "source": "PRIVATE_LOCAL_HOUSEHOLD_ONLY",
