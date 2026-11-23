@@ -80,7 +80,7 @@ def test_owner_only_and_explicit_reauthentication(tmp_path):
     assert data["tlsCertificateActuallyVerified"] is False
     assert data["offMachineIndependentRestoreVerified"] is False
     assert data["secretValuesRead"] is False
-    assert "token" not in str(data).lower()
+    assert PASSWORD not in str(data)
 
     assert family.get(API + "/posture").status_code == 403
     assert family.post(API + "/revoke-other-sessions", json=payload()).status_code == 403
