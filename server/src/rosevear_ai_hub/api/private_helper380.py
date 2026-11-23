@@ -175,9 +175,7 @@ def reference_contexts(_actor: Owner, db: DB, response: Response) -> dict:
     home = db.scalars(
         select(HomeInventoryIdentity369).order_by(HomeInventoryIdentity369.id).limit(100)
     ).all()
-    workshop = db.scalars(
-        select(WorkshopEquipment).order_by(WorkshopEquipment.id).limit(100)
-    ).all()
+    workshop = db.scalars(select(WorkshopEquipment).order_by(WorkshopEquipment.id).limit(100)).all()
     return {
         "references": [{"kind": "home", "id": d.id, "name": d.name, "type": d.source} for d in home]
         + [
