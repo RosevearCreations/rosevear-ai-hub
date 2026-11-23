@@ -123,7 +123,7 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 
 **Acceptance / security gate:** Accessible grocery-board create/edit/merge/print tests, family role scoping; no automatic orders or payments.
 
-### Build 379 — Family calendar, chores and reminders
+### Build 379 — Family calendar, chores and reminders (SOURCE IMPLEMENTED; FIELD HOLD)
 
 **Deliver:** Private household schedules, tasks, supplies, appointments, recurring chores and reminder evidence; family-specific role permissions..
 

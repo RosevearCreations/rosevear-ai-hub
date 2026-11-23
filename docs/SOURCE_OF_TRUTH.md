@@ -448,3 +448,18 @@ installation, family RBAC and cross-device print review are FIELD_HOLD.
 Operator guide: docs/BUILD_378_GROCERY_PANTRY.md. Next Build379 Family
 Calendar, Chores and Reminders; nine numbered builds 379–387 plus deferred
 radio-bridge work remain.
+
+## Build 379 — Private Family Calendar, Chores and Reminders (source, 2026-11-22)
+
+Authenticated Calendar month/worklist view with household/private entry roles,
+named Ontario/Canada IANA time zones and explicit DST gap/fold rejection,
+household notes and supplies, actor-scoped task assignment, recurring completion,
+overdue detection, in-app reminder acknowledgment (revision and replay guarded)
+and append-only private activity receipts. Data migration 0040 and Windows
+tzdata dependency. No timed external notifications, cloud calendar, messages,
+devices, retailer orders or cross-app writes. Source module estimate in
+docs/contracts/hub-feature-progress379.json. Original Windows migration,
+Firefox/mobile field checks and family role acceptance remain FIELD_HOLD.
+See docs/BUILD_379_FAMILY_CALENDAR_CHORES.md. Next proposed Build380 Private
+AI Helper Across Home and Workshop; eight numbered builds 380–387 plus
+deferred MQTT/radio bridge scope remain.
