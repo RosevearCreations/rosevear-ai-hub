@@ -1180,3 +1180,61 @@ class GroceryEvent378(Base):
     item_revision: Mapped[int] = mapped_column(Integer, nullable=False)
     related_item_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class FamilyPlan379(TimestampMixin, Base):
+    """Explicit household dates and manual reminder acknowledgements only."""
+
+    __tablename__ = "family_plans379"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(140), nullable=False)
+    kind: Mapped[str] = mapped_column(String(24), nullable=False)
+    detail: Mapped[str] = mapped_column(String(300), nullable=False, default="")
+    supplies: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    visibility: Mapped[str] = mapped_column(String(16), nullable=False)
+    local_due: Mapped[str] = mapped_column(String(16), nullable=False)
+    timezone: Mapped[str] = mapped_column(String(64), nullable=False)
+    due_at_utc: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    recurrence_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    reminder_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    reminder_ack_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    reminder_ack_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    completion_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    last_completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="open")
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    creator_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    assignee_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    updated_by_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+
+
+class FamilyPlanEvent379(Base):
+    """Append-only in-app history, not an outbound reminder receipt."""
+
+    __tablename__ = "family_plan_events379"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    plan_id: Mapped[int] = mapped_column(
+        ForeignKey("family_plans379.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    actor_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    action: Mapped[str] = mapped_column(String(32), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
