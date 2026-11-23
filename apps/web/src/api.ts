@@ -4322,3 +4322,71 @@ export function mergeGroceryItems378(target: GroceryItem378, duplicate: GroceryI
     owner_confirmed: true,
   });
 }
+
+export type FamilyKind379 = "appointment" | "chore" | "task" | "supply" | "event";
+export type FamilyVisibility379 = "household" | "private";
+export interface FamilyPlan379 {
+  id: number;
+  title: string; kind: FamilyKind379; detail: string; supplies: string;
+  visibility: FamilyVisibility379;
+  localDue: string; timezone: string; dueAtUtc: string;
+  recurrenceDays: number | null;
+  reminderMinutes: number | null; reminderAtUtc: string | null;
+  reminderDue: boolean; reminderAcknowledged: boolean;
+  reminderAcknowledgedAt: string | null; missed: boolean;
+  status: "open" | "done"; revision: number; completionCount: number;
+  lastCompletedAt: string | null;
+  creatorUserId: number; assigneeUserId: number | null;
+  automaticMessagesSent: 0;
+}
+export interface FamilyInput379 {
+  title: string; kind: FamilyKind379; detail: string; supplies: string;
+  visibility: FamilyVisibility379;
+  local_due: string; timezone: string;
+  recurrence_days: number | null; reminder_minutes: number | null;
+  assignee_user_id: number | null;
+}
+export interface FamilyBoard379 {
+  schema: "rosevear.hub.family-calendar.v379";
+  timezonePolicy: "IANA_ZONE_EXPLICIT_DST_GAPS_AND_FOLDS_REJECTED";
+  role: AuthRole; items: FamilyPlan379[];
+  history: Array<{
+    id: number; planId: number; action: string; revision: number;
+    actorUserId: number | null; at: string;
+  }>;
+  summary: {active: number; dueSoon: number; missed: number; recurring: number};
+  truncated: boolean; remindersAreInAppReadbackOnly: true;
+  backgroundSchedulerEnabled: false; outboundNotificationsEnabled: false;
+  externalCalendarSyncEnabled: false; automaticDeviceActionsEnabled: false;
+}
+export function getFamilyBoard379(signal?: AbortSignal): Promise<FamilyBoard379> {
+  return authJson("GET", "/api/v1/family-calendar-379/board", undefined, signal);
+}
+export function getFamilyMembers379(): Promise<{members: Array<{id: number; username: string}>}> {
+  return authJson("GET", "/api/v1/family-calendar-379/members");
+}
+export function createFamilyPlan379(value: FamilyInput379): Promise<FamilyPlan379> {
+  return authJson("POST", "/api/v1/family-calendar-379/plans", value);
+}
+export function editFamilyPlan379(
+  id: number, expected_revision: number, value: FamilyInput379,
+): Promise<FamilyPlan379> {
+  return authJson("PUT", "/api/v1/family-calendar-379/plans/" +
+    encodeURIComponent(String(id)), {...value, expected_revision});
+}
+export function acknowledgeFamilyReminder379(
+  id: number, revision: number,
+): Promise<FamilyPlan379> {
+  return authJson("POST", "/api/v1/family-calendar-379/plans/" +
+    encodeURIComponent(String(id)) + "/ack", {expected_revision: revision});
+}
+export function completeFamilyPlan379(id: number, revision: number): Promise<FamilyPlan379> {
+  return authJson("POST", "/api/v1/family-calendar-379/plans/" +
+    encodeURIComponent(String(id)) + "/complete", {expected_revision: revision});
+}
+export function archiveFamilyPlan379(
+  id: number, revision: number,
+): Promise<{state: "ARCHIVED"; planId: number; historyPreserved: true}> {
+  return authJson("POST", "/api/v1/family-calendar-379/plans/" +
+    encodeURIComponent(String(id)) + "/archive", {expected_revision: revision});
+}
