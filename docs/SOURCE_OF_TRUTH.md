@@ -432,3 +432,20 @@ field 18%, blended 37.0%). All physical device/source readings, field
 installation and real Windows host acceptance remain FIELD_HOLD. See
 docs/BUILD_377_WORKSHOP_PROCESS_HEALTH.md. Next Build378 Grocery/Pantry;
 ten numbered proposals (378–387) plus displaced radio bridge goal remain.
+
+
+## Build 378 — Private grocery ordering board and pantry (source, 2026-11-22)
+
+Authenticated shared household Groceries screen and additive database migration
+0039. Owner/family users manually record quantities, expiry dates, price notes
+and recurring essentials. Owner/administrator approves a precise requested
+quantity for manual pickup, not for a purchase or payment. Partial received
+quantities update only local pantry data and invalidate previous approval.
+Same-name and same-unit duplicates may be owner-merged, preserving history.
+Only approved pickup lines print. No retailer, financial, device/sensor,
+calendar, notification or external-app action is enabled. Source coverage
+assessment: docs/contracts/hub-feature-progress378.json. Original Windows
+installation, family RBAC and cross-device print review are FIELD_HOLD.
+Operator guide: docs/BUILD_378_GROCERY_PANTRY.md. Next Build379 Family
+Calendar, Chores and Reminders; nine numbered builds 379–387 plus deferred
+radio-bridge work remain.
