@@ -63,9 +63,7 @@ def _metric384(value: Any, low: float, high: float) -> float | None:
     return round(float(value), 2)
 
 
-def parse_observation384(
-    raw: Any, *, station_id: str, now_ms: int
-) -> dict[str, Any]:
+def parse_observation384(raw: Any, *, station_id: str, now_ms: int) -> dict[str, Any]:
     """Allowlist sanitized readings; never return station ID, coordinates or full JSON."""
     if not (
         STATION_RE384.fullmatch(station_id)
@@ -221,9 +219,7 @@ def poll_once384(
     }
 
 
-def cached_weather384(
-    path: Path | None, *, now_ms: int, original_host: bool
-) -> dict[str, Any]:
+def cached_weather384(path: Path | None, *, now_ms: int, original_host: bool) -> dict[str, Any]:
     result = {
         "schema": WEATHER_SCHEMA384,
         "status": "HOLD_WU_NOT_CONFIGURED_OR_NOT_ORIGINAL_HOST",
@@ -245,9 +241,7 @@ def cached_weather384(
     try:
         safe = _safe_path(path, create=False)
         with closing(sqlite3.connect(f"{safe.as_uri()}?mode=ro", uri=True, timeout=3)) as db:
-            budget = db.execute(
-                "SELECT utc_day,calls FROM wu_budget384 WHERE id=1"
-            ).fetchone()
+            budget = db.execute("SELECT utc_day,calls FROM wu_budget384 WHERE id=1").fetchone()
             row = db.execute(
                 "SELECT observed_ms, fetched_ms, sanitized_json FROM wu_cached384 WHERE id=1"
             ).fetchone()
@@ -271,9 +265,8 @@ def cached_weather384(
             and age >= 0
             and item["quality"] in ("PASSED_PROVIDER_QC", "PROVIDER_QC_NOT_PERFORMED")
             and type(item["values"]) is dict
-            and set(item["values"]) == set(WEATHER_FIELDS384) | {
-                "humidityPercent", "windDirectionDegrees"
-            }
+            and set(item["values"])
+            == set(WEATHER_FIELDS384) | {"humidityPercent", "windDirectionDegrees"}
         ):
             raise ValueError("HOLD_WU_CACHE_INVALID")
         for key, (_field, low, high) in WEATHER_FIELDS384.items():

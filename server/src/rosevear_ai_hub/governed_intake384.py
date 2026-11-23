@@ -112,9 +112,7 @@ def _valid_row384(row: sqlite3.Row, now_ms: int) -> dict[str, Any]:
     }
 
 
-def governed_snapshot384(
-    path: Path | None, *, now_ms: int, original_host: bool
-) -> dict[str, Any]:
+def governed_snapshot384(path: Path | None, *, now_ms: int, original_host: bool) -> dict[str, Any]:
     """Owner-only, no network; double-check both journals before releasing aggregates."""
     result = _empty384()
     if not original_host or path is None or type(now_ms) is not int:

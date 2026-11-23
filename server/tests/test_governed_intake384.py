@@ -97,23 +97,47 @@ def test_invalid_tenant_and_replay_never_enter_governed_journal(tmp_path):
     packet["payload"]["tenantId"] = "another-business-tenant"
     with pytest.raises(ValueError):
         record_transport_receipt367(
-            path, app_id="yw", envelope=packet, public_key=public, pin=pin,
-            expected_commit="a" * 40, now_ms=NOW384, transport_authenticated=True,
+            path,
+            app_id="yw",
+            envelope=packet,
+            public_key=public,
+            pin=pin,
+            expected_commit="a" * 40,
+            now_ms=NOW384,
+            transport_authenticated=True,
         )
     packet, public, pin = _packet384("yw", 5)
     with pytest.raises(ValueError):
         record_transport_receipt367(
-            path, app_id="yw", envelope=packet, public_key=public, pin=pin,
-            expected_commit="a" * 40, now_ms=NOW384, transport_authenticated=False,
+            path,
+            app_id="yw",
+            envelope=packet,
+            public_key=public,
+            pin=pin,
+            expected_commit="a" * 40,
+            now_ms=NOW384,
+            transport_authenticated=False,
         )
     record_transport_receipt367(
-        path, app_id="yw", envelope=packet, public_key=public, pin=pin,
-        expected_commit="a" * 40, now_ms=NOW384, transport_authenticated=True,
+        path,
+        app_id="yw",
+        envelope=packet,
+        public_key=public,
+        pin=pin,
+        expected_commit="a" * 40,
+        now_ms=NOW384,
+        transport_authenticated=True,
     )
     with pytest.raises(ValueError):
         record_transport_receipt367(
-            path, app_id="yw", envelope=packet, public_key=public, pin=pin,
-            expected_commit="a" * 40, now_ms=NOW384, transport_authenticated=True,
+            path,
+            app_id="yw",
+            envelope=packet,
+            public_key=public,
+            pin=pin,
+            expected_commit="a" * 40,
+            now_ms=NOW384,
+            transport_authenticated=True,
         )
 
 
