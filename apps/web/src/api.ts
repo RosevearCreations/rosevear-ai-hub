@@ -4507,3 +4507,50 @@ export function classifyBoot381(
     before, after,
   });
 }
+
+export interface SecurityCustody382Posture {
+  schema: "rosevear.hub.security-custody382.v1";
+  source: "LOCAL_AUTH_METADATA_ONLY";
+  checkedAtUtc: string;
+  activeOtherOwnerSessions: number;
+  otherAccountsUnaffected: true;
+  currentSessionPreservedOnRevocation: true;
+  sessionMaxHours: number;
+  cookieSecureConfigured: boolean;
+  mfaEnforced: false;
+  mfaEnrollmentAvailable: false;
+  vaultCredentialIntakeEnabled: false;
+  tlsCertificateActuallyVerified: false;
+  secretKeyRotationActuallyVerified: false;
+  offMachineIndependentRestoreVerified: false;
+  retentionAutoPruneEnabled: false;
+  backupRetentionTargetDays: number;
+  auditRetentionTargetDays: number;
+  sbom: string;
+  verifiedLocalOperations: string[];
+  fieldAcceptance: "HOLD";
+  secretValuesRead: false;
+  externalRequests: 0;
+  firewallChanges: 0;
+  tlsKeyChanges: 0;
+  backupDeletions: 0;
+}
+export interface SecuritySessionContainment382 {
+  schema: "rosevear.hub.security-custody382.session-containment.v1";
+  revokedCount: number;
+  currentSessionPreserved: true;
+  otherAccountsUnaffected: true;
+  credentialValuesStored: false;
+  auditMetadataOnly: true;
+  completedAtUtc: string;
+}
+export function securityCustody382Posture(
+  signal?: AbortSignal,
+): Promise<SecurityCustody382Posture> {
+  return authJson("GET", "/api/v1/system/security-custody-382/posture", undefined, signal);
+}
+export function revokeMyOtherSessions382(password: string): Promise<SecuritySessionContainment382> {
+  return authJson("POST", "/api/v1/system/security-custody-382/revoke-other-sessions", {
+    password, confirmation: "REVOKE_MY_OTHER_SESSIONS",
+  });
+}

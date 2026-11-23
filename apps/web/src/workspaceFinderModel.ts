@@ -13,6 +13,7 @@ const WORKSPACE_HINTS: Record<string, { description: string; terms: readonly str
   Groceries: { description: "Shared household groceries and pantry", terms: ["shopping", "pantry", "food", "pickup", "grocery", "list"] },
   Calendar: { description: "Private family calendar, chores, and in-app reminders", terms: ["appointments", "household", "tasks", "chores", "schedule", "reminders", "supplies"] },
   "Boot Recovery": { description: "Owner Windows startup stages, recovery and pre-login witness review", terms: ["windows reboot", "boot", "startup", "recovery", "caddy", "tailscale", "ollama", "virtualbox", "dependencies"] },
+  "Security Custody": { description: "Owner zero-trust sessions, encrypted copy custody, key-rotation and MFA holds", terms: ["zero trust", "sessions", "security", "backup restore", "custody", "mfa", "key rotation", "sbom"] },
   "Search & Help": { description: "Help and searchable guides", terms: ["help", "guides", "manual", "support"] },
   System: { description: "Health, diagnostics and updates", terms: ["status", "health", "diagnostics", "update", "backup", "restart"] },
   Workshop: { description: "Workshop jobs and maintenance", terms: ["projects", "equipment", "maintenance", "materials"] },
