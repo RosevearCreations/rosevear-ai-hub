@@ -21,8 +21,17 @@ PASSWORD = "boot-read-only-test-password-123"
 ROUTE = "/api/v1/system/boot-sequence-381"
 NOW = datetime(2026, 11, 23, 13, 0, tzinfo=UTC)
 IDS = (
-    "vm", "mqtt", "tailscale", "ollama", "api", "web", "go2rtc",
-    "gateway", "ip_reservation", "private_https", "off_device",
+    "vm",
+    "mqtt",
+    "tailscale",
+    "ollama",
+    "api",
+    "web",
+    "go2rtc",
+    "gateway",
+    "ip_reservation",
+    "private_https",
+    "off_device",
 )
 
 
@@ -88,9 +97,7 @@ def client(tmp_path):
 
 
 def login(c, username):
-    response = c.post(
-        "/api/v1/auth/login", json={"username": username, "password": PASSWORD}
-    )
+    response = c.post("/api/v1/auth/login", json={"username": username, "password": PASSWORD})
     assert response.status_code == 200, response.text
 
 
@@ -124,15 +131,22 @@ def test_owner_only_contract_and_no_credentials_or_actions(tmp_path):
 
 def test_bounded_dependency_cascade_does_not_claim_boot(tmp_path):
     c = client(tmp_path)
-    result = c.post(ROUTE + "/classify", json={"after": report(statuses={
-        "vm": "unavailable",
-        "mqtt": "healthy",
-        "api": "unavailable",
-        "web": "healthy",
-        "gateway": "healthy",
-        "private_https": "unverified",
-        "off_device": "unverified",
-    })}).json()
+    result = c.post(
+        ROUTE + "/classify",
+        json={
+            "after": report(
+                statuses={
+                    "vm": "unavailable",
+                    "mqtt": "healthy",
+                    "api": "unavailable",
+                    "web": "healthy",
+                    "gateway": "healthy",
+                    "private_https": "unverified",
+                    "off_device": "unverified",
+                }
+            )
+        },
+    ).json()
     stages = {stage["id"]: stage for stage in result["stages"]}
     assert stages["vm"]["state"] == "UNAVAILABLE"
     assert stages["mqtt"]["state"] == "DEPENDENCY_HOLD"
@@ -190,11 +204,15 @@ def test_invalid_phase_time_and_stale_recovery_rejected():
         Compare381.model_validate({"after": report("before")})
     with pytest.raises(ValidationError):
         Probe381.model_validate(report(boot_at=NOW + timedelta(minutes=1)))
-    old = Compare381.model_validate({
-        "after": report(captured_at=NOW - timedelta(days=2),
-                        boot_at=NOW - timedelta(days=3),
-                        tasks={"boot": "disabled", "recovery": "missing"}),
-    })
+    old = Compare381.model_validate(
+        {
+            "after": report(
+                captured_at=NOW - timedelta(days=2),
+                boot_at=NOW - timedelta(days=3),
+                tasks={"boot": "disabled", "recovery": "missing"},
+            ),
+        }
+    )
     result = classify381(old, now=NOW)
     assert "LOCAL_REPORT_STALE_OVER_24_HOURS" in result["holdReasons"]
     assert "UNATTENDED_BOOT_TASK_NOT_ENABLED_OR_UNKNOWN" in result["holdReasons"]
@@ -202,11 +220,15 @@ def test_invalid_phase_time_and_stale_recovery_rejected():
 
 
 def test_false_host_and_future_capture_never_pass():
-    future = Compare381.model_validate({
-        "after": report(captured_at=NOW + timedelta(minutes=15),
-                        boot_at=NOW - timedelta(minutes=10),
-                        original_host_name_matched=False),
-    })
+    future = Compare381.model_validate(
+        {
+            "after": report(
+                captured_at=NOW + timedelta(minutes=15),
+                boot_at=NOW - timedelta(minutes=10),
+                original_host_name_matched=False,
+            ),
+        }
+    )
     summary = classify381(future, now=NOW)
     assert "ORIGINAL_WINDOWS_HOST_NOT_MATCHED" in summary["holdReasons"]
     assert "LOCAL_REPORT_CLOCK_IN_FUTURE" in summary["holdReasons"]
