@@ -1,0 +1,222 @@
+{
+  "schema": "rosevear.hub.feature-progress.v382",
+  "build": 382,
+  "asOf": "2026-11-23",
+  "basis": "Owner-only session containment with fresh password/exact typed consent and audit, source-only security posture and enforced owner navigation; authenticated encrypted separate-copy restore drill and provenance/freshness flags; deterministic source-declared dependency inventory; MFA/TLS rotation and off-machine restore remain unverified field HOLD.",
+  "expansionPolicy": "New requirements enlarge denominator; never force +5-10 global points per build",
+  "oldBuild366NarrowScopeSourceTargetPercent": 64,
+  "oldBuild366NarrowScopeFieldTargetPercent": 18,
+  "sourceModuleCount": 24,
+  "weighting": "Equal-weight Hub-native categories; delegated payroll/accounting/HST/storefront remain excluded",
+  "estimatedExpandedScopeSourcePercent": 50.2,
+  "fieldAcceptancePlanningEstimatePercent": 18,
+  "blendedWeights": {
+    "source": 0.65,
+    "field": 0.35
+  },
+  "estimatedExpandedOverallPercent": 38.9,
+  "sourcesReviewed": [
+    "docs/SOURCE_OF_TRUTH.md",
+    "docs/BUILD_365_SEVEN_APP_SYSOP_STATISTICS_INTAKE.md",
+    "docs/BUILD_366_DURABLE_SYSOP_STATS_JOURNAL.md",
+    "Rosevear_AI_Hub_Build363_Source_of_Truth_2026-11-18.docx",
+    "server/src/rosevear_ai_hub",
+    "apps/web/src",
+    "Rosevear_Three_Master_Application_Review(3).pdf (owner-proposed goals, Nov 20 2026)",
+    "docs/BUILD_372_ALEXA_EXPOSURE_CONSENT.md",
+    "docs/BUILD_373_APPLE_HOME_MATTER_CUSTODY.md",
+    "docs/BUILD_374_SMARTTHINGS_PROVIDER_SCOPE.md",
+    "docs/BUILD_375_CAMERA_EVENT_RELIABILITY.md",
+    "docs/BUILD_376_SAFE_AUTOMATION_SEQUENCE.md",
+    "docs/BUILD_377_WORKSHOP_PROCESS_HEALTH.md",
+    "docs/BUILD_378_GROCERY_PANTRY.md",
+    "docs/BUILD_379_FAMILY_CALENDAR_CHORES.md",
+    "docs/BUILD_380_PRIVATE_HOME_WORKSHOP_HELPER.md",
+    "docs/BUILD_381_WINDOWS_BOOT_RECOVERY.md",
+    "docs/BUILD_382_ZERO_TRUST_RESTORE.md"
+  ],
+  "scorePolicy": "Source planning deltas security/access +8 (60→68), privacy/audit +7 (66→73), backup/Windows recovery +8 (59→67); original-host field stays 18%. No automated MFA, TLS key rotation, CVE clearance or independent off-machine restore.",
+  "modules": [
+    {
+      "id": "local-ai-chat-and-voice",
+      "estimatedSourceCoveragePercent": 79,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Owner-private bounded read-only manual assistant, explicit local voice transcription/playback reuse, local model citation assurance with safe offline excerpt fallback; field acceptance HOLD."
+    },
+    {
+      "id": "knowledge-search-and-citations",
+      "estimatedSourceCoveragePercent": 79,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Hard-gated owner-reviewed indexed local-only documents, explicit source allowlist, bounded local hybrid/keyword retrieval, exact verified citation IDs with quoted manual support; no original device/source field evidence."
+    },
+    {
+      "id": "home-assistant-device-inventory",
+      "estimatedSourceCoveragePercent": 70,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Owner-triggered complete registry/state capture, exact identity claims, missing/renamed/room drift, snapshots and MQTT note reconciliation; original home field proof remains HOLD"
+    },
+    {
+      "id": "safe-automations-and-scenes",
+      "estimatedSourceCoveragePercent": 67,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Deterministic graph ordering, owner source-pinned plan approval, duplicate-cause and cooldown simulation; real multi-rule execution and original-host provider acceptance remain HOLD"
+    },
+    {
+      "id": "mqtt-and-sensors",
+      "estimatedSourceCoveragePercent": 62,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "MQTT integration and guardrails exist; device/topic inventory incomplete"
+    },
+    {
+      "id": "cameras-and-doorbells",
+      "estimatedSourceCoveragePercent": 65,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Existing ONVIF/go2rtc/Frigate source reused for independent event vs transport health, bounded anomaly detection, owner binding and history; moving video and doorbell field checks remain HOLD"
+    },
+    {
+      "id": "workshop-registry-and-jobs",
+      "estimatedSourceCoveragePercent": 64,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Combined registered machine, owner job progress, independent maintenance schedule, warnings, source-separated process readings and role-gated owner dashboard; unverified original field operation"
+    },
+    {
+      "id": "maker-process-monitoring",
+      "estimatedSourceCoveragePercent": 43,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Append-only time-stamped manual operating/progress/temp/ventilation observations, source freshness/alert classification and signed OctoPrint metadata shown unbound; no verified hardware sensor or automatic controller link"
+    },
+    {
+      "id": "network-discovery-and-topology",
+      "estimatedSourceCoveragePercent": 36,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Camera transport and Frigate event source availability separated; actual LAN topology or field network recovery remains missing"
+    },
+    {
+      "id": "network-sequencing-and-recovery",
+      "estimatedSourceCoveragePercent": 52,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Build381 owner-only deterministic 11-stage network/boot causal diagnostics, pinned VM/Tailscale/loopback probes and explicit HTTPS/IP/MQTT dependency holds. Real prelogin witness pending."
+    },
+    {
+      "id": "alexa-integration",
+      "estimatedSourceCoveragePercent": 12,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Read-only HA Alexa WebSocket exposure + auto discovery readback, local 30-day owner consent and drift warnings; real account linking/voice proof not observed"
+    },
+    {
+      "id": "apple-home-and-matter",
+      "estimatedSourceCoveragePercent": 17,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "HA exact provider-marked registry, bounded source review, duplicate name alerts and audited owner local custody; no verified Apple Home/Matter pairing"
+    },
+    {
+      "id": "samsung-smartthings",
+      "estimatedSourceCoveragePercent": 31,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Safe bounded source reader, owner credential custody, HA exact identity match, audit, UI and synthetic tests; field token and real devices remain HOLD"
+    },
+    {
+      "id": "other-provider-device-coverage",
+      "estimatedSourceCoveragePercent": 23,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Samsung vendor-to-HA read-only reconciliation added; all other non-HA providers and physical field proof incomplete"
+    },
+    {
+      "id": "grocery-order-and-pantry-board",
+      "estimatedSourceCoveragePercent": 13,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Durable shared local grocery/pantry items, manual inventory, expiry, recurrence, approval, safe pickup, same-unit merge, print and audit. No connected retailer/sensor or original-host field verification."
+    },
+    {
+      "id": "household-calendar-and-chores",
+      "estimatedSourceCoveragePercent": 24,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Private/shared event/appointment/chore and supply notes, verified timezone and DST guard, role-scoped assignment, recurring interval and in-app reminder/overdue acknowledgment with audit. No push/email/external calendar; original-host acceptance HOLD."
+    },
+    {
+      "id": "three-master-signed-communications",
+      "estimatedSourceCoveragePercent": 46,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Signed source/guarded readback plus Build367 opt-in TLS intake; no real signed Master ACK"
+    },
+    {
+      "id": "seven-application-governance",
+      "estimatedSourceCoveragePercent": 31,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Seven app identities and source claims supported; field-connected sources unverified"
+    },
+    {
+      "id": "security-roles-and-access",
+      "estimatedSourceCoveragePercent": 68,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Freshly reauthenticated owner-only revocation of other same-owner sessions, exact consent, current session preserved and RBAC/role-denial regression; independent Windows MFA/TLS remains HOLD."
+    },
+    {
+      "id": "backup-and-windows-recovery",
+      "estimatedSourceCoveragePercent": 67,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Actual authenticated encrypted separate-copy restore via existing Build050 isolated scratch, SHA match, tampering refusal, freshness/retention review and source dependency manifest; independent device and off-machine restore still HOLD."
+    },
+    {
+      "id": "privacy-audit-and-consent",
+      "estimatedSourceCoveragePercent": 73,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Explicit session containment consent and scoped audit with no stored plaintext password/session token; no automatic backup/network/security mutating actions; field audit and credential rotation HOLD."
+    },
+    {
+      "id": "themes-accessibility-and-controls",
+      "estimatedSourceCoveragePercent": 57,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Multi-theme UI and recent contrast repair; 16-theme device matrix incomplete"
+    },
+    {
+      "id": "mobile-and-tablet-experience",
+      "estimatedSourceCoveragePercent": 61,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "Added responsive private HA Apple/Matter review panel; original iOS and tablet field testing unverified"
+    },
+    {
+      "id": "it-ops-and-support",
+      "estimatedSourceCoveragePercent": 65,
+      "evidence": "REVIEW_ESTIMATE_NOT_FIELD_CERTIFIED",
+      "reason": "System monitoring, timelines and docs; owner helpdesk and incident automation incomplete"
+    }
+  ],
+  "delegatedOutOfScope": [
+    "standalone storefront",
+    "payroll",
+    "HST/tax filings",
+    "accounting ledger",
+    "customer invoicing",
+    "social publishing engine",
+    "paid supplier orders"
+  ],
+  "activeHolds": [
+    "No real original-host verified three-Master signed transport/ACK",
+    "No complete seven-peer live enrollment",
+    "Comms QL-340C receiver not authorized",
+    "Unverified camera streams and maker machine integrations",
+    "No independently signed pre-login reboot and offline restore acceptance",
+    "Build368 owner key, LAN scope and real original-host field evidence unprovisioned",
+    "Build369 original Windows Home Assistant snapshot, owner claim review and MQTT field reconciliation have not been witnessed",
+    "Build370 printer-PC field install, real COM/USB/PnP enumeration, original-host TLS and Ed25519 key pairing, optional OctoPrint and first signed workshop source acceptance are not witnessed",
+    "Build371 original printer-PC installer, signed second receipt, two camera images, job controller and independently witnessed USB identity all remain FIELD_HOLD",
+    "Three Master Recommendation goals (bounded offline queue, independent remote signed ACK and full camera streaming) remain PROPOSED, not implemented",
+    "The original queue Build371 MQTT/Zigbee/Z-Wave/Thread/Bluetooth scope was displaced by owner-prioritized printer-PC Build371; carry it forward as an unnumbered planning obligation",
+    "Build377 owner process readings not yet observed on original Windows host; no real signed printer-PC process sample, sensor binding, physical ventilation verification or device controls accepted",
+    "Build378 original Windows migration 0039, family RBAC, actual browser print and mobile field acceptance remain HOLD; no provider purchase or inventory sensor connected",
+    "Build379 migration0040, original-host Calendar in Firefox, private-account permission and physical device/monthly print screens not FIELD_CERTIFIED; reminders are on-demand in-app only",
+    "Build380 original Windows Ollama, indexed manuals, owner-approved source selection, opt-in voice on Firefox/mobile, and original host safety acceptance remain FIELD_HOLD.",
+    "Build381 actual original Windows Task Scheduler identity, VM/HA guest/MQTT, private LAN HTTPS/TLS, DHCP reservation, original-host pre-login reboot, independent off-device witness and off-machine restore remain FIELD_HOLD.",
+    "Build382 real original Windows MFA, Caddy TLS certificate and key rotation, resolved dependency/SBOM vulnerability scan, secrets recovery, independently witnessed encrypted off-machine copy and restore, and original-host authenticated owner denial acceptance remain FIELD_HOLD."
+  ],
+  "futureBuildCount": 11,
+  "nextBuild": 377,
+  "fieldHolds": [
+    "Build372 Alexa/Amazon account linkage, Home Assistant admin readback on original host, skill activation, a low-risk spoken command and independently witnessed actual unexposure remain FIELD_HOLD",
+    "Build373 Apple Home bridge/pairing, Matter controller, Thread border router, iOS permission and original-home witnessed physical device acceptance remain FIELD_HOLD",
+    "Build374 Samsung account/plan, OAuth, original-device Android/Tizen permissions, original Windows Hub and genuine vendor/HA reconciliation remain FIELD_HOLD",
+    "Build375 original Windows-host local Frigate/go2rtc and independently observed moving video/audio, doorbell chime, physical event reliability and vendor-only integrations remain FIELD_HOLD",
+    "Build376 live original-host dependency orchestration, actual event causality across independent apps, source-authorized dispatch and supervised device checks remain FIELD_HOLD"
+  ]
+}
