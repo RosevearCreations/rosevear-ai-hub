@@ -87,6 +87,7 @@ import { WorkspaceQuickAccess } from "./WorkspaceQuickAccess";
 import { WorkspaceHistoryControls } from "./WorkspaceHistoryControls";
 import { HomeStartGuide } from "./HomeStartGuide";
 import { HomeActivitySummary } from "./HomeActivitySummary";
+import { WeatherStation384Panel } from "./WeatherStation384Panel";
 import { HomeLayoutCustomizer } from "./HomeLayoutCustomizer";
 import { hasLocalAiModel } from "./homeStartGuideModel";
 import {
@@ -768,6 +769,7 @@ function HomeView({
       </header>
 
       <HubVitalCards health={health} ollama={ollama} />
+      {role === "owner" && <WeatherStation384Panel />}
 
       <HomeActivitySummary key={`alert-review-${accountId}`} accountId={accountId} role={role} allowed={allowedSections} onNavigate={onNavigate}
         health={{
