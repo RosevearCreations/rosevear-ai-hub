@@ -3,6 +3,7 @@
 This is a real network sender, NOT a receiver, mock-ACK generator, web action or
 background worker. QL-340C private receiver authority is never granted here.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -75,16 +76,17 @@ def peer_preflight383(peers: dict[str, PeerEnrollment348]) -> bool:
             return False
         paths = (peer.ca_file, peer.client_cert_file, peer.client_key_file)
         if not all(
-            isinstance(p, Path) and p.is_absolute() and p.is_file()
-            and not p.is_symlink() and p.stat().st_size <= 64_000
+            isinstance(p, Path)
+            and p.is_absolute()
+            and p.is_file()
+            and not p.is_symlink()
+            and p.stat().st_size <= 64_000
             for p in paths
         ):
             return False
         try:
             ca_sha = hashlib.sha256(peer.ca_file.read_bytes()).hexdigest()
-            client_der = ssl.PEM_cert_to_DER_cert(
-                peer.client_cert_file.read_text(encoding="ascii")
-            )
+            client_der = ssl.PEM_cert_to_DER_cert(peer.client_cert_file.read_text(encoding="ascii"))
             client_sha = hashlib.sha256(client_der).hexdigest()
         except (OSError, UnicodeError, ValueError, ssl.SSLError):
             return False
@@ -108,8 +110,7 @@ def verified_pair383(
         and type(messages) is dict
         and set(messages) == set(PEERS383)
         and all(
-            type(mid) is str and len(mid) == 64
-            and all(c in "0123456789abcdef" for c in mid)
+            type(mid) is str and len(mid) == 64 and all(c in "0123456789abcdef" for c in mid)
             for mid in messages.values()
         )
         and len(set(messages.values())) == 2
@@ -119,7 +120,8 @@ def verified_pair383(
     records: dict[str, str] = {}
     for peer in PEERS383:
         entries = [
-            e for e in ledger_snapshot["latest"]
+            e
+            for e in ledger_snapshot["latest"]
             if type(e) is dict
             and e.get("messageId") == messages[peer]
             and e.get("audience") == peer
@@ -174,7 +176,8 @@ def deliver_pair_once383(
     for recipient in PEERS383:
         peer = peers[recipient]
         matches = [
-            p for p in manifest_peers
+            p
+            for p in manifest_peers
             if p.get("id") == recipient
             and p.get("hostname") == peer.hostname
             and p.get("port") == peer.port
@@ -186,7 +189,8 @@ def deliver_pair_once383(
             return hold
         if not any(
             registry.resolve(recipient, key.key_id, at_ms=now_ms)
-            for key in registry.records if key.issuer == recipient
+            for key in registry.records
+            if key.issuer == recipient
         ):
             return hold
     source = registry.resolve("rosevear-ai-hub", signing_key_id, at_ms=now_ms)
@@ -199,7 +203,8 @@ def deliver_pair_once383(
     if readings.get("integrity") != "LOCAL_HASH_CHAIN_VALID":
         return hold
     originals = [
-        e for e in readings["events"]
+        e
+        for e in readings["events"]
         if e.get("source") == "rosevear-ai-hub"
         and e.get("kind") == "module.observed"
         and type(e.get("observedAtMs")) is int
@@ -210,15 +215,21 @@ def deliver_pair_once383(
     signed: dict[str, dict[str, Any]] = {}
     for recipient in PEERS383:
         event = signed_event352(
-            private_key=signing_key, key_id=signing_key_id,
-            audience=recipient, event_type="master.health",
-            source_evidence_sha=originals[0]["evidenceDigest"], severity="INFO",
-            manifest_sha=manifest_sha, now_ms=now_ms,
+            private_key=signing_key,
+            key_id=signing_key_id,
+            audience=recipient,
+            event_type="master.health",
+            source_evidence_sha=originals[0]["evidenceDigest"],
+            severity="INFO",
+            manifest_sha=manifest_sha,
+            now_ms=now_ms,
             nonce=secrets.token_urlsafe(32),
         )
         if event is None or not journal.queue(
-            signed=event, registry=registry,
-            manifest_sha=manifest_sha, now_ms=now_ms,
+            signed=event,
+            registry=registry,
+            manifest_sha=manifest_sha,
+            now_ms=now_ms,
         ):
             return hold
         signed[recipient] = event
@@ -226,15 +237,20 @@ def deliver_pair_once383(
     delivered = {}
     for recipient in PEERS383:
         result = deliver_mtls_event352(
-            peer=peers[recipient], signed_event=signed[recipient],
-            enrollment=enrollment, registry=registry,
-            journal=journal, now_ms=now_ms,
+            peer=peers[recipient],
+            signed_event=signed[recipient],
+            enrollment=enrollment,
+            registry=registry,
+            journal=journal,
+            now_ms=now_ms,
         )
         delivered[recipient] = result.get("delivered") is True
     if not all(delivered.values()):
         return {
-            **hold, "reason": "HOLD_PARTIAL_OR_MISSING_PEER_ACK",
-            "messageIds": messages, "deliveryAttempts": delivered,
+            **hold,
+            "reason": "HOLD_PARTIAL_OR_MISSING_PEER_ACK",
+            "messageIds": messages,
+            "deliveryAttempts": delivered,
         }
     status = journal.status(manifest_sha=manifest_sha, now_ms=now_ms + 30_000, registry=registry)
     proof = verified_pair383(status, messages)
