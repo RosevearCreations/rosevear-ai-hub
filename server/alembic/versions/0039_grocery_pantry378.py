@@ -46,8 +46,8 @@ def upgrade() -> None:
             "updated_by_user_id", sa.Integer(),
             sa.ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
         ),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.current_timestamp(), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.current_timestamp(), nullable=False),
     )
     op.create_index("ix_grocery_items378_canonical_name", "grocery_items378", ["canonical_name"])
     op.create_table(
