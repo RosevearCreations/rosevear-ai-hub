@@ -31,27 +31,41 @@ def setup(tmp_path):
 
     app.dependency_overrides[get_session] = override
     client = TestClient(app)
-    assert client.post(
-        "/api/v1/auth/bootstrap",
-        json={"username": "owner", "password": "owner-password-123"},
-    ).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/bootstrap",
+            json={"username": "owner", "password": "owner-password-123"},
+        ).status_code
+        == 201
+    )
     with factory() as db:
         item = WorkshopEquipment(
-            project_key="workshop", name="Laser engraving station",
-            equipment_type="laser", activity_type="laser",
+            project_key="workshop",
+            name="Laser engraving station",
+            equipment_type="laser",
+            activity_type="laser",
             readiness_status="unverified",
         )
         db.add(item)
         db.flush()
         machine_id = item.id
-        db.add(WorkshopJob(
-            title="Owner sample engraving", category="laser", equipment_id=machine_id,
-            status="planned", progress_percent=25,
-        ))
-        db.add(WorkshopMaintenancePlan(
-            equipment_id=machine_id, interval_days=30, reminder_days=3,
-            next_due_at=datetime.now(UTC) - timedelta(days=1),
-        ))
+        db.add(
+            WorkshopJob(
+                title="Owner sample engraving",
+                category="laser",
+                equipment_id=machine_id,
+                status="planned",
+                progress_percent=25,
+            )
+        )
+        db.add(
+            WorkshopMaintenancePlan(
+                equipment_id=machine_id,
+                interval_days=30,
+                reminder_days=3,
+                next_due_at=datetime.now(UTC) - timedelta(days=1),
+            )
+        )
         db.commit()
     return client, factory, machine_id
 
@@ -110,17 +124,28 @@ def test_signed_receipt_stays_unbound_to_machine(tmp_path):
     now = datetime.now(UTC)
     ms = int(now.timestamp() * 1000)
     with factory() as db:
-        db.add(WorkshopGatewayReceipt370(
-            collector_id="printerpc", nonce="a" * 32,
-            observed_at_ms=ms - 1000, expires_at_ms=ms + 50000,
-            received_at=now, payload_json=json.dumps({
-                "devices": [{
-                    "kind": "octoprint", "proof": "octoprint_loopback",
-                    "label": "Printer local controller", "presence": "reported_printing",
-                    "progress_percent": 42.0,
-                }]
-            }),
-        ))
+        db.add(
+            WorkshopGatewayReceipt370(
+                collector_id="printerpc",
+                nonce="a" * 32,
+                observed_at_ms=ms - 1000,
+                expires_at_ms=ms + 50000,
+                received_at=now,
+                payload_json=json.dumps(
+                    {
+                        "devices": [
+                            {
+                                "kind": "octoprint",
+                                "proof": "octoprint_loopback",
+                                "label": "Printer local controller",
+                                "presence": "reported_printing",
+                                "progress_percent": 42.0,
+                            }
+                        ]
+                    }
+                ),
+            )
+        )
         db.commit()
     board = client.get("/api/v1/workshop-process-377/board").json()
     assert board["equipment"][0]["reading"] is None
@@ -141,8 +166,14 @@ def test_invalid_or_missing_source_cannot_be_laundered(tmp_path):
         report(machine_id, observed_at=datetime.now(UTC).replace(tzinfo=None).isoformat()),
         report(machine_id, observed_at=(datetime.now(UTC) + timedelta(days=1)).isoformat()),
         report(machine_id, note="bad\nheader"),
-        report(machine_id, operating_state="unknown", ventilation="unknown",
-               progress_percent=None, temperature_c=None, note=""),
+        report(
+            machine_id,
+            operating_state="unknown",
+            ventilation="unknown",
+            progress_percent=None,
+            temperature_c=None,
+            note="",
+        ),
     ]
     expected = [404, 422, 422, 422, 422, 422, 422]
     for payload, status in zip(cases, expected, strict=True):
