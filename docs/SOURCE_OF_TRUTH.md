@@ -419,3 +419,16 @@ are NOT source code or Git branch changes. Next Build 377 Workshop Process
 Health Command Centre. Remaining numbered builds 377–387 = 11, plus
 displaced radio/bridge task still open.
 
+## Build 377 — Workshop process-health command centre (source, 2026-11-22)
+
+Owner/administrator-only equipment/jobs/maintenance readout and append-only
+manual readings with honest freshness, ventilation/fault/maintenance HOLD
+reasons. Previously signed Build370 printer-PC metadata is displayed as an
+unbound source, not linked by machine name or claimed as live on Ree's host.
+Additive migration 0038, isolated audit and zero control path. Source-scoped
+24-module estimates are in docs/contracts/hub-feature-progress377.json
+(workshop registry 64%, maker monitoring 43%, source overall 47.2%,
+field 18%, blended 37.0%). All physical device/source readings, field
+installation and real Windows host acceptance remain FIELD_HOLD. See
+docs/BUILD_377_WORKSHOP_PROCESS_HEALTH.md. Next Build378 Grocery/Pantry;
+ten numbered proposals (378–387) plus displaced radio bridge goal remain.
