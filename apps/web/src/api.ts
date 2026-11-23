@@ -4557,3 +4557,12 @@ export function revokeMyOtherSessions382(password: string): Promise<SecuritySess
     password, confirmation: "REVOKE_MY_OTHER_SESSIONS",
   });
 }
+
+// Build384: owner-only local analytics and cached personal weather station.
+export function getGovernedIntake384(signal?: AbortSignal): Promise<unknown> {
+  return authJson("GET", "/api/v1/system/governance-384", undefined, signal);
+}
+
+export function getWeatherStation384(signal?: AbortSignal): Promise<unknown> {
+  return authJson("GET", "/api/v1/system/weather-station-384", undefined, signal);
+}
