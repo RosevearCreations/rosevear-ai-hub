@@ -465,3 +465,18 @@ Firefox/mobile field checks and family role acceptance remain FIELD_HOLD.
 See docs/BUILD_379_FAMILY_CALENDAR_CHORES.md. Next proposed Build380 Private
 AI Helper Across Home and Workshop; eight numbered builds 380–387 plus
 deferred MQTT/radio bridge scope remain.
+
+## Build 380 — Private Home/Workshop AI Helper (2026-11-23 SOURCE IMPLEMENTED; FIELD HOLD)
+
+Dedicated owner/admin-only Assistant workspace and read-only API over explicit
+indexed, local-only, already owner-approved knowledge sources. Existing
+Ollama/Knowledge/voice infrastructure reused; new scoped source allowlist,
+local registry-only device selection, citation validation and offline keyword
+evidence excerpts. The only voice actions are user-consented transcription
+draft and opt-in local TTS. No AI-driven Home Assistant, MQTT, workshop
+machine, order, commerce, cloud or external application operation. No new
+database migration. Source scorecard: docs/contracts/hub-feature-progress380.json;
+operator acceptance: docs/BUILD_380_PRIVATE_HOME_WORKSHOP_HELPER.md. Original
+Windows, Ollama, voice device and actual indexed-source acceptance remain
+FIELD_HOLD. Next Build381 Windows boot/network sequencing/local recovery;
+seven numbered builds 381–387 plus deferred radio/MQTT provenance goal remain.
