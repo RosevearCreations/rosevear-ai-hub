@@ -105,7 +105,7 @@ def test_owner_only_contract_and_no_credentials_or_actions(tmp_path):
     assert result["autoRecoveryInstalledByBuild"] is False
     assert len(result["stages"]) == len(IDS)
     assert [stage["id"] for stage in result["stages"]] == list(IDS)
-    assert "private" in result["stages"][-1]["safeManualAction"].lower()
+    assert "independent" in result["stages"][-1]["safeManualAction"].lower()
     data = c.post(ROUTE + "/classify", json={"after": report()})
     assert data.status_code == 200, data.text
     assert data.headers["Cache-Control"] == "no-store"
