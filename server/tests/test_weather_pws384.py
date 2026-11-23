@@ -64,8 +64,12 @@ def test_supervised_local_cached_weather_and_daily_limits(tmp_path):
     journal = tmp_path / "wu.sqlite"
     assert cached_weather384(journal, now_ms=NOW384, original_host=False)["values"] is None
     first = poll_once384(
-        journal, station_id=STATION384, key_path=str(key_path),
-        now_ms=NOW384, original_host=True, fetcher=lambda station, key: raw384(),
+        journal,
+        station_id=STATION384,
+        key_path=str(key_path),
+        now_ms=NOW384,
+        original_host=True,
+        fetcher=lambda station, key: raw384(),
     )
     assert first["callsUsedTodayByThisHub"] == 1
     cache = cached_weather384(journal, now_ms=NOW384, original_host=True)
@@ -75,8 +79,12 @@ def test_supervised_local_cached_weather_and_daily_limits(tmp_path):
     assert "A" * 32 not in str(cache) and STATION384 not in str(cache)
     with pytest.raises(ValueError, match="HOLD_WU_FIVE_MINUTE_CACHE"):
         poll_once384(
-            journal, station_id=STATION384, key_path=str(key_path),
-            now_ms=NOW384 + 1000, original_host=True, fetcher=lambda station, key: raw384(),
+            journal,
+            station_id=STATION384,
+            key_path=str(key_path),
+            now_ms=NOW384 + 1000,
+            original_host=True,
+            fetcher=lambda station, key: raw384(),
         )
     older = cached_weather384(journal, now_ms=NOW384 + 1_800_000, original_host=True)
     assert older["status"] == "STALE_CACHED_PROVIDER_OBSERVATION"
@@ -84,8 +92,11 @@ def test_supervised_local_cached_weather_and_daily_limits(tmp_path):
         db.execute("UPDATE wu_budget384 SET calls=?, last_attempt_ms=?", (DAILY_CALL_CAP384, 0))
     with pytest.raises(ValueError, match="HOLD_WU_DAILY_API_BUDGET"):
         poll_once384(
-            journal, station_id=STATION384, key_path=str(key_path),
-            now_ms=NOW384 + 400_000, original_host=True,
+            journal,
+            station_id=STATION384,
+            key_path=str(key_path),
+            now_ms=NOW384 + 400_000,
+            original_host=True,
             fetcher=lambda station, key: raw384(),
         )
 
@@ -100,8 +111,12 @@ def test_network_failure_spends_one_attempt_without_faking_new_reading(tmp_path)
 
     with pytest.raises(ValueError):
         poll_once384(
-            journal, station_id=STATION384, key_path=str(key_path),
-            now_ms=NOW384, original_host=True, fetcher=unreachable,
+            journal,
+            station_id=STATION384,
+            key_path=str(key_path),
+            now_ms=NOW384,
+            original_host=True,
+            fetcher=unreachable,
         )
     result = cached_weather384(journal, now_ms=NOW384, original_host=True)
     assert result["callsUsedTodayByThisHub"] == 1
