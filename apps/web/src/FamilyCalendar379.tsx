@@ -105,14 +105,16 @@ export function FamilyCalendar379({
     setBoard(data);
   }
   async function run(action: () => Promise<unknown>, message: string): Promise<boolean> {
-    if (busy) return;
+    if (busy) return false;
     setBusy(true); setError(""); setNotice("");
     try {
       await action();
       await refresh();
       setNotice(message);
+      return true;
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Operation failed; refresh and retry.");
+      return false;
     } finally {
       setBusy(false);
     }
