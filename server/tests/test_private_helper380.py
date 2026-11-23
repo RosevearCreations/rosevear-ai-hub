@@ -123,8 +123,12 @@ def setup(tmp_path):
         ):
             documents.append(
                 KnowledgeDocument(
-                    collection_id=col.id, filename=title, content_hash=title,
-                    mime_type="text/plain", source_path="local", size_bytes=50,
+                    collection_id=col.id,
+                    filename=title,
+                    content_hash=title,
+                    mime_type="text/plain",
+                    source_path="local",
+                    size_bytes=50,
                     extracted_text="Read filter maintenance guide.",
                     metadata_json={
                         "hub_source_review": {
@@ -145,11 +149,21 @@ def setup(tmp_path):
         assert not _approved(documents[2], other)
 
     hit = RetrievalHit(
-        chunk_id=23, document_id=ids[0], collection_id=collection.id,
-        filename="Approved filter guide.txt", collection_name="Owner manuals",
-        ordinal=0, text="Check the filter before use. Only trained operators should service it.",
-        start_char=0, end_char=80, page=1, section=None, location_label="page 1",
-        evidence_path="/api/v1/knowledge/evidence/23", score=0.95, method="keyword",
+        chunk_id=23,
+        document_id=ids[0],
+        collection_id=collection.id,
+        filename="Approved filter guide.txt",
+        collection_name="Owner manuals",
+        ordinal=0,
+        text="Check the filter before use. Only trained operators should service it.",
+        start_char=0,
+        end_char=80,
+        page=1,
+        section=None,
+        location_label="page 1",
+        evidence_path="/api/v1/knowledge/evidence/23",
+        score=0.95,
+        method="keyword",
     )
     retrieval = TestRetrieval(hit)
     registry = TestRegistry()
@@ -169,7 +183,9 @@ def login(client, username):
 def ask(ids, **extra):
     return {
         "question": "What does the local guide say about the filter?",
-        "document_ids": [ids[0]], "model": "", **extra,
+        "document_ids": [ids[0]],
+        "model": "",
+        **extra,
     }
 
 
@@ -181,9 +197,7 @@ def test_owner_only_approved_documents_and_no_implicit_approvals(tmp_path):
     assert response.headers["Cache-Control"] == "no-store"
     assert response.json()["automaticApproval"] is False
     for not_approved in ids[1:]:
-        blocked = client.post(
-            PREFIX + "/ask", json=ask(ids, document_ids=[not_approved])
-        )
+        blocked = client.post(PREFIX + "/ask", json=ask(ids, document_ids=[not_approved]))
         assert blocked.status_code == 403
     blocked = client.post(PREFIX + "/ask", json=ask(ids, document_ids=[]))
     assert blocked.status_code == 422
@@ -213,9 +227,12 @@ def test_evidence_only_no_model_cites_exact_approved_chunk(tmp_path):
     assert registry.model.requests == 0
     assert retrieval.calls == [(4, (ids[0],), "auto")]
     with factory() as db:
-        assert db.query(AuditEvent).filter(
-            AuditEvent.event_type == "private_helper380.readback"
-        ).count() == 1
+        assert (
+            db.query(AuditEvent)
+            .filter(AuditEvent.event_type == "private_helper380.readback")
+            .count()
+            == 1
+        )
 
 
 def test_grounded_model_valid_and_unknown_citation_rejected(tmp_path):
@@ -254,13 +271,9 @@ def test_offline_embeddings_and_ollama_fall_back_without_control(tmp_path):
 
 def test_no_invented_devices_or_unverified_identity(tmp_path):
     client, _, ids, _, registry = setup(tmp_path)
-    missing = client.post(
-        PREFIX + "/ask", json=ask(ids, context_kind="workshop", context_id=99999)
-    )
+    missing = client.post(PREFIX + "/ask", json=ask(ids, context_kind="workshop", context_id=99999))
     assert missing.status_code == 404
-    invalid = client.post(
-        PREFIX + "/ask", json=ask(ids, context_kind="home", context_id=None)
-    )
+    invalid = client.post(PREFIX + "/ask", json=ask(ids, context_kind="home", context_id=None))
     assert invalid.status_code == 422
     assert registry.model.requests == 0
 
