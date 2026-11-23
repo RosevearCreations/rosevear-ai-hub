@@ -94,16 +94,22 @@ def test_create_household_chores_timezone_and_read_only_access(tmp_path):
     assert board.json()["outboundNotificationsEnabled"] is False
     assert board.json()["externalCalendarSyncEnabled"] is False
     assert board.json()["automaticDeviceActionsEnabled"] is False
-    assert client.post(
-        BASE + "/plans",
-        json=plan(assignee_user_id=ids["bob"]),
-    ).status_code == 403
+    assert (
+        client.post(
+            BASE + "/plans",
+            json=plan(assignee_user_id=ids["bob"]),
+        ).status_code
+        == 403
+    )
     login(client, "reader")
     assert len(client.get(BASE + "/board").json()["items"]) == 1
     assert client.post(BASE + "/plans", json=plan()).status_code == 403
-    assert client.post(
-        BASE + f"/plans/{item['id']}/complete", json={"expected_revision": 1}
-    ).status_code == 403
+    assert (
+        client.post(
+            BASE + f"/plans/{item['id']}/complete", json={"expected_revision": 1}
+        ).status_code
+        == 403
+    )
     assert client.get(BASE + "/members").json()["members"] == []
     with factory() as db:
         assert db.query(FamilyPlan379).count() == 1
@@ -127,23 +133,31 @@ def test_private_visibility_and_nonparticipant_no_history_leak(tmp_path):
     board = client.get(BASE + "/board").json()
     assert [x["title"] for x in board["items"]] == ["Shared pickup task"]
     assert all(e["planId"] != secret["id"] for e in board["history"])
-    assert client.put(
-        BASE + f"/plans/{secret['id']}",
-        json={**plan(title="Try to alter"), "expected_revision": 1},
-    ).status_code == 404
-    assert client.post(
-        BASE + f"/plans/{secret['id']}/ack", json={"expected_revision": 1}
-    ).status_code == 404
-    assert client.post(
-        BASE + f"/plans/{shared['id']}/complete", json={"expected_revision": 1}
-    ).status_code == 403
+    assert (
+        client.put(
+            BASE + f"/plans/{secret['id']}",
+            json={**plan(title="Try to alter"), "expected_revision": 1},
+        ).status_code
+        == 404
+    )
+    assert (
+        client.post(BASE + f"/plans/{secret['id']}/ack", json={"expected_revision": 1}).status_code
+        == 404
+    )
+    assert (
+        client.post(
+            BASE + f"/plans/{shared['id']}/complete", json={"expected_revision": 1}
+        ).status_code
+        == 403
+    )
     login(client, "owner")
-    assert [x["id"] for x in client.get(BASE + "/board").json()["items"]] == [
-        shared["id"]
-    ]
-    assert client.post(
-        BASE + f"/plans/{secret['id']}/archive", json={"expected_revision": 1}
-    ).status_code == 404
+    assert [x["id"] for x in client.get(BASE + "/board").json()["items"]] == [shared["id"]]
+    assert (
+        client.post(
+            BASE + f"/plans/{secret['id']}/archive", json={"expected_revision": 1}
+        ).status_code
+        == 404
+    )
 
 
 def test_due_reminder_ack_replay_and_missed_negative_checks(tmp_path):
@@ -153,8 +167,11 @@ def test_due_reminder_ack_replay_and_missed_negative_checks(tmp_path):
     response = client.post(
         BASE + "/plans",
         json=plan(
-            local_due=past, kind="appointment", recurrence_days=None,
-            assignee_user_id=ids["alice"], reminder_minutes=30,
+            local_due=past,
+            kind="appointment",
+            recurrence_days=None,
+            assignee_user_id=ids["alice"],
+            reminder_minutes=30,
         ),
     )
     assert response.status_code == 201, response.text
@@ -163,31 +180,32 @@ def test_due_reminder_ack_replay_and_missed_negative_checks(tmp_path):
     assert item["reminderDue"] is True
     assert item["reminderAcknowledged"] is False
     login(client, "bob")
-    assert client.post(
-        BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 1}
-    ).status_code == 403
-    login(client, "alice")
-    ack = client.post(
-        BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 1}
+    assert (
+        client.post(BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 1}).status_code
+        == 403
     )
+    login(client, "alice")
+    ack = client.post(BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 1})
     assert ack.status_code == 200, ack.text
     assert ack.json()["reminderAcknowledged"] is True
     assert ack.json()["revision"] == 2
-    assert client.post(
-        BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 1}
-    ).status_code == 409
-    assert client.post(
-        BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 2}
-    ).status_code == 409
-    done = client.post(
-        BASE + f"/plans/{item['id']}/complete", json={"expected_revision": 2}
+    assert (
+        client.post(BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 1}).status_code
+        == 409
+    )
+    assert (
+        client.post(BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 2}).status_code
+        == 409
     )
     assert done.status_code == 200, done.text
     assert done.json()["status"] == "done"
     assert done.json()["missed"] is False
-    assert client.post(
-        BASE + f"/plans/{item['id']}/complete", json={"expected_revision": 3}
-    ).status_code == 409
+    assert (
+        client.post(
+            BASE + f"/plans/{item['id']}/complete", json={"expected_revision": 3}
+        ).status_code
+        == 409
+    )
     assert client.get(BASE + "/board").json()["summary"]["missed"] == 0
     with factory() as db:
         assert db.query(FamilyPlanEvent379).count() == 3
@@ -199,8 +217,10 @@ def test_recurrence_uses_local_wall_clock_not_utc_offset(tmp_path):
     response = client.post(
         BASE + "/plans",
         json=plan(
-            local_due="2027-03-07T14:30", timezone="America/Toronto",
-            recurrence_days=7, assignee_user_id=ids["alice"],
+            local_due="2027-03-07T14:30",
+            timezone="America/Toronto",
+            recurrence_days=7,
+            assignee_user_id=ids["alice"],
             reminder_minutes=0,
         ),
     )
@@ -208,9 +228,7 @@ def test_recurrence_uses_local_wall_clock_not_utc_offset(tmp_path):
     item = response.json()
     due = item["dueAtUtc"]
     login(client, "alice")
-    next_ = client.post(
-        BASE + f"/plans/{item['id']}/complete", json={"expected_revision": 1}
-    )
+    next_ = client.post(BASE + f"/plans/{item['id']}/complete", json={"expected_revision": 1})
     assert next_.status_code == 200, next_.text
     next_item = next_.json()
     assert next_item["status"] == "open"
@@ -221,9 +239,12 @@ def test_recurrence_uses_local_wall_clock_not_utc_offset(tmp_path):
     assert (
         datetime.fromisoformat(next_item["dueAtUtc"]) - datetime.fromisoformat(due)
     ) == timedelta(days=7, hours=-1)
-    assert client.post(
-        BASE + f"/plans/{item['id']}/complete", json={"expected_revision": 1}
-    ).status_code == 409
+    assert (
+        client.post(
+            BASE + f"/plans/{item['id']}/complete", json={"expected_revision": 1}
+        ).status_code
+        == 409
+    )
     with factory() as db:
         assert db.query(FamilyPlanEvent379).count() == 2
 
@@ -245,12 +266,18 @@ def test_update_invalidates_ack_archive_and_access_control(tmp_path):
     client, factory, ids = setup(tmp_path)
     past = (datetime.now(UTC) - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M")
     login(client, "alice")
-    item = client.post(BASE + "/plans", json=plan(
-        local_due=past, reminder_minutes=0, assignee_user_id=ids["alice"],
-    )).json()
-    assert client.post(
-        BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 1}
-    ).status_code == 200
+    item = client.post(
+        BASE + "/plans",
+        json=plan(
+            local_due=past,
+            reminder_minutes=0,
+            assignee_user_id=ids["alice"],
+        ),
+    ).json()
+    assert (
+        client.post(BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 1}).status_code
+        == 200
+    )
     changed = client.put(
         BASE + f"/plans/{item['id']}",
         json={**plan(local_due=date_at(4)), "expected_revision": 2},
@@ -258,17 +285,19 @@ def test_update_invalidates_ack_archive_and_access_control(tmp_path):
     assert changed.status_code == 200, changed.text
     assert changed.json()["reminderAcknowledged"] is False
     assert changed.json()["reminderDue"] is False
-    assert client.post(
-        BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 3}
-    ).status_code == 409
-    login(client, "bob")
-    assert client.post(
-        BASE + f"/plans/{item['id']}/archive", json={"expected_revision": 3}
-    ).status_code == 403
-    login(client, "alice")
-    archived = client.post(
-        BASE + f"/plans/{item['id']}/archive", json={"expected_revision": 3}
+    assert (
+        client.post(BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 3}).status_code
+        == 409
     )
+    login(client, "bob")
+    assert (
+        client.post(
+            BASE + f"/plans/{item['id']}/archive", json={"expected_revision": 3}
+        ).status_code
+        == 403
+    )
+    login(client, "alice")
+    archived = client.post(BASE + f"/plans/{item['id']}/archive", json={"expected_revision": 3})
     assert archived.status_code == 200, archived.text
     assert client.get(BASE + "/board").json()["items"] == []
     with factory() as db:
