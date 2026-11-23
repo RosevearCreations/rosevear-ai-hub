@@ -1,4 +1,5 @@
 """Build383 no-false-GREEN and peer identity safety regression."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -58,15 +59,23 @@ def test_missing_peer_and_mixed_receipts_never_green():
 
 def test_tls_preflight_needs_both_and_independent_custody(tmp_path: Path):
     assert not peer_preflight383({})
+
     def peer(destination: str):
         return PeerEnrollment348(
-            source="rosevear-ai-hub", destination=destination,
-            hostname="192.168.68.3", port=8443,
-            server_cert_pin="a" * 64, client_cert_pin="b" * 64,
-            ca_file=tmp_path / "ca", client_cert_file=tmp_path / "cert",
-            client_key_file=tmp_path / "key", peer_protocols=("1.1",),
-            peer_capabilities=("master.health.readonly",), owner_approved=True,
+            source="rosevear-ai-hub",
+            destination=destination,
+            hostname="192.168.68.3",
+            port=8443,
+            server_cert_pin="a" * 64,
+            client_cert_pin="b" * 64,
+            ca_file=tmp_path / "ca",
+            client_cert_file=tmp_path / "cert",
+            client_key_file=tmp_path / "key",
+            peer_protocols=("1.1",),
+            peer_capabilities=("master.health.readonly",),
+            owner_approved=True,
         )
+
     peers = {p: peer(p) for p in PEERS383}
     assert not peer_preflight383(peers)
     peers[PEERS383[1]] = PeerEnrollment348(
