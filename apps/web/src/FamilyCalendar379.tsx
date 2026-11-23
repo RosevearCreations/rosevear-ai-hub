@@ -104,7 +104,7 @@ export function FamilyCalendar379({
     const data = await getFamilyBoard379();
     setBoard(data);
   }
-  async function run(action: () => Promise<unknown>, message: string) {
+  async function run(action: () => Promise<unknown>, message: string): Promise<boolean> {
     if (busy) return;
     setBusy(true); setError(""); setNotice("");
     try {
@@ -139,12 +139,12 @@ export function FamilyCalendar379({
     event.preventDefault();
     if (!canEdit || busy || !form.title.trim()) return;
     const modifying = editing;
-    await run(() => modifying
+    const success = await run(() => modifying
       ? editFamilyPlan379(modifying.id, modifying.revision, form)
       : createFamilyPlan379(form),
     modifying ? "Plan updated; any earlier reminder acknowledgment was reset." :
       "Family plan created locally. No external message was sent.");
-    // Preserve the form on a failed write, so we can correct an invalid DST time.
+    if (success) clear();\n    // Preserve the form on failed writes, e.g. invalid DST times.
   }
   const today = (() => {
     const d = new Date();
