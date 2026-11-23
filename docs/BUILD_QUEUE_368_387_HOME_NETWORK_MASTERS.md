@@ -143,7 +143,7 @@ The purpose is a **single useful home/workshop AI and operations centre**, not 2
 
 **Acceptance / security gate:** Local model fallback, citation checks, consented voice; no LLM-driven hazardous or security controls.
 
-### Build 381 — Resilient Windows boot, network sequencing & local recovery
+### Build 381 — Resilient Windows boot, network sequencing & local recovery (SOURCE IMPLEMENTED; FIELD HOLD)
 
 **Deliver:** Verify Home Assistant VM, MQTT, Caddy, Ollama, go2rtc, Vite/API dependencies and private IP reservation; staged health/failover, rollback and pre-login evidence..
 
