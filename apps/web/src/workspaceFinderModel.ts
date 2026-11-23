@@ -12,6 +12,7 @@ const WORKSPACE_HINTS: Record<string, { description: string; terms: readonly str
   Notifications: { description: "Alerts and reminders", terms: ["alerts", "reminders", "inbox"] },
   Groceries: { description: "Shared household groceries and pantry", terms: ["shopping", "pantry", "food", "pickup", "grocery", "list"] },
   Calendar: { description: "Private family calendar, chores, and in-app reminders", terms: ["appointments", "household", "tasks", "chores", "schedule", "reminders", "supplies"] },
+  "Boot Recovery": { description: "Owner Windows startup stages, recovery and pre-login witness review", terms: ["windows reboot", "boot", "startup", "recovery", "caddy", "tailscale", "ollama", "virtualbox", "dependencies"] },
   "Search & Help": { description: "Help and searchable guides", terms: ["help", "guides", "manual", "support"] },
   System: { description: "Health, diagnostics and updates", terms: ["status", "health", "diagnostics", "update", "backup", "restart"] },
   Workshop: { description: "Workshop jobs and maintenance", terms: ["projects", "equipment", "maintenance", "materials"] },

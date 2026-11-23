@@ -14,6 +14,7 @@ from rosevear_ai_hub.api.audit import router as audit_router
 from rosevear_ai_hub.api.automation_sequencing376 import router as automation_sequencing376_router
 from rosevear_ai_hub.api.automations import router as automations_router
 from rosevear_ai_hub.api.backup_inventory import router as backup_inventory_router
+from rosevear_ai_hub.api.boot_sequence381 import router as boot_sequence381_router
 from rosevear_ai_hub.api.business import router as business_router
 from rosevear_ai_hub.api.camera_compatibility import router as camera_compatibility_router
 from rosevear_ai_hub.api.camera_import_assurance import router as camera_import_assurance_router
@@ -260,6 +261,7 @@ def create_app() -> FastAPI:
     application.include_router(sysop_telemetry423_router)
     application.include_router(global_search_router)
     application.include_router(grocery378_router)
+    application.include_router(boot_sequence381_router)
     application.include_router(private_helper380_router)
     application.include_router(family_calendar379_router)
     # QL-243: default-off, nonproduction-only, authenticated GET health metadata.
