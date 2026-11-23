@@ -197,6 +197,7 @@ def test_due_reminder_ack_replay_and_missed_negative_checks(tmp_path):
         client.post(BASE + f"/plans/{item['id']}/ack", json={"expected_revision": 2}).status_code
         == 409
     )
+    done = client.post(BASE + f"/plans/{item['id']}/complete", json={"expected_revision": 2})
     assert done.status_code == 200, done.text
     assert done.json()["status"] == "done"
     assert done.json()["missed"] is False
