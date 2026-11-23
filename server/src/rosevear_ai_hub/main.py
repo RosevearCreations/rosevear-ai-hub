@@ -104,6 +104,7 @@ from rosevear_ai_hub.api.mqtt import router as mqtt_router
 from rosevear_ai_hub.api.network_trust368 import router as network_trust368_router
 from rosevear_ai_hub.api.notifications import router as notifications_router
 from rosevear_ai_hub.api.ollama import router as ollama_router
+from rosevear_ai_hub.api.private_helper380 import router as private_helper380_router
 from rosevear_ai_hub.api.profiles import router as profiles_router
 from rosevear_ai_hub.api.providers import router as providers_router
 from rosevear_ai_hub.api.release_update_control import router as release_update_control_router
@@ -259,6 +260,7 @@ def create_app() -> FastAPI:
     application.include_router(sysop_telemetry423_router)
     application.include_router(global_search_router)
     application.include_router(grocery378_router)
+    application.include_router(private_helper380_router)
     application.include_router(family_calendar379_router)
     # QL-243: default-off, nonproduction-only, authenticated GET health metadata.
     application.include_router(integration_v1_router)
