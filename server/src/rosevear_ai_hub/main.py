@@ -33,6 +33,7 @@ from rosevear_ai_hub.api.device_registry import router as device_registry_router
 from rosevear_ai_hub.api.family_calendar379 import router as family_calendar379_router
 from rosevear_ai_hub.api.frigate import router as frigate_router
 from rosevear_ai_hub.api.global_search import router as global_search_router
+from rosevear_ai_hub.api.governance384 import router as governance384_router
 from rosevear_ai_hub.api.grocery378 import router as grocery378_router
 from rosevear_ai_hub.api.home_assistant import router as home_assistant_router
 from rosevear_ai_hub.api.home_assistant_controls import router as home_assistant_controls_router
@@ -128,7 +129,6 @@ from rosevear_ai_hub.api.server_shell365 import router as server_shell365_router
 from rosevear_ai_hub.api.smartthings374 import router as smartthings374_router
 from rosevear_ai_hub.api.speech import router as speech_router
 from rosevear_ai_hub.api.sysop_history366 import router as sysop_history366_router
-from rosevear_ai_hub.api.governance384 import router as governance384_router
 from rosevear_ai_hub.api.sysop_telemetry423 import router as sysop_telemetry423_router
 from rosevear_ai_hub.api.tools import router as tools_router
 from rosevear_ai_hub.api.tts import router as tts_router

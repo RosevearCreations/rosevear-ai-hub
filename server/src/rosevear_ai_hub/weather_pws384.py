@@ -10,7 +10,6 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-import os
 import re
 import sqlite3
 from contextlib import closing
@@ -175,7 +174,7 @@ def _fetch384(station_id: str, api_key: str) -> Any:
             ):
                 raise ValueError("HOLD_WU_REMOTE_RESPONSE")
             return response.json()
-    except (httpx.HTTPError, json.JSONDecodeError) as exc:
+    except (httpx.HTTPError, json.JSONDecodeError):
         raise ValueError("HOLD_WU_NETWORK_OR_JSON") from None
 
 
@@ -255,7 +254,11 @@ def cached_weather384(
         day = datetime.fromtimestamp(now_ms / 1000, UTC).strftime("%Y-%m-%d")
         used = budget[1] if budget and budget[0] == day else 0
         if not row:
-            return {**result, "status": "HOLD_NO_VALID_PWS_OBSERVATION", "callsUsedTodayByThisHub": used}
+            return {
+                **result,
+                "status": "HOLD_NO_VALID_PWS_OBSERVATION",
+                "callsUsedTodayByThisHub": used,
+            }
         item = json.loads(row[2])
         age = now_ms - row[0]
         if not (
@@ -273,7 +276,7 @@ def cached_weather384(
             }
         ):
             raise ValueError("HOLD_WU_CACHE_INVALID")
-        for key, (field, low, high) in WEATHER_FIELDS384.items():
+        for key, (_field, low, high) in WEATHER_FIELDS384.items():
             _metric384(item["values"][key], low, high)
         _metric384(item["values"]["humidityPercent"], 0, 100)
         _metric384(item["values"]["windDirectionDegrees"], 0, 360)
