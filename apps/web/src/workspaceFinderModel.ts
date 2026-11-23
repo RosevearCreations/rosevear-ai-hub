@@ -2,6 +2,7 @@
 const WORKSPACE_HINTS: Record<string, { description: string; terms: readonly string[] }> = {
   Home: { description: "Overview and daily status", terms: ["dashboard", "overview", "start"] },
   Chat: { description: "Ask the local AI assistant", terms: ["assistant", "ask", "conversation", "ai"] },
+  Assistant: { description: "Approved private manuals and workshop questions", terms: ["manuals", "approved sources", "offline evidence", "private ai", "equipment guidance"] },
   Knowledge: { description: "Notes, documents and research", terms: ["notes", "documents", "research", "library"] },
   Vault: { description: "Private vault planning", terms: ["secure storage", "private files"] },
   Devices: { description: "Home Assistant and smart devices", terms: ["lights", "sensors", "smart home", "home assistant"] },
