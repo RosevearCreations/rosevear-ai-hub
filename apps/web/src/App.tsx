@@ -20,6 +20,7 @@ import { CardHelp, CommandPalette, type ShellDensity, type ShellTheme } from "./
 import { loadShellTheme, parseShellTheme, saveShellTheme, MASTER_THEME_CHOICES } from "./shellThemePreference";
 import "./masterThemes467.css";
 import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
+import { ThemeAcceptance386Panel } from "./ThemeAcceptance386Panel";
 import { SystemWorkspaceGuide } from "./SystemWorkspaceGuide";
 import { SystemConsoleRefresh } from "./SystemConsoleRefresh";
 import { GlobalSearchHelp } from "./GlobalSearchHelp";
@@ -689,6 +690,7 @@ export function App() {
             {canAdminister && <RestartAppsPanel />}
             <div id="hub-system-remote"><RemoteAccessPanel /></div>
             {user.role === "owner" && <ITServiceDesk385Panel />}
+            {user.role === "owner" && <ThemeAcceptance386Panel activeTheme={appearance} onApplyTheme={setAppearance} />}
             {canAdminister && <div id="hub-system-resources"><ResourceBudgetPanel /><LocalModelHealthPanel /></div>}
             {canAdminister && <BackupRecoveryWorkbench />}
             {canAdminister && <SecurityReviewPanel />}

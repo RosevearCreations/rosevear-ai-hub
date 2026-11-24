@@ -7,6 +7,7 @@ import "./styles.css";
 import "./midnight-theme.css";
 import "./modern2026.css";
 import "./homeContrast366Hotfix.css";
+import "./themeAccessibility386.css";
 
 const root = document.getElementById("root");
 
