@@ -2,7 +2,12 @@
 
 from fastapi.testclient import TestClient
 
-from rosevear_ai_hub.campaign387 import GATES387, SCHEMA387, campaign_snapshot387
+from rosevear_ai_hub.campaign387 import (
+    GATES387,
+    MODULE_IDS387,
+    SCHEMA387,
+    campaign_snapshot387,
+)
 from rosevear_ai_hub.main import app
 
 
@@ -10,6 +15,9 @@ def test_campaign_all_fourteen_original_household_master_proofs_hold():
     sample = campaign_snapshot387(now_ms=1800000000000, original_host=False)
     assert sample["schema"] == SCHEMA387
     assert sample["gateCount"] == len(GATES387) == 14
+    assert sample["trackedModuleCount"] == len(MODULE_IDS387) == 24
+    assert sample["fieldCertifiedModuleCount"] == 0
+    assert all(m["fieldStatus"].startswith("HOLD") for m in sample["modules"])
     assert sample["status"] == "HOLD_NO_ORIGINAL_WINDOWS_CONTEXT"
     assert sample["runtimeSampleAvailable"] is False
     assert sample["fieldCertifiedCount"] == 0
