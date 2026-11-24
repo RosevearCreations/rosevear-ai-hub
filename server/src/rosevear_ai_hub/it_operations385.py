@@ -25,15 +25,25 @@ MAX_TICKETS385 = 500
 MAX_EVENTS385 = 3000
 TARGET_HOURS385 = frozenset((4, 24, 72, 168))
 CATEGORIES385 = frozenset(("incident", "complaint", "support", "maintenance"))
-SUMMARIES385 = frozenset((
-    "SERVICE_UNAVAILABLE", "LATENCY_SLOW", "PROCESS_RESTART_REPORTED",
-    "LAN_ISSUE_REPORTED", "SUPPORT_REQUEST", "COMPLAINT",
-    "RECOVERY_EVIDENCE_REVIEW", "OTHER",
-))
-EVIDENCE385 = frozenset((
-    "OWNER_REPORT_UNVERIFIED", "LOCAL_RUNTIME_SAMPLE_UNSIGNED",
-    "SOURCE_RECEIPT_REFERENCE_UNATTESTED",
-))
+SUMMARIES385 = frozenset(
+    (
+        "SERVICE_UNAVAILABLE",
+        "LATENCY_SLOW",
+        "PROCESS_RESTART_REPORTED",
+        "LAN_ISSUE_REPORTED",
+        "SUPPORT_REQUEST",
+        "COMPLAINT",
+        "RECOVERY_EVIDENCE_REVIEW",
+        "OTHER",
+    )
+)
+EVIDENCE385 = frozenset(
+    (
+        "OWNER_REPORT_UNVERIFIED",
+        "LOCAL_RUNTIME_SAMPLE_UNSIGNED",
+        "SOURCE_RECEIPT_REFERENCE_UNATTESTED",
+    )
+)
 STATES385 = frozenset(("open", "investigating", "waiting", "resolved"))
 TRANSITIONS385 = {
     "open": frozenset(("investigating", "waiting", "resolved")),
@@ -42,7 +52,11 @@ TRANSITIONS385 = {
     "resolved": frozenset(("open",)),
 }
 PROCESS_NAMES385 = (
-    "caddy.exe", "ollama.exe", "go2rtc.exe", "node.exe", "tailscale-ipn.exe",
+    "caddy.exe",
+    "ollama.exe",
+    "go2rtc.exe",
+    "node.exe",
+    "tailscale-ipn.exe",
 )
 DDL385 = """
 CREATE TABLE IF NOT EXISTS tickets385 (
@@ -98,13 +112,12 @@ def _process_counts385(now_sec: float) -> list[dict[str, Any]]:
         {
             "processName": name,
             "observedNameCount": len(buckets[name]),
-            "oldestObservedUptimeSeconds": (
-                int(max(buckets[name])) if buckets[name] else None
-            ),
+            "oldestObservedUptimeSeconds": (int(max(buckets[name])) if buckets[name] else None),
             "identityAndRoleVerified": False,
             "restartCountMeasured": None,
             "state": (
-                "NAME_PRESENT_ROLE_UNVERIFIED" if buckets[name]
+                "NAME_PRESENT_ROLE_UNVERIFIED"
+                if buckets[name]
                 else "NAME_NOT_OBSERVED_OR_ACCESS_DENIED"
             ),
         }
@@ -155,11 +168,13 @@ def runtime_snapshot385(*, now_ms: int, original_host: bool) -> dict[str, Any]:
             for name in resource["signals"]
         ]
         if not stats:
-            alerts.append({
-                "code": "INTERFACE_COUNTERS_NOT_AVAILABLE",
-                "severity": "UNKNOWN",
-                "evidence": "NO_NETWORK_PROBE",
-            })
+            alerts.append(
+                {
+                    "code": "INTERFACE_COUNTERS_NOT_AVAILABLE",
+                    "severity": "UNKNOWN",
+                    "evidence": "NO_NETWORK_PROBE",
+                }
+            )
         return {
             **result,
             "status": "LOCAL_RUNTIME_DIAGNOSTICS_ONLY",
@@ -188,8 +203,14 @@ def runtime_snapshot385(*, now_ms: int, original_host: bool) -> dict[str, Any]:
 
 
 def _validate385(
-    *, app_id: str, category: str, summary_code: str, target_hours: int,
-    evidence_kind: str, evidence_sha256: str | None, owner_user_id: int,
+    *,
+    app_id: str,
+    category: str,
+    summary_code: str,
+    target_hours: int,
+    evidence_kind: str,
+    evidence_sha256: str | None,
+    owner_user_id: int,
 ) -> None:
     if (
         app_id not in APPS
@@ -198,11 +219,12 @@ def _validate385(
         or type(target_hours) is not int
         or target_hours not in TARGET_HOURS385
         or evidence_kind not in EVIDENCE385
-        or (evidence_sha256 is not None and (
-            type(evidence_sha256) is not str
-            or HEX64.fullmatch(evidence_sha256) is None
-        ))
-        or type(owner_user_id) is not int or owner_user_id <= 0
+        or (
+            evidence_sha256 is not None
+            and (type(evidence_sha256) is not str or HEX64.fullmatch(evidence_sha256) is None)
+        )
+        or type(owner_user_id) is not int
+        or owner_user_id <= 0
     ):
         raise ValueError("HOLD_IT385_INVALID_TICKET_SCOPE_OR_EVIDENCE")
 
@@ -220,16 +242,28 @@ def _open_write385(path: Path) -> sqlite3.Connection:
 
 
 def create_ticket385(
-    path: Path, *, app_id: str, category: str, summary_code: str,
-    target_hours: int, evidence_kind: str, evidence_sha256: str | None,
-    owner_user_id: int, now_ms: int, original_host: bool,
+    path: Path,
+    *,
+    app_id: str,
+    category: str,
+    summary_code: str,
+    target_hours: int,
+    evidence_kind: str,
+    evidence_sha256: str | None,
+    owner_user_id: int,
+    now_ms: int,
+    original_host: bool,
 ) -> dict[str, Any]:
     if not original_host:
         raise ValueError("HOLD_NOT_ORIGINAL_WINDOWS_HOST")
     _validate385(
-        app_id=app_id, category=category, summary_code=summary_code,
-        target_hours=target_hours, evidence_kind=evidence_kind,
-        evidence_sha256=evidence_sha256, owner_user_id=owner_user_id,
+        app_id=app_id,
+        category=category,
+        summary_code=summary_code,
+        target_hours=target_hours,
+        evidence_kind=evidence_kind,
+        evidence_sha256=evidence_sha256,
+        owner_user_id=owner_user_id,
     )
     ticket_id = uuid.uuid4().hex
     with closing(_open_write385(path)) as db:
@@ -241,8 +275,15 @@ def create_ticket385(
                 """INSERT INTO tickets385(id,app_id,category,summary_code,opened_ms,
                      target_ms,updated_ms,closed_ms,status,revision)
                    VALUES(?,?,?,?,?,?,?,NULL,'open',1)""",
-                (ticket_id, app_id, category, summary_code, now_ms,
-                 now_ms + target_hours * 3600_000, now_ms),
+                (
+                    ticket_id,
+                    app_id,
+                    category,
+                    summary_code,
+                    now_ms,
+                    now_ms + target_hours * 3600_000,
+                    now_ms,
+                ),
             )
             db.execute(
                 """INSERT INTO ticket_events385
@@ -256,28 +297,42 @@ def create_ticket385(
             db.execute("ROLLBACK")
             raise
     return {
-        "ticketId": ticket_id, "revision": 1, "status": "open",
+        "ticketId": ticket_id,
+        "revision": 1,
+        "status": "open",
         "eventKind": "OWNER_STRUCTURED_REPORT_NOT_PROVIDER_SLA_PROOF",
     }
 
 
 def transition_ticket385(
-    path: Path, *, ticket_id: str, expected_revision: int,
-    status: str, evidence_kind: str, evidence_sha256: str | None,
-    owner_user_id: int, now_ms: int, original_host: bool,
+    path: Path,
+    *,
+    ticket_id: str,
+    expected_revision: int,
+    status: str,
+    evidence_kind: str,
+    evidence_sha256: str | None,
+    owner_user_id: int,
+    now_ms: int,
+    original_host: bool,
 ) -> dict[str, Any]:
     if not original_host:
         raise ValueError("HOLD_NOT_ORIGINAL_WINDOWS_HOST")
     _validate385(
-        app_id="rosevear-ai-hub", category="incident",
-        summary_code="SUPPORT_REQUEST", target_hours=24,
-        evidence_kind=evidence_kind, evidence_sha256=evidence_sha256,
+        app_id="rosevear-ai-hub",
+        category="incident",
+        summary_code="SUPPORT_REQUEST",
+        target_hours=24,
+        evidence_kind=evidence_kind,
+        evidence_sha256=evidence_sha256,
         owner_user_id=owner_user_id,
     )
     if (
-        type(ticket_id) is not str or len(ticket_id) != 32
+        type(ticket_id) is not str
+        or len(ticket_id) != 32
         or any(ch not in "0123456789abcdef" for ch in ticket_id)
-        or type(expected_revision) is not int or expected_revision < 1
+        or type(expected_revision) is not int
+        or expected_revision < 1
         or status not in STATES385
     ):
         raise ValueError("HOLD_INVALID_TICKET_TRANSITION")
@@ -301,29 +356,40 @@ def transition_ticket385(
             db.execute(
                 """UPDATE tickets385 SET status=?,revision=?,updated_ms=?,closed_ms=?
                    WHERE id=?""",
-                (status, revision, now_ms, now_ms if status == "resolved" else None,
-                 ticket_id),
+                (status, revision, now_ms, now_ms if status == "resolved" else None, ticket_id),
             )
             db.execute(
                 """INSERT INTO ticket_events385
                    (ticket_id,revision,occurred_ms,owner_user_id,action,
                     evidence_kind,evidence_sha256)
                    VALUES(?,?,?,?,?,?,?)""",
-                (ticket_id, revision, now_ms, owner_user_id,
-                 "owner_transition_" + status, evidence_kind, evidence_sha256),
+                (
+                    ticket_id,
+                    revision,
+                    now_ms,
+                    owner_user_id,
+                    "owner_transition_" + status,
+                    evidence_kind,
+                    evidence_sha256,
+                ),
             )
             db.execute("COMMIT")
         except Exception:
             db.execute("ROLLBACK")
             raise
     return {
-        "ticketId": ticket_id, "revision": revision, "status": status,
+        "ticketId": ticket_id,
+        "revision": revision,
+        "status": status,
         "eventKind": "OWNER_TRANSITION_NOT_INDEPENDENT_RESOLUTION_PROOF",
     }
 
 
 def service_desk_snapshot385(
-    path: Path | None, *, now_ms: int, original_host: bool,
+    path: Path | None,
+    *,
+    now_ms: int,
+    original_host: bool,
 ) -> dict[str, Any]:
     result = {
         "schema": TICKET_SCHEMA385,
@@ -373,18 +439,22 @@ def service_desk_snapshot385(
                 or e["owner_user_id"] <= 0
                 or type(e["occurred_ms"]) is not int
                 or e["occurred_ms"] > now_ms + 2000
-                or (e["evidence_sha256"] is not None and
-                    HEX64.fullmatch(e["evidence_sha256"]) is None)
+                or (
+                    e["evidence_sha256"] is not None
+                    and HEX64.fullmatch(e["evidence_sha256"]) is None
+                )
             ):
                 raise ValueError("HOLD_TICKET_EVENT_TAMPER")
-            grouped.setdefault(e["ticket_id"], []).append({
-                "revision": e["revision"],
-                "occurredAtMs": e["occurred_ms"],
-                "action": e["action"],
-                "evidenceKind": e["evidence_kind"],
-                "evidenceHashPresent": e["evidence_sha256"] is not None,
-                "authority": "OWNER_REPORT_ONLY",
-            })
+            grouped.setdefault(e["ticket_id"], []).append(
+                {
+                    "revision": e["revision"],
+                    "occurredAtMs": e["occurred_ms"],
+                    "action": e["action"],
+                    "evidenceKind": e["evidence_kind"],
+                    "evidenceHashPresent": e["evidence_sha256"] is not None,
+                    "authority": "OWNER_REPORT_ONLY",
+                }
+            )
         tickets = []
         for row in rows:
             if (
@@ -403,21 +473,23 @@ def service_desk_snapshot385(
             ):
                 raise ValueError("HOLD_TICKET_LEDGER_TAMPER")
             overdue = row["status"] != "resolved" and now_ms > row["target_ms"]
-            tickets.append({
-                "id": row["id"],
-                "appId": row["app_id"],
-                "category": row["category"],
-                "summaryCode": row["summary_code"],
-                "openedAtMs": row["opened_ms"],
-                "targetAtMs": row["target_ms"],
-                "updatedAtMs": row["updated_ms"],
-                "closedAtMs": row["closed_ms"],
-                "status": row["status"],
-                "revision": row["revision"],
-                "ownerTargetOverdue": overdue,
-                "slaVerified": False,
-                "events": grouped.get(row["id"], [])[:24],
-            })
+            tickets.append(
+                {
+                    "id": row["id"],
+                    "appId": row["app_id"],
+                    "category": row["category"],
+                    "summaryCode": row["summary_code"],
+                    "openedAtMs": row["opened_ms"],
+                    "targetAtMs": row["target_ms"],
+                    "updatedAtMs": row["updated_ms"],
+                    "closedAtMs": row["closed_ms"],
+                    "status": row["status"],
+                    "revision": row["revision"],
+                    "ownerTargetOverdue": overdue,
+                    "slaVerified": False,
+                    "events": grouped.get(row["id"], [])[:24],
+                }
+            )
         return {
             **result,
             "status": "PRIVATE_OWNER_TICKETS_NOT_PROVIDER_SLA",
