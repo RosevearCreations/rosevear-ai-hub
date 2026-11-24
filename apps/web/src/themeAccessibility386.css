@@ -1,0 +1,215 @@
+/* Build 386: sixteen-Master visual parity + accessible controls.
+   Presentation only. Never upgrades owner reports to device, release or signer proof. */
+
+/* The fourteen specialist dark skins inherit their audited tokens from
+   masterThemes467.css, leaving Daylight and the legacy light-content
+   High Contrast view independent. */
+.app-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"])
+:not([data-theme="high-contrast"]):not([data-theme="daylight"])
+.content :is(.panel,.shell349-status,.mc-panel,.hub-vital) {
+  background-color: var(--shell-selected);
+  color: var(--shell-ink);
+  border-color: var(--shell-border);
+}
+.app-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"])
+:not([data-theme="high-contrast"]):not([data-theme="daylight"])
+.content :is(.panel,.shell349-status,.mc-panel,.hub-vital) :is(h2,h3,h4,p,small,strong,label,summary) {
+  color: var(--shell-ink);
+}
+/* Muted text is a separate 4.5:1 verified token against the shared panel. */
+.app-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"])
+:not([data-theme="high-contrast"]):not([data-theme="daylight"])
+.content :is(.panel,.shell349-status,.mc-panel,.hub-vital) :is(.lede,.muted,.help-text) {
+  color: var(--shell-muted);
+}
+.app-shell[data-theme="daylight"] .content :is(.panel,.shell349-status,.mc-panel,.hub-vital) {
+  background-color: var(--shell-selected); color: var(--shell-ink);
+  border-color: var(--shell-border); color-scheme: light;
+}
+.app-shell[data-theme="daylight"] .content :is(.panel,.shell349-status,.mc-panel,.hub-vital) :is(p,small,strong,label,h2,h3,h4) {
+  color: var(--shell-ink);
+}
+/* High Contrast historically has light content and a dark sidebar; use
+   explicit scoped light-surface ink rather than inherited white sidebar ink. */
+.app-shell[data-theme="high-contrast"] .content :is(.panel,.shell349-status,.mc-panel,.hub-vital) {
+  --shell-paper: #ffffff; --shell-selected: #ffffff;
+  --shell-ink: #142c3d; --shell-muted: #293f4b;
+  --shell-border: #294860; --shell-accent: #294860;
+  background-color: #ffffff; color: #142c3d; border-color: #294860;
+  color-scheme: light;
+}
+.app-shell[data-theme="high-contrast"] .content :is(.panel,.shell349-status,.mc-panel,.hub-vital) :is(h2,h3,h4,p,small,strong,label) {
+  color: #142c3d;
+}
+
+/* Native controls must remain legible at 200% zoom and on touch devices.
+   Avoid changing checkbox/radio dimensions and do not force internal native
+   picker widgets to a custom colour unsupported by their browser. */
+.app-shell[data-theme] .content :is(.panel,.mc-panel,.shell349-status,.hub-owner-preferences)
+:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),textarea,select) {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  width: min(100%, 44rem);
+  min-height: 44px;
+  font: inherit;
+  font-size: max(1rem, 16px);
+  line-height: 1.45;
+  padding: .65rem .8rem;
+  border: 2px solid var(--shell-accent);
+  border-radius: .6rem;
+  color: var(--shell-ink);
+  background-color: var(--shell-paper);
+}
+.app-shell[data-theme] .content :is(.panel,.mc-panel,.shell349-status,.hub-owner-preferences)
+:is(textarea) { resize: vertical; min-height: 7rem; overflow-wrap: anywhere; }
+.app-shell[data-theme] .content :is(.panel,.mc-panel,.shell349-status,.hub-owner-preferences)
+:is(input[type="date"],input[type="datetime-local"],input[type="time"],input[type="month"]) {
+  width: min(100%, 22rem);
+  min-height: 48px;
+  color-scheme: dark;
+}
+.app-shell[data-theme="daylight"] .content :is(.panel,.mc-panel,.shell349-status,.hub-owner-preferences)
+:is(input,select,textarea) { color-scheme: light; }
+.app-shell[data-theme="high-contrast"] .content :is(.panel,.mc-panel,.shell349-status,.hub-owner-preferences)
+:is(input:not([type="checkbox"]):not([type="radio"]),select,textarea) {
+  color-scheme: light;
+  background: #ffffff;
+  color: #142c3d;
+  border-color: #294860;
+}
+.app-shell[data-theme] .content :is(button,a,input,textarea,select,summary,[role="button"]):focus-visible {
+  outline: 3px solid var(--shell-accent, #ffdd55);
+  outline-offset: 3px;
+}
+.app-shell[data-theme="high-contrast"] .content :is(button,a,input,textarea,select,summary,[role="button"]):focus-visible {
+  outline-color: #005bb5;
+}
+
+/* Auth panels in the fourteen dark palettes cannot inherit legacy white cards. */
+.auth-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"])
+:not([data-theme="high-contrast"]):not([data-theme="daylight"]) .auth-card {
+  background: var(--shell-selected); color: var(--shell-ink);
+  border: 2px solid var(--shell-accent);
+}
+.auth-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"])
+:not([data-theme="high-contrast"]):not([data-theme="daylight"]) .auth-card
+:is(h1,h2,p,small,strong,label) { color: var(--shell-ink); }
+.auth-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"])
+:not([data-theme="high-contrast"]):not([data-theme="daylight"]) .auth-card
+:is(input,select) { background: var(--shell-paper); color: var(--shell-ink); }
+.auth-shell[data-theme="daylight"] .auth-card {
+  background: #ffffff; color: #142d48; border: 2px solid #005bb5;
+}
+.auth-shell[data-theme="daylight"] .auth-card :is(h1,h2,p,small,strong,label) { color: #142d48; }
+.auth-shell[data-theme="daylight"] .auth-card :is(input,select) {
+  color: #142d48; background: #ffffff; color-scheme: light;
+}
+
+/* Owner-only 16 x 3 acceptance workspace, safe at 320px or 400% zoom. */
+.app-shell[data-theme] .theme386-acceptance {
+  box-sizing: border-box;
+  min-width: 0; max-width: 100%;
+  margin: 1.25rem 0;
+  padding: clamp(.8rem, 2vw, 1.25rem);
+  border: 2px solid var(--shell-accent, #005bb5);
+  border-radius: 1rem;
+  color: var(--shell-ink, #142c3d);
+  background: var(--shell-selected, #f5f9fb);
+  overflow-wrap: anywhere;
+}
+.app-shell[data-theme="high-contrast"] .theme386-acceptance {
+  --shell-ink: #142c3d; --shell-muted: #293f4b;
+  --shell-selected: #ffffff; --shell-paper: #ffffff; --shell-accent: #294860;
+}
+.theme386-acceptance :is(header,fieldset) { min-width: 0; max-width: 100%; }
+.theme386-acceptance fieldset {
+  display: grid; gap: .75rem;
+  border: 1px solid var(--shell-accent);
+  border-radius: .65rem; padding: .8rem; margin: .75rem 0;
+}
+.theme386-acceptance legend { font-weight: 750; padding-inline: .35rem; }
+.theme386-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(min(140px,100%),1fr));
+  gap: .5rem;
+}
+.theme386-acceptance button {
+  min-height: 44px; min-width: 0; max-width: 100%;
+  white-space: normal; text-align: left;
+  border: 2px solid var(--shell-accent);
+  border-radius: .6rem;
+  padding: .6rem .75rem;
+  background: var(--shell-paper);
+  color: var(--shell-ink);
+  overflow-wrap: anywhere;
+}
+.theme386-palette-choice { display: flex; align-items: center; gap: .55rem; }
+.theme386-palette-choice[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 2px var(--shell-accent);
+  font-weight: 800;
+}
+.theme386-swatch {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: 0 0 1.7rem; width: 1.7rem; height: 1.7rem;
+  border: 2px solid; border-radius: .4rem;
+}
+.theme386-swatch > span { width: .65rem; height: .65rem; border-radius: 50%; }
+.theme386-controls { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(250px,100%),1fr)); gap: .65rem; }
+.theme386-controls fieldset { align-content: start; }
+.theme386-controls label { display: flex; gap: .55rem; align-items: center; min-height: 44px; }
+.theme386-controls input[type="radio"] { width: 1.25rem; height: 1.25rem; flex: 0 0 auto; accent-color: var(--shell-accent); }
+.theme386-actions { align-self: center; }
+.theme386-preview-scroll { min-width: 0; max-width: 100%; overflow-x: auto; padding: .3rem 0; }
+.theme386-preview-scroll:focus-visible { outline: 3px solid var(--shell-accent); outline-offset: 3px; }
+.theme386-demo {
+  box-sizing: border-box;
+  min-width: 0; max-width: 100%;
+  margin: 0 auto; padding: clamp(.75rem,2vw,1.25rem);
+  border: 2px solid; border-radius: .85rem;
+  overflow-wrap: anywhere;
+}
+.theme386-demo[data-preview-viewport="desktop"] { width: min(100%, 90rem); }
+.theme386-demo[data-preview-viewport="tablet"] { width: min(100%, 48rem); }
+.theme386-demo[data-preview-viewport="phone"] { width: min(100%, 23.4375rem); }
+.theme386-demo :is(h3,label,p,small) { color: inherit; }
+.theme386-demo-card { display: grid; gap: .7rem; padding: .85rem; border: 1px solid; border-radius: .65rem; min-width: 0; }
+.theme386-demo label { display: grid; gap: .4rem; min-width: 0; font-weight: 650; }
+.theme386-demo :is(input,select,button) {
+  box-sizing: border-box; min-width: 0; width: 100%; max-width: 100%;
+  min-height: 46px; padding: .65rem; border: 2px solid;
+  border-radius: .5rem; font: inherit; font-size: max(1rem,16px);
+}
+.theme386-demo :is(input,select,button):focus-visible {
+  outline: 3px solid currentColor; outline-offset: 3px;
+}
+.theme386-date-row { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(180px,100%),1fr)); gap: .65rem; min-width: 0; }
+.theme386-error { padding: .6rem; border: 2px solid; border-radius: .5rem; font-weight: 700; }
+.theme386-manual-checks li { margin-bottom: .35rem; }
+.theme386-review-buttons { display: flex; flex-wrap: wrap; gap: .55rem; }
+.theme386-report-table-scroll { max-width: 100%; overflow-x: auto; }
+.theme386-matrix { width: 100%; border-collapse: collapse; }
+.theme386-matrix :is(th,td) { border: 1px solid var(--shell-accent); padding: .5rem; text-align: start; }
+.theme386-matrix button { width: 100%; min-width: 8rem; }
+@media (max-width: 650px) {
+  .theme386-controls { grid-template-columns: minmax(0,1fr); }
+  .theme386-palette-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .theme386-acceptance { padding: .65rem; }
+  .theme386-review-buttons button { width: 100%; }
+}
+@media (max-width: 350px) {
+  .theme386-palette-grid { grid-template-columns: minmax(0,1fr); }
+}
+@media (forced-colors: active) {
+  .theme386-acceptance :is(button,input,select,textarea) {
+    forced-color-adjust: auto; border: 2px solid CanvasText;
+  }
+  .app-shell[data-theme] .theme386-acceptance,
+  .theme386-demo, .theme386-demo-card {
+    forced-color-adjust: auto; color: CanvasText !important;
+    background: Canvas !important; border-color: CanvasText !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme386-acceptance :is(button,input,select) { animation: none; transition: none; }
+}
