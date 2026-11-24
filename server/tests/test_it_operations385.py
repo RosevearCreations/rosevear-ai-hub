@@ -165,7 +165,10 @@ def test_ticket_scope_isolation_and_tamper_detection(tmp_path):
     assert not journal.exists()
     created = make385(journal)
     with sqlite3.connect(journal) as db:
-        db.execute("UPDATE tickets385 SET app_id=? WHERE id=?", ("wrong-tenant", created["ticketId"]))
+        db.execute(
+            "UPDATE tickets385 SET app_id=? WHERE id=?",
+            ("wrong-tenant", created["ticketId"]),
+        )
     result = service_desk_snapshot385(journal, now_ms=NOW385, original_host=True)
     assert result["status"] == "HOLD_PRIVATE_TICKET_JOURNAL_INVALID_OR_MISSING"
     assert result["tickets"] == []
