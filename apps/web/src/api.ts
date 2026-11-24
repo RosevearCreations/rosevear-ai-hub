@@ -4563,3 +4563,30 @@ export function getGovernedIntake384(signal?: AbortSignal): Promise<unknown> {
 export function getWeatherStation384(signal?: AbortSignal): Promise<unknown> {
   return authJson("GET", "/api/v1/system/weather-station-384", undefined, signal);
 }
+
+// Build385: owner-only local host diagnostics and structured, revision-controlled IT tickets.
+export function getITDiagnostics385(signal?: AbortSignal): Promise<unknown> {
+  return authJson("GET", "/api/v1/system/it-ops-385/diagnostics", undefined, signal);
+}
+export function getITTickets385(signal?: AbortSignal): Promise<unknown> {
+  return authJson("GET", "/api/v1/system/it-ops-385/tickets", undefined, signal);
+}
+export function createITTicket385(payload: {
+  app_id: string;
+  category: string;
+  summary_code: string;
+  target_hours: number;
+  evidence_kind: string;
+}): Promise<unknown> {
+  return authJson("POST", "/api/v1/system/it-ops-385/tickets", payload);
+}
+export function transitionITTicket385(ticketId: string, payload: {
+  expected_revision: number;
+  status: string;
+  evidence_kind: string;
+}): Promise<unknown> {
+  if (!/^[a-f0-9]{32}$/.test(ticketId)) {
+    return Promise.reject(new Error("HOLD_INVALID_TICKET_ID"));
+  }
+  return authJson("POST", "/api/v1/system/it-ops-385/tickets/" + ticketId + "/transition", payload);
+}
