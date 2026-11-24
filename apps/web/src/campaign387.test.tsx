@@ -39,6 +39,12 @@ function source387(): Campaign387 {
     localLanInterfacesReportedUp: null,
     localResourceWarningCodes: [],
     gateCount: 14,
+    trackedModuleCount: 24,
+    fieldCertifiedModuleCount: 0,
+    modules: Array.from({ length: 24 }, (_, i) => ({
+      id: "module-" + i,
+      fieldStatus: "HOLD_INDEPENDENT_EVIDENCE_MISSING" as const,
+    })),
     fieldCertifiedCount: 0,
     independentOriginalHostWitnessVerified: false,
     realHouseholdDeviceEndToEndVerified: false,
@@ -80,7 +86,7 @@ describe("Build387 source and field separation", () => {
       expect(source).toContain('"' + id + '"');
     }
     expect(source).toContain("SOURCE_RECEIPT");
-    expect(source).toContain("private Comms");
+    expect(source).toContain("receiver QL-340C");
     expect(source).toContain("no duplicate broker");
     const css = readFileSync(resolve(process.cwd(), "src/campaign387.css"), "utf8");
     expect(css).toContain("focus-visible");
