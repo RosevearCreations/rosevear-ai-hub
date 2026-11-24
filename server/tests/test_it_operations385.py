@@ -6,7 +6,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from rosevear_ai_hub.it_operations385 import (
-    CATEGORIES385,
     create_ticket385,
     original_host385,
     runtime_snapshot385,
