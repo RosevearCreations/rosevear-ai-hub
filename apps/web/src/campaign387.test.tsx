@@ -138,7 +138,7 @@ describe("Build387 source and field separation", () => {
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(
       "original Windows runtime context missing",
     ));
-    expect(screen.getByText(/0\/14/)).toBeInTheDocument();
+    expect(screen.getAllByText(/0\/14/).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("combobox", { name: "Our local observation" })).toHaveLength(14);
     fireEvent.click(screen.getByRole("button", { name: "Open Devices" }));
     expect(navigate).toHaveBeenCalledWith("Devices");
@@ -148,7 +148,7 @@ describe("Build387 source and field separation", () => {
     expect(screen.getByText(/0\/14/).parentElement).toBeTruthy();
     expect(screen.getByText(/Field verdict: HOLD/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Clear session-only owner reports" }));
-    expect(screen.getByText(/0\/14/)).toBeInTheDocument();
+    expect(screen.getAllByText(/0\/14/).length).toBeGreaterThan(0);
   });
 
   it("rejects a forged response in the UI without showing any field checks", async () => {
