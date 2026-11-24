@@ -6,6 +6,21 @@
 
 Rosevear AI Hub is a private, local-first AI control and knowledge layer for our home, workshop, cameras, documents, automations, and business systems.
 
+## Current release: Build 386 — 16-theme accessibility and safe Windows folder discovery
+
+**Canonical source repository:** [RosevearCreations/rosevear-ai-hub](https://github.com/RosevearCreations/rosevear-ai-hub).
+The protected `main` branch is the source-release candidate; the real Windows installation must be verified separately before claiming that the running Hub is updated. Historical build sections below are preserved for project history and are not current release-status statements.
+
+**Several Windows Hub folders? Do not create another clone or guess.**
+The [Build 386 owner setup and original-host field guide](docs/BUILD_386_SIXTEEN_THEME_ACCESSIBILITY_AND_WINDOWS_PATH.md) explains how to find the right path and identify the *running* Windows Task Scheduler/Service action without restarting anything. The [read-only folder finder](scripts/Find-RosevearHub386.ps1) lists candidate checkouts, Git remotes, branches and local changes. `C:\rc470` belongs to the separate **Rosevear Comms Hub** repository, not this AI Hub. The finder never resets, deletes, clones, or chooses a running path by itself.
+
+**Build 386 feature:** an owner-only **System → Shared 16-theme accessibility workshop** with 16 manifest-aligned colour palettes, native date and time fields, clearer form contrast and keyboard focus, responsive layout checks, and a 48-combination owner-report worksheet. Static colour/token and CI checks are not an independent Windows, tablet, phone, or three-Master visual audit. Cross-device and actual Windows-host acceptance remain **FIELD HOLD** pending genuine evidence.
+
+**Source verification:** use the latest exact-commit protected `main` push at [GitHub Actions](https://github.com/RosevearCreations/rosevear-ai-hub/actions) before marking a release GREEN. A reviewed PR passing checks by itself does not prove a protected `main` push completed.
+
+---
+
+
 It is intentionally **not just another chatbot**. The Hub is designed to let us:
 - use local AI through Ollama
 - optionally use cloud AI through replaceable provider adapters
