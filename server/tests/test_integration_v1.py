@@ -8,6 +8,7 @@ import sqlite3
 import time
 from pathlib import Path
 
+from anyio.from_thread import start_blocking_portal
 from fastapi.testclient import TestClient
 
 from rosevear_ai_hub.main import app
@@ -213,50 +214,54 @@ def test_ql261_synthetic_health_capabilities_never_contact_home_systems(monkeypa
     def forbid_network(*_args, **_kwargs):
         raise AssertionError("QL-261 synthetic source contract attempted a network socket")
 
-    monkeypatch.setattr(socket.socket, "connect", forbid_network)
-    _configured(monkeypatch, tmp_path)
-    health = client.get(PATH, headers=_headers(nonce="np-" + "a" * 32))
-    capabilities = client.get(CAPS, headers=_headers(CAPS, nonce="np-" + "b" * 32))
-    assert health.status_code == 200
-    assert capabilities.status_code == 200
-    assert health.json() == {
-        "source_system": "rosevear-ai-hub",
-        "contract_version": "rosevear.integration.v1",
-        "environment": "nonproduction",
-        "tenant_id": None,
-        "connection_status": "DISCONNECTED",
-        "service_status": "UNVERIFIED",
-    }
-    assert capabilities.json() == {
-        "source_system": "rosevear-ai-hub",
-        "contract_version": "rosevear.integration.v1",
-        "environment": "nonproduction",
-        "tenant_id": None,
-        "connection_status": "DISCONNECTED",
-        "capabilities": ["read_health", "read_capabilities"],
-        "allowed_paths": [PATH, CAPS],
-        "enabled_operations": [],
-    }
-    for response in (health, capabilities):
-        assert response.headers["Cache-Control"] == "no-store"
-        assert response.headers["Pragma"] == "no-cache"
-        assert response.headers["X-Content-Type-Options"] == "nosniff"
-        assert all(
-            secret not in response.text.lower()
-            for secret in (
-                "camera",
-                "mqtt",
-                "home_assistant",
-                "vault",
-                "ip_address",
-                "hostname",
-                "credential",
-                "customer",
-                "secret",
-                "session",
-                "device",
+    # Windows asyncio creates its own loopback socket pair when the loop starts.
+    # Establish the in-process test portal before forbidding application network IO.
+    with start_blocking_portal() as portal, monkeypatch.context() as scoped:
+        scoped.setattr(client, "portal", portal)
+        scoped.setattr(socket.socket, "connect", forbid_network)
+        _configured(monkeypatch, tmp_path)
+        health = client.get(PATH, headers=_headers(nonce="np-" + "a" * 32))
+        capabilities = client.get(CAPS, headers=_headers(CAPS, nonce="np-" + "b" * 32))
+        assert health.status_code == 200
+        assert capabilities.status_code == 200
+        assert health.json() == {
+            "source_system": "rosevear-ai-hub",
+            "contract_version": "rosevear.integration.v1",
+            "environment": "nonproduction",
+            "tenant_id": None,
+            "connection_status": "DISCONNECTED",
+            "service_status": "UNVERIFIED",
+        }
+        assert capabilities.json() == {
+            "source_system": "rosevear-ai-hub",
+            "contract_version": "rosevear.integration.v1",
+            "environment": "nonproduction",
+            "tenant_id": None,
+            "connection_status": "DISCONNECTED",
+            "capabilities": ["read_health", "read_capabilities"],
+            "allowed_paths": [PATH, CAPS],
+            "enabled_operations": [],
+        }
+        for response in (health, capabilities):
+            assert response.headers["Cache-Control"] == "no-store"
+            assert response.headers["Pragma"] == "no-cache"
+            assert response.headers["X-Content-Type-Options"] == "nosniff"
+            assert all(
+                secret not in response.text.lower()
+                for secret in (
+                    "camera",
+                    "mqtt",
+                    "home_assistant",
+                    "vault",
+                    "ip_address",
+                    "hostname",
+                    "credential",
+                    "customer",
+                    "secret",
+                    "session",
+                    "device",
+                )
             )
-        )
-    assert client.post("/api/integration/v1/dispatch", headers=_headers()).status_code == 403
-    monkeypatch.setenv("APP_ENV", "production")
-    assert client.get(PATH, headers=_headers(nonce="np-" + "c" * 32)).status_code == 403
+        assert client.post("/api/integration/v1/dispatch", headers=_headers()).status_code == 403
+        monkeypatch.setenv("APP_ENV", "production")
+        assert client.get(PATH, headers=_headers(nonce="np-" + "c" * 32)).status_code == 403
