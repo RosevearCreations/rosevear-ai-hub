@@ -7,10 +7,7 @@ worker activation, automatic restarts, asserted external SLA, or live peer proof
 
 from __future__ import annotations
 
-import os
-import shutil
 import sqlite3
-import time
 import uuid
 from contextlib import closing
 from pathlib import Path
@@ -18,7 +15,6 @@ from typing import Any
 
 import psutil
 
-from rosevear_ai_hub.governed_intake384 import governed_snapshot384
 from rosevear_ai_hub.resource_budget import collect_resource_snapshot
 from rosevear_ai_hub.seven_app_stats365 import APPS, HEX64
 from rosevear_ai_hub.sysop_history366 import _safe_path
@@ -343,6 +339,12 @@ def service_desk_snapshot385(
     }
     if not original_host or path is None:
         return result
+    if not path.exists():
+        try:
+            _safe_path(path, create=True)
+            return {**result, "status": "PRIVATE_IT385_EMPTY_CREATE_ALLOWED"}
+        except ValueError:
+            return {**result, "status": "HOLD_PRIVATE_TICKET_JOURNAL_INVALID_OR_MISSING"}
     try:
         safe = _safe_path(path, create=False)
         with closing(sqlite3.connect(f"{safe.as_uri()}?mode=ro", uri=True, timeout=3)) as db:
