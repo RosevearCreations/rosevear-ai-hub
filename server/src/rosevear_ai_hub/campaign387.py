@@ -132,6 +132,34 @@ GATES387 = (
 )
 
 
+MODULE_IDS387 = (
+    "local-ai-chat-and-voice",
+    "knowledge-search-and-citations",
+    "home-assistant-device-inventory",
+    "safe-automations-and-scenes",
+    "mqtt-and-sensors",
+    "cameras-and-doorbells",
+    "workshop-registry-and-jobs",
+    "maker-process-monitoring",
+    "network-discovery-and-topology",
+    "network-sequencing-and-recovery",
+    "alexa-integration",
+    "apple-home-and-matter",
+    "samsung-smartthings",
+    "other-provider-device-coverage",
+    "grocery-order-and-pantry-board",
+    "household-calendar-and-chores",
+    "three-master-signed-communications",
+    "seven-application-governance",
+    "security-roles-and-access",
+    "backup-and-windows-recovery",
+    "privacy-audit-and-consent",
+    "themes-accessibility-and-controls",
+    "mobile-and-tablet-experience",
+    "it-ops-and-support",
+)
+
+
 def campaign_snapshot387(*, now_ms: int, original_host: bool) -> dict[str, Any]:
     """Return a safe read-only report; never assert a live test or an external ACK."""
     runtime = runtime_snapshot385(now_ms=now_ms, original_host=original_host)
@@ -160,6 +188,12 @@ def campaign_snapshot387(*, now_ms: int, original_host: bool) -> dict[str, Any]:
             [item["code"] for item in runtime["alerts"]] if local_sample else []
         ),
         "gateCount": len(GATES387),
+        "trackedModuleCount": len(MODULE_IDS387),
+        "fieldCertifiedModuleCount": 0,
+        "modules": [
+            {"id": module_id, "fieldStatus": "HOLD_INDEPENDENT_EVIDENCE_MISSING"}
+            for module_id in MODULE_IDS387
+        ],
         "fieldCertifiedCount": 0,
         "independentOriginalHostWitnessVerified": False,
         "realHouseholdDeviceEndToEndVerified": False,
