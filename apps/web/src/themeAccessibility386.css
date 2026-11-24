@@ -4,22 +4,16 @@
 /* The fourteen specialist dark skins inherit their audited tokens from
    masterThemes467.css, leaving Daylight and the legacy light-content
    High Contrast view independent. */
-.app-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"])
-:not([data-theme="high-contrast"]):not([data-theme="daylight"])
-.content :is(.panel,.shell349-status,.mc-panel,.hub-vital) {
+.app-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"]):not([data-theme="high-contrast"]):not([data-theme="daylight"]) .content :is(.panel,.shell349-status,.mc-panel,.hub-vital) {
   background-color: var(--shell-selected);
   color: var(--shell-ink);
   border-color: var(--shell-border);
 }
-.app-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"])
-:not([data-theme="high-contrast"]):not([data-theme="daylight"])
-.content :is(.panel,.shell349-status,.mc-panel,.hub-vital) :is(h2,h3,h4,p,small,strong,label,summary) {
+.app-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"]):not([data-theme="high-contrast"]):not([data-theme="daylight"]) .content :is(.panel,.shell349-status,.mc-panel,.hub-vital) :is(h2,h3,h4,p,small,strong,label,summary) {
   color: var(--shell-ink);
 }
 /* Muted text is a separate 4.5:1 verified token against the shared panel. */
-.app-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"])
-:not([data-theme="high-contrast"]):not([data-theme="daylight"])
-.content :is(.panel,.shell349-status,.mc-panel,.hub-vital) :is(.lede,.muted,.help-text) {
+.app-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"]):not([data-theme="high-contrast"]):not([data-theme="daylight"]) .content :is(.panel,.shell349-status,.mc-panel,.hub-vital) :is(.lede,.muted,.help-text) {
   color: var(--shell-muted);
 }
 .app-shell[data-theme="daylight"] .content :is(.panel,.shell349-status,.mc-panel,.hub-vital) {
@@ -87,16 +81,13 @@
 }
 
 /* Auth panels in the fourteen dark palettes cannot inherit legacy white cards. */
-.auth-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"])
-:not([data-theme="high-contrast"]):not([data-theme="daylight"]) .auth-card {
+.auth-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"]):not([data-theme="high-contrast"]):not([data-theme="daylight"]) .auth-card {
   background: var(--shell-selected); color: var(--shell-ink);
   border: 2px solid var(--shell-accent);
 }
-.auth-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"])
-:not([data-theme="high-contrast"]):not([data-theme="daylight"]) .auth-card
+.auth-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"]):not([data-theme="high-contrast"]):not([data-theme="daylight"]) .auth-card
 :is(h1,h2,p,small,strong,label) { color: var(--shell-ink); }
-.auth-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"])
-:not([data-theme="high-contrast"]):not([data-theme="daylight"]) .auth-card
+.auth-shell[data-theme]:not([data-theme="standard"]):not([data-theme="dark"]):not([data-theme="high-contrast"]):not([data-theme="daylight"]) .auth-card
 :is(input,select) { background: var(--shell-paper); color: var(--shell-ink); }
 .auth-shell[data-theme="daylight"] .auth-card {
   background: #ffffff; color: #142d48; border: 2px solid #005bb5;
