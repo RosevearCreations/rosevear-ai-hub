@@ -56,6 +56,7 @@ import { MQTTView } from "./MQTTView";
 import { PwaInstallPanel } from "./PwaInstallPanel";
 import { RemoteAccessPanel } from "./RemoteAccessPanel";
 import { ResourceBudgetPanel } from "./ResourceBudgetPanel";
+import { ITServiceDesk385Panel } from "./ITServiceDesk385Panel";
 import { LocalModelHealthPanel } from "./LocalModelHealthPanel";
 import { NotificationsView } from "./NotificationsView";
 import { OperationsDashboard } from "./OperationsDashboard";
@@ -687,6 +688,7 @@ export function App() {
             {canAdminister && <div id="hub-system-connection"><IntegrationHealthPanel ownerId={String(user.id)} /></div>}
             {canAdminister && <RestartAppsPanel />}
             <div id="hub-system-remote"><RemoteAccessPanel /></div>
+            {user.role === "owner" && <ITServiceDesk385Panel />}
             {canAdminister && <div id="hub-system-resources"><ResourceBudgetPanel /><LocalModelHealthPanel /></div>}
             {canAdminister && <BackupRecoveryWorkbench />}
             {canAdminister && <SecurityReviewPanel />}
