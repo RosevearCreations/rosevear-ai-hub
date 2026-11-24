@@ -82,7 +82,8 @@ export function Campaign387Panel({ onNavigate }: {
       <div><strong>{disposition.ownerReviewed}/14</strong><span>Owner reports entered</span></div>
       <div><strong>{disposition.ownerReportedIssues}</strong><span>Issues reported</span></div>
       <div><strong>{disposition.ownerReportedUnavailable}</strong><span>Unavailable checks</span></div>
-      <div><strong>0/14</strong><span>Independently certified</span></div>
+      <div><strong>0/14</strong><span>Field gates independently certified</span></div>
+      <div><strong>0/24</strong><span>Hub modules field-certified</span></div>
     </div>
     <p><strong>Field verdict: HOLD</strong> · {disposition.status} ·
       reports are local to this browser session. No source report is a signed receipt,
