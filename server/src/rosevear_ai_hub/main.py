@@ -26,6 +26,7 @@ from rosevear_ai_hub.api.camera_reliability375 import router as camera_reliabili
 from rosevear_ai_hub.api.camera_reviews import router as camera_reviews_router
 from rosevear_ai_hub.api.camera_wall import router as camera_wall_router
 from rosevear_ai_hub.api.cameras import router as cameras_router
+from rosevear_ai_hub.api.campaign387 import router as campaign387_router
 from rosevear_ai_hub.api.chat import router as chat_router
 from rosevear_ai_hub.api.confirmations import router as confirmations_router
 from rosevear_ai_hub.api.device_discovery import router as device_discovery_router
@@ -262,6 +263,7 @@ def create_app() -> FastAPI:
     application.include_router(server_shell365_router)
     application.include_router(sysop_history366_router)
     application.include_router(governance384_router)
+    application.include_router(campaign387_router)
     application.include_router(it_operations385_router)
     application.include_router(live_sources367_router)
     application.include_router(sysop_telemetry423_router)

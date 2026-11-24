@@ -21,6 +21,7 @@ import { loadShellTheme, parseShellTheme, saveShellTheme, MASTER_THEME_CHOICES }
 import "./masterThemes467.css";
 import { StandardThemeAcceptancePanel } from "./StandardThemeAcceptancePanel";
 import { ThemeAcceptance386Panel } from "./ThemeAcceptance386Panel";
+import { Campaign387Panel } from "./Campaign387Panel";
 import { SystemWorkspaceGuide } from "./SystemWorkspaceGuide";
 import { SystemConsoleRefresh } from "./SystemConsoleRefresh";
 import { GlobalSearchHelp } from "./GlobalSearchHelp";
@@ -691,6 +692,7 @@ export function App() {
             <div id="hub-system-remote"><RemoteAccessPanel /></div>
             {user.role === "owner" && <ITServiceDesk385Panel />}
             {user.role === "owner" && <ThemeAcceptance386Panel activeTheme={appearance} onApplyTheme={setAppearance} />}
+            {user.role === "owner" && <Campaign387Panel onNavigate={(target) => setSection(target as Section)} />}
             {canAdminister && <div id="hub-system-resources"><ResourceBudgetPanel /><LocalModelHealthPanel /></div>}
             {canAdminister && <BackupRecoveryWorkbench />}
             {canAdminister && <SecurityReviewPanel />}
