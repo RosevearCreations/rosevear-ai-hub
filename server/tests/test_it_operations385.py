@@ -123,7 +123,6 @@ def test_owner_ticket_creation_revision_and_evidence_history(tmp_path):
         owner_user_id=123,
         now_ms=NOW385 + 26 * 3600_000,
         original_host=True,
-
     )
     closed = service_desk_snapshot385(journal, now_ms=NOW385 + 27 * 3600_000, original_host=True)
     assert closed["targetOverdueCount"] == 0
