@@ -82,7 +82,5 @@ def test_tampered_digest_and_signature():
 def test_owner_endpoint_denies_anonymous():
     pair, _pins = _fixture()
     with TestClient(app) as client:
-        response = client.post(
-            "/api/v1/system/field-witness-reconcile-388", json=pair.model_dump()
-        )
+        response = client.post("/api/v1/system/field-witness-reconcile-388", json=pair.model_dump())
         assert response.status_code in (401, 403)
