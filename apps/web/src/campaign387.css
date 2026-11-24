@@ -1,0 +1,104 @@
+/* Build387: scoped responsive physical acceptance workbook, no fake GREEN badge. */
+.campaign387 {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.campaign387-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.campaign387-heading > div { flex: 1 1 18rem; min-width: 0; }
+.campaign387 button,
+.campaign387 select {
+  min-height: 44px;
+  max-width: 100%;
+  font: inherit;
+}
+.campaign387 button:focus-visible,
+.campaign387 select:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+.campaign387-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: .65rem;
+}
+.campaign387-stats > div {
+  padding: .75rem;
+  border: 1px solid currentColor;
+  border-radius: .65rem;
+  display: grid;
+  gap: .25rem;
+}
+.campaign387-stats strong { font-size: 1.25rem; }
+.campaign387-context {
+  max-width: 100%;
+  padding: .8rem;
+  border: 1px solid currentColor;
+  border-radius: .65rem;
+}
+.campaign387-gates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 23rem), 1fr));
+  gap: .9rem;
+}
+.campaign387-gate {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid currentColor;
+  border-radius: .65rem;
+}
+.campaign387-gateheading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: .8rem;
+  flex-wrap: wrap;
+}
+.campaign387-gateheading span {
+  font-weight: 700;
+  text-decoration: underline;
+}
+.campaign387-gate small { display: block; line-height: 1.45; }
+.campaign387-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  align-items: end;
+  margin-top: .9rem;
+}
+.campaign387-actions label {
+  display: grid;
+  gap: .25rem;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+.campaign387-actions select {
+  width: 100%;
+  min-width: 0;
+  padding: .4rem;
+  color: inherit;
+  background: var(--surface, var(--panel, transparent));
+  border: 1px solid currentColor;
+}
+.campaign387-foot { margin-top: 1rem; }
+@media (max-width: 650px) {
+  .campaign387-gates { grid-template-columns: minmax(0, 1fr); }
+  .campaign387-actions { display: grid; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .campaign387 *, .campaign387 *::before, .campaign387 *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .campaign387-gate, .campaign387-context, .campaign387-stats > div {
+    border-color: CanvasText;
+  }
+}

@@ -4590,3 +4590,9 @@ export function transitionITTicket385(ticketId: string, payload: {
   }
   return authJson("POST", "/api/v1/system/it-ops-385/tickets/" + ticketId + "/transition", payload);
 }
+
+// Build387: owner-only source-constrained household/Master acceptance campaign.
+// No command or mutation endpoint is exposed; owner reports remain browser-session-only.
+export function getHouseholdMasterCampaign387(signal?: AbortSignal): Promise<unknown> {
+  return authJson("GET", "/api/v1/system/household-master-campaign-387", undefined, signal);
+}
