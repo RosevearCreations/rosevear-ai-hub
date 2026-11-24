@@ -49,7 +49,8 @@ def test_original_host_gate_fails_closed():
 def test_measured_local_snapshot_never_claims_remote_connection():
     snapshot = runtime_snapshot385(now_ms=NOW385, original_host=True)
     assert snapshot["status"] in (
-        "LOCAL_RUNTIME_DIAGNOSTICS_ONLY", "HOLD_RUNTIME_SAMPLE_UNAVAILABLE"
+        "LOCAL_RUNTIME_DIAGNOSTICS_ONLY",
+        "HOLD_RUNTIME_SAMPLE_UNAVAILABLE",
     )
     assert snapshot["osBootIndependentlyWitnessed"] is False
     assert snapshot["restartHistoryIndependentlyVerified"] is False
@@ -64,9 +65,7 @@ def test_measured_local_snapshot_never_claims_remote_connection():
 
 def test_owner_ticket_creation_revision_and_evidence_history(tmp_path):
     journal = tmp_path / "service-desk.sqlite"
-    before = service_desk_snapshot385(
-        journal, now_ms=NOW385, original_host=True
-    )
+    before = service_desk_snapshot385(journal, now_ms=NOW385, original_host=True)
     assert before["status"] == "PRIVATE_IT385_EMPTY_CREATE_ALLOWED"
     assert not journal.exists()
 
@@ -74,9 +73,7 @@ def test_owner_ticket_creation_revision_and_evidence_history(tmp_path):
     assert created["status"] == "open"
     tid = created["ticketId"]
     assert len(tid) == 32
-    after = service_desk_snapshot385(
-        journal, now_ms=NOW385 + 1000, original_host=True
-    )
+    after = service_desk_snapshot385(journal, now_ms=NOW385 + 1000, original_host=True)
     assert after["ticketCount"] == 1
     assert after["slaCertifiedCount"] == 0
     assert after["providerComplaintResolutionVerified"] is False
@@ -108,9 +105,7 @@ def test_owner_ticket_creation_revision_and_evidence_history(tmp_path):
             now_ms=NOW385 + 2000,
             original_host=True,
         )
-    final = service_desk_snapshot385(
-        journal, now_ms=NOW385 + 25 * 3600_000, original_host=True
-    )
+    final = service_desk_snapshot385(journal, now_ms=NOW385 + 25 * 3600_000, original_host=True)
     ticket = final["tickets"][0]
     assert ticket["ownerTargetOverdue"] is True
     assert ticket["revision"] == 2
@@ -128,10 +123,9 @@ def test_owner_ticket_creation_revision_and_evidence_history(tmp_path):
         owner_user_id=123,
         now_ms=NOW385 + 26 * 3600_000,
         original_host=True,
+
     )
-    closed = service_desk_snapshot385(
-        journal, now_ms=NOW385 + 27 * 3600_000, original_host=True
-    )
+    closed = service_desk_snapshot385(journal, now_ms=NOW385 + 27 * 3600_000, original_host=True)
     assert closed["targetOverdueCount"] == 0
     assert closed["slaCertifiedCount"] == 0
     assert closed["tickets"][0]["closedAtMs"] is not None
@@ -179,13 +173,19 @@ def test_owner_only_routes_never_execute_unauthenticated_post():
         base = "/api/v1/system/it-ops-385"
         for path in ("/diagnostics", "/tickets"):
             assert client.get(base + path).status_code in (401, 403)
-        assert client.post(base + "/tickets", json={
-            "app_id": "rosevear-ai-hub",
-            "category": "incident",
-            "summary_code": "SUPPORT_REQUEST",
-            "target_hours": 24,
-        }).status_code in (401, 403)
-        assert client.post(base + "/tickets/" + "a" * 32 + "/transition", json={
-            "expected_revision": 1,
-            "status": "resolved",
-        }).status_code in (401, 403)
+        assert client.post(
+            base + "/tickets",
+            json={
+                "app_id": "rosevear-ai-hub",
+                "category": "incident",
+                "summary_code": "SUPPORT_REQUEST",
+                "target_hours": 24,
+            },
+        ).status_code in (401, 403)
+        assert client.post(
+            base + "/tickets/" + "a" * 32 + "/transition",
+            json={
+                "expected_revision": 1,
+                "status": "resolved",
+            },
+        ).status_code in (401, 403)
