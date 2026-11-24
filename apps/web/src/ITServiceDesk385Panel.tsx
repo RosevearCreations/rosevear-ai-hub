@@ -287,7 +287,8 @@ export function ITServiceDesk385Panel() {
       </label>
     </div>
     <button type="button" disabled={busy || !tickets ||
-        tickets.status !== "PRIVATE_OWNER_TICKETS_NOT_PROVIDER_SLA"}
+        !["PRIVATE_OWNER_TICKETS_NOT_PROVIDER_SLA",
+          "PRIVATE_IT385_EMPTY_CREATE_ALLOWED"].includes(tickets.status)}
       onClick={() => void create()}>Record owner ticket</button>
     <p>No free-form secrets, customer identifiers or confidential notes are collected.
       The selected target is not a provider SLA or warranty.</p>
