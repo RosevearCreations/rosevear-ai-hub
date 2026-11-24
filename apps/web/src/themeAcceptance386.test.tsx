@@ -28,6 +28,7 @@ const manifest = JSON.parse(readFileSync(
 const main = readFileSync(resolve(process.cwd(), "src/main.tsx"), "utf8");
 const css = readFileSync(resolve(process.cwd(), "src/themeAccessibility386.css"), "utf8");
 const canonical = readFileSync(resolve(process.cwd(), "src/masterThemes467.css"), "utf8");
+const legacyStyles = readFileSync(resolve(process.cwd(), "src/styles.css"), "utf8");
 
 describe("Build386 shared 16-theme source contract", () => {
   it("uses the exact Master manifest, labels and token values with no new signer", () => {
@@ -39,7 +40,9 @@ describe("Build386 shared 16-theme source contract", () => {
     expect(new Set(manifest.themeIds).size).toBe(16);
     for (const theme of THEME_PALETTES386) {
       expect(parseShellTheme(theme.id)).toBe(theme.id);
-      expect(canonical).toContain(`data-theme="${theme.id}"`);
+      // High Contrast predates QL-467 and intentionally lives in the legacy shell CSS.
+      expect(theme.id === "high-contrast" ? legacyStyles : canonical)
+        .toContain(`data-theme="${theme.id}"`);
     }
     expect(main).toContain('import "./themeAccessibility386.css"');
   });
