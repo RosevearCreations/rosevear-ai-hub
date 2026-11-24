@@ -44,6 +44,9 @@ export type Campaign387 = {
   localLanInterfacesReportedUp: number | null;
   localResourceWarningCodes: string[];
   gateCount: 14;
+  trackedModuleCount: 24;
+  fieldCertifiedModuleCount: 0;
+  modules: { id: string; fieldStatus: "HOLD_INDEPENDENT_EVIDENCE_MISSING" }[];
   fieldCertifiedCount: 0;
   independentOriginalHostWitnessVerified: false;
   realHouseholdDeviceEndToEndVerified: false;
@@ -89,6 +92,12 @@ export function trustedCampaign387(raw: unknown): raw is Campaign387 {
       x.status === "HOLD_NO_ORIGINAL_WINDOWS_CONTEXT") &&
     x.gateCount === CAMPAIGN_STEP_IDS387.length &&
     x.fieldCertifiedCount === 0 &&
+    x.trackedModuleCount === 24 &&
+    x.fieldCertifiedModuleCount === 0 &&
+    Array.isArray(x.modules) && x.modules.length === 24 &&
+    new Set(x.modules.map((m: Record<string, unknown>) => m.id)).size === 24 &&
+    x.modules.every((m: Record<string, unknown>) => typeof m.id === "string" &&
+      m.fieldStatus === "HOLD_INDEPENDENT_EVIDENCE_MISSING") &&
     x.sourceReleaseAndFieldAcceptanceIndependent === true &&
     x.backgroundNetworkOrDeviceProbesPerformed === 0 &&
     x.windowsServicesRestarted === 0 &&
