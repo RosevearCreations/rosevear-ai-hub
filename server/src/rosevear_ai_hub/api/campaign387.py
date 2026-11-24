@@ -25,7 +25,5 @@ def get_household_master_campaign387(response: Response, _owner: Owner387) -> di
     response.headers["X-Content-Type-Options"] = "nosniff"
     return campaign_snapshot387(
         now_ms=int(time.time() * 1000),
-        original_host=original_host385(
-            machine_name=platform.node(), windows_host=os.name == "nt"
-        ),
+        original_host=original_host385(machine_name=platform.node(), windows_host=os.name == "nt"),
     )
