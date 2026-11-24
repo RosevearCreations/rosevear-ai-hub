@@ -24,17 +24,28 @@ from rosevear_ai_hub.models import User
 router = APIRouter(prefix="/api/v1/system/it-ops-385", tags=["it-ops385"])
 Owner385 = Annotated[User, Depends(require_roles("owner"))]
 Application385 = Literal[
-    "ai-data-platform", "rosevear-ai-hub", "rosevear-comms-hub",
-    "yw", "icamp", "rosiedazzlers", "devilndove",
+    "ai-data-platform",
+    "rosevear-ai-hub",
+    "rosevear-comms-hub",
+    "yw",
+    "icamp",
+    "rosiedazzlers",
+    "devilndove",
 ]
 Category385 = Literal["incident", "complaint", "support", "maintenance"]
 Summary385 = Literal[
-    "SERVICE_UNAVAILABLE", "LATENCY_SLOW", "PROCESS_RESTART_REPORTED",
-    "LAN_ISSUE_REPORTED", "SUPPORT_REQUEST", "COMPLAINT",
-    "RECOVERY_EVIDENCE_REVIEW", "OTHER",
+    "SERVICE_UNAVAILABLE",
+    "LATENCY_SLOW",
+    "PROCESS_RESTART_REPORTED",
+    "LAN_ISSUE_REPORTED",
+    "SUPPORT_REQUEST",
+    "COMPLAINT",
+    "RECOVERY_EVIDENCE_REVIEW",
+    "OTHER",
 ]
 Evidence385 = Literal[
-    "OWNER_REPORT_UNVERIFIED", "LOCAL_RUNTIME_SAMPLE_UNSIGNED",
+    "OWNER_REPORT_UNVERIFIED",
+    "LOCAL_RUNTIME_SAMPLE_UNSIGNED",
     "SOURCE_RECEIPT_REFERENCE_UNATTESTED",
 ]
 Status385 = Literal["open", "investigating", "waiting", "resolved"]
@@ -101,7 +112,9 @@ def read_tickets385(response: Response, _owner: Owner385) -> dict[str, Any]:
 
 @router.post("/tickets", status_code=201)
 def create_ticket_endpoint385(
-    payload: TicketCreate385, response: Response, owner: Owner385,
+    payload: TicketCreate385,
+    response: Response,
+    owner: Owner385,
 ) -> dict[str, Any]:
     _no_store385(response)
     if not _original385():
@@ -125,15 +138,18 @@ def create_ticket_endpoint385(
 
 @router.post("/tickets/{ticket_id}/transition")
 def transition_ticket_endpoint385(
-    ticket_id: str, payload: TicketTransition385,
-    response: Response, owner: Owner385,
+    ticket_id: str,
+    payload: TicketTransition385,
+    response: Response,
+    owner: Owner385,
 ) -> dict[str, Any]:
     _no_store385(response)
     if not _original385():
         raise HTTPException(status_code=409, detail="HOLD_NOT_ORIGINAL_WINDOWS_HOST")
     try:
         return transition_ticket385(
-            _journal385(), ticket_id=ticket_id,
+            _journal385(),
+            ticket_id=ticket_id,
             expected_revision=payload.expected_revision,
             status=payload.status,
             evidence_kind=payload.evidence_kind,
