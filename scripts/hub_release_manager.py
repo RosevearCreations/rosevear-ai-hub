@@ -86,6 +86,20 @@ def eligible(sha, run, jobs):
     )
 
 
+def matches_backend389(identity, sha, version, process):
+    return bool(
+        isinstance(identity, dict)
+        and process
+        and identity.get("schema") == "rosevear.hub.runtime-identity389.v1"
+        and identity.get("sha") == sha
+        and identity.get("version") == version
+        and type(identity.get("pid")) is int
+        and identity["pid"] > 0
+        and identity["pid"] == process.get("pid")
+        and identity.get("scope") == "loaded_package_marker_not_external_attestation"
+    )
+
+
 def green_release(sha):
     require(bool(SHA.fullmatch(sha)), "GitHub returned an invalid main SHA.")
     runs = request_json(
@@ -638,6 +652,11 @@ class Manager:
             env=env,
         )
         require(bool(VERSION.fullmatch(version)), "Staged backend version is invalid.")
+        exact_backend = (path / "server/src/rosevear_ai_hub/release_identity389.py").is_file()
+        if exact_backend:
+            package = path / ".venv/Lib/site-packages/rosevear_ai_hub"
+            require(package.is_dir(), "Staged backend package missing.")
+            atomic_json(package / "_release_identity389.json", {"sha": sha, "version": version})
         public = path / "apps/web/public"
         public.mkdir(exist_ok=True)
         atomic_json(public / "__hub_release.json", {"sha": sha, "version": version})
@@ -655,6 +674,7 @@ class Manager:
             "sha": sha,
             "version": version,
             "tests_passed": True,
+            "exact_backend_identity389": exact_backend,
             "base_python": str(base),
             "base_python_sha256": digest(base),
             "node_sha256": digest(path / "runtime/node.exe"),
@@ -692,6 +712,10 @@ class Manager:
                 return False
             api = inspect_listener(8765, self.roots(sha))
             web = inspect_listener(5173, self.roots(sha))
+            if m.get("exact_backend_identity389") is True:
+                identity = request_json("http://127.0.0.1:8765/release-identity-389")
+                if not matches_backend389(identity, sha, m["version"], api):
+                    return False
             expected = ntpath.normpath(str(self.slot(sha) / ".venv/Lib/site-packages")).lower()
             api_tokens = (
                 [
@@ -789,7 +813,11 @@ class Manager:
 
     def rollback(self, previous, candidate):
         self.step = "rollback"
-        self.manifest(previous)  # Never stop services without a valid retained fallback.
+        retained = self.manifest(previous)
+        require(
+            database_revision(self.root) == retained["schema_revision"],
+            "HOLD: rollback schema differs from live database; nothing stopped.",
+        )
         roots = self.roots(previous, candidate)
         stop_verified(5173, roots)
         stop_verified(8765, roots)

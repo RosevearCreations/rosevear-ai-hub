@@ -3,7 +3,7 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -148,6 +148,7 @@ from rosevear_ai_hub.camera_runtime import reconcile_camera_streams
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.logging import configure_logging
 from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
+from rosevear_ai_hub.release_identity389 import loaded_identity389
 from rosevear_ai_hub.schemas import HealthResponse, VersionResponse
 
 
@@ -225,6 +226,13 @@ def create_app() -> FastAPI:
             version=__version__,
             environment=settings.app_env,
         )
+
+    @application.get("/release-identity-389")
+    def release_identity389(request: Request, response: Response) -> dict[str, object]:
+        if not request.client or request.client.host not in {"127.0.0.1", "::1"}:
+            raise HTTPException(404, "Not found")
+        response.headers["Cache-Control"] = "no-store"
+        return loaded_identity389()
 
     application.include_router(auth_router)
     application.include_router(backup_inventory_router)
