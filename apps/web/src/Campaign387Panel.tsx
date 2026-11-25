@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getHouseholdMasterCampaign387 } from "./api";
 import { FieldCustody388Panel } from "./FieldCustody388Panel";
+import { MasterAcceptance389Panel } from "./MasterAcceptance389Panel";
 import {
   campaignDisposition387,
   emptyCampaignReports387,
@@ -135,6 +136,7 @@ export function Campaign387Panel({ onNavigate }: {
         source contract is loaded. No physical test has been certified.</p>}
     </div>
     <FieldCustody388Panel />
+    <MasterAcceptance389Panel />
     <div className="campaign387-foot">
       <button type="button" onClick={() => setReports(emptyCampaignReports387())}>
         Clear session-only owner reports

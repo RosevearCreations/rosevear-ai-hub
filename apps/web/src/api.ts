@@ -4604,3 +4604,10 @@ export function fieldCustody388(action: "read" | "challenge" | "intake" | "revie
     ? authJson("GET", "/api/v1/system/field-witness-388")
     : authJson("POST", "/api/v1/system/field-witness-388/" + action, payload);
 }
+
+// Build389: local release readiness and challenge-bound Master signatures.
+export function masterAcceptance389(action: "read" | "challenge" | "receipt", payload?: unknown): Promise<unknown> {
+  return action === "read"
+    ? authJson("GET", "/api/v1/system/master-acceptance-389")
+    : authJson("POST", "/api/v1/system/master-acceptance-389/" + action, payload);
+}

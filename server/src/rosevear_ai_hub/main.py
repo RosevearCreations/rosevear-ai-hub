@@ -3,7 +3,7 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -47,6 +47,7 @@ from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.knowledge_reviews import router as knowledge_reviews_router
 from rosevear_ai_hub.api.live_sources367 import router as live_sources367_router
 from rosevear_ai_hub.api.maintenance_actions import router as maintenance_actions_router
+from rosevear_ai_hub.api.master_acceptance389 import router as master_acceptance389_router
 from rosevear_ai_hub.api.master_shell_continuity335 import (
     router as master_shell_continuity335_router,
 )
@@ -148,6 +149,7 @@ from rosevear_ai_hub.camera_runtime import reconcile_camera_streams
 from rosevear_ai_hub.config import get_settings
 from rosevear_ai_hub.logging import configure_logging
 from rosevear_ai_hub.master_shell_monitor304 import PersistentReeMonitor304
+from rosevear_ai_hub.release_identity389 import loaded_identity389
 from rosevear_ai_hub.schemas import HealthResponse, VersionResponse
 
 
@@ -226,6 +228,13 @@ def create_app() -> FastAPI:
             environment=settings.app_env,
         )
 
+    @application.get("/release-identity-389")
+    def release_identity389(request: Request, response: Response) -> dict[str, object]:
+        if not request.client or request.client.host not in {"127.0.0.1", "::1"}:
+            raise HTTPException(404, "Not found")
+        response.headers["Cache-Control"] = "no-store"
+        return loaded_identity389()
+
     application.include_router(auth_router)
     application.include_router(backup_inventory_router)
     application.include_router(security_posture_router)
@@ -264,6 +273,7 @@ def create_app() -> FastAPI:
     application.include_router(sysop_history366_router)
     application.include_router(governance384_router)
     application.include_router(campaign387_router)
+    application.include_router(master_acceptance389_router)
     application.include_router(it_operations385_router)
     application.include_router(live_sources367_router)
     application.include_router(sysop_telemetry423_router)
