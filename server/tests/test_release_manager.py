@@ -337,3 +337,25 @@ def test_preview_exposes_real_schema_and_running_version_drift(tmp_path, monkeyp
     assert report["runtime_version"] == "0.0.56"
     assert report["live_schema"] == "0016"
     assert report["expected_schema"] == "0018"
+
+
+def test_exact_backend_marker_rejects_same_version_wrong_commit_and_pid():
+    identity = {
+        "schema": "rosevear.hub.runtime-identity389.v1",
+        "sha": A,
+        "version": "0.0.57",
+        "pid": 12,
+        "scope": "loaded_package_marker_not_external_attestation",
+    }
+    assert manager.matches_backend389(identity, A, "0.0.57", {"pid": 12})
+    assert not manager.matches_backend389(identity, B, "0.0.57", {"pid": 12})
+    assert not manager.matches_backend389(identity, A, "0.0.57", {"pid": 13})
+    assert not manager.matches_backend389(identity, A, "0.0.57", None)
+
+
+def test_rollback_schema_mismatch_never_stops_live_process(tmp_path, monkeypatch):
+    m = prepared(tmp_path, monkeypatch)
+    monkeypatch.setattr(manager, "database_revision", lambda root: "0016")
+    monkeypatch.setattr(manager, "stop_verified", lambda *args: pytest.fail("must not stop"))
+    with pytest.raises(manager.Refusal, match="rollback schema"):
+        m.rollback(A, B)
