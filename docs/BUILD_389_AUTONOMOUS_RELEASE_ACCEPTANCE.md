@@ -27,5 +27,14 @@ First enrollment, actual migration compatibility, exact source/runtime
 readback, genuine rollback and independent three-Master receipts require
 separate verified evidence on the original host. No external attestation or
 off-machine restore is claimed from a package marker. No arbitrary remote
-execution or silent task enrollment is authorized. The next increment must
-consolidate the readiness and operational acceptance workflow before promotion.
+execution or silent task enrollment is authorized. The owner-only /api/v1/system/master-acceptance-389 endpoint consolidates local
+runtime and loaded package identity. A private ledger accepts a single-use
+challenge signed by all three distinct source pins over all three separately
+approved release SHAs. Stored receipts are revalidated on read and expire.
+Configure HUB_MASTER389_PRIVATE_LEDGER in an independently ACL-reviewed private
+directory and HUB_MASTER389_PIN_ / HUB_MASTER389_TARGET_ for each upper-case
+underscore source name. No signer or target can be supplied by the client.
+Receipt signatures prove signed challenge agreement, not independent TLS
+delivery or physical acceptance. Existing release manager gates still apply.
+Actual peer signer integration, operational transport and original-host
+installation remain field HOLD; no remote commands or new tasks are enabled.

@@ -47,6 +47,7 @@ from rosevear_ai_hub.api.knowledge_admin import router as knowledge_admin_router
 from rosevear_ai_hub.api.knowledge_reviews import router as knowledge_reviews_router
 from rosevear_ai_hub.api.live_sources367 import router as live_sources367_router
 from rosevear_ai_hub.api.maintenance_actions import router as maintenance_actions_router
+from rosevear_ai_hub.api.master_acceptance389 import router as master_acceptance389_router
 from rosevear_ai_hub.api.master_shell_continuity335 import (
     router as master_shell_continuity335_router,
 )
@@ -272,6 +273,7 @@ def create_app() -> FastAPI:
     application.include_router(sysop_history366_router)
     application.include_router(governance384_router)
     application.include_router(campaign387_router)
+    application.include_router(master_acceptance389_router)
     application.include_router(it_operations385_router)
     application.include_router(live_sources367_router)
     application.include_router(sysop_telemetry423_router)
