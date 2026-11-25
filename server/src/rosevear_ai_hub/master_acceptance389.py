@@ -128,9 +128,17 @@ def intake389(path, packet, *, pins, targets, loaded, owner, now):
 
 def read389(path, *, pins, targets, loaded, owner, now):
     policy389(pins, targets, loaded)
+    if (
+        not path.is_absolute()
+        or path.suffix != ".sqlite3"
+        or not path.parent.is_dir()
+        or path.is_symlink()
+        or path.resolve() != path
+    ):
+        raise ValueError("HOLD_PRIVATE_LEDGER_PATH")
     if not path.exists():
         return False
-    if path.is_symlink() or path.resolve() != path or not path.is_file():
+    if not path.is_file():
         raise ValueError("HOLD_PRIVATE_LEDGER_PATH")
     with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, timeout=5)) as db:
         row = db.execute(
@@ -142,7 +150,5 @@ def read389(path, *, pins, targets, loaded, owner, now):
     if not row or not 0 <= now - row[2] <= TTL:
         return False
     packet = Packet389.model_validate_json(row[3])
-    verify389(
-        packet, pins=pins, targets=targets, challenge=row[0], issued=row[1], now=now
-    )
+    verify389(packet, pins=pins, targets=targets, challenge=row[0], issued=row[1], now=now)
     return True
