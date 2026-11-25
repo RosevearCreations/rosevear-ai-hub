@@ -78,7 +78,7 @@ export function Campaign387Panel({ onNavigate }: {
         {loading ? "Checking…" : "Refresh original-host context"}
       </button>
     </div>
-    <p role="status">{message}</p>
+    <p role="status" aria-label="Original host campaign status">{message}</p>
     <div className="campaign387-stats">
       <div><strong>{disposition.ownerReviewed}/14</strong><span>Owner reports entered</span></div>
       <div><strong>{disposition.ownerReportedIssues}</strong><span>Issues reported</span></div>

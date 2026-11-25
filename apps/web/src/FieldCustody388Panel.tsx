@@ -79,7 +79,7 @@ export function FieldCustody388Panel() {
       onChange={e => setPacket(e.target.value)} /></label>
     <button type="button" disabled={busy || !packet.trim()} onClick={submit}>Verify and store signed metadata</button>
     <button type="button" disabled={busy} onClick={() => void run("read")}>Read private review ledger</button>
-    <p role="status">{message}</p>
+    <p role="status" aria-label="Private witness custody status">{message}</p>
     {rows.map(row => <article key={row.challenge}>
       <p>{row.gateId} — {row.decision ?? "Owner review required"}</p>
       {!row.decision && <>
