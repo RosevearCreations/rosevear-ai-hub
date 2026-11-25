@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getHouseholdMasterCampaign387 } from "./api";
+import { FieldCustody388Panel } from "./FieldCustody388Panel";
 import {
   campaignDisposition387,
   emptyCampaignReports387,
@@ -133,13 +134,14 @@ export function Campaign387Panel({ onNavigate }: {
       {!report && <p>Acceptance steps cannot be asserted until a valid, owner-only
         source contract is loaded. No physical test has been certified.</p>}
     </div>
+    <FieldCustody388Panel />
     <div className="campaign387-foot">
       <button type="button" onClick={() => setReports(emptyCampaignReports387())}>
         Clear session-only owner reports
       </button>
       <p>No secret input, browser storage, master receiver activation, automated device scanning,
         remote service control, destructive restore or unattended reboot is available here.
-        Genuine independent witness evidence must be reviewed outside this UI.</p>
+        Signed metadata can be reconciled below; independent physical evidence must still be reviewed separately.</p>
     </div>
   </section>;
 }
