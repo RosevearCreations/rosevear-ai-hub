@@ -171,7 +171,7 @@ def test_forged_stale_unpinned_and_false_machine_attestation(tmp_path, monkeypat
     assert client.post(url, json=packet).status_code == 403
 
 
-def test_collector_private_https_and_no_physical_machine_assumptions():
+def test_collector_private_https_and_no_physical_machine_assumptions(monkeypatch):
     import importlib.util
     from pathlib import Path
 
@@ -190,5 +190,10 @@ def test_collector_private_https_and_no_physical_machine_assumptions():
     ):
         with pytest.raises(ValueError):
             module.valid_private_url(candidate)
-    assert module.windows_registry_devices() == []
+    # Exercise the non-Windows branch without reading the executor's registry.
+    from types import SimpleNamespace
+
+    with monkeypatch.context() as scoped:
+        scoped.setattr(module, "os", SimpleNamespace(name="posix"))
+        assert module.windows_registry_devices() == []
     assert module.optional_octoprint() is None

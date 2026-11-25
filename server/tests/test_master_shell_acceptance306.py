@@ -46,6 +46,13 @@ def signed(private, payload):
     }
 
 
+def disable_ree(monkeypatch):
+    monkeypatch.setattr(
+        "rosevear_ai_hub.master_shell_acceptance306.socket.gethostname",
+        lambda: "SYNTHETIC-NONOWNER",
+    )
+
+
 def enable_ree(monkeypatch):
     monkeypatch.setattr(
         "rosevear_ai_hub.master_shell_acceptance306.platform.system", lambda: "Windows"
@@ -57,6 +64,7 @@ def enable_ree(monkeypatch):
 
 
 def test_signed_original_field_review_needs_independent_pin_owner_and_pointer(monkeypatch):
+    disable_ree(monkeypatch)
     private, der, pin = signer()
     review = {
         "schema": REVIEW_SCHEMA,
@@ -106,6 +114,7 @@ def test_signed_original_field_review_needs_independent_pin_owner_and_pointer(mo
 
 
 def test_one_test_import_is_source_signed_replay_gated_and_never_comms_ack(monkeypatch):
+    disable_ree(monkeypatch)
     private, der, pin = signer()
     payload = {
         "schema": COMMS_SCHEMA,
@@ -173,6 +182,7 @@ def test_readonly_seven_day_trend_does_not_impute_missing_time(tmp_path):
 
 
 def test_protected_import_claim_is_durable_and_rejects_replay(monkeypatch, tmp_path):
+    disable_ree(monkeypatch)
     ledger = ProtectedSourceImportLedger306(tmp_path / "protected-intake.sqlite3")
     opts = dict(
         source_id="rosevear-ai-hub",

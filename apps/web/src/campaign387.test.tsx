@@ -135,7 +135,7 @@ describe("Build387 source and field separation", () => {
     vi.mocked(getHouseholdMasterCampaign387).mockResolvedValue(source387());
     const navigate = vi.fn();
     render(<Campaign387Panel onNavigate={navigate} />);
-    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(
+    await waitFor(() => expect(screen.getByRole("status", { name: "Original host campaign status" })).toHaveTextContent(
       "original Windows runtime context missing",
     ));
     expect(screen.getAllByText(/0\/14/).length).toBeGreaterThan(0);
@@ -156,7 +156,7 @@ describe("Build387 source and field separation", () => {
       ...source387(), independentThreeMasterAckVerified: true,
     });
     render(<Campaign387Panel onNavigate={vi.fn()} />);
-    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(
+    await waitFor(() => expect(screen.getByRole("status", { name: "Original host campaign status" })).toHaveTextContent(
       "HOLD_INVALID_CAMPAIGN_SOURCE_OR_UNAUTHORIZED_SUCCESS",
     ));
     expect(screen.queryByRole("combobox", { name: "Our local observation" })).toBeNull();
