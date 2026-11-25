@@ -13,15 +13,14 @@ Canonical signing input is UTF-8 JSON of the typed witness without signature,
 plus schema `rosevear.hub.field-witness388.v1`, with lexically sorted keys
 and compact separators. The signature is 128 lowercase hex characters.
 
-This is an initial candidate, **not a field certification or complete intake
-ledger**. An owner cannot turn valid signatures into field closure: the
+The original reconciliation endpoint is **not a field certification or durable intake**. An owner cannot turn valid signatures into field closure: the
 evidence bytes, challenge issuance, durable replay prevention, independent
 reviewer enrollment and off-machine restore remain separately unverified.
 Do not configure synthetic keys in the original runtime. No data is persisted,
 no network calls or device actuation occur, and QL-340C remains OFF.
-Future integration must provide durable private evidence/challenge custody,
-independent restore evidence and the owner review UI before full Build 388
-acceptance. No completion percentage is advanced by this candidate alone.
+The durable intake increment below adds challenge custody and an owner review UI.
+Independent physical restore evidence remains outstanding. No field completion
+percentage is advanced by this candidate alone.
 
 
 ## Durable intake increment
@@ -42,3 +41,6 @@ A separate source and reviewer must sign after issuance and before expiry.
 The owner review revalidates stored signatures; a reported recovery can be
 reviewed but never certifies the actual archive, machine, or restore. A real
 off-machine recovery witness remains HOLD until independently established.
+
+The owner panel appears inside System → Household & Three-Master acceptance campaign.
+Use the explicit read button; no background calls or browser storage are required.
