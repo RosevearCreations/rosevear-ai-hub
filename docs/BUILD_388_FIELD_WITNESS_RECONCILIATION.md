@@ -22,3 +22,23 @@ no network calls or device actuation occur, and QL-340C remains OFF.
 Future integration must provide durable private evidence/challenge custody,
 independent restore evidence and the owner review UI before full Build 388
 acceptance. No completion percentage is advanced by this candidate alone.
+
+
+## Durable intake increment
+
+Provision an existing owner-restricted directory on the original Windows host
+and explicitly set HUB_FIELD388_PRIVATE_LEDGER to an absolute canonical .sqlite3
+path in that directory. No default database, migration or live service changes.
+The directory ACL must be independently reviewed; path checks are not an ACL
+audit. No raw artifact or secret should be submitted. Metadata includes a
+gate ID, redacted artifact SHA-256, observed/issue/unavailable disposition and
+recovery-report kind. The signed evidence digest is SHA-256 of the compact,
+sorted UTF-8 JSON metadata (see evidence_bytes388).
+
+Owner-only challenge, intake, review and readback APIs bind owner, release,
+gate, distinct configured keys and a single-use random challenge. SQLite
+serializes receipt consumption and retains the signed pair for owner review.
+A separate source and reviewer must sign after issuance and before expiry.
+The owner review revalidates stored signatures; a reported recovery can be
+reviewed but never certifies the actual archive, machine, or restore. A real
+off-machine recovery witness remains HOLD until independently established.
