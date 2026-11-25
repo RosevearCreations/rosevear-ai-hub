@@ -87,29 +87,44 @@ def _local_call388(response: Response, action, *args, **kwargs):
 @router.post("/field-witness-388/challenge")
 def issue_field388(payload: Issue388, response: Response, owner: Owner387):
     return _local_call388(
-        response, issue388, gate=payload.gate_id, owner=owner.id,
-        now_ms=int(time.time() * 1000), **_pins388(),
+        response,
+        issue388,
+        gate=payload.gate_id,
+        owner=owner.id,
+        now_ms=int(time.time() * 1000),
+        **_pins388(),
     )
 
 
 @router.post("/field-witness-388/intake")
 def intake_field388(payload: Intake388, response: Response, owner: Owner387):
     return _local_call388(
-        response, intake388, payload, owner=owner.id,
-        now_ms=int(time.time() * 1000), **_pins388(),
+        response,
+        intake388,
+        payload,
+        owner=owner.id,
+        now_ms=int(time.time() * 1000),
+        **_pins388(),
     )
 
 
 @router.post("/field-witness-388/review")
 def review_field388(payload: Review388, response: Response, owner: Owner387):
     return _local_call388(
-        response, review388, payload, owner=owner.id,
-        now_ms=int(time.time() * 1000), **_pins388(),
+        response,
+        review388,
+        payload,
+        owner=owner.id,
+        now_ms=int(time.time() * 1000),
+        **_pins388(),
     )
 
 
 @router.get("/field-witness-388")
 def read_field388(response: Response, owner: Owner387):
     return _local_call388(
-        response, snapshot388, owner=owner.id, release_sha=_pins388()["release_sha"],
+        response,
+        snapshot388,
+        owner=owner.id,
+        release_sha=_pins388()["release_sha"],
     )

@@ -32,22 +32,30 @@ def test_private_challenge_intake_replay_and_owner_review(tmp_path):
     assert not path.exists()
     issued = issue388(path, gate=gate, owner=1, now_ms=now, **pins)
     evidence = Evidence388(
-        gate_id=gate, artifact_sha256="b" * 64, result="observed",
+        gate_id=gate,
+        artifact_sha256="b" * 64,
+        result="observed",
         recovery="isolated_restore_reported",
     )
     digest = hashlib.sha256(evidence_bytes388(evidence)).hexdigest()
 
     def signed(role, key):
         w = Witness388(
-            role=role, gate_id=gate, host="DESKTOP-AE894KC", release_sha="a" * 40,
-            evidence_sha256=digest, challenge=issued["challenge"],
-            observed_at_ms=now + 1, signature="0" * 128,
+            role=role,
+            gate_id=gate,
+            host="DESKTOP-AE894KC",
+            release_sha="a" * 40,
+            evidence_sha256=digest,
+            challenge=issued["challenge"],
+            observed_at_ms=now + 1,
+            signature="0" * 128,
         )
         return w.model_copy(update={"signature": key.sign(signing_bytes388(w)).hex()})
 
     packet = Intake388(
         pair=WitnessPair388(
-            original=signed("original-host", a), independent=signed("independent-reviewer", b),
+            original=signed("original-host", a),
+            independent=signed("independent-reviewer", b),
         ),
         evidence=evidence,
     )
@@ -55,9 +63,17 @@ def test_private_challenge_intake_replay_and_owner_review(tmp_path):
         intake388(path, packet, owner=2, now_ms=now + 2, **pins)
     with pytest.raises(ValueError, match="DIGEST"):
         intake388(
-            path, packet.model_copy(update={"evidence": evidence.model_copy(
-                update={"artifact_sha256": "c" * 64},
-            )}), owner=1, now_ms=now + 2, **pins,
+            path,
+            packet.model_copy(
+                update={
+                    "evidence": evidence.model_copy(
+                        update={"artifact_sha256": "c" * 64},
+                    )
+                }
+            ),
+            owner=1,
+            now_ms=now + 2,
+            **pins,
         )
     result = intake388(path, packet, owner=1, now_ms=now + 2, **pins)
     assert result["evidencePersisted"] and result["durableReplayProtectionVerified"]

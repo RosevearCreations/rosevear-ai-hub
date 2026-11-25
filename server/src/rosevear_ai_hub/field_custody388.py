@@ -95,8 +95,14 @@ def _trust(original_key: str, reviewer_key: str, release_sha: str) -> None:
 
 
 def issue388(
-    path: Path, *, gate: str, owner: int, now_ms: int,
-    original_key: str, reviewer_key: str, release_sha: str,
+    path: Path,
+    *,
+    gate: str,
+    owner: int,
+    now_ms: int,
+    original_key: str,
+    reviewer_key: str,
+    release_sha: str,
 ) -> dict[str, object]:
     _trust(original_key, reviewer_key, release_sha)
     if gate not in GATE_IDS:
@@ -108,24 +114,46 @@ def issue388(
             raise ValueError("HOLD_LEDGER_CAPACITY_REVIEW")
         db.execute(
             "INSERT INTO witness388 VALUES (?,?,?,?,?,?,?,?,NULL,NULL,NULL,NULL,NULL,NULL)",
-            (challenge, gate, release_sha, owner, now_ms, now_ms + MAX_AGE_MS,
-             original_key, reviewer_key),
+            (
+                challenge,
+                gate,
+                release_sha,
+                owner,
+                now_ms,
+                now_ms + MAX_AGE_MS,
+                original_key,
+                reviewer_key,
+            ),
         )
     return {
-        "challenge": challenge, "gateId": gate, "releaseSha": release_sha,
-        "issuedAtMs": now_ms, "expiresAtMs": now_ms + MAX_AGE_MS, "fieldCertified": False,
+        "challenge": challenge,
+        "gateId": gate,
+        "releaseSha": release_sha,
+        "issuedAtMs": now_ms,
+        "expiresAtMs": now_ms + MAX_AGE_MS,
+        "fieldCertified": False,
     }
 
 
 def intake388(
-    path: Path, packet: Intake388, *, owner: int, now_ms: int,
-    original_key: str, reviewer_key: str, release_sha: str,
+    path: Path,
+    packet: Intake388,
+    *,
+    owner: int,
+    now_ms: int,
+    original_key: str,
+    reviewer_key: str,
+    release_sha: str,
 ) -> dict[str, object]:
     _trust(original_key, reviewer_key, release_sha)
     pair, evidence = packet.pair, packet.evidence
     result = reconcile388(
-        pair, now_ms=now_ms, original_key=original_key, reviewer_key=reviewer_key,
-        release_sha=release_sha, original_host=True,
+        pair,
+        now_ms=now_ms,
+        original_key=original_key,
+        reviewer_key=reviewer_key,
+        release_sha=release_sha,
+        original_host=True,
     )
     if not result["pairedSignaturesVerified"]:
         raise ValueError(str(result["status"]))
@@ -139,7 +167,8 @@ def intake388(
         db.execute("BEGIN IMMEDIATE")
         row = db.execute(
             "SELECT gate,release,owner,issued,expires,original_key,reviewer_key,received "
-            "FROM witness388 WHERE challenge=?", (a.challenge,),
+            "FROM witness388 WHERE challenge=?",
+            (a.challenge,),
         ).fetchone()
         if row is None:
             raise ValueError("HOLD_UNKNOWN_CHALLENGE")
@@ -151,26 +180,40 @@ def intake388(
             raise ValueError("HOLD_CHALLENGE_EXPIRED_OR_PREISSUE")
         db.execute(
             "UPDATE witness388 SET digest=?,evidence=?,pair=?,received=? WHERE challenge=?",
-            (digest, evidence_bytes388(evidence).decode(), pair.model_dump_json(),
-             now_ms, a.challenge),
+            (
+                digest,
+                evidence_bytes388(evidence).decode(),
+                pair.model_dump_json(),
+                now_ms,
+                a.challenge,
+            ),
         )
     return {
-        **result, "status": "DURABLE_SIGNED_METADATA_OWNER_REVIEW_REQUIRED",
-        "challengeIssuanceVerified": True, "durableReplayProtectionVerified": True,
+        **result,
+        "status": "DURABLE_SIGNED_METADATA_OWNER_REVIEW_REQUIRED",
+        "challengeIssuanceVerified": True,
+        "durableReplayProtectionVerified": True,
         "evidencePersisted": True,
     }
 
 
 def review388(
-    path: Path, request: Review388, *, owner: int, now_ms: int,
-    original_key: str, reviewer_key: str, release_sha: str,
+    path: Path,
+    request: Review388,
+    *,
+    owner: int,
+    now_ms: int,
+    original_key: str,
+    reviewer_key: str,
+    release_sha: str,
 ) -> dict[str, object]:
     _trust(original_key, reviewer_key, release_sha)
     with closing(_connect(path)) as db, db:
         db.execute("BEGIN IMMEDIATE")
         row = db.execute(
             "SELECT owner,release,original_key,reviewer_key,received,decision,evidence,pair,"
-            "digest FROM witness388 WHERE challenge=?", (request.challenge,),
+            "digest FROM witness388 WHERE challenge=?",
+            (request.challenge,),
         ).fetchone()
         if row is None or row[:4] != (owner, release_sha, original_key, reviewer_key):
             raise ValueError("HOLD_REVIEW_SCOPE")
@@ -181,8 +224,12 @@ def review388(
         if hashlib.sha256(evidence_bytes388(evidence)).hexdigest() != row[8]:
             raise ValueError("HOLD_STORED_EVIDENCE_MISMATCH")
         result = reconcile388(
-            packet, now_ms=row[4], original_key=original_key, reviewer_key=reviewer_key,
-            release_sha=release_sha, original_host=True,
+            packet,
+            now_ms=row[4],
+            original_key=original_key,
+            reviewer_key=reviewer_key,
+            release_sha=release_sha,
+            original_host=True,
         )
         if (
             not result["pairedSignaturesVerified"]
@@ -198,11 +245,13 @@ def review388(
             (request.decision, now_ms, request.challenge),
         )
     return {
-        "status": "SIGNED_METADATA_REVIEW_RECORDED", "decision": request.decision,
+        "status": "SIGNED_METADATA_REVIEW_RECORDED",
+        "decision": request.decision,
         "recoveryReviewRecorded": (
             request.decision == "reviewed" and evidence.recovery == "isolated_restore_reported"
         ),
-        "independentRecoveryClosed": False, "fieldCertified": False,
+        "independentRecoveryClosed": False,
+        "fieldCertified": False,
     }
 
 
@@ -214,13 +263,14 @@ def snapshot388(path: Path, *, owner: int, release_sha: str) -> dict[str, object
             rows = db.execute(
                 "SELECT challenge,gate,received,decision FROM witness388 "
                 "WHERE owner=? AND release=? AND received IS NOT NULL "
-                "ORDER BY received DESC LIMIT 100", (owner, release_sha),
+                "ORDER BY received DESC LIMIT 100",
+                (owner, release_sha),
             ).fetchall()
     return {
         "status": "PRIVATE_METADATA_REVIEW_FIELD_HOLD",
         "receipts": [
-            {"challenge": a, "gateId": b, "receivedAtMs": c, "decision": d}
-            for a, b, c, d in rows
+            {"challenge": a, "gateId": b, "receivedAtMs": c, "decision": d} for a, b, c, d in rows
         ],
-        "fieldCertified": False, "independentRecoveryClosed": False,
+        "fieldCertified": False,
+        "independentRecoveryClosed": False,
     }
