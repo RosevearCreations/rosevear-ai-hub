@@ -168,23 +168,24 @@ def test_ticket_scope_isolation_and_tamper_detection(tmp_path):
 
 
 def test_owner_only_routes_never_execute_unauthenticated_post():
-    with TestClient(app) as client:
-        base = "/api/v1/system/it-ops-385"
-        for path in ("/diagnostics", "/tickets"):
-            assert client.get(base + path).status_code in (401, 403)
-        assert client.post(
-            base + "/tickets",
-            json={
-                "app_id": "rosevear-ai-hub",
-                "category": "incident",
-                "summary_code": "SUPPORT_REQUEST",
-                "target_hours": 24,
-            },
-        ).status_code in (401, 403)
-        assert client.post(
-            base + "/tickets/" + "a" * 32 + "/transition",
-            json={
-                "expected_revision": 1,
-                "status": "resolved",
-            },
-        ).status_code in (401, 403)
+    # Route authorization tests must not start household background workers.
+    client = TestClient(app)
+    base = "/api/v1/system/it-ops-385"
+    for path in ("/diagnostics", "/tickets"):
+        assert client.get(base + path).status_code in (401, 403)
+    assert client.post(
+        base + "/tickets",
+        json={
+            "app_id": "rosevear-ai-hub",
+            "category": "incident",
+            "summary_code": "SUPPORT_REQUEST",
+            "target_hours": 24,
+        },
+    ).status_code in (401, 403)
+    assert client.post(
+        base + "/tickets/" + "a" * 32 + "/transition",
+        json={
+            "expected_revision": 1,
+            "status": "resolved",
+        },
+    ).status_code in (401, 403)

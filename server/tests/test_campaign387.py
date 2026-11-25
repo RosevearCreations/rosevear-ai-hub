@@ -69,16 +69,17 @@ def test_campaign_local_process_observation_not_physical_field_proof():
 
 
 def test_campaign_is_owner_only_and_cannot_write_or_start_services():
-    with TestClient(app) as client:
-        endpoint = "/api/v1/system/household-master-campaign-387"
-        assert client.get(endpoint).status_code in (401, 403)
-        assert client.post(endpoint, json={"certified": True}).status_code in (
-            401,
-            403,
-            405,
-        )
-        assert client.put(endpoint, json={"receiver": "start"}).status_code in (
-            401,
-            403,
-            405,
-        )
+    # Route authorization tests must not start household background workers.
+    client = TestClient(app)
+    endpoint = "/api/v1/system/household-master-campaign-387"
+    assert client.get(endpoint).status_code in (401, 403)
+    assert client.post(endpoint, json={"certified": True}).status_code in (
+        401,
+        403,
+        405,
+    )
+    assert client.put(endpoint, json={"receiver": "start"}).status_code in (
+        401,
+        403,
+        405,
+    )

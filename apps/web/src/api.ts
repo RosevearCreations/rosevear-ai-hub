@@ -4596,3 +4596,11 @@ export function transitionITTicket385(ticketId: string, payload: {
 export function getHouseholdMasterCampaign387(signal?: AbortSignal): Promise<unknown> {
   return authJson("GET", "/api/v1/system/household-master-campaign-387", undefined, signal);
 }
+
+
+// Build388: private owner-controlled signed metadata custody, no device commands.
+export function fieldCustody388(action: "read" | "challenge" | "intake" | "review", payload?: unknown): Promise<unknown> {
+  return action === "read"
+    ? authJson("GET", "/api/v1/system/field-witness-388")
+    : authJson("POST", "/api/v1/system/field-witness-388/" + action, payload);
+}

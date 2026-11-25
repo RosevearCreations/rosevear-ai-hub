@@ -142,9 +142,10 @@ def test_invalid_tenant_and_replay_never_enter_governed_journal(tmp_path):
 
 
 def test_owner_only_endpoints_and_no_mutation():
-    with TestClient(app) as client:
-        for suffix in ("governance-384", "weather-station-384"):
-            url = "/api/v1/system/" + suffix
-            assert client.get(url).status_code in (401, 403)
-            for method in ("post", "put", "delete"):
-                assert getattr(client, method)(url).status_code in (401, 403, 405)
+    # Route authorization tests must not start household background workers.
+    client = TestClient(app)
+    for suffix in ("governance-384", "weather-station-384"):
+        url = "/api/v1/system/" + suffix
+        assert client.get(url).status_code in (401, 403)
+        for method in ("post", "put", "delete"):
+            assert getattr(client, method)(url).status_code in (401, 403, 405)
