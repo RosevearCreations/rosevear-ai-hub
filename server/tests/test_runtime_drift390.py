@@ -40,9 +40,7 @@ def test_drift_and_recovery_are_durable_and_not_independent_acceptance(tmp_path)
         )
 
     def read(now):
-        report = snapshot390(
-            path, pins=pins, targets=targets, now_ms=now, loaded_hub_sha=None
-        )
+        report = snapshot390(path, pins=pins, targets=targets, now_ms=now, loaded_hub_sha=None)
         assert not report["independentThreeMasterAcceptance"]
         assert not report["remoteRecoveryExecuted"]
         return next(row["status"] for row in report["sources"] if row["source"] == source)

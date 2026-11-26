@@ -99,9 +99,7 @@ def intake390(
             "ORDER BY sequence DESC LIMIT 1",
             (observation.source, pin),
         ).fetchone()
-        if prior and (
-            observation.sequence <= prior[0] or observation.observed_at_ms <= prior[1]
-        ):
+        if prior and (observation.sequence <= prior[0] or observation.observed_at_ms <= prior[1]):
             raise ValueError("HOLD_REPLAY_OR_OUT_OF_ORDER")
         if db.execute("SELECT COUNT(*) FROM runtime390").fetchone()[0] >= MAX_RECEIPTS:
             raise ValueError("HOLD_LEDGER_CAPACITY_REVIEW")
