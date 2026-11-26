@@ -83,9 +83,7 @@ def _devices(row):
 
 def _fresh(row, now):
     return bool(
-        row
-        and row.observed_at_ms <= now <= row.expires_at_ms
-        and now - row.observed_at_ms <= 90000
+        row and row.observed_at_ms <= now <= row.expires_at_ms and now - row.observed_at_ms <= 90000
     )
 
 
@@ -144,14 +142,16 @@ def board392(_owner: Owner, db: DB, response: Response):
     return {
         "observationHistory": history,
         "jobs": eligible,
-        "receipt": {
-            "receiptId": row.id,
-            "observedAtMs": row.observed_at_ms,
-            "fresh": _fresh(row, now),
-            "devices": _devices(row),
-        }
-        if row
-        else None,
+        "receipt": (
+            {
+                "receiptId": row.id,
+                "observedAtMs": row.observed_at_ms,
+                "fresh": _fresh(row, now),
+                "devices": _devices(row),
+            }
+            if row
+            else None
+        ),
         "links": [e.sanitized_arguments for e in events],
         "source": "PREVIOUSLY_ADMITTED_SIGNED_RECEIPT_NOT_REVERIFIED",
         "physicalFitVerified": False,
@@ -199,10 +199,10 @@ def link392(body: Link392, actor: Owner, db: DB, response: Response):
         "association": "OWNER_REPORTED_NOT_PHYSICAL_IDENTITY",
     }
     prior = db.scalars(
-        select(AuditEvent).where(
-            AuditEvent.event_type == EVENT, AuditEvent.object_id == str(job.id)
-        )
-        .order_by(AuditEvent.id.desc()).limit(100)
+        select(AuditEvent)
+        .where(AuditEvent.event_type == EVENT, AuditEvent.object_id == str(job.id))
+        .order_by(AuditEvent.id.desc())
+        .limit(100)
     ).all()
     if len(prior) >= 100 or any(
         isinstance(e.sanitized_arguments, dict)
