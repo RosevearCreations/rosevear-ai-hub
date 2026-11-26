@@ -8,7 +8,9 @@ from rosevear_ai_hub.main import app
 from rosevear_ai_hub.runtime_drift390 import (
     MASTERS390,
     Observation390,
+    Review390,
     intake390,
+    review390,
     signing_bytes390,
     snapshot390,
 )
@@ -50,11 +52,20 @@ def test_drift_and_recovery_are_durable_and_not_independent_acceptance(tmp_path)
     first = signed(1, NOW, B)
     intake390(path, first, pins=pins, targets=targets, now_ms=NOW)
     assert read(NOW) == "OPEN_DEPLOYMENT_DRIFT"
+    review = Review390(source=source, sequence=1, decision="follow_up")
+    review390(path, review, pins=pins, targets=targets, now_ms=NOW, owner=7)
+    report = snapshot390(
+        path, pins=pins, targets=targets, now_ms=NOW, loaded_hub_sha=None, owner=7
+    )
+    row = next(row for row in report["sources"] if row["source"] == source)
+    assert row["ownerReview"] == "follow_up"
     with pytest.raises(ValueError, match="REPLAY"):
         intake390(path, first, pins=pins, targets=targets, now_ms=NOW)
     second = signed(2, NOW + 1000, A)
     intake390(path, second, pins=pins, targets=targets, now_ms=NOW + 1000)
     assert read(NOW + 1000) == "HOLD_RECOVERY_CONFIRMATION"
+    with pytest.raises(ValueError, match="STALE_SEQUENCE"):
+        review390(path, review, pins=pins, targets=targets, now_ms=NOW + 1000, owner=7)
     third = signed(3, NOW + 32000, A)
     intake390(path, third, pins=pins, targets=targets, now_ms=NOW + 32000)
     assert read(NOW + 32000) == "RECOVERY_SOURCE_REPORTED"

@@ -27,8 +27,11 @@ receipts cannot prove recovery. The Hub must also match its loaded-package
 marker. Neither a signed observation nor a local readback is independent
 operational acceptance, a remote delivery ACK, or a release promotion.
 
-Outstanding: connect existing approved source emitters without enabling
-QL-340C or accepting arbitrary remote commands; add the owner review and
-approved recovery handoff; test actual source signers, delivery and the
-original host independently. No automatic schema migration, task enrollment,
+Owner review is stored once per owner and verified receipt sequence. A new
+receipt supersedes the displayed review; an old receipt cannot authorize a
+new handoff. The System campaign panel supports signed packet intake and
+review only. A review is not a recovery command or independent closure.
+Outstanding: deploy independently approved source emitters without enabling
+QL-340C or accepting arbitrary remote commands; test actual source signers,
+delivery and the original host independently. No automatic schema migration, task enrollment,
 household service restarts or remote deployment.

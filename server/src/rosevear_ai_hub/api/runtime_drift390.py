@@ -13,7 +13,14 @@ from rosevear_ai_hub.auth import require_roles
 from rosevear_ai_hub.it_operations385 import original_host385
 from rosevear_ai_hub.models import User
 from rosevear_ai_hub.release_identity389 import LOADED_SHA389
-from rosevear_ai_hub.runtime_drift390 import MASTERS390, Observation390, intake390, snapshot390
+from rosevear_ai_hub.runtime_drift390 import (
+    MASTERS390,
+    Observation390,
+    Review390,
+    intake390,
+    review390,
+    snapshot390,
+)
 
 router = APIRouter(prefix="/api/v1/system/runtime-drift-390", tags=["runtime390"])
 Owner390 = Annotated[User, Depends(require_roles("owner"))]
@@ -35,7 +42,7 @@ def context390():
 
 
 @router.get("")
-def read_runtime390(response: Response, _owner: Owner390):
+def read_runtime390(response: Response, owner: Owner390):
     response.headers["Cache-Control"] = "no-store"
     path, pins, targets = context390()
     try:
@@ -45,6 +52,7 @@ def read_runtime390(response: Response, _owner: Owner390):
             targets=targets,
             now_ms=int(time.time() * 1000),
             loaded_hub_sha=LOADED_SHA389,
+            owner=owner.id,
         )
     except (OSError, sqlite3.Error, ValueError):
         raise HTTPException(409, "HOLD_RUNTIME_READBACK_FAILED") from None
@@ -59,3 +67,21 @@ def receive_runtime390(packet: Observation390, response: Response, _owner: Owner
     except (OSError, sqlite3.Error, ValueError):
         raise HTTPException(409, "HOLD_RUNTIME_OBSERVATION_REJECTED") from None
     return {"accepted": True, "independentThreeMasterAcceptance": False}
+
+
+@router.post("/review")
+def review_runtime390(packet: Review390, response: Response, owner: Owner390):
+    response.headers["Cache-Control"] = "no-store"
+    path, pins, targets = context390()
+    try:
+        review390(
+            path,
+            packet,
+            pins=pins,
+            targets=targets,
+            now_ms=int(time.time() * 1000),
+            owner=owner.id,
+        )
+    except (OSError, sqlite3.Error, ValueError):
+        raise HTTPException(409, "HOLD_RUNTIME_REVIEW_REJECTED") from None
+    return {"recorded": True, "remoteRecoveryExecuted": False}

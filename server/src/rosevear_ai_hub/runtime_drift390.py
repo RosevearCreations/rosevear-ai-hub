@@ -33,6 +33,62 @@ class Observation390(BaseModel):
     signature: str = Field(pattern=r"^[a-f0-9]{128}$")
 
 
+class Review390(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    source: Literal["rosevear-ai-hub", "ai-data-platform", "rosevear-comms-hub"]
+    sequence: int = Field(ge=1, le=9007199254740991)
+    decision: Literal["follow_up", "reviewed"]
+
+
+def review390(
+    path: Path,
+    request: Review390,
+    *,
+    pins: dict[str, str],
+    targets: dict[str, str],
+    now_ms: int,
+    owner: int,
+) -> None:
+    """Record a handoff against the latest signed observation; never execute."""
+    validate_policy390(pins, targets)
+    pin, target = pins[request.source], targets[request.source]
+    path = safe_path390(path)
+    if not path.exists():
+        raise ValueError("HOLD_REVIEW_NO_RECEIPT")
+    with closing(sqlite3.connect(path, timeout=5)) as db, db:
+        db.execute("BEGIN IMMEDIATE")
+        row = db.execute(
+            "SELECT sequence,observed,target,packet FROM runtime390 "
+            "WHERE source=? AND pin=? ORDER BY sequence DESC LIMIT 1",
+            (request.source, pin),
+        ).fetchone()
+        if not row or row[0] != request.sequence or row[2] != target:
+            raise ValueError("HOLD_REVIEW_STALE_SEQUENCE")
+        if not isinstance(row[3], str) or len(row[3]) > 2048:
+            raise ValueError("HOLD_REVIEW_INVALID_RECEIPT")
+        packet = Observation390.model_validate_json(row[3])
+        verify390(packet, pin, target)
+        if (
+            (packet.source, packet.sequence, packet.observed_at_ms)
+            != (request.source, row[0], row[1])
+            or not 0 <= now_ms - packet.observed_at_ms <= FRESH_MS
+        ):
+            raise ValueError("HOLD_REVIEW_INVALID_RECEIPT")
+        db.execute(
+            """CREATE TABLE IF NOT EXISTS review390 (
+                source TEXT NOT NULL, pin TEXT NOT NULL, sequence INTEGER NOT NULL,
+                owner INTEGER NOT NULL, decision TEXT NOT NULL, reviewed INTEGER NOT NULL,
+                PRIMARY KEY(source,pin,sequence,owner))"""
+        )
+        if db.execute("SELECT COUNT(*) FROM review390").fetchone()[0] >= MAX_RECEIPTS:
+            raise ValueError("HOLD_REVIEW_CAPACITY")
+        db.execute(
+            "INSERT INTO review390 VALUES (?,?,?,?,?,?)",
+            (request.source, pin, request.sequence, owner, request.decision, now_ms),
+        )
+
+
 def signing_bytes390(observation: Observation390) -> bytes:
     payload = {"schema": SCHEMA390, **observation.model_dump(exclude={"signature"})}
     return json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
@@ -151,10 +207,12 @@ def snapshot390(
     targets: dict[str, str],
     now_ms: int,
     loaded_hub_sha: str | None,
+    owner: int | None = None,
 ) -> dict[str, object]:
     validate_policy390(pins, targets)
     path = safe_path390(path)
     groups: dict[str, list[Observation390]] = {source: [] for source in MASTERS390}
+    reviews = {}
     if path.exists():
         with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, timeout=5)) as db:
             rows = db.execute(
@@ -162,6 +220,23 @@ def snapshot390(
                 "ORDER BY source,sequence LIMIT ?",
                 (MAX_RECEIPTS + 1,),
             ).fetchall()
+            if owner is not None:
+                exists = db.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='review390'"
+                ).fetchone()
+                if exists:
+                    review_rows = db.execute(
+                        "SELECT source,pin,sequence,decision FROM review390 "
+                        "WHERE owner=? LIMIT ?",
+                        (owner, MAX_RECEIPTS + 1),
+                    ).fetchall()
+                    if len(review_rows) > MAX_RECEIPTS:
+                        raise ValueError("HOLD_REVIEW_CAPACITY")
+                    reviews = {
+                        (source, pin, sequence): decision
+                        for source, pin, sequence, decision in review_rows
+                        if decision in ("follow_up", "reviewed")
+                    }
         if len(rows) > MAX_RECEIPTS:
             raise ValueError("HOLD_LEDGER_CAPACITY_REVIEW")
         for source, pin, sequence, observed, target, raw in rows:
@@ -194,6 +269,10 @@ def snapshot390(
                 "runtimeSha": samples[-1].runtime_sha if samples else None,
                 "observedAtMs": samples[-1].observed_at_ms if samples else None,
                 "status": status,
+                "sequence": samples[-1].sequence if samples else None,
+                "ownerReview": (
+                    reviews.get((source, pins[source], samples[-1].sequence)) if samples else None
+                ),
             }
         )
     return {
