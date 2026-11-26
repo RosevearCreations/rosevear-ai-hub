@@ -115,6 +115,7 @@ from rosevear_ai_hub.api.providers import router as providers_router
 from rosevear_ai_hub.api.release_update_control import router as release_update_control_router
 from rosevear_ai_hub.api.resources import router as resources_router
 from rosevear_ai_hub.api.runtime_drift390 import router as runtime_drift390_router
+from rosevear_ai_hub.api.runtime_resilience391 import router as runtime_resilience391_router
 from rosevear_ai_hub.api.secrets import router as secrets_router
 from rosevear_ai_hub.api.security_custody382 import router as security_custody382_router
 from rosevear_ai_hub.api.security_posture import router as security_posture_router
@@ -275,6 +276,7 @@ def create_app() -> FastAPI:
     application.include_router(governance384_router)
     application.include_router(campaign387_router)
     application.include_router(runtime_drift390_router)
+    application.include_router(runtime_resilience391_router)
     application.include_router(master_acceptance389_router)
     application.include_router(it_operations385_router)
     application.include_router(live_sources367_router)
