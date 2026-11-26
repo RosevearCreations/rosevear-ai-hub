@@ -4611,3 +4611,10 @@ export function masterAcceptance389(action: "read" | "challenge" | "receipt", pa
     ? authJson("GET", "/api/v1/system/master-acceptance-389")
     : authJson("POST", "/api/v1/system/master-acceptance-389/" + action, payload);
 }
+
+// Build390: private signed observations and owner recovery review; no commands.
+export function runtimeDrift390(action: "read" | "observation" | "review", payload?: unknown): Promise<unknown> {
+  return action === "read"
+    ? authJson("GET", "/api/v1/system/runtime-drift-390")
+    : authJson("POST", "/api/v1/system/runtime-drift-390/" + action, payload);
+}
