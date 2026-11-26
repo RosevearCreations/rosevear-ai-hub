@@ -69,11 +69,11 @@ def review390(
             raise ValueError("HOLD_REVIEW_INVALID_RECEIPT")
         packet = Observation390.model_validate_json(row[3])
         verify390(packet, pin, target)
-        if (
-            (packet.source, packet.sequence, packet.observed_at_ms)
-            != (request.source, row[0], row[1])
-            or not 0 <= now_ms - packet.observed_at_ms <= FRESH_MS
-        ):
+        if (packet.source, packet.sequence, packet.observed_at_ms) != (
+            request.source,
+            row[0],
+            row[1],
+        ) or not 0 <= now_ms - packet.observed_at_ms <= FRESH_MS:
             raise ValueError("HOLD_REVIEW_INVALID_RECEIPT")
         db.execute(
             """CREATE TABLE IF NOT EXISTS review390 (
@@ -226,8 +226,7 @@ def snapshot390(
                 ).fetchone()
                 if exists:
                     review_rows = db.execute(
-                        "SELECT source,pin,sequence,decision FROM review390 "
-                        "WHERE owner=? LIMIT ?",
+                        "SELECT source,pin,sequence,decision FROM review390 WHERE owner=? LIMIT ?",
                         (owner, MAX_RECEIPTS + 1),
                     ).fetchall()
                     if len(review_rows) > MAX_RECEIPTS:

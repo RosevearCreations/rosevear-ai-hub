@@ -54,9 +54,7 @@ def test_drift_and_recovery_are_durable_and_not_independent_acceptance(tmp_path)
     assert read(NOW) == "OPEN_DEPLOYMENT_DRIFT"
     review = Review390(source=source, sequence=1, decision="follow_up")
     review390(path, review, pins=pins, targets=targets, now_ms=NOW, owner=7)
-    report = snapshot390(
-        path, pins=pins, targets=targets, now_ms=NOW, loaded_hub_sha=None, owner=7
-    )
+    report = snapshot390(path, pins=pins, targets=targets, now_ms=NOW, loaded_hub_sha=None, owner=7)
     row = next(row for row in report["sources"] if row["source"] == source)
     assert row["ownerReview"] == "follow_up"
     with pytest.raises(ValueError, match="REPLAY"):
