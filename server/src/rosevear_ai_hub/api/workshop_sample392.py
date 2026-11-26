@@ -112,7 +112,8 @@ def board392(_owner: Owner, db: DB, response: Response):
                 }
             )
     events = db.scalars(
-        select(AuditEvent).where(AuditEvent.event_type == EVENT)
+        select(AuditEvent)
+        .where(AuditEvent.event_type == EVENT)
         .order_by(AuditEvent.id.desc())
         .limit(100)
     ).all()
