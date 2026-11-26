@@ -65,6 +65,8 @@ def classify_mqtt(
         return "connected"
     # Match only strings emitted by this project's own MQTT callbacks;
     # never serialize raw error strings, broker addresses or credentials.
+    if last_error == "MQTT transport connection attempt failed.":
+        return "unreachable"
     if last_error == "MQTT broker rejected credentials.":
         return "broker_rejected_credentials"
     if last_error == "MQTT broker rejected the connection.":
