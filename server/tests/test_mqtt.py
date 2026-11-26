@@ -159,3 +159,23 @@ def test_connect_generation_tracks_genuine_callbacks_without_restart_or_publish(
     assert recovered["connect_generation"] == 2
     assert recovered["last_connected_at"] is not None
     assert client.publishes == []
+
+
+def test_failed_initial_transport_reports_safe_reason_and_recovers() -> None:
+    from rosevear_ai_hub.integration_triage import classify_mqtt
+
+    integration, client = build_client()
+    integration.start()
+    client.on_connect_fail(client, None)
+    report = integration.snapshot()
+    assert report["connected"] is False
+    assert report["last_error"] == "MQTT transport connection attempt failed."
+    assert (
+        classify_mqtt(configured=True, connected=False, last_error=report["last_error"])
+        == "unreachable"
+    )
+    assert "mqtt.local" not in report["last_error"]
+    assert client.publishes == []
+    client.trigger_connect()
+    assert integration.snapshot()["last_error"] is None
+    assert integration.connected

@@ -149,6 +149,7 @@ class MQTTClient:
             max_delay=reconnect_max_seconds,
         )
         self._client.on_connect = self._on_connect
+        self._client.on_connect_fail = self._on_connect_fail
         self._client.on_disconnect = self._on_disconnect
         self._client.on_message = self._on_message
 
@@ -168,7 +169,7 @@ class MQTTClient:
         except (OSError, ValueError) as exc:
             with self._lock:
                 self._started = False
-                self._last_error = f"Unable to start MQTT connection to {self.host}:{self.port}."
+                self._last_error = "MQTT transport connection attempt failed."
             raise MQTTUnavailableError(self._last_error) from exc
 
     def close(self) -> None:
@@ -267,6 +268,13 @@ class MQTTClient:
         if success:
             for topic_filter, qos in subscriptions:
                 self._client.subscribe(topic_filter, qos=qos)
+
+    def _on_connect_fail(self, _client: Any, _userdata: Any) -> None:
+        # Paho calls this for failed automatic TCP/TLS connection attempts.
+        # It does not identify DNS, firewall, listener or certificate root cause.
+        with self._lock:
+            if self._started and not self._connected:
+                self._last_error = "MQTT transport connection attempt failed."
 
     def _on_disconnect(
         self,

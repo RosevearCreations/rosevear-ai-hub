@@ -210,6 +210,10 @@ export function MQTTView({ currentUser }: { currentUser: AuthUser }) {
               <p>Check that the MQTT broker/add-on is running and reachable from the Hub
                 server on the configured port, and that broker credentials are valid.
                 A saved username and password do not confirm a working connection.</p>
+              {loadState.status.recovery_reason === "unreachable" && <p>
+                The broker transport attempt failed before a successful MQTT connection.
+                Verify the existing broker listener, private address, configured port and TLS settings.
+                This does not establish that the password is incorrect.</p>}
               <p>Try Refresh after checking the broker. Messages cannot be published
                 or subscribed while the connection is unavailable.</p>
             </div>
