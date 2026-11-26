@@ -14,7 +14,13 @@ from sqlalchemy.orm import Session
 from rosevear_ai_hub.audit import record_audit_event
 from rosevear_ai_hub.auth import require_roles
 from rosevear_ai_hub.database import get_session
-from rosevear_ai_hub.models import AuditEvent, User, WorkshopEquipment, WorkshopGatewayReceipt370, WorkshopJob
+from rosevear_ai_hub.models import (
+    AuditEvent,
+    User,
+    WorkshopEquipment,
+    WorkshopGatewayReceipt370,
+    WorkshopJob,
+)
 
 router = APIRouter(prefix="/api/v1/workshop-sample-392", tags=["workshop-sample392"])
 Owner = Annotated[User, Depends(require_roles("owner"))]
@@ -40,7 +46,9 @@ def _latest(db):
     return db.scalar(
         select(WorkshopGatewayReceipt370)
         .where(WorkshopGatewayReceipt370.collector_id == collector)
-        .order_by(WorkshopGatewayReceipt370.observed_at_ms.desc(), WorkshopGatewayReceipt370.id.desc())
+        .order_by(
+            WorkshopGatewayReceipt370.observed_at_ms.desc(), WorkshopGatewayReceipt370.id.desc()
+        )
         .limit(1)
     )
 
@@ -70,7 +78,10 @@ def _devices(row):
 
 
 def _fresh(row, now):
-    return bool(row and row.observed_at_ms <= now <= row.expires_at_ms and now - row.observed_at_ms <= 90000)
+    return bool(
+        row and row.observed_at_ms <= now <= row.expires_at_ms
+        and now - row.observed_at_ms <= 90000
+    )
 
 
 @router.get("")
@@ -143,7 +154,9 @@ def link392(body: Link392, actor: Owner, db: DB, response: Response):
         "association": "OWNER_REPORTED_NOT_PHYSICAL_IDENTITY",
     }
     prior = db.scalars(
-        select(AuditEvent).where(AuditEvent.event_type == EVENT, AuditEvent.object_id == str(job.id))
+        select(AuditEvent).where(
+            AuditEvent.event_type == EVENT, AuditEvent.object_id == str(job.id)
+        )
         .order_by(AuditEvent.id.desc()).limit(100)
     ).all()
     if len(prior) >= 100 or any(

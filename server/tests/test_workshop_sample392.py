@@ -1,8 +1,7 @@
 """Build 392 isolated authenticated sample-link regression, no hardware."""
 
-from test_workshop_gateway370 import prepared, signed
-
 from rosevear_ai_hub.models import WorkshopEquipment, WorkshopJob
+from test_workshop_gateway370 import prepared, signed
 
 
 def test_sample_association_uses_admitted_receipt_and_revision(tmp_path, monkeypatch):
