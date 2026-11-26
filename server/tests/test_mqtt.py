@@ -170,9 +170,10 @@ def test_failed_initial_transport_reports_safe_reason_and_recovers() -> None:
     report = integration.snapshot()
     assert report["connected"] is False
     assert report["last_error"] == "MQTT transport connection attempt failed."
-    assert classify_mqtt(
-        configured=True, connected=False, last_error=report["last_error"]
-    ) == "unreachable"
+    assert (
+        classify_mqtt(configured=True, connected=False, last_error=report["last_error"])
+        == "unreachable"
+    )
     assert "mqtt.local" not in report["last_error"]
     assert client.publishes == []
     client.trigger_connect()
