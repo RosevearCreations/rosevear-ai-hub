@@ -123,17 +123,24 @@ def board392(_owner: Owner, db: DB, response: Response):
         previous = db.scalars(
             select(WorkshopGatewayReceipt370)
             .where(WorkshopGatewayReceipt370.collector_id == row.collector_id)
-            .order_by(WorkshopGatewayReceipt370.observed_at_ms.desc(), WorkshopGatewayReceipt370.id.desc())
+            .order_by(
+                WorkshopGatewayReceipt370.observed_at_ms.desc(),
+                WorkshopGatewayReceipt370.id.desc(),
+            )
             .limit(30)
         ).all()
         for index, observation in enumerate(previous):
             older = previous[index + 1] if index + 1 < len(previous) else None
-            history.append({
-                "receiptId": observation.id,
-                "observedAtMs": observation.observed_at_ms,
-                "observedGapMs": observation.observed_at_ms - older.observed_at_ms if older else None,
-                "devices": _devices(observation),
-            })
+            history.append(
+                {
+                    "receiptId": observation.id,
+                    "observedAtMs": observation.observed_at_ms,
+                    "observedGapMs": (
+                        observation.observed_at_ms - older.observed_at_ms if older else None
+                    ),
+                    "devices": _devices(observation),
+                }
+            )
     return {
         "observationHistory": history,
         "jobs": eligible,
