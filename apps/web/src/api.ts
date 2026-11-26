@@ -4607,3 +4607,10 @@ export function fieldCustody388(action: "read" | "challenge" | "intake" | "revie
     ? authJson("GET", "/api/v1/system/field-witness-388")
     : authJson("POST", "/api/v1/system/field-witness-388/" + action, payload);
 }
+
+// Build391: bounded infrastructure forecast and local advisory reconciliation.
+export function runtimeResilience391(action: "read" | "reconcile"): Promise<unknown> {
+  return action === "read"
+    ? authJson("GET", "/api/v1/system/runtime-resilience-391")
+    : authJson("POST", "/api/v1/system/runtime-resilience-391/reconcile");
+}
