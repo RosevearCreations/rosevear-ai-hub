@@ -135,8 +135,10 @@ def reconcile391(
             # Retain the first sequence at each state transition for audit.
             if last and last[:2] == (row["priority"], row["status"]):
                 continue
-            if last and last[2] is not None and (
-                raw["sequence"] is None or raw["sequence"] < last[2]
+            if (
+                last
+                and last[2] is not None
+                and (raw["sequence"] is None or raw["sequence"] < last[2])
             ):
                 raise ValueError("HOLD_ESCALATION_EVIDENCE_REGRESSED")
             if db.execute("SELECT COUNT(*) FROM escalation391").fetchone()[0] >= MAX_ESCALATIONS:
@@ -150,9 +152,7 @@ def reconcile391(
     return {"recordedTransitions": count, "externalDeliveryVerified": False}
 
 
-def read_queue391(
-    queue_path: Path, *, pins: dict[str, str], targets: dict[str, str]
-) -> list[dict]:
+def read_queue391(queue_path: Path, *, pins: dict[str, str], targets: dict[str, str]) -> list[dict]:
     """Read limited advisory transition history; not signed field evidence."""
     queue_path = safe_path390(queue_path)
     if not queue_path.exists():
