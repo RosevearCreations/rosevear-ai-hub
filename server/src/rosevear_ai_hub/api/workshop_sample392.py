@@ -68,8 +68,12 @@ def _devices(row):
         ):
             return []
         return [
-            {"deviceId": d["device_id"], "label": d["label"], "status": d["presence"],
-             "progressPercent": d.get("progress_percent")}
+            {
+                "deviceId": d["device_id"],
+                "label": d["label"],
+                "status": d["presence"],
+                "progressPercent": d.get("progress_percent"),
+            }
             for d in packet["devices"][:48]
             if d.get("kind") == "octoprint" and d.get("proof") == "octoprint_loopback"
         ]
@@ -79,7 +83,8 @@ def _devices(row):
 
 def _fresh(row, now):
     return bool(
-        row and row.observed_at_ms <= now <= row.expires_at_ms
+        row
+        and row.observed_at_ms <= now <= row.expires_at_ms
         and now - row.observed_at_ms <= 90000
     )
 
@@ -92,22 +97,54 @@ def board392(_owner: Owner, db: DB, response: Response):
     jobs = db.scalars(
         select(WorkshopJob)
         .where(WorkshopJob.archived.is_(False), WorkshopJob.category == "3d_print")
-        .order_by(WorkshopJob.id.desc()).limit(100)
+        .order_by(WorkshopJob.id.desc())
+        .limit(100)
     ).all()
     eligible = []
     for job in jobs:
         equipment = db.get(WorkshopEquipment, job.equipment_id) if job.equipment_id else None
         if equipment and not equipment.disabled:
-            eligible.append({"jobId": job.id, "revision": job.revision, "title": job.title,
-                             "stage": job.status, "progressPercent": job.progress_percent})
+            eligible.append(
+                {
+                    "jobId": job.id,
+                    "revision": job.revision,
+                    "title": job.title,
+                    "stage": job.status,
+                    "progressPercent": job.progress_percent,
+                }
+            )
     events = db.scalars(
         select(AuditEvent).where(AuditEvent.event_type == EVENT)
-        .order_by(AuditEvent.id.desc()).limit(100)
+        .order_by(AuditEvent.id.desc())
+        .limit(100)
     ).all()
+    history = []
+    if row:
+        previous = db.scalars(
+            select(WorkshopGatewayReceipt370)
+            .where(WorkshopGatewayReceipt370.collector_id == row.collector_id)
+            .order_by(WorkshopGatewayReceipt370.observed_at_ms.desc(), WorkshopGatewayReceipt370.id.desc())
+            .limit(30)
+        ).all()
+        for index, observation in enumerate(previous):
+            older = previous[index + 1] if index + 1 < len(previous) else None
+            history.append({
+                "receiptId": observation.id,
+                "observedAtMs": observation.observed_at_ms,
+                "observedGapMs": observation.observed_at_ms - older.observed_at_ms if older else None,
+                "devices": _devices(observation),
+            })
     return {
+        "observationHistory": history,
         "jobs": eligible,
-        "receipt": {"receiptId": row.id, "observedAtMs": row.observed_at_ms,
-                    "fresh": _fresh(row, now), "devices": _devices(row)} if row else None,
+        "receipt": {
+            "receiptId": row.id,
+            "observedAtMs": row.observed_at_ms,
+            "fresh": _fresh(row, now),
+            "devices": _devices(row),
+        }
+        if row
+        else None,
         "links": [e.sanitized_arguments for e in events],
         "source": "PREVIOUSLY_ADMITTED_SIGNED_RECEIPT_NOT_REVERIFIED",
         "physicalFitVerified": False,
@@ -143,6 +180,7 @@ def link392(body: Link392, actor: Owner, db: DB, response: Response):
         "jobRevision": body.expected_revision,
         "equipmentId": job.equipment_id,
         "sampleReference": body.sample_reference,
+        "sampleReferenceSource": "OWNER_ENTERED_EXTERNAL_UNVERIFIED",
         "receiptId": row.id,
         "collectorId": row.collector_id,
         "deviceId": body.device_id,
@@ -168,9 +206,14 @@ def link392(body: Link392, actor: Owner, db: DB, response: Response):
         db.rollback()
         raise HTTPException(409, "HOLD_DUPLICATE_OR_CAPACITY")
     record_audit_event(
-        db, actor_user_id=actor.id, event_type=EVENT, object_type="workshop_job",
-        object_id=str(job.id), action="associate_prior_admitted_receipt",
-        arguments=evidence, result={"ok": True, "machine_commands": 0, "physical_fit": False},
+        db,
+        actor_user_id=actor.id,
+        event_type=EVENT,
+        object_type="workshop_job",
+        object_id=str(job.id),
+        action="associate_prior_admitted_receipt",
+        arguments=evidence,
+        result={"ok": True, "machine_commands": 0, "physical_fit": False},
     )
     db.commit()
     return {"link": evidence, "physicalFitVerified": False, "machineControlEnabled": False}
