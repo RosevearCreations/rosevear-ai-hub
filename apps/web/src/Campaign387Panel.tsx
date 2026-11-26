@@ -3,6 +3,7 @@ import { getHouseholdMasterCampaign387 } from "./api";
 import { FieldCustody388Panel } from "./FieldCustody388Panel";
 import { MasterAcceptance389Panel } from "./MasterAcceptance389Panel";
 import { RuntimeDrift390Panel } from "./RuntimeDrift390Panel";
+import { RuntimeResilience391Panel } from "./RuntimeResilience391Panel";
 import {
   campaignDisposition387,
   emptyCampaignReports387,
@@ -139,6 +140,7 @@ export function Campaign387Panel({ onNavigate }: {
     <FieldCustody388Panel />
     <MasterAcceptance389Panel />
     <RuntimeDrift390Panel />
+    <RuntimeResilience391Panel />
     <div className="campaign387-foot">
       <button type="button" onClick={() => setReports(emptyCampaignReports387())}>
         Clear session-only owner reports
