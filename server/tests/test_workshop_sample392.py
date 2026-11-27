@@ -111,10 +111,7 @@ def test_windows_inventory_has_no_print_progress(tmp_path, monkeypatch):
         ).status_code
         == 201
     )
-    assert (
-        client.post("/api/v1/workshop-gateway-370/receipt", json=signed(key)).status_code
-        == 202
-    )
+    assert client.post("/api/v1/workshop-gateway-370/receipt", json=signed(key)).status_code == 202
     devices = client.get("/api/v1/workshop-sample-392").json()["receipt"]["devices"]
     assert len(devices) == 1
     assert devices[0]["deviceId"] == "COM7"
@@ -135,16 +132,11 @@ def test_observation_gap_is_not_physical_downtime(tmp_path, monkeypatch):
     gateway = "/api/v1/workshop-gateway-370/receipt"
     path = "/api/v1/workshop-sample-392"
     now = int(time.time() * 1000)
-    assert (
-        client.post(gateway, json=signed(key, observed=now - 70000)).status_code == 202
-    )
+    assert client.post(gateway, json=signed(key, observed=now - 70000)).status_code == 202
     stale = client.get(path).json()
     assert stale["receipt"]["fresh"] is False
     assert stale["observationHistory"][0]["observedGapMs"] is None
-    assert (
-        client.post(gateway, json=signed(key, nonce="b" * 32, observed=now)).status_code
-        == 202
-    )
+    assert client.post(gateway, json=signed(key, nonce="b" * 32, observed=now)).status_code == 202
     current = client.get(path).json()
     assert current["receipt"]["fresh"] is True
     assert current["observationHistory"][0]["observedGapMs"] == 70000
