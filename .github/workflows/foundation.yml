@@ -235,6 +235,21 @@ jobs:
             $allErrors | ForEach-Object { Write-Error $_ }
             exit 1
           }
+      - name: Build 393 printer observation syntax and non-registering trigger test
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tokens = $null
+          $issues = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'scripts/resume-printer-pc393.ps1'), [ref]$tokens, [ref]$issues) | Out-Null
+          if (@($issues).Count -ne 0) { throw "BUILD393_SYNTAX_HOLD: $($issues -join '; ')" }
+          $identity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+          $logon = New-ScheduledTaskTrigger -AtLogOn -User $identity
+          $repeat = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(5) -RepetitionInterval (New-TimeSpan -Minutes 5)
+          $principal = New-ScheduledTaskPrincipal -UserId $identity -LogonType Interactive -RunLevel Limited
+          if ($logon.CimClass.CimClassName -ne 'MSFT_TaskLogonTrigger') { throw 'BAD_LOGON_TRIGGER' }
+          if ([string]$repeat.Repetition.Interval -ne 'PT5M' -or $repeat.Repetition.Duration) { throw 'BAD_PERIODIC_TRIGGER' }
+          if ([string]$principal.LogonType -ne 'Interactive' -or [string]$principal.RunLevel -ne 'Limited') { throw 'BAD_PRINCIPAL' }
       - name: Build 356 original Windows unattended boot and installer parser
         shell: pwsh
         run: |
