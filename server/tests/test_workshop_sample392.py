@@ -157,9 +157,7 @@ def test_read_only_account_cannot_access_sample_custody(tmp_path, monkeypatch):
     )
     credentials = {"username": "sample-reader", "password": "reader-password-123"}
     assert (
-        client.post(
-            "/api/v1/auth/users", json={**credentials, "role": "read_only"}
-        ).status_code
+        client.post("/api/v1/auth/users", json={**credentials, "role": "read_only"}).status_code
         == 201
     )
     assert client.post("/api/v1/workshop-gateway-370/receipt", json=signed(key)).status_code == 202
