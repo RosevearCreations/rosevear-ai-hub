@@ -1,4 +1,5 @@
 """Source contract only; actual Windows task enrollment remains field unverified."""
+
 from pathlib import Path
 
 
