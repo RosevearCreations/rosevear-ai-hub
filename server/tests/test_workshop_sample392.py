@@ -143,3 +143,30 @@ def test_observation_gap_is_not_physical_downtime(tmp_path, monkeypatch):
     assert len(current["observationHistory"]) == 2
     assert current["physicalFitVerified"] is False
     assert current["machineControlEnabled"] is False
+
+
+def test_read_only_account_cannot_access_sample_custody(tmp_path, monkeypatch):
+    client, _, key = prepared(tmp_path, monkeypatch)
+    path = "/api/v1/workshop-sample-392"
+    assert (
+        client.post(
+            "/api/v1/auth/bootstrap",
+            json={"username": "owner", "password": "owner-password-123"},
+        ).status_code
+        == 201
+    )
+    credentials = {"username": "sample-reader", "password": "reader-password-123"}
+    assert (
+        client.post(
+            "/api/v1/auth/users", json={**credentials, "role": "read_only"}
+        ).status_code
+        == 201
+    )
+    assert client.post("/api/v1/workshop-gateway-370/receipt", json=signed(key)).status_code == 202
+    assert client.get(path).status_code == 200
+    assert client.post("/api/v1/auth/logout").status_code == 200
+    assert client.post("/api/v1/auth/login", json=credentials).status_code == 200
+    assert client.get("/api/v1/auth/me").json()["role"] == "read_only"
+    assert client.get(path).status_code == 403
+    assert client.post(path + "/link", json={}).status_code == 403
+    assert client.post(path + "/recovery", json={}).status_code == 403
