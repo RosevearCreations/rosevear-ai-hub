@@ -91,7 +91,8 @@ def _devices(row):
                 "progressPercent": d.get("progress_percent"),
             }
             for d in packet["devices"][:48]
-            if (d.get("kind"), d.get("proof")) in {
+            if (d.get("kind"), d.get("proof"))
+            in {
                 ("octoprint", "octoprint_loopback"),
                 ("serial", "windows_registry"),
                 ("printer_queue", "windows_registry"),
