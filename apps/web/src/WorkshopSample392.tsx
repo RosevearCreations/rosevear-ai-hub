@@ -114,7 +114,7 @@ export function WorkshopSample392() {
   }
   return <section className="panel" aria-label="Build 392 workshop sample observation">
     <h2>Devil n Dove sample observation</h2>
-    <p>Link a local job and previously admitted signed printer-PC observation. This is a maker-reported association, not proof of physical fit, machine identity or permission to run.</p>
+    <p>Link a local job and previously admitted signed printer-PC observation. Windows serial or queue enumeration does not measure print progress; only an approved local OctoPrint source can report controller progress. This is a maker-reported association, not proof of physical fit, machine identity or permission to run.</p>
     <button type="button" disabled={busy} onClick={() => void read()}>Read sample evidence</button>
     <p role="status" aria-label="Sample observation status">{message}</p>
     {board && <>
@@ -123,8 +123,8 @@ export function WorkshopSample392() {
       <label>Workshop job<select value={jobId} onChange={e => {setJobId(e.target.value); setConfirmed(false);}}>
         <option value="">Choose a job</option>{board.jobs.map(j => <option key={j.jobId} value={j.jobId}>{j.title} · {j.stage}</option>)}
       </select></label>
-      <label>Observed controller<select value={deviceId} onChange={e => {setDeviceId(e.target.value); setConfirmed(false);}}>
-        <option value="">Choose exact controller</option>{board.receipt?.devices.map(d => <option key={d.deviceId} value={d.deviceId}>{d.label} · {d.status}</option>)}
+      <label>Observed device or queue<select value={deviceId} onChange={e => {setDeviceId(e.target.value); setConfirmed(false);}}>
+        <option value="">Choose exact observed device or queue</option>{board.receipt?.devices.map(d => <option key={d.deviceId} value={d.deviceId}>{d.label} · {d.status}</option>)}
       </select></label>
       <label>Non-customer sample reference (DND-…)<input value={reference} maxLength={52} onChange={e => {setReference(e.target.value.toUpperCase()); setConfirmed(false);}} /></label>
       <label><input type="checkbox" checked={confirmed} onChange={e => setConfirmed(e.target.checked)} /> I reviewed the association to this sample; no physical fit decision is implied.</label>

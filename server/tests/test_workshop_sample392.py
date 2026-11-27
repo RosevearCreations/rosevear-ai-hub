@@ -98,3 +98,24 @@ def test_sample_association_uses_admitted_receipt_and_revision(tmp_path, monkeyp
         assert job.revision == 3
     client.post("/api/v1/auth/logout")
     assert client.post(path + "/recovery", json=review).status_code in (401, 403)
+
+
+def test_windows_inventory_has_no_print_progress(tmp_path, monkeypatch):
+    client, _, key = prepared(tmp_path, monkeypatch)
+    assert (
+        client.post(
+            "/api/v1/auth/bootstrap",
+            json={"username": "owner", "password": "owner-password-123"},
+        ).status_code
+        == 201
+    )
+    assert (
+        client.post("/api/v1/workshop-gateway-370/receipt", json=signed(key)).status_code
+        == 202
+    )
+    devices = client.get("/api/v1/workshop-sample-392").json()["receipt"]["devices"]
+    assert len(devices) == 1
+    assert devices[0]["deviceId"] == "COM7"
+    assert devices[0]["kind"] == "serial"
+    assert devices[0]["status"] == "enumerated"
+    assert devices[0]["progressPercent"] is None

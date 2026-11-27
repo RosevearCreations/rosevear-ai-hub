@@ -17,3 +17,7 @@ hardware, live login or physical disconnection. The owner screen includes receip
 inspection checklist and disposition. No checklist outcome starts equipment,
 changes a job stage, or constitutes independently verified fit. Record actual observed field evidence separately; Devil n Dove
 order intake remains owned by that application. Never restart equipment.
+
+Windows serial and print queue observations may be explicitly associated even
+without OctoPrint. Enumeration is not print progress, machine identity or
+proof of physical activity. Manual notes remain excluded from source association.

@@ -86,10 +86,16 @@ def _devices(row):
                 "deviceId": d["device_id"],
                 "label": d["label"],
                 "status": d["presence"],
+                "kind": d["kind"],
+                "proof": d["proof"],
                 "progressPercent": d.get("progress_percent"),
             }
             for d in packet["devices"][:48]
-            if d.get("kind") == "octoprint" and d.get("proof") == "octoprint_loopback"
+            if (d.get("kind"), d.get("proof")) in {
+                ("octoprint", "octoprint_loopback"),
+                ("serial", "windows_registry"),
+                ("printer_queue", "windows_registry"),
+            }
         ]
     except (ValueError, TypeError, KeyError):
         return []
@@ -215,6 +221,8 @@ def link392(body: Link392, actor: Owner, db: DB, response: Response):
         "deviceId": body.device_id,
         "observedAtMs": row.observed_at_ms,
         "deviceStatus": devices[0]["status"],
+        "deviceKind": devices[0]["kind"],
+        "deviceProof": devices[0]["proof"],
         "reportedProgressPercent": devices[0]["progressPercent"],
         "ownerJobStage": job.status,
         "ownerJobProgressPercent": job.progress_percent,
