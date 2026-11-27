@@ -1,5 +1,7 @@
 """Build 392 isolated authenticated sample-link regression, no hardware."""
 
+import time
+
 from rosevear_ai_hub.models import WorkshopEquipment, WorkshopJob
 from test_workshop_gateway370 import prepared, signed
 
@@ -119,3 +121,33 @@ def test_windows_inventory_has_no_print_progress(tmp_path, monkeypatch):
     assert devices[0]["kind"] == "serial"
     assert devices[0]["status"] == "enumerated"
     assert devices[0]["progressPercent"] is None
+
+
+def test_observation_gap_is_not_physical_downtime(tmp_path, monkeypatch):
+    client, _, key = prepared(tmp_path, monkeypatch)
+    assert (
+        client.post(
+            "/api/v1/auth/bootstrap",
+            json={"username": "owner", "password": "owner-password-123"},
+        ).status_code
+        == 201
+    )
+    gateway = "/api/v1/workshop-gateway-370/receipt"
+    path = "/api/v1/workshop-sample-392"
+    now = int(time.time() * 1000)
+    assert (
+        client.post(gateway, json=signed(key, observed=now - 70000)).status_code == 202
+    )
+    stale = client.get(path).json()
+    assert stale["receipt"]["fresh"] is False
+    assert stale["observationHistory"][0]["observedGapMs"] is None
+    assert (
+        client.post(gateway, json=signed(key, nonce="b" * 32, observed=now)).status_code
+        == 202
+    )
+    current = client.get(path).json()
+    assert current["receipt"]["fresh"] is True
+    assert current["observationHistory"][0]["observedGapMs"] == 70000
+    assert len(current["observationHistory"]) == 2
+    assert current["physicalFitVerified"] is False
+    assert current["machineControlEnabled"] is False
