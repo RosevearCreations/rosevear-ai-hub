@@ -16,3 +16,9 @@ def test_printer_resume_reuses_existing_client():
     assert "pip install" not in source
     assert "Restart-Computer" not in source
     assert "preLoginRecoveryVerified = $false" in source
+
+    assert "Assert-PrivateCustody393" in source
+    assert "HOLD_REVIEW_EXISTING_PRINTER_CLIENT_ACL" in source
+    assert "[IO.FileShare]::None" in source
+    assert "HOLD_OBSERVATION_BUSY" in source
+    assert "$lease.Dispose()" in source

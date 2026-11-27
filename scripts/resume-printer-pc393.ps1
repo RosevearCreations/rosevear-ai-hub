@@ -15,6 +15,7 @@ $collector = Join-Path $root 'printer-pc-collector370.py'
 $key = Join-Path $root 'private\printer370-key.pem'
 $configPath = Join-Path $root 'private\observation393.json'
 $runner = Join-Path $root 'resume-printer-pc393.ps1'
+$lockPath = Join-Path $root 'private\observation393.lock'
 $taskName = 'Rosevear Printer PC Read-only Observation'
 $ready = (Test-Path -LiteralPath $python -PathType Leaf) -and
          (Test-Path -LiteralPath $collector -PathType Leaf) -and
@@ -44,6 +45,38 @@ if ($Action -eq 'Inspect') {
     return
 }
 if (-not $ready) { throw 'HOLD_EXISTING_CLIENT_FILES_MISSING; no reinstall or key rotation performed.' }
+function Assert-PrivateCustody393 {
+    param([string]$Path)
+    $item = Get-Item -LiteralPath $Path -Force
+    if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw 'HOLD_REPARSE_POINT_NOT_ALLOWED'
+    }
+    $allowed = @($identity.User.Value,'S-1-5-18','S-1-5-32-544')
+    foreach ($rule in (Get-Acl -LiteralPath $Path).Access) {
+        $sid = $rule.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value
+        if ($rule.AccessControlType -eq 'Allow' -and $sid -notin $allowed) {
+            throw 'HOLD_REVIEW_EXISTING_PRINTER_CLIENT_ACL'
+        }
+    }
+}
+function Invoke-Observation393 {
+    param([string]$Url, [string]$Ca)
+    Assert-PrivateCustody393 (Split-Path -Parent $key)
+    Assert-PrivateCustody393 $key
+    if (Test-Path -LiteralPath $lockPath) { Assert-PrivateCustody393 $lockPath }
+    $lease = $null
+    try {
+        $lease = [IO.File]::Open($lockPath,[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)
+    } catch [IO.IOException] {
+        throw 'HOLD_OBSERVATION_BUSY'
+    }
+    try {
+        & $python $collector --key $key --include-usb --push-url $Url --ca-file $Ca
+        if ($LASTEXITCODE -ne 0) { throw 'HOLD_SIGNED_OBSERVATION_NOT_ACCEPTED' }
+    } finally {
+        $lease.Dispose()
+    }
+}
 function Test-PrivateDestination393 {
     param([string]$Value)
     $uri = [uri]$Value
@@ -72,11 +105,12 @@ if ($Action -eq 'Enroll') {
     $ca = (Resolve-Path -LiteralPath $TrustedCaFile).Path
     $caHash = (Get-FileHash -LiteralPath $ca -Algorithm SHA256).Hash
     # First demonstrate actual admitted receipt with existing key before enrolling.
-    & $python $collector --key $key --include-usb --push-url $url --ca-file $ca
-    if ($LASTEXITCODE -ne 0) { throw 'HOLD_FIRST_SIGNED_RECEIPT_NOT_ACCEPTED' }
+    try { Invoke-Observation393 $url $ca }
+    catch { throw 'HOLD_FIRST_SIGNED_RECEIPT_NOT_ACCEPTED; inspect existing local custody and private TLS.' }
     [ordered]@{url=$url; ca=$ca; caHash=$caHash} | ConvertTo-Json -Compress |
         Set-Content -LiteralPath $configPath -Encoding UTF8
     Copy-Item -LiteralPath $PSCommandPath -Destination $runner
+    Assert-PrivateCustody393 $configPath
     $actionSpec = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $expectedArgs
     $logon = New-ScheduledTaskTrigger -AtLogOn -User $identity.Name
     $repeat = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(5) -RepetitionInterval (New-TimeSpan -Minutes 5)
@@ -87,12 +121,12 @@ if ($Action -eq 'Enroll') {
     return
 }
 if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) { throw 'HOLD_ONE_TIME_ENROLLMENT_REQUIRED' }
+Assert-PrivateCustody393 $configPath
 $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
 $url = Test-PrivateDestination393 $config.url
 if (-not (Test-Path -LiteralPath $config.ca -PathType Leaf) -or
     (Get-FileHash -LiteralPath $config.ca -Algorithm SHA256).Hash -cne $config.caHash) {
     throw 'HOLD_TRUSTED_CA_CHANGED'
 }
-& $python $collector --key $key --include-usb --push-url $url --ca-file $config.ca
-if ($LASTEXITCODE -ne 0) { throw 'HOLD_SIGNED_OBSERVATION_NOT_ACCEPTED' }
+Invoke-Observation393 $url $config.ca
 Write-Output 'SIGNED_OBSERVATION_ACCEPTED; no physical identity or live printer progress inferred.'
