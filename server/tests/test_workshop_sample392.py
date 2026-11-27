@@ -72,3 +72,29 @@ def test_sample_association_uses_admitted_receipt_and_revision(tmp_path, monkeyp
         job = db.get(WorkshopJob, jid)
         assert job.status == "active" and job.progress_percent == 30
         assert job.revision == 2
+
+    report = client.get(path).json()
+    link_id = report["links"][0]["linkId"]
+    review = {
+        "job_id": jid,
+        "expected_revision": 2,
+        "link_id": link_id,
+        "identity_checked": True,
+        "condition_checked": True,
+        "fit_checked": False,
+        "duplicate_run_checked": True,
+        "disposition": "continue_locally",
+    }
+    assert client.post(path + "/recovery", json=review).status_code == 409
+    review["fit_checked"] = True
+    result = client.post(path + "/recovery", json=review)
+    assert result.status_code == 201, result.text
+    assert result.json()["machineControlEnabled"] is False
+    assert client.post(path + "/recovery", json=review).status_code == 409
+    assert len(client.get(path).json()["recoveryReviews"]) == 1
+    with sessions() as db:
+        job = db.get(WorkshopJob, jid)
+        assert job.status == "active" and job.progress_percent == 30
+        assert job.revision == 3
+    client.post("/api/v1/auth/logout")
+    assert client.post(path + "/recovery", json=review).status_code in (401, 403)

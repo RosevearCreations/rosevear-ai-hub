@@ -12,7 +12,8 @@ remain unverified. No business records or customer data are written externally.
 
 Acceptance environment: isolated SQLite, synthetic keys and owner bootstrap,
 normal signed receipt intake then sample association; no original Windows
-hardware, live login or physical disconnection. Next increments: accessible
-operator screen, receipt expiry/reconnect history and physical resume
-checklist. Record actual observed field evidence separately; Devil n Dove
+hardware, live login or physical disconnection. The owner screen includes receipt history, elapsed intervals between observations
+(not physical downtime), and a separate revision-checked maker-reported
+inspection checklist and disposition. No checklist outcome starts equipment,
+changes a job stage, or constitutes independently verified fit. Record actual observed field evidence separately; Devil n Dove
 order intake remains owned by that application. Never restart equipment.

@@ -4,7 +4,7 @@ import json
 import os
 import time
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
@@ -26,6 +26,7 @@ router = APIRouter(prefix="/api/v1/workshop-sample-392", tags=["workshop-sample3
 Owner = Annotated[User, Depends(require_roles("owner"))]
 DB = Annotated[Session, Depends(get_session)]
 EVENT = "workshop392.sample_observation_linked"
+REVIEW = "workshop392.sample_recovery_reviewed"
 
 
 class Link392(BaseModel):
@@ -37,6 +38,19 @@ class Link392(BaseModel):
     device_id: str = Field(pattern=r"^[A-Za-z0-9 _.,():/-]{1,96}$")
     sample_reference: str = Field(pattern=r"^DND-[A-Z0-9-]{1,48}$")
     maker_association_confirmed: StrictBool
+
+
+class Recovery392(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    job_id: int = Field(gt=0)
+    expected_revision: int = Field(gt=0)
+    link_id: int = Field(gt=0)
+    identity_checked: StrictBool
+    condition_checked: StrictBool
+    fit_checked: StrictBool
+    duplicate_run_checked: StrictBool
+    disposition: Literal["hold", "continue_locally", "remake", "retire"]
 
 
 def _latest(db):
@@ -117,6 +131,12 @@ def board392(_owner: Owner, db: DB, response: Response):
         .order_by(AuditEvent.id.desc())
         .limit(100)
     ).all()
+    reviews = db.scalars(
+        select(AuditEvent)
+        .where(AuditEvent.event_type == REVIEW)
+        .order_by(AuditEvent.id.desc())
+        .limit(100)
+    ).all()
     history = []
     if row:
         previous = db.scalars(
@@ -153,7 +173,8 @@ def board392(_owner: Owner, db: DB, response: Response):
             if row
             else None
         ),
-        "links": [e.sanitized_arguments for e in events],
+        "links": [{"linkId": e.id, **e.sanitized_arguments} for e in events],
+        "recoveryReviews": [e.sanitized_arguments for e in reviews],
         "source": "PREVIOUSLY_ADMITTED_SIGNED_RECEIPT_NOT_REVERIFIED",
         "physicalFitVerified": False,
         "machineControlEnabled": False,
@@ -225,3 +246,54 @@ def link392(body: Link392, actor: Owner, db: DB, response: Response):
     )
     db.commit()
     return {"link": evidence, "physicalFitVerified": False, "machineControlEnabled": False}
+
+
+@router.post("/recovery", status_code=201)
+def recovery392(body: Recovery392, actor: Owner, db: DB, response: Response):
+    """Append a maker's reported disposition, not permission to resume machinery."""
+    response.headers["Cache-Control"] = "no-store"
+    job = db.get(WorkshopJob, body.job_id)
+    link = db.get(AuditEvent, body.link_id)
+    if (
+        not job
+        or job.archived
+        or not link
+        or link.event_type != EVENT
+        or link.object_id != str(job.id)
+        or not isinstance(link.sanitized_arguments, dict)
+        or link.sanitized_arguments.get("equipmentId") != job.equipment_id
+    ):
+        raise HTTPException(409, "HOLD_MATCHING_JOB_AND_SAMPLE_LINK_REQUIRED")
+    if body.disposition != "hold" and not (
+        body.identity_checked
+        and body.condition_checked
+        and body.fit_checked
+        and body.duplicate_run_checked
+    ):
+        raise HTTPException(409, "HOLD_COMPLETE_PHYSICAL_REVIEW_REQUIRED")
+    changed = db.execute(
+        update(WorkshopJob)
+        .where(WorkshopJob.id == job.id, WorkshopJob.revision == body.expected_revision)
+        .values(revision=body.expected_revision + 1, updated_at=datetime.now(UTC))
+    )
+    if changed.rowcount != 1:
+        db.rollback()
+        raise HTTPException(409, "HOLD_JOB_CHANGED")
+    evidence = {
+        **body.model_dump(),
+        "sampleReference": link.sanitized_arguments["sampleReference"],
+        "reviewedAtMs": int(time.time() * 1000),
+        "reviewSource": "MAKER_REPORTED_NOT_INDEPENDENT_PHYSICAL_ACCEPTANCE",
+    }
+    record_audit_event(
+        db,
+        actor_user_id=actor.id,
+        event_type=REVIEW,
+        object_type="workshop_job",
+        object_id=str(job.id),
+        action="record_local_recovery_disposition",
+        arguments=evidence,
+        result={"ok": True, "machine_commands": 0, "physical_fit": False},
+    )
+    db.commit()
+    return {"recorded": True, "physicalFitVerified": False, "machineControlEnabled": False}
