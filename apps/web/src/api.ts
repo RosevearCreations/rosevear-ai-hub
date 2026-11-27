@@ -4625,3 +4625,10 @@ export function runtimeResilience391(action: "read" | "reconcile"): Promise<unkn
     ? authJson("GET", "/api/v1/system/runtime-resilience-391")
     : authJson("POST", "/api/v1/system/runtime-resilience-391/reconcile");
 }
+
+// Build392: explicit local maker-reviewed association, never physical control.
+export function workshopSample392(action: "read" | "link" | "recovery", payload?: unknown): Promise<unknown> {
+  return action === "read"
+    ? authJson("GET", "/api/v1/workshop-sample-392")
+    : authJson("POST", "/api/v1/workshop-sample-392/" + action, payload);
+}
