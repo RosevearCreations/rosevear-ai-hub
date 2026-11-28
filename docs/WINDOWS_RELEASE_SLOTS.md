@@ -21,7 +21,7 @@ for malicious code. Repository authors and reviewed GREEN main are trusted.
 
 Run `scripts/hub-auto-update.ps1` for a GREEN/runtime preview; `-Stage` also
 prepares and tests a release without activation. Both leave running processes
-alone. The official main push must have all five required jobs completed and
+alone. The official main push must have all six required jobs completed and
 successful on the exact SHA. A PR success, old run, skipped job or duplicate
 required job does not count. No Git token or inbound connection is added.
 

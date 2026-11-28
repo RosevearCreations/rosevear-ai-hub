@@ -26,7 +26,7 @@ from pathlib import Path
 
 OFFICIAL = "https://github.com/RosevearCreations/rosevear-ai-hub.git"
 API = "https://api.github.com/repos/RosevearCreations/rosevear-ai-hub"
-JOBS = {"docs-foundation", "backend", "web", "backup-windows", "desktop-windows"}
+JOBS = {"docs-foundation", "backend", "web", "backup-windows", "desktop-windows", "ci-budget"}
 SHA = re.compile(r"^[0-9a-f]{40}$")
 VERSION = re.compile(r"^\d+\.\d+\.\d+$")
 
@@ -113,7 +113,7 @@ def green_release(sha):
     jobs = request_json(API + f"/actions/runs/{run['id']}/jobs?per_page=100")
     require(
         jobs["total_count"] <= 100 and eligible(sha, run, jobs["jobs"]),
-        "HOLD: latest main must pass all five jobs on the exact push SHA.",
+        "HOLD: latest main must pass all six jobs on the exact push SHA.",
     )
     return sha
 
@@ -548,6 +548,47 @@ class Manager:
             not git(self.root, "status", "--porcelain", "--untracked-files=no"),
             "Tracked live edits block preparation.",
         )
+
+    def adoption_preflight395(self, sha, baseline="", backup_evidence=None):
+        """Reject an unsafe automatic attempt before expensive isolated staging."""
+        self.step = "adoption readiness"
+        self.validate_repository()
+        current = read_json(self.state)["sha"] if self.state.exists() else None
+        previous = current or baseline
+        require(
+            bool(previous),
+            "HOLD: first supervised installation and rollback baseline are required.",
+        )
+        require(bool(SHA.fullmatch(previous)), "HOLD: invalid retained release identity.")
+        if self.journal.exists():
+            journal = read_json(self.journal)
+            phase = journal.get("phase")
+            if current:
+                consistent = (phase == "committed" and journal.get("candidate") == current) or (
+                    phase == "rolled_back" and journal.get("previous") == current
+                )
+            else:
+                consistent = phase == "supervised_bootstrap"
+            require(consistent, "HOLD: activation journal needs supervised reconciliation.")
+        retained = self.manifest(previous)
+        require(
+            database_revision(self.root) == retained["schema_revision"],
+            "HOLD: live schema differs from retained rollback release; "
+            "supervised schema cutover required.",
+        )
+        if current:
+            require(
+                self.health(current),
+                "HOLD: retained runtime is not healthy; recover before adopting a release.",
+            )
+        if current != sha and backup_evidence is not None:
+            verify_backup(backup_evidence)
+        elif current != sha:
+            require(
+                (self.root / "logs/private-recovery/backup-key.dpapi").is_file(),
+                "HOLD: existing private backup enrollment required before automatic adoption.",
+            )
+        return current
 
     def prepare(self, sha, historical=False, allow_reviewed=False):
         self.step = "isolated preparation"
@@ -1082,6 +1123,9 @@ def main():
                             "HOLD: this release failed activation and is quarantined; "
                             "wait for a newer GREEN release or explicitly review a retry.",
                         )
+                    if args.action == "apply":
+                        with controller_lock(manager.home / "maintenance.lock"):
+                            manager.adoption_preflight395(sha, args.baseline, args.backup_evidence)
                     manager.prepare(sha, allow_reviewed=args.reviewed_control_changes)
                     if args.action == "apply":
                         if (
@@ -1095,9 +1139,12 @@ def main():
                                 release=sha,
                             )
                         else:
-                            manager.validate_database_config(sha)
-                            evidence = args.backup_evidence or manager.fresh_backup()
                             with controller_lock(manager.home / "maintenance.lock"):
+                                manager.adoption_preflight395(
+                                    sha, args.baseline, args.backup_evidence
+                                )
+                                manager.validate_database_config(sha)
+                                evidence = args.backup_evidence or manager.fresh_backup()
                                 manager.activate(
                                     sha, args.baseline, evidence, args.reviewed_control_changes
                                 )

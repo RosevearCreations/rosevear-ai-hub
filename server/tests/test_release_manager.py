@@ -359,3 +359,119 @@ def test_rollback_schema_mismatch_never_stops_live_process(tmp_path, monkeypatch
     monkeypatch.setattr(manager, "stop_verified", lambda *args: pytest.fail("must not stop"))
     with pytest.raises(manager.Refusal, match="rollback schema"):
         m.rollback(A, B)
+
+
+def test_budget_is_independently_required_for_adoption395():
+    run = {
+        "head_sha": A,
+        "head_branch": "main",
+        "event": "push",
+        "name": "Foundation, Backend, Web and Desktop Checks",
+        "status": "completed",
+        "conclusion": "success",
+    }
+    jobs = [{"name": name, "status": "completed", "conclusion": "success"} for name in manager.JOBS]
+    assert "ci-budget" in manager.JOBS
+    assert manager.eligible(A, run, jobs)
+    assert not manager.eligible(A, run, [j for j in jobs if j["name"] != "ci-budget"])
+    for j in jobs:
+        if j["name"] == "ci-budget":
+            j["conclusion"] = "failure"
+    assert not manager.eligible(A, run, jobs)
+
+
+def test_adoption_preflight395_requires_healthy_same_schema_baseline(tmp_path, monkeypatch):
+    m = prepared(tmp_path, monkeypatch)
+    monkeypatch.setattr(m, "validate_repository", lambda: None)
+    monkeypatch.setattr(m, "manifest", lambda sha: {"schema_revision": "0018"})
+    key = m.root / "logs/private-recovery/backup-key.dpapi"
+    key.parent.mkdir(parents=True)
+    key.touch()
+    monkeypatch.setattr(m, "health", lambda sha: True)
+    assert m.adoption_preflight395(B) == A
+    monkeypatch.setattr(manager, "database_revision", lambda root: "0029")
+    with pytest.raises(manager.Refusal, match="supervised schema cutover"):
+        m.adoption_preflight395(B)
+    monkeypatch.setattr(manager, "database_revision", lambda root: "0018")
+    monkeypatch.setattr(m, "health", lambda sha: False)
+    with pytest.raises(manager.Refusal, match="not healthy"):
+        m.adoption_preflight395(B)
+    monkeypatch.setattr(m, "health", lambda sha: True)
+    manager.atomic_json(m.journal, {"phase": "committed", "candidate": B})
+    with pytest.raises(manager.Refusal, match="journal"):
+        m.adoption_preflight395(B)
+
+
+def test_adoption_preflight395_no_unenrolled_retry(tmp_path, monkeypatch):
+    m = manager.Manager(tmp_path)
+    monkeypatch.setattr(m, "validate_repository", lambda: None)
+    with pytest.raises(manager.Refusal, match="first supervised"):
+        m.adoption_preflight395(B)
+
+
+def test_explicit_verified_backup_remains_supported395(tmp_path, monkeypatch):
+    m = prepared(tmp_path, monkeypatch)
+    monkeypatch.setattr(m, "validate_repository", lambda: None)
+    monkeypatch.setattr(m, "health", lambda sha: True)
+    with pytest.raises(manager.Refusal, match="backup enrollment"):
+        m.adoption_preflight395(B)
+    checked = []
+    monkeypatch.setattr(manager, "verify_backup", lambda path: checked.append(path))
+    evidence_path = tmp_path / "existing-verified.json"
+    assert m.adoption_preflight395(B, backup_evidence=evidence_path) == A
+    assert checked == [evidence_path]
+
+
+@pytest.mark.parametrize(
+    ("scenario", "expected", "code"),
+    [
+        ("eligible", "ADOPTED", 0),
+        ("current", "CURRENT", 0),
+        ("candidate_failure", "ROLLED_BACK", 1),
+        ("rollback_failure", "ROLLBACK_FAILED", 1),
+        ("schema_hold", "HOLD", 1),
+    ],
+)
+def test_scheduled_apply395(tmp_path, monkeypatch, scenario, expected, code):
+    m = prepared(tmp_path, monkeypatch)
+    calls = []
+    monkeypatch.setattr(manager, "Manager", lambda root: m)
+    monkeypatch.setattr(m, "validate_repository", lambda: None)
+    monkeypatch.setattr(m, "health", lambda sha: True)
+    key = m.root / "logs/private-recovery/backup-key.dpapi"
+    key.parent.mkdir(parents=True)
+    key.touch()
+    monkeypatch.setattr(m, "prepare", lambda *args, **kwargs: calls.append("prepare"))
+    monkeypatch.setattr(m, "validate_database_config", lambda sha: calls.append("database"))
+
+    def backup():
+        calls.append("backup")
+        return tmp_path / "verified.json"
+
+    def start(sha):
+        calls.append(("start", sha))
+        if scenario == "rollback_failure" or (scenario == "candidate_failure" and sha == B):
+            raise manager.Refusal("simulated unhealthy runtime")
+
+    monkeypatch.setattr(m, "fresh_backup", backup)
+    monkeypatch.setattr(m, "start", start)
+    monkeypatch.setattr(manager, "stop_verified", lambda port, *args: calls.append(("stop", port)))
+    if scenario == "current":
+        monkeypatch.setattr(manager, "green_main", lambda: A)
+    if scenario == "schema_hold":
+        monkeypatch.setattr(manager, "database_revision", lambda root: "0029")
+    monkeypatch.setattr(manager.sys, "argv", ["controller", "apply", "--repo-root", str(tmp_path)])
+    assert manager.main() == code
+    assert manager.read_json(m.status)["state"] == expected
+    assert manager.read_json(m.state)["sha"] == (B if scenario == "eligible" else A)
+    if scenario == "schema_hold":
+        assert calls == []
+    elif scenario == "current":
+        assert calls == ["prepare"]
+    else:
+        assert calls[:3] == ["prepare", "database", "backup"]
+        assert ("start", B) in calls
+        if scenario != "eligible":
+            assert ("start", A) in calls
+            phase = "activating" if scenario == "rollback_failure" else "rolled_back"
+            assert manager.read_json(m.journal)["phase"] == phase

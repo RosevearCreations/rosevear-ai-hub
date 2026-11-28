@@ -10,7 +10,7 @@ function Test-HubReleaseEligible {
     if ([string]$Run.head_branch -cne 'main' -or [string]$Run.event -cne 'push') { return $false }
     if ([string]$Run.status -cne 'completed' -or [string]$Run.conclusion -cne 'success') { return $false }
     if ([string]$Run.name -cne 'Foundation, Backend, Web and Desktop Checks') { return $false }
-    $required = @('docs-foundation', 'backend', 'web', 'backup-windows', 'desktop-windows')
+    $required = @('docs-foundation', 'backend', 'web', 'backup-windows', 'desktop-windows', 'ci-budget')
     foreach ($name in $required) {
         $matched = @($Jobs | Where-Object { $_.name -ceq $name })
         if ($matched.Count -ne 1) { return $false }
@@ -22,7 +22,7 @@ function Test-HubReleaseEligible {
 function Test-HubSchemaChanges {
     param([string[]]$ChangedPaths)
     # Any changes in migration history require operator-reviewed backup + migration.
-    return [bool](@($ChangedPaths | Where-Object { $_ -match '^server/alembic/versions/' }).Count -gt 0)
+    return [bool](@($ChangedPaths | Where-Object { ($_ -match '^server/alembic/') -or $_ -eq 'alembic.ini' }).Count -gt 0)
 }
 
 function Test-HubOrigin {
