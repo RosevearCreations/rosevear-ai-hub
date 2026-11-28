@@ -441,12 +441,8 @@ def test_scheduled_apply395(tmp_path, monkeypatch, scenario, expected, code):
     key = m.root / "logs/private-recovery/backup-key.dpapi"
     key.parent.mkdir(parents=True)
     key.touch()
-    monkeypatch.setattr(
-        m, "prepare", lambda *args, **kwargs: calls.append("prepare")
-    )
-    monkeypatch.setattr(
-        m, "validate_database_config", lambda sha: calls.append("database")
-    )
+    monkeypatch.setattr(m, "prepare", lambda *args, **kwargs: calls.append("prepare"))
+    monkeypatch.setattr(m, "validate_database_config", lambda sha: calls.append("database"))
 
     def backup():
         calls.append("backup")
@@ -454,9 +450,7 @@ def test_scheduled_apply395(tmp_path, monkeypatch, scenario, expected, code):
 
     def start(sha):
         calls.append(("start", sha))
-        if scenario == "rollback_failure" or (
-            scenario == "candidate_failure" and sha == B
-        ):
+        if scenario == "rollback_failure" or (scenario == "candidate_failure" and sha == B):
             raise manager.Refusal("simulated unhealthy runtime")
 
     monkeypatch.setattr(m, "fresh_backup", backup)
@@ -468,9 +462,7 @@ def test_scheduled_apply395(tmp_path, monkeypatch, scenario, expected, code):
         monkeypatch.setattr(manager, "green_main", lambda: A)
     if scenario == "schema_hold":
         monkeypatch.setattr(manager, "database_revision", lambda root: "0029")
-    monkeypatch.setattr(
-        manager.sys, "argv", ["controller", "apply", "--repo-root", str(tmp_path)]
-    )
+    monkeypatch.setattr(manager.sys, "argv", ["controller", "apply", "--repo-root", str(tmp_path)])
     assert manager.main() == code
     assert manager.read_json(m.status)["state"] == expected
     assert manager.read_json(m.state)["sha"] == (B if scenario == "eligible" else A)
