@@ -564,9 +564,9 @@ class Manager:
             journal = read_json(self.journal)
             phase = journal.get("phase")
             if current:
-                consistent = (
-                    phase == "committed" and journal.get("candidate") == current
-                ) or (phase == "rolled_back" and journal.get("previous") == current)
+                consistent = (phase == "committed" and journal.get("candidate") == current) or (
+                    phase == "rolled_back" and journal.get("previous") == current
+                )
             else:
                 consistent = phase == "supervised_bootstrap"
             require(consistent, "HOLD: activation journal needs supervised reconciliation.")

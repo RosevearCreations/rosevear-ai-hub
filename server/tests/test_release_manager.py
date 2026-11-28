@@ -455,9 +455,7 @@ def test_scheduled_apply395(tmp_path, monkeypatch, scenario, expected, code):
 
     monkeypatch.setattr(m, "fresh_backup", backup)
     monkeypatch.setattr(m, "start", start)
-    monkeypatch.setattr(
-        manager, "stop_verified", lambda port, *args: calls.append(("stop", port))
-    )
+    monkeypatch.setattr(manager, "stop_verified", lambda port, *args: calls.append(("stop", port)))
     if scenario == "current":
         monkeypatch.setattr(manager, "green_main", lambda: A)
     if scenario == "schema_hold":
