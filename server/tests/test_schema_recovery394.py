@@ -33,9 +33,7 @@ def test_real_0029_to_0040_rehearsal_preserves_old_records(tmp_path, monkeypatch
         db.execute("CREATE TABLE preserved_fixture (id INTEGER PRIMARY KEY, text_value TEXT)")
         db.execute("INSERT INTO preserved_fixture VALUES (1, 'private fixture')")
         db.commit()
-    report = recovery.rehearse(
-        source, scratch, lambda path: upgrade(path, "0040", monkeypatch)
-    )
+    report = recovery.rehearse(source, scratch, lambda path: upgrade(path, "0040", monkeypatch))
     assert report["sourceRevision"] == "0029"
     assert report["rehearsedRevision"] == "0040"
     assert report["existingRowsPreserved"] is True
@@ -43,9 +41,7 @@ def test_real_0029_to_0040_rehearsal_preserves_old_records(tmp_path, monkeypatch
     assert report["liveMigrationPerformed"] is False
     with closing(recovery.readonly(source)) as db:
         assert recovery.revision(db) == "0029"
-        assert db.execute("SELECT * FROM preserved_fixture").fetchall() == [
-            (1, "private fixture")
-        ]
+        assert db.execute("SELECT * FROM preserved_fixture").fetchall() == [(1, "private fixture")]
     with pytest.raises(ValueError, match="NEW_ISOLATED"):
         recovery.rehearse(source, source, lambda path: None)
     with pytest.raises(ValueError, match="NEW_ISOLATED"):
@@ -73,9 +69,7 @@ def test_migration_that_changes_existing_records_is_held(tmp_path, monkeypatch):
 def test_interrupted_activation_is_never_approved(tmp_path):
     manager = recovery.releases.Manager(tmp_path)
     assert recovery.journal_state(manager) == "LEGACY"
-    recovery.releases.atomic_json(
-        manager.journal, {"phase": "activating", "previous": "a" * 40}
-    )
+    recovery.releases.atomic_json(manager.journal, {"phase": "activating", "previous": "a" * 40})
     assert recovery.journal_state(manager) == "INTERRUPTED_ACTIVATION_HOLD"
     recovery.releases.atomic_json(manager.journal, {"phase": "supervised_bootstrap"})
     assert recovery.journal_state(manager) == "SUPERVISED_BOOTSTRAP"

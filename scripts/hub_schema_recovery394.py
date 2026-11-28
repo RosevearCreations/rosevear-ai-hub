@@ -13,6 +13,7 @@ import sqlite3
 import subprocess
 import sys
 import tempfile
+import time
 from contextlib import closing
 from pathlib import Path
 
@@ -48,9 +49,7 @@ def table_state(connection):
     result = {}
     for (name,) in tables:
         table = quote(name)
-        columns = [
-            row[1] for row in connection.execute(f"PRAGMA table_info({table})")
-        ]
+        columns = [row[1] for row in connection.execute(f"PRAGMA table_info({table})")]
         order = ", ".join(quote(column) + " COLLATE BINARY" for column in columns)
         digest = hashlib.sha256()
         count = 0
@@ -79,7 +78,13 @@ def rehearse(source, scratch, migrate):
         raise ValueError("HOLD_NEW_ISOLATED_DATABASE_REQUIRED")
     with closing(readonly(source)) as origin:
         with closing(sqlite3.connect(scratch)) as copy:
-            origin.backup(copy, pages=128, sleep=0.05)
+            deadline = time.monotonic() + 120
+
+            def check_progress(_status, _remaining, _total):
+                if time.monotonic() > deadline:
+                    raise TimeoutError("HOLD_SNAPSHOT_TIMEOUT")
+
+            origin.backup(copy, pages=128, sleep=0.05, progress=check_progress)
             if revision(copy) != SOURCE or not integrity(copy):
                 raise ValueError("HOLD_SOURCE_REVISION_OR_INTEGRITY")
             baseline = table_state(copy)
@@ -173,7 +178,6 @@ def main():
         private = manager.root / "logs/private-recovery"
         if not private.is_dir() or private.is_symlink():
             raise ValueError("HOLD_EXISTING_PRIVATE_BACKUP_DIRECTORY_REQUIRED")
-        secure_folder(private)
         slot = manager.slot(sha)
         python = slot / ".venv/Scripts/python.exe"
 
