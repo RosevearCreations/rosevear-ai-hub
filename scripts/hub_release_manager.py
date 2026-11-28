@@ -1140,7 +1140,9 @@ def main():
                             )
                         else:
                             with controller_lock(manager.home / "maintenance.lock"):
-                                manager.adoption_preflight395(sha, args.baseline, args.backup_evidence)
+                                manager.adoption_preflight395(
+                                    sha, args.baseline, args.backup_evidence
+                                )
                                 manager.validate_database_config(sha)
                                 evidence = args.backup_evidence or manager.fresh_backup()
                                 manager.activate(
