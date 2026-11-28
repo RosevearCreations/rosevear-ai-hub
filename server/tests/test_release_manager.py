@@ -359,3 +359,51 @@ def test_rollback_schema_mismatch_never_stops_live_process(tmp_path, monkeypatch
     monkeypatch.setattr(manager, "stop_verified", lambda *args: pytest.fail("must not stop"))
     with pytest.raises(manager.Refusal, match="rollback schema"):
         m.rollback(A, B)
+
+
+def test_budget_is_independently_required_for_adoption395():
+    run = {
+        "head_sha": A,
+        "head_branch": "main",
+        "event": "push",
+        "name": "Foundation, Backend, Web and Desktop Checks",
+        "status": "completed",
+        "conclusion": "success",
+    }
+    jobs = [{"name": name, "status": "completed", "conclusion": "success"} for name in manager.JOBS]
+    assert "ci-budget" in manager.JOBS
+    assert manager.eligible(A, run, jobs)
+    assert not manager.eligible(A, run, [j for j in jobs if j["name"] != "ci-budget"])
+    for j in jobs:
+        if j["name"] == "ci-budget":
+            j["conclusion"] = "failure"
+    assert not manager.eligible(A, run, jobs)
+
+
+def test_adoption_preflight395_requires_healthy_same_schema_baseline(tmp_path, monkeypatch):
+    m = prepared(tmp_path, monkeypatch)
+    monkeypatch.setattr(m, "validate_repository", lambda: None)
+    monkeypatch.setattr(m, "manifest", lambda sha: {"schema_revision": "0018"})
+    key = m.root / "logs/private-recovery/backup-key.dpapi"
+    key.parent.mkdir(parents=True)
+    key.touch()
+    monkeypatch.setattr(m, "health", lambda sha: True)
+    assert m.adoption_preflight395(B) == A
+    monkeypatch.setattr(manager, "database_revision", lambda root: "0029")
+    with pytest.raises(manager.Refusal, match="supervised schema cutover"):
+        m.adoption_preflight395(B)
+    monkeypatch.setattr(manager, "database_revision", lambda root: "0018")
+    monkeypatch.setattr(m, "health", lambda sha: False)
+    with pytest.raises(manager.Refusal, match="not healthy"):
+        m.adoption_preflight395(B)
+    monkeypatch.setattr(m, "health", lambda sha: True)
+    manager.atomic_json(m.journal, {"phase": "committed", "candidate": B})
+    with pytest.raises(manager.Refusal, match="journal"):
+        m.adoption_preflight395(B)
+
+
+def test_adoption_preflight395_no_unenrolled_retry(tmp_path, monkeypatch):
+    m = manager.Manager(tmp_path)
+    monkeypatch.setattr(m, "validate_repository", lambda: None)
+    with pytest.raises(manager.Refusal, match="first supervised"):
+        m.adoption_preflight395(B)

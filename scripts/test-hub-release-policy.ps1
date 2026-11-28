@@ -9,9 +9,9 @@ $run = [pscustomobject]@{
     conclusion = 'success'
     name = 'Foundation, Backend, Web and Desktop Checks'
 }
-$jobs = @('docs-foundation', 'backend', 'web', 'backup-windows', 'desktop-windows') |
+$jobs = @('docs-foundation', 'backend', 'web', 'backup-windows', 'desktop-windows', 'ci-budget') |
     ForEach-Object { [pscustomobject]@{ name = $_; status = 'completed'; conclusion = 'success' } }
-if (-not (Test-HubReleaseEligible -RemoteSha $sha -Run $run -Jobs $jobs)) { throw 'GREEN five-job main push should be approved.' }
+if (-not (Test-HubReleaseEligible -RemoteSha $sha -Run $run -Jobs $jobs)) { throw 'GREEN six-job main push should be approved.' }
 $run.event = 'pull_request'
 if (Test-HubReleaseEligible -RemoteSha $sha -Run $run -Jobs $jobs) { throw 'PR green is not independent main push green.' }
 $run.event = 'push'
@@ -22,6 +22,12 @@ $jobs[0].conclusion = 'skipped'
 if (Test-HubReleaseEligible -RemoteSha $sha -Run $run -Jobs $jobs) { throw 'Skipped required job must block.' }
 $jobs[0].conclusion = 'success'
 if (Test-HubReleaseEligible -RemoteSha $sha -Run $run -Jobs @($jobs[0..3])) { throw 'Missing Windows desktop job must block.' }
+if (Test-HubReleaseEligible -RemoteSha $sha -Run $run -Jobs @($jobs[0..4])) { throw 'Missing CI budget job must block.' }
+$jobs[5].conclusion = 'failure'
+if (Test-HubReleaseEligible -RemoteSha $sha -Run $run -Jobs $jobs) { throw 'Failed CI budget job must block.' }
+$jobs[5].conclusion = 'success'
+if (-not (Test-HubSchemaChanges @('alembic.ini'))) { throw 'Alembic configuration change not detected.' }
+if (-not (Test-HubSchemaChanges @('server/alembic/env.py'))) { throw 'Alembic environment change not detected.' }
 if (-not (Test-HubSchemaChanges @('docs/BUILD_STATUS.md', 'server/alembic/versions/0020_schema.py'))) { throw 'Schema migration not detected.' }
 if (Test-HubSchemaChanges @('apps/web/src/App.tsx')) { throw 'A web-only release should not require schema migration.' }
 if (-not (Test-HubOrigin 'https://github.com/RosevearCreations/rosevear-ai-hub.git')) { throw 'Valid HTTPS remote rejected.' }
