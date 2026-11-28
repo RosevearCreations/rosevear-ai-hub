@@ -69,9 +69,25 @@ def test_migration_that_changes_existing_records_is_held(tmp_path, monkeypatch):
 def test_interrupted_activation_is_never_approved(tmp_path):
     manager = recovery.releases.Manager(tmp_path)
     assert recovery.journal_state(manager) == "LEGACY"
+    manager.home.mkdir(parents=True)
     recovery.releases.atomic_json(manager.journal, {"phase": "activating", "previous": "a" * 40})
     assert recovery.journal_state(manager) == "INTERRUPTED_ACTIVATION_HOLD"
     recovery.releases.atomic_json(manager.journal, {"phase": "supervised_bootstrap"})
     assert recovery.journal_state(manager) == "SUPERVISED_BOOTSTRAP"
     recovery.releases.atomic_json(manager.journal, {"phase": "committed"})
     assert recovery.journal_state(manager) == "UNKNOWN_HOLD"
+
+
+def test_failed_migration_leaves_original_unchanged(tmp_path, monkeypatch):
+    source = tmp_path / "source.sqlite3"
+    upgrade(source, "0029", monkeypatch)
+
+    def fail(path):
+        upgrade(path, "0040", monkeypatch)
+        raise RuntimeError("simulated interruption")
+
+    with pytest.raises(RuntimeError, match="simulated interruption"):
+        recovery.rehearse(source, tmp_path / "scratch.sqlite3", fail)
+    with closing(recovery.readonly(source)) as db:
+        assert recovery.revision(db) == "0029"
+        assert recovery.integrity(db)

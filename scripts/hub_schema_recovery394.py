@@ -165,7 +165,7 @@ def main():
     if not releases.SHA.fullmatch(args.expected_commit):
         raise ValueError("HOLD_EXACT_GREEN_COMMIT_REQUIRED")
     sha = args.expected_commit
-    with releases.controller_lock(manager.home / "controller.lock"):
+    with releases.controller_lock(manager.home / "maintenance.lock"):
         if releases.green_main() != sha:
             raise ValueError("HOLD_APPROVED_MAIN_CHANGED")
         # Historical staging permits PREPARATION across a schema boundary,
