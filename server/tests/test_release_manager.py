@@ -407,3 +407,16 @@ def test_adoption_preflight395_no_unenrolled_retry(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "validate_repository", lambda: None)
     with pytest.raises(manager.Refusal, match="first supervised"):
         m.adoption_preflight395(B)
+
+
+def test_explicit_verified_backup_remains_supported395(tmp_path, monkeypatch):
+    m = prepared(tmp_path, monkeypatch)
+    monkeypatch.setattr(m, "validate_repository", lambda: None)
+    monkeypatch.setattr(m, "health", lambda sha: True)
+    with pytest.raises(manager.Refusal, match="backup enrollment"):
+        m.adoption_preflight395(B)
+    checked = []
+    monkeypatch.setattr(manager, "verify_backup", lambda path: checked.append(path))
+    evidence_path = tmp_path / "existing-verified.json"
+    assert m.adoption_preflight395(B, backup_evidence=evidence_path) == A
+    assert checked == [evidence_path]

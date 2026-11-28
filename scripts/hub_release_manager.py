@@ -549,7 +549,7 @@ class Manager:
             "Tracked live edits block preparation.",
         )
 
-    def adoption_preflight395(self, sha, baseline=""):
+    def adoption_preflight395(self, sha, baseline="", backup_evidence=None):
         """Reject an unsafe automatic attempt before expensive isolated staging."""
         self.step = "adoption readiness"
         self.validate_repository()
@@ -581,7 +581,9 @@ class Manager:
                 self.health(current),
                 "HOLD: retained runtime is not healthy; recover before adopting a release.",
             )
-        if current != sha:
+        if current != sha and backup_evidence is not None:
+            verify_backup(backup_evidence)
+        elif current != sha:
             require(
                 (self.root / "logs/private-recovery/backup-key.dpapi").is_file(),
                 "HOLD: existing private backup enrollment required before automatic adoption.",
@@ -1123,7 +1125,7 @@ def main():
                         )
                     if args.action == "apply":
                         with controller_lock(manager.home / "maintenance.lock"):
-                            manager.adoption_preflight395(sha, args.baseline)
+                            manager.adoption_preflight395(sha, args.baseline, args.backup_evidence)
                     manager.prepare(sha, allow_reviewed=args.reviewed_control_changes)
                     if args.action == "apply":
                         if (
@@ -1138,7 +1140,7 @@ def main():
                             )
                         else:
                             with controller_lock(manager.home / "maintenance.lock"):
-                                manager.adoption_preflight395(sha, args.baseline)
+                                manager.adoption_preflight395(sha, args.baseline, args.backup_evidence)
                                 manager.validate_database_config(sha)
                                 evidence = args.backup_evidence or manager.fresh_backup()
                                 manager.activate(
